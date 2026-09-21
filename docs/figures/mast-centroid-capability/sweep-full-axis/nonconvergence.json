@@ -1,0 +1,1582 @@
+{
+  "case": {
+    "coil_circuit_index": 8,
+    "coil_family": "p4_upper",
+    "constraint": {
+      "ampere_scale_a": 1185524.572279439,
+      "components": [
+        "centroid_z"
+      ],
+      "definition": "vertical current-centre row, matrix-led over the active mapping",
+      "direction_authority_m_per_a": 8.435084547233583e-07,
+      "drivable_circuits": [
+        {
+          "circuit": 0,
+          "direction_weight": -0.12803827524950412,
+          "family": "sol"
+        },
+        {
+          "circuit": 1,
+          "direction_weight": 0.12470506111384576,
+          "family": "p2_inner_upper"
+        },
+        {
+          "circuit": 2,
+          "direction_weight": 0.15977135758590902,
+          "family": "p2_outer_upper"
+        },
+        {
+          "circuit": 3,
+          "direction_weight": -0.11530506970162153,
+          "family": "p2_inner_lower"
+        },
+        {
+          "circuit": 4,
+          "direction_weight": -0.14767650706614796,
+          "family": "p2_outer_lower"
+        },
+        {
+          "circuit": 5,
+          "direction_weight": 1.0,
+          "family": "p3_upper"
+        },
+        {
+          "circuit": 6,
+          "direction_weight": -0.889811830896423,
+          "family": "p3_lower"
+        },
+        {
+          "circuit": 7,
+          "direction_weight": 0.6971575388917033,
+          "family": "p4_upper"
+        },
+        {
+          "circuit": 8,
+          "direction_weight": -0.6684562656717181,
+          "family": "p4_lower"
+        },
+        {
+          "circuit": 9,
+          "direction_weight": 0.47478184555538344,
+          "family": "p5_upper"
+        },
+        {
+          "circuit": 10,
+          "direction_weight": -0.5459936470678501,
+          "family": "p5_lower"
+        },
+        {
+          "circuit": 11,
+          "direction_weight": 0.7988009393720109,
+          "family": "p6_upper"
+        },
+        {
+          "circuit": 12,
+          "direction_weight": -0.7872427629026109,
+          "family": "p6_lower"
+        }
+      ],
+      "position_scale_m": 4.0,
+      "selection_rule": "dominant_authority",
+      "support": "all_domain",
+      "target_m": 0.0385013328466231,
+      "tolerance_m": 1e-06
+    },
+    "machine": "MAST",
+    "shot": 22086,
+    "slice_index": 43,
+    "solver_policy": {
+      "active_set_steps": 16,
+      "ladder_scoring": "batched_tail",
+      "newton_steps": 12,
+      "tolerance": 1e-08,
+      "trip_boundary": "fused"
+    }
+  },
+  "edits": [
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.0959575324986449,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -151860.0409375,
+      "compilation_cache": "hit",
+      "converged": true,
+      "edit_fraction": -0.18000000000000002,
+      "edit_index": 0,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        12,
+        2,
+        0
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 1,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 11,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 2,
+      "persistent_cache_misses_before": 2,
+      "program_reused": false,
+      "raster_separatrix_vertex_count": 283,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 5115.275755524635,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        0,
+        0,
+        0
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.05677904713482602,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          61
+        ],
+        "trip_residual_trace": [
+          0.05677904713482602
+        ]
+      },
+      "solve_wall_milliseconds": 141959.3713004142,
+      "terminal_residual": 2.218511700921353e-12,
+      "termination": "converged",
+      "trip_count": 3,
+      "trip_mask_difference_trace": [
+        60,
+        43,
+        0
+      ],
+      "trip_residual_trace": [
+        0.01711143132812113,
+        6.7561448511231944e-12,
+        2.218511700921353e-12
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": 6508.955247788849,
+        "compensating_current_norm_a": 13957.974776617619,
+        "observed_m": 0.038501332848316375,
+        "qualified": true,
+        "residual_m": 1.6932774626887692e-12,
+        "scaled_residual": 4.233193656721923e-13,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 147074.64620098472,
+      "warm_seed_source": "converged base frame at the shot current"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.08288607026019276,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -155563.944375,
+      "compilation_cache": "hit",
+      "converged": false,
+      "edit_fraction": -0.16000000000000003,
+      "edit_index": 1,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        12
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 5,
+      "persistent_cache_misses_before": 5,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 283,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 428.81711199879646,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        0
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.023736787493322878,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          125
+        ],
+        "trip_residual_trace": [
+          0.023736787493322878
+        ]
+      },
+      "solve_wall_milliseconds": 5358.168860897422,
+      "terminal_residual": 4.0940708827050127e-05,
+      "termination": "active_set_settled",
+      "trip_count": 1,
+      "trip_mask_difference_trace": [
+        0
+      ],
+      "trip_residual_trace": [
+        4.0940708827050127e-05
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": 5811.058975938146,
+        "compensating_current_norm_a": 12461.387661120587,
+        "observed_m": 0.038500883432877574,
+        "qualified": true,
+        "residual_m": -4.494137455235414e-07,
+        "scaled_residual": -1.1235343638088535e-07,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 5786.985179409385,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.07150262239014182,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -159267.8478125,
+      "compilation_cache": "hit",
+      "converged": true,
+      "edit_fraction": -0.14000000000000004,
+      "edit_index": 2,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        12,
+        2
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 5,
+      "persistent_cache_misses_before": 5,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 282,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 421.7172469943762,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        0,
+        0
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.021508038312427983,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          36
+        ],
+        "trip_residual_trace": [
+          0.021508038312427983
+        ]
+      },
+      "solve_wall_milliseconds": 6251.0832995176315,
+      "terminal_residual": 2.304654271005253e-10,
+      "termination": "converged",
+      "trip_count": 2,
+      "trip_mask_difference_trace": [
+        1,
+        0
+      ],
+      "trip_residual_trace": [
+        1.55571292911157e-05,
+        2.304654271005253e-10
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": 5100.824755877011,
+        "compensating_current_norm_a": 10938.342725073177,
+        "observed_m": 0.03850133284649607,
+        "qualified": true,
+        "residual_m": -1.2703033069882963e-13,
+        "scaled_residual": -3.175758267470741e-14,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 6672.799555584788,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.18424061352844934,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -162971.75124999997,
+      "compilation_cache": "hit",
+      "converged": false,
+      "edit_fraction": -0.12000000000000005,
+      "edit_index": 3,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        4,
+        1,
+        0
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 6,
+      "persistent_cache_misses_before": 6,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 284,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 393.9274996519089,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        1,
+        1,
+        1
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.01870538612758963,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          37
+        ],
+        "trip_residual_trace": [
+          0.01870538612758963
+        ]
+      },
+      "solve_wall_milliseconds": 5693.4918705374,
+      "terminal_residual": 0.005017783180212393,
+      "termination": "active_set_settled",
+      "trip_count": 3,
+      "trip_mask_difference_trace": [
+        118,
+        1,
+        0
+      ],
+      "trip_residual_trace": [
+        0.009921202904109425,
+        0.005094363769636618,
+        0.005017783180212393
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": 4193.977557597384,
+        "compensating_current_norm_a": 8993.675748889349,
+        "observed_m": 0.05746726056967309,
+        "qualified": false,
+        "residual_m": 0.018965927723049995,
+        "scaled_residual": 0.004741481930762499,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 6087.418617680669,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.04482940789859229,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -166675.65468749998,
+      "compilation_cache": "hit",
+      "converged": false,
+      "edit_fraction": -0.10000000000000006,
+      "edit_index": 4,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        5,
+        4,
+        7,
+        2
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 7,
+      "persistent_cache_misses_before": 7,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 280,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 449.75509122014046,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        1,
+        0,
+        1,
+        1
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.019350936113284235,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          202
+        ],
+        "trip_residual_trace": [
+          0.019350936113284235
+        ]
+      },
+      "solve_wall_milliseconds": 11157.393611967564,
+      "terminal_residual": 0.0005373903375413912,
+      "termination": "active_set_settled",
+      "trip_count": 4,
+      "trip_mask_difference_trace": [
+        111,
+        63,
+        54,
+        0
+      ],
+      "trip_residual_trace": [
+        0.008282157971249544,
+        0.008176982990478119,
+        0.0005959108100628607,
+        0.0005373903375413912
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": 3632.200339322621,
+        "compensating_current_norm_a": 7788.985910927829,
+        "observed_m": 0.040528448026781565,
+        "qualified": false,
+        "residual_m": 0.0020271151801584675,
+        "scaled_residual": 0.0005067787950396169,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 11607.148077338934,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.03877543025600971,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -170379.55812499998,
+      "compilation_cache": "hit",
+      "converged": false,
+      "edit_fraction": -0.08000000000000007,
+      "edit_index": 5,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        4,
+        2
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 8,
+      "persistent_cache_misses_before": 8,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 281,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 396.0253391414881,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        1,
+        1
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.011181650569911158,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          106
+        ],
+        "trip_residual_trace": [
+          0.011181650569911158
+        ]
+      },
+      "solve_wall_milliseconds": 5065.784012898803,
+      "terminal_residual": 0.0027329198745643596,
+      "termination": "active_set_settled",
+      "trip_count": 2,
+      "trip_mask_difference_trace": [
+        1,
+        0
+      ],
+      "trip_residual_trace": [
+        0.0036663387567726874,
+        0.0027329198745643596
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": 3192.4447811492546,
+        "compensating_current_norm_a": 6845.962529265093,
+        "observed_m": 0.048845845779481166,
+        "qualified": false,
+        "residual_m": 0.010344512932858069,
+        "scaled_residual": 0.002586128233214517,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 5461.808795109391,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.1661058004948024,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -174083.4615625,
+      "compilation_cache": "hit",
+      "converged": false,
+      "edit_fraction": -0.06000000000000008,
+      "edit_index": 6,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        4,
+        12,
+        5,
+        0,
+        0
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 9,
+      "persistent_cache_misses_before": 9,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 292,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 458.4423266351223,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        1,
+        0,
+        1,
+        1,
+        1
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.008978679765931922,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          102
+        ],
+        "trip_residual_trace": [
+          0.008978679765931922
+        ]
+      },
+      "solve_wall_milliseconds": 13224.340379238129,
+      "terminal_residual": 0.006972693193259617,
+      "termination": "active_set_settled",
+      "trip_count": 5,
+      "trip_mask_difference_trace": [
+        31,
+        21,
+        20,
+        1,
+        0
+      ],
+      "trip_residual_trace": [
+        0.006996804238927819,
+        0.0058408695436983115,
+        0.006858784728389191,
+        0.006915900116433798,
+        0.006972693193259617
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": 2428.8376660592958,
+        "compensating_current_norm_a": 5208.463353757295,
+        "observed_m": 0.011627714767174958,
+        "qualified": false,
+        "residual_m": -0.026873618079448137,
+        "scaled_residual": -0.006718404519862034,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 13682.78188072145,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.0889038077978911,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -177787.365,
+      "compilation_cache": "hit",
+      "converged": false,
+      "edit_fraction": -0.04000000000000009,
+      "edit_index": 7,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        5,
+        5,
+        0
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 10,
+      "persistent_cache_misses_before": 10,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 289,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 399.9311178922653,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        1,
+        1,
+        1
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.0076607780225588775,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          7
+        ],
+        "trip_residual_trace": [
+          0.0076607780225588775
+        ]
+      },
+      "solve_wall_milliseconds": 7566.7630936950445,
+      "terminal_residual": 0.0045556875562078915,
+      "termination": "active_set_settled",
+      "trip_count": 3,
+      "trip_mask_difference_trace": [
+        17,
+        6,
+        0
+      ],
+      "trip_residual_trace": [
+        0.0057378381753767456,
+        0.004575950020701524,
+        0.0045556875562078915
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": 1728.7674484013462,
+        "compensating_current_norm_a": 3707.214371710544,
+        "observed_m": 0.02084288580621496,
+        "qualified": false,
+        "residual_m": -0.017658447040408136,
+        "scaled_residual": -0.004414611760102034,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 7966.692080721259,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.05922815264075643,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -181491.26843749997,
+      "compilation_cache": "hit",
+      "converged": false,
+      "edit_fraction": -0.0200000000000001,
+      "edit_index": 8,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        3
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 11,
+      "persistent_cache_misses_before": 11,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 286,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 397.3062504082918,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        1
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.011530665129161045,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          126
+        ],
+        "trip_residual_trace": [
+          0.011530665129161045
+        ]
+      },
+      "solve_wall_milliseconds": 3429.171562194824,
+      "terminal_residual": 0.003695967454843636,
+      "termination": "active_set_settled",
+      "trip_count": 1,
+      "trip_mask_difference_trace": [
+        0
+      ],
+      "trip_residual_trace": [
+        0.003695967454843636
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": 179.05314865628165,
+        "compensating_current_norm_a": 383.966279913716,
+        "observed_m": 0.025028080425243435,
+        "qualified": false,
+        "residual_m": -0.013473252421379662,
+        "scaled_residual": -0.0033683131053449155,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 3826.476963236928,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.03197455072788087,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -185195.17187499997,
+      "compilation_cache": "hit",
+      "converged": true,
+      "edit_fraction": -1.1102230246251565e-16,
+      "edit_index": 9,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        11,
+        1,
+        0
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 11,
+      "persistent_cache_misses_before": 11,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 280,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 391.1446277052164,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        0,
+        0,
+        0
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.011135864410497581,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          126
+        ],
+        "trip_residual_trace": [
+          0.011135864410497581
+        ]
+      },
+      "solve_wall_milliseconds": 6359.976289793849,
+      "terminal_residual": 1.2612144822196007e-12,
+      "termination": "converged",
+      "trip_count": 3,
+      "trip_mask_difference_trace": [
+        1,
+        1,
+        0
+      ],
+      "trip_residual_trace": [
+        0.0006934531279730069,
+        4.103755830812155e-12,
+        1.2612144822196007e-12
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": 2.385888341215579,
+        "compensating_current_norm_a": 5.1163616922740625,
+        "observed_m": 0.03850133284825916,
+        "qualified": true,
+        "residual_m": 1.6360593435571502e-12,
+        "scaled_residual": 4.0901483588928755e-13,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 6751.117918640375,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.05286034103850804,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -188899.07531249998,
+      "compilation_cache": "hit",
+      "converged": true,
+      "edit_fraction": 0.01999999999999988,
+      "edit_index": 10,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        5
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 11,
+      "persistent_cache_misses_before": 11,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 283,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 385.0380592048168,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        0
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.0025370102778114333,
+        "termination": "active_set_settled",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          0
+        ],
+        "trip_residual_trace": [
+          0.0025370102778114333
+        ]
+      },
+      "solve_wall_milliseconds": 2882.1627125144005,
+      "terminal_residual": 1.785788854467814e-09,
+      "termination": "converged",
+      "trip_count": 1,
+      "trip_mask_difference_trace": [
+        0
+      ],
+      "trip_residual_trace": [
+        1.785788854467814e-09
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": -660.3176173524643,
+        "compensating_current_norm_a": 1416.0024607164007,
+        "observed_m": 0.03850133271253411,
+        "qualified": true,
+        "residual_m": -1.340889899115183e-10,
+        "scaled_residual": -3.3522247477879574e-11,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 3267.2001402825117,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.04283975461172478,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -192602.97874999995,
+      "compilation_cache": "hit",
+      "converged": true,
+      "edit_fraction": 0.03999999999999987,
+      "edit_index": 11,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        10
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 11,
+      "persistent_cache_misses_before": 11,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 279,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 396.37821167707443,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        0
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.003482478562470673,
+        "termination": "active_set_settled",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          0
+        ],
+        "trip_residual_trace": [
+          0.003482478562470673
+        ]
+      },
+      "solve_wall_milliseconds": 4710.53527854383,
+      "terminal_residual": 5.918447638353737e-09,
+      "termination": "converged",
+      "trip_count": 1,
+      "trip_mask_difference_trace": [
+        0
+      ],
+      "trip_residual_trace": [
+        5.918447638353737e-09
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": -1181.106295688449,
+        "compensating_current_norm_a": 2532.795395900753,
+        "observed_m": 0.03850133262406142,
+        "qualified": true,
+        "residual_m": -2.2256167742096267e-10,
+        "scaled_residual": -5.5640419355240667e-11,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 5106.910990551114,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.03773104420345218,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -196306.88218749996,
+      "compilation_cache": "hit",
+      "converged": true,
+      "edit_fraction": 0.05999999999999989,
+      "edit_index": 12,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        12,
+        1
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 11,
+      "persistent_cache_misses_before": 11,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 277,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 384.5362365245819,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        0,
+        0
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.010815936000109053,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          103
+        ],
+        "trip_residual_trace": [
+          0.010815936000109053
+        ]
+      },
+      "solve_wall_milliseconds": 5978.141341358423,
+      "terminal_residual": 1.0971609483286799e-13,
+      "termination": "converged",
+      "trip_count": 2,
+      "trip_mask_difference_trace": [
+        1,
+        0
+      ],
+      "trip_residual_trace": [
+        7.54722987063344e-08,
+        1.0971609483286799e-13
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": -1702.8909468889976,
+        "compensating_current_norm_a": 3651.7241214834953,
+        "observed_m": 0.03850133284681786,
+        "qualified": true,
+        "residual_m": 1.9476087409486809e-13,
+        "scaled_residual": 4.869021852371702e-14,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 6362.677017226815,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.047997322749000114,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -200010.78562499996,
+      "compilation_cache": "hit",
+      "converged": false,
+      "edit_fraction": 0.07999999999999985,
+      "edit_index": 13,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        5,
+        2
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 12,
+      "persistent_cache_misses_before": 12,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 273,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 396.5737149119377,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        1,
+        1
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.00564488741871434,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          1
+        ],
+        "trip_residual_trace": [
+          0.00564488741871434
+        ]
+      },
+      "solve_wall_milliseconds": 5368.4736378490925,
+      "terminal_residual": 0.0007296244640433206,
+      "termination": "active_set_settled",
+      "trip_count": 2,
+      "trip_mask_difference_trace": [
+        2,
+        0
+      ],
+      "trip_residual_trace": [
+        0.0012038373705280541,
+        0.0007296244640433206
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": -1923.3405584350485,
+        "compensating_current_norm_a": 4124.462064876212,
+        "observed_m": 0.04051564266550593,
+        "qualified": false,
+        "residual_m": 0.0020143098188828354,
+        "scaled_residual": 0.0005035774547207088,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 5765.0464698672295,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.0766219509755808,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -203714.68906249997,
+      "compilation_cache": "hit",
+      "converged": false,
+      "edit_fraction": 0.09999999999999981,
+      "edit_index": 14,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        3
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 13,
+      "persistent_cache_misses_before": 13,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 272,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 397.98411168158054,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        1
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.026877066701018176,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          94
+        ],
+        "trip_residual_trace": [
+          0.026877066701018176
+        ]
+      },
+      "solve_wall_milliseconds": 2942.6222145557404,
+      "terminal_residual": 0.0043727816629609345,
+      "termination": "active_set_settled",
+      "trip_count": 1,
+      "trip_mask_difference_trace": [
+        0
+      ],
+      "trip_residual_trace": [
+        0.0043727816629609345
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": -974.8415371484449,
+        "compensating_current_norm_a": 2090.475824263732,
+        "observed_m": 0.045799072556147576,
+        "qualified": false,
+        "residual_m": 0.007297739709524478,
+        "scaled_residual": 0.0018244349273811196,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 3340.6046461313963,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.13983475735760356,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -207418.59249999997,
+      "compilation_cache": "hit",
+      "converged": false,
+      "edit_fraction": 0.11999999999999983,
+      "edit_index": 15,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        3,
+        8,
+        8,
+        4,
+        1,
+        0,
+        0
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 13,
+      "persistent_cache_misses_before": 13,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 270,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 481.6808942705393,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.029295859404168997,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          96
+        ],
+        "trip_residual_trace": [
+          0.029295859404168997
+        ]
+      },
+      "solve_wall_milliseconds": 16318.18838790059,
+      "terminal_residual": 0.005210818551638458,
+      "termination": "active_set_settled",
+      "trip_count": 7,
+      "trip_mask_difference_trace": [
+        94,
+        87,
+        140,
+        19,
+        11,
+        2,
+        0
+      ],
+      "trip_residual_trace": [
+        0.026356774038242447,
+        0.00028333262393949725,
+        0.016375557056804213,
+        0.005694477924265273,
+        0.005176929991892356,
+        0.005186212363814983,
+        0.005210818551638458
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": -2276.254747469201,
+        "compensating_current_norm_a": 4881.260531192685,
+        "observed_m": 0.06142330964865863,
+        "qualified": false,
+        "residual_m": 0.022921976802035532,
+        "scaled_residual": 0.005730494200508883,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 16799.86740089953,
+      "warm_seed_source": "previous edit terminal state"
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "boundary_displacement_m": 0.07541080279885255,
+      "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
+      "coil_current_a": -211122.49593749997,
+      "compilation_cache": "hit",
+      "converged": true,
+      "edit_fraction": 0.13999999999999985,
+      "edit_index": 16,
+      "lcfs_vertex_count": 0,
+      "newton_steps_per_trip": [
+        12,
+        5,
+        0
+      ],
+      "off_support_leakage_wb": 0.0,
+      "persistent_cache_hit_count": 0,
+      "persistent_cache_hits_after": 12,
+      "persistent_cache_hits_before": 12,
+      "persistent_cache_miss_count": 0,
+      "persistent_cache_misses_after": 14,
+      "persistent_cache_misses_before": 14,
+      "program_reused": true,
+      "raster_separatrix_vertex_count": 268,
+      "receipt_error": null,
+      "receipt_wall_milliseconds": 397.82662130892277,
+      "reduced_dimension": 2548,
+      "rejected_steps_per_trip": [
+        0,
+        0,
+        0
+      ],
+      "seed_probe": {
+        "achieved_class": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "achieved_class_after_trip": {
+          "class": "diverted",
+          "class_margin": null,
+          "read_status": "qualified"
+        },
+        "converged": false,
+        "residual": 0.007103427781845314,
+        "termination": "active_set_iteration_budget_exhausted",
+        "trip_count": 1,
+        "trip_mask_difference_trace": [
+          2
+        ],
+        "trip_residual_trace": [
+          0.007103427781845314
+        ]
+      },
+      "solve_wall_milliseconds": 7691.50516949594,
+      "terminal_residual": 8.723484787253657e-10,
+      "termination": "converged",
+      "trip_count": 3,
+      "trip_mask_difference_trace": [
+        129,
+        1,
+        0
+      ],
+      "trip_residual_trace": [
+        0.006497442351592952,
+        2.602496037727655e-09,
+        8.723484787253657e-10
+      ],
+      "vertical_centroid": {
+        "compensating_current_a": -3759.305679998491,
+        "compensating_current_norm_a": 8061.553945518307,
+        "observed_m": 0.038501332582631734,
+        "qualified": true,
+        "residual_m": -2.6399136349164465e-10,
+        "scaled_residual": -6.599784087291116e-11,
+        "target_m": 0.0385013328466231,
+        "tolerance_m": 1e-06
+      },
+      "wall_milliseconds": 8089.32981453836,
+      "warm_seed_source": "previous edit terminal state"
+    }
+  ],
+  "schema": "nova.coil-edit-nonconvergence",
+  "seed_probe_definition": "one trip closed with zero Newton steps on this edit's current vector, seeded from the state the edit starts from; the reported residual is the seed's own residual on the edited operator, measured without the vertical current-centre row so it stays the same quantity every earlier sweep recorded",
+  "source_revision": "7ce715a94da0114cbf1475bbd33ce89d8f689dc9",
+  "summary": {
+    "convergence": {
+      "converged_points": [
+        0,
+        2,
+        9,
+        10,
+        11,
+        12,
+        16
+      ],
+      "trip_count_by_point": {
+        "0": 3,
+        "1": 1,
+        "10": 1,
+        "11": 1,
+        "12": 2,
+        "13": 2,
+        "14": 1,
+        "15": 7,
+        "16": 3,
+        "2": 2,
+        "3": 3,
+        "4": 4,
+        "5": 2,
+        "6": 5,
+        "7": 3,
+        "8": 1,
+        "9": 3
+      }
+    },
+    "failure_count": 10,
+    "groups": {
+      "partial_walk": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        13,
+        15
+      ],
+      "refused_first_step": [],
+      "stall": [
+        1,
+        8,
+        14
+      ]
+    },
+    "termination_groups": {
+      "active_set_settled": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        13,
+        14,
+        15
+      ]
+    }
+  }
+}

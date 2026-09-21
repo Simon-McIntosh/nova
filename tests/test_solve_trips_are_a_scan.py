@@ -132,6 +132,33 @@ def test_read_body_counter_rejects_lowered_call_sharing():
     )
 
 
+@pytest.mark.parametrize(
+    "helper", ["_backtracked_promotion", "_rebuilt_model_promotion"]
+)
+def test_initial_and_retried_promotions_share_one_optimized_body(monkeypatch, helper):
+    original = getattr(fixed_point, helper)
+
+    def marked(*args, **kwargs):
+        result = original(*args, **kwargs)
+        return result._replace(state=jnp.sin(result.state))
+
+    monkeypatch.setattr(fixed_point, helper, marked)
+
+    def solve(initial):
+        return fixed_point.newton_krylov(
+            lambda state: jnp.tanh(state) + 0.5,
+            initial,
+            newton_steps=3,
+            gmres_iterations=2,
+            warmup=0,
+            precision=Precision.DOUBLE,
+        )
+
+    initial = jnp.linspace(0.1, 0.9, 17, dtype=jnp.float64)
+    assert _optimized_read_body_count(jnp.sin, initial) == 1
+    assert _optimized_read_body_count(solve, initial) == 1
+
+
 @pytest.mark.parametrize("use_incumbent", [False, True])
 def test_shadow_selection_lowers_one_live_map(use_incumbent):
     initial = jnp.asarray([0.25, 0.75], dtype=jnp.float64)

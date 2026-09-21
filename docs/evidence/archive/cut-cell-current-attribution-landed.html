@@ -1719,6 +1719,87 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   <p>The analytic fixture still cannot run unbridged. The exact clip branch reads the census saddle unconditionally at nova/equilibrium/forward_operator.py:3091, while the fixture topology carries no x_point, so the gate bridges that single read inside the module for the duration of its fixtures and changes nothing under nova/equilibrium or scripts/. The defect stands as the plan's typed-saddle findings, whose blast radius this gate extends to the census module's own measure() entry point.</p>
 </section>
 
+<section id="fixture-topology-saddle-vertex">
+  <h2 id="fixture-topology-saddle-vertex-h">The analytic fixture topology carries the saddle vertex its clip consumes</h2>
+  <p>Commits <code>708af7007</code> (fixture producer and test) on base
+  <code>61354dec5</code>. The forward support clip takes
+  <code>saddle_vertex=topology.x_point</code> at
+  <code>nova/equilibrium/forward_operator.py:3091</code>, but the analytic fixture
+  built its topology record from the three flux scalars alone, so the exact-mode
+  fixture route raised before any numeric assertion ran. Nothing in
+  <code>nova/equilibrium</code> was changed: the defect is at the fixture, which
+  was supplying a topology record narrower than the one the operator reads.</p>
+  <h3>Reproduction, before the repair</h3>
+  <p><code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p
+  no:cacheprovider tests/test_forward_census.py::test_forward_census_exact_diverted_oracle
+  -q</code> — exit 1, <code>1 failed in 17.07s</code>, on an
+  <code>all_debug</code> allocation with <code>JAX_PLATFORMS=cpu</code>,
+  <code>TMPDIR=/tmp</code> in the submit environment and in the payload, the root
+  interpreter run directly and <code>uv</code> never invoked on the node:</p>
+  <pre>&gt;           saddle_vertex=topology.x_point,
+E       AttributeError: 'types.SimpleNamespace' object has no attribute x_point
+nova/equilibrium/forward_operator.py:3091: AttributeError</pre>
+  <h3>Source markers</h3>
+  <table><thead><tr><th>Site</th><th>Before</th><th>After</th></tr></thead><tbody>
+    <tr><td><code>scripts/analytic_oracle_fixtures/measure.py</code>, the fixture poses
+    the topology the clip traces</td>
+    <td><code>SimpleNamespace(axis_flux=..., boundary_flux=..., flux_span=...)</code>
+    — three flux scalars, no vertex</td>
+    <td><code>_analytic_topology(analytic, axis_flux, boundary_flux, flux_span)</code>,
+    the record built by one named helper</td></tr>
+    <tr><td><code>scripts/analytic_oracle_fixtures/measure.py</code>, the vertex source</td>
+    <td>absent</td>
+    <td><code>_analytic_saddle</code>: <code>getattr(analytic, "x_point", None)</code> —
+    the analytic reference's declared X-point for a diverted case,
+    <code>jnp.full(2, jnp.nan)</code> for a limited one</td></tr>
+  </tbody></table>
+  <p>The absent-saddle value is the one a production read carries: at
+  <code>nova/equilibrium/topology.py:417</code>, <code>x_point_data</code> returns
+  <code>jnp.full_like(vmap_x[0], jnp.nan)</code> wherever no contained saddle is
+  admitted (<code>jnp.full(2, jnp.nan)</code> after the <code>[:2]</code> slice the
+  operator reads), so the fixture mirrors it rather than inventing a position. The
+  fixture holds both arms at once because the same helper serves the diverted
+  single-null reference and the limited rotating-equilibrium references, which
+  carry no <code>x_point</code> attribute at all.</p>
+  <h3>Gate</h3>
+  <p>One <code>all_debug</code> allocation, 8 cpus, 64G, three processes each run
+  from the root interpreter with <code>JAX_PLATFORMS=cpu</code> and
+  <code>all_debug</code>'s own <code>uv</code>-free recipe:</p>
+  <table><thead><tr><th>Command</th><th>Exit</th><th>Result</th></tr></thead><tbody>
+    <tr><td><code>tests/test_analytic_oracle_fixture_topology.py</code></td><td>0</td>
+    <td><code>2 passed in 8.06s</code></td></tr>
+    <tr><td><code>tests/test_forward_census.py::test_forward_census_exact_diverted_oracle</code></td>
+    <td>0</td><td><code>1 passed in 97.56s</code></td></tr>
+    <tr><td><code>tests/test_xpoint_cell_wedge_clip.py</code></td><td>0</td>
+    <td><code>14 passed in 30.15s</code>, unchanged against the same command's
+    pre-repair base run (<code>14 passed in 31.90s</code>): zero added failures</td></tr>
+  </tbody></table>
+  <p>The census row that failed before the repair now passes unchanged in its
+  assertions: the diverted oracle read reaches its numbers instead of raising at
+  the clip call, and the read stays limited with a non-finite
+  <code>x_point</code> at both rungs, which is that test's own recorded
+  expectation rather than a weakened one.</p>
+  <h3>Negative control</h3>
+  <p>Declared mutation: <em>scripts/analytic_oracle_fixtures/measure.py
+  <code>_analytic_saddle</code> returns the absent-saddle pair unconditionally, so
+  a diverted analytic reference contributes no saddle</em>. Under it the new file
+  exits 1, <code>1 failed, 1 passed in 13.74s</code>, failing
+  <code>test_fixture_topology_carries_the_diverted_saddle</code> at
+  <code>tests/test_analytic_oracle_fixture_topology.py:47</code> on
+  <code>assert np.all(np.isfinite(saddle))</code> — the assertion that names the
+  mutation's effect fires, and the limited arm stays green, so the test separates a
+  saddle-carrying topology from an absent-saddle one rather than merely requiring
+  the attribute to exist. The diverted arm additionally pins the vertex as the
+  analytic saddle: the flux gradient there is under
+  <code>1e-6</code> of its magnitude at an interior point, measured
+  <code>1.17e-16</code> against <code>7.70e-03</code>.</p>
+  <p>Raw logs are under
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T104457846138-…</code>
+  (<code>logs/baseline_lane.log</code>, <code>logs/after_lane.log</code>,
+  <code>logs/negative_control.log</code>). This entry does not close the section or
+  resolve its driving followup, and its gate measures only this node's own change;
+  verifying the merged head belongs to a separately dispatched test node.</p>
+</section>
 </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T12:40:27",
+  "updated": "2026-09-21T12:44:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5056,6 +5056,15 @@
       },
       {
         "id": "s19c-fitness-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
+      },
+      {
+        "id": "s19c-fixture-saddle-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -226095,6 +226104,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3047
+    "_version": 3048
   }
 }

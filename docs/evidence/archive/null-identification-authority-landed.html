@@ -1348,6 +1348,47 @@ benchmarks/solovev_certificate.py:2514: RuntimeError
   is restored to its committed content in the worktree (<code>git checkout HEAD --</code> on that one
   path, inside the worktree), so no class-less rows land. The gate stays unmeasured and the node stays
   blocked, with the measurement it owes unchanged: regenerate the bank, then run the 22086/43 gate.</p>
+
+  <p><strong>Superseding ruling: the regeneration ran in this node, and it does not fit an hour.</strong>
+  The coordinator moved the wholesale regeneration inside the fence. Two attempts were submitted as one
+  <code>all_debug</code> allocation each, all six shots named in the single command, <code>TMPDIR=/tmp</code>
+  exported before the submit and inside the payload, <code>JAX_PLATFORMS=cpu</code>,
+  <code>NOVA_COMPILATION_CACHE_ROOT</code> pointed at the pinned pre-warm root, the root interpreter run
+  directly and <code>uv</code> never invoked on the node. Both failed, for unrelated causes, and neither
+  wrote anything on disk: the worktree carries only the source change, because the bank and the atlas
+  receipt are written once, at the end of a pass.</p>
+
+  <p><strong>First attempt (job 1275009, 19 min).</strong> The six-shot route cleared the stale-cache
+  hatch — that is what naming the full set buys — and then raised
+  <code>RuntimeError: the MAST solve returned no observable branch portfolio</code> from
+  <code>generate_topology_visuals.py:286</code> on the very first row, 21978/35, after the row's two
+  solves had already run. The cause is a seam that moved under the renderer and left a hook behind, and it
+  is repaired here. The wrapper forwarded a profile while capturing the <em>portfolio</em> the solve
+  returned (<code>_ObservedProfile.solve_portfolio</code>), and the renderer read the diverted branch's
+  iteration count off that portfolio. Production solves now go through the typed request and receipt
+  (<code>profile.solve(request)</code> at
+  <code>docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py:143</code>), and
+  <code>ForwardProfile.solve</code> builds no <code>ForwardPortfolio</code> on that route —
+  <code>solve_portfolio</code> survives on the profile but no production path calls it. So the wrapper's
+  portfolio stayed <code>None</code> on every row and the guard raised on the first one. The wrapper now
+  intercepts <code>solve</code> and keeps each receipt in call order, and the iteration count is read from
+  the pure arm's own receipt, which is the same solve the portfolio branch used to carry. The bank has
+  not been regenerated since that seam moved in <code>384d759ec</code>, which is why the fault went
+  unreported: nothing had run this path in between.</p>
+
+  <p><strong>Second attempt (job 1275068, 29 min).</strong> With the hook repaired the run made progress:
+  row 21978/35 completed both arms and the replay fields were read for each, and the pass advanced to
+  21983/35. There it died in XLA compilation — <code>execution_engine.cc:54] LLVM compilation error:
+  Cannot allocate memory</code>, thousands of lines of it, ending in a segmentation fault
+  (<code>RENDERER_EXIT=139</code>). The job's own peak resident set was <code>MaxRSS 23.5 GiB</code> against
+  a 64 GiB request, so the ceiling the job asked for is not what it hit; the compile of the next row's
+  module did not fit. That is one row of the twelve, against a 59-minute wall and roughly ten minutes of
+  wall per row: the twelve-row pass cannot complete inside a single <code>*_debug</code> allocation on
+  these partitions, which accept no more than the hour. Naming a subset is refused by the hatch above —
+  the requested set has to equal the available set, so a chunked pass cannot take the stale
+  bank as its retained rows. What the regeneration needs is one compiled pass over
+  the row set, or a pre-warm that warms <em>this</em> driver rather than the test lane, or a partition
+  whose wall is longer than the debug hour.</p>
 </section>
 </main>
 </body>

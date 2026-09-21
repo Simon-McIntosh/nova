@@ -663,6 +663,45 @@
     <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T181701895943-fsri-the-trips-are-a-scan-not-a-loop/</code>.
     The manifest names every artifact. The local implementation is unpromoted.</p>
   </section>
+  <section id="loop-inventory-scan-form">
+    <h2>The loop inventory names the scan form the certificate budget now carries</h2>
+    <p>Commit <code>d8bbc0491e72df29ddaabc1e6d76f704c4c8dc2d</code> replaced the
+    separately executed first active-set trip with one <code>jax.lax.scan</code>, which
+    removed the source marker <code>jax.lax.fori_loop(1, active_set_steps</code> the
+    program-scope loop inventory searched for. The inventory row for the certificate
+    active-set budget therefore raised <code>ValueError</code> from
+    <code>_source_line</code> and both certificate gates carrying
+    <code>tests/test_solve_program_size.py</code> failed there.</p>
+    <p>Reproduced before the repair by
+    <code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q
+    tests/test_solve_program_size.py::test_loop_inventory_finds_both_compiled_slice_budgets</code>,
+    which failed at <code>benchmarks/program_scope_census.py:1003</code> with
+    <code>_active_set_newton_krylov has no occurrence 0 of 'jax.lax.fori_loop(1,
+    active_set_steps'</code>.</p>
+    <table><thead><tr><th>Inventory row</th><th>Source marker (literal)</th><th>Form</th><th>Program effect</th><th>Resolved source</th></tr></thead><tbody>
+      <tr><td>certificate active-set budget (before)</td><td><code>jax.lax.fori_loop(1, active_set_steps</code></td><td><code>jax.lax.fori_loop</code></td><td>one while body in optimised HLO</td><td>unresolvable — marker removed</td></tr>
+      <tr><td>certificate active-set budget (after)</td><td><code>outer, _ = jax.lax.scan(</code></td><td><code>jax.lax.scan</code></td><td>one scan body in optimised HLO</td><td><code>nova/equilibrium/fixed_point.py:3864</code> in <code>_active_set_newton_krylov</code></td></tr>
+    </tbody></table>
+    <p>The marker is the literal scan call text and is unique in the function
+    (<code>grep -c</code> returns 1), so the row resolves to a real source line rather
+    than a placeholder. The added assertion requires the row's form to be
+    <code>jax.lax.scan</code> and its resolved <code>line</code> to be a positive
+    integer.</p>
+    <h3>Gate and negative control</h3>
+    <p>Gate: <code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest
+    -p no:cacheprovider -q
+    tests/test_solve_program_size.py::test_loop_inventory_finds_both_compiled_slice_budgets</code>
+    — exit 0, <code>1 passed in 10.54s</code>.</p>
+    <p>Negative control: with the row's form set back to
+    <code>jax.lax.fori_loop</code> (the label to be removed), the same command exits 1
+    and fails at <code>tests/test_solve_program_size.py:227</code> on the new scan-form
+    assertion — the assertion is what fires, not the removed-marker error.</p>
+    <p>Raw logs are under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T084552350328-fsri-the-loop-inventory-names-the-scan-form/</code>
+    (<code>gate.log</code>, <code>negative_control.log</code>). This gate measures only
+    the inventory row; verifying the merged head belongs to the separately dispatched
+    test node. This entry does not close the section or resolve its driving followup.</p>
+  </section>
 </main>
 </body>
 </html>

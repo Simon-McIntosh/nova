@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T06:20:15",
+  "updated": "2026-09-21T06:20:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7235,6 +7235,15 @@
       {
         "id": "s19k-audit-routes",
         "harness": "codex-astra",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
+      },
+      {
+        "id": "s19k-audit-tests",
+        "harness": "codex",
         "role": "review",
         "session_id": null,
         "session_model": null,
@@ -220144,6 +220153,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3006
+    "_version": 3007
   }
 }

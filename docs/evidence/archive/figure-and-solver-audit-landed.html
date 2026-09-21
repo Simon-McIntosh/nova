@@ -1453,17 +1453,17 @@ ROW2_EXIT=139</pre>
 <table><thead><tr><th>Row</th><th>Run</th><th>Commits touching review scope / deferred commits</th><th>Review status</th><th>Verdict</th><th>Gate replay</th></tr></thead><tbody>
 <tr><td>1</td><td><code>r-20260915T184108433291-cca-exact-clip-seed-books-target-current</code></td><td>29a690a29, 9dfc35b1c</td><td>in-progress</td><td>unverifiable</td><td>continued-seed-amplitude: running (exit None)</td></tr>
 <tr><td>2</td><td><code>r-20260915T132132875202-cca-exact-clip-solve-memory-scaling</code></td><td>826358aa9, 823b9e6d8, 7fe47a072, 5366ac4e2, e203bde33, 9693713b2, ff051c9b3, 9fa332fe4, 14193b48f, c7e8cc12e</td><td>in-progress</td><td>defective</td><td>clip-memory: passed (exit 0)</td></tr>
-<tr><td>3</td><td><code>r-20260916T065036630331-msc-mesh-arguments-plumbing</code></td><td>dd7d82867, 78d87c694, 205d0f354, e0e9417ac</td><td>in-progress</td><td>defective</td><td>continued-certificate-mesh: pending (exit None)</td></tr>
-<tr><td>4</td><td><code>r-20260916T084805089053-msc-flux-functions-as-program-arguments</code></td><td>a4de1caf5, 77b149b48, a8443a12c, ebe734bd5</td><td>in-progress</td><td>defective</td><td>continued-certificate-profile: pending (exit None)</td></tr>
+<tr><td>3</td><td><code>r-20260916T065036630331-msc-mesh-arguments-plumbing</code></td><td>dd7d82867, 78d87c694, 205d0f354, e0e9417ac</td><td>in-progress</td><td>defective</td><td>continued-certificate-mesh: running (exit None)</td></tr>
+<tr><td>4</td><td><code>r-20260916T084805089053-msc-flux-functions-as-program-arguments</code></td><td>a4de1caf5, 77b149b48, a8443a12c, ebe734bd5</td><td>in-progress</td><td>defective</td><td>profile-coefficient-recompile: failed (exit 1); continued-certificate-profile: running (exit None)</td></tr>
 <tr><td>5</td><td><code>r-20260917T042807085151-cca-delete-clip-globals-clone</code></td><td>294b070ec</td><td>in-progress</td><td>sound</td><td>clip-tracer: passed (exit 0); clip-operator: passed (exit 0)</td></tr>
-<tr><td>6</td><td><code>r-20260917T170314445551-msc-request-set-machine-2</code></td><td>1f141e67d, 41bd2b448, f79019234</td><td>in-progress</td><td>defective</td><td>continued-certificate-request: pending (exit None)</td></tr>
+<tr><td>6</td><td><code>r-20260917T170314445551-msc-request-set-machine-2</code></td><td>1f141e67d, 41bd2b448, f79019234</td><td>in-progress</td><td>defective</td><td>request-parent-decomposition: passed (exit 0); continued-certificate-request: pending (exit None)</td></tr>
 <tr><td>7</td><td><code>r-20260918T203029970629-cank-shafranov-field-responses</code></td><td>796df3501</td><td>in-progress</td><td>unverifiable</td><td>field-responses: failed (exit 1)</td></tr>
 <tr><td>8</td><td><code>r-20260918T094416317124-cank-flux-function-fit</code></td><td>fa2301a2e</td><td>in-progress</td><td>unverifiable</td><td>continued-source-projection: passed (exit 0); continued-compensator: failed (exit 1)</td></tr>
 <tr><td>9</td><td><code>r-20260918T154507107752-fsa-coil-edit-panel-lcfs-2</code></td><td>f258917e8</td><td>in-progress</td><td>sound</td><td>closed-branches: passed (exit 0)</td></tr>
 <tr><td>10</td><td><code>r-20260918T165636099922-msc-forward-solve-lane-regressions</code></td><td>e37e38194, 40bb54553</td><td>in-progress</td><td>defective</td><td>continued-forward-solve: pending (exit None)</td></tr>
-<tr><td>11</td><td><code>r-20260919T200510357550-nia-promotion-fallback-nan</code></td><td>fd42ffc65</td><td>in-progress</td><td>defective</td><td>continued-fallback: running (exit None)</td></tr>
-<tr><td>12</td><td><code>r-20260919T223218420452-msc-inert-dispatcher-and-fused-branch</code></td><td>fdc6abaa8</td><td>in-progress</td><td>defective</td><td>fused-equilibrium_forward_operator: passed (exit 0); continued-forward_operator_domain: failed (exit 1); continued-forward_operator_tangent: passed (exit 0); continued-forward_operator_arguments: passed (exit 0); continued-forward_profile_arguments: failed (exit 1); continued-forward_operator_axes: failed (exit 1); continued-fused_same_state_read: running (exit None)</td></tr>
-<tr><td>13</td><td><code>r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle</code></td><td>d90a522fe</td><td>in-progress</td><td>unverifiable</td><td>typed-saddle: passed (exit 0)</td></tr>
+<tr><td>11</td><td><code>r-20260919T200510357550-nia-promotion-fallback-nan</code></td><td>fd42ffc65</td><td>in-progress</td><td>defective</td><td>continued-fallback: cannot-run-write-fence (exit 1)</td></tr>
+<tr><td>12</td><td><code>r-20260919T223218420452-msc-inert-dispatcher-and-fused-branch</code></td><td>fdc6abaa8</td><td>in-progress</td><td>defective</td><td>fused-equilibrium_forward_operator: passed (exit 0); continued-forward_operator_domain: failed (exit 1); continued-forward_operator_tangent: passed (exit 0); continued-forward_operator_arguments: passed (exit 0); continued-forward_profile_arguments: failed (exit 1); continued-forward_operator_axes: failed (exit 1); continued-fused_same_state_read: passed (exit 0)</td></tr>
+<tr><td>13</td><td><code>r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle</code></td><td>d90a522fe</td><td>in-progress</td><td>defective</td><td>typed-saddle: passed (exit 0)</td></tr>
 <tr><td>14</td><td><code>r-20260920T181701895943-fsri-the-trips-are-a-scan-not-a-loop</code></td><td>d8bbc0491, a999eff40, 8dc6be23a</td><td>deferred-to-an-independent-lane</td><td>— no verdict</td><td>deferred to sol seat</td></tr>
 </tbody></table>
 <h3 id="fsa-audit-solver-fixed-point-and-newton-routes-1-r-20260915t184108433291-cca-exact-clip-seed-books-target-c">1. r-20260915T184108433291-cca-exact-clip-seed-books-target-current</h3>
@@ -1566,9 +1566,9 @@ ROW2_EXIT=139</pre>
     ],
     &quot;limit&quot;: 900,
     &quot;provenance&quot;: &quot;run_certificate_identity.sh/certificate_run.sh payload; output receipt rebound&quot;,
-    &quot;status&quot;: &quot;pending&quot;,
+    &quot;status&quot;: &quot;running&quot;,
     &quot;exit_status&quot;: null,
-    &quot;log_path&quot;: null,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-certificate-mesh.log&quot;,
     &quot;failure_ids&quot;: [],
     &quot;summary&quot;: &quot;&quot;
   }
@@ -1590,6 +1590,21 @@ ROW2_EXIT=139</pre>
 <p>Current-head replay outcomes:</p>
 <pre>[
   {
+    &quot;key&quot;: &quot;profile-coefficient-recompile&quot;,
+    &quot;promotion&quot;: 4,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;benchmarks/profile_coefficients_recompile_audit.py&quot;
+    ],
+    &quot;status&quot;: &quot;failed&quot;,
+    &quot;exit_status&quot;: 1,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/profile-recompile-replay.log&quot;,
+    &quot;provenance&quot;: &quot;run_recompile_audit.sh payload; output/HLO/figure directories rebound to exclusive review fence&quot;,
+    &quot;failure_reason&quot;: &quot;AttributeError in analytic_oracle_fixtures/measure.py _analytic_profile_support: its SimpleNamespace topology has no x_point required at forward_operator.py:3091&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;&quot;
+  },
+  {
     &quot;key&quot;: &quot;continued-certificate-profile&quot;,
     &quot;promotion&quot;: 4,
     &quot;argv&quot;: [
@@ -1600,9 +1615,9 @@ ROW2_EXIT=139</pre>
     ],
     &quot;limit&quot;: 900,
     &quot;provenance&quot;: &quot;run_certificate_identity.sh/certificate_run.sh payload; output receipt rebound&quot;,
-    &quot;status&quot;: &quot;pending&quot;,
+    &quot;status&quot;: &quot;running&quot;,
     &quot;exit_status&quot;: null,
-    &quot;log_path&quot;: null,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-certificate-profile.log&quot;,
     &quot;failure_ids&quot;: [],
     &quot;summary&quot;: &quot;&quot;
   }
@@ -1680,6 +1695,23 @@ ROW2_EXIT=139</pre>
 <p>Declared negative control: none recorded.</p>
 <p>Current-head replay outcomes:</p>
 <pre>[
+  {
+    &quot;key&quot;: &quot;request-parent-decomposition&quot;,
+    &quot;promotion&quot;: 6,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/request-set/decompose_read_parents.py&quot;,
+      &quot;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes&quot;,
+      &quot;/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/request-set/census-base-cold/hlo/weak-rotation-reactor-static_300c_solve.hlo.txt&quot;,
+      &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/decomposed-parents.json&quot;
+    ],
+    &quot;status&quot;: &quot;passed&quot;,
+    &quot;exit_status&quot;: 0,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/decomposition-replay.log&quot;,
+    &quot;provenance&quot;: &quot;Original decompose_run.sh payload with current code root and output path rebound; same declared historical HLO input. This reproduces the historical instrument, not a newly compiled current-head HLO.&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;&quot;
+  },
   {
     &quot;key&quot;: &quot;continued-certificate-request&quot;,
     &quot;promotion&quot;: 6,
@@ -1902,11 +1934,15 @@ ROW2_EXIT=139</pre>
     ],
     &quot;limit&quot;: 900,
     &quot;provenance&quot;: &quot;recovered head pytest payload; checkout/log paths rebound to assigned review&quot;,
-    &quot;status&quot;: &quot;running&quot;,
-    &quot;exit_status&quot;: null,
+    &quot;status&quot;: &quot;cannot-run-write-fence&quot;,
+    &quot;exit_status&quot;: 1,
+    &quot;seconds&quot;: 266.26691080257297,
     &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-fallback.log&quot;,
-    &quot;failure_ids&quot;: [],
-    &quot;summary&quot;: &quot;&quot;
+    &quot;failure_ids&quot;: [
+      &quot;tests/test_promotion_fallback_amplitude.py::test_the_diverted_rung_settles_on_its_un_carried_residual&quot;,
+      &quot;tests/test_forward_operator_axes.py::test_tensor_product_grid_class_margin_is_read_on_the_spline&quot;
+    ],
+    &quot;summary&quot;: &quot;2 failed, 7 passed in 254.40s (0:04:14)&quot;
   }
 ]</pre>
 <p>Inputs: <code>promotion-11.json</code>, <code>manifest-11.md</code>, <code>core-11.diff</code>, <code>tests-11.diff</code>.</p>
@@ -2094,16 +2130,17 @@ ROW2_EXIT=139</pre>
     ],
     &quot;limit&quot;: 360,
     &quot;provenance&quot;: &quot;recovered head pytest payload; checkout/log paths rebound to assigned review&quot;,
-    &quot;status&quot;: &quot;running&quot;,
-    &quot;exit_status&quot;: null,
+    &quot;status&quot;: &quot;passed&quot;,
+    &quot;exit_status&quot;: 0,
+    &quot;seconds&quot;: 138.7484629675746,
     &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-fused_same_state_read.log&quot;,
     &quot;failure_ids&quot;: [],
-    &quot;summary&quot;: &quot;&quot;
+    &quot;summary&quot;: &quot;4 passed in 132.63s (0:02:12)&quot;
   }
 ]</pre>
 <p>Inputs: <code>promotion-12.json</code>, <code>manifest-12.md</code>, <code>core-12.diff</code>, <code>tests-12.diff</code>.</p>
 <h3 id="fsa-audit-solver-fixed-point-and-newton-routes-13-r-20260919t234730758244-cca-production-clip-takes-the-typ">13. r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle</h3>
-<p>Review status: <strong>in-progress</strong>. Verdict: <strong>unverifiable</strong>. The saddle keyword and structural guard are sound, and the focused gate is replayed. The full declared numeric/region-consumer gate is not met (1.388e-1 vs 1e-13 at 110, larger rows unmeasured, region profiles not consumed); preserve the explicit ruling accepting the handoff only. The green ledger field cites the red log.</p>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>defective</strong>. The saddle keyword and structural guard are sound, and the focused gate is replayed. The full declared numeric/region-consumer gate is not met (1.388e-1 vs 1e-13 at 110, larger rows unmeasured, region profiles not consumed); preserve the explicit ruling accepting the handoff only. The green ledger field cites the red log. Fresh consumer replays additionally fail at the introduced topology.x_point access in both the normalisation tangent and profile-amplitude compensator gates; this untested consumer contract is a current defect beyond the already-disclosed oracle deferral.</p>
 <p>All promotion commits: <code>d90a522fe8ac53d4a26477bf920aeb8ac367be47</code>, <code>3d0b2f494bd5da2dcb5115e4803cf346cc68a5ed</code>, <code>156bff654384b72925d23fbfdf9a010a4840f37b</code>, <code>fa7db0d675a0bceb8b8edf85a13df4832da7b59c</code>.</p>
 <p>Done-when as recorded:</p>
 <p>&gt; the forward operator passes the typed census saddle to the clip as its saddle vertex, the four region-owned moment profiles are consumed by the plasma-cell partition and by the null read, and the oracle is made independent of the carrier by integrating the analytic current over the region bounded by the separatrix branches and the cell edges rather than over the carrier own emitted polygons; one all_debug CPU allocation, --cpus-per-task=8 --mem=64G --time=00:59:00, TMPDIR=/tmp in the submit environment and in the payload, JAX_PLATFORMS=cpu, the shared root interpreter run directly and uv never invoked on the compute node, runs that independent oracle at 110, 300 and 500 cells in one job and never as an array, and the core-side current agrees with the analytic wedge integral to within 1e-13 relative at each resolution; the certificate re-solve half of this section gate is NOT attempted and is reported as deferred, because the quality-of-service caps this account at four cards and the model serve holds all four, so a GPU job cannot schedule; committed cases pin the saddle vertex reaching the clip and the four profiles reaching both consumers, the gate reports added failures against the base revision, and the declared negative control reddens</p>
@@ -2193,6 +2230,10 @@ ROW2_EXIT=139</pre>
 <p><code>796df3501</code> — <code>tests/test_equilibrium_diagnostics.py:452</code> — current-head gate failure without baseline attribution.</p>
 <p>The gate promoted with 796df3501 now returns 3 failed and 67 passed at audit head 0322e911a: test_shafranov_contour_integrals_equal_their_volume_side at 321, 641 and 1281 exceeds the unchanged 5e-4 bound, with maxima 0.0007173192006160823, 0.0006415557775379364 and 0.000627177830842935. This audit does not attribute those failures to the field-response commit without a matched baseline. Reproduce and localise the contour/volume mechanism in the owning test/diagnostic scope; preserve the tolerance while repairing or obtaining a physics ruling.</p>
 <p>Evidence: <code>field-responses.log</code>.</p>
+<h4 id="fsa-audit-solver-fixed-point-and-newton-routes-carry-the-typed-saddle-through-the-certificate-profile-fixtu">Carry the typed saddle through the certificate profile fixtures</h4>
+<p><code>d90a522fe8</code> — <code>nova/equilibrium/forward_operator.py:3091</code> — typed handoff breaks untested consumers.</p>
+<p>At code identical to main 7c97f916, both test_profile_component_image_is_the_normalisation_tangent and test_profile_amplitude_compensator_reaches_its_row fail before the intended numeric assertion: saddle_vertex=topology.x_point raises AttributeError because the certificate fixture supplies a SimpleNamespace without x_point. The promoted twelve-case saddle gate passes and does not reach these consumers. Repair the fixture/producer contract to carry the typed census saddle or an explicit absent-saddle value for the applicable topology, and include the profile and compensator consumers in its gate. Do not bypass the saddle requirement or weaken the amplitude assertions to make the tests pass. This is recorded as a follow-on; no source or test repair was made in this review. The original profile_coefficients_recompile_audit.py payload also exits 1 on the same missing x_point at scripts/analytic_oracle_fixtures/measure.py:1014, so this is a shared analytic-fixture consumer defect, not merely a test-only mock.</p>
+<p>Evidence: <code>continued-forward_profile_arguments.log</code>, <code>continued-compensator.log</code>, <code>profile-recompile-replay.log</code>.</p>
 <h3 id="fsa-audit-solver-fixed-point-and-newton-routes-negative-controls-in-this-seat">Negative controls in this seat</h3>
 <table><thead><tr><th>Promotion</th><th>Applied mutation versus declaration</th><th>Actual red reason</th><th>Assessment</th></tr></thead><tbody>
 <tr><td>11</td><td>Declares reverting the refusal repair; instead enables carried partitions on target-normalised route</td><td>residual 6.3706933429737305 != 2.248351582217136</td><td>different guard and different claimed mechanism</td></tr>
@@ -2203,7 +2244,7 @@ ROW2_EXIT=139</pre>
 <h3 id="fsa-audit-solver-fixed-point-and-newton-routes-remaining-evidence-limits">Remaining evidence limits</h3>
 <p>The original seed/memory records combine CPU and H200 gates. A CPU replay cannot reproduce a GPU allocator measurement verbatim. Full importer censuses and physical certificate solves can exceed the remaining fixed fence; incomplete attempts have their own exit/status and log. Source-swapping producer drivers are not run verbatim against this read-only scope: their recoverable head test payload is run directly, and any fixture that attempts a repository write is visibly refused. These limits keep the affected promotion unverifiable; they do not stop unrelated rows.</p>
 <p>The recorded field-response gate at the audited head fails three contour/volume cases (321, 641, 1281), each above the unchanged 5e-4 bound. Attribution to an individual promotion requires a matched baseline; no tolerance or production code was changed here.</p>
-<p>Promotions reviewed: 13; defective: 7; sound: 2; unverifiable: 4; deferred-to-an-independent-lane: 1 run / 3 commits, with no verdict. Defect classes: bit identity replaced by tolerance; comparator suppresses a production refusal; current-head gate failure without baseline attribution; focused structural gate substituted for numerical contract; gate replay unavailable; guard lost at wrapper boundary; negative control mutates a different guard; same-revision control presented as cross-revision evidence; tracer refusal before cache bypass.</p>
+<p>Promotions reviewed: 13; defective: 8; sound: 2; unverifiable: 3; deferred-to-an-independent-lane: 1 run / 3 commits, with no verdict. Defect classes: bit identity replaced by tolerance; comparator suppresses a production refusal; current-head gate failure without baseline attribution; focused structural gate substituted for numerical contract; gate replay unavailable; guard lost at wrapper boundary; negative control mutates a different guard; same-revision control presented as cross-revision evidence; tracer refusal before cache bypass; typed handoff breaks untested consumers.</p>
 </section>
 <section class="audit-directory" id="fsa-audit-solver-test-pins-section">
 <h2 id="fsa-audit-solver-test-pins">Solver test-pin promotion audit</h2>

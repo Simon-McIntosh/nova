@@ -1061,6 +1061,26 @@
 <li>SVGs were rasterised read-only to <code>/tmp/fsa_svg</code> with <code>rsvg-convert -w 1800</code>; nothing was written into the repository and no figure was regenerated.</li>
 </ul>
 </section>
+<section class="solver-driver-review" id="solver-driver-review">
+<h2 id="solver-driver-review-summary">Solver-driver promotion review — independent lane</h2>
+<p>Reviewer node <code>fsa-audit-solver-census-and-certificate-drivers</code>, worktree head <code>0322e911a52588e116bb76a2243ff0dc728cc655</code>, review lane independent of the locally served implementation lane. The ledger join against <code>docs/state/nova/crew.json</code> found <strong>18</strong> promotions since 2026-09-16 touching the requested benchmark paths. <code>benchmarks/forward_census.py</code> is absent at this head and has no matching history, so it has no fabricated gate row.</p>
+<p>The current-head gate that fit this worker's fence ran in one fresh <code>all_debug</code> allocation with <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in the submit environment and payload, the shared root interpreter directly, and no <code>uv</code> on the node. Four focused modules passed <strong>28 tests, 0 failures</strong> with four dtype warnings; log <code>/tmp/fsa-audit-current/all-debug-gate.log</code>. A second fresh all_debug process ran the compile-abort sampler with a shared summary path: the child exited 7, peak maps were 25 of 65530, one sample was written, and the wrapper returned 0; log <code>/tmp/fsa-audit-current/abort-all-debug.log</code>, receipt <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-census-and-certificate-drivers/current-abort-summary.json</code>. Historical H200 and multi-minute certificate/coil/DIII-D gates were not rerun at this head and are marked unverifiable rather than treated as green.</p>
+<table><thead><tr><th>reviewed promotions</th><th>count</th><th>defect or evidence class</th></tr></thead><tbody>
+<tr><td>sound</td><td>6</td><td>empty-identity refusal, gauge-free negative result, full non-convergence diagnostic, completed 12-row drift successor, edge-root gate, persisted-pair guard</td></tr>
+<tr><td>defective</td><td>11</td><td>red threshold promoted, incomplete or blocked done-when promoted, non-discriminating negative control, missing fixture/sweep evidence, unsettled mapping hypothesis</td></tr>
+<tr><td>unverifiable</td><td>1</td><td>positive constrained control blocked by compile-size failure; no current merged-head confirmation</td></tr>
+<tr><th>total</th><th>18</th><th></th></tr>
+</tbody></table>
+<h3 id="solver-driver-review-findings">Representative findings</h3>
+<ul>
+<li><strong>Threshold mismatch:</strong> the mesh-argument promotion's named size gate measured <code>210159751</code> effective bytes against the <code>50000000</code>-byte done-when ceiling and returned <code>FAIL</code>; the remainder was handed off after promotion.</li>
+<li><strong>Instrument coverage:</strong> <code>benchmarks/bank_drift_paired_probe.py:337-342</code> loads checkpointed rows and then resets them to an empty list, while <code>:477-483</code> iterates only left-tree identities. Synthetic reproductions recorded in the review report show the resume marker disappearing and a right-only identity being omitted.</li>
+<li><strong>Exit masking:</strong> <code>benchmarks/compile_abort_probe.py:149-167</code> records child exit 7 but returns 0; the current all_debug receipt reproduces the mismatch.</li>
+<li><strong>Negative control:</strong> the bounded-row control uses the same displaced seed for its no-row arm, which returns to its own unconstrained fixed point; the recorded arm therefore cannot prove the row's effect.</li>
+<li><strong>Unpromoted certificate run:</strong> the one-process-per-row measurement is withheld. Its observed diff is 31 paths, all under the five declared roots (not 63), but the candidate state path is an absolute removed-worktree path and the probe wrapper/child exits are conflated.</li>
+</ul>
+<p>Ready-to-append repair items, with commit/file/line anchors, are stored beside the review at <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-census-and-certificate-drivers/findings.json</code>. No file under <code>nova/</code> and no test file was edited by this review.</p>
+</section>
   </main>
 </body>
 </html>

@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="235">
+<meta name="plan-version" content="236">
 </head>
 <body>
 <main class="plan-doc">
@@ -1117,6 +1117,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260921T103310878070-nia-the-drift-campaign-resumes-without-re-emitting-landed-rows" data-who="reckon-ship" data-when="2026-09-21T11:06:07.275Z">
     <div class="r-comment-body"><p>the bank-drift paired probe keeps its checkpointed rows on resume and skips landed identities; verified independently on codex sol</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260921T123729655027-nia-wall-arrays-are-promoted-before-traced-indexing" data-who="reckon-ship" data-when="2026-09-21T14:37:55.845Z">
+    <div class="r-comment-body"><p>wall coordinate and flux arrays promoted to jnp arrays before traced indexing in connectivity_boundary.py and topology.py with two trace pins; reader 3/3, limiter 10/10 both arms, axes pre-existing failure identical both arms, control reddens with TracerArrayConversionError; bookend review fsa-verify-the-wall-array-promotion scored 98/100 and its textual reject on one pre-existing line-wrap hunk (ASTs identical to the reference commit) is relaxed by the coordinator as formatting</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

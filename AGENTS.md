@@ -432,11 +432,51 @@ and it is refused in one call; the same request into `gpu_0003_grpB` fails with
 group B job sits stuck identically. The cause is the cluster configuration
 (two `CoreCnt=30` reservations with `CoreIDs=(null)` on a 64-core node under
 `sched/builtin`), an SDCC matter, so stopping or shrinking the serve would
-change nothing. Until it is fixed, write every heavy gate for `all_debug` with
-`JAX_PLATFORMS=cpu` and size the row count to the one-hour limit; a correctly
-shaped H200 job may be left queued so it runs the moment the reservation
-admits jobs again. The node's live budget and the serving footprint are kept in
-imas-ambix `imas_ambix/agent/AGENTS.md`.
+change nothing. `CoreIDs=(null)` against a declared `CoreCnt=30` is the tell:
+the reservation claims thirty cores and holds none, so a job restricted to it
+resolves to an empty core set, which is why SLURM answers with a *configuration*
+refusal rather than a shortage and why neither free resources nor a smaller
+request changes anything. Backfill is therefore not the remedy — a job that can
+never be placed is skipped by backfill too. Leave a correctly shaped H200 job
+queued so it runs the moment the reservation is repaired, and route the work per
+the hierarchy below. The node's live budget and the serving footprint are kept
+in imas-ambix `imas_ambix/agent/AGENTS.md`.
+
+### Compute hierarchy: H200, then titan, then CPU (binding, lead 2026-09-21)
+
+**Every GPU-shaped gate defaults to the H200 and falls back to titan before it
+falls back to CPU.** A node that lands on CPU without trying titan has skipped a
+rung, and that is a scope defect in the brief rather than a worker's choice.
+
+| Rung | Submission | When |
+|---|---|---|
+| 1. H200 | `--partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1` | always first; leave the job queued even when the reservation refuses |
+| 2. titan (P100) | `--partition=titan --gres=gpu:1` | whenever betelgeuse will not admit the job |
+| 3. CPU | `--partition=all_debug` (or `sirius` past the hour) with `JAX_PLATFORMS=cpu` | only when neither GPU rung can serve the shape |
+
+**Titan is a working JAX lane, measured rather than assumed.** The worry is that
+a P100 is compute capability 6.0 and recent jaxlib CUDA wheels drop pre-Volta.
+It does not: on `98dci4-gpu-0002`, JAX 0.11.0 reports `devices
+[CudaDevice(id=0)]`, `x64 True` and `default backend gpu` on a
+`Tesla P100-PCIE-16GB`. The node carries `gpu:p100:8` with 20 cores and 256 GB,
+needs **no reservation and no special account**, and a plain submission starts
+immediately.
+
+Read a titan number as a titan number. It has 16 GB of device memory against the
+H200's 141, and P100 fp64 at roughly a seventh of H200 fp64, so it serves a
+solve or a render honestly and must never carry a throughput or latency
+headline attributed to the H200. The persistent compilation cache keys on
+backend platform and device topology, so an H200 entry is never read on a P100:
+a first titan run cold-compiles even where the H200 cache is warm, which is
+correct rather than a cache defect, and its compile wall belongs in the receipt
+beside the execute wall.
+
+**CPU is the last rung because its compile is itself the constraint.** Measured
+2026-09-21 on the centroid-constrained MAST sweep: a warm edit took 322 s on
+CPU against 370 ms on the H200, about 870 times, and the twenty-edit sweep
+aborted at edit nine with `LLVM ERROR: Unable to allocate section memory` at a
+128 GB allocation. Size a CPU fallback to what its backend can actually compile,
+and say in the receipt that the walls are not the GPU measurement.
 
 For CPU work the partition is `all_debug`. **`rigel_debug` is up, accepts jobs
 and has zero nodes**, so a job sent there pends forever with reason

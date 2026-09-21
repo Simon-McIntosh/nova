@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
 <meta name="plan-impl" content="0.6">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 </head>
 <body>
   <main class="plan-doc">
@@ -204,6 +204,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260921T060958695202-fsa-audit-solver-fixed-point-and-newton-routes" data-who="reckon-ship" data-when="2026-09-21T07:14:22Z">
     <div class="r-comment-body"><p>thirteen fixed-point and Newton-route promotions reviewed at the merged head with the astra scan landing deferred to an independent lane; the full verbatim replay of heavy historical commands is owed to measurement nodes</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260921T111835466271-fsa-verify-the-fixture-saddle-repair" data-who="s19k-audit-wall" data-when="2026-09-21T11:31:00Z">
+    <div class="r-comment-body"><p>Independent strongest-lane review of the prescribed fixture-saddle repair gives <strong>PROMOTE, 100/100</strong> for commits <code>708af7007</code> and <code>4c6c4f38d</code>. Diff-by-anomaly found only the analytic fixture producer plus its focused test, with no <code>nova/equilibrium</code> source change; the limited-case <code>jnp.full(2, jnp.nan)</code> value matches the production absent-saddle convention. One <code>all_debug</code> allocation, job <code>1274904</code>, reproduced the base defect as the missing-<code>x_point</code> <code>AttributeError</code>, then recorded <code>2 passed</code> for the focused diverted/limited fixture arms and <code>1 passed</code> for the forward-census row. Removing the field again produced the identical <code>AttributeError</code>, so the control reddened for the claimed reason. Evidence: <a href="/nova/evidence/archive/figure-and-solver-audit-landed.html#fixture-saddle-repair-bookend">scored review and gate receipts</a>. This comment records the node landing only; it does not close the section or resolve the driving followup, and merged-head verification remains separately owned.</p></div>
 </div>
 </section>
   </main>

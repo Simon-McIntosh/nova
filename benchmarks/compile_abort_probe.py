@@ -164,7 +164,7 @@ def main(argv: list[str] | None = None) -> int:
         f"wall={summary['wall_seconds']}s",
         flush=True,
     )
-    return 0
+    return exit_code
 
 
 if __name__ == "__main__":

@@ -1954,11 +1954,12 @@ def _branch_style_note(drawn: dict[str, int]) -> str:
 def _null_ordering(x_points: Any, saddle_index: int, axis: Any) -> str:
     """Compare the admitted saddle's height with the magnetic axis's.
 
-    Both the reference and every solved state carry a qualified null set, and
-    which one is admitted as the boundary saddle differs between them: the
-    reference's sits above its axis, the solved states' below.  The caption
-    states the comparison rather than assuming it, so a regenerated reference
-    whose ordering changed does not silently contradict its own caption.
+    The reference and every solved state carry their own qualified null set,
+    and nothing requires the admitted saddle to sit on the same side of the
+    axis from one set to the next.  The caption therefore reads the comparison
+    out of whichever set it is describing, for the reference and for each drawn
+    panel alike, so a state whose ordering differs from the reference is stated
+    rather than described by a clause written for a different state.
     """
     array = np.atleast_2d(np.asarray(x_points, dtype=float))
     if not 0 <= saddle_index < array.shape[0]:
@@ -1999,20 +2000,31 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
     reference_note = _saddle_note(
         loaded["reference_xpoints"], loaded["reference_saddle_index"]
     )
-    solved_note = _saddle_note(
-        loaded["failed"]["xpoints"], loaded["failed"]["saddle_index"]
+    # Both drawn panels report their own admitted saddle and its side of their
+    # own axis: the constrained solve need not place the null where the
+    # reference placed its own, and a caption that said so would describe a
+    # state other than the one drawn.
+    solved_notes = tuple(
+        _saddle_note(loaded[label]["xpoints"], loaded[label]["saddle_index"])
+        for label in ("converged", "failed")
+    )
+    solved_orderings = tuple(
+        _null_ordering(
+            loaded[label]["xpoints"],
+            loaded[label]["saddle_index"],
+            loaded[label]["axis"],
+        )
+        for label in ("converged", "failed")
     )
     constraint_note = _constraint_note(loaded.get("vertical_centroid"))
     figure.suptitle(
         "terminal poloidal flux on shared levels between the axis and boundary "
         "flux (%.4f to %.4f Wb)  |  every solved state imposes the "
         "vertical current-centre row %s  |  reference is the unedited "
-        "equilibrium, an "
-        "upper-null state whose admitted saddle sits above its axis, while every "
-        "solved state admits a lower null (blue, admitted saddle %s)  |  "
-        "reference set blue: %s, admitted %s, "
-        "other qualified nulls hollow  |  solved set orange: %s, admitted %s, "
-        "other hollow  |  wall drawn"
+        "equilibrium, its admitted saddle %s (blue set: %s, admitted %s)  |  "
+        "solved sets orange: %s, admitted %s %s in the converged panel "
+        "and %s %s in the failed panel  |  other qualified nulls hollow  |  "
+        "wall drawn"
         % (
             loaded["reference_axis_flux"],
             loaded["reference_boundary_flux"],
@@ -2025,7 +2037,10 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
             _branch_style_note(loaded.get("reference_branches_drawn", {})),
             reference_note,
             _branch_style_note(loaded["failed"].get("branches_drawn", {})),
-            solved_note,
+            solved_notes[0],
+            solved_orderings[0],
+            solved_notes[1],
+            solved_orderings[1],
         ),
         fontsize=9,
     )

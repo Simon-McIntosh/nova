@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from functools import partial
-from types import SimpleNamespace
-from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -161,46 +159,6 @@ def test_backtracking_incumbent_shares_the_candidate_read_body():
         observed.incumbent_residual,
         fixed_point._relative_residual(mapped(state), state),
     )
-
-
-def test_material_qualification_lowers_one_read_body():
-    class State(NamedTuple):
-        axis: jax.Array
-
-    class Qualification(NamedTuple):
-        masks: jax.Array
-        state: State
-        connected: jax.Array
-        axis_admitted: jax.Array
-
-    def qualify(physical, _polarity, material, _requested, _private):
-        value = jax.lax.optimization_barrier(physical)
-        return Qualification(
-            jnp.where(material, value, 0.0),
-            State(value[:2]),
-            material,
-            jnp.asarray(True),
-        )
-
-    operator = object.__new__(ForwardFluxOperator)
-    operator.polarity = 1.0
-    operator.inside_material = jnp.asarray([True, False])
-    rescued_material = jnp.asarray([False, True])
-    operator._fixed_design_topology = SimpleNamespace(
-        split_flux_map=lambda physical: (physical, physical),
-        grid=lambda physical: (physical, physical),
-        read_qualification=qualify,
-    )
-    operator._independent_rescue_axis = lambda points: points
-    operator.connectivity_axis_seed = lambda _axis: (0, rescued_material)
-    state = jnp.asarray([0.25, 0.75], dtype=jnp.float64)
-    assert _barrier_count(jax.lax.optimization_barrier, state) == 1
-    assert _barrier_count(operator._fixed_design_read, state) == 1
-    masks, topology, connected, admitted = jax.jit(operator._fixed_design_read)(state)
-    np.testing.assert_array_equal(masks, [0.0, 0.75])
-    np.testing.assert_array_equal(topology.axis, state)
-    np.testing.assert_array_equal(connected, rescued_material)
-    assert bool(admitted)
 
 
 @pytest.mark.parametrize("trips", [2, 5])

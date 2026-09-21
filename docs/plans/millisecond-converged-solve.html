@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="133">
+<meta name="plan-version" content="134">
 </head>
 <body>
 <main class="plan-doc">
@@ -694,6 +694,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260920T154610428813-msc-give-the-containment-rule-a-positive-control" data-who="reckon-ship" data-when="2026-09-20T18:35:28.764Z">
     <div class="r-comment-body"><p>the diverted oracle fixture admits no saddle at any carrier pitch on the rung ladder, measured at two rungs and pinned by a case; the declared half-pitch displacement control reddens that case, so the containment rule now has a positive control rather than a tautology</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-mcs-20260921-matched-grid-comparison" data-who="" data-when="">
+    <div class="r-comment-body">Matched comparison of the two coil-edit sweeps (same shot and slice, same selected coil p4_upper, stored circuit 8, shot current -185195.171875 A, seventeen shared edits): three edits converge on the full stored axes and fail at the stride (indices 2, 10, 16 at fractions -0.14, +0.02, +0.14), six converge at the stride and fail on the full axes (3, 5, 7, 13, 14, 15), eight agree. The grid moves which edits close rather than raising the fraction, and the full axes are net worse on this sweep, which reads as basin sensitivity: changing the discretisation moves which side of a basin boundary an edited frame starts on. Edit 10 at +0.02 corroborates the separate three-edit probe (which sampled +2, +4 and +6 percent near the base frame) on the sweep's own machinery. Receipts: /nova/figures/mast-centroid-capability/sweep-full-axis/grid-comparison.json (per-edit fractions, both convergence flags and terminal residuals, gain and loss lists, coil-identity check; convergence compared across devices deliberately, walls not) beside coil-edit-latency.json; the graph-leak traceback excerpt for f-mcs-cuda-graph-leak-in-branch-assembly is cuda-graph-leak.log in the same directory. For that followup the alive-graph count is one observation at the failure, not a series, so its flat-count gate needs a baseline first: log the count on each assembly over a short run before anyone tries to satisfy it. The poloidal panel of edit 10 on both grids (both null sets, the wall, line contours on one shared level array) is being rendered on titan.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19h-s3-certificate-prerequisite" data-who="reckon-ship s19-handoff" data-when="2026-09-15T10:15:00Z">
     <div class="r-comment-body">Section 3 prerequisite, held by the coordinator rather than by a plan-level wire: the certified millisecond measurement runs only once gs-absolute-accuracy-gates section 3 (the certificate artifact and its pin) is current on the exact cut-cell participation and the joint qualification, because it reports cost for certificate-passing solves. The stage-scoped dependency gs-absolute-accuracy-gates#s3 was authored and withdrawn the same hour: the roadmap's anchor resolver did not recognise that section (reported to reckon), and a plan-level dependency on the whole certificate plan would hold section 2, which never needed it. gs-absolute-accuracy-gates now informs this plan; no section 3 node is dispatched before the certificate lands.</div>

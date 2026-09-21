@@ -1416,6 +1416,40 @@ benchmarks/solovev_certificate.py:2514: RuntimeError
   The committed negative control changes the diverted boundary level to the wall contact flux and
   reddens the class-anchor case (1 failed, 7 passed), while the fresh-process module gate is recorded
   beside it in the worker manifest.</p>
+
+  <p><strong>Bookend review repairs.</strong> The review found that the prior renderer read
+  <code>panels[].class</code> from the existing atlas, whose MAST label had been inferred from
+  boundary-point presence. The repair removes that circular authority: each MAST solve receipt's
+  <code>topology_read.diverted</code> is mapped to <code>TopologyClass</code>, persisted as
+  <code>solve_topology_class</code>, and used for both the pinned operator read and the atlas label.
+  The limited end-to-end contract is exercised without an atlas file: a synthetic limited receipt
+  produces label <code>limited</code> and persists the wall-contact flux, while the diverted case
+  persists the admitted saddle flux. The source and focused test changes are in
+  <code>bb89552ad</code> and <code>f2334c8ef</code>; the empty-boundary marker is in
+  <code>51e4d0801</code>.</p>
+
+  <p>The two previously silent MAST panels, <code>21983/35 pure</code> and
+  <code>21986/46 pure</code>, remain geometrically empty in the persisted operand rather than being
+  invented. The atlas now draws and records <code>BoundaryGenerationFailure</code> with the reason
+  <code>the class-governed diverted state has no closed branch in the persisted boundary operand</code>,
+  preserving the wall, contours and null marks while making the missing boundary an explicit
+  receipt failure. The twelve refreshed panels use axes-off atlas rendering; this worktree still
+  carries the pre-shared-vocabulary glyphs (red dot axis, filled <code>X</code> admitted saddle,
+  hollow qualified X-points and grey <code>+</code> EFIT references).</p>
+
+  <p><strong>Gate and instrument evidence.</strong> One <code>all_debug</code> CPU allocation
+  (job <code>1275409</code>) exported <code>TMPDIR=/tmp</code> before submission and inside the
+  payload, set <code>JAX_PLATFORMS=cpu</code>, used the root interpreter directly and invoked no
+  <code>uv</code> on the node. The gate log is
+  <code>~/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/gate-repair.log</code>:
+  <code>RENDERER_EXIT=0</code>, <code>ATLAS_EXIT=0</code>, <code>MEASURE_EXIT=0</code>;
+  <code>22086/43 mixed</code> has 676 persisted boundary points, admitted saddle
+  (0.5849783456, 1.2305027322) m, minimum distance <strong>0.0000 m</strong>, and
+  <code>atlas_class=diverted</code>. The refreshed metadata carries <code>diverted</code> for all
+  twelve MAST rows, with the two empty rows explicitly marked as generation failures in the atlas
+  record. The focused test allocation (job <code>1275404</code>) passes 8 tests in 82.66 s, exit 0;
+  the negative control remains the required 1 failed / 7 passed red result. The generated receipt
+  and panels land in <code>b51d96717</code>.</p>
 </section>
 </main>
 </body>

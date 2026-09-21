@@ -2750,6 +2750,32 @@ ROW2_EXIT=139</pre>
 <p><strong>Excluded from promotion counts:</strong> <code>r-20260920T180231259880-cca-one-certificate-row-per-process</code> is explicitly described in the census review as local and unpromoted; its useful measurement and defective receipt are not counted as a promotion.</p>
 
 </section>
+<section class="audit-directory" id="fsa-verify-the-vertex-ring-census-section">
+<h2 id="fsa-verify-the-vertex-ring-census">Vertex-ring census verification — reject, 58/100</h2>
+<p><strong>Promotion verdict: reject.</strong> The local-lane report is numerically repeatable, but its admitted saddles come from a different candidate generator than the owning brief specifies. The brief says four cyclic sign changes name a saddle candidate and each candidate is then polished. The implementation computes that raw mask, then does not use it: it fits every cell's own-node quadratic and admits every finite near-cell indefinite root before wall containment and dedupe. The reported <code>9/9</code> admission therefore belongs to an all-cell quadratic stationary-point scan, not to the four-change vertex-ring census followed by polish.</p>
+
+<h3>Independent replay</h3>
+<p>SLURM job <code>1275270</code> ran on one <code>all_debug</code> allocation with eight CPUs, 96 GiB, <code>JAX_PLATFORMS=cpu</code> and <code>TMPDIR=/tmp</code> in both submit and payload environments. Five fresh root-interpreter processes used the report's own driver: the 132- and 2616-cell rungs, plus separately launched cyclic-origin, smooth-noise and manufactured-null controls. All five completed and <code>allocation.log</code> ends in <code>REVIEW_PROBES_EXIT=0</code>.</p>
+<table>
+<caption>Independent replay beside the stored report values.</caption>
+<thead><tr><th>realised cells</th><th>raw saddle count</th><th>typed quadratic roots</th><th>retained saddle</th><th>saddle error / pitch</th><th>axis error / pitch</th><th>production saddle</th></tr></thead>
+<tbody>
+<tr><td>132</td><td>0</td><td>3</td><td>1, admitted</td><td>0.0867592202</td><td>0.00423212214</td><td>not admitted</td></tr>
+<tr><td>2616</td><td>0</td><td>3</td><td>1, admitted</td><td>0.0157781110</td><td>0.00271040597</td><td>admitted</td></tr>
+</tbody>
+</table>
+<p>The errors reproduce the stored receipts exactly and the report's rounded values. The cyclic-origin control reproduced zero cyclic-count changes against 256 open-chain changes; the smooth-noise control at <code>1e-4</code> of the axis-to-X span retained both nulls; the manufactured saddle and extremum were detected and polished to at most <code>8.67e-19 m</code>. These controls establish a functioning instrument. They do not reconnect the empty raw mask to the operative candidate path.</p>
+
+<h3>Findings</h3>
+<ol>
+<li><strong>Critical, promotion-blocking — candidate origin.</strong> <code>raw_saddle = crossing == 4</code> is computed, while <code>typed_saddle = finite &amp; near_cell &amp; saddle_type</code> contains neither the raw mask nor the stationary-level crossing count. Both replayed rungs show <code>raw=0</code>, <code>typed=3</code>, <code>representative=1</code>. Either implement the briefed seed-and-polish chain or materially revise and independently re-read the owning plan so the all-cell quadratic scan is the declared method.</li>
+<li><strong>High, promotion-blocking — false-candidate accounting.</strong> The report's <code>0→0</code> columns compare false rows in the empty raw mask before the Hessian with false survivors from the independently created quadratic population after Hessian, containment and dedupe. At 132 cells the operative intermediate counts are three typed, three contained and one representative. Report all stages on one population.</li>
+<li><strong>Medium, promotion-blocking — panels.</strong> All four opened PNGs use unfilled line contours and suppress axes and grids. The wall is visible only on the diverted panel; it is cropped out of all three static panels. The census and production results are drawn with direct <code>axis.plot</code> markers rather than the required <code>draw_nulls</code> vocabulary. Regenerate with the wall in view and solid-triangle axis, filled-cross admitted-saddle and hollow other-qualified-null semantics, keeping analytic, census and production styles distinct.</li>
+<li><strong>Low — failure propagation.</strong> The report honestly records that its panel stage failed in the first allocation and was rerun in a second. The original launch log nevertheless ends the inner failure with <code>CENSUS_ALLOCATION_FAILED</code> and reports <code>SRUN_EXIT=0</code>. A repeated evidence run should propagate that nonzero status.</li>
+</ol>
+
+<p><strong>Score:</strong> reproducibility and execution 24/25; receipts and controls 14/20; semantic fidelity 8/35; panel compliance 8/15; failure propagation and provenance 4/5; total <strong>58/100</strong>. Full review and findings JSON: <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-verify-the-vertex-ring-census/</code>. No production or <code>nova/</code> source changed.</p>
+</section>
   </main>
 </body>
 </html>

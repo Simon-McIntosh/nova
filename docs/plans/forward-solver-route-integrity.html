@@ -25,8 +25,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-modified" content="2026-09-20">
-<meta name="plan-version" content="6">
+<meta name="plan-modified" content="2026-09-21">
+<meta name="plan-version" content="7">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 </head>
 <body>
@@ -156,6 +156,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-fsri-compile-blocks-a-cpu-control" data-who="coordinator" data-when="2026-09-19T16:55:00Z">
     <div class="r-comment-body"><p>The program size this section owns now blocks another plan's evidence, measured 2026-09-19 on the centroid-constrained positive control. Two all_debug jobs aborted inside LLVM compiling <code>jit_scan</code>, the first at 64G and the second at 180G, both with <code>allocateMappedMemory failed</code> and a core dump at exit 134, the second after a slow-compile alarm and 38 minutes. Tripling the allocation changed nothing, so the constraint is the compiled module rather than the job's memory request. Two things follow for this section. The gate for section 2 should include a CPU arm, since an executable that cannot be compiled on a 180G node is a failure a device-only budget would not catch. And the scheduler signal is not trustworthy here: <code>sacct</code> reported <code>COMPLETED 0:0</code> for both jobs and for every sub-step while the payload aborted, so the payload log is the only evidence of what happened. The centroid plan's positive control waits on this section rather than on its own node.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260920T181701895943-fsri-the-trips-are-a-scan-not-a-loop" data-who="reckon-ship" data-when="2026-09-20T19:19:56.088Z">
+    <div class="r-comment-body"><p>every active-set trip now runs through one lax.scan with the first trip inside it; the 300-cell certificate executable falls from 597,161,307 to 146,456,085 bytes (135,466,680 on the production signature) with the focused suites bit-identical and the restored separate-first-trip control red; the sub-100 MB ceiling, the single operator read per trip and the historical-digest comparison are the next rung</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-fsri-section-2-goes-first-and-never-loops" data-who="lead" data-when="2026-09-20T19:55:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-09-20, reordering this plan. Section 2 goes first, ahead of the Newton-Krylov repair and the pre-warm pin, and on the strongest lane. The reason is measured on the compile-abort plan: one compiled solve costs about seventeen thousand memory mappings to load because it is 400 to 900 MB of executable, a process is capped at 65,530, and the certificate needs four loads, so every heavy CPU measurement in the sprint now aborts in compilation. The pre-warm pin is moot until this section shrinks the programs; pre-warming 450 MB programs is what fills a 7.6 GB cache.</p><p>The ruling is also a design constraint, stronger than the section's wording of scanning the trips: <strong>these processes never loop; they are designed as efficient maps.</strong> Newton steps, trips, the per-trip read and the polygon fan over cells are expressed as vectorised maps and scans with fixed telemetry slots, never as Python loops that inline a copy of the body per iteration. A converged forward solve compiles to megabytes.</p></div>

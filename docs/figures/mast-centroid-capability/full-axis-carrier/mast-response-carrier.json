@@ -1,0 +1,92 @@
+{
+  "cache_only_reload": {
+    "direct_builder_import_guard": [
+      "nova.biot.greens",
+      "nova.biot.polygon",
+      "nova.imas.mast_vacuum_response"
+    ],
+    "direct_builder_modules_entered": [],
+    "reached_persisted_carrier": true,
+    "source_store_opened": false,
+    "warm_load_seconds": 0.04044464719481766
+  },
+  "carrier": {
+    "file_sha256": "b9b6f0b4d4fcf3dad185a629be7f6ec2c9e976017e90c338333fcb2da18acf51",
+    "frozen_reference_count": 6,
+    "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/75029bb0f932cd4f6f57aa145eb49a938e2b973393ce8ae90b27634b1f6c526d.npz",
+    "resolved_target_digest": "eaa48962037c010f204885d16c5482b03721c6c7ea57ace779ada3621cc31783",
+    "response_sha256": "e2fea2f12f8ac3c7e41ac1ff2692ba0dced04e6a247d631ce388967d73ee8230",
+    "response_shape": [
+      4262,
+      101
+    ],
+    "semantic_response_identity": "75029bb0f932cd4f6f57aa145eb49a938e2b973393ce8ae90b27634b1f6c526d",
+    "size_bytes": 2739014,
+    "stored_circuit_count": 101,
+    "warm_load_seconds": 0.04044464719481766
+  },
+  "cold_build": {
+    "direct_response_build_seconds": 1792.7737556190696,
+    "frozen_references": [
+      {
+        "shot": 21978,
+        "slice_index": 35
+      },
+      {
+        "shot": 21983,
+        "slice_index": 35
+      },
+      {
+        "shot": 21985,
+        "slice_index": 51
+      },
+      {
+        "shot": 21986,
+        "slice_index": 46
+      },
+      {
+        "shot": 21989,
+        "slice_index": 55
+      },
+      {
+        "shot": 22086,
+        "slice_index": 43
+      }
+    ],
+    "grid": {
+      "axis_points": 65,
+      "name": "stored-axis-full",
+      "pinned_before_build": false,
+      "resolved_target_digest": "eaa48962037c010f204885d16c5482b03721c6c7ea57ace779ada3621cc31783",
+      "response_shape": [
+        4262,
+        101
+      ],
+      "semantic_response_identity": "75029bb0f932cd4f6f57aa145eb49a938e2b973393ce8ae90b27634b1f6c526d"
+    },
+    "machine_resolution_seconds": 56.747823301004246,
+    "publication_seconds": 0.08243414596654475,
+    "section_kernel_evaluations": 938,
+    "total_before_publication_seconds": 1849.5215789200738,
+    "total_seconds": 1849.6040130660404
+  },
+  "receipt": "persisted MAST frozen-reference response carrier",
+  "runtime": {
+    "advisory_lock": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/75029bb0f932cd4f6f57aa145eb49a938e2b973393ce8ae90b27634b1f6c526d.npz.lock",
+    "hostname": "98dci4-clu-5005.iter.org",
+    "slurm_job_gpus": null,
+    "slurm_job_id": "1274959",
+    "slurm_partition": "sirius",
+    "slurm_reservation": null
+  },
+  "verdict": {
+    "all_stored_circuits_carried": true,
+    "cache_only_reload_passes": true,
+    "carrier_persisted": true,
+    "direct_green_builder_entered_during_reload": false,
+    "passes": true,
+    "resolved_targets_match": true,
+    "response_shape_matches": true,
+    "semantic_identity_matches": true
+  }
+}

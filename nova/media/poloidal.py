@@ -241,6 +241,22 @@ def _sample_cubic_controls(
     return np.vstack((sampled, selected[-1, -1]))
 
 
+def sample_cubic_controls(
+    controls: np.ndarray,
+    valid: np.ndarray,
+    samples_per_segment: int = 8,
+) -> np.ndarray:
+    """Return one assembled branch as an ordered polyline.
+
+    The painter draws the branch directly, but a caller that must CUT against
+    the boundary -- clipping a plasma mesh to the last closed surface, say --
+    needs the same polyline the painter draws, from the same spline controls.
+    Re-deriving it from a raster contour instead is what puts a wobble on the
+    boundary the assembler resolved smoothly.
+    """
+    return _sample_cubic_controls(controls, valid, samples_per_segment)
+
+
 def draw_separatrix_branches(
     axes: matplotlib.axes.Axes,
     branches: dict[str, np.ndarray],

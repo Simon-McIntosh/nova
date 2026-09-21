@@ -89,9 +89,13 @@ CARRIER_GRIDS: dict[str, CarrierGrid] = {
     "stored-axis-full": CarrierGrid(
         name="stored-axis-full",
         axis_points=65,
-        semantic_identity=None,
-        resolved_target_digest=None,
-        response_shape=None,
+        semantic_identity=(
+            "75029bb0f932cd4f6f57aa145eb49a938e2b973393ce8ae90b27634b1f6c526d"
+        ),
+        resolved_target_digest=(
+            "eaa48962037c010f204885d16c5482b03721c6c7ea57ace779ada3621cc31783"
+        ),
+        response_shape=(4262, 101),
     ),
 }
 #: The grid a new build takes when none is named.  The full stored axes are the

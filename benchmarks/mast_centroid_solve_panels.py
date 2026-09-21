@@ -946,6 +946,28 @@ def series(
         "summary": {
             "member_count": len(members),
             "converged_count": int(sum(bool(m.get("converged")) for m in members)),
+            "plasma_current_relative_error_maximum": max(
+                (m.get("plasma_current_relative_error", 0.0) for m in members),
+                default=None,
+            ),
+            "current_normalisation_amplitude_range": [
+                min(
+                    (
+                        m["current_normalisation_amplitude"]
+                        for m in members
+                        if "current_normalisation_amplitude" in m
+                    ),
+                    default=None,
+                ),
+                max(
+                    (
+                        m["current_normalisation_amplitude"]
+                        for m in members
+                        if "current_normalisation_amplitude" in m
+                    ),
+                    default=None,
+                ),
+            ],
             "classes": sorted(
                 {
                     _class_label(m["achieved_class"])
@@ -1137,13 +1159,30 @@ def family(
         record["rational_vertex_counts"] = {
             name: int(loop.shape[0]) for name, loop in surfaces.items()
         }
+        # The solve pins the current by scaling the cell-current moments with
+        # one amplitude, target over unscaled sum. That amplitude multiplies
+        # BOTH flux functions equally, so it is the lambda that moves p-prime
+        # down as ff-prime is scaled up. Read it back from the terminal state
+        # and check the pinned current rather than asserting it.
+        moments, amplitude = member_profile.operator.normalised_current_moments(
+            result.state, target_current, requested
+        )
+        achieved = float(np.asarray(jnp.sum(moments.cell_current)))
+        record["current_normalisation_amplitude"] = float(np.asarray(amplitude))
+        record["achieved_plasma_current_a"] = achieved
+        record["target_plasma_current_a"] = target_current
+        record["plasma_current_relative_error"] = abs(achieved - target_current) / abs(
+            target_current
+        )
         members.append(record)
         curves.append(
             {
                 "scale": float(scale),
                 "boundary": boundary,
                 "rational": surfaces,
-                "ff_prime": scale * stored["ff_prime"],
+                "ff_prime": float(np.asarray(amplitude)) * scale * stored["ff_prime"],
+                "p_prime": float(np.asarray(amplitude)) * stored["p_prime"],
+                "amplitude": float(np.asarray(amplitude)),
                 "converged": bool(np.asarray(result.converged)),
                 "class": record["achieved_class"],
             }
@@ -1205,6 +1244,28 @@ def family(
         "summary": {
             "member_count": len(members),
             "converged_count": int(sum(bool(m.get("converged")) for m in members)),
+            "plasma_current_relative_error_maximum": max(
+                (m.get("plasma_current_relative_error", 0.0) for m in members),
+                default=None,
+            ),
+            "current_normalisation_amplitude_range": [
+                min(
+                    (
+                        m["current_normalisation_amplitude"]
+                        for m in members
+                        if "current_normalisation_amplitude" in m
+                    ),
+                    default=None,
+                ),
+                max(
+                    (
+                        m["current_normalisation_amplitude"]
+                        for m in members
+                        if "current_normalisation_amplitude" in m
+                    ),
+                    default=None,
+                ),
+            ],
             "classes": sorted({str(m.get("achieved_class")) for m in members}),
             "rational_surface_found": {
                 f"{order:g}": int(
@@ -1238,8 +1299,20 @@ def _render_family(
     lattice: Any,
     figure_path: Path,
 ) -> None:
-    """Draw the shape family beside the gradient variation that produced it."""
+    """Draw the shape family beside both flux functions that produced it.
+
+    The right column carries BOTH gradients because only the pair explains the
+    family. ff-prime is what the series sets; p-prime is what the solve's own
+    current normalisation does in response, since that one amplitude multiplies
+    both functions equally to hold the net plasma current. So the reader sees
+    the imposed change and the compensating one, which is the whole mechanism.
+
+    Both are drawn AFTER the normalisation, which is what the equilibrium
+    actually carried. Drawing the supplied p-prime instead would show a single
+    unmoving curve and hide the compensation.
+    """
     from matplotlib import colormaps
+
     from nova.media.ink import trace_axes
 
     if not curves:
@@ -1247,23 +1320,22 @@ def _render_family(
     radius = np.asarray(lattice.radius, float)
     height = np.asarray(lattice.height, float)
     colours = colormaps["viridis"](np.linspace(0.05, 0.9, len(curves)))
-    figure, axes = plt.subplots(
-        1,
-        2,
-        figsize=(10.4, 6.6),
-        width_ratios=(1.35, 1.0),
-        facecolor=DEFAULT_INK.figure_facecolor,
-    )
-    poloidal_axes(axes[0])
+    figure = plt.figure(figsize=(11.6, 6.8), facecolor=DEFAULT_INK.figure_facecolor)
+    grid = figure.add_gridspec(2, 2, width_ratios=(1.30, 1.0), hspace=0.32, wspace=0.22)
+    poloidal_panel = figure.add_subplot(grid[:, 0])
+    field_panel = figure.add_subplot(grid[0, 1])
+    pressure_panel = figure.add_subplot(grid[1, 1], sharex=field_panel)
+
+    poloidal_axes(poloidal_panel)
     poloidal.draw_coils(
-        axes[0], coils, edgecolor=COIL_EDGE_COLOR, linewidth=COIL_LINEWIDTH
+        poloidal_panel, coils, edgecolor=COIL_EDGE_COLOR, linewidth=COIL_LINEWIDTH
     )
-    poloidal.draw_wall(axes[0], units=units)
+    poloidal.draw_wall(poloidal_panel, units=units)
     for colour, item in zip(colours, curves):
         style = "solid" if item["converged"] else (0, (4, 2))
         if item["boundary"].shape[0] >= 2:
             loop = np.vstack((item["boundary"], item["boundary"][:1]))
-            axes[0].plot(
+            poloidal_panel.plot(
                 loop[:, 0],
                 loop[:, 1],
                 color=colour,
@@ -1273,7 +1345,7 @@ def _render_family(
             )
         for name, surface in item["rational"].items():
             loop = np.vstack((surface, surface[:1]))
-            axes[0].plot(
+            poloidal_panel.plot(
                 loop[:, 0],
                 loop[:, 1],
                 color=colour,
@@ -1281,27 +1353,47 @@ def _render_family(
                 linestyle=RATIONAL_STYLES.get(name, (0, (2, 2))),
                 zorder=DEFAULT_INK.zorder_separatrix,
             )
-    axes[0].set_xlim(float(radius.min()), float(radius.max()))
-    axes[0].set_ylim(float(height.min()), float(height.max()))
+    poloidal_panel.set_xlim(float(radius.min()), float(radius.max()))
+    poloidal_panel.set_ylim(float(height.min()), float(height.max()))
     drawn = sorted({name for item in curves for name in item["rational"]})
     internal = (
         ", ".join(f"q = {name}" for name in drawn) if drawn else "no rational surface"
     )
-    axes[0].set_title(f"separatrix (solid) and {internal}", fontsize=9)
+    poloidal_panel.set_title(
+        f"separatrix (solid) and {internal}\ndashed: did not converge", fontsize=9
+    )
 
-    trace_axes(axes[1])
-    for colour, item in zip(colours, curves):
-        axes[1].plot(
-            np.asarray(psi_norm, float),
-            np.asarray(item["ff_prime"], float),
-            color=colour,
-            linewidth=1.4,
-            label=f"x{item['scale']:.2f}",
-        )
-    axes[1].set_xlabel(r"$\psi_N$", fontsize=9)
-    axes[1].set_ylabel(r"$FF^\prime$  [T m / Wb]", fontsize=9)
-    axes[1].set_title("the diamagnetic gradient that produced them", fontsize=9)
-    axes[1].legend(fontsize=7, frameon=False, title="ff' scale", title_fontsize=7)
+    label = np.asarray(psi_norm, float)
+    for panel, key, name in (
+        (field_panel, "ff_prime", r"$FF^\prime$  [T m / Wb]"),
+        (pressure_panel, "p_prime", r"$p^\prime$  [Pa / Wb]"),
+    ):
+        trace_axes(panel)
+        for colour, item in zip(colours, curves):
+            panel.plot(
+                label,
+                np.asarray(item[key], float),
+                color=colour,
+                linewidth=1.4,
+                label=f"x{item['scale']:.2f}",
+            )
+        panel.set_ylabel(name, fontsize=9)
+    field_panel.set_title("imposed: the diamagnetic gradient is scaled", fontsize=9)
+    pressure_panel.set_title(
+        "compensating: the pressure gradient follows, to hold the current",
+        fontsize=9,
+    )
+    pressure_panel.set_xlabel(r"$\psi_N$", fontsize=9)
+    field_panel.tick_params(labelbottom=False)
+    field_panel.legend(
+        fontsize=7, frameon=False, title="ff' scale", title_fontsize=7, ncol=2
+    )
+    amplitudes = [item["amplitude"] for item in curves]
+    figure.suptitle(
+        "one pinned net plasma current: the normalisation amplitude runs "
+        f"{min(amplitudes):.4f} to {max(amplitudes):.4f}",
+        fontsize=9,
+    )
 
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(figure_path, dpi=200, bbox_inches="tight")

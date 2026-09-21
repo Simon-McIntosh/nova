@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T10:42:43",
+  "updated": "2026-09-21T10:42:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4553,6 +4553,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-20"
+      },
+      {
+        "id": "s19c-atlas-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
       },
       {
         "id": "s19c-bob-drift-l",
@@ -225372,6 +225381,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3028
+    "_version": 3029
   }
 }

@@ -1274,6 +1274,71 @@ benchmarks/solovev_certificate.py:2514: RuntimeError
   whose first line names the declared mutation, <code>gate_driver.sh</code>,
   <code>base-tree.tar</code>). Implementation at commit <code>34bf882da</code>.</p>
 </section>
+
+<section id="the-persisted-boundary-follows-the-recorded-class">
+  <h2>The persisted boundary follows the recorded class, not the stored curve length (2026-09-21)</h2>
+
+  <p>Two source sites, and nothing else in this change. The MAST operand renderer reads the class the
+  convergence-atlas receipt records for the frame (<code>panels[].class</code>, <code>"diverted"</code>
+  or <code>"limited"</code>), inverts it through the label map the atlas already carries, and passes it
+  to the operator read as <code>requested_class</code>; the level the boundary is traced at is then the
+  admitted saddle flux for a diverted frame and the wall contact flux for a limited one. The atlas reads
+  the class the row carries instead of deriving it from <code>nova_boundary.shape[0] &gt;= 3</code>, and
+  keeps <code>unclassified</code> only where no class is recorded. Implementation at commit
+  <code>fe7d8c053</code>, in <code>docs/figures/topology-visual-corroboration/generate_topology_visuals.py</code>
+  and <code>benchmarks/poloidal_convergence_atlas.py</code>, with the contract in
+  <code>tests/test_topology_visual_generator.py</code> (8 passed, exit 0, in a fresh process under
+  <code>JAX_PLATFORMS=cpu</code>).</p>
+
+  <p><strong>The class-pinned level is the operator's own read, not an approximation of it.</strong>
+  <code>nova/equilibrium/topology.py</code> selects <code>data_x</code> for a diverted frame and
+  <code>data_w</code> for a limited one on a pinned boundary, so the pinned read's
+  <code>boundary_flux</code> is bit-identical to <code>x_point_flux</code> (diverted) or
+  <code>wall_point_flux</code> (limited). The committed case builds a synthesised read carrying the
+  three levels explicitly and asserts the level the renderer persists: saddle flux under the diverted
+  class, contact flux under the limited class, and the read's own <code>boundary_flux</code> when no
+  class is requested. A second case asserts the receipt lookup — the class is taken from the atlas
+  receipt's row for the identity, a row whose class reads <code>unclassified</code> maps to no
+  requested class, and an identity absent from the receipt does the same. The correlated negative
+  control takes the diverted level from the wall contact flux instead of the admitted saddle flux; it
+  reddens the new case (1 failed, 7 passed) rather than passing beside it.</p>
+
+  <p><strong>The named measurement is blocked, and by pre-existing faults.</strong> The gate regenerates
+  the persisted 22086/43 boundary from its banked state through the renderer as it now reads — no new
+  solve of the earlier stage — and reports its distance to the admitted saddle (0.5648, 1.2580) m
+  together with the atlas row's class. Two faults outside this node's two sites stop it, both present at
+  the base revision. First, the committed operand bank is stale against its authority: the bank records
+  MAST authority source identity <code>sha256:5b14529506daccb2…</code> while the committed authority
+  file (<code>docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py</code>, changed by
+  <code>d5354a5a2</code> after the bank's last regeneration at <code>52cad98a5</code>) hashes
+  <code>23038d9c17076ab8…</code>, so <code>_read_cache</code> refuses the refresh outright. The
+  renderer's escape hatch re-raises unless the requested shot set equals the full available set, which
+  is why the one-shot attempt and the six-shot attempt fail differently. Second, the regeneration path
+  cannot run at all at this revision: on the six-shot route it raised
+  <code>TypeError: _mast_states() missing 1 required keyword-only argument: 'carrier_identity'</code> at
+  <code>generate_topology_visuals.py:279</code>. The keyword was added to the MAST state request and
+  this call site was not updated; a second site in the same authority tree
+  (<code>reachability_grid_final.py:208</code>) also omits it, while
+  <code>efit_topology_corroboration.py:771</code>, <code>benchmarks/bank_drift_paired_probe.py</code>
+  and <code>benchmarks/jacobian_null_direction.py</code> pass it. The carrier is already in scope at
+  line 279 (<code>carrier["carrier"]["semantic_response_identity"]</code>), so the repair is one
+  argument — a third site, outside this node's spec, and therefore reported rather than made.</p>
+
+  <p>What the gate did measure is the pre-change baseline, and it is recorded as such rather than as a
+  verdict: the boundary the bank already carries for 22086/43 mixed is the 487-point class-free curve,
+  and its minimum distance to the admitted saddle is <strong>0.4853 m</strong>. The measurement is a
+  distance from that unchanged polyline, so it does not exercise the class-pinned read on a persisted
+  frame; the repaired path owes that measurement. Gate logs and drivers:
+  <code>~/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/</code>
+  (<code>gate.log</code> and <code>gate.sh</code>, job 1274725; <code>gate2.log</code> and
+  <code>gate2.sh</code>, job 1274744; <code>tests-after.log</code>;
+  <code>negative-control.log</code>, whose first line names the declared mutation).</p>
+
+  <p>Follow-on for the coordinator, in the order the repair needs: give the MAST state request its
+  carrier identity at both stale call sites, then regenerate the MAST operand bank wholesale (the
+  bank's rows carry no class field, so the retained eleven rows and every DIII-D row read
+  <code>unclassified</code> until it is refreshed), then run this node's gate for 22086/43 mixed.</p>
+</section>
 </main>
 </body>
 </html>

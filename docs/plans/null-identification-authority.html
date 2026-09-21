@@ -109,6 +109,43 @@
 
 <p>Evidence: <a href="/nova/evidence/archive/null-identification-authority-landed">the drift-probe record's own account of these repairs</a>.</p>
 
+<h3>The persisted boundary follows the recorded class, not the stored curve length (2026-09-21)</h3>
+<p>Two sites carry the receipt's class into the plot read, and nothing else changed. The MAST operand
+renderer reads the class recorded for the frame out of the convergence-atlas receipt
+(<code>panels[].class</code>), inverts it through the same label map the atlas already uses, and passes
+it to the operator read as <code>requested_class</code>; the persisted boundary flux is then the
+admitted saddle flux for a diverted frame — bit-identical to <code>x_point_flux</code>, because
+<code>pinned_boundary</code> selects the diverted or limited member — and the wall contact flux for a
+limited one. The atlas stops deriving its label from <code>nova_boundary.shape[0] &gt;= 3</code> and
+reads the class the row carries, with <code>unclassified</code> only when none is recorded. Commit
+<code>fe7d8c053</code>; the unit contract builds a synthesised read and asserts diverted→saddle and
+limited→contact, plus the receipt lookup, and the correlated negative control (a diverted level taken
+from the wall contact flux) reddens the new case.</p>
+<p><strong>The named measurement could not be produced, and neither cause is this change.</strong> The
+gate regenerates the persisted 22086/43 boundary from its banked state through the renderer as it now
+reads, then measures its distance to the admitted saddle (0.5648, 1.2580) m. Two pre-existing faults
+outside this node's two sites stop it. (1) <em>The committed operand bank is stale against its
+authority:</em> the bank records MAST authority source identity <code>sha256:5b14529506daccb2…</code>
+while the committed authority file hashes <code>23038d9c17076ab8…</code>, so <code>_read_cache</code>
+refuses a partial refresh, and no bank row carries a class field at all — every MAST atlas row
+therefore reads <code>unclassified</code> until the bank is regenerated wholesale. The renderer's own
+escape hatch opens only when the requested shot set is the full available set, which is why the first
+gate attempt (one shot) and the second (all six shots) fail differently. (2) <em>The regeneration path
+itself does not run at this revision:</em> on the full-set route the renderer raised
+<code>TypeError: _mast_states() missing 1 required keyword-only argument: 'carrier_identity'</code> at
+generate_topology_visuals.py:279. The keyword was added to the MAST state request and this call site
+was not updated; <code>reachability_grid_final.py:208</code> is a second such site in the same
+authority tree, while <code>efit_topology_corroboration.py:771</code>, <code>bank_drift_paired_probe.py</code>
+and <code>jacobian_null_direction.py</code> do pass it. The carrier is already in scope at line 279
+(<code>carrier["carrier"]["semantic_response_identity"]</code>), so the repair is one argument — but it
+is a third site, outside this node's spec, so it is reported rather than made.</p>
+<p>The distance measured against the unchanged boundary curve is <strong>0.4853 m</strong> from the
+admitted saddle, on the 487-point polyline the bank already carried. That is the pre-change baseline,
+not a verdict on this change: no bank row was refreshed, so the class-pinned read has not yet been
+exercised on a persisted frame. Gate logs and the two drivers:
+<code>~/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/</code>
+(<code>gate.log</code>, job 1274725; <code>gate2.log</code>, job 1274744).</p>
+
 <h2 id="s2"><span class="badge badge-shipped">✓ landed 2026-09-04</span> §2 — Connected, contained stationary points on the read the solve uses</h2>
 <p class="landed-summary">The solve's own read path is containment-aware for the single closed ring: X candidates are masked by first-wall containment before the flux ranking (<code>nova/equilibrium/topology.py</code> lines 352–368, commit <code>54e8911b</code>), O admission uses one shared seed mask and requires a material-connected component rather than accepting a private well (lines 754–812), the fixed-shape candidate census keeps overflow visible instead of truncating (<code>nova/equilibrium/forward_operator.py</code> lines 404–412, 620–652), private wall anchors are masked (<code>20f3a40c</code>), and the out-of-vessel saddle regression is pinned (<code>tests/test_stationary_point_admission.py</code>). The generalisation from one ring to the occupiable region of a multi-unit wall is owned by <code>multi-unit-limiter-wall</code> §3. Record: <a href="/nova/evidence/archive/null-identification-authority-landed">landed evidence</a>.</p>
 

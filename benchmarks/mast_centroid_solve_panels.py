@@ -64,6 +64,8 @@ WARM_EDIT_FRACTIONS = (0.02, 0.04, 0.06)
 LEVEL_COUNT = 24
 #: Translucent enough that the contours read through the filled cells.
 CELL_ALPHA = 0.55
+#: Drawn plasma tessellation; the wall fit decides the delivered count.
+DEFAULT_HEX_CELLS = 4000
 CPU_PROVENANCE_MARKER = "NOVA_CENTROID_PANELS_CPU_PROVENANCE"
 
 
@@ -360,20 +362,73 @@ def measure(state_path: Path, receipt_path: Path, carrier_path: Path) -> None:
     print("RECEIPT=" + str(receipt_path), flush=True)
 
 
-def panels(state_path: Path, figure_path: Path, receipt_path: Path) -> None:
-    """Draw the conductor-only and the solved panel from the persisted fields."""
+def _solved_boundary(
+    radius: np.ndarray,
+    height: np.ndarray,
+    flux: np.ndarray,
+    level: float,
+    axis: np.ndarray,
+) -> np.ndarray:
+    """Return the closed contour at ``level`` that encloses the magnetic axis.
+
+    Selecting by axis containment rather than by size is what keeps the choice
+    polarity-free: the core is the high side of the boundary flux under one
+    polarity and the low side under the other, and both cases leave the axis
+    inside the same loop.
+    """
+    import contourpy
+    import shapely
+
+    generator = contourpy.contour_generator(
+        x=radius, y=height, z=flux, line_type=contourpy.LineType.Separate
+    )
+    point = shapely.Point(float(axis[0]), float(axis[1]))
+    best: tuple[float, np.ndarray] | None = None
+    for line in generator.lines(float(level)):
+        loop = np.asarray(line, dtype=float)
+        if loop.shape[0] < 4 or not np.allclose(loop[0], loop[-1]):
+            continue
+        polygon = shapely.Polygon(loop)
+        if not polygon.is_valid:
+            polygon = polygon.buffer(0.0)
+        if polygon.is_empty or not polygon.contains(point):
+            continue
+        if best is None or polygon.area > best[0]:
+            best = (float(polygon.area), loop)
+    if best is None:
+        raise ValueError("no closed boundary contour encloses the magnetic axis")
+    return best[1]
+
+
+def panels(
+    state_path: Path, figure_path: Path, receipt_path: Path, hex_cells: int
+) -> None:
+    """Draw the conductor-only and the solved panel from the persisted fields.
+
+    The plasma is drawn as the production hexagonal tessellation: whole
+    hexagons trimmed to the first wall, then cut to the solved boundary, so a
+    straddling cell appears as the piece that is inside rather than as a whole
+    hexagon. The solve itself ran on the rectangular flux lattice, which the
+    receipt states, so the two are never conflated.
+    """
+    from nova.media.sources.plasma_mesh import clip_to_boundary, hex_mesh
+
     data = np.load(state_path, allow_pickle=False)
     shape = tuple(int(value) for value in np.asarray(data["shape"]))
     radius = np.asarray(data["radius"], dtype=float)
     height = np.asarray(data["height"], dtype=float)
     vacuum = np.asarray(data["vacuum_psi"], dtype=float).reshape(shape).T
     solved = np.asarray(data["solved_psi"], dtype=float).reshape(shape).T
-    cells = np.asarray(data["cell_polygons"], dtype=float)
-    core = np.asarray(data["cell_core"], dtype=bool)
     units = _restore_units(data)
     boundary_flux = float(np.asarray(data["boundary_flux"]))
+    magnetic_axis = np.asarray(data["axis"], dtype=float)
     x_points = np.asarray(data["x_points"], dtype=float).reshape(-1, 2)
     saddle = int(np.asarray(data["saddle_index"]))
+
+    boundary = _solved_boundary(radius, height, solved, boundary_flux, magnetic_axis)
+    mesh, mesh_provenance = hex_mesh(units, cells=hex_cells)
+    clipped = clip_to_boundary(mesh, boundary)
+    vertex_counts = np.asarray([len(item) for item in clipped])
 
     # One physical level array serves both panels: two maps contoured on
     # independently chosen levels can be made to look like anything.
@@ -390,16 +445,15 @@ def panels(state_path: Path, figure_path: Path, receipt_path: Path) -> None:
     poloidal.draw_wall(axes[0], units=units)
     axes[0].set_title("conductors only, no plasma", fontsize=9)
 
-    poloidal.draw_plasma_cells(
-        axes[1], [cell for cell, keep in zip(cells, core) if keep], alpha=CELL_ALPHA
-    )
+    poloidal.draw_plasma_cells(axes[1], clipped, alpha=CELL_ALPHA)
     poloidal.draw_flux_contours(axes[1], radius, height, solved, levels)
+    poloidal.draw_boundary(axes[1], boundary[:, 0], boundary[:, 1])
     poloidal.draw_wall(axes[1], units=units)
     admitted = x_points[saddle : saddle + 1] if x_points.size else None
     other = np.delete(x_points, saddle, axis=0) if x_points.shape[0] > 1 else None
     poloidal.draw_nulls(
         axes[1],
-        magnetic_axis=np.asarray(data["axis"], dtype=float),
+        magnetic_axis=magnetic_axis,
         x_points=admitted,
         other_x_points=other,
         contain=units,
@@ -414,14 +468,36 @@ def panels(state_path: Path, figure_path: Path, receipt_path: Path) -> None:
     figure.savefig(figure_path, dpi=200, bbox_inches="tight")
     figure.savefig(figure_path.with_suffix(".svg"), bbox_inches="tight")
     plt.close(figure)
+    drawn = {
+        **mesh_provenance,
+        "boundary_clipped_cells": int(len(clipped)),
+        "boundary_vertex_count_range": [
+            int(vertex_counts.min()),
+            int(vertex_counts.max()),
+        ],
+        "cut_at_boundary_cells": int(np.count_nonzero(vertex_counts != 7)),
+        "boundary_vertex_count": int(boundary.shape[0]),
+        "clip": (
+            "whole hexagons trimmed to the first wall, then intersected with the "
+            "solved boundary polygon; the solve's own control cells are the "
+            "rectangular flux lattice recorded under cell_representation"
+        ),
+    }
     print(
-        "FIGURE=%s core_cells=%d levels=%d boundary_flux=%.6f"
-        % (figure_path, int(np.count_nonzero(core)), levels.size, boundary_flux),
+        "FIGURE=%s hex_delivered=%d boundary_cells=%d cut=%d levels=%d"
+        % (
+            figure_path,
+            int(mesh_provenance["delivered_cells"]),
+            len(clipped),
+            drawn["cut_at_boundary_cells"],
+            levels.size,
+        ),
         flush=True,
     )
     if receipt_path.exists():
         receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
         receipt["figure"] = str(figure_path)
+        receipt["drawn_plasma_mesh"] = drawn
         receipt_path.write_text(
             json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
             encoding="utf-8",
@@ -439,11 +515,17 @@ def main() -> None:
         item.add_argument(
             "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
         )
+        item.add_argument("--hex-cells", type=int, default=DEFAULT_HEX_CELLS)
     arguments = parser.parse_args()
     if arguments.command == "run":
         measure(arguments.state, arguments.receipt, arguments.carrier)
     else:
-        panels(arguments.state, arguments.figure, arguments.receipt)
+        panels(
+            arguments.state,
+            arguments.figure,
+            arguments.receipt,
+            arguments.hex_cells,
+        )
 
 
 if __name__ == "__main__":

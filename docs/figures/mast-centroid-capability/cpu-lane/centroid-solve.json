@@ -19,6 +19,27 @@
     "wall_milliseconds": 25649.8462818563,
     "wall_seconds": 25.6498462818563
   },
+  "drawn_plasma_mesh": {
+    "boundary_clipped_cells": 1460,
+    "boundary_vertex_count": 75,
+    "boundary_vertex_count_range": [
+      4,
+      10
+    ],
+    "clip": "whole hexagons trimmed to the first wall, then intersected with the solved boundary polygon; the solve's own control cells are the rectangular flux lattice recorded under cell_representation",
+    "coupling": "none; cell geometry only, no Biot build",
+    "cut_at_boundary_cells": 222,
+    "delivered_cells": 4286,
+    "requested_cells": 4000,
+    "source": "nova.frame.firstwall.PlasmaGrid.insert",
+    "turn": "hex",
+    "vertex_count_range": [
+      4,
+      29
+    ],
+    "wall_clipped": true,
+    "wall_unit_count": 1
+  },
   "evidence_inputs": {
     "coil_mapping": {
       "family": "p4_upper",

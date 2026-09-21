@@ -16,21 +16,22 @@
     "terminal_residual": 1.2989609388114458e-14,
     "termination": "converged",
     "trip_count": 1,
-    "wall_milliseconds": 413839.0124216676,
-    "wall_seconds": 413.8390124216676
+    "wall_milliseconds": 133145.79957723618,
+    "wall_seconds": 133.14579957723618
   },
   "drawn_plasma_mesh": {
-    "boundary_clipped_cells": 4273,
-    "boundary_vertex_count": 75,
-    "boundary_vertex_count_range": [
-      4,
-      9
-    ],
-    "clip": "whole hexagons trimmed to the first wall, then intersected with the solved boundary polygon; the solve's own control cells are the rectangular flux lattice recorded under cell_representation",
+    "boundary_branches_drawn": {
+      "closed_drawn": 1,
+      "open_drawn": 2
+    },
+    "boundary_clipped_cells": 1461,
+    "boundary_source": "assemble_separatrix_branches on the solved lattice spline, split at the admitted saddle",
+    "boundary_vertex_count": 901,
+    "coil_section_count": 938,
     "coupling": "none; cell geometry only, no Biot build",
-    "cut_at_boundary_cells": 391,
-    "delivered_cells": 12353,
-    "requested_cells": 12000,
+    "cut_at_boundary_cells": 258,
+    "delivered_cells": 4286,
+    "requested_cells": 4000,
     "source": "nova.frame.firstwall.PlasmaGrid.insert",
     "turn": "hex",
     "vertex_count_range": [
@@ -113,7 +114,7 @@
       "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
       "size_bytes": 645864,
       "stored_circuit_count": 101,
-      "warm_load_seconds": 0.04374309070408344
+      "warm_load_seconds": 0.02076878771185875
     },
     "shot": 22086,
     "slice_index": 43
@@ -145,7 +146,7 @@
     "python": "3.14.2",
     "scheduler": {
       "cpus_per_task": "4",
-      "job_id": "1274949",
+      "job_id": "1275023",
       "memory": "65536",
       "node": "98dci4-gpu-0002",
       "partition": "titan",
@@ -153,16 +154,16 @@
     },
     "tmpdir": "/tmp"
   },
-  "source_revision": "120d6136bfc2347a8f9764e200c11bf6bf32038c",
+  "source_revision": "52a55fd3a3eba3dd0286454b2c95a7346323ebd5",
   "summary": {
-    "cold_wall_milliseconds": 413839.0124216676,
+    "cold_wall_milliseconds": 133145.79957723618,
     "core_cell_count": 234,
-    "elapsed_seconds": 837.9162946641445,
+    "elapsed_seconds": 274.7169276326895,
     "warm_converged_count": 1,
     "warm_point_count": 3,
-    "warm_wall_milliseconds_maximum": 2353.4687496721745,
-    "warm_wall_milliseconds_median": 1825.0525146722794,
-    "warm_wall_milliseconds_minimum": 1155.7993292808533
+    "warm_wall_milliseconds_maximum": 2179.3850995600224,
+    "warm_wall_milliseconds_median": 1812.4833926558495,
+    "warm_wall_milliseconds_minimum": 1093.7894992530346
   },
   "warm_solves": [
     {
@@ -171,8 +172,8 @@
       "terminal_residual": 0.0005101893256318779,
       "termination": "active_set_settled",
       "trip_count": 2,
-      "wall_milliseconds": 2353.4687496721745,
-      "wall_seconds": 2.3534687496721745
+      "wall_milliseconds": 2179.3850995600224,
+      "wall_seconds": 2.1793850995600224
     },
     {
       "converged": false,
@@ -180,8 +181,8 @@
       "terminal_residual": 0.002995653696748194,
       "termination": "active_set_settled",
       "trip_count": 1,
-      "wall_milliseconds": 1155.7993292808533,
-      "wall_seconds": 1.1557993292808533
+      "wall_milliseconds": 1093.7894992530346,
+      "wall_seconds": 1.0937894992530346
     },
     {
       "converged": true,
@@ -189,8 +190,8 @@
       "terminal_residual": 1.6167806892768988e-09,
       "termination": "converged",
       "trip_count": 2,
-      "wall_milliseconds": 1825.0525146722794,
-      "wall_seconds": 1.8250525146722794
+      "wall_milliseconds": 1812.4833926558495,
+      "wall_seconds": 1.8124833926558495
     }
   ]
 }

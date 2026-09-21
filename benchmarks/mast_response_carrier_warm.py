@@ -196,6 +196,25 @@ def _carrier_build_lock(path: Path) -> Iterator[Path]:
         yield lock_path
 
 
+def grid_for_carrier(path: Path) -> CarrierGrid:
+    """Return the pinned grid whose identity this carrier file is named by.
+
+    The store names every file by its own semantic identity, so the filename is
+    the lookup key and no read is needed to choose the contract.  An identity
+    that is pinned nowhere raises rather than defaulting to a grid, because
+    defaulting is exactly how a carrier gets verified against the wrong
+    contract and passes.
+    """
+    identity = path.stem
+    for grid in CARRIER_GRIDS.values():
+        if grid.pinned and grid.semantic_identity == identity:
+            return grid
+    known = ", ".join(sorted(CARRIER_GRIDS))
+    raise ValueError(
+        f"carrier identity {identity} is pinned by no grid; known grids: {known}"
+    )
+
+
 def load_carrier(
     path: Path,
     *,

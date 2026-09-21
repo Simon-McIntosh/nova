@@ -127,8 +127,21 @@ def _archive_scalar(archive: Any, name: str) -> str:
 
 
 def _response_cache(carrier_path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Load the persisted response and its complete input ledger."""
-    response, metadata = response_carrier.load_carrier(carrier_path)
+    """Load the persisted response and its complete input ledger.
+
+    The contract the carrier is held to is the one its own grid declares, found
+    by identity among the pinned grids, so a carrier built on the full stored
+    axes is verified as strictly as the coarse one rather than refused against
+    the other grid's pin.  A carrier whose identity is not pinned anywhere is
+    still refused.
+    """
+    grid = response_carrier.grid_for_carrier(carrier_path)
+    response, metadata = response_carrier.load_carrier(
+        carrier_path,
+        semantic_identity=grid.semantic_identity,
+        resolved_target_digest=grid.resolved_target_digest,
+        response_shape=grid.response_shape,
+    )
     with np.load(carrier_path, allow_pickle=False) as archive:
         input_digests = json.loads(_archive_scalar(archive, "input_digests_json"))
         audit = json.loads(_archive_scalar(archive, "audit_json"))

@@ -98,6 +98,12 @@ BOUNDARY_COIL_FAMILIES = frozenset({"p4_lower", "p4_upper", "p5_lower", "p5_uppe
 # interactive measurement, and the receipt echoes the marker so the lowered
 # provenance travels with the artefact.
 CPU_PROVENANCE_MARKER = "NOVA_COIL_EDIT_CPU_PROVENANCE"
+#: Set to the reason a run is on a GPU that is not the H200 measurement host --
+#: the titan rung of the compute hierarchy. Its per-edit walls are that device's
+#: walls and are not the interactive measurement; the receipt echoes both the
+#: marker and the device kind so the lowered provenance travels with the
+#: artefact rather than being inferred from a field the refusal removed.
+OFF_HOST_PROVENANCE_MARKER = "NOVA_COIL_EDIT_OFF_HOST_PROVENANCE"
 INTERACTIVE_LATENCY_TARGET_MILLISECONDS = 100.0
 # The compiled slice route's own production budgets (the kernel's declared
 # constants), not the parity-driver Newton budgets the endpoint prep uses.
@@ -209,6 +215,18 @@ def _require_measurement_host() -> None:
         if device.platform != "cpu":
             raise RuntimeError(
                 "the CPU provenance marker requires a CPU platform, got "
+                f"{device.platform} on {device.device_kind}"
+            )
+        return
+    off_host = os.environ.get(OFF_HOST_PROVENANCE_MARKER, "").strip()
+    if off_host:
+        # The titan rung: a GPU that is not the measurement host. It is
+        # admitted only with its reason named, and the H200 checks below are
+        # the ones that do not apply to it -- an unmarked run off the
+        # reservation is refused exactly as before.
+        if device.platform != "gpu":
+            raise RuntimeError(
+                "the off-host provenance marker requires a GPU platform, got "
                 f"{device.platform} on {device.device_kind}"
             )
         return
@@ -2272,6 +2290,7 @@ def _receipt_document(
             "jax_platforms": os.environ.get("JAX_PLATFORMS"),
             "tmpdir": os.environ.get("TMPDIR"),
             "measurement_host_marker": os.environ.get(CPU_PROVENANCE_MARKER),
+        "off_host_marker": os.environ.get(OFF_HOST_PROVENANCE_MARKER),
             "elapsed_seconds": elapsed_seconds,
             "exit_marker": marker,
         },
@@ -2396,8 +2415,14 @@ def run(
     panel_data: Path,
     panel_figure: Path,
     raster_figure: Path = DEFAULT_RASTER_FIGURE,
+    grid_points: int | None = None,
 ) -> dict[str, Any]:
-    """Compile once and measure successive warm prescribed-current edits."""
+    """Compile once and measure successive warm prescribed-current edits.
+
+    ``grid_points`` selects the uniform per-axis node count and must agree
+    with the grid the supplied carrier was built for; the default keeps the
+    stored-axis stride every banked measurement on this driver was taken on.
+    """
     total_started = time.perf_counter()
     configure_dtypes()
     _require_measurement_host()
@@ -2410,7 +2435,7 @@ def run(
     )
     reporter.start()
     try:
-        profile, prepared, carrier = _prepare_case(carrier_path)
+        profile, prepared, carrier = _prepare_case(carrier_path, grid_points)
         _preflight_panel_wall(profile)
         solve_persistent_hits_start = int(cache_events["hits"])
         solve_persistent_misses_start = int(cache_events["misses"])
@@ -3015,6 +3040,7 @@ def main() -> None:
     run_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
     )
+    run_parser.add_argument("--grid-points", type=int, default=None)
     for name in ("sbatch", "submit"):
         job_parser = subparsers.add_parser(name)
         job_parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
@@ -3067,6 +3093,7 @@ def main() -> None:
             arguments.panel_data,
             arguments.panel_figure,
             arguments.raster_figure,
+            arguments.grid_points,
         )
     elif arguments.command == "panel":
         print(

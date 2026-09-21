@@ -75,6 +75,11 @@ COIL_LINEWIDTH = 0.45
 #: p-prime scales by 1+offset and ff-prime by 1-offset, so the pinned net
 #: plasma current is unchanged and only its radial distribution moves.
 RATIO_OFFSETS = (-0.30, -0.15, 0.0, 0.15, 0.30)
+#: ff-prime alone, over a wide amplitude range; p-prime is held and the solve
+#: pins the net plasma current, so the current normalisation is the lambda.
+FIELD_FUNCTION_SCALES = (0.40, 0.60, 0.80, 1.00, 1.20, 1.40, 1.60)
+#: The internal shape witness: the q = 3/2 rational surface.
+RATIONAL_ORDER = 1.5
 #: Drawn plasma tessellation; the wall fit decides the delivered count.
 DEFAULT_HEX_CELLS = 4000
 CPU_PROVENANCE_MARKER = "NOVA_CENTROID_PANELS_CPU_PROVENANCE"
@@ -187,6 +192,77 @@ def _branches(profile: Any, state: Any, topology: Any) -> dict[str, np.ndarray]:
         "open_branch_valid": np.asarray(assembled["open_branch_valid"], bool),
         "well_formed": np.asarray(bool(np.asarray(assembled["well_formed"]))),
     }
+
+
+def _rational_surface_flux(
+    lattice: Any,
+    source: Any,
+    flux: np.ndarray,
+    topology: Any,
+    order: float,
+) -> tuple[float, float] | None:
+    """Return the absolute flux and normalised label of one rational surface.
+
+    The safety factor is read from the flux-surface-averaged geometry of this
+    member's own map and its own diamagnetic gradient, so the surface moves
+    with the profile rather than being carried over from another member. The
+    OUTERMOST crossing is taken: q rises towards the boundary on these frames,
+    so an inner crossing would be a different surface of the same order.
+    """
+    from nova.equilibrium.flux_surface_geometry import (
+        FluxSurfaceGeometry,
+        source_field_function,
+    )
+
+    axis = np.asarray(topology.axis, dtype=float).reshape(-1)[:2]
+    axis_flux = float(np.asarray(topology.axis_flux))
+    boundary_flux = float(np.asarray(topology.boundary_flux))
+    try:
+        geometry = FluxSurfaceGeometry.from_flux_map(
+            lattice,
+            flux,
+            source_field_function(source, float(np.asarray(topology.flux_span))),
+            axis=(float(axis[0]), float(axis[1])),
+            boundary_flux=boundary_flux,
+        )
+    except Exception:  # noqa: BLE001 - absence is reported, not raised
+        return None
+    label = np.asarray(geometry.psi_norm, dtype=float)
+    factor = np.abs(np.asarray(geometry.safety_factor, dtype=float))
+    finite = np.isfinite(label) & np.isfinite(factor)
+    label, factor = label[finite], factor[finite]
+    if label.size < 2:
+        return None
+    crossings = np.flatnonzero((factor[:-1] - order) * (factor[1:] - order) < 0.0)
+    if crossings.size == 0:
+        return None
+    index = int(crossings[-1])
+    span = factor[index + 1] - factor[index]
+    weight = 0.0 if span == 0.0 else (order - factor[index]) / span
+    psi_norm = float(label[index] + weight * (label[index + 1] - label[index]))
+    return axis_flux + psi_norm * (boundary_flux - axis_flux), psi_norm
+
+
+def _closed_loop(
+    lattice: Any, flux: np.ndarray, level: float, axis: np.ndarray
+) -> np.ndarray:
+    """Return the axis-enclosing closed loop of one level of the solved spline."""
+    shape = tuple(int(value) for value in np.asarray(lattice.shape))
+    values = np.asarray(flux, dtype=float).reshape(shape)
+    assembled = jax.device_get(
+        assemble_separatrix_branches(
+            jnp.asarray(values.T),
+            jnp.asarray(np.asarray(lattice.radius, dtype=float)),
+            jnp.asarray(np.asarray(lattice.height, dtype=float)),
+            jnp.asarray(float(level)),
+            jnp.asarray(np.asarray(axis, dtype=float).reshape(-1)[:2]),
+        )
+    )
+    return poloidal.sample_cubic_controls(
+        np.asarray(assembled["closed_controls_rz"], float),
+        np.asarray(assembled["closed_valid"], bool),
+        BOUNDARY_SAMPLES,
+    )
 
 
 def _class_label(achieved: dict[str, Any]) -> str:
@@ -942,10 +1018,250 @@ def _render_series(
     print(f"SERIES_FIGURE={figure_path} members={len(panels_data)}", flush=True)
 
 
+def family(
+    receipt_path: Path,
+    figure_path: Path,
+    carrier_path: Path,
+    grid_points: int | None,
+) -> None:
+    """Vary the diamagnetic gradient alone and record how the shape answers.
+
+    One parameter moves: the amplitude of ff-prime. p-prime is untouched and
+    the solve pins the net plasma current, so the current normalisation is the
+    lambda that absorbs the amplitude change and every member carries the SAME
+    total current. What is left is shape.
+
+    Two curves are recorded per member because shape is not only the outline:
+    the separatrix is the external shape and the q = 3/2 rational surface is an
+    internal one, read from each member's own flux-surface-averaged safety
+    factor rather than carried over from a neighbour.
+    """
+    configure_dtypes()
+    if jax.config.jax_enable_x64 is not True:
+        raise RuntimeError("extended precision did not take before any array was built")
+    _require_host()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    started = time.perf_counter()
+    profile, prepared, carrier = edit._prepare_case(
+        carrier_path, grid_points, _sampled_factory
+    )
+    operator = profile.operator
+    lattice = profile.lattice
+    node_count = int(operator.grid.node_number)
+    requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    target_current = float(prepared["target_current"])
+    base_current = jnp.asarray(prepared["prescribed_current"])
+    pairs = (prepared["vertical_centroid_pair"],)
+    seed = prepared["initial"]
+    units = edit._wall_units(operator)
+    coils = _coil_outlines(edit.SHOT)
+    stored = _stored_profiles(edit.SHOT, edit.SLICE_INDEX)
+
+    members: list[dict[str, Any]] = []
+    curves: list[dict[str, Any]] = []
+    program = None
+    state = seed
+    for scale in FIELD_FUNCTION_SCALES:
+        varied = _varied_source(stored, 1.0, scale)
+        member_profile = profile._with_source(varied)
+        result, wall = _timed_solve(
+            member_profile,
+            state,
+            base_current,
+            requested,
+            target_current,
+            program,
+            pairs,
+        )
+        program = result.program
+        record = _solve_record(result, wall)
+        record["field_function_scale"] = float(scale)
+        flux = np.asarray(result.state, float)[:node_count]
+        try:
+            _masks, topology = member_profile.operator.read(result.state)
+        except Exception as error:  # noqa: BLE001 - recorded, not swallowed
+            record["read_error"] = f"{type(error).__name__}: {error}"
+            members.append(record)
+            continue
+        record["achieved_class"] = _class_label(
+            edit._achieved_class(member_profile, result.state)
+        )
+        record["axis_rz"] = np.asarray(topology.axis, float).reshape(-1)[:2].tolist()
+        record["boundary_flux"] = float(np.asarray(topology.boundary_flux))
+        record["axis_flux"] = float(np.asarray(topology.axis_flux))
+        boundary = _closed_loop(
+            lattice, flux, record["boundary_flux"], np.asarray(topology.axis, float)
+        )
+        rational = _rational_surface_flux(
+            lattice, varied, flux, topology, RATIONAL_ORDER
+        )
+        surface = np.empty((0, 2))
+        if rational is not None:
+            record["rational_psi_norm"] = float(rational[1])
+            record["rational_flux"] = float(rational[0])
+            surface = _closed_loop(
+                lattice, flux, rational[0], np.asarray(topology.axis, float)
+            )
+        record["boundary_vertex_count"] = int(boundary.shape[0])
+        record["rational_vertex_count"] = int(surface.shape[0])
+        members.append(record)
+        curves.append(
+            {
+                "scale": float(scale),
+                "boundary": boundary,
+                "rational": surface,
+                "ff_prime": scale * stored["ff_prime"],
+                "converged": bool(np.asarray(result.converged)),
+                "class": record["achieved_class"],
+            }
+        )
+        print(
+            f"MEMBER ff_scale={scale:.2f} wall_s={wall:.3f} "
+            f"residual={record['terminal_residual']:.3e} "
+            f"converged={record['converged']} class={record['achieved_class']} "
+            f"q{RATIONAL_ORDER:g}_psi_n={record.get('rational_psi_norm')}",
+            flush=True,
+        )
+        state = result.state
+
+    _render_family(curves, stored["psi_norm"], units, coils, lattice, figure_path)
+    receipt = {
+        "artifact": (
+            "diamagnetic-gradient family at one pinned net plasma current, with "
+            "external and internal shape recorded"
+        ),
+        "identity": f"{edit.SHOT}/{edit.SLICE_INDEX} mixed",
+        "source_revision": _source_revision(),
+        "runtime": _provenance(),
+        "evidence_inputs": {
+            "response_carrier": carrier,
+            "persistent_compilation_cache": cache.receipt(),
+            "grid_points": grid_points,
+            "lattice_shape": [int(value) for value in np.asarray(lattice.shape)],
+        },
+        "measurement_contract": {
+            "varied": "the ff-prime table amplitude alone; p-prime is untouched",
+            "held": (
+                "conductor currents, the vertical current-centroid row, and the "
+                "net plasma current, which the solve pins so the current "
+                "normalisation absorbs the amplitude change"
+            ),
+            "target_current_a": target_current,
+            "field_function_scales": [float(value) for value in FIELD_FUNCTION_SCALES],
+            "external_shape": "separatrix, the axis-enclosing lobe at boundary flux",
+            "internal_shape": (
+                f"q = {RATIONAL_ORDER:g} surface, from each member's own "
+                "flux-surface-averaged safety factor, outermost crossing"
+            ),
+            "program_reuse": (
+                "one compiled program serves every member: the tables cross the "
+                "program boundary as array leaves"
+            ),
+        },
+        "members": members,
+        "summary": {
+            "member_count": len(members),
+            "converged_count": int(sum(bool(m.get("converged")) for m in members)),
+            "classes": sorted({str(m.get("achieved_class")) for m in members}),
+            "rational_surface_found": int(
+                sum("rational_psi_norm" in m for m in members)
+            ),
+            "elapsed_seconds": float(time.perf_counter() - started),
+        },
+    }
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, default=str) + "\n",
+        encoding="utf-8",
+    )
+    print("RECEIPT=" + str(receipt_path), flush=True)
+
+
+def _render_family(
+    curves: list[dict[str, Any]],
+    psi_norm: np.ndarray,
+    units: tuple[Any, ...],
+    coils: np.ndarray,
+    lattice: Any,
+    figure_path: Path,
+) -> None:
+    """Draw the shape family beside the gradient variation that produced it."""
+    from matplotlib import colormaps
+    from nova.media.ink import trace_axes
+
+    if not curves:
+        raise RuntimeError("the family produced no drawable member")
+    radius = np.asarray(lattice.radius, float)
+    height = np.asarray(lattice.height, float)
+    colours = colormaps["viridis"](np.linspace(0.05, 0.9, len(curves)))
+    figure, axes = plt.subplots(
+        1,
+        2,
+        figsize=(10.4, 6.6),
+        width_ratios=(1.35, 1.0),
+        facecolor=DEFAULT_INK.figure_facecolor,
+    )
+    poloidal_axes(axes[0])
+    poloidal.draw_coils(
+        axes[0], coils, edgecolor=COIL_EDGE_COLOR, linewidth=COIL_LINEWIDTH
+    )
+    poloidal.draw_wall(axes[0], units=units)
+    for colour, item in zip(colours, curves):
+        style = "solid" if item["converged"] else (0, (4, 2))
+        if item["boundary"].shape[0] >= 2:
+            loop = np.vstack((item["boundary"], item["boundary"][:1]))
+            axes[0].plot(
+                loop[:, 0],
+                loop[:, 1],
+                color=colour,
+                linewidth=1.6,
+                linestyle=style,
+                zorder=DEFAULT_INK.zorder_separatrix,
+            )
+        if item["rational"].shape[0] >= 2:
+            loop = np.vstack((item["rational"], item["rational"][:1]))
+            axes[0].plot(
+                loop[:, 0],
+                loop[:, 1],
+                color=colour,
+                linewidth=1.0,
+                linestyle=(0, (2, 2)),
+                zorder=DEFAULT_INK.zorder_separatrix,
+            )
+    axes[0].set_xlim(float(radius.min()), float(radius.max()))
+    axes[0].set_ylim(float(height.min()), float(height.max()))
+    axes[0].set_title(
+        f"separatrix (solid) and q = {RATIONAL_ORDER:g} surface (dotted)",
+        fontsize=9,
+    )
+
+    trace_axes(axes[1])
+    for colour, item in zip(colours, curves):
+        axes[1].plot(
+            np.asarray(psi_norm, float),
+            np.asarray(item["ff_prime"], float),
+            color=colour,
+            linewidth=1.4,
+            label=f"x{item['scale']:.2f}",
+        )
+    axes[1].set_xlabel(r"$\psi_N$", fontsize=9)
+    axes[1].set_ylabel(r"$FF^\prime$  [T m / Wb]", fontsize=9)
+    axes[1].set_title("the diamagnetic gradient that produced them", fontsize=9)
+    axes[1].legend(fontsize=7, frameon=False, title="ff' scale", title_fontsize=7)
+
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(figure_path, dpi=200, bbox_inches="tight")
+    figure.savefig(figure_path.with_suffix(".svg"), bbox_inches="tight")
+    plt.close(figure)
+    print(f"FAMILY_FIGURE={figure_path} members={len(curves)}", flush=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
-    for name in ("run", "panels", "series"):
+    for name in ("run", "panels", "series", "family"):
         item = subparsers.add_parser(name)
         item.add_argument("--state", type=Path, default=DEFAULT_STATE)
         item.add_argument("--receipt", type=Path, default=DEFAULT_RECEIPT)
@@ -956,7 +1272,14 @@ def main() -> None:
         item.add_argument("--hex-cells", type=int, default=DEFAULT_HEX_CELLS)
         item.add_argument("--grid-points", type=int, default=None)
     arguments = parser.parse_args()
-    if arguments.command == "series":
+    if arguments.command == "family":
+        family(
+            arguments.receipt,
+            arguments.figure,
+            arguments.carrier,
+            arguments.grid_points,
+        )
+    elif arguments.command == "series":
         series(
             arguments.receipt,
             arguments.figure,

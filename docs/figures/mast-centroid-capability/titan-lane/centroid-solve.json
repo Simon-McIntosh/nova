@@ -13,11 +13,11 @@
   },
   "cold_solve": {
     "converged": true,
-    "terminal_residual": 1.3086753902769162e-14,
+    "terminal_residual": 1.2989609388114458e-14,
     "termination": "converged",
     "trip_count": 1,
-    "wall_milliseconds": 25649.8462818563,
-    "wall_seconds": 25.6498462818563
+    "wall_milliseconds": 413839.0124216676,
+    "wall_seconds": 413.8390124216676
   },
   "drawn_plasma_mesh": {
     "boundary_clipped_cells": 4273,
@@ -48,7 +48,7 @@
     },
     "edited_circuit": 8,
     "persistent_compilation_cache": {
-      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-d5aa9180337b1ddf4186",
       "entry_key_fields": [
         "serialized computation",
         "jaxlib version",
@@ -77,8 +77,8 @@
       "minimum_compile_seconds": 1.0,
       "root": "/home/ITER/mcintos/.cache",
       "runtime_identity": {
-        "backend": "cpu",
-        "backend_version": "cpu",
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
         "compiler_options": {
           "jax_compilation_cache_include_metadata_in_key": false,
           "jax_default_matmul_precision": null,
@@ -89,8 +89,8 @@
         "device_topology": [
           {
             "id": 0,
-            "kind": "cpu",
-            "platform": "cpu",
+            "kind": "Tesla P100-PCIE-16GB",
+            "platform": "gpu",
             "process_index": 0
           }
         ],
@@ -98,7 +98,7 @@
         "jaxlib_version": "0.11.0"
       },
       "selection": "explicit_per_recipe",
-      "version_key": "runtime-ea5c55820be3d80549fe"
+      "version_key": "runtime-d5aa9180337b1ddf4186"
     },
     "response_carrier": {
       "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
@@ -113,16 +113,16 @@
       "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
       "size_bytes": 645864,
       "stored_circuit_count": 101,
-      "warm_load_seconds": 0.017267846036702394
+      "warm_load_seconds": 0.04374309070408344
     },
     "shot": 22086,
     "slice_index": 43
   },
-  "figure": "/home/ITER/mcintos/Code/nova/docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",
+  "figure": "/home/ITER/mcintos/Code/nova/docs/figures/mast-centroid-capability/titan-lane/vacuum-and-plasma-panels.png",
   "identity": "22086/43 mixed",
   "measurement_contract": {
     "active_set_steps": 16,
-    "centroid_target_m": 0.03167978092303942,
+    "centroid_target_m": 0.031679780923040135,
     "centroid_tolerance_m": 1e-06,
     "cold_definition": "no program in hand: the wall carries tracing and compilation alongside one execution",
     "constraint": "one vertical current-centroid row targeted on the frame's own reference centre height",
@@ -133,64 +133,64 @@
     "warm_definition": "the same fixed-shape program re-entered on a moved current vector, so the timed solve does real trips"
   },
   "runtime": {
-    "cpu_provenance_marker": "reservation gpu_0003_grpA admits no job at all: sbatch --test-only refuses a one-task request with no cpu, memory or gres ask while the node holds 43 idle cores, 792 GB free and cards IDX 1-3 idle",
-    "device_kind": "cpu",
+    "cpu_provenance_marker": null,
+    "device_kind": "Tesla P100-PCIE-16GB",
     "devices": [
-      "cpu:0"
+      "cuda:0"
     ],
-    "host": "98dci4-clu-5012.iter.org",
+    "host": "98dci4-gpu-0002.iter.org",
     "jax": "0.11.0",
-    "jax_platforms": "cpu",
-    "platform": "cpu",
+    "jax_platforms": "cuda,cpu",
+    "platform": "gpu",
     "python": "3.14.2",
     "scheduler": {
-      "cpus_per_task": "8",
-      "job_id": "1274545",
-      "memory": "131072",
-      "node": "98dci4-clu-5012",
-      "partition": "sirius",
+      "cpus_per_task": "4",
+      "job_id": "1274949",
+      "memory": "65536",
+      "node": "98dci4-gpu-0002",
+      "partition": "titan",
       "reservation": null
     },
     "tmpdir": "/tmp"
   },
-  "source_revision": "e3970977ca762c391696cdd47cbdd7eab5f19080",
+  "source_revision": "120d6136bfc2347a8f9764e200c11bf6bf32038c",
   "summary": {
-    "cold_wall_milliseconds": 25649.8462818563,
+    "cold_wall_milliseconds": 413839.0124216676,
     "core_cell_count": 234,
-    "elapsed_seconds": 366.0342421042733,
+    "elapsed_seconds": 837.9162946641445,
     "warm_converged_count": 1,
     "warm_point_count": 3,
-    "warm_wall_milliseconds_maximum": 66834.81331728399,
-    "warm_wall_milliseconds_median": 52333.205628208816,
-    "warm_wall_milliseconds_minimum": 30233.172729145736
+    "warm_wall_milliseconds_maximum": 2353.4687496721745,
+    "warm_wall_milliseconds_median": 1825.0525146722794,
+    "warm_wall_milliseconds_minimum": 1155.7993292808533
   },
   "warm_solves": [
     {
       "converged": false,
       "edit_fraction": 0.02,
-      "terminal_residual": 0.0005101893256319732,
+      "terminal_residual": 0.0005101893256318779,
       "termination": "active_set_settled",
       "trip_count": 2,
-      "wall_milliseconds": 66834.81331728399,
-      "wall_seconds": 66.83481331728399
+      "wall_milliseconds": 2353.4687496721745,
+      "wall_seconds": 2.3534687496721745
     },
     {
       "converged": false,
       "edit_fraction": 0.04,
-      "terminal_residual": 0.0029956536967481935,
+      "terminal_residual": 0.002995653696748194,
       "termination": "active_set_settled",
       "trip_count": 1,
-      "wall_milliseconds": 30233.172729145736,
-      "wall_seconds": 30.233172729145736
+      "wall_milliseconds": 1155.7993292808533,
+      "wall_seconds": 1.1557993292808533
     },
     {
       "converged": true,
       "edit_fraction": 0.06,
-      "terminal_residual": 1.6167807750184793e-09,
+      "terminal_residual": 1.6167806892768988e-09,
       "termination": "converged",
       "trip_count": 2,
-      "wall_milliseconds": 52333.205628208816,
-      "wall_seconds": 52.333205628208816
+      "wall_milliseconds": 1825.0525146722794,
+      "wall_seconds": 1.8250525146722794
     }
   ]
 }

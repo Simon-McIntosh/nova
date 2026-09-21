@@ -42,7 +42,9 @@ import numpy as np
 
 from benchmarks import coil_edit_latency as edit
 from benchmarks import mast_response_carrier_warm as response_carrier
+from nova.catalog.mast_geometry import shaped_section_vertices
 from nova.equilibrium.forward import _lattice_cells
+from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import (
     configure_dtypes,
@@ -64,6 +66,12 @@ WARM_EDIT_FRACTIONS = (0.02, 0.04, 0.06)
 LEVEL_COUNT = 24
 #: Translucent enough that the contours read through the filled cells.
 CELL_ALPHA = 0.55
+#: The boundary is drawn in the contour ink, only heavier.
+BOUNDARY_LINEWIDTH = 2.6 * 0.35
+BOUNDARY_SAMPLES = 12
+#: Coils are context, not subject: a faint outline the contours read through.
+COIL_EDGE_COLOR = "#b8b8b8"
+COIL_LINEWIDTH = 0.45
 #: Drawn plasma tessellation; the wall fit decides the delivered count.
 DEFAULT_HEX_CELLS = 4000
 CPU_PROVENANCE_MARKER = "NOVA_CENTROID_PANELS_CPU_PROVENANCE"
@@ -113,6 +121,69 @@ def _require_host() -> None:
             "a run off the GPU must name its reason in "
             f"{CPU_PROVENANCE_MARKER}; the receipt carries it"
         )
+
+
+def _coil_outlines(shot: int) -> np.ndarray:
+    """Return every stored winding-pack section of one shot as a quadrilateral.
+
+    The outlines are the machine the conductor-only panel is the field of, so
+    they come from the same stored geometry the response was built from rather
+    than from a drawing table.
+    """
+    import zarr
+
+    from nova.imas.mast_solve_inputs import SHOT_STORE
+
+    group = zarr.open_group(str(SHOT_STORE / f"{shot}.zarr"), mode="r")["efm"]
+    fields = {
+        name: np.asarray(group[f"fcoil_{name}"], dtype=np.float64).reshape(-1)
+        for name in ("r", "z", "width", "height", "ang1", "ang2")
+    }
+    return np.asarray(
+        [
+            shaped_section_vertices(
+                fields["r"][index],
+                fields["z"][index],
+                fields["width"][index],
+                fields["height"][index],
+                fields["ang1"][index],
+                fields["ang2"][index],
+            )
+            for index in range(fields["r"].size)
+        ],
+        dtype=float,
+    )
+
+
+def _branches(profile: Any, state: Any, topology: Any) -> dict[str, np.ndarray]:
+    """Assemble the solved field's own level set at the boundary flux.
+
+    The assembly runs on the SOLUTION'S lattice spline, not on a receiver
+    raster: a raster is a resampled image whose contour wanders between nodes,
+    and the raw level set of either grid is unsplit and unbounded. Splitting it
+    at the polished saddle is what leaves one axis-enclosing cycle to draw and
+    to cut the plasma mesh against.
+    """
+    lattice = profile.lattice
+    shape = tuple(int(value) for value in np.asarray(lattice.shape))
+    values = np.asarray(state[: lattice.node_count], dtype=float).reshape(shape)
+    assembled = jax.device_get(
+        assemble_separatrix_branches(
+            jnp.asarray(values.T),
+            jnp.asarray(np.asarray(lattice.radius, dtype=float)),
+            jnp.asarray(np.asarray(lattice.height, dtype=float)),
+            jnp.asarray(topology.boundary_flux),
+            jnp.asarray(np.asarray(topology.axis, dtype=float)),
+        )
+    )
+    return {
+        "closed_controls_rz": np.asarray(assembled["closed_controls_rz"], float),
+        "closed_valid": np.asarray(assembled["closed_valid"], bool),
+        "open_controls_rz": np.asarray(assembled["open_controls_rz"], float),
+        "open_valid": np.asarray(assembled["open_valid"], bool),
+        "open_branch_valid": np.asarray(assembled["open_branch_valid"], bool),
+        "well_formed": np.asarray(bool(np.asarray(assembled["well_formed"]))),
+    }
 
 
 def _timed_solve(
@@ -189,7 +260,12 @@ def _restore_units(data: Any) -> tuple[Any, ...]:
     )
 
 
-def measure(state_path: Path, receipt_path: Path, carrier_path: Path) -> None:
+def measure(
+    state_path: Path,
+    receipt_path: Path,
+    carrier_path: Path,
+    grid_points: int | None = None,
+) -> None:
     """Solve the centroid-constrained frame and persist the panel fields."""
     configure_dtypes()
     if jax.config.jax_enable_x64 is not True:
@@ -200,7 +276,7 @@ def measure(state_path: Path, receipt_path: Path, carrier_path: Path) -> None:
     )
     total_started = time.perf_counter()
 
-    profile, prepared, carrier = edit._prepare_case(carrier_path)
+    profile, prepared, carrier = edit._prepare_case(carrier_path, grid_points)
     operator = profile.operator
     lattice = profile.lattice
     node_count = int(operator.grid.node_number)
@@ -266,6 +342,8 @@ def measure(state_path: Path, receipt_path: Path, carrier_path: Path) -> None:
     cells = np.asarray(_lattice_cells(lattice), dtype=float)
     units = edit._wall_units(operator)
     nulls = edit._null_points(profile, cold.state)
+    branches = _branches(profile, cold.state, achieved)
+    coils = _coil_outlines(edit.SHOT)
 
     payload: dict[str, Any] = {
         "radius": np.asarray(lattice.radius, dtype=float),
@@ -283,6 +361,8 @@ def measure(state_path: Path, receipt_path: Path, carrier_path: Path) -> None:
         "saddle_index": np.asarray(int(nulls["saddle_index"])),
         "axis_flux": np.asarray(float(np.asarray(achieved.axis_flux))),
         "boundary_flux": np.asarray(float(np.asarray(achieved.boundary_flux))),
+        "coil_outlines": coils,
+        **{f"branch_{name}": value for name, value in branches.items()},
         **_wall_arrays(units),
     }
     state_path.parent.mkdir(parents=True, exist_ok=True)
@@ -299,6 +379,8 @@ def measure(state_path: Path, receipt_path: Path, carrier_path: Path) -> None:
             "persistent_compilation_cache": cache.receipt(),
             "shot": edit.SHOT,
             "slice_index": edit.SLICE_INDEX,
+            "grid_points": grid_points,
+            "lattice_shape": [int(value) for value in np.asarray(lattice.shape)],
             "edited_circuit": circuit_index,
             "coil_mapping": prepared["coil_mapping"],
         },
@@ -405,11 +487,17 @@ def panels(
 ) -> None:
     """Draw the conductor-only and the solved panel from the persisted fields.
 
-    The plasma is drawn as the production hexagonal tessellation: whole
-    hexagons trimmed to the first wall, then cut to the solved boundary, so a
-    straddling cell appears as the piece that is inside rather than as a whole
-    hexagon. The solve itself ran on the rectangular flux lattice, which the
-    receipt states, so the two are never conflated.
+    The pair is a superposition statement: the left panel is the field of the
+    conductors alone, which is known exactly from their stored geometry and
+    currents, and the right panel is that same field plus the plasma image the
+    two low-degree flux functions support. Both are contoured on ONE physical
+    level array so the difference between them is the plasma and not a change
+    of scale.
+
+    The boundary is the assembled level set of the solved lattice spline, split
+    at its saddle -- not a contour of the receiver raster, whose between-node
+    wander would show as a wobble and would also be the wrong curve to cut the
+    plasma mesh against.
     """
     from nova.media.sources.plasma_mesh import clip_to_boundary, hex_mesh
 
@@ -420,18 +508,33 @@ def panels(
     vacuum = np.asarray(data["vacuum_psi"], dtype=float).reshape(shape).T
     solved = np.asarray(data["solved_psi"], dtype=float).reshape(shape).T
     units = _restore_units(data)
+    coils = np.asarray(data["coil_outlines"], dtype=float)
     boundary_flux = float(np.asarray(data["boundary_flux"]))
     magnetic_axis = np.asarray(data["axis"], dtype=float)
     x_points = np.asarray(data["x_points"], dtype=float).reshape(-1, 2)
     saddle = int(np.asarray(data["saddle_index"]))
+    branches = {
+        name: np.asarray(data[f"branch_{name}"])
+        for name in (
+            "closed_controls_rz",
+            "closed_valid",
+            "open_controls_rz",
+            "open_valid",
+            "open_branch_valid",
+        )
+    }
 
-    boundary = _solved_boundary(radius, height, solved, boundary_flux, magnetic_axis)
+    boundary = poloidal.sample_cubic_controls(
+        branches["closed_controls_rz"], branches["closed_valid"], BOUNDARY_SAMPLES
+    )
     mesh, mesh_provenance = hex_mesh(units, cells=hex_cells)
-    clipped = clip_to_boundary(mesh, boundary)
-    vertex_counts = np.asarray([len(item) for item in clipped])
+    clipped = clip_to_boundary(mesh, boundary) if boundary.shape[0] >= 3 else ()
+    vertex_counts = (
+        np.asarray([len(item) for item in clipped])
+        if clipped
+        else np.zeros(0, dtype=int)
+    )
 
-    # One physical level array serves both panels: two maps contoured on
-    # independently chosen levels can be made to look like anything.
     both = np.concatenate((vacuum.ravel(), solved.ravel()))
     levels = poloidal.contour_levels(both, LEVEL_COUNT, boundary=boundary_flux)
 
@@ -440,15 +543,27 @@ def panels(
     )
     for panel in axes:
         poloidal_axes(panel)
+        poloidal.draw_coils(
+            panel, coils, edgecolor=COIL_EDGE_COLOR, linewidth=COIL_LINEWIDTH
+        )
+        poloidal.draw_wall(panel, units=units)
 
     poloidal.draw_flux_contours(axes[0], radius, height, vacuum, levels)
-    poloidal.draw_wall(axes[0], units=units)
     axes[0].set_title("conductors only, no plasma", fontsize=9)
 
     poloidal.draw_plasma_cells(axes[1], clipped, alpha=CELL_ALPHA)
     poloidal.draw_flux_contours(axes[1], radius, height, solved, levels)
-    poloidal.draw_boundary(axes[1], boundary[:, 0], boundary[:, 1])
-    poloidal.draw_wall(axes[1], units=units)
+    # The boundary is one of the drawn contours, not a separate red curve: same
+    # ink, slightly heavier, so it reads as the surface the level array already
+    # contains rather than as an overlay from somewhere else.
+    tally = poloidal.draw_separatrix_branches(
+        axes[1],
+        branches,
+        closed_color=DEFAULT_INK.contour_color,
+        open_color=DEFAULT_INK.contour_color,
+        closed_linewidth=BOUNDARY_LINEWIDTH,
+        open_linewidth=BOUNDARY_LINEWIDTH,
+    )
     admitted = x_points[saddle : saddle + 1] if x_points.size else None
     other = np.delete(x_points, saddle, axis=0) if x_points.shape[0] > 1 else None
     poloidal.draw_nulls(
@@ -470,26 +585,26 @@ def panels(
     plt.close(figure)
     drawn = {
         **mesh_provenance,
-        "boundary_clipped_cells": int(len(clipped)),
-        "boundary_vertex_count_range": [
-            int(vertex_counts.min()),
-            int(vertex_counts.max()),
-        ],
-        "cut_at_boundary_cells": int(np.count_nonzero(vertex_counts != 7)),
-        "boundary_vertex_count": int(boundary.shape[0]),
-        "clip": (
-            "whole hexagons trimmed to the first wall, then intersected with the "
-            "solved boundary polygon; the solve's own control cells are the "
-            "rectangular flux lattice recorded under cell_representation"
+        "boundary_source": (
+            "assemble_separatrix_branches on the solved lattice spline, split "
+            "at the admitted saddle"
         ),
+        "boundary_vertex_count": int(boundary.shape[0]),
+        "boundary_branches_drawn": tally,
+        "boundary_clipped_cells": int(len(clipped)),
+        "cut_at_boundary_cells": int(np.count_nonzero(vertex_counts != 7)),
+        "coil_section_count": int(coils.shape[0]),
     }
     print(
-        "FIGURE=%s hex_delivered=%d boundary_cells=%d cut=%d levels=%d"
+        "FIGURE=%s hex_delivered=%d boundary_cells=%d cut=%d coils=%d "
+        "boundary_vertices=%d levels=%d"
         % (
             figure_path,
             int(mesh_provenance["delivered_cells"]),
             len(clipped),
             drawn["cut_at_boundary_cells"],
+            coils.shape[0],
+            boundary.shape[0],
             levels.size,
         ),
         flush=True,
@@ -516,9 +631,15 @@ def main() -> None:
             "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
         )
         item.add_argument("--hex-cells", type=int, default=DEFAULT_HEX_CELLS)
+        item.add_argument("--grid-points", type=int, default=None)
     arguments = parser.parse_args()
     if arguments.command == "run":
-        measure(arguments.state, arguments.receipt, arguments.carrier)
+        measure(
+            arguments.state,
+            arguments.receipt,
+            arguments.carrier,
+            arguments.grid_points,
+        )
     else:
         panels(
             arguments.state,

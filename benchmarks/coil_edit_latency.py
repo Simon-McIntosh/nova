@@ -525,13 +525,22 @@ def _vertical_centroid_pair(
     return pair, actuator
 
 
-def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, Any]]:
+def _prepare_case(
+    carrier_path: Path, grid_points: int | None = None
+) -> tuple[Any, dict[str, Any], dict[str, Any]]:
+    """Prepare the sweep's base frame, optionally on a named axis count.
+
+    ``grid_points`` selects the uniform per-axis node count the case is built
+    on and must agree with the grid the supplied carrier was built for; the
+    default keeps the stored-axis stride this driver has always used.
+    """
     response_cache, carrier = _response_cache(carrier_path)
     selected = {"shot": SHOT, "slice_index": SLICE_INDEX}
     case, context = parity._mast_case_from_selection(
         SHOT_STORE,
         selected,
         qualification=None,
+        grid_points=grid_points,
     )
     passive_case, profile, policy = parity._passive_inclusive_case(
         case,

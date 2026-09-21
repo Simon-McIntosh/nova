@@ -4,7 +4,7 @@
     "source_identity": "sha256:23038d9c17076ab89be916f6aa65fea049e6e2241edba15e334c8b4dcf90e0a3",
     "source_path": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py"
   },
-  "base_revision": "3d381ef8b5f5b0c5c49c5627b42c166723402bd0",
+  "base_revision": "68cfe15ced6b66ceef2e3d8da0ef5ce68371bcb6",
   "producer_commit": "24d5f8c5af443647173cb7d3364610fa132420fa",
   "rows": [
     {
@@ -166,9 +166,9 @@
       "identity": "22086/43 pure",
       "machine": "MAST",
       "qualification": "active_set_settled",
-      "regeneration_elapsed_s_per_shot": 2530.2391649633646,
+      "regeneration_elapsed_s_per_shot": 1527.540162846446,
       "shot": 22086,
-      "terminal_residual": 0.00047749374833591846,
+      "terminal_residual": 0.00047749374833596324,
       "termination_reason": "active_set_settled",
       "time": 0.22999998927116394
     },
@@ -181,9 +181,9 @@
       "identity": "22086/43 mixed",
       "machine": "MAST",
       "qualification": "converged",
-      "regeneration_elapsed_s_per_shot": 2530.2391649633646,
+      "regeneration_elapsed_s_per_shot": 1527.540162846446,
       "shot": 22086,
-      "terminal_residual": 7.169964871501041e-16,
+      "terminal_residual": 6.273719262563409e-16,
       "termination_reason": "converged",
       "time": 0.22999998927116394
     }

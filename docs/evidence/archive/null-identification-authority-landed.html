@@ -1389,6 +1389,33 @@ benchmarks/solovev_certificate.py:2514: RuntimeError
   bank as its retained rows. What the regeneration needs is one compiled pass over
   the row set, or a pre-warm that warms <em>this</em> driver rather than the test lane, or a partition
   whose wall is longer than the debug hour.</p>
+
+  <p><strong>The longer regeneration and the named gate close this node's measurement.</strong> One
+  Titan P100 allocation regenerated the six MAST shots and both arms in <code>03:07:00</code>
+  (job <code>1275265</code>, <code>RENDERER_EXIT=0</code>, <code>refreshed_rows=12</code>); every
+  regenerated row carries <code>class=diverted</code>. The bank and metadata are durable at
+  <code>68cfe15ce</code>. The acceptance then ran as one <code>all_debug</code> CPU allocation with
+  <code>TMPDIR=/tmp</code> in the submit environment and payload, <code>JAX_PLATFORMS=cpu</code>, the
+  root interpreter invoked directly and no <code>uv</code> on the node (job <code>1275321</code>,
+  <code>00:27:04</code>, exit <code>0:0</code>). Its receipt records <code>RENDERER_EXIT=0</code>,
+  <code>ATLAS_EXIT=0</code> and <code>MEASURE_EXIT=0</code>. For 22086/43 mixed, the refreshed atlas
+  row carries <code>class=diverted</code>, the boundary has 676 points, the admitted saddle is
+  (0.584978, 1.230503) m, and the boundary-to-saddle minimum is <strong>0.0000 m</strong>: below one
+  lattice pitch, where the stale class-free 487-point curve was 0.4853 m away.</p>
+
+  <figure><img src="/nova/figures/null-identification-authority/convergence-atlas/22086-43-mixed.png"
+  alt="MAST 22086 row 43 mixed terminal flux contours, wall, red class-governed boundary passing through the upper admitted saddle, magnetic axis and EFIT reference nulls">
+  <figcaption>The decisive 22086/43 mixed panel after the class-governed redraw. The red boundary
+  visibly passes through the upper admitted saddle. This worktree predates the later shared
+  null-vocabulary change: the literal glyphs here are a red dot for the Nova axis, a filled
+  <code>X</code> for the admitted saddle, hollow circles or squares for the other qualified X-points,
+  and grey <code>+</code> markers for the EFIT axis and X-points. The separate atlas-vocabulary item
+  owns the triangle/cross redraw; this record does not claim those later glyphs for this bitmap.</figcaption></figure>
+
+  <p>Gate log: <code>~/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/gate-final.log</code>.
+  The committed negative control changes the diverted boundary level to the wall contact flux and
+  reddens the class-anchor case (1 failed, 7 passed), while the fresh-process module gate is recorded
+  beside it in the worker manifest.</p>
 </section>
 </main>
 </body>

@@ -1,10 +1,10 @@
 {
   "schema": "nova-poloidal-convergence-atlas",
-  "renderer_revision": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+  "renderer_revision": "68cfe15ced6b66ceef2e3d8da0ef5ce68371bcb6",
   "panel_count": 17,
   "per_frame_render_cost": {
-    "mean_seconds": 0.5927297211087802,
-    "max_seconds": 8.341465758159757,
+    "mean_seconds": 0.1182791172143291,
+    "max_seconds": 0.6479665618389845,
     "count": 17
   },
   "panels": [
@@ -18,20 +18,20 @@
       "current_ma": 0.8015,
       "class": "diverted",
       "converged": false,
-      "terminal_residual": 0.0029974764384111193,
+      "terminal_residual": 0.0024506488565449003,
       "qualification": "active_set_cycle_detected",
-      "boundary_point_count": 523,
+      "boundary_point_count": 730,
       "axis": [
-        0.9065715904831593,
-        0.003539733205531276
+        0.9049917162246327,
+        0.013105001981437846
       ],
       "admitted_x": [
-        0.5685255405438062,
-        1.2390654261879772
+        0.5596012790217029,
+        1.2647305978963983
       ],
       "wall_point": [
         0.5649306774139404,
-        -1.7455855846479669
+        -1.7554459771296087
       ],
       "efit_axis": [
         0.9045118689537048,
@@ -42,10 +42,10 @@
       "qualified_x_outside_wall": 0,
       "shadow_band_wall_nodes": 16,
       "shadow_band_drawn_segments": 18,
-      "shadow_private_wall_nodes": 0,
-      "shadow_private_drawn_segments": 0,
+      "shadow_private_wall_nodes": 10,
+      "shadow_private_drawn_segments": 12,
       "revision": "e6a83802b",
-      "render_seconds": 8.341465758159757,
+      "render_seconds": 0.6479665618389845,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21978-35-pure.png"
     },
     {
@@ -57,21 +57,21 @@
       "current_band": "low",
       "current_ma": 0.8015,
       "class": "diverted",
-      "converged": false,
-      "terminal_residual": 0.0012713070637531015,
-      "qualification": "iteration_budget_exhausted",
-      "boundary_point_count": 541,
+      "converged": true,
+      "terminal_residual": 3.306295264111589e-16,
+      "qualification": "converged",
+      "boundary_point_count": 694,
       "axis": [
-        0.9035153450433918,
-        0.02786980907892999
+        0.9052090498497042,
+        0.027148789634969802
       ],
       "admitted_x": [
-        0.5615808562216046,
-        1.2819551708231136
+        0.5754456671134566,
+        1.2590074314465143
       ],
       "wall_point": [
         0.5649306774139404,
-        1.7485667235181692
+        1.7560341988714383
       ],
       "efit_axis": [
         0.9045118689537048,
@@ -80,12 +80,12 @@
       "efit_x_count": 2,
       "qualified_x_count": 2,
       "qualified_x_outside_wall": 0,
-      "shadow_band_wall_nodes": 16,
-      "shadow_band_drawn_segments": 18,
-      "shadow_private_wall_nodes": 0,
-      "shadow_private_drawn_segments": 0,
+      "shadow_band_wall_nodes": 17,
+      "shadow_band_drawn_segments": 19,
+      "shadow_private_wall_nodes": 10,
+      "shadow_private_drawn_segments": 12,
       "revision": "e6a83802b",
-      "render_seconds": 0.07049385830760002,
+      "render_seconds": 0.07402259856462479,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21978-35-mixed.png"
     },
     {
@@ -98,34 +98,34 @@
       "current_ma": 0.8137,
       "class": "diverted",
       "converged": false,
-      "terminal_residual": 0.0036153260526382647,
-      "qualification": "active_set_cycle_detected",
-      "boundary_point_count": 559,
+      "terminal_residual": 0.004368658757464849,
+      "qualification": "active_set_settled",
+      "boundary_point_count": 0,
       "axis": [
-        0.9025584095625726,
-        0.032022649456697715
+        0.9039928466471353,
+        0.03885526341039182
       ],
       "admitted_x": [
-        0.5294946121842712,
-        1.2896631084670336
+        0.5511885941287912,
+        1.2737171788916752
       ],
       "wall_point": [
         0.2800000011920929,
-        -1.640860979016424
+        -1.6381010657170434
       ],
       "efit_axis": [
         0.9043859839439392,
         0.004791049286723137
       ],
       "efit_x_count": 2,
-      "qualified_x_count": 4,
+      "qualified_x_count": 2,
       "qualified_x_outside_wall": 0,
-      "shadow_band_wall_nodes": 16,
-      "shadow_band_drawn_segments": 18,
-      "shadow_private_wall_nodes": 0,
-      "shadow_private_drawn_segments": 0,
+      "shadow_band_wall_nodes": 17,
+      "shadow_band_drawn_segments": 19,
+      "shadow_private_wall_nodes": 7,
+      "shadow_private_drawn_segments": 9,
       "revision": "e6a83802b",
-      "render_seconds": 0.28232452645897865,
+      "render_seconds": 0.07077101618051529,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21983-35-pure.png"
     },
     {
@@ -138,34 +138,34 @@
       "current_ma": 0.8137,
       "class": "diverted",
       "converged": false,
-      "terminal_residual": 0.004035926862603041,
-      "qualification": "iteration_budget_exhausted",
-      "boundary_point_count": 559,
+      "terminal_residual": 0.00037871449656229415,
+      "qualification": "active_set_cycle_detected",
+      "boundary_point_count": 712,
       "axis": [
-        0.9027715025314195,
-        0.04097414905532949
+        0.9040439480378066,
+        0.03865828484126316
       ],
       "admitted_x": [
-        0.5379020133226977,
-        1.2891877650881471
+        0.5608387772075203,
+        1.2582523109271575
       ],
       "wall_point": [
         0.2800000011920929,
-        -1.6415174803386097
+        -1.6347645840070824
       ],
       "efit_axis": [
         0.9043859839439392,
         0.004791049286723137
       ],
       "efit_x_count": 2,
-      "qualified_x_count": 3,
+      "qualified_x_count": 2,
       "qualified_x_outside_wall": 0,
       "shadow_band_wall_nodes": 17,
       "shadow_band_drawn_segments": 19,
-      "shadow_private_wall_nodes": 0,
-      "shadow_private_drawn_segments": 0,
+      "shadow_private_wall_nodes": 8,
+      "shadow_private_drawn_segments": 10,
       "revision": "e6a83802b",
-      "render_seconds": 0.285667110234499,
+      "render_seconds": 0.0720682293176651,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21983-35-mixed.png"
     },
     {
@@ -178,20 +178,20 @@
       "current_ma": 0.9344,
       "class": "diverted",
       "converged": false,
-      "terminal_residual": 0.00339859040460876,
+      "terminal_residual": 0.0006702453420648606,
       "qualification": "active_set_settled",
-      "boundary_point_count": 451,
+      "boundary_point_count": 640,
       "axis": [
-        0.8971361974180511,
-        0.023242799865682073
+        0.8983553247853762,
+        0.02714390630076316
       ],
       "admitted_x": [
-        0.5610989050128365,
-        1.1550314358653346
+        0.5963051161166824,
+        1.1843129803529113
       ],
       "wall_point": [
-        0.5649306774139404,
-        1.7930294496487158
+        0.5854756314436056,
+        1.8250000476837158
       ],
       "efit_axis": [
         0.8993120789527893,
@@ -202,10 +202,10 @@
       "qualified_x_outside_wall": 0,
       "shadow_band_wall_nodes": 22,
       "shadow_band_drawn_segments": 24,
-      "shadow_private_wall_nodes": 0,
-      "shadow_private_drawn_segments": 0,
+      "shadow_private_wall_nodes": 10,
+      "shadow_private_drawn_segments": 12,
       "revision": "e6a83802b",
-      "render_seconds": 0.07017263770103455,
+      "render_seconds": 0.0720139592885971,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21985-51-pure.png"
     },
     {
@@ -218,20 +218,20 @@
       "current_ma": 0.9344,
       "class": "diverted",
       "converged": false,
-      "terminal_residual": 0.0020736761044596575,
-      "qualification": "iteration_budget_exhausted",
-      "boundary_point_count": 451,
+      "terminal_residual": 0.0006569422056901083,
+      "qualification": "active_set_settled",
+      "boundary_point_count": 640,
       "axis": [
-        0.8980918246759667,
-        0.021304415844562052
+        0.89838472569411,
+        0.026140249665651094
       ],
       "admitted_x": [
-        0.5506172417197256,
-        1.171476499322636
+        0.5655026233324624,
+        1.1529757921399753
       ],
       "wall_point": [
-        0.5649306774139404,
-        1.7894681875002554
+        0.5854752904656615,
+        1.8250000476837158
       ],
       "efit_axis": [
         0.8993120789527893,
@@ -242,10 +242,10 @@
       "qualified_x_outside_wall": 0,
       "shadow_band_wall_nodes": 22,
       "shadow_band_drawn_segments": 24,
-      "shadow_private_wall_nodes": 0,
-      "shadow_private_drawn_segments": 0,
+      "shadow_private_wall_nodes": 5,
+      "shadow_private_drawn_segments": 6,
       "revision": "e6a83802b",
-      "render_seconds": 0.0710418839007616,
+      "render_seconds": 0.07154783047735691,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21985-51-mixed.png"
     },
     {
@@ -258,20 +258,20 @@
       "current_ma": 0.8743,
       "class": "diverted",
       "converged": false,
-      "terminal_residual": 0.005891455685358932,
+      "terminal_residual": 0.005889860956808233,
       "qualification": "active_set_iteration_budget_exhausted",
-      "boundary_point_count": 433,
+      "boundary_point_count": 0,
       "axis": [
-        0.9136539972796212,
-        0.05412835214503442
+        0.9139210094251309,
+        0.05664562765080271
       ],
       "admitted_x": [
-        0.6107480226057648,
-        1.1421472883099502
+        0.6155495226123269,
+        1.1523493404625142
       ],
       "wall_point": [
         0.5649306774139404,
-        1.7719848728740997
+        1.8245331631365573
       ],
       "efit_axis": [
         0.9118046164512634,
@@ -282,10 +282,10 @@
       "qualified_x_outside_wall": 0,
       "shadow_band_wall_nodes": 20,
       "shadow_band_drawn_segments": 22,
-      "shadow_private_wall_nodes": 0,
-      "shadow_private_drawn_segments": 0,
+      "shadow_private_wall_nodes": 5,
+      "shadow_private_drawn_segments": 6,
       "revision": "e6a83802b",
-      "render_seconds": 0.06910064816474915,
+      "render_seconds": 0.11367900297045708,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21986-46-pure.png"
     },
     {
@@ -298,20 +298,20 @@
       "current_ma": 0.8743,
       "class": "diverted",
       "converged": false,
-      "terminal_residual": 0.005487702473131911,
-      "qualification": "iteration_budget_exhausted",
-      "boundary_point_count": 433,
+      "terminal_residual": 0.0013464194829658925,
+      "qualification": "active_set_settled",
+      "boundary_point_count": 640,
       "axis": [
-        0.9138925514764273,
-        0.04855194270724766
+        0.9141728976850331,
+        0.0605793078178209
       ],
       "admitted_x": [
-        0.6100124742800892,
-        1.1296717665605136
+        0.6201333589632316,
+        1.1403353084251435
       ],
       "wall_point": [
-        0.5649306774139404,
-        1.7740179270229823
+        0.5763851138411615,
+        1.8250000476837158
       ],
       "efit_axis": [
         0.9118046164512634,
@@ -320,12 +320,12 @@
       "efit_x_count": 2,
       "qualified_x_count": 2,
       "qualified_x_outside_wall": 0,
-      "shadow_band_wall_nodes": 22,
-      "shadow_band_drawn_segments": 24,
-      "shadow_private_wall_nodes": 0,
-      "shadow_private_drawn_segments": 0,
+      "shadow_band_wall_nodes": 20,
+      "shadow_band_drawn_segments": 22,
+      "shadow_private_wall_nodes": 10,
+      "shadow_private_drawn_segments": 12,
       "revision": "e6a83802b",
-      "render_seconds": 0.07605754025280476,
+      "render_seconds": 0.07216851972043514,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21986-46-mixed.png"
     },
     {
@@ -338,34 +338,34 @@
       "current_ma": 0.9289,
       "class": "diverted",
       "converged": false,
-      "terminal_residual": 0.0029679538126672015,
-      "qualification": "active_set_iteration_budget_exhausted",
-      "boundary_point_count": 433,
+      "terminal_residual": 0.003646731774171435,
+      "qualification": "active_set_cycle_detected",
+      "boundary_point_count": 658,
       "axis": [
-        0.9138182316024713,
-        0.03815256962467518
+        0.9148750638753619,
+        0.040632356906692216
       ],
       "admitted_x": [
-        0.5792639617179477,
-        1.173737533201991
+        0.5799978252409368,
+        1.173085163564988
       ],
       "wall_point": [
         0.5649306774139404,
-        1.765594003137498
+        1.7763171436865506
       ],
       "efit_axis": [
         0.9149412512779236,
         0.010957644321024418
       ],
       "efit_x_count": 2,
-      "qualified_x_count": 3,
+      "qualified_x_count": 2,
       "qualified_x_outside_wall": 0,
       "shadow_band_wall_nodes": 22,
       "shadow_band_drawn_segments": 24,
-      "shadow_private_wall_nodes": 0,
-      "shadow_private_drawn_segments": 0,
+      "shadow_private_wall_nodes": 10,
+      "shadow_private_drawn_segments": 12,
       "revision": "e6a83802b",
-      "render_seconds": 0.0752315241843462,
+      "render_seconds": 0.07249057106673717,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21989-55-pure.png"
     },
     {
@@ -378,34 +378,34 @@
       "current_ma": 0.9289,
       "class": "diverted",
       "converged": false,
-      "terminal_residual": 0.002998178235528507,
-      "qualification": "iteration_budget_exhausted",
-      "boundary_point_count": 433,
+      "terminal_residual": 0.0007321243552128608,
+      "qualification": "active_set_settled",
+      "boundary_point_count": 640,
       "axis": [
-        0.9125723574832081,
-        0.03203930070696315
+        0.913742929487556,
+        0.03815152466297166
       ],
       "admitted_x": [
-        0.5728336859156682,
-        1.1818890224213945
+        0.5882165593620193,
+        1.1576033058991824
       ],
       "wall_point": [
         0.5649306774139404,
-        1.7658582284043132
+        1.775154646072949
       ],
       "efit_axis": [
         0.9149412512779236,
         0.010957644321024418
       ],
       "efit_x_count": 2,
-      "qualified_x_count": 4,
+      "qualified_x_count": 2,
       "qualified_x_outside_wall": 0,
-      "shadow_band_wall_nodes": 20,
-      "shadow_band_drawn_segments": 22,
-      "shadow_private_wall_nodes": 0,
-      "shadow_private_drawn_segments": 0,
+      "shadow_band_wall_nodes": 22,
+      "shadow_band_drawn_segments": 24,
+      "shadow_private_wall_nodes": 5,
+      "shadow_private_drawn_segments": 6,
       "revision": "e6a83802b",
-      "render_seconds": 0.0700774434953928,
+      "render_seconds": 0.0724890548735857,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21989-55-mixed.png"
     },
     {
@@ -418,20 +418,20 @@
       "current_ma": 0.933,
       "class": "diverted",
       "converged": false,
-      "terminal_residual": 0.0004788269350422851,
+      "terminal_residual": 0.00047749374833596324,
       "qualification": "active_set_settled",
-      "boundary_point_count": 487,
+      "boundary_point_count": 676,
       "axis": [
-        0.9019330968584681,
-        0.02011608721239092
+        0.9037436254143673,
+        0.01792332792014415
       ],
       "admitted_x": [
-        0.5917516875565209,
-        1.219749197600917
+        0.5892573682268838,
+        1.216816481138625
       ],
       "wall_point": [
         0.5649306774139404,
-        1.756473891146531
+        1.7659991434399893
       ],
       "efit_axis": [
         0.9052576422691345,
@@ -442,10 +442,10 @@
       "qualified_x_outside_wall": 0,
       "shadow_band_wall_nodes": 20,
       "shadow_band_drawn_segments": 22,
-      "shadow_private_wall_nodes": 0,
-      "shadow_private_drawn_segments": 0,
+      "shadow_private_wall_nodes": 5,
+      "shadow_private_drawn_segments": 6,
       "revision": "e6a83802b",
-      "render_seconds": 0.07086759060621262,
+      "render_seconds": 0.07127734087407589,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/22086-43-pure.png"
     },
     {
@@ -458,20 +458,20 @@
       "current_ma": 0.933,
       "class": "diverted",
       "converged": true,
-      "terminal_residual": 1.7364758673167596e-14,
+      "terminal_residual": 6.273719262563409e-16,
       "qualification": "converged",
-      "boundary_point_count": 487,
+      "boundary_point_count": 676,
       "axis": [
-        0.9016135226490096,
-        0.024617984126865743
+        0.9033613058059199,
+        0.022469963649238818
       ],
       "admitted_x": [
-        0.564816849749112,
-        1.2580221561476006
+        0.5849783456209242,
+        1.2305027322144644
       ],
       "wall_point": [
         0.5649306774139404,
-        1.756851207809876
+        1.7661659105627965
       ],
       "efit_axis": [
         0.9052576422691345,
@@ -482,10 +482,10 @@
       "qualified_x_outside_wall": 0,
       "shadow_band_wall_nodes": 19,
       "shadow_band_drawn_segments": 21,
-      "shadow_private_wall_nodes": 0,
-      "shadow_private_drawn_segments": 0,
+      "shadow_private_wall_nodes": 10,
+      "shadow_private_drawn_segments": 12,
       "revision": "e6a83802b",
-      "render_seconds": 0.06829444319009781,
+      "render_seconds": 0.07057170942425728,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/22086-43-mixed.png"
     },
     {
@@ -525,7 +525,7 @@
       "shadow_private_wall_nodes": 0,
       "shadow_private_drawn_segments": 0,
       "revision": "diiid:d3d_shot_00000c4a7b",
-      "render_seconds": 0.24858258292078972,
+      "render_seconds": 0.22950291261076927,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/d3d_shot_00000c4a7b-179.png"
     },
     {
@@ -565,7 +565,7 @@
       "shadow_private_wall_nodes": 0,
       "shadow_private_drawn_segments": 0,
       "revision": "diiid:d3d_shot_0003ff34e7",
-      "render_seconds": 0.06787370890378952,
+      "render_seconds": 0.08487995341420174,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/d3d_shot_0003ff34e7-44.png"
     },
     {
@@ -605,7 +605,7 @@
       "shadow_private_wall_nodes": 1,
       "shadow_private_drawn_segments": 2,
       "revision": "diiid:d3d_shot_001554e054",
-      "render_seconds": 0.06848394870758057,
+      "render_seconds": 0.072416502982378,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/d3d_shot_001554e054-144.png"
     },
     {
@@ -616,7 +616,7 @@
       "time_s": 3.18,
       "current_band": "high",
       "current_ma": 1.63,
-      "class": "diverted",
+      "class": "unclassified",
       "converged": false,
       "terminal_residual": null,
       "qualification": "public branch selector found no convergence-qualified diverted root",
@@ -645,7 +645,7 @@
       "shadow_private_wall_nodes": 0,
       "shadow_private_drawn_segments": 0,
       "revision": "diiid:d3d_shot_002495e835",
-      "render_seconds": 0.07074696384370327,
+      "render_seconds": 0.07004162669181824,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/d3d_shot_002495e835-146.png"
     },
     {
@@ -685,7 +685,7 @@
       "shadow_private_wall_nodes": 0,
       "shadow_private_drawn_segments": 0,
       "revision": "diiid:d3d_shot_0040ca9bdc",
-      "render_seconds": 0.06992308981716633,
+      "render_seconds": 0.07283760234713554,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/d3d_shot_0040ca9bdc-137.png"
     }
   ]

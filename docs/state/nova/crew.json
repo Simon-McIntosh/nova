@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T10:56:36",
+  "updated": "2026-09-21T10:56:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7299,6 +7299,15 @@
         "id": "s19k-audit-wall",
         "harness": "codex",
         "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
+      },
+      {
+        "id": "s19k-fitness-l",
+        "harness": "codex-luna",
+        "role": "investigate",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -225390,6 +225399,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3030
+    "_version": 3031
   }
 }

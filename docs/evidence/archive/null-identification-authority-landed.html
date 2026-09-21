@@ -712,7 +712,7 @@
 
 <p>Ten separate compilations of <code>jit(solve)</code> ran on the current tree, one per arm, at 728.5 to 774.0 seconds each — 98.6 percent of that tree's entire compile time, and roughly twelve minutes of compilation per arm against a producer tree whose heaviest single compile is thirty-five seconds and whose whole twelve-arm sweep costs 723 seconds. The shared persistent compilation cache was configured and live for both processes (the compilation-line counts are stated once, in the table above, under the <code>JAX_LOG_COMPILES</code> marker), which means the <code>solve</code> compilations missed the cache because their keys differ — a cache asset cannot rescue this cost while the trace itself changes per arm. The practical rate is about 42 arms per hour of compile on the producer tree against 4.4 on the current one.</p>
 
-<p><strong>Coverage.</strong> Twelve of twelve rows. The first allocation's current-tree process reached five of the six identities inside its <code>02:30:00</code> and was cancelled mid-identity on 22086/43, leaving ten paired arms and a merged receipt reporting <code>rows_present 10</code> with <code>rows_missing 2</code> and a nonzero exit by design — the missing rows named rather than silently absent. The remainder closed in a second single-card allocation that ran only the current-tree half: one emission closes 22086/43 and pairs both of its arms against the producer emissions that already existed, so the receipt regenerates with <code>rows_expected 12</code>, <code>rows_present 12</code>, <code>rows_missing 0</code> and <code>rows_unexpected 0</code>. Both remainder arms make <code>partition_structure</code> the first differing stage, so the count is twelve of twelve; the pure arm converges to <code>3.5849824357505203e-16</code> on the producer tree against <code>4.774937e-04</code> on the current tree, non-converged on the same active-set cycle that stalls the load-bearing row, and the mixed arm converges on both trees while its residual still moves, <code>4.929e-16</code> to <code>2.689e-16</code>.</p>
+<p><strong>Coverage.</strong> Twelve of twelve rows. The first allocation's current-tree process reached five of the six identities inside its <code>02:30:00</code> and was cancelled mid-identity on 22086/43, leaving ten paired arms and a merged receipt reporting <code>rows_present 10</code> with <code>rows_missing 2</code> and a nonzero exit by design — the missing rows named rather than silently absent. The remainder closed in a second single-card allocation that ran only the current-tree half: one emission closes 22086/43 and pairs both of its arms against the producer emissions that already existed, so the receipt regenerates with <code>rows_expected 12</code>, <code>rows_present 12</code>, <code>rows_missing 0</code> and <code>rows_unexpected 0</code>. Both remainder arms make <code>partition_structure</code> the first differing stage, so the count is twelve of twelve; the pure arm converges to <code>3.5849824357505203e-16</code> on the producer tree against <code>4.774937e-04</code> on the current tree, whose own emission under the reports fence (<code>arms/new-22086-43-pure.json</code>) records <code>converged</code> false under <code>termination_reason=active_set_settled</code> — the active set settled without reaching the residual floor, which is a different termination from the <code>active_set_cycle_detected</code> that stalls the load-bearing row — and the mixed arm converges on both trees while its residual still moves, <code>4.929e-16</code> to <code>2.689e-16</code>.</p>
 
 <p><strong>The terminal states are drawn, not only digested.</strong> A digest cannot be read, and the plotting rules require a forward-solve record to show its terminal state as line contours. The pair below renders 21978/35 pure from the two resolve archives the same allocations resolved — producer tree <code>fae50f15</code> beside the current tree — as unfilled contours on one shared level array computed from the producer state, so the two states cannot be made to agree by independent level choices. Each panel draws the vessel from its own resolved wall polygon, its own magnetic axis (solid triangle) and admitted saddle (solid cross), and the other state's in a hollow grey.</p>
 <figure><img src="/nova/figures/null-identification-authority/bank-drift-probe/21978-35-pure-panels.png" alt="MAST 21978/35 pure terminal state on the producer tree beside the current tree, both as poloidal flux line contours on one shared level array, with each panel's axis and admitted saddle solid and the other state's hollow, and the vessel drawn in both"><figcaption>The 21978/35 pure terminal state, producer tree <code>fae50f15</code> (left, converged, residual 3.857e-16) beside the current tree (right, non-converged, residual 2.451e-03), both as unfilled flux contours on one shared level array with the vessel drawn. Solid triangle and solid cross are the panel's own axis and admitted saddle; the hollow grey markers are the other state's.</figcaption></figure>
@@ -1186,6 +1186,92 @@ benchmarks/solovev_certificate.py:2514: RuntimeError
   <code>negative-control.log</code> (first line names the declared mutation) under
   <code>~/.config/reckon/crew/runs/r-20260920T160154139156-nia-retire-the-stale-certificate-pin/logs/</code>.
   Implementation at commit <code>f205bff1f</code>.</p>
+
+<section id="the-drift-probe-statements-cite-what-carries-them">
+  <h2>Every drift-probe statement now cites the receipt or log that carries it (2026-09-20)</h2>
+  <p>Node <code>nia-make-the-drift-probe-record-match-its-receipts</code>, route map, the review's
+  five statement defects. The record's producer
+  <code>benchmarks/bank_drift_paired_probe.py</code> and its guard
+  <code>tests/test_bank_drift_paired_probe.py</code> were unchanged by this node; three of the five
+  defects were already repaired at commit <code>1892b73f6</code> and were verified here rather than
+  reimplemented, and the two that still stood were repaired in the two documents this node holds.</p>
+
+  <p><strong>The pure remainder arm was reported on the wrong termination.</strong> This record's
+  coverage paragraph called the current-tree <code>22086/43</code> pure arm non-converged "on the same
+  active-set cycle that stalls the load-bearing row". Its own emission, under the reports fence at
+  <code>bank-drift-remainder/arms/new-22086-43-pure.json</code>, carries
+  <code>rows[0].arms.pure = {converged: false, terminal_residual: 4.7749374833599707e-04,
+  termination_reason: "active_set_settled"}</code>, against the producer emission
+  <code>bank-drift/emit-faefloor.json</code> carrying <code>{converged: true,
+  terminal_residual: 3.5849824357505203e-16, termination_reason: "converged"}</code>. A settled
+  active set is not a cycling one: the load-bearing row's <code>21978/35</code> pure arm is the one
+  that ends under <code>active_set_cycle_detected</code>, and the repair this record's own finding
+  argues for is a function of which of the two a row ends on. The paragraph now states the
+  termination the emission records, in both places the claim appears, and every other number in it is
+  unchanged — the merged receipt's row for that arm still reads <code>residual_right
+  0.00047749374833599707</code>, which is the same residual the paragraph quotes as
+  <code>4.774937e-04</code>.</p>
+
+  <p><strong>The compile-line count was cited to a field no emission writes.</strong> The
+  <code>462</code> lines matching <code>Compiling </code>, of which <code>2</code> are
+  <code>Compiling jit(solve)</code>, come from the job's own <code>JAX_LOG_COMPILES=1</code> capture,
+  which the remainder driver writes as <code>grep 'Compiling ' "$RXR/emit-$SLUG.log" &gt;
+  "$RXR/compile-$SLUG.txt"</code> inside the allocation that ran the solve. The capture is
+  <code>b96f7b6d80277ce11c3ddb737b5e0dc854626e49768ce1e08d7c8b7123aeffb0</code>, 462 marker lines and
+  2 solve compiles by direct count, and the merged receipt's <code>compile_evidence</code> block
+  states the count beside that capture's repository-root-relative location and digest — which is the
+  field the sentence wrongly attributed it to, so the receipt and the sentence now agree. The record
+  also states that the merge raises rather than reporting a zero when the capture carries no compile
+  line, so a missing capture cannot read as a cheap compile.</p>
+
+  <table>
+    <caption>The gate: one <code>all_debug</code> allocation, three runs of
+    <code>tests/test_bank_drift_paired_probe.py</code>.</caption>
+    <tr><th>run</th><th>tree</th><th>result</th></tr>
+    <tr><td>baseline</td><td>extracted copy of the base revision
+      <code>83f585a11</code></td><td><strong>11 passed</strong>, exit 0</td></tr>
+    <tr><td>after</td><td>the worktree head</td><td><strong>11 passed</strong>, exit 0</td></tr>
+    <tr><td>declared negative control</td><td>extracted copy of the base revision with
+      <code>wall = panel["wall"]</code> replaced by <code>wall = panels[0]["wall"]</code> at
+      <code>benchmarks/bank_drift_paired_probe.py:913</code></td>
+      <td><strong>1 failed, 10 passed</strong>, exit 1: <code>test_panel_draws_each_archive_s_own_wall_and_grid</code>
+      alone reddens</td></tr>
+  </table>
+
+  <p><strong>The control's first form did not fire, and the instrument was at fault.</strong> The
+  mutation was first placed on <code>PYTHONPATH</code> as a mutated copy of the <code>benchmarks</code>
+  package beside an unmutated extracted tree, and all 11 tests passed. pytest prepends the test
+  package's rootdir to <code>sys.path</code>, so the unmutated tree answered for the mutated one and
+  the control measured nothing. Rebuilt as an independent extraction mutated in place, it reddens
+  exactly the guard it should, and leaves the shared-level guard green — which it must, because both
+  of that guard's fixture archives carry the same wall, so the two guards are shown to be
+  discriminating rather than merely strict. This record reports the false pass because the same
+  shape recurs: a control that cannot fail is indistinguishable from a guard that fires.</p>
+
+  <p><strong>One statement is reported rather than changed.</strong> The compile-cost table's
+  current-tree cell of <code>468</code> compilation lines does not reproduce from the log that
+  carries that tree. The producer-side peer <code>1068</code> reproduces exactly from
+  <code>bank-drift/sweep-old.log</code> (1068 marker lines, all <code>Compiling jit</code>), and the
+  remainder capture's <code>462</code> reproduces exactly from its own file; but
+  <code>bank-drift/sweep-new.log</code> comprises 2003 lines with sha256
+  <code>e8be7d16e0f0b8a10faad9ca8b4c8d78948aac82b30ff91a7bddcd8edf6005fa</code> and carries
+  <code>482</code> marker lines at its end (469 <code>Compiling jit</code>, 13
+  <code>Compiling module</code>, 11 <code>Compiling jit(solve)</code>). <code>468</code> is the
+  running count at line 1933 of that same log, so it is a reading taken while the log was still being
+  written — the sweep was cancelled by the limit with the sixth identity's compile in flight — rather
+  than a count from a different instrument. It sits beside the row's own terminal readings
+  (<code>5</code> of <code>10</code> arms swept, "ended by the limit"), which is the inconsistency:
+  one cell of a terminal row carries a mid-run reading. The convention the cell is meant to follow is
+  not settled by the plan — whether it counts the swept identities only or the whole file — so it is
+  recorded here as a follow-on rather than edited.</p>
+
+  <figure><img src="/nova/figures/null-identification-authority/bank-drift-probe/compile-line-count-against-log-position.png" alt="A rising staircase of the running count of Compiling lines against line number in sweep-new.log, with a hollow circle at 468 near the end and a filled square at 482 at the end of the log"><figcaption>The running count of <code>Compiling </code> lines against the line number it was read at, in <code>sweep-new.log</code>. A count quoted without the position it was read at is a point on this curve rather than a property of the file: the record's cell is the hollow marker at <code>468</code>, and the end of the log is the filled marker at <code>482</code>. Reproduce with <code>compile_count_against_log_position.py</code> under the reports fence.</figcaption></figure>
+
+  <p>Gate logs, the driver and the extracted base tree:
+  <code>~/.config/reckon/crew/reports/nova/s19-local/drift-probe-record-repairs/</code>
+  (<code>gate-baseline.log</code>, <code>gate-after.log</code>, <code>gate-negative-control.log</code>
+  whose first line names the declared mutation, <code>gate_driver.sh</code>,
+  <code>base-tree.tar</code>). Implementation at commit <code>34bf882da</code>.</p>
 </section>
 </main>
 </body>

@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="150">
+<meta name="plan-version" content="151">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
 <meta name="plan-impl" content="0.75">
@@ -603,6 +603,11 @@ No production or test files, section status, or driving followup were changed.</
     <h4 class="r-fu-title">f-cca-verify-the-separatrix-test-repair-4</h4>
     <div class="r-fu-body"><p>From review <code>separatrix-test repair verification (codex sol)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#cca-verify-the-separatrix-test-repair</code>.</p><p></p></div>
     <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution</pre>
+    </article>
+<article class="r-fu" data-id="f-cca-conv-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="s19-codex-20260916" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship cut-cell-current-attribution §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Integrate separatrix motion continuously in current moments and the Newton tangent</h4>
+    <div class="r-fu-body">The 135- and 342-realised-cell static certificate rows stop after three of sixteen trips at residuals 0.05726747948 and 0.05393078397, with no outer mask cycle. The static-profile moment path integrates a hard confined/open indicator on fixed atomic-cell quadrature; at the 135-cell terminal state its map JVP along the defect is zero, while a 1e-8 step removes 847.431879 A from cell 66 and jumps the map by 0.024194195 Wb. Replace fixed-point sampling as the sole representation of moving support with geometrically integrated confined moments and a tangent that carries boundary motion on each fixed topological branch. Reuse the existing clip/moment machinery and retain pointwise confinement as an exclusion check. Do not remove the current pin, leak current, weaken sufficient decrease, or increase budgets to recover a pass count. First show the candidate scores under the production smooth merit and trust tests, then show per-cell current accuracy on the analytic input and directional finite-difference agreement away from genuine topological switches. Separately account for the analytic one-map defects 0.00107474168 and 0.00074243743 before claiming the analytic state is a discrete fixed point. Re-run these two cold-seed rows and require the locked residual, null-position and joint qualification criteria against the analytic reference, with per-trip contours and both null sets. A larger-budget run alone is not acceptance.</div>
+    <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §5</pre>
     </article>
 </section>
 

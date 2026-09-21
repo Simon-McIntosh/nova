@@ -562,6 +562,7 @@ def draw_nulls(
             markersize=size,
             markeredgewidth=width,
             color=color,
+            markerfacecolor=color,
             markeredgecolor=edge or color,
             linestyle="none",
             zorder=style.zorder_markers,

@@ -197,7 +197,9 @@ def render(figure_path: Path) -> None:
     figure.suptitle(
         f"one matched edit, index {EDIT_INDEX} at "
         f"{float(stride['edit_fraction'][EDIT_INDEX]):+.2f} of the p4_upper "
-        f"current, on {_panel.levels.size} shared levels",
+        f"current, on {_panel.levels.size} shared levels\n"
+        "solid triangle: magnetic axis.  filled cross: the saddle the read "
+        "admitted.  hollow cross: the reference x-point.",
         fontsize=9,
     )
     figure_path.parent.mkdir(parents=True, exist_ok=True)

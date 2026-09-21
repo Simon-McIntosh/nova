@@ -73,11 +73,17 @@ class InkStyle:
     plasma_linewidth: float = 0.5
 
     # Topology markers. The three shapes stay distinguishable in greyscale.
-    axis_marker: str = "."
-    axis_markersize: float = 6.0
+    # The null vocabulary is a solid triangle for the axis, a filled cross for
+    # the admitted saddle and hollow for every other qualified null. Both
+    # markers must therefore HAVE a face: "." and "x" are line markers with no
+    # face, so `markerfacecolor="none"` is silently inert on them and a hollow
+    # null renders identically to a filled one. That is what made a reference
+    # x-point indistinguishable from the saddle the solve actually chose.
+    axis_marker: str = "^"
+    axis_markersize: float = 6.5
     axis_color: str = "#cc0000"
-    xpoint_marker: str = "x"
-    xpoint_markersize: float = 6.0
+    xpoint_marker: str = "X"
+    xpoint_markersize: float = 7.5
     xpoint_markeredgewidth: float = 1.2
     xpoint_color: str = "#cc0000"
     strike_marker: str = "o"

@@ -1,0 +1,175 @@
+{
+  "artifact": "one centroid-constrained MAST fixed-point solve and its panels",
+  "cell_representation": {
+    "cell_count": 1089,
+    "clipped_cell_count": 0,
+    "distinct_cell_areas": 1,
+    "note": "every cell carries the full radial-by-vertical control area; no cell is cut by the wall or by the separatrix, so a panel must not be read as showing clipped cells",
+    "radial_step_m": 0.060625000041909516,
+    "shape": "uniform rectangle, one control cell per lattice node",
+    "source": "nova.equilibrium.forward._lattice_cells over the FluxLattice",
+    "vertical_step_m": 0.125,
+    "vertices_per_cell": 4
+  },
+  "cold_solve": {
+    "converged": true,
+    "terminal_residual": 1.3086753902769162e-14,
+    "termination": "converged",
+    "trip_count": 1,
+    "wall_milliseconds": 25649.8462818563,
+    "wall_seconds": 25.6498462818563
+  },
+  "evidence_inputs": {
+    "coil_mapping": {
+      "family": "p4_upper",
+      "stored_circuit": 8,
+      "two_percent_wall_flux_sup_wb": 0.018026559731829244
+    },
+    "edited_circuit": 8,
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 1.0,
+      "root": "/home/ITER/mcintos/.cache",
+      "runtime_identity": {
+        "backend": "cpu",
+        "backend_version": "cpu",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "cpu",
+            "platform": "cpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-ea5c55820be3d80549fe"
+    },
+    "response_carrier": {
+      "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+      "frozen_reference_count": 6,
+      "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+      "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+      "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+      "response_shape": [
+        1126,
+        101
+      ],
+      "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+      "size_bytes": 645864,
+      "stored_circuit_count": 101,
+      "warm_load_seconds": 0.017267846036702394
+    },
+    "shot": 22086,
+    "slice_index": 43
+  },
+  "figure": "/home/ITER/mcintos/Code/nova/docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png",
+  "identity": "22086/43 mixed",
+  "measurement_contract": {
+    "active_set_steps": 16,
+    "centroid_target_m": 0.03167978092303942,
+    "centroid_tolerance_m": 1e-06,
+    "cold_definition": "no program in hand: the wall carries tracing and compilation alongside one execution",
+    "constraint": "one vertical current-centroid row targeted on the frame's own reference centre height",
+    "newton_steps": 12,
+    "requested_class": "diverted",
+    "route": "reduced_newton.solve_constrained_reduced_newton_compiled through benchmarks.coil_edit_latency._compiled_edit",
+    "tolerance": 1e-08,
+    "warm_definition": "the same fixed-shape program re-entered on a moved current vector, so the timed solve does real trips"
+  },
+  "runtime": {
+    "cpu_provenance_marker": "reservation gpu_0003_grpA admits no job at all: sbatch --test-only refuses a one-task request with no cpu, memory or gres ask while the node holds 43 idle cores, 792 GB free and cards IDX 1-3 idle",
+    "device_kind": "cpu",
+    "devices": [
+      "cpu:0"
+    ],
+    "host": "98dci4-clu-5012.iter.org",
+    "jax": "0.11.0",
+    "jax_platforms": "cpu",
+    "platform": "cpu",
+    "python": "3.14.2",
+    "scheduler": {
+      "cpus_per_task": "8",
+      "job_id": "1274545",
+      "memory": "131072",
+      "node": "98dci4-clu-5012",
+      "partition": "sirius",
+      "reservation": null
+    },
+    "tmpdir": "/tmp"
+  },
+  "source_revision": "e3970977ca762c391696cdd47cbdd7eab5f19080",
+  "summary": {
+    "cold_wall_milliseconds": 25649.8462818563,
+    "core_cell_count": 234,
+    "elapsed_seconds": 366.0342421042733,
+    "warm_converged_count": 1,
+    "warm_point_count": 3,
+    "warm_wall_milliseconds_maximum": 66834.81331728399,
+    "warm_wall_milliseconds_median": 52333.205628208816,
+    "warm_wall_milliseconds_minimum": 30233.172729145736
+  },
+  "warm_solves": [
+    {
+      "converged": false,
+      "edit_fraction": 0.02,
+      "terminal_residual": 0.0005101893256319732,
+      "termination": "active_set_settled",
+      "trip_count": 2,
+      "wall_milliseconds": 66834.81331728399,
+      "wall_seconds": 66.83481331728399
+    },
+    {
+      "converged": false,
+      "edit_fraction": 0.04,
+      "terminal_residual": 0.0029956536967481935,
+      "termination": "active_set_settled",
+      "trip_count": 1,
+      "wall_milliseconds": 30233.172729145736,
+      "wall_seconds": 30.233172729145736
+    },
+    {
+      "converged": true,
+      "edit_fraction": 0.06,
+      "terminal_residual": 1.6167807750184793e-09,
+      "termination": "converged",
+      "trip_count": 2,
+      "wall_milliseconds": 52333.205628208816,
+      "wall_seconds": 52.333205628208816
+    }
+  ]
+}

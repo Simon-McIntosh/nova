@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
+from dataclasses import dataclass
 import fcntl
 import hashlib
 import importlib.abc
@@ -26,18 +27,86 @@ from typing import Any, Iterator
 import numpy as np
 
 
-SEMANTIC_RESPONSE_IDENTITY = (
-    "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994"
+CARRIER_STORE = Path(
+    "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers"
 )
-RESOLVED_TARGET_DIGEST = (
-    "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9"
-)
-RESPONSE_SHAPE = (1126, 101)
 STORED_CIRCUIT_COUNT = 101
-DEFAULT_CARRIER = (
-    Path("/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers")
-    / f"{SEMANTIC_RESPONSE_IDENTITY}.npz"
-)
+
+
+@dataclass(frozen=True)
+class CarrierGrid:
+    """One response grid and the contract a build on it must satisfy.
+
+    ``axis_points`` is the uniform per-axis node count the case is built on.
+    ``None`` takes the stored-axis stride the parity module declares, which is
+    the coarse grid this carrier was first frozen on.  At 65 it is the stored
+    EFIT axis count itself, so the reference map is carried without any
+    interpolation rather than resampled onto a different lattice.
+
+    A grid whose contract values are ``None`` is not yet pinned: its build runs
+    in discovery, publishes under whatever identity it computes -- the store
+    names every file by its own identity, so a discovery build can never
+    overwrite a pinned one -- and prints the contract to record here.  Nothing
+    loads an unpinned grid, so the fail-closed property the pins exist for is
+    unchanged.
+    """
+
+    name: str
+    axis_points: int | None
+    semantic_identity: str | None
+    resolved_target_digest: str | None
+    response_shape: tuple[int, int] | None
+
+    @property
+    def pinned(self) -> bool:
+        """Return whether every contract value of this grid is known."""
+        return None not in (
+            self.semantic_identity,
+            self.resolved_target_digest,
+            self.response_shape,
+        )
+
+    def path(self, identity: str | None = None) -> Path:
+        """Return the store path of this grid, or of a discovered identity."""
+        resolved = identity or self.semantic_identity
+        if resolved is None:
+            raise ValueError(f"grid {self.name} has no identity to resolve a path")
+        return CARRIER_STORE / f"{resolved}.npz"
+
+
+CARRIER_GRIDS: dict[str, CarrierGrid] = {
+    "stored-axis-stride": CarrierGrid(
+        name="stored-axis-stride",
+        axis_points=None,
+        semantic_identity=(
+            "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994"
+        ),
+        resolved_target_digest=(
+            "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9"
+        ),
+        response_shape=(1126, 101),
+    ),
+    "stored-axis-full": CarrierGrid(
+        name="stored-axis-full",
+        axis_points=65,
+        semantic_identity=None,
+        resolved_target_digest=None,
+        response_shape=None,
+    ),
+}
+#: The grid a new build takes when none is named.  The full stored axes are the
+#: declared default; the coarse grid stays pinned and loadable by name.
+DEFAULT_CARRIER_GRID = "stored-axis-full"
+#: The grid every current consumer resolves through.  It moves to the default
+#: once the full-axis grid is pinned AND its consumers are verified against the
+#: wider response, because each of them asserts the coarse row count today.
+CONSUMER_CARRIER_GRID = "stored-axis-stride"
+
+_CONSUMER = CARRIER_GRIDS[CONSUMER_CARRIER_GRID]
+SEMANTIC_RESPONSE_IDENTITY = _CONSUMER.semantic_identity
+RESOLVED_TARGET_DIGEST = _CONSUMER.resolved_target_digest
+RESPONSE_SHAPE = _CONSUMER.response_shape
+DEFAULT_CARRIER = _CONSUMER.path()
 DEFAULT_RECEIPT = Path(
     "docs/figures/plateau-input-attribution/mast-response-carrier.json"
 )
@@ -128,6 +197,7 @@ def load_carrier(
     *,
     semantic_identity: str = SEMANTIC_RESPONSE_IDENTITY,
     resolved_target_digest: str = RESOLVED_TARGET_DIGEST,
+    response_shape: tuple[int, int] = RESPONSE_SHAPE,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     """Load a response only after its complete persisted contract matches."""
     started = perf_counter()
@@ -154,12 +224,12 @@ def load_carrier(
                 f"expected {STORED_CIRCUIT_COUNT}, got {stored_circuits}"
             )
         response = np.asarray(archive["response"], dtype=np.float64)
-        if response.shape != RESPONSE_SHAPE:
+        if response.shape != response_shape:
             raise ValueError(
                 "persisted response shape does not match frozen contract: "
-                f"expected {RESPONSE_SHAPE}, got {response.shape}"
+                f"expected {response_shape}, got {response.shape}"
             )
-        if targets.shape != (RESPONSE_SHAPE[0], 2):
+        if targets.shape != (response_shape[0], 2):
             raise ValueError("persisted targets do not span every response row")
         if not np.all(np.isfinite(response)):
             raise ValueError("persisted response contains non-finite values")
@@ -187,8 +257,13 @@ def load_carrier(
     }
 
 
-def _cold_response() -> tuple[dict[str, Any], dict[str, Any]]:
-    """Build the exact shared response through the frozen scoring seam."""
+def _cold_response(grid: CarrierGrid) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build the exact shared response for one grid through the scoring seam.
+
+    A pinned grid must reproduce its recorded identity, digest and shape; an
+    unpinned one reports whatever it computed so the contract can be recorded
+    before anything is allowed to load it.
+    """
     from benchmarks.efit_forward_parity_slice import (
         DECOMPOSITION_BANK,
         _mast_case_from_selection,
@@ -210,6 +285,7 @@ def _cold_response() -> tuple[dict[str, Any], dict[str, Any]]:
         SHOT_STORE,
         first_row,
         qualification,
+        grid_points=grid.axis_points,
     )
     machine_seconds = perf_counter() - machine_started
     targets = np.vstack((mast_case["grid_coordinate"], mast_case["wall_coordinate"]))
@@ -223,19 +299,19 @@ def _cold_response() -> tuple[dict[str, Any], dict[str, Any]]:
     input_digests = policy["response_input_digests"]
     identity = input_digests["combined_sha256"]
     target_digest = input_digests["inputs"]["resolved_response_targets"]["sha256"]
-    if identity != SEMANTIC_RESPONSE_IDENTITY:
+    if grid.pinned and identity != grid.semantic_identity:
         raise RuntimeError(
             "resolved response identity changed: "
-            f"expected {SEMANTIC_RESPONSE_IDENTITY}, got {identity}"
+            f"expected {grid.semantic_identity}, got {identity}"
         )
-    if target_digest != RESOLVED_TARGET_DIGEST:
+    if grid.pinned and target_digest != grid.resolved_target_digest:
         raise RuntimeError(
             "resolved-target digest changed: "
-            f"expected {RESOLVED_TARGET_DIGEST}, got {target_digest}"
+            f"expected {grid.resolved_target_digest}, got {target_digest}"
         )
-    if response.shape != RESPONSE_SHAPE:
+    if grid.pinned and response.shape != grid.response_shape:
         raise RuntimeError(
-            f"cold response has shape {response.shape}, expected {RESPONSE_SHAPE}"
+            f"cold response has shape {response.shape}, expected {grid.response_shape}"
         )
     if int(policy["stored_circuit_count"]) != STORED_CIRCUIT_COUNT:
         raise RuntimeError("cold response does not carry every stored circuit")
@@ -273,6 +349,14 @@ def _cold_response() -> tuple[dict[str, Any], dict[str, Any]]:
         ),
     }
     return arrays, {
+        "grid": {
+            "name": grid.name,
+            "axis_points": grid.axis_points,
+            "pinned_before_build": grid.pinned,
+            "semantic_response_identity": identity,
+            "resolved_target_digest": target_digest,
+            "response_shape": list(response.shape),
+        },
         "machine_resolution_seconds": machine_seconds,
         "direct_response_build_seconds": response_seconds,
         "total_before_publication_seconds": machine_seconds + response_seconds,
@@ -281,7 +365,9 @@ def _cold_response() -> tuple[dict[str, Any], dict[str, Any]]:
     }
 
 
-def _cache_only_subprocess(carrier: Path) -> dict[str, Any]:
+def _cache_only_subprocess(
+    carrier: Path, contract: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """Load the carrier in a fresh interpreter with direct imports refused."""
     command = [
         sys.executable,
@@ -290,6 +376,15 @@ def _cache_only_subprocess(carrier: Path) -> dict[str, Any]:
         "--carrier",
         str(carrier),
     ]
+    if contract is not None:
+        command += [
+            "--expect-identity",
+            str(contract["semantic_response_identity"]),
+            "--expect-target-digest",
+            str(contract["resolved_target_digest"]),
+            "--expect-rows",
+            str(int(contract["response_shape"][0])),
+        ]
     completed = subprocess.run(
         command,
         check=True,
@@ -300,14 +395,30 @@ def _cache_only_subprocess(carrier: Path) -> dict[str, Any]:
     return json.loads(completed.stdout)
 
 
-def build(carrier: Path, receipt: Path) -> dict[str, Any]:
-    """Build, publish and immediately verify one content-addressed carrier."""
+def build(
+    carrier: Path | None, receipt: Path, grid: CarrierGrid | None = None
+) -> dict[str, Any]:
+    """Build, publish and immediately verify one content-addressed carrier.
+
+    A discovery build has no path until its identity is computed, so the store
+    path is resolved from the built identity rather than supplied.  The store
+    names every file by its own identity, so this can only ever create a new
+    file; it cannot land on a pinned one.
+    """
+    grid = grid or CARRIER_GRIDS[CONSUMER_CARRIER_GRID]
+    arrays, cold = _cold_response(grid)
+    identity = str(arrays["semantic_response_identity"])
+    contract = {
+        "semantic_response_identity": identity,
+        "resolved_target_digest": str(arrays["resolved_target_digest"]),
+        "response_shape": list(arrays["response"].shape),
+    }
+    carrier = carrier or grid.path(identity)
     with _carrier_build_lock(carrier) as lock_path:
         if carrier.exists():
             raise FileExistsError(
                 f"cold publication refuses to replace existing carrier {carrier}"
             )
-        arrays, cold = _cold_response()
         temporary = carrier.with_name(f".{carrier.name}.{os.getpid()}.building.npz")
         publication_started = perf_counter()
         try:
@@ -317,19 +428,22 @@ def build(carrier: Path, receipt: Path) -> dict[str, Any]:
             if temporary.exists():
                 temporary.unlink()
         publication_seconds = perf_counter() - publication_started
-    warm = _cache_only_subprocess(carrier)
+    warm = _cache_only_subprocess(carrier, contract)
     entered = warm.pop("direct_builder_modules_entered")
     report = {
         "receipt": "persisted MAST frozen-reference response carrier",
         "verdict": {
             "carrier_persisted": True,
             "semantic_identity_matches": (
-                warm["semantic_response_identity"] == SEMANTIC_RESPONSE_IDENTITY
+                warm["semantic_response_identity"]
+                == contract["semantic_response_identity"]
             ),
             "resolved_targets_match": (
-                warm["resolved_target_digest"] == RESOLVED_TARGET_DIGEST
+                warm["resolved_target_digest"] == contract["resolved_target_digest"]
             ),
-            "response_shape_matches": warm["response_shape"] == list(RESPONSE_SHAPE),
+            "response_shape_matches": (
+                warm["response_shape"] == contract["response_shape"]
+            ),
             "all_stored_circuits_carried": (
                 warm["stored_circuit_count"] == STORED_CIRCUIT_COUNT
             ),
@@ -402,16 +516,34 @@ def check(carrier: Path, receipt: Path) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("build", "check", "probe"))
-    parser.add_argument("--carrier", type=Path, default=DEFAULT_CARRIER)
+    parser.add_argument("--carrier", type=Path, default=None)
     parser.add_argument("--receipt", type=Path, default=DEFAULT_RECEIPT)
+    parser.add_argument(
+        "--grid",
+        choices=tuple(CARRIER_GRIDS),
+        default=DEFAULT_CARRIER_GRID,
+        help="response grid to build; check and probe resolve the consumer grid",
+    )
+    parser.add_argument("--expect-identity", default=None)
+    parser.add_argument("--expect-target-digest", default=None)
+    parser.add_argument("--expect-rows", type=int, default=None)
     arguments = parser.parse_args()
+    grid = CARRIER_GRIDS[arguments.grid]
     if arguments.mode == "probe":
+        carrier = arguments.carrier or DEFAULT_CARRIER
+        expected = {}
+        if arguments.expect_identity is not None:
+            expected["semantic_identity"] = arguments.expect_identity
+        if arguments.expect_target_digest is not None:
+            expected["resolved_target_digest"] = arguments.expect_target_digest
+        if arguments.expect_rows is not None:
+            expected["response_shape"] = (arguments.expect_rows, STORED_CIRCUIT_COUNT)
         with _guard_direct_builders() as guard:
-            _response, report = load_carrier(arguments.carrier)
+            _response, report = load_carrier(carrier, **expected)
         print(json.dumps(report | {"direct_builder_modules_entered": guard.entered}))
         return
     if arguments.mode == "build":
-        report = build(arguments.carrier, arguments.receipt)
+        report = build(arguments.carrier, arguments.receipt, grid)
         print(
             "MAST_RESPONSE_CARRIER "
             f"shape={report['carrier']['response_shape']} "
@@ -422,7 +554,7 @@ def main() -> None:
             "verdict=PASS"
         )
         return
-    report = check(arguments.carrier, arguments.receipt)
+    report = check(arguments.carrier or DEFAULT_CARRIER, arguments.receipt)
     print(
         "MAST_RESPONSE_CARRIER_CACHE_ONLY "
         f"shape={report['response_shape']} "

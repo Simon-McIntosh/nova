@@ -1,0 +1,26 @@
+building terminal chord
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-candidacy-from-the-clip-geometry-not-the-label/docs/figures/cut-cell-current-attribution/outboard-hole/measure.py", line 110, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-candidacy-from-the-clip-geometry-not-the-label/docs/figures/cut-cell-current-attribution/outboard-hole/measure.py", line 46, in main
+    context = census._build_context(control)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-candidacy-from-the-clip-geometry-not-the-label/benchmarks/unit_amplitude_current_census.py", line 256, in _build_context
+    exact_physical = oracle_fixture.exact_current_moments(
+        source_case, empty_operator, oracle_state
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-candidacy-from-the-clip-geometry-not-the-label/scripts/analytic_oracle_fixtures/measure.py", line 1029, in exact_current_moments
+    support = _analytic_profile_support(
+        case if analytic is None else analytic, operator, state
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-candidacy-from-the-clip-geometry-not-the-label/scripts/analytic_oracle_fixtures/measure.py", line 1014, in _analytic_profile_support
+    return operator._profile_support(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        masks, topology, physical, sample_psi_norm
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ).qualify(jnp.asarray(participation))
+    ^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-candidacy-from-the-clip-geometry-not-the-label/nova/equilibrium/forward_operator.py", line 3091, in _profile_support
+    saddle_vertex=topology.x_point,
+                  ^^^^^^^^^^^^^^^^
+AttributeError: 'types.SimpleNamespace' object has no attribute 'x_point'

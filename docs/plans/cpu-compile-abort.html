@@ -253,6 +253,32 @@
       <a href="/nova/evidence/archive/cpu-compile-abort-landed">the mapping-count record</a>, carrying
       both series as a figure.</p>
     </section>
+
+    <section id="sampler-exit-status">
+      <h2><span class="sec">§</span> The sampler's exit status now carries the child's failure</h2>
+      <p class="worker-landing"><strong>Landed 2026-09-21, commit <code>c1af3a06d</code>.</strong>
+      <code>benchmarks/compile_abort_probe.py</code> wrote the sampled child's <code>exit_code</code>
+      into its summary and then returned zero from <code>main()</code> unconditionally, so a caller
+      gating on the wrapper's status read a driver that had died inside the compiler as a successful
+      measurement. The defect reproduced at head before the change was made: the wrapper run as
+      <code>python -m benchmarks.compile_abort_probe --samples … --summary … -- /bin/sh -c "exit 7"</code>
+      wrote <code>exit_code: 7</code> into its summary and then exited
+      <strong>0</strong>. The repair is the single return, which now carries the recorded
+      status; the same invocation exits <strong>7</strong> with the summary unchanged at
+      <code>exit_code: 7</code>. Nothing else in the probe was touched.</p>
+      <p class="worker-landing">The new <code>tests/test_compile_abort_probe.py</code> runs the wrapper
+      as a subprocess around a trivial shell child, so the case costs a scheduling slice rather than a
+      compile, and asserts both directions: a child exiting <code>7</code> leaves the wrapper at
+      <code>7</code> with <code>exit_code 7</code> recorded, and a child exiting <code>0</code> leaves
+      it at <code>0</code> — a wrapper that failed whenever it ran would not pass either case.
+      Against the unfixed wrapper the file reddens on <code>test_failed_child_fails_the_wrapper</code>
+      with <code>assert 0 == 7</code> while the zero-exit case passes, which is the failure the
+      wrapper was hiding. Restoring <code>return 0</code> over the repair reproduces exactly that red,
+      so the guard is shown to fire rather than assumed to. Gate:
+      <code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_compile_abort_probe.py</code>,
+      exit <code>0</code>, <code>2 passed</code>. This measures the node's own change only; the merged
+      result is a separate node's.</p>
+    </section>
   </main>
 </body>
 </html>

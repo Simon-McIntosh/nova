@@ -227,6 +227,51 @@ run exists because of that, and its role is to supply the step size and its dura
   each as PNG beside SVG).</li>
 </ul>
 
+<h2 id="sampler-exit-status">The sampler now exits with the status of the child it sampled</h2>
+
+<p>The probe records the sampled child's exit status in its summary. Until commit
+<code>c1af3a06d</code> it then returned zero from <code>main()</code> unconditionally, so a caller
+gating on the wrapper's status could not distinguish a driver that completed from one that died
+inside the compiler — the distinction the probe exists to preserve. This is a status-propagation
+change with a before-and-after table rather than a spatial relationship, so no figure accompanies
+it.</p>
+
+<table>
+  <thead>
+    <tr><th>Invocation</th><th>Summary <code>exit_code</code></th><th>Wrapper exit status</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>… -- /bin/sh -c "exit 7"</code>, before the repair</td>
+      <td><code>7</code></td>
+      <td><strong><code>0</code></strong> — the failure was discarded</td>
+    </tr>
+    <tr>
+      <td><code>… -- /bin/sh -c "exit 7"</code>, after the repair</td>
+      <td><code>7</code></td>
+      <td><strong><code>7</code></strong></td>
+    </tr>
+    <tr>
+      <td><code>… -- /bin/sh -c "exit 0"</code>, after the repair</td>
+      <td><code>0</code></td>
+      <td><code>0</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The change is one token: <code>main()</code> returns the recorded status instead of
+<code>0</code>. The accompanying <code>tests/test_compile_abort_probe.py</code> runs the wrapper as
+a subprocess around a trivial shell child so the case costs a scheduling slice rather than a
+compile, and asserts both directions. Against the unfixed wrapper the file reddens on
+<code>test_failed_child_fails_the_wrapper</code> with <code>assert 0 == 7</code> while the zero-exit
+case passes; restoring <code>return 0</code>
+over the repair reproduces that same red, so the guard is shown to fire rather than assumed to.</p>
+
+<p>Gate: <code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q
+tests/test_compile_abort_probe.py</code>, exit <code>0</code>, <code>2 passed</code> on the login
+node. This measures the node's own change; the merged result belongs to a separately dispatched
+test node.</p>
+
 </main>
 </body>
 </html>

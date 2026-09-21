@@ -437,7 +437,7 @@ def _panel(
     boundary_failure = record.get("boundary_generation_failure")
     if (
         boundary_failure is None
-        and record.get("solve_topology_class") == "diverted"
+        and record.get("machine") == "MAST"
         and nova_boundary.shape[0] < 3
     ):
         boundary_failure = "BoundaryGenerationFailure"

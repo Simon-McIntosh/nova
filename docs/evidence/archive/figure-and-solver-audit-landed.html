@@ -8,7 +8,6 @@
   <meta name="plan-slug" content="figure-and-solver-audit-landed">
   <meta name="plan-title" content="Figure and solver audit — landed record">
   <meta name="plan-summary" content="Scored, independent-lane review records of every figure directory the sprint touched, one anchor per directory, with the repair followups filed from them.">
-  <meta name="plan-status" content="active">
   <meta name="plan-evidence-for" content="figure-and-solver-audit">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="review,evidence">
@@ -16,6 +15,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
+<meta name="plan-status" content="active">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -1060,6 +1061,21 @@
 <li><strong>One figure was not opened</strong>: <code>docs/figures/forward-solve-api/coil-edit-latency.png</code> (the directory-root copy, md5 <code>9491567066442bdc791cd3002f8be4af</code>). It is byte-distinct from all three files under <code>coil-edit-latency/</code> and from <code>coil-edit-latency-converging.png</code>, so it is a fifth independent rendering of the same case. Its receipt <code>docs/figures/forward-solve-api/coil-edit-latency.json</code> points its <code>figure</code> field at a removed worktree path. It is excluded from the directory mean (which is over the 10 figures scored) and is carried as a follow-on, not scored.</li>
 <li>SVGs were rasterised read-only to <code>/tmp/fsa_svg</code> with <code>rsvg-convert -w 1800</code>; nothing was written into the repository and no figure was regenerated.</li>
 </ul>
+</section>
+<section class="audit-directory" id="solver-test-pins">
+<h2>Solver test-pin promotion audit</h2>
+<p>Reviewer node <code>fsa-audit-solver-test-pins</code>, independent of the locally served lane that produced the work, joined every promotion since 2026-09-16 whose commit touched one of the ten declared test paths. The durable row-by-row record is <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-test-pins/review.md</code>; ready-to-append owning-plan followups are in the adjacent <code>findings.json</code>.</p>
+<table>
+<thead><tr><th>measure</th><th>result</th></tr></thead>
+<tbody>
+<tr><td>promotions reviewed</td><td>13</td></tr>
+<tr><td>verdicts</td><td>4 sound, 9 defective</td></tr>
+<tr><td>current-main gates</td><td>8 passed, 2 failed, 3 could not run</td></tr>
+<tr><td>recorded negative controls</td><td>7 read; 6 redden for the declared mechanism, 1 reddens for a different assertion</td></tr>
+</tbody>
+</table>
+<p>All runnable gates executed in fresh processes on one <code>all_debug</code> allocation at revision <code>0322e911a52588e116bb76a2243ff0dc728cc655</code>, with <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>, the shared root interpreter and no <code>uv</code> on the compute node. The two red gates fail on the same integration defect: <code>forward_operator.py:3091</code> unconditionally reads <code>topology.x_point</code> from the diverted-oracle helper namespace, which does not carry that attribute. Three other ledgered promotions cannot run at current main because their commits are not ancestors and their named test files or node id are absent.</p>
+<p>The defect classes are: easy-attribute assertions, a non-discriminating fixture, a circular oracle with a tolerance that does not establish the claimed mechanism, gate-log misbinding, a passed verdict over an exit-1 gate, a wrong-reason negative control, promoted-but-unlanded commits, and the integrated typed-saddle regression. No figure is added because these exact textual mappings are clearer as an HTML table than as an image.</p>
 </section>
   </main>
 </body>

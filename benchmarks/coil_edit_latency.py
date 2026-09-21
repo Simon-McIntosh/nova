@@ -1828,7 +1828,9 @@ def _draw_null_set(
     )
 
 
-def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> None:
+def _paint_panel(
+    axis: Any, loaded: dict[str, Any], panel: dict[str, Any]
+) -> dict[str, dict[str, int]]:
     """Draw one edit's terminal flux over the reference field.
 
     Both rasters are masked to the wall interior before contouring, so a level
@@ -1836,6 +1838,12 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
     Both null sets are drawn in their own styles, each with its admitted saddle
     filled and its remaining qualified nulls hollow, so a solved null is never
     mistaken for the reference one.
+
+    Returns what each painter actually drew, keyed by set. The admitted saddle
+    is dropped when it falls outside the wall and the hollow cup is empty for a
+    set with no second qualified null, so the two sets can be drawn with
+    different glyph vocabularies; carrying the counts out of the painter is what
+    lets the caption state the drawing rather than assert it.
     """
     radius = loaded["radius"]
     height = loaded["height"]
@@ -1866,7 +1874,7 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         axis, panel["branches"], "#cc7722", panel["separatrix"]
     )
 
-    _draw_null_set(
+    loaded["reference_nulls_drawn"] = _draw_null_set(
         axis,
         loaded["reference_axis"],
         loaded["reference_xpoints"],
@@ -1874,7 +1882,7 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         "#3366cc",
         loaded["wall"],
     )
-    _draw_null_set(
+    panel["nulls_drawn"] = _draw_null_set(
         axis,
         panel["axis"],
         panel["xpoints"],
@@ -1883,6 +1891,10 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         loaded["wall"],
     )
     poloidal_axes(axis)
+    return {
+        "reference": dict(loaded["reference_nulls_drawn"]),
+        "solved": dict(panel["nulls_drawn"]),
+    }
 
 
 def _branch_terms(branches: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -1920,6 +1932,7 @@ def _panel_summary(panel: dict[str, Any]) -> dict[str, Any]:
         "termination": panel["termination"],
         "achieved_class": panel["class_name"],
         "branches_drawn": dict(panel.get("branches_drawn", {})),
+        "nulls_drawn": dict(panel.get("nulls_drawn", {})),
         "branches": _branch_terms(panel.get("branches")),
     }
 
@@ -1944,6 +1957,31 @@ def _branch_style_note(drawn: dict[str, int]) -> str:
     if drawn.get("unassembled"):
         return "unassembled, crossings drawn unconnected"
     return "lobe solid, legs dashed"
+
+
+def _null_style_note(tally: dict[str, int]) -> str:
+    """Return the caption fragment for what a null set was drawn as.
+
+    The caption reads the glyphs off the painter's own tally rather than
+    restating the intent: a set whose only qualified null is the admitted
+    saddle has no hollow cup to draw, and an admitted saddle outside the wall
+    is dropped instead of drawn. A caption claiming hollow markers for a panel
+    that carries none sends the reader looking for a glyph that is not there.
+    """
+    drawn = int(tally.get("x_points_drawn", 0))
+    dropped = int(tally.get("x_points_dropped_outside_wall", 0))
+    other = int(tally.get("other_x_points_drawn", 0))
+    phrase = "as drawn %d admitted filled"
+    arguments = [drawn]
+    if dropped:
+        phrase += ", %d admitted dropped outside the wall"
+        arguments.append(dropped)
+    if other:
+        phrase += ", %d other qualified hollow"
+        arguments.append(other)
+    else:
+        phrase += ", no other qualified nulls"
+    return phrase % tuple(arguments)
 
 
 def _null_ordering(x_points: Any, saddle_index: int, axis: Any) -> str:
@@ -1977,9 +2015,10 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
     loaded = _panel_load(data_path)
     figure, axes = plt.subplots(1, 2, figsize=(10.6, 4.6), constrained_layout=True)
 
+    tallies: dict[str, dict[str, dict[str, int]]] = {}
     for axis, label in zip(axes, ("converged", "failed"), strict=True):
         panel = loaded[label]
-        _paint_panel(axis, loaded, panel)
+        tallies[label] = _paint_panel(axis, loaded, panel)
         axis.set_title(
             "edit %d  %+d%%  residual %.3e  converged %s  trips %d"
             % (
@@ -1994,20 +2033,20 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
     reference_note = _saddle_note(
         loaded["reference_xpoints"], loaded["reference_saddle_index"]
     )
+    reference_tally = tallies["converged"]["reference"]
     solved_note = _saddle_note(
         loaded["failed"]["xpoints"], loaded["failed"]["saddle_index"]
     )
     constraint_note = _constraint_note(loaded.get("vertical_centroid"))
-    figure.suptitle(
+    caption = (
         "terminal poloidal flux on shared levels between the axis and boundary "
         "flux (%.4f to %.4f Wb)  |  every solved state imposes the "
         "vertical current-centre row %s  |  reference is the unedited "
         "equilibrium, an "
         "upper-null state whose admitted saddle sits above its axis, while every "
         "solved state admits a lower null (blue, admitted saddle %s)  |  "
-        "reference set blue: %s, admitted %s, "
-        "other qualified nulls hollow  |  solved set orange: %s, admitted %s, "
-        "other hollow  |  wall drawn"
+        "reference set blue: %s, admitted %s, %s  |  solved set orange: %s, "
+        "admitted %s, %s  |  wall drawn"
         % (
             loaded["reference_axis_flux"],
             loaded["reference_boundary_flux"],
@@ -2019,18 +2058,21 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
             ),
             _branch_style_note(loaded.get("reference_branches_drawn", {})),
             reference_note,
+            _null_style_note(reference_tally),
             _branch_style_note(loaded["failed"].get("branches_drawn", {})),
             solved_note,
-        ),
-        fontsize=9,
+            _null_style_note(tallies["failed"]["solved"]),
+        )
     )
+    figure.suptitle(caption, fontsize=9)
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(figure_path, dpi=140)
     vector_path = figure_path.with_suffix(".svg")
     figure.savefig(vector_path)
     plt.close(figure)
 
-    return {
+    receipt_path = figure_path.with_suffix(".json")
+    document = {
         "figure": str(figure_path),
         "figure_vector": str(vector_path),
         "levels": [float(value) for value in loaded["levels"]],
@@ -2040,10 +2082,19 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
         },
         "reference_branches": _branch_terms(loaded["reference_branches"]),
         "reference_branches_drawn": dict(loaded.get("reference_branches_drawn", {})),
+        "reference_nulls_drawn": reference_tally,
         "vertical_centroid": loaded.get("vertical_centroid"),
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
     }
+    receipt = dict(document)
+    receipt["caption"] = " ".join(caption.split())
+    receipt["receipt"] = str(receipt_path)
+    receipt_path.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return document
+    return document
 
 
 def _declared_path(path: Path) -> str:

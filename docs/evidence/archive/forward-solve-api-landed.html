@@ -437,8 +437,13 @@ rather than endpoints of one segment, so joining them drew a fan of chords acros
 caption says so, and names the reference as the unedited equilibrium whose admitted saddle sits above
 its axis, against the solved states whose saddle sits below. Levels run between the axis flux 0.341217&nbsp;Wb
 and the boundary flux &minus;0.122930&nbsp;Wb, and the shared level array is the same on both panels.
-Both null sets are drawn: solid triangles for each axis and filled crosses for each admitted saddle,
-hollow markers for other qualified nulls. The wall is drawn from the unit collection. Both files are
+Both null sets are drawn: solid triangles for each axis and filled crosses for each admitted saddle, and
+an empty cup for other qualified nulls &mdash; which, on this panel, is empty for both sets: the
+reference and the solved set each carry one admitted saddle and no second qualified null, so no hollow
+marker appears and each panel carries two filled glyphs. The painter's drawn and dropped tally is
+recorded per set in <code>converged-vs-nonconverged.json</code> rather than discarded
+(<code>x_points_drawn: 1, x_points_dropped_outside_wall: 0, other_x_points_drawn: 0</code> on both
+sets). The wall is drawn from the unit collection. Both files are
 committed: <code>converged-vs-nonconverged.png</code> and
 <code>converged-vs-nonconverged.svg</code>.</figcaption></figure>
 </section>
@@ -665,6 +670,83 @@ from the null its reference closes through. It remains <strong>known-wrong</stro
 silently stale: it is not captioned as regenerated under the constraint, and the followup
 <code>f-fsa-regenerate-coil-edit-fixture</code> stays open carrying the regeneration, the census
 agreement and the redraw. The row that this node committed is what that regeneration will run.</p>
+</section>
+<section id="coil-edit-record-numbers">
+<h2>Every coil-edit number now has a file behind it (2026-09-20)</h2>
+<p>The coil-edit records asserted numbers their own files did not carry, and one figure asserted
+a glyph it did not draw. Five repairs, each landed with the number re-derived from the committed
+forensics rather than from a new solve. No solve ran in this node: the only compute is one panel
+re-render that reproduced its receipt byte for byte.</p>
+
+<h3>The overwritten receipt is back, and each paragraph cites its own file</h3>
+<p>Commit <code>0797f64f</code> rewrote <code>coil-edit-latency.json</code> and its PNG in place,
+outside the node that produced them, so the paragraph quoting the replaced run pointed at a file
+that no longer carried its number. That receipt is restored from git history under a dated name,
+<code>coil-edit-latency-2026-09-17.json</code>, text unchanged and its <code>figure</code> field
+repointed at <code>coil-edit-latency-2026-09-17.png</code>, beside the current one and following
+the 2026-09-15 restoration. The three runs the plan quotes now resolve to three files:</p>
+<table>
+<tr><th>Paragraph quotes</th><th>File that carries it</th><th>Run</th></tr>
+<tr><td>525.6 ms</td><td><code>coil-edit-latency-2026-09-15.json</code></td><td>4c7529ce, H200 job 1271257</td></tr>
+<tr><td>353.0 ms</td><td><code>coil-edit-latency-2026-09-17.json</code></td><td>7514edd9, H200 job 1273204</td></tr>
+<tr><td>370.4 ms (the sweep)</td><td><code>coil-edit-latency.json</code></td><td>d3849192, H200 job 1273580</td></tr>
+</table>
+<p>The third row is the one the committed nonconvergence forensics belong to, so the number that
+re-derives from those forensics is 370.367 ms, and the plan previously attributed it to a file
+holding 353.038 ms.</p>
+
+<figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets"><figcaption>The panel the caption repair covers: edit 7 (converged, residual 5.0e-09, left) beside edit 6 (non-converged, residual 4.4e-03, right). Both sets draw one admitted saddle and no other qualified null, which is what the caption now says in those words.</figcaption></figure>
+
+<h3>The termination word is all the receipt carried</h3>
+<p>All ten failures persisted the same termination word, <code>active_set_settled</code>, which the
+prose then had to read as three different mechanisms. The receipt now carries them as data:
+<code>summary.groups</code> holds stall (1, 2, 4, 6, 8, 10 &mdash; one trip of twelve steps, the
+active set unchanged), refused first step (17, 19 &mdash; one trip of zero steps) and partial walk
+(16, 18), with <code>summary.termination_groups.active_set_settled</code> holding all ten, so both
+readings of the same run are checkable.</p>
+
+<h3>The caption is composed from the painter's tally, not asserted</h3>
+<p>The caption called the other qualified nulls hollow while the driver drew every null with the ink
+defaults. The fix does not merely restate the caption: it composes it from what the painter returns,
+and keeps that tally in the receipt where it was previously discarded.
+<code>converged-vs-nonconverged.json</code> now holds <code>reference_nulls_drawn</code> and each
+panel's <code>nulls_drawn</code>, all reading <code>x_points_drawn: 1,
+x_points_dropped_outside_wall: 0, other_x_points_drawn: 0</code>, and the caption reads
+&ldquo;as drawn 1 admitted filled, no other qualified nulls&rdquo; for each set.</p>
+<p>A glyph count could not settle this, and an early draft of the control claimed it could.
+<code>fill: none</code> appears 64 times in both the pre-change and the repaired vector, so it is
+carried by contour and wall paths too and says nothing about null markers; that claim is withdrawn.
+What settles it is the tally plus a rendering that makes the guarded thing happen: a set carrying a
+second qualified null renders hollow marker glyphs that a set with none does not.</p>
+<p>The control also found a defect in the first draft of the repair, which is what a control is for.
+The three tallies composed as:</p>
+<table>
+<tr><th>Set</th><th>Composed fragment</th></tr>
+<tr><td>one admitted saddle, no other qualified nulls</td><td>as drawn 1 admitted filled, no other qualified nulls</td></tr>
+<tr><td>one admitted saddle plus a second qualified null</td><td>as drawn 1 admitted filled, 2 other qualified hollow</td></tr>
+<tr><td>admitted saddle dropped outside the wall</td><td>as drawn 0 admitted filled, 1 admitted dropped outside the wall, no other qualified nulls</td></tr>
+</table>
+<p>Before the repair the second row raised <code>TypeError: not enough arguments for format
+string</code>, because the argument tuple omitted the other-null count whenever the dropped count
+was zero. The caption was not only wrong before; the first repair was wrong too, and the second
+tally is what exposed it.</p>
+
+<h3>The corrected contrast sentence</h3>
+<p>The converged edit was described as showing mask motion in every trip; its own trace reads
+18, 34, 6, 0. Edit 0 takes four trips with twelve, ten, zero and zero accepted steps and a residual
+trace of 5.007e-02, 4.141e-02, 5.028e-10, 2.729e-09, so it converges below the 1e-8 tolerance
+while the mask moves on its first three trips only and the fourth closing read promotes nothing.</p>
+
+<h3>Recorded, not repaired</h3>
+<p><code>nova/media/poloidal.py</code> is outside this node's write scope, and it carries a latent
+shape fragility found by the control: <code>draw_nulls</code> raises <code>IndexError: index 0 is
+out of bounds for axis 1 with size 0</code> when <code>other_x_points</code> is an empty array,
+because <code>np.atleast_2d</code> of an empty array is shape (1, 0), the finiteness filter keeps
+its one all-True row, the row count reads 1, and <code>other[:, 0]</code> then fails. The panel path
+does not reach it: the driver passes <code>np.delete</code> of a single-row array, shape (0, 1),
+whose row count is 0. Reported here rather than fixed outside scope.</p>
+<p>Gate: <code>tests/test_coil_edit_persistence_guard.py</code>, the only test file importing the
+changed module, 3 passed in 34.31 s against base 62acf7dc &mdash; added failures none.</p>
 </section>
 </main>
 </body>

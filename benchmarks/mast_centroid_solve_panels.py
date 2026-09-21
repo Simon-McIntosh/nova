@@ -41,11 +41,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from benchmarks import coil_edit_latency as edit
+from benchmarks import efit_forward_parity_slice as parity
 from benchmarks import mast_response_carrier_warm as response_carrier
 from nova.catalog.mast_geometry import shaped_section_vertices
 from nova.equilibrium.forward import _lattice_cells
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
-from nova.equilibrium.source import PolynomialFluxFunction
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import (
     configure_dtypes,
@@ -197,39 +197,63 @@ def _class_label(achieved: dict[str, Any]) -> str:
     return str(achieved.get("class", "unread"))
 
 
-def _varied_source(source: Any, pressure_scale: float, field_scale: float) -> Any:
-    """Return the source with its two flux-function amplitudes rescaled.
+def _stored_profiles(shot: int, row: int) -> dict[str, np.ndarray]:
+    """Return the stored flux-function tables and their boundary primitives.
 
-    The plasma is supported by two low-degree flux functions, and the solve
-    pins the net plasma current, so scaling the pair in OPPOSITE directions
-    leaves the current where it was and changes only how that current is
-    distributed: p-prime enters the toroidal density weighted by R and
-    ff-prime weighted by 1/R, so the ratio is the radial shape knob. The
-    coefficient vectors and the evaluator are untouched, which is what lets
-    one compiled program serve every member of a series.
-
-    The field-by-field copy is the same construction the operator's own
-    profile-amplitude tangent uses; the frozen dataclasses validate on their
-    normal constructor and this path deliberately rebuilds around already
-    validated leaves.
+    The case builds its two flux functions as closures over these tables, so
+    the tables are not reachable from the built source; they are re-read from
+    the same store, converted by the same expressions the case uses, and the
+    varied source is then assembled through the ordinary constructors rather
+    than by reaching inside a closure.
     """
-    core = object.__new__(type(source.core))
-    for name, value in source.core.__dict__.items():
-        object.__setattr__(core, name, value)
-    for field, scale in (("p_prime", pressure_scale), ("ff_prime", field_scale)):
-        function = getattr(source.core, field)
-        object.__setattr__(
-            core,
-            field,
-            PolynomialFluxFunction(
-                function.coefficients, function.normalisation * scale
+    import zarr
+
+    from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
+    from nova.imas.mast_solve_inputs import SHOT_STORE
+
+    group = zarr.open_group(str(SHOT_STORE / f"{shot}.zarr"), mode="r")["efm"]
+    psi_norm = np.asarray(group["psi_norm"], dtype=np.float64)
+    return {
+        "psi_norm": psi_norm,
+        "p_prime": -np.asarray(group["pprime"][row], dtype=np.float64)
+        / TOTAL_FLUX_FACTOR,
+        "ff_prime": -np.asarray(group["ffprime"][row], dtype=np.float64)
+        / TOTAL_FLUX_FACTOR,
+        "boundary_pressure": float(group["ppsi_c"][row, -1]),
+        "boundary_field_function": float(group["fpsi_c"][row, -1]),
+    }
+
+
+def _varied_source(
+    stored: dict[str, np.ndarray], pressure_scale: float, field_scale: float
+) -> Any:
+    """Return a source with the two flux-function tables rescaled.
+
+    The solve pins the net plasma current, so scaling the pair in OPPOSITE
+    directions leaves the current where it was and changes only how it is
+    distributed: p-prime enters the toroidal density weighted by R and
+    ff-prime weighted by 1/R, so their ratio is the radial shape lever.
+
+    The sampled tables are closed over by the evaluator rather than carried as
+    traced leaves, so each member is its own compiled program. That is the
+    representation the reference case declares and it is kept rather than
+    swapped for a cheaper one, because a different evaluator would be a
+    different equilibrium.
+    """
+    from nova.equilibrium.source import DomainProfile, ForwardSource
+
+    return ForwardSource(
+        core=DomainProfile(
+            p_prime=parity._profile_function(
+                stored["psi_norm"], pressure_scale * stored["p_prime"]
             ),
-        )
-    varied = object.__new__(type(source))
-    for name, value in source.__dict__.items():
-        object.__setattr__(varied, name, value)
-    object.__setattr__(varied, "core", core)
-    return varied
+            ff_prime=parity._profile_function(
+                stored["psi_norm"], field_scale * stored["ff_prime"]
+            ),
+        ),
+        boundary_pressure=stored["boundary_pressure"],
+        boundary_field_function=stored["boundary_field_function"],
+    )
 
 
 def _timed_solve(
@@ -708,11 +732,11 @@ def series(
     units = edit._wall_units(operator)
     coils = _coil_outlines(edit.SHOT)
 
+    stored = _stored_profiles(edit.SHOT, edit.SLICE_INDEX)
     members: list[dict[str, Any]] = []
     panels_data: list[dict[str, Any]] = []
-    program = None
     for offset in RATIO_OFFSETS:
-        varied = _varied_source(profile.source, 1.0 + offset, 1.0 - offset)
+        varied = _varied_source(stored, 1.0 + offset, 1.0 - offset)
         member_profile = profile._with_source(varied)
         result, wall = _timed_solve(
             member_profile,
@@ -720,10 +744,9 @@ def series(
             base_current,
             requested,
             target_current,
-            program,
+            None,
             pairs,
         )
-        program = result.program
         record = _solve_record(result, wall)
         record["ratio_offset"] = float(offset)
         record["pressure_scale"] = 1.0 + float(offset)
@@ -788,8 +811,12 @@ def series(
             "target_current_a": target_current,
             "ratio_offsets": [float(value) for value in RATIO_OFFSETS],
             "program_reuse": (
-                "one compiled program serves every member; the flux-function "
-                "amplitudes cross the program boundary as traced scalars"
+                "none: the reference case closes its evaluator over the sampled "
+                "tables, so every member compiles its own program"
+            ),
+            "profile_representation": (
+                "65-node sampled tables from efm/pprime and efm/ffprime with a "
+                "slope-matched cubic exterior closure, not a polynomial family"
             ),
         },
         "members": members,

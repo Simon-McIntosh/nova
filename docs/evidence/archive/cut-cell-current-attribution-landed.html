@@ -1698,6 +1698,7 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
 </section>
 <section id="current-candidacy-preflight">
 <h2>Current candidacy: the terminal census refuses its analytic fixture</h2>
+<p><strong>Historical prerequisite, resolved below:</strong> the resumed <a href="#current-candidacy-attribution">terminal attribution</a> loads the repaired fixture and completes the candidacy decision.</p>
 <p><strong>Implementation blocked before the required defect reproduction.</strong>
 On 2026-09-21, base <code>61f7d79d558ec6219f39272bded5ab6933c666d1</code>, one
 <code>all_debug</code> allocation (job <code>1274784</code>, eight CPUs, 64 GiB,
@@ -1783,6 +1784,151 @@ No test suite or negative-control mutation ran. The reproduction driver passes
 Ruff, and the launcher passes <code>bash -n</code>; these checks do not establish
 any of those physics acceptance criteria. The plan section, driving followup,
 and status metadata remain open and unchanged.</p>
+</section>
+<section id="current-candidacy-attribution">
+<h2>Residual current deficit: candidacy change is not needed</h2>
+<p><strong>Completed under the coordinator's conditional ruling, 2026-09-21.</strong>
+Every one of the 135 cells is label-eligible in both clip modes. Replacing all
+labels with CORE changes no booked current: the maximum per-cell difference is
+<strong>0.0 A</strong> in chord and exact modes. The control that deliberately
+excludes cell 106 removes <strong>192,343.790435 A</strong> in each mode, taking
+that cell to exactly zero. The instrument therefore sees a real label veto;
+there is none responsible for the residual deficit. <strong>No candidacy,
+production source, or test change was made.</strong></p>
+<p>The earlier <a href="#current-candidacy-preflight">fixture refusal</a> is
+resolved for this measurement by evaluating the exact fixture and gate blobs at
+<code>120d6136bfc2347a8f9764e200c11bf6bf32038c</code> in memory, as authorized.
+The repaired fixture supplies its own saddle field; the gate's compatibility
+bridge is never installed. No merge or source-file replacement was performed.
+The three production paths are byte-identical to that fetched main revision.
+The census and attribution are committed at <code>dbbae47a0</code>; label controls
+and the inspected PNG/SVG at <code>3256c286e</code>.</p>
+<h3>Measured total and location of the deficit</h3>
+<table>
+<thead><tr><th>Measure</th><th>Chord mode</th><th>Exact mode</th></tr></thead>
+<tbody>
+<tr><td>Booked current</td><td>15,868,149.094491 A</td><td>15,491,114.132435 A</td></tr>
+<tr><td>Fraction of 16,314,773.311828 A target</td><td>0.972624552680</td><td>0.949514518918</td></tr>
+<tr><td>Target deficit</td><td>446,624.217337 A (2.737545%)</td><td>823,659.179393 A (5.048548%)</td></tr>
+<tr><td>Label-excluded cells / lost current</td><td>0 / 0 A</td><td>0 / 0 A</td></tr>
+<tr><td>Inactive interpolation cells</td><td>0</td><td>0</td></tr>
+<tr><td>Deficit in 43 analytically cut cells</td><td>429,462.061461 A</td><td>756,623.398829 A</td></tr>
+<tr><td>Deficit in 78 analytically interior cells</td><td>16,957.721204 A</td><td>66,831.345891 A</td></tr>
+<tr><td>Current in 14 analytically exterior cells</td><td>0 A</td><td>0 A</td></tr>
+<tr><td>Zero-booking cells</td><td>16: 14 exterior and 2 cut</td><td>22: 14 exterior and 8 cut</td></tr>
+<tr><td>Gross underbooking / overbooking</td><td>446,483.875875 / 64.093210 A</td><td>823,518.837931 / 64.093210 A</td></tr>
+</tbody>
+</table>
+<p>The adaptive analytic cell integrals sum to <strong>16,314,568.877155 A</strong>,
+204.434673 A below the declared target. That separate reference-integration
+remainder closes the arithmetic above: cellwise net deficit plus 204.434673 A
+is the target deficit. Boundary-cut cells carry 96.201396% of the chord cellwise
+net deficit and 91.884029% of the exact one. Forty-one cells differ between modes
+by more than one microampere. The full 135-cell census, including every zero and
+overbooking, is retained in the
+<a href="/nova/figures/cut-cell-current-attribution/outboard-hole/terminal-attribution.json">terminal attribution receipt</a>.</p>
+<h3>Which cells lose current, and through which selection</h3>
+<p><strong>Chord mode:</strong> all atomic supports are included and every local
+flux polynomial is active, so neither a label veto nor an empty polygon can
+explain its loss. Its pointwise <code>psi_norm &gt; 1</code> density test removes
+current relative to the independent analytic domain. Cells <strong>35 and
+128</strong> each contain 8,850.331339 A analytically but book zero; each is
+9.763383% analytically inside and has centroid <code>psi_norm = 1.151027</code>.
+Partially booked cells dominate the remainder. The largest chord deficits are
+cells 28 (29.246073 kA), 68 (24.651986 kA), 13 (24.182609 kA), 72 (23.323463 kA),
+14 (21.528776 kA), and 71 (21.173757 kA). The only analytically interior losses
+above a microampere are cell 30 (7.477755 kA) and cell 65 (9.479966 kA).</p>
+<p><strong>Exact mode:</strong> the clip excludes 22 supports geometrically,
+including eight analytically cut cells: <strong>2, 35, 75, 89, 114, 126, 128,
+and 134</strong>. Those eight carry <strong>229,430.953211 A</strong> analytically
+and zero booked current. Cells 75 and 134 alone lose 76,394.815864 A each;
+2 and 126 lose 23,242.041894 A each; 35 and 128 lose 8,850.331339 A each; 89 and
+114 lose 6,228.287509 A each. Cells 75 and 134 have centroid
+<code>psi_norm = 0.994401</code>, and 89 and 114 have
+<code>psi_norm = 0.980476</code>, yet all four have zero clipped area. This is
+an explicit disagreement between the cell-centroid normalized field and the
+curved support, while all four labels already permit current. Broadening
+candidacy cannot recover them. Exact mode also partially underbooks other cut
+cells and six analytic interior cells: 5, 7, 30, 65, 74, and 124.</p>
+<p>The table ranks the twelve largest exact-mode deficits. Every listed cell is
+label-eligible in both modes; currents and differences are in kA.</p>
+<table>
+<thead><tr><th>Cell</th><th>Analytic</th><th>Chord booked</th><th>Exact booked</th><th>Chord deficit</th><th>Exact deficit</th></tr></thead>
+<tbody>
+<tr><td>134</td><td>76.394816</td><td>61.645865</td><td>0.000000</td><td>14.748951</td><td>76.394816</td></tr>
+<tr><td>75</td><td>76.394816</td><td>60.187812</td><td>0.000000</td><td>16.207004</td><td>76.394816</td></tr>
+<tr><td>119</td><td>162.756800</td><td>156.202702</td><td>124.146375</td><td>6.554098</td><td>38.610425</td></tr>
+<tr><td>78</td><td>162.756800</td><td>153.692877</td><td>124.146375</td><td>9.063923</td><td>38.610425</td></tr>
+<tr><td>28</td><td>112.553362</td><td>83.307289</td><td>82.221416</td><td>29.246073</td><td>30.331946</td></tr>
+<tr><td>68</td><td>112.553362</td><td>87.901376</td><td>82.247378</td><td>24.651986</td><td>30.305985</td></tr>
+<tr><td>4</td><td>68.570467</td><td>50.130245</td><td>40.473896</td><td>18.440221</td><td>28.096571</td></tr>
+<tr><td>131</td><td>68.570467</td><td>53.201560</td><td>40.777777</td><td>15.368907</td><td>27.792690</td></tr>
+<tr><td>72</td><td>125.716318</td><td>102.392855</td><td>102.201446</td><td>23.323463</td><td>23.514871</td></tr>
+<tr><td>126</td><td>23.242042</td><td>13.345363</td><td>0.000000</td><td>9.896679</td><td>23.242042</td></tr>
+<tr><td>2</td><td>23.242042</td><td>11.955116</td><td>0.000000</td><td>11.286926</td><td>23.242042</td></tr>
+<tr><td>13</td><td>125.716318</td><td>101.533709</td><td>102.887443</td><td>24.182609</td><td>22.828874</td></tr>
+</tbody>
+</table>
+<p>The original five outboard cells remain booked in both modes: cell 83 carries
+113,536.532289 A; 104 carries 192,269.940302 A; 106 carries 192,343.790435 A;
+108 carries 192,269.940302 A; and 116 carries 112,093.466421 A. Each value is
+identical between modes. Thus the historical five-cell hole is absent, even
+though a smaller, differently distributed deficit remains.</p>
+<figure>
+<img src="/nova/figures/cut-cell-current-attribution/outboard-hole/booked-versus-analytic.png" alt="Analytic, chord-booked and exact-booked per-cell current on three poloidal panels; the top and bottom exact-mode cells 134 and 75 lose their analytic current despite eligible labels">
+<figcaption>Independent analytic current beside current booked on the same
+persisted terminal state. Hollow red circle area uses one current scale;
+grey crosses mark zero current. The eight largest exact-mode deficits are
+labelled. Analytic blue and terminal ochre flux contours share 5 through 45 Wb
+in 5 Wb increments. Both axes are solid triangles, the unit-faithful wall is
+shown, and neither read admits an X-point. Terminal residual
+<strong>0.007447526862; converged=false</strong>. These are unscaled currents,
+with no solve or candidacy change. The
+<a href="/nova/figures/cut-cell-current-attribution/outboard-hole/booked-versus-analytic.svg">SVG companion</a> preserves the same
+panel. Both files were rendered on all_debug and the PNG was inspected.</figcaption>
+</figure>
+<h3>Controls, execution evidence, and limits</h3>
+<p>The <a href="/nova/figures/cut-cell-current-attribution/outboard-hole/label-controls.json">label-control receipt</a> records
+bit-identical currents when all labels are CORE, and a zero booking in cell 106
+when its label is deliberately changed to excluded material. The total then falls
+by 192,343.790435 A in either mode. This is a positive control for the instrument's
+ability to detect label exclusion. The originally proposed label-only repair
+mutation is not applied: the coordinator's condition selects no production or
+test change after this measurement.</p>
+<p>All three assertions from
+<code>tests/test_outboard_hole_census_gate.py</code> pass on the return from its
+own <code>terminal_booked_currents()</code>: pinned totals, pinned five-cell
+currents, and all five currents nonzero. These functions were executed directly
+against the reusable gate's measured result, without pytest collection and
+without its absent-saddle bridge. This is three passing gate assertions, not a
+claim of a source-import regression suite. No source-import suite was rerun
+because none of its production or test sources changed.</p>
+<p>Job <code>1274982</code> ran the census, label controls, and rendering in three
+fresh processes on one <code>all_debug</code> allocation: CPU JAX, x64, eight CPUs,
+64 GiB, <code>TMPDIR=/tmp</code> in submit and payload, root interpreter directly,
+and no compute-node uv invocation. All three child exits and the scheduler exit
+are 0. The allocation lasted 285 seconds, consumed 350.379 CPU seconds, and
+peaked at 2,501,348 KiB resident memory. A figure-only all_debug rerender, exit 0,
+overrode the painters' default dot marker with the required solid triangles;
+no current measurement was repeated for it.</p>
+<p>Earlier resumed job <code>1274978</code> exited 1 while serializing JAX topology
+arrays after the gate assertions; its refusal is preserved and the writer now
+converts those leaves and persists the booked census before adding details.
+That failed allocation used 154 seconds elapsed and 183.826 CPU seconds.
+The <a href="/nova/figures/cut-cell-current-attribution/outboard-hole/attribution-decision.json">decision receipt</a> binds the
+input blobs, artifact hashes, controls, and child exits. The
+<a href="/nova/figures/cut-cell-current-attribution/outboard-hole/terminal-allocation.log">allocation log</a>,
+<a href="/nova/figures/cut-cell-current-attribution/outboard-hole/terminal-census.log">census log</a>, and
+<a href="/nova/figures/cut-cell-current-attribution/outboard-hole/terminal-controls.log">control log</a> preserve the measured evidence.</p>
+<p><strong>Limits retained:</strong> the independent per-cell adaptive integration
+recorded 72 warnings, which are retained in the receipt; no sub-microampere oracle
+accuracy is claimed. The persisted terminal is nonconverged. The observed support
+mismatch therefore identifies where the current is lost but does not establish
+whether the curved clip itself is wrong or is faithfully clipping a distorted
+terminal field. The next investigation should compare the local normalized-flux
+density boundary and exact clipped polygons with the independent analytic domain
+on these named cells, retaining the convergence qualifier. Changing participation
+labels is ruled out as the remedy on this measured state.</p>
 </section>
 </main>
 </body>

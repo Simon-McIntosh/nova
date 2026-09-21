@@ -104,6 +104,26 @@ reproduction before selecting a candidacy change. See the
 <a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#current-candidacy-preflight">current-candidacy prerequisite record</a>
 for commands, evidence limits, and the untouched acceptance criteria.</p>
 
+<h3 id="s6-current-candidacy-attribution">Candidacy measured: no label repair is needed</h3>
+<p><strong>2026-09-21 resumed worker outcome.</strong> The repaired fixture at
+<code>120d6136b</code> and the repeatable gate run without the compatibility bridge;
+all three published gate assertions pass. Every one of the 135 cells is eligible
+in both modes. Making every label CORE changes no current (maximum per-cell delta
+0.0 A), while deliberately excluding cell 106 removes 192,343.790435 A. Candidacy
+is therefore not the cause and is unchanged. Chord mode books 15.868149 MA
+(2.737545% below target); exact mode books 15.491114 MA (5.048548% below target).
+The remaining loss is in pointwise normalized-flux confinement and clipped
+geometry: cut-cell net deficits are 429.462 kA chord and 756.623 kA exact, with
+zero exact support in analytic cut cells 2, 35, 75, 89, 114, 126, 128, and 134.
+Cells 75 and 134 each lose 76.395 kA despite eligible labels and centroid
+<code>psi_norm &lt; 1</code>. The original five outboard cells all remain nonzero.
+The terminal is nonconverged at residual 0.00744753; the one-percent current
+criterion remains unmet and belongs to the support/field investigation.
+Commits <code>dbbae47a0</code> and <code>3256c286e</code> retain the full census,
+controls, and inspected PNG/SVG. See the
+<a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#current-candidacy-attribution">quantitative attribution and poloidal comparison</a>.
+No production or test files, section status, or driving followup were changed.</p>
+
 <h2 id="s7">§7 — Wire the typed census saddle into the production spline-chain clip and re-solve the diverted certificate rows</h2>
 <p>The wedge split landed on the oracle (core-side current within 1e-13 relative of the analytic wedge integral at 110, 300 and 500 cells) but the production spline route discards it because the operator passes no saddle vertex, and the oracle compares the carrier against its own emitted polygons. Pass the typed census saddle as the clip's saddle vertex, consume the four region-owned moment profiles in the plasma partition and the null read, and make the oracle independent of the carrier by integrating the analytic current over the region bounded by the separatrix branches and the cell edges. Gate: the independent oracle at 110, 300 and 500 cells on all_debug, then one H200 job re-solving the four diverted certificate rows with the four limited rows as the bit-identical negative control.</p>
 

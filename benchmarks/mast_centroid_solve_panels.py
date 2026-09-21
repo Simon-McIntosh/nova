@@ -41,7 +41,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from benchmarks import coil_edit_latency as edit
-from benchmarks import efit_forward_parity_slice as parity
 from benchmarks import mast_response_carrier_warm as response_carrier
 from nova.catalog.mast_geometry import shaped_section_vertices
 from nova.equilibrium.forward import _lattice_cells
@@ -224,6 +223,22 @@ def _stored_profiles(shot: int, row: int) -> dict[str, np.ndarray]:
     }
 
 
+def _sampled_factory(nodes: np.ndarray, values: np.ndarray) -> Any:
+    """Return the array-owned equivalent of the case's interpolating closure.
+
+    The default representation closes the evaluator over its tables, so a
+    changed table is a changed program by construction. This one carries the
+    coordinate and value tables as leaves, so a series that moves the tables
+    shares one compiled program. The end caps differ in form -- a quintic cap
+    here against the case's slope-matched cubic -- so a run on this
+    representation is not a bit reproduction of the reference case, and the
+    receipt says so rather than implying one.
+    """
+    from nova.equilibrium.solve_request import SampledFluxFunction
+
+    return SampledFluxFunction(np.asarray(nodes, float), np.asarray(values, float))
+
+
 def _varied_source(
     stored: dict[str, np.ndarray], pressure_scale: float, field_scale: float
 ) -> Any:
@@ -234,20 +249,18 @@ def _varied_source(
     distributed: p-prime enters the toroidal density weighted by R and
     ff-prime weighted by 1/R, so their ratio is the radial shape lever.
 
-    The sampled tables are closed over by the evaluator rather than carried as
-    traced leaves, so each member is its own compiled program. That is the
-    representation the reference case declares and it is kept rather than
-    swapped for a cheaper one, because a different evaluator would be a
-    different equilibrium.
+    The tables are carried as array leaves, so every member of the series
+    shares one compiled program and the variation costs one solve rather than
+    one build.
     """
     from nova.equilibrium.source import DomainProfile, ForwardSource
 
     return ForwardSource(
         core=DomainProfile(
-            p_prime=parity._profile_function(
+            p_prime=_sampled_factory(
                 stored["psi_norm"], pressure_scale * stored["p_prime"]
             ),
-            ff_prime=parity._profile_function(
+            ff_prime=_sampled_factory(
                 stored["psi_norm"], field_scale * stored["ff_prime"]
             ),
         ),
@@ -720,7 +733,9 @@ def series(
         default_persistent_compilation_cache_root()
     )
     started = time.perf_counter()
-    profile, prepared, carrier = edit._prepare_case(carrier_path, grid_points)
+    profile, prepared, carrier = edit._prepare_case(
+        carrier_path, grid_points, _sampled_factory
+    )
     operator = profile.operator
     lattice = profile.lattice
     node_count = int(operator.grid.node_number)
@@ -735,6 +750,7 @@ def series(
     stored = _stored_profiles(edit.SHOT, edit.SLICE_INDEX)
     members: list[dict[str, Any]] = []
     panels_data: list[dict[str, Any]] = []
+    program = None
     for offset in RATIO_OFFSETS:
         varied = _varied_source(stored, 1.0 + offset, 1.0 - offset)
         member_profile = profile._with_source(varied)
@@ -744,9 +760,10 @@ def series(
             base_current,
             requested,
             target_current,
-            None,
+            program,
             pairs,
         )
+        program = result.program
         record = _solve_record(result, wall)
         record["ratio_offset"] = float(offset)
         record["pressure_scale"] = 1.0 + float(offset)
@@ -811,12 +828,14 @@ def series(
             "target_current_a": target_current,
             "ratio_offsets": [float(value) for value in RATIO_OFFSETS],
             "program_reuse": (
-                "none: the reference case closes its evaluator over the sampled "
-                "tables, so every member compiles its own program"
+                "one compiled program serves every member: the tables cross the "
+                "program boundary as array leaves"
             ),
             "profile_representation": (
-                "65-node sampled tables from efm/pprime and efm/ffprime with a "
-                "slope-matched cubic exterior closure, not a polynomial family"
+                "65-node efm/pprime and efm/ffprime tables carried by "
+                "SampledFluxFunction; the reference case closes the same tables "
+                "into its evaluator behind a slope-matched cubic cap, so this "
+                "series is not a bit reproduction of that case"
             ),
         },
         "members": members,

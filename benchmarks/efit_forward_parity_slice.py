@@ -416,8 +416,17 @@ def build_profile(
     current_field: str,
     *,
     grid_points: int | None = None,
+    flux_function_factory: Any = None,
 ) -> tuple[ForwardProfile, np.ndarray, np.ndarray, dict[str, Any]]:
-    """Build one prescribed-anchor forward profile and reference seed."""
+    """Build one prescribed-anchor forward profile and reference seed.
+
+    ``flux_function_factory`` names the representation the two stored profile
+    tables are carried in.  The default closes the evaluator over the tables,
+    which is what pins one member to one compiled program.  A caller varying
+    the tables across members supplies an array-owned representation instead,
+    so the tables cross the program boundary as leaves and the members share a
+    program; the representation is a declared input either way.
+    """
     full_r, full_z, reference_full = _stored_map(group, row)
     radius, height, reference, grid_selection = _benchmark_spatial_grid(
         full_r, full_z, reference_full, grid_points
@@ -459,10 +468,11 @@ def build_profile(
         raise ValueError("efm/psi_norm is not the declared uniform 65-point base")
     p_prime = -np.asarray(group["pprime"][row], dtype=np.float64) / TOTAL_FLUX_FACTOR
     ff_prime = -np.asarray(group["ffprime"][row], dtype=np.float64) / TOTAL_FLUX_FACTOR
+    build_flux_function = flux_function_factory or _profile_function
     source = ForwardSource(
         core=DomainProfile(
-            p_prime=_profile_function(psi_norm, p_prime),
-            ff_prime=_profile_function(psi_norm, ff_prime),
+            p_prime=build_flux_function(psi_norm, p_prime),
+            ff_prime=build_flux_function(psi_norm, ff_prime),
         ),
         boundary_pressure=float(group["ppsi_c"][row, -1]),
         boundary_field_function=float(group["fpsi_c"][row, -1]),
@@ -2569,13 +2579,19 @@ def _mast_case_from_selection(
     qualification: dict[str, Any],
     *,
     grid_points: int | None = None,
+    flux_function_factory: Any = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Build one selected MAST prescribed-anchor reference state."""
     shot = int(selected["shot"])
     row = int(selected["slice_index"])
     group = zarr.open_group(str(store / f"{shot}.zarr"), mode="r")["efm"]
     profile, seed, reference, provenance = build_profile(
-        group, shot, row, "fcoil_c", grid_points=grid_points
+        group,
+        shot,
+        row,
+        "fcoil_c",
+        grid_points=grid_points,
+        flux_function_factory=flux_function_factory,
     )
     axis = np.asarray(
         [group["magnetic_axis_r"][row], group["magnetic_axis_z"][row]],

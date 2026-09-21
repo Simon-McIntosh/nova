@@ -539,7 +539,9 @@ def _vertical_centroid_pair(
 
 
 def _prepare_case(
-    carrier_path: Path, grid_points: int | None = None
+    carrier_path: Path,
+    grid_points: int | None = None,
+    flux_function_factory: Any = None,
 ) -> tuple[Any, dict[str, Any], dict[str, Any]]:
     """Prepare the sweep's base frame, optionally on a named axis count.
 
@@ -554,6 +556,7 @@ def _prepare_case(
         selected,
         qualification=None,
         grid_points=grid_points,
+        flux_function_factory=flux_function_factory,
     )
     passive_case, profile, policy = parity._passive_inclusive_case(
         case,

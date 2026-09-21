@@ -383,7 +383,7 @@ class FixedPointResult(NamedTuple):
     ``promotion_recovery_outcomes`` names that result and is not-applicable for
     promotions decided by the Newton ladder.
     ``promotion_model_rebuild_activations`` is one when radius exhaustion
-    triggers a fresh linearization, and ``promotion_model_rebuild_damping``
+    activates an exact local tangent model, and ``promotion_model_rebuild_damping``
     records its accepted Levenberg damping or the last refused value.
     ``promotion_descent_activations`` is one when both recovery models exhaust
     and the smooth relative-sup gradient ladder runs.  Its selected absolute step

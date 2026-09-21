@@ -132,18 +132,38 @@
     lowered solve still has 73 read-entry markers. See the
     <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#shared-live-read-bodies">candidate measurements, unchanged terminal field and remaining evaluator work</a>.</p>
 
-    <h3 id="s2-read-body-counter-boundary">Read-count acceptance requires an optimized-body definition</h3>
+    <h3 id="s2-read-body-counter-boundary">Read-count instrument and clarified acceptance</h3>
     <p>The unchanged assigned base reproduces 126,313,582 serialized bytes with
     136.081234 s compile wall and all 1,529 terminal values matching the current
     <code>d730c294</code> pin exactly. Its 73 StableHLO read-entry markers coexist
     with three executed trips in 16 slots. Commit <code>bafd2a8a0</code> adds an
     optimized-body counter control that sees three executable copies behind one
     lowered callee; substituting a StableHLO-only counter fails at
-    <code>assert 1 == 3</code>. The evaluator rewrite is held for the coordinator
-    to confirm one optimized static body independently of runtime trip count.
-    The sub-100 MB target and full operator-body sharing remain unmet. See the
+    <code>assert 1 == 3</code>. The coordinator subsequently confirmed one
+    optimized primal body and one optimized linearized body per shared scan body,
+    with runtime trips reported separately; the definition hold is retired.
+    The implementation resumes in the following landing. See the
     <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#read-body-counter-boundary">baseline, mapping receipt, counter refusal and pending definition</a>.
     This entry leaves the section and its driving followup open.</p>
+
+    <h3 id="s2-shared-promotion-bodies">Shared promotion bodies put the executable below 100 MB</h3>
+    <p>Commit <code>faf2a7e014eade3cb0bd28a707169b26de667c6d</code> routes the first
+    promotion and unchanged-state retries through one traced body. The CPU executable
+    falls from 126,313,582 to <strong>88,289,094 bytes</strong> (30.10% smaller),
+    compiles in 140.948557 s, and adds 8,125 mappings at load. All 1,529 terminal
+    values retain the <code>d730c294</code> digest exactly, maximum difference 0 Wb.
+    The focused and fallback-identity gates pass 157 tests; restoring the separately
+    lowered promotion bodies fails both optimized guards at <code>assert 2 == 1</code>.</p>
+    <p>The census measures actual HLO protobuf bytes embedded in the executable,
+    separating direct computation bytes from overlapping reachable regions. It identifies
+    the duplicated 32.801 MB carried-fallback region that the change shares.
+    The physical ceiling is met. The global one-primal/one-linearized read proof remains
+    unaccepted: a known single-read control fans into 27 primal marker instructions and
+    three derivative marker instructions after fusion, so that raw counter cannot prove
+    complete-body multiplicity. The precise census, retained change and remaining
+    instrument work are in the
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#shared-promotion-byte-census">cumulative landing record</a>.
+    No driving followup or section status is closed by this worker.</p>
 
     <h2 id="s3">§3 — Carry every solve evaluation through one traced operator state machine</h2>
     <p>The frozen-topology interim reduced the 300- and 1000-cell optimised solves from 654,832 and 662,331

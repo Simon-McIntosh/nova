@@ -1,0 +1,132 @@
+[
+  {
+    "variant": "baseline",
+    "target": "tests/test_xpoint_cell_wedge_clip.py",
+    "command": [
+      "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+      "baseline",
+      "tests/test_xpoint_cell_wedge_clip.py"
+    ],
+    "exit_status": 0,
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_xpoint_cell_wedge_clip.log",
+    "completed": true
+  },
+  {
+    "variant": "after",
+    "target": "tests/test_xpoint_cell_wedge_clip.py",
+    "command": [
+      "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+      "after",
+      "tests/test_xpoint_cell_wedge_clip.py"
+    ],
+    "exit_status": 0,
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_xpoint_cell_wedge_clip.log",
+    "completed": true
+  },
+  {
+    "variant": "baseline",
+    "target": "tests/test_clipped_support_quadrature.py",
+    "command": [
+      "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+      "baseline",
+      "tests/test_clipped_support_quadrature.py"
+    ],
+    "exit_status": 0,
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_clipped_support_quadrature.log",
+    "completed": true
+  },
+  {
+    "variant": "after",
+    "target": "tests/test_clipped_support_quadrature.py",
+    "command": [
+      "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+      "after",
+      "tests/test_clipped_support_quadrature.py"
+    ],
+    "exit_status": 0,
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_clipped_support_quadrature.log",
+    "completed": true
+  },
+  {
+    "variant": "baseline",
+    "target": "tests/test_solovev_certificate_builder.py",
+    "command": [
+      "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+      "baseline",
+      "tests/test_solovev_certificate_builder.py"
+    ],
+    "exit_status": 0,
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_solovev_certificate_builder.log",
+    "completed": true
+  },
+  {
+    "variant": "after",
+    "target": "tests/test_solovev_certificate_builder.py",
+    "command": [
+      "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+      "after",
+      "tests/test_solovev_certificate_builder.py"
+    ],
+    "exit_status": 0,
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_solovev_certificate_builder.log",
+    "completed": true
+  },
+  {
+    "variant": "baseline",
+    "target": "tests/test_exact_clip_moments.py",
+    "command": [
+      "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+      "baseline",
+      "tests/test_exact_clip_moments.py"
+    ],
+    "exit_status": 0,
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_exact_clip_moments.log",
+    "completed": true
+  },
+  {
+    "variant": "after",
+    "target": "tests/test_exact_clip_moments.py",
+    "command": [
+      "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+      "after",
+      "tests/test_exact_clip_moments.py"
+    ],
+    "exit_status": 0,
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_exact_clip_moments.log",
+    "completed": true
+  },
+  {
+    "variant": "baseline",
+    "target": "tests/test_moment_path_separatrix_test.py",
+    "command": [
+      "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+      "baseline",
+      "tests/test_moment_path_separatrix_test.py"
+    ],
+    "exit_status": 0,
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_moment_path_separatrix_test.log",
+    "completed": true
+  },
+  {
+    "variant": "after",
+    "target": "tests/test_moment_path_separatrix_test.py",
+    "command": [
+      "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+      "after",
+      "tests/test_moment_path_separatrix_test.py"
+    ],
+    "exit_status": 0,
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_moment_path_separatrix_test.log",
+    "completed": true
+  }
+]

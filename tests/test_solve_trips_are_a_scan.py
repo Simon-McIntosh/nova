@@ -101,6 +101,66 @@ def _barrier_count(function, *arguments):
     )
 
 
+@pytest.mark.parametrize("use_incumbent", [False, True])
+def test_shadow_selection_lowers_one_live_map(use_incumbent):
+    initial = jnp.asarray([0.25, 0.75], dtype=jnp.float64)
+    previous = jnp.asarray([True, False])
+
+    def induced(candidate, _previous):
+        return candidate >= 0.5
+
+    def mapped(candidate, shadow):
+        value = jax.lax.optimization_barrier(candidate)
+        return jnp.where(shadow, value, 0.25 * value + 1.0)
+
+    def selected(candidate, incumbent):
+        return fixed_point._map_on_selected_shadow(
+            candidate, previous, incumbent, induced, mapped
+        )
+
+    def reference(candidate, incumbent):
+        return fixed_point._acceptance_map_on_selected_partition(
+            candidate,
+            previous,
+            incumbent,
+            lambda value: mapped(value, previous),
+            induced,
+            mapped,
+        )
+
+    assert _barrier_count(jax.lax.optimization_barrier, initial) == 1
+    assert _barrier_count(selected, initial, jnp.asarray(use_incumbent)) == 1
+    for evaluate in (
+        lambda fn: fn(initial, use_incumbent),
+        lambda fn: jax.jacfwd(fn)(initial, use_incumbent),
+    ):
+        np.testing.assert_array_equal(evaluate(selected), evaluate(reference))
+
+
+def test_backtracking_incumbent_shares_the_candidate_read_body():
+    def mapped(candidate):
+        return jnp.tanh(jax.lax.optimization_barrier(candidate)) + 0.5
+
+    def scores(state):
+        return fixed_point._backtracking_scores(
+            mapped,
+            lambda candidate: 0.25 * candidate + 1.0,
+            state,
+            jnp.ones_like(state),
+            jnp.asarray(1.0),
+            False,
+        )
+
+    state = jnp.asarray([0.25, 0.75], dtype=jnp.float64)
+    assert _barrier_count(jax.lax.optimization_barrier, state) == 1
+    assert _barrier_count(scores, state) == 1
+    observed = scores(state)
+    np.testing.assert_array_equal(
+        observed.incumbent_residual,
+        fixed_point._relative_residual(mapped(state), state),
+    )
+
+
 @pytest.mark.parametrize("trips", [2, 5])
 def test_active_trip_body_is_lowered_once(monkeypatch, trips):
     original = fixed_point._newton_krylov_inner

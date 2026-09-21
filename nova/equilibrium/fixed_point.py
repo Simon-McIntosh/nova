@@ -962,6 +962,27 @@ def _acceptance_map_on_selected_partition(
     )
 
 
+def _map_on_selected_shadow(
+    candidate,
+    previous_shadow,
+    use_incumbent_partition,
+    induced_shadow_fn,
+    shadowed_map_fn,
+):
+    """Select the residual domain before evaluating the common live map.
+
+    Both authorities use the same candidate-dependent current read; only the
+    residual exclusion differs. Selecting that exclusion first keeps one map
+    body in the lowered selection without retaining another state's topology.
+    """
+    shadow = jax.lax.cond(
+        jnp.asarray(use_incumbent_partition),
+        lambda: previous_shadow,
+        lambda: jnp.ravel(induced_shadow_fn(candidate, previous_shadow)),
+    )
+    return shadowed_map_fn(candidate, shadow)
+
+
 def _backtracking_scores(
     map_fn: Callable[[jax.Array], jax.Array],
     model_map_fn: Callable[[jax.Array], jax.Array],
@@ -986,10 +1007,11 @@ def _backtracking_scores(
             _relative_residual(mapped, candidate),
         )
 
-    merits, residuals = jax.lax.map(score, candidates)
-    incumbent_mapped = acceptance_map_fn(state)
-    incumbent_merit = _smooth_relative_sup_merit(incumbent_mapped, state)
-    incumbent_residual = _relative_residual(incumbent_mapped, state)
+    all_merits, all_residuals = jax.lax.map(
+        score, jnp.concatenate((candidates, state[None, :]), axis=0)
+    )
+    merits, incumbent_merit = all_merits[:-1], all_merits[-1]
+    residuals, incumbent_residual = all_residuals[:-1], all_residuals[-1]
     acceptance_reference = jnp.where(
         own_mask_acceptance, incumbent_merit, reference_merit
     )
@@ -2568,6 +2590,9 @@ def _newton_krylov_inner(
     acceptance_shadowed_map_fn: (
         Callable[[jax.Array, jax.Array], jax.Array] | None
     ) = None,
+    acceptance_selected_map_fn: (
+        Callable[[jax.Array, jax.Array, jax.Array], jax.Array] | None
+    ) = None,
     own_mask_acceptance: bool = False,
     presettlement_incumbent_scoring: jax.Array | bool = False,
     carry_unchanged_fallback: bool = True,
@@ -2811,6 +2836,10 @@ def _newton_krylov_inner(
         def acceptance_map(candidate):
             if acceptance_shadow_mask_fn is None or not own_mask_acceptance:
                 return frozen_map(candidate)
+            if acceptance_selected_map_fn is not None:
+                return acceptance_selected_map_fn(
+                    candidate, carry.shadow_mask, presettlement_incumbent_scoring
+                )
             return _acceptance_map_on_selected_partition(
                 candidate,
                 carry.shadow_mask,
@@ -3484,6 +3513,15 @@ def _active_set_newton_krylov(
         )
         acceptance_map = frozen_acceptance_map if freeze_topology else shadowed_map_fn
 
+        def selected_acceptance_map(candidate, previous_shadow, use_incumbent):
+            return _map_on_selected_shadow(
+                candidate,
+                previous_shadow,
+                use_incumbent,
+                promoted_shadow_mask_fn,
+                shadowed_map_fn,
+            )
+
         return _newton_krylov_inner(
             frozen_map,
             state,
@@ -3503,6 +3541,9 @@ def _active_set_newton_krylov(
             model_trust_selection=model_trust_selection,
             acceptance_shadow_mask_fn=acceptance_mask,
             acceptance_shadowed_map_fn=acceptance_map,
+            acceptance_selected_map_fn=(
+                None if freeze_topology else selected_acceptance_map
+            ),
             own_mask_acceptance=own_mask_acceptance,
             presettlement_incumbent_scoring=presettlement,
             precision=precision,

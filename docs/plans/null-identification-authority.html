@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="230">
+<meta name="plan-version" content="231">
 </head>
 <body>
 <main class="plan-doc">
@@ -430,6 +430,11 @@ for the lead before merge.</p>
 <article class="r-fu" data-id="f-discarded-wall-level-candidate" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="solver wall-read review (codex sol)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship null-identification-authority" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">f-discarded-wall-level-candidate</h4>
     <div class="r-fu-body"><p>From review <code>solver wall-read review (codex sol)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-wall-read</code>.</p><p></p></div>
+    <pre class="r-fu-prompt">/reckon-ship null-identification-authority</pre>
+    </article>
+<article class="r-fu" data-id="f-fsa-audit-bank-drift-coverage" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="solver census-and-certificate-drivers review (codex luna)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship null-identification-authority" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Repair bank-drift resume and identity coverage guards</h4>
+    <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Commit 5ed1dd3b, benchmarks/bank_drift_paired_probe.py:337-342, reads checkpointed rows and then replaces them with an empty list, so a resumed campaign re-emits already landed identities; the reproduction is in /tmp/fsa-driver-reproductions.log (`RESUME_REPRO ... old_marker=None`). Commit 5ed1dd3b, benchmarks/bank_drift_paired_probe.py:477-483, iterates only left-tree identities, so a right-only identity is omitted while the merge can still report the expected count; the synthetic reproduction reports rows_present=2 with identities=[&#x27;left-only&#x27;]. Repair: preserve checkpoint rows, skip their identities, compare the union of left/right identities, and reject duplicate or one-sided rows unless the receipt names the absence. recommends_skill=/reckon-ship null-identification-authority §1.</p></div>
     <pre class="r-fu-prompt">/reckon-ship null-identification-authority</pre>
     </article>
 </section>

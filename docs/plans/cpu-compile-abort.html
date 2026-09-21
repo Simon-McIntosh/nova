@@ -23,9 +23,9 @@
   <title>The CPU Lane Aborts In Compilation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-20">
+<meta name="plan-modified" content="2026-09-21">
 <meta name="plan-impl" content="0.55">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 </head>
 <body>
   <main class="plan-doc">
@@ -137,6 +137,16 @@
     <h4 class="r-fu-title">Run each certificate row in its own process, so no process loads more programs than it can map</h4>
     <div class="r-fu-body"><p>The interim half of the lead's ruling. One program load costs about seventeen thousand mappings against a cap of 65,530, so three loads fit and the certificate asks for four; the run that completed did so only because it released a program before its fourth load. Giving each row its own process makes that release unconditional. It changes no solver code and it unblocks the two unmeasured certificate rows, the coil-edit regeneration and the centroid positive arm while the program-size work on the route-integrity plan does the real repair.</p><p>The certificate driver already persists each row's receipt as it lands, so the per-process shape costs nothing in recoverability. The regeneration sweep and the centroid arm need the same treatment and are named here so they are not forgotten when the certificate is done.</p></div>
     <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort §2</pre>
+    </article>
+<article class="r-fu" data-id="f-fsa-audit-probe-exit-status" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="solver census-and-certificate-drivers review (codex luna)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship cpu-compile-abort" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Propagate compile-abort child failure in the sampler exit status</h4>
+    <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Commit 17bd21d5, benchmarks/compile_abort_probe.py:149-167, writes the child&#x27;s exit_code but unconditionally returns 0. Reproduction in /tmp/fsa-driver-reproductions.log and current all_debug receipt current-abort-summary.json: `/bin/sh -c exit 7` records child exit 7 while the wrapper prints WRAPPER_EXIT=0. Repair: return the recorded child status, or expose an explicit measurement-success status and make every caller gate on the receipt rather than the wrapper&#x27;s zero. recommends_skill=/reckon-ship cpu-compile-abort §2.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort</pre>
+    </article>
+<article class="r-fu" data-id="f-fsa-audit-certificate-receipt-provenance" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="solver census-and-certificate-drivers review (codex luna)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship cpu-compile-abort" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make per-row certificate receipts relocatable and status-faithful</h4>
+    <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Unpromoted run r-20260920T180231259880-cca-one-certificate-row-per-process, commit 2710b2ea1, benchmarks/solve_program_size_gate.py:1737 and :2165, writes candidate_state_array_path as an absolute worktree path and calls the probe wrapper result exit_code even though the child status is only probe_exit_code; the run manifest names both follow-ons. Repair receipt paths relative to the receipt/state directory and distinguish wrapper exit from child exit in the schema and gate. recommends_skill=/reckon-ship cpu-compile-abort §2.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort</pre>
     </article>
 </section>
 

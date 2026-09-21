@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="86">
+<meta name="plan-version" content="87">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -155,6 +155,11 @@
 <article class="r-fu" data-id="f-fsa-resolve-duplicate-latency-figures" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="figure-and-solver-audit reviewer fsa-audit-figures-remaining-directories" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship forward-solve-api" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Resolve the five contradictory coil-edit latency renderings into one canonical figure</h4>
     <div class="r-fu-body"><p>Audit anchor: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figures-remaining-directories</code>; reviewer node <code>fsa-audit-figures-remaining-directories</code>, review lane claude-opus.</p><p><code>docs/figures/forward-solve-api/</code> carries five byte-distinct renderings of the same case (MAST 22086/43 mixed arm, P4-UPPER): <code>coil-edit-latency.png</code> (md5 9491567066442bdc791cd3002f8be4af), <code>coil-edit-latency-converging.png</code>, and <code>coil-edit-latency/</code>'s <code>coil-edit-latency.png</code>, <code>coil-edit-latency-2026-09-08.png</code> and <code>coil-edit-latency-2026-09-15.png</code>. Only one is cited. They disagree materially: wall time 1e4-1e5 ms against 300-450 ms, active-set trips to 16 against a maximum of 4, boundary displacement 2500 mm against 440-300 mm against 210-510 mm, and termination vocabularies that do not overlap. <code>coil-edit-latency-converging.png</code> also plots an unexplained 'cold-portfolio control' on four of twenty edits. Three of the five carry a bottom-right panel title truncated at the canvas edge. Repair: keep the one rendering the record cites, move the dated snapshots to an <code>archive/</code> subdirectory with a one-line README naming what each superseded, delete or cite the rest, and fix the truncated titles. Reviewer evidence: the figure and solver audit anchor for the remaining figure directories.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solve-api</pre>
+    </article>
+<article class="r-fu" data-id="f-fsa-audit-vertical-regeneration" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="solver census-and-certificate-drivers review (codex luna)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship forward-solve-api" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Do not promote the vertical constraint until the fixture regeneration lands</h4>
+    <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Promotion run r-20260919T231747888058-fsa-coil-edit-under-the-vertical-constraint, commit c920e30d, benchmarks/coil_edit_latency.py: the required twenty-edit regeneration aborts at the LLVM section allocation after nine edits, so the persisted census and redraw in the done-when are absent. Repair the allocation/compile route or split the sweep into durable one-edit receipts, then require the regenerated fixture and panel before promotion. recommends_skill=/reckon-ship forward-solve-api §5.</p></div>
     <pre class="r-fu-prompt">/reckon-ship forward-solve-api</pre>
     </article>
 </section>

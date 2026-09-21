@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.55">
 </head>
@@ -262,6 +262,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260921T123028157432-fsri-one-operator-read-per-trip-under-100-mb" data-who="reckon-ship" data-when="2026-09-21T13:31:06Z">
     <div class="r-comment-body"><p>shared live maps across the shadow-selection branches take the weak-rotation 300-cell certificate executable from 146,456,085 to 126,313,707 bytes with the current-base terminal state d730c294 bit-identical and the focused suite at 151 passed; the sub-100 MB ceiling and the single lowered read body are the third rung</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260921T135548855711-fsri-one-read-body-per-trip-under-100-mb" data-who="reckon-ship" data-when="2026-09-21T14:59:37Z">
+    <div class="r-comment-body"><p>shared initial and retried promotion bodies in _newton_krylov_inner take the weak-rotation 300-cell certificate executable from 126,313,582 to 88,289,094 bytes, under the 100 MB ceiling, with the d730c294 terminal state bit-identical, CPU compile witness exit 0, focused suites 157 passed, control reddens both duplication guards; the global one-primal/one-linearized read proof is not claimed because the optimized-HLO counting positive control failed (instrument repair recorded as a follow-on)</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-fsri-section-2-goes-first-and-never-loops" data-who="lead" data-when="2026-09-20T19:55:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-09-20, reordering this plan. Section 2 goes first, ahead of the Newton-Krylov repair and the pre-warm pin, and on the strongest lane. The reason is measured on the compile-abort plan: one compiled solve costs about seventeen thousand memory mappings to load because it is 400 to 900 MB of executable, a process is capped at 65,530, and the certificate needs four loads, so every heavy CPU measurement in the sprint now aborts in compilation. The pre-warm pin is moot until this section shrinks the programs; pre-warming 450 MB programs is what fills a 7.6 GB cache.</p><p>The ruling is also a design constraint, stronger than the section's wording of scanning the trips: <strong>these processes never loop; they are designed as efficient maps.</strong> Newton steps, trips, the per-trip read and the polygon fan over cells are expressed as vectorised maps and scans with fixed telemetry slots, never as Python loops that inline a copy of the body per iteration. A converged forward solve compiles to megabytes.</p></div>

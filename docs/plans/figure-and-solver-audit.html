@@ -129,15 +129,16 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<article class="r-decision" data-id="review-lane-and-wave-policy" data-status="locked" data-choice="figure-led-on-claude-then-code-on-codex" data-locked-by="lead" data-locked-at="2026-09-21">
-    <h4 class="r-decision-question">What shape does the review take, and what happens to the local lane's work while it runs?</h4>
-    <ul class="r-decision-options">
-      <li data-option="figure-led-on-claude-then-code-on-codex">Figure-led audit on claude-opus now, one reviewer per figure directory; the solver core commit by commit on codex once its window resets; findings as scored rows and repair nodes.</li>
-      <li data-option="commit-by-commit-on-claude">Every promotion this sprint re-read on claude-opus with its gate re-run at the merged head.</li>
-      <li data-option="wait-for-codex">No review spend until the codex window resets; review there only.</li>
-    </ul>
-    <p class="r-decision-rationale">Lead 2026-09-21. The figure is the artifact a reader can check without re-running anything and the lane that can open it is idle, so the figures go first; the solver core follows on the strongest lane. While the review runs, nodes in flight on the local lane finish but nothing from that lane is promoted without a scored review, and no new implementation node is dispatched there; it keeps investigation and reporting nodes. The findings also scope the future use of this class of background agent, which the lead judges to have a role and to have been deployed too liberally.</p>
-</article>
+<div class="r-dec" data-key="review-lane-and-wave-policy" data-choice="figure-led-on-claude-then-code-on-codex" data-by="lead" data-when="2026-09-21T03:40:00+00:00">
+    <p class="r-dec-q">What shape does the review take, and what happens to the local lane's work while it runs?</p>
+    <p class="r-dec-ctx">157 promotions this sprint, mostly on the locally served lane; the codex window spent until 05:16Z; the claude-opus profile idle. A review by the lane that did the work is worthless, so the reviewer is another lane.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="figure-led-on-claude-then-code-on-codex">figure-led audit on claude-opus now, one reviewer per figure directory; the solver core commit by commit on codex once its window resets; findings as scored rows and repair nodes</button>
+      <button class="r-opt" data-value="commit-by-commit-on-claude">every promotion this sprint re-read on claude-opus with its gate re-run at the merged head</button>
+      <button class="r-opt" data-value="wait-for-codex">no review spend until the codex window resets; review there only</button>
+      </p>
+    <p class="r-dec-rat">Lead 2026-09-21. The figure is the artifact a reader can check without re-running anything and the lane that can open it is idle, so the figures go first; the solver core follows on the strongest lane. While the review runs, nodes in flight on the local lane finish but nothing from that lane is promoted without a scored review, and no new implementation node is dispatched there; it keeps investigation and reporting nodes. The findings also scope the future use of this class of background agent, which the lead judges to have a role and to have been deployed too liberally.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">

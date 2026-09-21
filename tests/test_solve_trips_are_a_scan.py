@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from functools import partial
+import re
 
 import jax
 import jax.numpy as jnp
@@ -98,6 +99,36 @@ def _barrier_count(function, *arguments):
     lowered = jax.jit(function).lower(*arguments)
     return str(lowered.compiler_ir(dialect="stablehlo")).count(
         "stablehlo.optimization_barrier"
+    )
+
+
+def _optimized_read_body_count(function, *arguments):
+    """Count the distinctive read operation after the compiler has inlined calls."""
+    compiled = jax.jit(function).lower(*arguments).compile()
+    return len(re.findall(r"^\s*(?:ROOT )?%\S+ = .* sine\(", compiled.as_text(), re.M))
+
+
+def test_read_body_counter_rejects_lowered_call_sharing():
+    """A shared lowered callee must not hide its optimized copies."""
+
+    @jax.jit
+    def read(state):
+        return jnp.sin(state)
+
+    def repeated(first, second, third):
+        return read(first), read(second), read(third)
+
+    def shared(states):
+        return jax.lax.map(read, states)
+
+    states = jnp.arange(51, dtype=jnp.float64).reshape(3, 17) / 51.0
+    lowered = jax.jit(repeated).lower(*states)
+    assert str(lowered.compiler_ir(dialect="stablehlo")).count("stablehlo.sine") == 1
+    assert _optimized_read_body_count(read, states[0]) == 1
+    assert _optimized_read_body_count(repeated, *states) == 3
+    assert _optimized_read_body_count(shared, states) == 1
+    np.testing.assert_array_equal(
+        np.stack(jax.jit(repeated)(*states)), jax.jit(shared)(states)
     )
 
 

@@ -10,10 +10,67 @@ import numpy as np
 import pytest
 
 from nova.equilibrium import fixed_point, reduced_newton
+from nova.equilibrium.forward_operator import CellCurrentMoments, ForwardFluxOperator
 from nova.jax.config import Precision, configure_dtypes
 
 configure_dtypes()
 assert jax.config.jax_enable_x64 is True
+
+
+class _CandidateCurrentOperator(ForwardFluxOperator):
+    """A normalized two-cell map whose current read varies with the candidate."""
+
+    def __init__(self):
+        self.use_linear_moments = False
+
+    def cell_current_moments(self, psi, requested_class=None):
+        current = jnp.stack((1.0 + 0.25 * psi[0], jnp.ones_like(psi[1])))
+        zero = jnp.zeros_like(current)
+        return CellCurrentMoments(current, zero, zero)
+
+    def current_moment_image(self, moments):
+        return moments.cell_current
+
+    def _frozen_topology_partition(self, *_args, **_kwargs):
+        raise AssertionError(
+            "normalized-current read was frozen across Newton candidates"
+        )
+
+
+@pytest.mark.parametrize("target", [2.0, 3.0])
+def test_normalized_current_trip_keeps_candidate_reads_live(target):
+    operator = _CandidateCurrentOperator()
+    initial = jnp.full(2, target / 2.0, dtype=jnp.float64)
+    external = jnp.zeros_like(initial)
+    shadow = jnp.zeros_like(initial, dtype=bool)
+    mapped = operator.traced_flux_map_with_shadow(target_current=target)
+    bound = fixed_point._bind_traced_map_arguments(
+        mapped, (external, operator, jnp.asarray(target))
+    )
+
+    def solve(state):
+        return fixed_point.newton_krylov(
+            lambda candidate: bound(candidate, shadow),
+            state,
+            newton_steps=8,
+            gmres_iterations=2,
+            warmup=0,
+            shadow_mask_fn=lambda _candidate: shadow,
+            promoted_shadow_mask_fn=lambda _candidate, _previous: shadow,
+            shadowed_map_fn=bound,
+            active_set_steps=2,
+            convergence_tolerance=1e-14,
+            precision=Precision.DOUBLE,
+        )
+
+    result = jax.jit(solve)(initial)
+    linear = 2.0 - 0.25 * target
+    first = (-linear + np.sqrt(linear**2 + target)) / 0.5
+    expected = np.asarray((first, target - first))
+    assert bool(result.converged)
+    np.testing.assert_allclose(result.state, expected, rtol=0.0, atol=1e-12)
+    # A read retained at the entry state produces a different fixed point.
+    assert np.max(np.abs(np.asarray(bound(initial, shadow)) - expected)) > 1e-3
 
 
 def _active_solve(initial, *, trips=4, steps=2):
@@ -41,6 +98,66 @@ def _barrier_count(function, *arguments):
     lowered = jax.jit(function).lower(*arguments)
     return str(lowered.compiler_ir(dialect="stablehlo")).count(
         "stablehlo.optimization_barrier"
+    )
+
+
+@pytest.mark.parametrize("use_incumbent", [False, True])
+def test_shadow_selection_lowers_one_live_map(use_incumbent):
+    initial = jnp.asarray([0.25, 0.75], dtype=jnp.float64)
+    previous = jnp.asarray([True, False])
+
+    def induced(candidate, _previous):
+        return candidate >= 0.5
+
+    def mapped(candidate, shadow):
+        value = jax.lax.optimization_barrier(candidate)
+        return jnp.where(shadow, value, 0.25 * value + 1.0)
+
+    def selected(candidate, incumbent):
+        return fixed_point._map_on_selected_shadow(
+            candidate, previous, incumbent, induced, mapped
+        )
+
+    def reference(candidate, incumbent):
+        return fixed_point._acceptance_map_on_selected_partition(
+            candidate,
+            previous,
+            incumbent,
+            lambda value: mapped(value, previous),
+            induced,
+            mapped,
+        )
+
+    assert _barrier_count(jax.lax.optimization_barrier, initial) == 1
+    assert _barrier_count(selected, initial, jnp.asarray(use_incumbent)) == 1
+    for evaluate in (
+        lambda fn: fn(initial, use_incumbent),
+        lambda fn: jax.jacfwd(fn)(initial, use_incumbent),
+    ):
+        np.testing.assert_array_equal(evaluate(selected), evaluate(reference))
+
+
+def test_backtracking_incumbent_shares_the_candidate_read_body():
+    def mapped(candidate):
+        return jnp.tanh(jax.lax.optimization_barrier(candidate)) + 0.5
+
+    def scores(state):
+        return fixed_point._backtracking_scores(
+            mapped,
+            lambda candidate: 0.25 * candidate + 1.0,
+            state,
+            jnp.ones_like(state),
+            jnp.asarray(1.0),
+            False,
+        )
+
+    state = jnp.asarray([0.25, 0.75], dtype=jnp.float64)
+    assert _barrier_count(jax.lax.optimization_barrier, state) == 1
+    assert _barrier_count(scores, state) == 1
+    observed = scores(state)
+    np.testing.assert_array_equal(
+        observed.incumbent_residual,
+        fixed_point._relative_residual(mapped(state), state),
     )
 
 

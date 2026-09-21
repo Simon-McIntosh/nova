@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T12:32:01",
+  "updated": "2026-09-21T12:32:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5089,6 +5089,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-19"
+      },
+      {
+        "id": "s19c-fsa-latency-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
       },
       {
         "id": "s19c-fsa-lcfs2-c",
@@ -225488,6 +225497,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3044
+    "_version": 3045
   }
 }

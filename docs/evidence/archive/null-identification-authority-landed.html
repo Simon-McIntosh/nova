@@ -1291,6 +1291,25 @@ benchmarks/solovev_certificate.py:2514: RuntimeError
   whose first line names the declared mutation, <code>gate_driver.sh</code>,
   <code>base-tree.tar</code>). Implementation at commit <code>34bf882da</code>.</p>
 </section>
+<section id="the-census-read-traces-once-the-wall-arrays-are-promoted">
+<h2>The census read traces once the wall arrays are promoted (2026-09-21)</h2>
+<p><strong>Defect.</strong> The connectivity census read hands the ingredient read concrete wall coordinate and wall flux arrays. The wall-unit lane indexes them with traced segment indices inside a <code>lax.cond</code>, and indexing a concrete array by a tracer raises <code>TracerArrayConversionError</code>, so the census read could not be traced and the wall-contact read was unavailable under <code>jit</code>.</p>
+<p><strong>Repair.</strong> Promote the arrays at the three sites that index them with traced indices: <code>wall_r</code> and <code>wall_z</code> in <code>_sample_wall_polyline</code> and in <code>_select_reachable_wall_limiter</code> (<code>nova/equilibrium/connectivity_boundary.py</code> lines 985 and 1060), and <code>self.wall.coordinate</code> and <code>wall_flux</code> before the bracket index in <code>_wall_anchor_candidates</code> (<code>nova/equilibrium/topology.py</code> line 526). The supplied-wall and reachability verdicts are unchanged; the arrays stay concrete at the callers, and only the traced lanes copy them.</p>
+<p><strong>Gate.</strong> One <code>all_debug</code> allocation (job <code>1275083</code>), <code>JAX_PLATFORMS=cpu</code> with <code>TMPDIR=/tmp</code> in the submit environment and inside the payload, the root interpreter <code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code> run directly, <code>uv</code> never invoked on the node, one process per module, and the base arm built as a hardlink copy of the worktree carrying the base revision of both source modules.</p>
+<table>
+<thead><tr><th>arm</th><th>module</th><th>exit</th><th>result</th></tr></thead>
+<tbody>
+<tr><td>head <code>192a8ed20</code></td><td><code>tests/test_connectivity_class_reader.py</code></td><td>0</td><td>3 passed in 152.32s, both trace pins green</td></tr>
+<tr><td>head <code>192a8ed20</code></td><td><code>tests/test_forward_operator_axes.py</code></td><td>1</td><td>1 failed, 2 passed in 122.24s</td></tr>
+<tr><td>head <code>192a8ed20</code></td><td><code>tests/test_limiter_spline_minimum.py</code></td><td>0</td><td>10 passed in 209.71s</td></tr>
+<tr><td>base <code>0c92afb7</code></td><td><code>tests/test_forward_operator_axes.py</code></td><td>1</td><td>1 failed, 2 passed in 110.62s</td></tr>
+<tr><td>base <code>0c92afb7</code></td><td><code>tests/test_limiter_spline_minimum.py</code></td><td>0</td><td>10 passed in 202.85s</td></tr>
+<tr><td>negative control</td><td><code>tests/test_connectivity_class_reader.py</code></td><td>1</td><td>3 failed in 138.30s</td></tr>
+</tbody>
+</table>
+<p><strong>Zero added failures.</strong> Both focused modules carry the same result on the head and base arms: <code>tests/test_limiter_spline_minimum.py</code> 10 passed on each, and <code>tests/test_forward_operator_axes.py</code> carries the single pre-existing <code>test_tensor_product_grid_class_margin_is_read_on_the_spline</code> failure at both revisions, so the repair neither causes nor cures it.</p>
+<p><strong>Negative control.</strong> The declared mutation reverts the three promotions to the base modules while keeping the new pins, and the log's first line repeats it verbatim. It reddens 3 of 3 with nine <code>TracerArrayConversionError</code> frames, both new pins among them, so the pins are shown to fire rather than merely to pass. Gate logs and the driver: <code>~/.config/reckon/crew/runs/r-20260921T123729655027-nia-wall-arrays-are-promoted-before-traced-indexing/scratch/logs/</code>. Implementation at commit <code>192a8ed20</code>.</p>
+</section>
 </main>
 </body>
 </html>

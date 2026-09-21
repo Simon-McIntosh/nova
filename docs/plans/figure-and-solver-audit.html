@@ -107,10 +107,10 @@
 
     <aside class="callout" id="solver-test-pins-landing">
       <p><strong>Test-pin review landed 2026-09-21.</strong> Thirteen promotions touching the ten
-      declared test paths were re-read: four are sound and nine defective. One <code>all_debug</code>
-      allocation at <code>0322e911a</code> reran every available promoted gate in a fresh process:
-      eight passed, two failed on the same <code>topology.x_point</code> integration defect, and three
-      could not run because their ledgered commits are not ancestors of current main. Seven recorded
+      declared test paths were re-read: five are sound and eight defective. One <code>all_debug</code>
+      allocation reran all thirteen promoted gates in fresh processes from one unchanged code state:
+      nine passed; two failed on the <code>topology.x_point</code> integration defect; and two failed
+      because the scan refactor left the program-scope inventory on a removed source marker. Seven recorded
       negative controls were read; six redden for their declared mechanism and the containment control
       reddens on wall membership instead. Full record:
       <a href="/nova/evidence/archive/figure-and-solver-audit-landed#solver-test-pins">solver test-pin audit</a>.</p>

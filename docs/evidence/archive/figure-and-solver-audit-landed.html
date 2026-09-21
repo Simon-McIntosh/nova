@@ -15,8 +15,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
+<meta name="plan-version" content="2">
 <meta name="plan-status" content="active">
-<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -1069,13 +1069,13 @@
 <thead><tr><th>measure</th><th>result</th></tr></thead>
 <tbody>
 <tr><td>promotions reviewed</td><td>13</td></tr>
-<tr><td>verdicts</td><td>4 sound, 9 defective</td></tr>
-<tr><td>current-main gates</td><td>8 passed, 2 failed, 3 could not run</td></tr>
+<tr><td>verdicts</td><td>5 sound, 8 defective</td></tr>
+<tr><td>current-main gates</td><td>9 passed, 4 failed, 0 could not run</td></tr>
 <tr><td>recorded negative controls</td><td>7 read; 6 redden for the declared mechanism, 1 reddens for a different assertion</td></tr>
 </tbody>
 </table>
-<p>All runnable gates executed in fresh processes on one <code>all_debug</code> allocation at revision <code>0322e911a52588e116bb76a2243ff0dc728cc655</code>, with <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>, the shared root interpreter and no <code>uv</code> on the compute node. The two red gates fail on the same integration defect: <code>forward_operator.py:3091</code> unconditionally reads <code>topology.x_point</code> from the diverted-oracle helper namespace, which does not carry that attribute. Three other ledgered promotions cannot run at current main because their commits are not ancestors and their named test files or node id are absent.</p>
-<p>The defect classes are: easy-attribute assertions, a non-discriminating fixture, a circular oracle with a tolerance that does not establish the claimed mechanism, gate-log misbinding, a passed verdict over an exit-1 gate, a wrong-reason negative control, promoted-but-unlanded commits, and the integrated typed-saddle regression. No figure is added because these exact textual mappings are clearer as an HTML table than as an image.</p>
+<p>All thirteen gates executed in fresh processes on one <code>all_debug</code> allocation whose code state began at <code>d8e4f15106c89085a7714742ec0a94801436fa45</code>, with <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>, the shared root interpreter and no <code>uv</code> on the compute node. Main advanced through documentation records while the allocation ran, but <code>git diff d8e4f151..04a47ec2 -- nova benchmarks scripts tests</code> is empty, proving one code state served every process. Two red gates fail because <code>forward_operator.py:3091</code> unconditionally reads <code>topology.x_point</code> from the diverted-oracle helper namespace. Two fail because <code>benchmarks/program_scope_census.py:1054</code> still searches for the <code>jax.lax.fori_loop(1, active_set_steps</code> marker removed by the scan refactor.</p>
+<p>The defect classes are: easy-attribute assertions, a non-discriminating fixture, a circular oracle with a tolerance that does not establish the claimed mechanism, gate-log misbinding, a passed verdict over an exit-1 gate, a wrong-reason negative control, an under-gated source-marker regression, and the integrated typed-saddle regression. No figure is added because these exact textual mappings are clearer as an HTML table than as an image.</p>
 </section>
   </main>
 </body>

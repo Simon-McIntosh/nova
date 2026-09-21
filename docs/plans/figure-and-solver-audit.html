@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="figure-and-solver-audit">
+  <meta name="plan-title" content="Figure And Solver Audit — every figure re-derived, every solver commit re-read, before anything else lands">
+  <meta name="plan-summary" content="Independent-lane review of the local lane's sprint work: figures scored against the plotting rules and receipts, solver commits re-read, defects repaired.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="30.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="review,evidence">
+  <meta name="plan-blocks" content="null-identification-authority,cut-cell-current-attribution,forward-solve-api,millisecond-converged-solve,constraint-augmented-newton-krylov,gs-absolute-accuracy-gates">
+  <title>Figure And Solver Audit | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-21">
+<meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s0">Why this plan exists</h2>
+    <p>The lead read the figures this sprint produced and found them shoddy, and the coordinator's
+    own record of the last day agrees with the reading. Since the sprint opened on 2026-09-16 there
+    have been 157 promotions on this project, the large majority delivered by the locally served
+    model lane, and they touched sixteen figure directories: 78 files under
+    <code>constraint-augmented-newton-krylov</code>, 54 under <code>null-identification-authority</code>,
+    52 under <code>millisecond-converged-solve</code>, 50 under <code>gs-absolute-accuracy</code>,
+    43 under <code>cut-cell-current-attribution</code>. In one day the coordinator caught a
+    "negative control" that inverted an assertion in a copy of the test file, three manifests in a
+    row that wrote prose after the red-log path so the promotion had to be repaired by hand, a
+    certificate node whose diff spans sixty-three files, and a wall read certified green on a
+    reachability verdict that the separation probe's panels show to be a discretisation artifact
+    on both fixtures. None of this was caught by the gates the workers ran, because a gate the
+    implementing worker writes and runs against its own diff measures internal consistency and
+    not correctness.</p>
+
+    <p>The lead's ruling of 2026-09-21: an in-depth review, on a lane other than the one that did
+    the work, figure-led first because a figure is the one artifact a reader can check without
+    re-running anything, then the solver core commit by commit once the codex window resets. No
+    locally served implementation node is promoted from this point without a scored review, and
+    no new implementation node is dispatched to that lane while the review runs; it keeps
+    investigation and reporting nodes. The findings feed two things: repair nodes on the plans
+    they belong to, and a record in reckon that scopes where background agents of this class are
+    fit to be deployed, because the lead's judgement is that they have a role and were deployed
+    too liberally.</p>
+
+    <h2 id="s1">§1 — The figure-led audit, one reviewer per figure directory</h2>
+    <p>One review node per figure directory touched this sprint, on the claude-opus lane because
+    it can open the image and the review needs eyes. Each reviewer takes every PNG and SVG in its
+    directory with the JSON receipt beside it and the evidence record that cites it, and answers
+    four questions per figure, writing the answers as a scored table. <strong>Rules:</strong> does
+    the figure obey the plotting rules of this repository (no axes or gridlines on a 2D plot; scalar
+    fields as unfilled line contours on stated levels; every flux map marks its axis and admitted
+    X-point in the null vocabulary, both null sets where a reference exists; every poloidal panel
+    draws the wall over the unit collection)? <strong>Numbers:</strong> does every number in the
+    caption and in the paragraph that cites the figure re-derive from the committed receipt, read
+    out of the named JSON path, to the digit? <strong>Physics:</strong> does the figure show what
+    its caption says it shows — a converged state's contours closing on the stated null, a limited
+    boundary touching the wall, a diverted one passing through its X-point — or does it show a
+    different equilibrium captioned around? <strong>Honesty:</strong> is anything drawn that the
+    receipt does not carry, or omitted that would change the reading?</p>
+    <p>Each figure receives a score out of 100 with the deductions itemised, and each deduction
+    names the file, the receipt path, the rule or number it breaks, and the repair. A figure that
+    scores under 70, or that misrepresents its physics at any score, is a repair node on the plan
+    that owns it, filed by the reviewer as a followup on that plan with the reviewer's evidence
+    linked. The reviewer commits nothing under <code>nova/</code> and regenerates nothing; the
+    review's deliverable is the scored record.</p>
+    <p><strong>Done when.</strong> Every figure directory touched since 2026-09-16 has a scored
+    review record under <code>docs/evidence/archive/figure-and-solver-audit-landed.html</code>,
+    one anchor per directory, with the per-figure table and the itemised deductions; every figure
+    under 70 or misrepresenting its physics has a repair followup on its owning plan naming the
+    reviewer's anchor; and the record states the directory's mean score, the count under 70, and
+    the count misrepresenting physics, so the lane-fitness record of §4 can be built from it
+    without re-reading the figures.</p>
+
+    <h2 id="s2">§2 — The solver core, commit by commit, once the codex window resets</h2>
+    <p>The figures are the visible surface; the solver core underneath was edited by the same lane.
+    Once the codex window resets, one review node per solver area re-reads every promotion this
+    sprint that touched it against its node's done-when and against the code as it stands: the
+    connectivity and wall read (<code>connectivity_boundary.py</code>, <code>topology.py</code>),
+    the clip and quadrature (<code>separatrix_clip.py</code>, <code>clip_quadrature.py</code>,
+    <code>stencil_mesh.py</code>), the fixed-point and Newton routes
+    (<code>fixed_point.py</code>, <code>reduced_newton.py</code>, <code>forward_operator.py</code>),
+    the census and certificate drivers under <code>benchmarks/</code>, and the test files that
+    pin them. The reviewer reads the diff by anomaly, re-runs the promoted gate at the merged head
+    on an <code>all_debug</code> allocation, and for every negative control recorded on the ledger
+    checks that the mutation applied is the mutation declared and that it reddens for the reason
+    claimed. A control that inverted an assertion, a gate that measured a stub, a tolerance widened
+    to absorb a difference, a guard that passes by switching itself off: each is a finding with the
+    commit, the line, and the repair.</p>
+    <p><strong>Done when.</strong> Every promotion since 2026-09-16 touching the five areas has a
+    row in the record with its verdict (sound, defective, or unverifiable), the defective rows have
+    repair followups on their owning plans, and the record states per area the count of promotions,
+    the count defective, and the classes of defect found, so §4 can name which classes of work the
+    lane got wrong.</p>
+
+    <h2 id="s3">§3 — Repairs, on the strongest lane, before the sprint continues</h2>
+    <p>Every repair followup filed by §1 and §2 is dispatched on the codex or claude lanes, never on
+    the lane that produced the defect, with the reviewer's anchor in the brief and the reviewer's
+    re-derivation as the gate. A repaired figure is regenerated under the plotting rules, never
+    recaptioned; a repaired solver change carries the negative control the review found missing.
+    The sprint's other plans resume implementation only when their repair followups are closed.</p>
+    <p><strong>Done when.</strong> No open repair followup remains on any plan this audit blocks,
+    and each repair's promotion cites the review anchor it closes.</p>
+
+    <h2 id="s4">§4 — The lane-fitness record, handed to reckon</h2>
+    <p>The audit exists to change how work is dispatched, not only to fix this sprint. From the
+    per-directory and per-area counts of §1 and §2 a short record states, per class of work
+    (figure rendering, record repair, mechanical refactor, measurement driver, solver change,
+    negative-control authoring, investigation and reporting), how the locally served lane scored,
+    which defect classes it produced, and which it did not. That record is the evidence input of
+    the reckon plan <code>background-agent-fitness-and-dispatch-scope</code>, which turns it into
+    the dispatch rules: which roles and spec levels route to the local lane by default, which need
+    an independent-lane review before promotion, and which never route there.</p>
+    <p><strong>Done when.</strong> The record exists as an anchor of this plan's evidence document
+    with one row per class of work carrying the counts behind it, and the reckon plan cites that
+    anchor as its evidence input.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<article class="r-decision" data-id="review-lane-and-wave-policy" data-status="locked" data-choice="figure-led-on-claude-then-code-on-codex" data-locked-by="lead" data-locked-at="2026-09-21">
+    <h4 class="r-decision-question">What shape does the review take, and what happens to the local lane's work while it runs?</h4>
+    <ul class="r-decision-options">
+      <li data-option="figure-led-on-claude-then-code-on-codex">Figure-led audit on claude-opus now, one reviewer per figure directory; the solver core commit by commit on codex once its window resets; findings as scored rows and repair nodes.</li>
+      <li data-option="commit-by-commit-on-claude">Every promotion this sprint re-read on claude-opus with its gate re-run at the merged head.</li>
+      <li data-option="wait-for-codex">No review spend until the codex window resets; review there only.</li>
+    </ul>
+    <p class="r-decision-rationale">Lead 2026-09-21. The figure is the artifact a reader can check without re-running anything and the lane that can open it is idle, so the figures go first; the solver core follows on the strongest lane. While the review runs, nodes in flight on the local lane finish but nothing from that lane is promoted without a scored review, and no new implementation node is dispatched there; it keeps investigation and reporting nodes. The findings also scope the future use of this class of background agent, which the lead judges to have a role and to have been deployed too liberally.</p>
+</article>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-fsa-audit-001-figure-wave" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="lead" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship figure-and-solver-audit §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Dispatch the figure-led audit wave: one claude-opus reviewer per figure directory touched since 2026-09-16</h4>
+    <div class="r-fu-body"><p>Eleven directories carry figures from this sprint: constraint-augmented-newton-krylov (24 PNG, 10 SVG, 37 JSON), null-identification-authority (54, 1, 55), millisecond-converged-solve (32, 26, 58), gs-absolute-accuracy (46, 16, 33), cut-cell-current-attribution (77, 37, 454), playable-forward-solve (55, 5, 111), forward-solve-api (10, 1, 14), exact-clip-moment-quadrature (3, 2, 7), centroid-constrained-oracle-solve (4, 1, 9), exact-clip-capacity (1, 1, 6), multi-unit-limiter-wall (1, 0, 6). One review node each for the first six; the last five share one node. Each reviewer scores every figure against the rules, the numbers, the physics and the honesty, files repair followups on the owning plan for every figure under 70 or misrepresenting its physics, and writes its anchor of the evidence record.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship figure-and-solver-audit §1</pre>
+    </article>
+<article class="r-fu" data-id="f-fsa-audit-002-solver-core" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="lead" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship figure-and-solver-audit §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">At the codex reset, re-read every solver-core promotion of the sprint on sol and terra</h4>
+    <div class="r-fu-body"><p>Five areas, five review nodes on codex: the connectivity and wall read; the clip and quadrature; the fixed-point and Newton routes; the census and certificate drivers; the test files pinning them. Each re-runs the promoted gates at the merged head, checks every recorded negative control is the declared mutation and reddens for the claimed reason, and files repair followups with commit and line.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship figure-and-solver-audit §2</pre>
+    </article>
+<article class="r-fu" data-id="f-fsa-audit-003-lane-fitness-record" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="lead" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship figure-and-solver-audit §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the lane-fitness record from the audit counts and hand it to the reckon dispatch-scope plan</h4>
+    <div class="r-fu-body"><p>Once §1 and §2 have their counts, one node writes the per-class-of-work record (figure rendering, record repair, mechanical refactor, measurement driver, solver change, negative-control authoring, investigation and reporting) with the scores and defect classes behind each row, as an anchor of this plan's evidence document, and the reckon plan <code>background-agent-fitness-and-dispatch-scope</code> cites it as its evidence input.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship figure-and-solver-audit §4</pre>
+    </article>
+</section>
+
+  <section data-reckon="comments" id="comments" class="r-comments">
+</section>
+  </main>
+</body>
+</html>

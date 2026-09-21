@@ -2655,6 +2655,101 @@ ROW2_EXIT=139</pre>
   ]
 }</pre>
 </section>
+<section class="audit-directory" id="lane-fitness-record-section">
+<h2 id="lane-fitness-record">Lane-fitness record: one row per class of work</h2>
+<table id="lane-fitness-record">
+<caption>Lane-fitness record for the audited work classes. Promotion counts are review rows: 55 rows name 48 unique promotion IDs, with seven cross-area re-reviews retained so conflicting area verdicts remain visible. Figure rendering is reported in its artifact unit because its findings records do not name the source promotion IDs.</caption>
+<thead><tr><th>class</th><th>local-lane promotions reviewed</th><th>local mean score where scored</th><th>local defective count</th><th>local defect classes with counts</th><th>metered-lane promotions reviewed</th><th>metered defective count</th><th>anchor list</th><th>default routing</th></tr></thead>
+<tbody>
+<tr><th scope="row">figure rendering under the plotting rules</th><td>0 named promotions; 348 complete figure artifacts</td><td>55.7 / 100 for the 348 artifacts</td><td>242 artifact scores under 70; 103 misrepresenting physics</td><td>score below floor: 242; physics misrepresentation: 103 (non-disjoint artifact findings)</td><td>0 named promotions</td><td>0 promotion defects; figure review lane is independent of the producing run</td><td><code>fsa-audit-figures-newton-krylov</code>, <code>null-identification</code>, <code>gs-accuracy</code>, <code>cut-cell</code>, <code>playable-solve</code>, and <code>remaining-directories</code> findings JSON; 348 is their complete-record sum. The millisecond record has a separate 58-figure tally but no scalar findings counts and is excluded from this complete sum.</td><td>local-with-independent-review; source-promotion lane is <em>too few to rule in</em> because no producing run IDs are named</td></tr>
+<tr><th scope="row">record repair</th><td>8</td><td>not scored in the promotion records</td><td>7</td><td>incomplete or blocked record: 4; gate/log binding: 2; paired-row completeness: 1</td><td>0</td><td>0</td><td>Census-and-certificate review rows 17, 20, 21, 25, 26, 27, 28, 29; test-pin rows 1, 2, 9; ledger joins for each named run.</td><td>never-local; metered sample is <em>too few to rule in</em></td></tr>
+<tr><th scope="row">mechanical refactor with a bit-identity or focused gate</th><td>4</td><td>not scored in the promotion records</td><td>3</td><td>unmet evidence or gate contract: 3</td><td>3</td><td>3</td><td>Fixed-point/Newton rows 3, 4, 5, 6, 9, 10, 12; census row 1; the mesh row is intentionally counted once per audit row because it is reviewed in both areas.</td><td>local-with-independent-review</td></tr>
+<tr><th scope="row">measurement driver</th><td>7</td><td>not scored in the promotion records</td><td>4</td><td>unmet scientific gate or incomplete measurement: 4; one additional local row is unverifiable</td><td>3</td><td>2</td><td>Fixed-point/Newton rows 1, 7, 8, 9; census rows 2, 4, 7, 9, 12, 17; the listed class is assigned from the run's measurement receipt and done-when.</td><td>never-local</td></tr>
+<tr><th scope="row">solver change</th><td>11</td><td>not scored in the promotion records</td><td>9</td><td>acceptance or evidence gate unmet: 5; guard, topology, or route wiring: 4; one additional local row is unverifiable</td><td>6</td><td>5</td><td>Clip/quadrature rows 1–8; fixed-point/Newton rows 2, 7, 11, 12, 13; test-pin rows 3, 8, 12; wall-read rows 1–3; census row 10; overlapping rows remain separate review rows.</td><td>never-local</td></tr>
+<tr><th scope="row">negative-control authoring</th><td>9</td><td>not scored in the promotion records</td><td>2</td><td>non-discriminating control: 1; gate or log binding: 1</td><td>0</td><td>0</td><td>Test-pin rows 4–7 and 13; census rows 3, 14, 16; the oracle-reconstruction and terminal-state controls are classified by their declared mutation and refusal assertion.</td><td>local-with-independent-review; metered sample is <em>too few to rule in</em></td></tr>
+<tr><th scope="row">investigation and reporting with no code change</th><td>3</td><td>not scored in the promotion records</td><td>1</td><td>instrument did not settle the claimed hypothesis: 1</td><td>1</td><td>0</td><td>Fixed-point/Newton row 1; census rows 6, 18; the seed-target row is explicitly unverifiable rather than defective.</td><td>default-local; metered result is <em>too few to rule in</em></td></tr>
+</tbody>
+</table>
+
+<table id="lane-fitness-provenance">
+<caption>Provenance for every numeric field in the table.</caption>
+<thead><tr><th>table field</th><th>source record and path</th><th>derivation or line</th></tr></thead>
+<tbody>
+<tr><th scope="row">figure rendering counts and score</th><td><code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-figures-newton-krylov/findings-*.json</code>; the corresponding <code>null-identification</code>, <code>gs-accuracy</code>, <code>cut-cell</code>, <code>playable-solve</code>, and <code>remaining-directories</code> findings files</td><td>Sum of each file's <code>figure_count</code>/<code>scored_count</code>, <code>count_under_70</code>, and <code>count_misrepresenting_physics</code>; weighted mean of <code>mean_score</code> is 55.7 over 348. The millisecond review tally is <code>review.md:39-42</code> (58, 57.4, 45, 1), but its findings JSON has no scalar count fields, so it is not folded into the complete-record sum.</td></tr>
+<tr><th scope="row">record-repair review-row counts</th><td><code>fsa-audit-solver-census-and-certificate-drivers/review.md</code> and <code>fsa-audit-solver-test-pins/review.md</code></td><td>Census tally and defect classes: <code>review.md:52-54</code>; the row records are <code>review.md:17-30</code>. Test-pin row verdicts are <code>review.md:26-218</code> and final tally <code>review.md:240-244</code>. Lane fields and models are joined at <code>docs/state/nova/crew.json</code> by each run ID: <code>local</code>, <code>backend</code>, and <code>agent.model</code>.</td></tr>
+<tr><th scope="row">mechanical-refactor review-row counts</th><td><code>fsa-audit-solver-fixed-point-and-newton-routes/review.md</code>; <code>fsa-audit-solver-census-and-certificate-drivers/review.md</code></td><td>Fixed-point rows and verdicts: <code>review.md:15-26</code>; census mesh row: <code>review.md:13</code>. The fixed-point summary names the classes at <code>review.md:1074</code>. The duplicate mesh review row is retained and is not silently deduplicated.</td></tr>
+<tr><th scope="row">measurement-driver review-row counts</th><td><code>fsa-audit-solver-fixed-point-and-newton-routes/review.md</code>; <code>fsa-audit-solver-census-and-certificate-drivers/review.md</code></td><td>Named rows: fixed-point <code>review.md:15,21-24</code>; census <code>review.md:14,16-17,19,23,25,29</code>. Their verdict totals and defect vocabulary are preserved in the area summaries rather than inferred from a passing test.</td></tr>
+<tr><th scope="row">solver-change review-row counts</th><td><code>fsa-audit-solver-clip-and-quadrature/review.md</code>; <code>fsa-audit-solver-fixed-point-and-newton-routes/review.md</code>; <code>fsa-audit-solver-test-pins/review.md</code>; <code>fsa-audit-solver-wall-read/review.md</code>; <code>fsa-audit-solver-census-and-certificate-drivers/review.md</code></td><td>Area tallies: clip <code>review.md:87</code>; fixed-point <code>review.md:1074</code>; test pins <code>review.md:240-244</code>; wall read <code>review.md:15</code>; census defect classes <code>review.md:52-54</code>. Cross-area rows are retained, including the x-point and typed-saddle verdict differences.</td></tr>
+<tr><th scope="row">negative-control review-row counts</th><td><code>fsa-audit-solver-test-pins/review.md</code>; <code>fsa-audit-solver-census-and-certificate-drivers/review.md</code></td><td>Test-pin rows <code>review.md:74-122,186-218</code>; census control rows <code>review.md:15,26,28-29</code>. The final test-pin tally is <code>review.md:240-244</code>; no metered promotion is named in this class.</td></tr>
+<tr><th scope="row">investigation/reporting review-row counts</th><td><code>fsa-audit-solver-fixed-point-and-newton-routes/review.md</code>; <code>fsa-audit-solver-census-and-certificate-drivers/review.md</code></td><td>Fixed-point row <code>review.md:15</code>; census rows <code>review.md:18-19,30</code>. The seed-target row is marked unverifiable in the fixed-point tally, not converted to a failure.</td></tr>
+<tr><th scope="row">lane and model split</th><td><code>/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-the-lane-fitness-record/docs/state/nova/crew.json</code></td><td>For every named run ID, the small ledger join read <code>&lt;run&gt;.local</code>, <code>&lt;run&gt;.backend</code>, and <code>&lt;run&gt;.agent.model</code>. Local rows resolve to <code>true / clive / deepseek-v4.1-flash</code>; metered rows resolve to <code>false / codex / gpt-5.6-sol</code>, except the explicitly non-local Clive trip-scan row (<code>false / clive / deepseek-v4.1-flash</code>).</td></tr>
+</tbody>
+</table>
+
+<p id="method">Method note: the defect-class labels in the table are normalized labels assigned to the classification register below; they are counts of review rows, not estimates of hidden defects. A promotion reviewed in two solver areas contributes one row to each area tally. That preserves the audit's evidence and explains why 55 review rows name 48 unique IDs. No producing run ID is present in the figure findings records, so figure counts are not misrepresented as promotion counts.</p>
+
+<h2 id="classification-register">Classification register — one line per reviewed promotion row</h2>
+<ol>
+<li><code>r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2</code> — record repair — defective — local, <code>clive/deepseek-v4.1-flash</code> — test pins.</li>
+<li><code>r-20260918T080721770101-nia-drift-probe-record-repairs</code> — record repair — defective — local, <code>clive/deepseek-v4.1-flash</code> — test pins.</li>
+<li><code>r-20260918T202207266011-cca-xpoint-cell-treatment</code> — solver change — defective — metered, <code>codex/gpt-5.6-sol</code> — test pins.</li>
+<li><code>r-20260919T140106096257-nia-panel-test-strength</code> — negative-control authoring — sound — local, <code>clive/deepseek-v4.1-flash</code> — test pins.</li>
+<li><code>r-20260919T140543659843-msc-diverted-oracle-census-linearring</code> — negative-control authoring — sound — local, <code>clive/deepseek-v4.1-flash</code> — test pins.</li>
+<li><code>r-20260919T141620037986-fsa-persistence-guard-positive-control</code> — negative-control authoring — sound — local, <code>clive/deepseek-v4.1-flash</code> — test pins.</li>
+<li><code>r-20260919T223350107712-msc-certificate-baseline-from-base-revision</code> — negative-control authoring — sound — local, <code>clive/deepseek-v4.1-flash</code> — test pins.</li>
+<li><code>r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle</code> — solver change — defective — local, <code>clive/deepseek-v4.1-flash</code> — test pins.</li>
+<li><code>r-20260920T153733162419-cca-repair-the-independent-oracle-reconstruction</code> — negative-control authoring — defective — local, <code>clive/deepseek-v4.1-flash</code> — test pins.</li>
+<li><code>r-20260920T153922912568-msc-persist-the-baseline-state-array</code> — record repair — defective — local, <code>clive/deepseek-v4.1-flash</code> — test pins.</li>
+<li><code>r-20260920T154610428813-msc-give-the-containment-rule-a-positive-control</code> — negative-control authoring — defective — local, <code>clive/deepseek-v4.1-flash</code> — test pins.</li>
+<li><code>r-20260920T181701895943-fsri-the-trips-are-a-scan-not-a-loop</code> — solver change — defective — metered, <code>clive/deepseek-v4.1-flash</code> — test pins.</li>
+<li><code>r-20260920T183703371948-cco-persist-the-terminal-state-and-guard-the-lattice-order</code> — negative-control authoring — sound — local, <code>clive/deepseek-v4.1-flash</code> — test pins.</li>
+<li><code>r-20260915T184108433291-cca-exact-clip-seed-books-target-current</code> — investigation and reporting with no code change — unverifiable — metered, <code>codex/gpt-5.6-sol</code> — fixed-point/Newton.</li>
+<li><code>r-20260915T132132875202-cca-exact-clip-solve-memory-scaling</code> — measurement driver — defective — metered, <code>codex/gpt-5.6-sol</code> — fixed-point/Newton.</li>
+<li><code>r-20260916T065036630331-msc-mesh-arguments-plumbing</code> — mechanical refactor — defective — metered, <code>codex/gpt-5.6-sol</code> — fixed-point/Newton.</li>
+<li><code>r-20260916T084805089053-msc-flux-functions-as-program-arguments</code> — mechanical refactor — defective — metered, <code>codex/gpt-5.6-sol</code> — fixed-point/Newton.</li>
+<li><code>r-20260917T042807085151-cca-delete-clip-globals-clone</code> — mechanical refactor — sound — local, <code>clive/deepseek-v4.1-flash</code> — fixed-point/Newton.</li>
+<li><code>r-20260917T170314445551-msc-request-set-machine-2</code> — mechanical refactor — defective — local, <code>clive/deepseek-v4.1-flash</code> — fixed-point/Newton.</li>
+<li><code>r-20260918T203029970629-cank-shafranov-field-responses</code> — measurement driver — unverifiable — metered, <code>codex/gpt-5.6-sol</code> — fixed-point/Newton.</li>
+<li><code>r-20260918T094416317124-cank-flux-function-fit</code> — measurement driver — unverifiable — local, <code>clive/deepseek-v4.1-flash</code> — fixed-point/Newton.</li>
+<li><code>r-20260918T154507107752-fsa-coil-edit-panel-lcfs-2</code> — measurement driver — sound — local, <code>clive/deepseek-v4.1-flash</code> — fixed-point/Newton.</li>
+<li><code>r-20260918T165636099922-msc-forward-solve-lane-regressions</code> — mechanical refactor — defective — local, <code>clive/deepseek-v4.1-flash</code> — fixed-point/Newton.</li>
+<li><code>r-20260919T200510357550-nia-promotion-fallback-nan</code> — solver change — defective — local, <code>clive/deepseek-v4.1-flash</code> — fixed-point/Newton.</li>
+<li><code>r-20260919T223218420452-msc-inert-dispatcher-and-fused-branch</code> — mechanical refactor — defective — local, <code>clive/deepseek-v4.1-flash</code> — fixed-point/Newton.</li>
+<li><code>r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle</code> — solver change — defective — local, <code>clive/deepseek-v4.1-flash</code> — fixed-point/Newton.</li>
+<li><code>r-20260916T070630305673-ecq-polygon-exact-density-moments</code> — solver change — defective — metered, <code>codex/gpt-5.6-sol</code> — clip/quadrature.</li>
+<li><code>r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter</code> — solver change — defective — local, <code>clive/deepseek-v4.1-flash</code> — clip/quadrature.</li>
+<li><code>r-20260916T204834010483-ecq-sampled-arc-gauss-route</code> — solver change — defective — local, <code>clive/deepseek-v4.1-flash</code> — clip/quadrature.</li>
+<li><code>r-20260917T094325762879-ecq-shifted-path-order-and-budget-terms</code> — solver change — defective — local, <code>clive/deepseek-v4.1-flash</code> — clip/quadrature.</li>
+<li><code>r-20260917T100810663195-ecq-capacity-sizing</code> — solver change — defective — local, <code>clive/deepseek-v4.1-flash</code> — clip/quadrature.</li>
+<li><code>r-20260918T080952872560-ecq-capacity-refusal-must-report</code> — solver change — defective — local, <code>clive/deepseek-v4.1-flash</code> — clip/quadrature.</li>
+<li><code>r-20260918T202207266011-cca-xpoint-cell-treatment</code> — solver change — sound — metered, <code>codex/gpt-5.6-sol</code> — clip/quadrature.</li>
+<li><code>r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle</code> — solver change — defective — local, <code>clive/deepseek-v4.1-flash</code> — clip/quadrature.</li>
+<li><code>r-20260916T065036630331-msc-mesh-arguments-plumbing</code> — mechanical refactor — defective — metered, <code>codex/gpt-5.6-sol</code> — census/certificate.</li>
+<li><code>r-20260916T070747822998-cco-bounded-uniform-field-unknown</code> — measurement driver — defective — metered, <code>codex/gpt-5.6-sol</code> — census/certificate.</li>
+<li><code>r-20260916T205150200621-mulw-zero-residual-identity-assert</code> — negative-control authoring — sound — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260916T205409901465-cco-bounded-row-step-control</code> — measurement driver — defective — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260916T205009785219-nia-bank-drift-paired-probe</code> — record repair — defective — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260917T095016652314-cco-fixed-point-clause-in-one-gauge</code> — investigation and reporting with no code change — sound — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260917T163636652426-fsa-coil-edit-nonconvergence</code> — investigation and reporting with no code change — sound — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2</code> — record repair — sound — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260918T091602435823-fsa-coil-edit-panel-lcfs</code> — measurement driver — defective — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260917T214414373906-cco-flux-level-compensating-term-2</code> — solver change — unverifiable — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260918T154507107752-fsa-coil-edit-panel-lcfs-2</code> — measurement driver — defective — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260919T090619820972-fsa-edge-root-bracket</code> — measurement driver — sound — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260919T112104763452-fsa-coil-edit-records</code> — record repair — defective — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260919T141620037986-fsa-persistence-guard-positive-control</code> — negative-control authoring — sound — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260919T125427607332-fsa-sweep-persistence</code> — record repair — defective — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260919T111944475334-cco-review-repairs</code> — record repair — defective — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260919T231747888058-fsa-coil-edit-under-the-vertical-constraint</code> — measurement driver — defective — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260920T153324775149-cca-sample-the-mapping-count-through-the-abort</code> — investigation and reporting with no code change — defective — local, <code>clive/deepseek-v4.1-flash</code> — census/certificate.</li>
+<li><code>r-20260918T201949355073-nia-limited-boundary-touches-wall-2</code> — solver change — defective — metered, <code>codex/gpt-5.6-sol</code> — wall read.</li>
+<li><code>r-20260919T075817963210-nia-containment-aware-anchor</code> — solver change — defective — metered, <code>codex/gpt-5.6-sol</code> — wall read.</li>
+<li><code>r-20260919T112327157134-trcr-class-free-containment</code> — solver change — sound — local, <code>clive/deepseek-v4.1-flash</code> — wall read.</li>
+</ol>
+
+<p><strong>Excluded from promotion counts:</strong> <code>r-20260920T180231259880-cca-one-certificate-row-per-process</code> is explicitly described in the census review as local and unpromoted; its useful measurement and defective receipt are not counted as a promotion.</p>
+
+</section>
   </main>
 </body>
 </html>

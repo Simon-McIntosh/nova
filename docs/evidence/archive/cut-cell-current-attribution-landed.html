@@ -1698,25 +1698,25 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
 </section>
 
 <section id="outboard-hole-booking-gate">
-  <h2 id="outboard-hole-booking-gate-h">The outboard-hole booking gate: committed, and red at HEAD for two out-of-fence reasons</h2>
-  <p>Commit <code>a0986a04</code> lands <code>tests/test_outboard_hole_census_gate.py</code>, which reuses the unit-amplitude census helpers on the committed terminal flux state of the weak-rotation 110-cell row and pins the values the census receipt records: chord total 15,540,896.52 A, exact-clip total 15,148,862.10 A against the 16,314,773.31 A analytic target, and a zero booking in both clip modes for cells 83, 104, 106, 108 and 116. It draws no figure and exposes <code>terminal_booked_currents()</code> for the candidacy repair node.</p>
-  <p><strong>Reproduction of the instrument breakage.</strong> On HEAD <code>61f7d79d5</code>, one <code>all_debug</code> allocation (job 1274709, host 98dci4-clu-3141, 4 cpus, 32 GB, <code>JAX_PLATFORMS=cpu</code>, root interpreter run directly, uv never invoked on the node) ran the gate and reached no assertion:</p>
-  <pre>benchmarks/unit_amplitude_current_census.py:256 in _build_context
-  -&gt; scripts/analytic_oracle_fixtures/measure.py:1014 in _analytic_profile_support
-  -&gt; nova/equilibrium/forward_operator.py:3091
-E  AttributeError: 'types.SimpleNamespace' object has no attribute 'x_point'
-2 errors in 14.88s</pre>
-  <p>Cause: commit <code>d90a522fe</code> added an unconditional <code>saddle_vertex=topology.x_point</code> read in the exact clip branch, while the oracle fixture's analytic topology namespace has no <code>x_point</code> (<code>git grep -n x_point HEAD -- scripts/analytic_oracle_fixtures/measure.py</code> returns nothing). Line 2716 of the same file already uses <code>getattr(topology, "x_point", jnp.full(2, jnp.nan))</code>, so the file is internally inconsistent about an absent census saddle. The plan already carries this as <code>f-cca-typed-saddle-compatibility</code> and <code>f-cca-audit-typed-saddle-integration</code>; this is a third instrument confirming it, with the added fact that <code>benchmarks/unit_amplitude_current_census.py::measure()</code> cannot run at all.</p>
-  <p><strong>The receipt is stale at HEAD, so the pinned constants do not hold.</strong> With the operator's own absent-saddle sentinel injected at the one call boundary (uncommitted scratch driver), the gate reached its assertions and failed on the values:</p>
+  <h2 id="outboard-hole-booking-gate-h">The outboard-hole booking gate: committed and green at HEAD. The recorded outboard hole is absent at HEAD.</h2>
+  <p>Commit <code>8a33b741b</code> lands <code>tests/test_outboard_hole_census_gate.py</code>. The module reuses the unit-amplitude census helpers on the committed terminal flux state of the weak-rotation 110-cell row, reading that state from the committed control part rather than by re-solving, and it draws no figure. It exposes <code>terminal_booked_currents()</code>, returning the chord and exact booked totals beside the per-cell booked current for cells 83, 104, 106, 108 and 116, so the booking repair node can re-run it against its after values.</p>
+  <p><strong>Receipt.</strong> One <code>all_debug</code> allocation (job 1274786, host 98dci4-clu-3141, 4 cpus, 32 GB, <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in the payload and in the submit environment, the root interpreter run directly, <code>uv</code> never invoked on the node) recorded the gate green at exit 0 with 3 passed in 129.55 s. The declared source-mutation control recorded 2 failed at exit 1, and the census module was restored clean. The control prescribed for this node, asserting that cells 106, 104, 108 and 116 book nonzero in chord mode, recorded exit 0: it passes rather than reddening.</p>
+<p><strong>The pinned values.</strong> Measured on the committed terminal state:</p>
   <table>
-    <thead><tr><th>quantity</th><th>census receipt (28a49bcb)</th><th>HEAD 61f7d79d5, no-saddle reading</th></tr></thead>
+    <thead><tr><th>quantity</th><th>census receipt, 28a49bcb</th><th>this revision</th></tr></thead>
     <tbody>
       <tr><td>chord booked total</td><td>15,540,896.52 A</td><td>15,868,149.094491 A</td></tr>
-      <tr><td>cell 83, chord clip</td><td>0.0 A</td><td>113,536.532289 A</td></tr>
+      <tr><td>exact booked total</td><td>15,148,862.10 A</td><td>15,491,114.132435 A</td></tr>
+      <tr><td>cell 83, both clips</td><td>0.0 A</td><td>113,536.532289 A</td></tr>
+      <tr><td>cell 104, both clips</td><td>0.0 A</td><td>192,269.940302 A</td></tr>
+      <tr><td>cell 106, both clips</td><td>0.0 A</td><td>192,343.790435 A</td></tr>
+<tr><td>cell 108, both clips</td><td>0.0 A</td><td>192,269.940302 A</td></tr>
+      <tr><td>cell 116, both clips</td><td>0.0 A</td><td>112,093.466421 A</td></tr>
     </tbody>
   </table>
-  <p>The chord total differs by 2.1e-2 relative, 21,000 times the 1e-6 tolerance the gate asserts. A supplied non-finite saddle and a <code>None</code> saddle leave <code>saddle</code> all false whenever a curve evaluator is present, so neither value the fixture can legitimately carry reproduces the receipt's geometry. Cell 83's own booking therefore changed at HEAD, which is a fact about the outboard hole rather than only about the instrument.</p>
-  <p>No figure accompanies this record: the finding is a reproduction, a command and a pair of numbers, and nothing spatial is claimed here that a plot would carry better.</p>
+  <p>The chord and exact clips book identical values for each of the five cells, with identical clip vertex counts, so the two modes agree on these cells rather than one of them dropping the cell. None of the five books zero in either mode, so the receipt's outboard hole is not present on this state.</p>
+  <p>The instrument is not degenerate: on the same state 41 of 135 cells still differ between the two clips and 16 cells book zero in chord mode, so the curved clip does clip. The exact clip books 0.950 of the analytic 16,314,773.31 A target, so the total remains short for reasons other than these five cells.</p>
+  <p>The analytic fixture still cannot run unbridged. The exact clip branch reads the census saddle unconditionally at nova/equilibrium/forward_operator.py:3091, while the fixture topology carries no x_point, so the gate bridges that single read inside the module for the duration of its fixtures and changes nothing under nova/equilibrium or scripts/. The defect stands as the plan's typed-saddle findings, whose blast radius this gate extends to the census module's own measure() entry point.</p>
 </section>
 
 </main>

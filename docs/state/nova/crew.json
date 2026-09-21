@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T10:42:39",
+  "updated": "2026-09-21T10:42:43",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5084,6 +5084,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-20"
+      },
+      {
+        "id": "s19c-loop-inv-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
       },
       {
         "id": "s19c-msc-byteid-c",
@@ -225363,6 +225372,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3027
+    "_version": 3028
   }
 }

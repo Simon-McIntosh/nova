@@ -23,12 +23,12 @@
   <title>Exact-clip moment quadrature | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-19">
+<meta name="plan-modified" content="2026-09-21">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="38">
 </head>
 <body>
   <main class="plan-doc">
@@ -198,6 +198,16 @@
 <article class="r-fu" data-id="f-ecq-memory-identification-swept-product" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship exact-clip-moment-quadrature" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">One more committed receipt still declares the retired swept product</h4>
     <div class="r-fu-body">Reported by the capacity node from outside its write paths: docs/figures/cut-cell-current-attribution/reposed-fixture/certificate/solve-memory-identification.json declares exact_support_capacity 3072 in two places, the retired swept product. Mark it historical with its provenance the same way the exact-clip cost receipts now are, or regenerate its dimensions block from the compiled bound without a new solve. Check for any other committed receipt carrying 3072, 3840 or 2816 as a capacity while making the change.</div>
+    <pre class="r-fu-prompt">/reckon-ship exact-clip-moment-quadrature</pre>
+    </article>
+<article class="r-fu" data-id="f-ecq-repair-retracted-comparison-figure" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="figure-and-solver-audit reviewer fsa-audit-figures-remaining-directories" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship exact-clip-moment-quadrature" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Regenerate the comparison figure whose order, evaluation count and panel title the plan has retracted</h4>
+    <div class="r-fu-body"><p>Audit anchor: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figures-remaining-directories</code>; reviewer node <code>fsa-audit-figures-remaining-directories</code>, review lane claude-opus.</p><p><code>docs/figures/exact-clip-moment-quadrature/comparison.png</code> and <code>comparison.svg</code>, cited from <code>docs/evidence/archive/exact-clip-moment-quadrature-landed.html</code>, assert two claims this plan's own shifted-path record withdraws. The in-figure caption states '149 fixed arc edges at per-edge Gauss order 3 (472 live evaluations per cut cell)'; the plan states that the shifted first-moment integrands reach degree six, so the smallest exact order is four and the fixed count is 149 x 4 = <b>621</b>, which also <b>exceeds the declared ceiling of 500</b>. Panel (b) is titled 'the arc representation contributes nothing' and annotated '0.0 exactly'; the plan states the exact-density arm was removed because it reproduced the fan by construction, so that zero was an arithmetic identity and not evidence for the title's claim. A committed figure whose panel title states a refuted claim is the honesty question failing outright. Repair: regenerate at order 4 through <code>render_comparison.py</code> with the 621-evaluation count and the ceiling breach stated in the caption, and either delete panel (b) or retitle it to what the arm actually measured. Reviewer evidence: the figure and solver audit anchor for the remaining figure directories.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship exact-clip-moment-quadrature</pre>
+    </article>
+<article class="r-fu" data-id="f-ecq-repair-rows-svg-captions" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="figure-and-solver-audit reviewer fsa-audit-figures-remaining-directories" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship exact-clip-moment-quadrature" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Replace the two captions that claim every row clears its budget</h4>
+    <div class="r-fu-body"><p>Audit anchor: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figures-remaining-directories</code>; reviewer node <code>fsa-audit-figures-remaining-directories</code>, review lane claude-opus.</p><p><code>docs/figures/exact-clip-moment-quadrature/rows.svg</code> is cited twice with captions that state the opposite of what the committed image shows. <code>docs/evidence/archive/exact-clip-moment-quadrature-landed.html</code> captions it 'Budget cleared by every measured row'; <code>docs/plans/exact-clip-moment-quadrature.html</code> captions it 'Every measured row clears its budget ... The smallest margin on any row or moment is 23x ... the largest is about 1000x'. The image at that path plots each row's worst moment as a multiple of its own fence and shows <b>five of the nine rows sitting 1e9 to 1e12 above the unit line at every swept count</b>, never crossing it; its own in-figure caption says 'no swept count meets either fence and the honest column stays none'. The SVG was regenerated alongside <code>rows.png</code> - whose figcaption <i>does</i> describe the committed image correctly - and both of its captions were left describing the superseded order-three margin picture. Repair: replace both captions with the <code>rows.png</code> figcaption text. No regeneration is needed; the figure is correct and the captions are not. Reviewer evidence: the figure and solver audit anchor for the remaining figure directories.</p></div>
     <pre class="r-fu-prompt">/reckon-ship exact-clip-moment-quadrature</pre>
     </article>
 </section>

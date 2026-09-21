@@ -23,8 +23,8 @@
   <title>Centroid-constrained oracle solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-20">
-<meta name="plan-version" content="25">
+<meta name="plan-modified" content="2026-09-21">
+<meta name="plan-version" content="26">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -76,6 +76,11 @@
 <article class="r-fu" data-id="f-cco-review-repairs" data-status="open" data-written-by="coordinator" data-written-at="2026-09-19T07:16:00Z" data-recommends-skill="/reckon-ship" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">SVG companions, a persisted terminal state, a gauge-free level error and a guard that guards</h4>
     <div class="r-fu-body">One node: (1) persist the terminal state beside the banked receipt (the save at benchmarks/centroid_constrained_fixture_receipt.py line 1006 must run before the receipt is written) and re-render the three figures under docs/figures/centroid-constrained-oracle-solve from that state on all_debug as PNG and SVG per the plotting rules, without a betelgeuse solve; (2) replace level_error_wb with a gauge-free quantity (the level row's scaled residual is the physical error) or drop it from the receipt, and caption accordingly; (3) make the lattice-order guard in nova/equilibrium/constraint.py near line 1200 fail under the pre-fix indexing (compare the sampled pool slice against the cell count the stencil convention states) so the repair does not rest on one stub test; gate on the two-module all_debug lane with zero added failures against the stated base.</div>
+    <pre class="r-fu-prompt">/reckon-ship centroid-constrained-oracle-solve</pre>
+    </article>
+<article class="r-fu" data-id="f-ccos-cite-the-negative-control-and-the-unpublished-arms" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="figure-and-solver-audit reviewer fsa-audit-figures-remaining-directories" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship centroid-constrained-oracle-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Cite the negative control panel and account for the six unpublished field-response arms</h4>
+    <div class="r-fu-body"><p>Audit anchor: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figures-remaining-directories</code>; reviewer node <code>fsa-audit-figures-remaining-directories</code>, review lane claude-opus.</p><p>Three figures under <code>docs/figures/centroid-constrained-oracle-solve/</code> are published with no citing paragraph, so no number in them can be re-derived and no reader can check them. <code>control-negative.png</code> and <code>control-negative.svg</code> carry the negative control on which <code>control-positive.png</code>'s verdict rests, with no caption, no receipt path and no terminal residual stated anywhere; they also draw the terminal series in magenta against the positive control's ochre with no key, hiding the blue analytic contours the comparison exists to show. Separately, <code>field-response/parts/</code> holds <b>eight</b> receipts - radial and vertical at +/-1 mT and +/-10 mT - and only the two <code>+10 mT</code> panels are published under <code>field-response/panels/</code>, with nothing stating that the other six arms were measured and not drawn; a reader sees the two arms that agree and not the six that were measured. Finally, <code>control-positive.png</code>'s caption asserts the state is limited with its boundary touching the wall at (7.711243498509007, -1.2833930119030192) m, and the panel places no marker at that contact point, so the limited-boundary claim cannot be read off the figure. Repair: cite the negative control with its receipt and numbers, unify the colour convention across the pair, publish or explicitly account for all eight field-response arms, and mark the limiter contact point on the positive control. Reviewer evidence: the figure and solver audit anchor for the remaining figure directories.</p></div>
     <pre class="r-fu-prompt">/reckon-ship centroid-constrained-oracle-solve</pre>
     </article>
 </section>

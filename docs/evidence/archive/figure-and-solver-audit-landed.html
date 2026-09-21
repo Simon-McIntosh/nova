@@ -1351,6 +1351,1111 @@ ROW2_EXIT=139</pre>
 <li><code>masks.profile_participation</code> is the domain the profile <strong>owns</strong>, not the current-carrying set, so 135 of 135 is neither a collapsed nor an inflated support.</li>
 </ul>
 </section>
+<section class="audit-directory" id="fsa-audit-solver-census-and-certificate-drivers-section">
+<h2 id="fsa-audit-solver-census-and-certificate-drivers">Solver-driver promotion review</h2>
+<p>Review lane: independent Codex worker, worktree head <code>0322e911a52588e116bb76a2243ff0dc728cc655</code> (<code>main</code>). Review window: promotions whose git history touched the eight requested benchmark paths since 2026-09-16. The ledger join was performed against <code>docs/state/nova/crew.json</code>; it produced 18 promotion rows. <code>benchmarks/forward_census.py</code> is not present at the merged head and has no matching git history, so it has no gate row rather than an invented result.</p>
+<p>The current-head check that could be completed within this worker's 55-minute fence was one fresh <code>all_debug</code> allocation with <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in the submit environment and payload, the shared interpreter directly, and no <code>uv</code> on the node. It ran the four focused modules covering the available driver pins: 28 passed, 0 failed, 4 dtype warnings; log: <code>/tmp/fsa-audit-current/all-debug-gate.log</code>. A second fresh <code>all_debug</code> process reran the compile-abort sampler with a shared receipt path: child exit 7, peak maps 25 of 65530, one sample, wrapper exit 0; log: <code>/tmp/fsa-audit-current/abort-all-debug.log</code>, receipt: <code>current-abort-summary.json</code>. The remaining historical H200 or multi-minute certificate/coil/DIII-D gates were not rerun at this head; those rows are explicitly <code>unverifiable</code>, not green by absence of a current failure.</p>
+<h3 id="fsa-audit-solver-census-and-certificate-drivers-promotion-rows">Promotion rows</h3>
+<p>“Done-when” below is a compact transcription of the recorded fence, retaining its quantitative obligation. “Current rerun” distinguishes a fresh merged-head execution from the promotion's older receipt.</p>
+<table><thead><tr><th>run</th><th>commits</th><th>recorded done-when</th><th>historical gate receipt</th><th>current rerun</th><th>verdict and reason</th></tr></thead><tbody>
+<tr><td><code>r-20260916T065036630331-msc-mesh-arguments-plumbing</code></td><td><code>dd7d8286</code>, <code>4cd74aed</code>, <code>27b2495f</code>, <code>64c2a161</code>, <code>78d87c69</code>, <code>8d84644c</code>, <code>205d0f35</code>, <code>e0e9417a</code>, <code>ff496808</code></td><td>Mesh-sized arrays are traced arguments; four certificate rows remain bit-identical; the 300-cell effective executable is under 50 MB; focused modules have zero added failures.</td><td><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments/logs/size-1271977.log</code>: <code>effective_bytes=210159751</code>, <code>verdict=FAIL</code>; the receipt explicitly says the 50 MB obligation remains open.</td><td>Not rerun verbatim; current focused tests are covered by <code>/tmp/fsa-audit-current/all-debug-gate.log</code>.</td><td><strong>defective</strong> — the named size gate failed its own threshold and was separated into a followup after promotion.</td></tr>
+<tr><td><code>r-20260916T070747822998-cco-bounded-uniform-field-unknown</code></td><td><code>57d681a9</code>, <code>ac7abf81</code>, <code>bc0a80cd</code>, <code>b40753c5</code>, <code>2046f02a</code>, <code>903cf2e2</code>, <code>7f83a9db</code>, <code>374ed402</code></td><td>Weak-110 positive control within 0.1 pitch and 1e-12 residual; displaced negative control; bound refusal; four-row table; fresh modules green.</td><td><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row/h200-receipt-repair-status.txt</code>: job 1272020 timed out with weak-110 at 0.5663 pitches off target and residual 1.001e-3; remaining rows absent.</td><td>Not rerun; scientific route is an H200-sized gate.</td><td><strong>defective</strong> — the manifest is <code>failed</code>, but the promotion row remains in the ledger with the done-when unmet.</td></tr>
+<tr><td><code>r-20260916T205150200621-mulw-zero-residual-identity-assert</code></td><td><code>c478f13b</code>, <code>77c50e19</code></td><td>Empty identity set must refuse; positive non-empty set must be accepted; diverted CPU identity row must report its non-zero count beside the residual.</td><td><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/zero-identity/logs/diverted-identity-row-1272380.log</code>: exit 0, identity count 730, difference 0.0; focused guard tests passed.</td><td>Focused tests passed in <code>/tmp/fsa-audit-current/all-debug-gate.log</code>.</td><td><strong>sound</strong> — the refusal was exercised and the positive receipt carries the denominator; two unrelated pre-existing failures were preserved as follow-ons.</td></tr>
+<tr><td><code>r-20260916T205409901465-cco-bounded-row-step-control</code></td><td><code>a096fecc</code>, <code>8165d70f</code>, <code>66e8e8c7</code>, <code>34a6e995</code>, <code>442820bf</code>, <code>9fbe44b3</code></td><td>Two weak-110 H200 jobs must show first-step scale, positive control at 0.1 pitch/1e-12, a discriminating no-row negative, bound behavior, amplitude and panels.</td><td><code>/home/ITER/.config/reckon/crew/reports/nova/s19-local/centroid-step/control-positive-1272540.log</code> and <code>control-negative-1272541.log</code>; the positive row residual is 1.3398e-3, the earlier weak row exceeds the 0.25 T bound, and the no-row arm returns to its own fixed point rather than staying in the displaced basin.</td><td>Focused unit tests passed, but the scientific gate was not rerun.</td><td><strong>defective</strong> — the recorded negative control cannot discriminate the claimed effect, and the exact residual/bound clauses fail.</td></tr>
+<tr><td><code>r-20260916T205009785219-nia-bank-drift-paired-probe</code></td><td><code>5ed1dd3b</code>, <code>37fec904</code>, <code>f7364e82</code>, <code>1b467745</code>, <code>903d5d49</code></td><td>One allocation must produce 12 paired arm rows, name the first differing stage, and merge with a zero-missing receipt.</td><td><code>/home/ITER/.config/reckon/crew/reports/nova/s19-local/bank-drift/campaign-1272590.log</code>: time limit after 10 rows; receipt says 10 present, 2 missing, merge non-zero.</td><td>Not rerun; H200 paired-tree campaign.</td><td><strong>defective</strong> — the promoted row is incomplete against its 12-row done-when; a later successor measured the missing two arms and is reviewed separately.</td></tr>
+<tr><td><code>r-20260917T095016652314-cco-fixed-point-clause-in-one-gauge</code></td><td><code>d2e0c68e</code></td><td>Re-read the banked positive control in one gauge, record the gauge-free offset and scaled residual, and state whether the 1e-12 clause holds, fails or is undecidable.</td><td><code>/home/ITER/.config/reckon/crew/reports/nova/s19-local/centroid-gauge/gauge-reread.json</code>: gauge-free span offset and residual are recorded; verdict is <code>fails</code>.</td><td>Not rerun; current focused centroid tests only cover the helper path.</td><td><strong>sound</strong> — it reports the negative scientific result rather than promoting a false pass.</td></tr>
+<tr><td><code>r-20260917T163636652426-fsa-coil-edit-nonconvergence</code></td><td><code>7514edd9</code>, <code>0797f64f</code></td><td>One H200 twenty-edit sweep must persist every edit's residual, reason, topology, trips and trace, plus a shared-level panel; no solver code changes.</td><td><code>/home/ITER/.config/reckon/crew/runs/r-20260917T163636652426-fsa-coil-edit-nonconvergence/logs/coil-edit-latency-1273204.log</code>: all 20 edits landed, driver exit 2 for the two declared false gates; receipt explains the ten non-converged edits.</td><td>Not rerun; exact H200 sweep unavailable in this fence.</td><td><strong>sound</strong> — the false gates are preserved as findings and the diagnostic done-when is met.</td></tr>
+<tr><td><code>r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2</code></td><td><code>a2563494</code>, <code>0c255b56</code>, <code>f884b659</code>, <code>80e78f51</code>, <code>915c4cee</code>, <code>b8d0bcbb</code>, <code>5397a939</code>, <code>d85874f8</code></td><td>Complete the two 22086/43 arms, merge 12/12 with no missing rows, render the 21978/35 panel pair, and pin the merge/unpaired contracts.</td><td><code>/home/ITER/.config/reckon/crew/reports/nova/s19-local/bank-drift-remainder</code> and the committed receipt: 12 present, 0 missing, panel render exit 0, six focused tests passed.</td><td>Current focused bank tests passed; H200 resolve not rerun.</td><td><strong>sound</strong> — the successor closes the earlier 10/12 gap and carries its receipt and panel.</td></tr>
+<tr><td><code>r-20260918T091602435823-fsa-coil-edit-panel-lcfs</code></td><td><code>98d0fbe9</code>, <code>714a48a0</code>, <code>82dcd45e</code>, <code>14ec3206</code>, <code>d3849192</code>, <code>e2728913</code>, <code>bfa7bdc0</code></td><td>Replace the raw raster level set with assembled branches, regenerate the panel and verify the sweep.</td><td><code>/home/ITER/.config/reckon/crew/runs/r-20260918T091602435823-fsa-coil-edit-panel-lcfs/manifest.md</code>: status <code>blocked</code>; the branch-closing repair and sweep rerun were not landed.</td><td>Not rerun; promotion is already blocked before a gate can be meaningful.</td><td><strong>defective</strong> — implementation and records were promoted while the stated branch repair remained outstanding.</td></tr>
+<tr><td><code>r-20260917T214414373906-cco-flux-level-compensating-term-2</code></td><td><code>67e0296c</code>, <code>42fab795</code>, <code>6cccf91b</code>, <code>f39ae4a8</code>, <code>a4c3c129</code>, <code>bdb3d49</code>, <code>f5804eeb</code>, <code>e9363e8f</code>, <code>4bf4a59c</code>, <code>67296f75</code>, <code>826a7434</code>, <code>9f08bd58</code>, <code>ee628446</code>, <code>d6043df9</code>, <code>99f1345e</code>, <code>b66ab9cb</code></td><td>Remove the mixed-gauge level error, preserve the fixture control evidence, and run the named fresh CPU module gate with zero added failures.</td><td><code>/home/ITER/.config/reckon/crew/reports/nova/s19-local/centroid-gauge/all_debug_test.log</code> plus the landed receipt; the positive H200 control was blocked by compile size and is explicitly recorded as absent.</td><td>Not rerun verbatim; current focused centroid tests passed.</td><td><strong>unverifiable</strong> — the record is honest about the missing positive control, but the full scientific done-when cannot be confirmed from the available merged-head run.</td></tr>
+<tr><td><code>r-20260918T154507107752-fsa-coil-edit-panel-lcfs-2</code></td><td><code>18fd78a7</code></td><td>Run the connectivity and branch gates on one all_debug allocation, add the even-crossing repair, and leave any fixture regeneration blocker explicit.</td><td><code>/home/ITER/.config/reckon/crew/reports/nova/s19-local/coil-edit-panel-lcfs-2/gate-6.log</code>: 30 passed, exit 0; the twenty-state regeneration remains blocked by the measurement-host guard and serving lane.</td><td>Not rerun verbatim; current focused modules do not include this branch gate.</td><td><strong>defective</strong> — the code gate is green, but the required current fixture/sweep evidence was not produced.</td></tr>
+<tr><td><code>r-20260919T090619820972-fsa-edge-root-bracket</code></td><td><code>1037c68a</code></td><td>Two branch test modules plus the twenty-state census must pass on all_debug with 0/20 failures; redraw the panel.</td><td><code>/home/ITER/.config/reckon/crew/reports/nova/s19-local/edge-root-bracket</code>: 34 passed, census 0/20, exit 0.</td><td>Not rerun; current gate is outside the focused set.</td><td><strong>sound</strong> — the committed fixture gate meets its declared quantitative result; a probe-only stationary-root discrepancy is recorded as follow-on.</td></tr>
+<tr><td><code>r-20260919T112104763452-fsa-coil-edit-records</code></td><td><code>df4791d1</code>, <code>5738d3f7</code>, <code>298bef8b</code>, <code>a0149cc8</code>, <code>960c4864</code></td><td>Refresh branch terms, reference orientation, CPU provenance and figures on the regenerated fixture, with the two test modules and census green.</td><td><code>gate.log</code>: committed fixture 34 passed and 0/20; <code>gate2.log</code>: regenerated fixture 32 passed, 2 failed, and eight lobes remain open.</td><td>Not rerun; current gate is outside the focused set.</td><td><strong>defective</strong> — the regenerated-fixture portion of the done-when failed and was left as a follow-on while the row was marked complete.</td></tr>
+<tr><td><code>r-20260919T141620037986-fsa-persistence-guard-positive-control</code></td><td><code>8bfcff1d</code>, <code>c5580fac</code></td><td>Reproduce the old self-comparison miss on the retained fixture, make read-back compare the persisted pair, and pass the positive synthetic archive.</td><td><code>/home/ITER/.config/reckon/crew/reports/nova/s19-local/fsa-persistence-guard-positive-control/gate.log</code>: 3 passed, exit 0; retained fixture fires on all 20 states.</td><td>Current focused coil guard passed in <code>/tmp/fsa-audit-current/all-debug-gate.log</code>.</td><td><strong>sound</strong> — the previously recorded defect reproduces and the guard's positive and refusal paths are both evidenced.</td></tr>
+<tr><td><code>r-20260919T125427607332-fsa-sweep-persistence</code></td><td><code>16a4dfe5</code></td><td>Run the connectivity tests and census on the regenerated fixture, assert persisted-state consistency, and redraw the panel.</td><td>No gate log: manifest says <code>none run</code> and defers the all_debug gate to the follow-on regeneration node.</td><td>Current focused coil guard passed, but the declared sweep was not rerun.</td><td><strong>defective</strong> — the promotion has no named gate result and its done-when was explicitly deferred.</td></tr>
+<tr><td><code>r-20260919T111944475334-cco-review-repairs</code></td><td><code>10ff11fd</code>, <code>0452c5cf</code>, <code>662bc387</code>, <code>44c0bd28</code>, <code>28a632cd</code>, <code>53112c65</code>, <code>1851827b</code></td><td>Persist the terminal state, repair the mixed-gauge record, exercise the lattice-order refusal and produce both controls/figures with fresh CPU gates.</td><td><code>/home/ITER/.config/reckon/crew/runs/r-20260919T111944475334-cco-review-repairs/control-positive-chunk.log</code>: positive arm aborts with LLVM section allocation; negative arm only is produced and gated.</td><td>Current focused centroid tests passed; positive scientific arm not rerun.</td><td><strong>defective</strong> — the positive control is absent, so the full repair done-when is not met even though the negative arm and unit repairs are sound.</td></tr>
+<tr><td><code>r-20260919T231747888058-fsa-coil-edit-under-the-vertical-constraint</code></td><td><code>c920e30d</code>, <code>5a1bac81</code>, <code>eb9d7285</code>, <code>315bdf33</code></td><td>Regenerate the constrained twenty-edit fixture and redraw the panel on one all_debug CPU allocation, with the persisted census agreeing before commit.</td><td><code>/home/ITER/.config/reckon/crew/runs/r-20260919T231747888058-fsa-coil-edit-under-the-vertical-constraint/logs/regen-1274099.log</code>: LLVM abort after nine edits; the earlier red controls identify and repair two driver defects.</td><td>Current focused coil guard passed; exact regeneration not rerun.</td><td><strong>defective</strong> — the core regeneration and redraw required by the done-when were not delivered.</td></tr>
+<tr><td><code>r-20260920T153324775149-cca-sample-the-mapping-count-through-the-abort</code></td><td><code>17bd21d5</code>, <code>018879d7</code></td><td>Reproduce the smallest compile abort on one all_debug job, sample mappings and RSS through process exit, and settle whether the 65530 mapping limit was reached.</td><td><code>/home/ITER/.config/reckon/crew/runs/r-20260920T153324775149-cca-sample-the-mapping-count-through-the-abort/mapping-count.log</code>: 65271/65530 peak, but the actual panel-producing abort did not reproduce; receipt says the hypothesis is not settled.</td><td>Current sampler rerun: child exit 7 is read in <code>current-abort-summary.json</code>; it is an instrument check, not the historical certificate abort.</td><td><strong>defective</strong> — the instrument ran, but the scientific done-when (“settle either way”) was not met and the record correctly leaves it open.</td></tr>
+</tbody></table>
+<h3 id="fsa-audit-solver-census-and-certificate-drivers-local-lane-promotion-held-for-review">Local lane promotion held for review</h3>
+<p>The local, unpromoted run <code>r-20260920T180231259880-cca-one-certificate-row-per-process</code> is not sound to promote yet. Its two commits are <code>2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0</code> and <code>0028295f5ed999d7d8d02d3dfa0fe427e12d2c12</code>; the measured diff is 31 paths, not 63, and all 31 fall under the five declared path roots. The measurement itself is useful: one all_debug allocation, four sequential children, peaks 24750/40756/40752/39095 of 65530, four rows landed, and the diverted row terminates at residual 2.092e-1. It is not a certificate identity pass: the digest-only baseline leaves the identity gate red. Two receipt defects also remain in the committed candidate: <code>benchmarks/solve_program_size_gate.py:1737</code> writes <code>candidate_state_array_path</code> as an absolute worktree path, and <code>:2165</code> labels the probe wrapper's always-zero return as <code>exit_code</code> while the child's result is only under <code>probe_exit_code</code>. The run's own manifest names both as follow-ons. Verdict: <strong>defective / do not promote</strong> until the receipt paths and exit semantics are repaired; scope is path-contained, but its generated evidence is not promotion-ready.</p>
+<h3 id="fsa-audit-solver-census-and-certificate-drivers-negative-control-audit">Negative-control audit</h3>
+<table><thead><tr><th>run</th><th>declared control</th><th>applied control and red evidence</th><th>finding</th></tr></thead><tbody>
+<tr><td><code>r-20260916T205150200621-mulw-zero-residual-identity-assert</code></td><td>Empty identity set must refuse, then a non-empty set must pass.</td><td><code>tests/test_solve_program_size_gate.py</code> exercises <code>EmptyIdentitySetError</code>; the 730-row receipt is the positive case.</td><td>Sound and directly guarded.</td></tr>
+<tr><td><code>r-20260916T205409901465-cco-bounded-row-step-control</code></td><td>No-row displaced seed must remain in the displaced basin.</td><td>The recorded no-row arm converges to its own map fixed point (<code>6.057406900 m</code>) with a tiny residual; it does not remain at the displaced seed. No standalone red log names a mutation.</td><td><strong>Finding:</strong> negative control is scientifically non-discriminating; repair the displacement/target before using it as a control.</td></tr>
+<tr><td><code>r-20260919T111944475334-cco-review-repairs</code></td><td>Wrong terminal-state digest must refuse, valid banked state must render.</td><td>The wrong-digest test refuses and the banked negative arm reloads to its recorded digest; positive constrained arm aborts before measurement.</td><td>Negative guard sound; positive scientific claim remains unverified.</td></tr>
+<tr><td><code>r-20260919T231747888058-fsa-coil-edit-under-the-vertical-constraint</code></td><td>Apply the vertical constraint through the machine interface.</td><td><code>regen-1274093.log</code> first line repeats the declared mutation; it reddens on the pre-existing <code>FluxTarget</code>/wall-unit path, while the later repair log reaches the LLVM abort.</td><td>Control and mutation identity are sound; regeneration remains blocked.</td></tr>
+<tr><td><code>r-20260920T180231259880-cca-one-certificate-row-per-process</code></td><td>Force parent-process execution instead of one child per row.</td><td><code>negative-control.log</code> applies <code>if row is not None or not process_per_row:</code> → <code>if True:</code> and the child-process shape test fails as expected.</td><td>Control sound; promotion still defective for receipt provenance and exit semantics.</td></tr>
+</tbody></table>
+<p>Rows whose prompts mention a positive/negative scientific control but carry no declared mutation and no red log are not silently counted as passed; they are covered by the defective or unverifiable verdict above.</p>
+<h3 id="fsa-audit-solver-census-and-certificate-drivers-findings-and-counts">Findings and counts</h3>
+<p>Actionable followups are in <code>findings.json</code>; each names the run, commit, file, line, defect and repair and is ready to append to the owning plan. The principal defect classes are:</p>
+<ul>
+<li><strong>11 defective promotions:</strong> threshold gate promoted with <code>FAIL</code>; incomplete/blocked scientific done-when promoted as complete; non-discriminating negative control; missing fixture/sweep evidence; and a measurement instrument that did not settle the claimed hypothesis.</li>
+<li><strong>1 unverifiable promotion:</strong> the record is explicit about a blocked positive arm, but the full done-when cannot be established at this merged head.</li>
+<li><strong>6 sound promotions:</strong> refusal guard, gauge-free negative result, full diagnostic sweep, completed 12-row drift successor, edge-root gate, and persistence guard. (The count is conservative: sound means the recorded done-when was met, not that the surrounding solver is scientifically green.)</li>
+</ul>
+<p>The local certificate-row run is separately <strong>defective / withheld</strong>, with a path-contained 31-file diff and two receipt defects. Current merged-head evidence is limited to the 28-test all_debug run and the shared-path sampler receipt named above; every other row retains its historical log and is explicitly not presented as a fresh green gate.</p>
+</section>
+<section class="audit-directory" id="fsa-audit-solver-clip-and-quadrature-section">
+<h2 id="fsa-audit-solver-clip-and-quadrature">Clip and quadrature promotion audit</h2>
+<p>Reviewer run: <code>r-20260921T061551405436-fsa-audit-solver-clip-and-quadrature</code> Reviewed head: <code>0322e911a52588e116bb76a2243ff0dc728cc655</code> Area: <code>nova/equilibrium/separatrix_clip.py</code>, <code>nova/equilibrium/clip_quadrature.py</code>, and <code>nova/equilibrium/stencil_mesh.py</code>.</p>
+<h3 id="fsa-audit-solver-clip-and-quadrature-method-and-gate-record">Method and gate record</h3>
+<p><code>git log --since=2026-09-16</code> found fourteen commits touching the three owned files. Joining every SHA to <code>docs/state/nova/crew.json</code> produced eight promotion records. Each source diff was read against the ledger's recorded done-when. The portable named pytest portions were re-run at the merged head in 19 fresh direct-interpreter processes in one <code>all_debug</code> allocation with <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>, and <code>PYTHONPATH</code> set to this worktree; <code>uv</code> was never invoked on the compute node.</p>
+<p>The allocation completed with 13 passing and 6 failing processes. The failures contain 10 failed tests and all name the same candidate, <code>d90a522fe</code>, at <code>nova/equilibrium/forward_operator.py:3091</code>: <code>AttributeError: 'types.SimpleNamespace' object has no attribute 'x_point'</code>. They are post-promotion cross-gate regressions, not retrospective attribution to the earlier clip commits. The original historical gate scripts for the first two rows hard-code removed worktrees/base revisions, and both require <code>tests/test_exact_clip_memory.py</code>; their own manifests prove that module did not complete inside its 59-minute allocation. Those gates are recorded as incomplete, not as successful absence evidence.</p>
+<p>Logs: <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-clip-and-quadrature/gates/all-debug-portable-gates.log</code>; one fresh-process log per target sits beside it.</p>
+<h3 id="fsa-audit-solver-clip-and-quadrature-promotion-rows">Promotion rows</h3>
+<h4 id="fsa-audit-solver-clip-and-quadrature-r-20260916t070630305673-ecq-polygon-exact-density-moments-de">r-20260916T070630305673-ecq-polygon-exact-density-moments — defective</h4>
+<p>Ledger commits: <code>e916b3f99d21555613402fa12ac9c7f81f30df62</code>, <code>1f8852170c47a9536203e399f80b305baabc5a2a</code>, <code>5fea2b5b861c1236795ee11f9ca4b1f141a0a782</code>, <code>a9d8061e15f179d397e4a24567786feda80b3f3a</code>, <code>f221d583b461dae43489434d83df41299fbbe5cb</code>, <code>5c32623e16f246bda64ea6490e3b88d399f90b47</code>, <code>1f42a3ee2bd7287774aedd9b72eaf8d9e5d0db5d</code>, <code>8095963bdc22343ec4b2d899dd9f4c767bc690b3</code>, <code>a6c812c0ee1c923da023035b39ed6ba68b2a268e</code>, <code>58c5951eedf44d129f692096be98b338ac28ad83</code>, <code>f86ad436687ae5e6f81a7e491fb048a74e1e25a3</code>, <code>9c3acea88bdfd36cc0addf301e391f6c182c70a2</code>, <code>d621ea7b36f02b0248468c5cfb58cfc5b298bea8</code>, <code>93162c252fee99ab44d63b6c25bcf96b03cf3597</code>. Source-touching commits: <code>e916b3f9</code>, <code>f221d583</code>, <code>58c5951e</code>, <code>93162c25</code>.</p>
+<p>Recorded done-when: on <code>all_debug</code> with CPU JAX, measure the fan floor by doubling density; agree with it on weak/moderate/strong/single-null rows at 110/300/1000 cells; preserve the weak-110 frozen image; keep cut-cell evaluations under 200 and workspace bounded; pass <code>tests/test_clipped_support_quadrature.py</code> plus every clip-quadrature importing module in fresh processes with zero added failures; persist row receipts and a comparison figure.</p>
+<p>The ledger records <code>gate=failed</code>; its manifest says five of six module gates passed but the memory baseline timed out at 59m10s, no after arm exists, and both baseline and after suites are <code>completed=false</code>. It also records the boundary route's live evaluation range as 8,192–8,448 per cell, not the promised under-200. At the merged head the portable quadrature target fails 3 tests and the moments target fails 1, all due to later <code>d90a522fe</code>; the historical promotion is defective independently because its recorded gate and evaluation ceiling were unmet.</p>
+<h4 id="fsa-audit-solver-clip-and-quadrature-r-20260916t205800570103-cca-implicit-arc-tracer-by-parameter">r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter — defective</h4>
+<p>Ledger commit: <code>935589accb2747064211e8039d68ed1cf98b79db</code>.</p>
+<p>Recorded done-when: remove the globals clone from <code>separatrix_clip.py</code>; run the twelve-test exact-clip module and every module importing it in fresh <code>all_debug</code> CPU processes with zero added failures; prove weak-110 moments bit-identical to base; avoid other <code>nova/</code> changes; and persist logs.</p>
+<p>The diff correctly makes <code>arc_tracer</code> an explicit seam. However, the ledger records <code>gate=failed</code>; its own manifest says seven modules were green while <code>tests/test_exact_clip_memory.py</code> reached its 59-minute limit without completing. The remaining portable current-head modules yield 4, 3, 25, 4, 3, and 14 passes, with only <code>test_forward_moment_class.py</code> now failing from <code>d90a522fe</code>. The required complete module gate never existed, so this promotion is defective for unmet acceptance evidence, not for a demonstrated defect in the explicit-tracer hunk.</p>
+<h4 id="fsa-audit-solver-clip-and-quadrature-r-20260916t204834010483-ecq-sampled-arc-gauss-route-defectiv">r-20260916T204834010483-ecq-sampled-arc-gauss-route — defective</h4>
+<p>Ledger commits: <code>1ad4bea965d4c00863192499e1aa350d386740c6</code>, <code>c96dad28e91c9be1779531931e7d7b7ad3792a43</code>, <code>d9b594b29be63302832faf0097ae60b983e20295</code>, <code>f573ac1b61ed0d6c0b93023684916e87ba938e9b</code>, <code>f225e9c0e1521464c799ee7e4fe6d2ed7c7fb0c7</code>. Source-touching commit: <code>1ad4bea96</code>.</p>
+<p>Recorded done-when: find the lowest per-edge order whose three moments meet one tenth of the row-specific error term across weak/moderate/strong rows and three resolutions; report the fixed edge-count evaluation total, expected under 500; preserve weak-110 fan-default identity; and pass exact-moment plus clipped-quadrature modules in fresh CPU processes.</p>
+<p><code>1ad4bea96</code> set <code>_ARC_EDGE_ORDER = 3</code> at <code>clip_quadrature.py:50</code>. Its own commit message says order three is exact through degree five; it omits that the shifted first-moment paths raise the antiderivative to degree six. The successor <code>e25803d8</code> explicitly re-derived this and changed the order to four. The original promotion is therefore a real quadrature-order defect even though its ledger gate says passed. Its two current-head target modules now fail only from the later typed-saddle compatibility regression.</p>
+<h4 id="fsa-audit-solver-clip-and-quadrature-r-20260917t094325762879-ecq-shifted-path-order-and-budget-te">r-20260917T094325762879-ecq-shifted-path-order-and-budget-terms — defective</h4>
+<p>Ledger commits: <code>e25803d87cec1ac25d5260c80c3e4c54e4f90968</code>, <code>73432e5bdd258f2dc9b1ced05d68030bdbf98566</code>, <code>861b10ab2552f5c94defb21c4200ef2c9aaf5cfb</code>. Source-touching commit: <code>e25803d8</code>.</p>
+<p>Recorded done-when: compare all three antiderivative paths against a closed-form asymmetric quadratic sliver; set the smallest order below 1e-12; recompute nine row margins against the specified independent denominators; replace or remove the arithmetic-sharing exact-density arm; pin nonzero quadratic coefficients; prove weak-110 default identity; and run the exact-moments module fresh on <code>all_debug</code>.</p>
+<p>The order-four correction is mechanically sound, but the promotion's carried evaluation contract is false. Current code reports <code>cut_capacity_edge_bound() = 149</code> and <code>cut_cell_moment_evaluation_bound() = 621</code> (25 density samples + 149 × 4), exceeding the predecessor's expected-under-500 ceiling. The independent figure audit also records the stale 472-count claim. The current moments module has 7 passes and the same one <code>d90a522fe</code> fixture failure. Verdict is defective because the promoted acceptance envelope was not met, even though the order repair itself is correct.</p>
+<h4 id="fsa-audit-solver-clip-and-quadrature-r-20260917t100810663195-ecq-capacity-sizing-defective">r-20260917T100810663195-ecq-capacity-sizing — defective</h4>
+<p>Ledger commits: <code>f7fefbd780aae7ef3d9707722fc4d80a1f0742cd</code>, <code>128f5f57ca0fab4a2823071019e05ff981de8284</code>. Source-touching commit: <code>f7fefbd7</code>.</p>
+<p>Recorded done-when: replace the 3,840 capacity with a documented derived 128-plus-straight-chain bound, retain overflow refusal and test a polygon above it, preserve three fan-route identities, run the memory scaling program and report compile walls.</p>
+<p>The derived capacity was right, but <code>f7fefbd7</code> made overflow silent: at historical <code>separatrix_clip.py:1253</code> it set <code>included = included &amp; ~overflow</code>, then zeroed the geometry. A later promotion had to disclose that this made an over-capacity cell indistinguishable from a legitimate outside cell. The current fresh separatrix gate passes 25 tests, but it verifies the later repaired state; this promotion remains defective because its claimed retained refusal did not exist.</p>
+<h4 id="fsa-audit-solver-clip-and-quadrature-r-20260918t080952872560-ecq-capacity-refusal-must-report-def">r-20260918T080952872560-ecq-capacity-refusal-must-report — defective</h4>
+<p>Ledger commits: <code>57af295535461807787caa1b19a1eae04ae5f9d7</code>, <code>f6bce45ed9fee2c83441f091ac65c98348a0e02b</code>, <code>da67cfc543b4599339210f2915f80d27307c1546</code>, <code>22c268e0ddfcee0d6c3072e503e7eb9b3d70ee4b</code>, <code>5d4eca292ebc0ab40b815cf99fd09da3a8db80a8</code>. Source-touching commit: <code>57af2955</code>.</p>
+<p>Recorded done-when: report any over-capacity layout as a counted receipt refusal with a fail-closed assertion path the solve can surface, test a two-arc refusal, derive the 158 capacity in certificate receipts, census all named rows, and run the specified CPU measurements.</p>
+<p>The fixture guard fires—current <code>tests/test_equilibrium_separatrix_clip.py</code> passes 25 tests and directly calls <code>support.assert_no_refusal()</code> at line 719. But an aimed source census finds the method only in its definition (<code>separatrix_clip.py:249</code>) and that test: no <code>nova/</code> production call site invokes it. The production path can still receive <code>included=0</code> without surfacing the count. This is a current fail-open integration defect: a manually called guard is not the solve-visible refusal the done-when required.</p>
+<h4 id="fsa-audit-solver-clip-and-quadrature-r-20260918t202207266011-cca-xpoint-cell-treatment-sound">r-20260918T202207266011-cca-xpoint-cell-treatment — sound</h4>
+<p>Ledger commits: <code>0e18d6df1388361ae42f2d5d8bbe1dfa538a0f35</code>, <code>6ef263161270298af0e377ee58d60926a7c2a72b</code>, <code>1f21b58c372b26f21ec06ca8cf2ec7c7888c0fb8</code>, <code>aca7dda6e25dac0631ffba8c3c00e9be55100c38</code>, <code>9b941292ef62b0fbcc1481e52f43751c0a173003</code>. Source-touching commits: <code>0e18d6df</code>, <code>6ef26316</code>.</p>
+<p>Recorded done-when: make the spline-chain route admit the typed saddle, split and pair its four branches with fixed capacity and zero padding, verify the independent CPU oracle at 110/300/500 cells, defer the unavailable H200 half explicitly, and publish the specified wedge panel.</p>
+<p>The CPU oracle half matches its declared boundary: the fresh current-head <code>tests/test_xpoint_cell_wedge_clip.py</code> plus <code>test_forward_census_spline_wedge_current_oracle</code> process passed 17 tests. Its manifest records the H200 gate as explicitly deferred by the occupied QoS, rather than falsely green. No negative control was recorded for this ledger row.</p>
+<h4 id="fsa-audit-solver-clip-and-quadrature-r-20260919t234730758244-cca-production-clip-takes-the-typed-">r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle — defective</h4>
+<p>Ledger commits: <code>d90a522fe8ac53d4a26477bf920aeb8ac367be47</code>, <code>3d0b2f494bd5da2dcb5115e4803cf346cc68a5ed</code>, <code>156bff654384b72925d23fbfdf9a010a4840f37b</code>, <code>fa7db0d675a0bceb8b8edf85a13df4832da7b59c</code>. Source-touching commit: <code>d90a522fe</code>.</p>
+<p>Recorded done-when: pass the typed census saddle to the production clip; route the four region profiles into partition and null reads; measure the independent 110/300/500 CPU oracle below 1e-13 relative; defer the occupied-GPU certificate re-solve; pin the saddle/profile consumers; report base delta; and make the declared negative control red.</p>
+<p>Its focused current-head pin passes 14 tests. The declared negative-control log is valid: it starts with the declared deletion of <code>saddle_vertex=topology.x_point,</code> and fails its dedicated pin with <code>AssertionError: the clip is called with no saddle vertex</code>. But the normal path unconditionally reads <code>topology.x_point</code> at <code>forward_operator.py:3091</code>. The analytic fixtures provide a <code>SimpleNamespace</code> topology without that attribute, breaking <code>test_clipped_support_quadrature.py</code> (3 failures), <code>test_exact_clip_moments.py</code> (1), and <code>test_forward_moment_class.py</code> (1). The control proves only that a present saddle is propagated; it misses the supported no-census-saddle route. This promotion is defective.</p>
+<h3 id="fsa-audit-solver-clip-and-quadrature-negative-control-review">Negative-control review</h3>
+<p>Only the final ledger row recorded a declared negative control. Its declaration and the first line of <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle/negative-control.red.log</code> agree byte-for-text on deleting <code>saddle_vertex=topology.x_point,</code>. The red log names the intended assertion. No assertion inversion, stub, tolerance widening, or self-disabling test was found in that control. Its missing no-<code>x_point</code> case is a coverage defect, recorded in <code>findings.json</code>.</p>
+<h3 id="fsa-audit-solver-clip-and-quadrature-totals">Totals</h3>
+<p>Promotions reviewed: <strong>8</strong>. Verdicts: <strong>1 sound</strong>, <strong>7 defective</strong>, <strong>0 unverifiable</strong>. Defect classes: unmet historical gate; quadrature order too low; stated evaluation ceiling exceeded; silent capacity overflow; guard not wired into production; later promotion regressing analytic topology compatibility; negative-control coverage gap.</p>
+<p>Follow-on repairs are structured in <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-clip-and-quadrature/findings.json</code>.</p>
+</section>
+<section class="audit-directory" id="fsa-audit-solver-fixed-point-and-newton-routes-section">
+<p>Fixed-point and Newton review — in-progress for 13 promotion records; one run deferred.</p>
+<p>Coordinator ruling: <code>r-20260920T181701895943-fsri-the-trips-are-a-scan-not-a-loop</code> and commits <code>d8bbc0491e72df29ddaabc1e6d76f704c4c8dc2d</code>, <code>a999eff40521e428d4c09a3b0d3adea5724a17b2</code>, <code>8dc6be23ae6d0c3f76b6bd20e9821733200f23db</code> are <strong>deferred-to-an-independent-lane</strong>, with <strong>no verdict</strong> from this seat. A sol seat owns their independent review. Their earlier logs remain observations only and are excluded from every reviewed/defective total below.</p>
+<p>The remaining audit is at <code>0322e911a52588e116bb76a2243ff0dc728cc655</code>. Main advanced to <code>7c97f916d81c041fda079d82ee963f7788863e20</code>; <code>git diff --name-only</code> over all <code>nova/</code>, <code>tests/</code>, and <code>benchmarks/</code> returned no difference, so the measured code and tests match that main head. Review commits change only the assigned plan/evidence HTML. No production source or test file was edited.</p>
+<p>Initial allocation <code>1274424</code> completed eight recovered payloads before being cancelled for the now-resolved whole-node lane hold. On the coordinator's instruction, allocation <code>1274451</code> resumes all remaining recoverable commands, each in its own CPU process within one allocation. Both use all_debug, eight CPUs, 64 GiB, TMPDIR=/tmp in submit and payload, JAX_PLATFORMS=cpu, and the shared interpreter directly; uv is never invoked on compute. Three disjoint CPU-affinity groups shard independent processes inside the resumed allocation. Timings are not performance claims. A read-only audit hook refuses writes into production/worktree repository paths while allowing the exclusive reports directory and test scratch; an actual refusal is labelled cannot-run-write-fence, never a solver pass or numerical defect.</p>
+<p>Census: the prompt-literal date selector yields 20 non-merge reachable commits; explicit midnight in Europe/Paris and the full-history filter both yield 25, all joined. Including every ledger promotion completed since the date gives 14 records and 33 touching commits, including seven older boundary commits and the deferred scan implementation. The brief's 29-commit premise is not reproduced. One ledger row is failed although its commits landed; that state is preserved. Scope for this seat: 13 reviewed records, one deferred record with no verdict.</p>
+<p>The ledger often stores prose rather than executable argv. The original field is preserved verbatim below; recovered payloads preserve their test/benchmark arguments, rebinding checkout and output paths. A reconstructed flag selection is labelled, and a command that cannot execute safely or within the fixed time budget is distinguished from a failing gate. A passing selected subset never substitutes for an unrun physical certificate. Historical deferrals and later repairs are preserved. Three recorded negative controls remain in this seat's scope; no assertion inversion was found in them.</p>
+<table><thead><tr><th>Row</th><th>Run</th><th>Commits touching review scope / deferred commits</th><th>Review status</th><th>Verdict</th><th>Gate replay</th></tr></thead><tbody>
+<tr><td>1</td><td><code>r-20260915T184108433291-cca-exact-clip-seed-books-target-current</code></td><td>29a690a29, 9dfc35b1c</td><td>in-progress</td><td>unverifiable</td><td>continued-seed-amplitude: running (exit None)</td></tr>
+<tr><td>2</td><td><code>r-20260915T132132875202-cca-exact-clip-solve-memory-scaling</code></td><td>826358aa9, 823b9e6d8, 7fe47a072, 5366ac4e2, e203bde33, 9693713b2, ff051c9b3, 9fa332fe4, 14193b48f, c7e8cc12e</td><td>in-progress</td><td>defective</td><td>clip-memory: passed (exit 0)</td></tr>
+<tr><td>3</td><td><code>r-20260916T065036630331-msc-mesh-arguments-plumbing</code></td><td>dd7d82867, 78d87c694, 205d0f354, e0e9417ac</td><td>in-progress</td><td>defective</td><td>continued-certificate-mesh: pending (exit None)</td></tr>
+<tr><td>4</td><td><code>r-20260916T084805089053-msc-flux-functions-as-program-arguments</code></td><td>a4de1caf5, 77b149b48, a8443a12c, ebe734bd5</td><td>in-progress</td><td>defective</td><td>continued-certificate-profile: pending (exit None)</td></tr>
+<tr><td>5</td><td><code>r-20260917T042807085151-cca-delete-clip-globals-clone</code></td><td>294b070ec</td><td>in-progress</td><td>sound</td><td>clip-tracer: passed (exit 0); clip-operator: passed (exit 0)</td></tr>
+<tr><td>6</td><td><code>r-20260917T170314445551-msc-request-set-machine-2</code></td><td>1f141e67d, 41bd2b448, f79019234</td><td>in-progress</td><td>defective</td><td>continued-certificate-request: pending (exit None)</td></tr>
+<tr><td>7</td><td><code>r-20260918T203029970629-cank-shafranov-field-responses</code></td><td>796df3501</td><td>in-progress</td><td>unverifiable</td><td>field-responses: failed (exit 1)</td></tr>
+<tr><td>8</td><td><code>r-20260918T094416317124-cank-flux-function-fit</code></td><td>fa2301a2e</td><td>in-progress</td><td>unverifiable</td><td>continued-source-projection: passed (exit 0); continued-compensator: failed (exit 1)</td></tr>
+<tr><td>9</td><td><code>r-20260918T154507107752-fsa-coil-edit-panel-lcfs-2</code></td><td>f258917e8</td><td>in-progress</td><td>sound</td><td>closed-branches: passed (exit 0)</td></tr>
+<tr><td>10</td><td><code>r-20260918T165636099922-msc-forward-solve-lane-regressions</code></td><td>e37e38194, 40bb54553</td><td>in-progress</td><td>defective</td><td>continued-forward-solve: pending (exit None)</td></tr>
+<tr><td>11</td><td><code>r-20260919T200510357550-nia-promotion-fallback-nan</code></td><td>fd42ffc65</td><td>in-progress</td><td>defective</td><td>continued-fallback: running (exit None)</td></tr>
+<tr><td>12</td><td><code>r-20260919T223218420452-msc-inert-dispatcher-and-fused-branch</code></td><td>fdc6abaa8</td><td>in-progress</td><td>defective</td><td>fused-equilibrium_forward_operator: passed (exit 0); continued-forward_operator_domain: failed (exit 1); continued-forward_operator_tangent: passed (exit 0); continued-forward_operator_arguments: passed (exit 0); continued-forward_profile_arguments: failed (exit 1); continued-forward_operator_axes: failed (exit 1); continued-fused_same_state_read: running (exit None)</td></tr>
+<tr><td>13</td><td><code>r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle</code></td><td>d90a522fe</td><td>in-progress</td><td>unverifiable</td><td>typed-saddle: passed (exit 0)</td></tr>
+<tr><td>14</td><td><code>r-20260920T181701895943-fsri-the-trips-are-a-scan-not-a-loop</code></td><td>d8bbc0491, a999eff40, 8dc6be23a</td><td>deferred-to-an-independent-lane</td><td>— no verdict</td><td>deferred to sol seat</td></tr>
+</tbody></table>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-1-r-20260915t184108433291-cca-exact-clip-seed-books-target-c">1. r-20260915T184108433291-cca-exact-clip-seed-books-target-current</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>unverifiable</strong>. Boundary promotion completed after the cutoff; both core commits predate it. Exact-only wall-level seed search is guarded and retains other modes, but its six-row seed/solve and 38-importer gate cannot be inferred from selected unit tests. Original primary command is a job-summary sentence, not executable argv.</p>
+<p>All promotion commits: <code>29a690a293e75c5ef793d9bb559174b959ab1145</code>, <code>9dfc35b1c41e6e0c4cdd5f5484fbf117adda91ab</code>, <code>1a83fbca5159bd6f49e68d2978b47920beae07cb</code>, <code>a8cf8670b3eebdde3031be732dce5da2a967fcbe</code>, <code>346f9df012ccde4cd68296f2f318e7791d968cd1</code>, <code>9aebe5faea06beaa830e52cec69ef5ad17407abf</code>, <code>5f7e0f50e3f659bf78592a7072b4dab7373932da</code>, <code>bfa673da897d7f83cd310a97d0dd185f03e4b211</code>, <code>9089a86bdc458d0de474466ad9777efde906343e</code>, <code>ae59270ef039a646e72b002703b22dc88c0a73a8</code>, <code>62f9b8c808bc139eba9c482a2de950a39fc927ae</code>, <code>6e33e3b476b9b02f42bc32239c72aa4e6919f065</code>, <code>d473fe81c024522e0e2a4f8751b6ffa3e60b135b</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; Followup f-20260911T061050375499 measured (gate C at 07cd60e0, receipts docs/figures/cut-cell-current-attribution/gate-c-resolve/receipt.json): every static row books about half the plasma current at the cold seed under the clip (seed amplitude 2.05, 2.03, 1.95, 1.89 for weak at 110, 300, 500, 1000 cells against 0.93 to 0.90 whole-cell) because the uniform-disc seed's own flux places half the cells outside its clip while the partition labels cover the whole target region, so the normalisation doubles the profile before the first trip and the solve cycles unconverged (active_set_cycle_detected, residual 0.075 to 0.098, axis error 0.17 to 0.37 m); remedy (a) is implemented in nova/equilibrium/forward.py cold_seed_portfolio and moment_seed: choose the disc seed's boundary level or radius so that the clipped region at the seed equals the partition's confined region and the booked current equals the target at unit amplitude (solve the one-dimensional level or radius equation against the clip's booked current with the analytic normalisation stated in the docstring), with remedy (b) (whole-cell booking on the first trip only, switching to the clip once the flux is self-consistent) recorded as the alternative and attempted only if (a) cannot reach one percent, in which case request a scope extension to forward_operator.py rather than editing it, since a live node owns that file; gates, each persisted as it lands: a benchmark benchmarks/exact_clip_seed_amplitude.py on all_debug CPU (JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on the node, foreground srun under 59 minutes) tabling seed amplitude under set_support_clip_mode("exact") for weak, moderate and strong at 110 and 300 cells before and after, acceptance within one percent of unity on every row; then ONE H200 job (one card, 8 cores, 128 GiB, TMPDIR=/tmp in submit environment and payload, PYTHONPATH the worktree, root venv python, persistent compilation cache, rows persisted as each lands) re-solving weak, moderate and strong at 110 and 300 cells under the exact clip from the repaired seed, tabling seed and terminal amplitude, terminal residual, axis error in pitch, boundary flux against the analytic zero and converged flag beside the gate C and the committed whole-cell rows, with one line-contour panel per row of solved over analytic on shared levels plus a solved-minus-analytic difference panel in fractions of span (the 1000-cell exact row is owned by the memory node and is not attempted here); the committed whole-cell certificate rows and the single-null 500 control bit-identical (the seed change must not touch the chord route, or the change is gated behind the exact mode); every test module importing forward.py passes one per fresh CPU process on all_debug against the base ids with zero added failures; manifest in plain key: value lines, any waiting declaration with wait_probe as a JSON list such as ["squeue","-h","-j","1271409"] and wait_terminal exit:0</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;all_debug job 1271699 six-row seed amplitude gate; H200 job 1271708 six exact-clip rows re-solved from the repaired seed; all_debug jobs 1271801 and 1271817 38 forward.py importers base and after, zero added failures&quot;,
+  &quot;exit_status&quot;: 0,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/Code/nova/docs/figures/cut-cell-current-attribution/exact-clip-seed/receipt.json&quot;,
+  &quot;log_digest&quot;: &quot;sha256:e843f1f7982e22102d602642f1a3c10f7f11e913ebf2262d1fc61e8fab30ebf7&quot;
+}</pre>
+<p>Declared negative control: none recorded.</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;continued-seed-amplitude&quot;,
+    &quot;promotion&quot;: 1,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;benchmarks/exact_clip_seed_amplitude.py&quot;,
+      &quot;--output-root&quot;,
+      &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/seed-amplitude&quot;
+    ],
+    &quot;limit&quot;: 900,
+    &quot;provenance&quot;: &quot;declared six-row CPU seed benchmark; output root rebound&quot;,
+    &quot;status&quot;: &quot;running&quot;,
+    &quot;exit_status&quot;: null,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-seed-amplitude.log&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-01.json</code>, <code>manifest-01.md</code>, <code>core-01.diff</code>, <code>tests-01.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-2-r-20260915t132132875202-cca-exact-clip-solve-memory-scalin">2. r-20260915T132132875202-cca-exact-clip-solve-memory-scaling</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>defective</strong>. Core scan and custom-JVP changes read. The exact terminal identity requirement was weakened to solver-scale tolerances; the fast gate excludes the changed terminal-state assertion. Full memory/1000-cell and physical terminal gates are not reproduced by the focused fast tests.</p>
+<p>All promotion commits: <code>f3b64a46266ba60d53a06dcb5bfed72d61138e0f</code>, <code>c42612cd9cb67f8f9de0cab9d6c61df1941ad5a5</code>, <code>826358aa96acf2f3d0f96698adc3727a23180ad8</code>, <code>ad0bdf79d386238429ef90ea64f276ad23536e32</code>, <code>5ad5a59d396fd49e126483342eec1f8e4e8605a6</code>, <code>823b9e6d8c33f7a78d2f35f83b59f4fd762171ac</code>, <code>7fe47a072bc64df701e663eb7f1852d8d3c7d293</code>, <code>5366ac4e210fae5c3bb0fa7cb74bfc33c70d553c</code>, <code>e6bfb8014c2faad29d47166e6882199f17b2a77e</code>, <code>eb567d241d1793a1fa69f1e11d218b27b6ca7143</code>, <code>fbef2dd9392286427bf766e38b4697f8e0237189</code>, <code>e203bde33374f9986783516223c8d78b1d5998bb</code>, <code>a55eb09bdbd9ada674ae65e750cf468f2112509a</code>, <code>e89fbebff8829df374a1e7678789bb59d90fdb33</code>, <code>9693713b24fff75e50691931e4d7ff836d772e6b</code>, <code>454cd2ca06fa6304845b8f76a85d6571ebf95464</code>, <code>39cee36b1ca755ed5c4b727d8ee0cfbe2dc8fed0</code>, <code>ff051c9b3c93dd92163e0a9e1b4c167db9c557f0</code>, <code>9fa332fe47072ac9a38b6c598fdbf42cbe3278e7</code>, <code>14193b48f48085321ef3ab09cb185e4d774d46e1</code>, <code>534baa61046e52f89d3036ed7ed772d55520a313</code>, <code>db468fa66631fc0cc394cce4d4e070c5c57fd229</code>, <code>b7bc1515ff31fb87acf981291e1168dc77f1074f</code>, <code>89b26f54dd3610b1c4f0477f161f0f405c27ff03</code>, <code>f9389773113e80c4102d1f33c0009c8398880eeb</code>, <code>70a9b7b809ddc3cc47ac1e793a9ef63287c3fac0</code>, <code>8800562d9158016136694543bc2ba3d5cba11b08</code>, <code>c7e8cc12ebc081fc2bb7bb0c6bf957ec901e21e6</code>, <code>617b657c19b2806ada1337318c62b0d459e562b5</code>, <code>c221f20de39d1c4497bc1ad779c5db397ebe54d2</code>, <code>7e1456e4182195e09c2fa7ae3590f8b4c660b9d6</code>, <code>ddd34096682d5ef0695cbe6f6e60bdf16069ea4b</code>, <code>5b65b6732ad50e9931fe01c3bf25392b28950e62</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; The producer of the jit_bitwise_and temporary is identified from the compiled program's memory analysis at 300 and 500 cells on CPU (all_debug, JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on the node, one foreground srun under 59 minutes, receipts persisted per rung): the plan records about 279 GiB at 1000 cells (jobs 1270272 and 1270262) and the limited-shadow node measured 159.06 GiB for the same allocation under an XLA-estimated 159.23 GiB executable (jobs 1271272 and 1271297, receipt docs/figures/cut-cell-current-attribution/limited-shadow/solve-receipt.json), inside profile.solve on the exact-clip path (candidates: the frozen-partition reconcile, the topology read, or the spline-chain clip inside the traced residual in nova/equilibrium/forward_operator.py and nova/equilibrium/cell_partition.py); the report fits the exponent of that temporary's bytes against realised cells from 110, 300 and 500 and names the file, function and line that build it; the pairwise construction is replaced by the per-cell form it stands for (a segment or neighbour list of fixed per-cell capacity, never an all-cells-by-all-cells mask), with the docstring stating why the result is unchanged; gates, each persisted as it lands: terminal states bit-identical at 300 cells on the weak exact-clip row and the committed single-null whole-cell 500 control, peak device memory of the exact-clip solve at 1000 cells under 20 GiB by XLA's memory analysis and by the measured allocation, then ONE H200 job (one card, 8 cores, 128 GiB, TMPDIR=/tmp, PYTHONPATH the worktree, root venv python, persistent compilation cache) solving the weak 1000 exact-clip row with the row receipt persisted immediately and a line-contour panel of solved beside analytic on shared levels with both null sets and the wall, tabling axis error in pitch, terminal residual, boundary flux against the analytic zero and amplitude beside the whole-cell 1000 row's 0.635 pitch, 1.39e-15 and 4.96 Wb; every test module importing the changed files passes one per fresh CPU process on all_debug against the base ids with zero added failures; manifest in plain key: value lines, any waiting declaration with wait_probe as a JSON list such as ["squeue","-h","-j","1271409"] and wait_terminal exit:0</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;H200 job 1271849 fixed-root finite differences 8 of 8 at weak 110 and 300; job 1271863 whole-cell 500 control bit-identical; job 1271864 1000-cell memory 7.82 GiB; job 1271873 weak 1000 exact-clip row residual 1.45e-13 qualified; all_debug job 1271880 tests/test_exact_clip_memory.py 12 of 12&quot;,
+  &quot;exit_status&quot;: 0,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/Code/nova/docs/figures/cut-cell-current-attribution/exact-clip-memory/weak-1000-exact-implicit-seed-repaired-receipt.json&quot;,
+  &quot;log_digest&quot;: &quot;sha256:35445da0a7c70be2eaa9eef0312ef666d175ca7b103aa0239f52896084802b0e&quot;
+}</pre>
+<p>Declared negative control: none recorded.</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;clip-memory&quot;,
+    &quot;promotion&quot;: 2,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;tests/test_exact_clip_memory.py&quot;,
+      &quot;-m&quot;,
+      &quot;not slow&quot;,
+      &quot;-vv&quot;
+    ],
+    &quot;limit&quot;: 300,
+    &quot;provenance&quot;: &quot;manifest pytest payload&quot;,
+    &quot;status&quot;: &quot;passed&quot;,
+    &quot;exit_status&quot;: 0,
+    &quot;seconds&quot;: 30.637345287948847,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/clip-memory.log&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;13 passed, 2 deselected in 25.20s&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-02.json</code>, <code>manifest-02.md</code>, <code>core-02.diff</code>, <code>tests-02.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-3-r-20260916t065036630331-msc-mesh-arguments-plumbing">3. r-20260916T065036630331-msc-mesh-arguments-plumbing</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>defective</strong>. Mesh arrays, capacities, host identity and topology reconstruction read. Four-row identity was measured by the historical same-head driver. The 210159751-byte result misses the original 50000000 target, but the live plan expressly accepts mesh plumbing and defers the remaining size work; this is a documented deferral, not a newly discovered arithmetic defect.</p>
+<p>All promotion commits: <code>dd7d828678917a305bc8e189ea462a1dc9c0339e</code>, <code>4cd74aed447fd9b01d8f4811ef7b9b3fb2502f0d</code>, <code>27b2495f9763609c5d675d25002f59cef5a71d14</code>, <code>64c2a161359de9a5b13e9d93b010b0d5d2f3a0d0</code>, <code>78d87c6943960f8219fe027336309086692d28db</code>, <code>8d84644c5d45f749eeb6104f4b656b17403c9b33</code>, <code>205d0f35402d600c9da09240a5301466252b6ecb</code>, <code>e0e9417ac16e36f3259c3971489ead66a01480b4</code>, <code>ff496808b6e40437875156ff7ea8a0b7a8dbf062</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; on all_debug with JAX_PLATFORMS=cpu the committed 300-cell certificate rows (weak, moderate, strong, single-null 500) re-solve to bit-identical terminal states against the base revision, benchmarks/solve_program_size_gate.py reports the 300-cell effective executable bytes under 50 MB against the 462 MB baseline with the generated-code bytes logged at 300 cells, every test module importing the changed files passes one module per fresh CPU process on all_debug with zero added failures against the base revision, receipts persisted under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments as each lands</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;benchmarks.solve_program_size_gate certificate identity, four rows on all_debug (job 1271939)&quot;,
+  &quot;exit_status&quot;: 0,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments/logs/certificate-1271939.log&quot;,
+  &quot;log_digest&quot;: &quot;sha256:0e4e406fc1970ab30f40c2b7a826ec6a157e26705b7b09ab94b459b6b688c9f2&quot;
+}</pre>
+<p>Declared negative control: none recorded.</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;continued-certificate-mesh&quot;,
+    &quot;promotion&quot;: 3,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;benchmarks/solve_program_size_gate.py&quot;,
+      &quot;--certificate-output&quot;,
+      &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/certificate-mesh.json&quot;
+    ],
+    &quot;limit&quot;: 900,
+    &quot;provenance&quot;: &quot;run_certificate_identity.sh/certificate_run.sh payload; output receipt rebound&quot;,
+    &quot;status&quot;: &quot;pending&quot;,
+    &quot;exit_status&quot;: null,
+    &quot;log_path&quot;: null,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-03.json</code>, <code>manifest-03.md</code>, <code>core-03.diff</code>, <code>tests-03.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-4-r-20260916t084805089053-msc-flux-functions-as-program-argu">4. r-20260916T084805089053-msc-flux-functions-as-program-arguments</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>defective</strong>. Profile coefficient, normalization, operator identity and target plumbing read. The target is still converted via NumPy before the traced-input cache bypass; the historical identity certificate uses the same-head driver. Current-target cache defect reproduced separately with a positive concrete-target control.</p>
+<p>All promotion commits: <code>a4de1caf516226eba5b724f633aa06ce5a13e189</code>, <code>9ef0bde7b42139ef6102f1f9c64d7577347de04f</code>, <code>bf43763e4b098493b99d8be9bcf193a74d63f301</code>, <code>f351e3170daf9a39c666abcef0ebdfc3d18c1b68</code>, <code>77b149b48fc4890008e9e4c93ad26aba10cf0f42</code>, <code>a8443a12c48b1d7a0d96a4e160f52cecfe4c4f7d</code>, <code>ebe734bd58262a6f9c6aff856e4fb3b3728aa60f</code>, <code>07be63d0de946b139df74312e3dd3cf3ad687894</code>, <code>a23eb612a6b96ac0aa9493051d9db1f527d505d1</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; on all_debug with JAX_PLATFORMS=cpu two distinct profiles on one 300-cell mesh lower to identical StableHLO digests where the base revision's differ (benchmarks/profile_coefficients_recompile_audit.py extended to state both digests), the second profile's backend compile reads 0.0 s from the persistent cache, the four committed certificate rows re-solve bit-identical against the base through benchmarks.solve_program_size_gate certificate identity (weak, moderate, strong 300 and single-null 500, maximum difference 0.0), every test module importing the changed files passes one module per fresh CPU process with zero added failures against the base, the argument set is documented in nova/equilibrium/AGENTS.md at the forward-solve seam, receipts persisted under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/flux-arguments as each lands</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;benchmarks.solve_program_size_gate certificate identity, four rows (jobs 1272030, 1272094) plus paired digest job 1272031&quot;,
+  &quot;exit_status&quot;: 0,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/flux-arguments/certificate-identity.json&quot;,
+  &quot;log_digest&quot;: &quot;sha256:66a77df78708f3b4ae66991175faa100a0fec3121fb85c36b3508d84d83891fd&quot;
+}</pre>
+<p>Declared negative control: none recorded.</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;continued-certificate-profile&quot;,
+    &quot;promotion&quot;: 4,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;benchmarks/solve_program_size_gate.py&quot;,
+      &quot;--certificate-output&quot;,
+      &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/certificate-profile.json&quot;
+    ],
+    &quot;limit&quot;: 900,
+    &quot;provenance&quot;: &quot;run_certificate_identity.sh/certificate_run.sh payload; output receipt rebound&quot;,
+    &quot;status&quot;: &quot;pending&quot;,
+    &quot;exit_status&quot;: null,
+    &quot;log_path&quot;: null,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-04.json</code>, <code>manifest-04.md</code>, <code>core-04.diff</code>, <code>tests-04.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-5-r-20260917t042807085151-cca-delete-clip-globals-clone">5. r-20260917T042807085151-cca-delete-clip-globals-clone</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>sound</strong>. The globals clone is replaced by an explicit arc_tracer parameter. The historical receipt reports six identical arrays and has useful exact-vs-chord and one-ulp positive controls; its self-comparison field is explicitly disclaimed by the worker. Fresh module results are recorded separately. The previously noted stale test import has since been repaired: current fast clip-memory tests collect and pass. The promoted two-module gate has been rerun successfully at code identical to current main; the explicit tracer handoff and its positive controls are sound.</p>
+<p>All promotion commits: <code>294b070ec92b032683ecaf6fbc6a30b82de2f29f</code>, <code>aa2eec1ace60a38e88336c76bae0d94622964805</code>, <code>dbf411d9ecc8316beea1ef94394c378cc92af061</code>, <code>4bfbb18c5d30545435ee5ece3b95cb236401cdeb</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; grep for _implicit_clip_globals over nova/ and tests/ returns nothing; the forward operator builds its implicit clip by calling the separatrix_clip entry points with arc_tracer=_implicit_traced_level_arc and no FunctionType or __globals__ manipulation remains in forward_operator.py; a receipt JSON under the reports fence compares the exact-clip terminal moments (clipped area, first moments, second moments per cell) on the weak-110 certificate fixture between the node head and the main checkout at the orientation base sha, computed on one all_debug job with JAX_PLATFORMS=cpu and the root venv interpreter, and reports max absolute difference exactly 0.0 on every moment array with the two arrays' shapes and sha256 digests printed; tests/test_equilibrium_separatrix_clip.py and the forward-operator test module that covers the implicit clip each pass in their own all_debug job with the log paths named in the manifest; every uv command carries --no-sync and nothing runs uv sync</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;tests/test_equilibrium_separatrix_clip.py 23 passed and tests/test_equilibrium_forward_operator.py 3 passed, one module per fresh all_debug process; independent review&quot;,
+  &quot;exit_status&quot;: 0,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T042807085151-cca-delete-clip-globals-clone.json&quot;,
+  &quot;log_digest&quot;: &quot;sha256:165aaad1078314ab3e0822cf7b3d2c04f1f4c98ee98927a2ac2edc70c53aff49&quot;
+}</pre>
+<p>Declared negative control: none recorded.</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;clip-tracer&quot;,
+    &quot;promotion&quot;: 5,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;tests/test_equilibrium_separatrix_clip.py&quot;
+    ],
+    &quot;limit&quot;: 300,
+    &quot;provenance&quot;: &quot;manifest pytest payload&quot;,
+    &quot;status&quot;: &quot;passed&quot;,
+    &quot;exit_status&quot;: 0,
+    &quot;seconds&quot;: 71.6982093397528,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/clip-tracer.log&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;25 passed in 64.76s (0:01:04)&quot;
+  },
+  {
+    &quot;key&quot;: &quot;clip-operator&quot;,
+    &quot;promotion&quot;: 5,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;tests/test_equilibrium_forward_operator.py&quot;
+    ],
+    &quot;limit&quot;: 300,
+    &quot;provenance&quot;: &quot;manifest pytest payload&quot;,
+    &quot;status&quot;: &quot;passed&quot;,
+    &quot;exit_status&quot;: 0,
+    &quot;seconds&quot;: 127.73039340414107,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/clip-operator.log&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;7 passed in 123.75s (0:02:03)&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-05.json</code>, <code>manifest-05.md</code>, <code>core-05.diff</code>, <code>tests-05.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-6-r-20260917t170314445551-msc-request-set-machine-2">6. r-20260917T170314445551-msc-request-set-machine-2</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>defective</strong>. Three core commits read: dispatcher, gather replacement and point-current read fusion. Dispatcher has no production caller and moved the production census by zero (120/74 at both revisions). The live plan suspends the one-body target and records that partial result; the dispatcher is already removed by promotion 12. The historical cross-revision identity claim remains unsupported by its same-head instrument.</p>
+<p>All promotion commits: <code>1f141e67d1e1bf9a8adc4f75de5b8b0146edc56b</code>, <code>41bd2b44882e58849ec7a544ce80bbb2327ac856</code>, <code>f79019234a0a33b337aca865f1e6b8c492ee6732</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; The five request kinds reach the operator through a single traced machine invocation whose request list is data and whose tag is a loop-carried value dispatched inside the body, never a Python constant at a call site (D1, D2); reduced_newton.py's residual_from_external, _fixed_design_read and normalised_current_moments uses are requests of the same machine (D5); the Jacobian-vector request stays on its present path for stage four; before merging any two reads, the state identity at every residual_shadow_mask call site is confirmed per D4 and stated in the manifest; the marker census in benchmarks/solve_program_size_gate.py, run UNCHANGED at the node head on the 300-cell solve in ONE all_debug job (--time 00:59:00, 4 cores, --mem=64G, JAX_PLATFORMS=cpu, root interpreter with PYTHONPATH set to the worktree, no uv on the node), reports ONE read body reachable from those five request paths against the re-baselined 120 current-moment and 79 topology-read copies at base, both counts stated before and after with the HLO dump path and byte size; all four Solovev certificate rows are bit-identical to the main tree at the node's base sha (max abs diff 0.0 on terminal states, digests stated), one all_debug job per row; the module tests covering the four changed modules pass one module per fresh all_debug process with zero added failures against base (base ids listed); a landing record in the plan and an evidence anchor; commit after each coherent step and, when a gate job must outlive the turn, park with status waiting and all five wait fields rather than stopping; every uv command carries --no-sync and nothing runs uv sync</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;census job 1273284 exit 0; certificate identity at f7901923; independent review&quot;,
+  &quot;exit_status&quot;: 0,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T170314445551-msc-request-set-machine-2.json&quot;,
+  &quot;log_digest&quot;: &quot;sha256:53bce94e7fa9e842557a485bdbc229dcfaf537c47c5e5397d643b73711252018&quot;
+}</pre>
+<p>Declared negative control: none recorded.</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;continued-certificate-request&quot;,
+    &quot;promotion&quot;: 6,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;benchmarks/solve_program_size_gate.py&quot;,
+      &quot;--certificate-output&quot;,
+      &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/certificate-request.json&quot;
+    ],
+    &quot;limit&quot;: 900,
+    &quot;provenance&quot;: &quot;run_certificate_identity.sh/certificate_run.sh payload; output receipt rebound&quot;,
+    &quot;status&quot;: &quot;pending&quot;,
+    &quot;exit_status&quot;: null,
+    &quot;log_path&quot;: null,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-06.json</code>, <code>manifest-06.md</code>, <code>core-06.diff</code>, <code>tests-06.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-7-r-20260918t203029970629-cank-shafranov-field-responses">7. r-20260918T203029970629-cank-shafranov-field-responses</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>unverifiable</strong>. Response matrices, validation, content identity, pytree leaves, field imaging and boundary interpolation read. The focused gate reaches response reuse and the analytic three-resolution comparison; downstream constraint/benchmark wiring was expressly outside the original node.</p>
+<p>All promotion commits: <code>796df3501b46ecd0c7ce732ca7f7af3fda8f0960</code>, <code>a00ea1ada1f60a132f6ea52ba8e163c971820a17</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; followup f-cank-shafranov-field-responses on the plan, items (1), (2) and (4): in nova/equilibrium/forward_operator.py add radial and vertical field response matrices on the operator grid, built once at operator build beside the flux response (PrescribedCurrentField near line 1524 holds the flux response, validated in __post_init__ and imaged by the property near 1560 to 1571; the operator threads its response as a pytree child through tree_flatten near 2337 and tree_unflatten near 2394; geometry_identity near 2281 is the digest the cache path keys on), covering the conductor circuits and the plasma cell-current and first-moment field responses with the same fixed shapes, the same digest and the same cache path, and a test in tests/test_equilibrium_forward_operator.py that the build runs once and a second solve reuses it (count kernel evaluations, not wall time); image the current vector through those matrices to B_R and B_Z at every grid node and interpolate to the boundary contour with StencilMesh.shared_node_flux_stencil over the operator's own mesh, the pattern already used at forward_operator.py near line 2128, with no Biot kernel and no flux gradient per evaluation (the lead ruled both: the field is the exact Biot field imaged on the grid, never a gradient of the flux map, and no interaction is recalculated per evaluation, only the current vector updates); feed that boundary field to shafranov_contour_integrals and beta_p_plus_half_internal_inductance in nova/equilibrium/diagnostics.py and gate on the analytic rows against the volume definition exactly as tests/test_equilibrium_diagnostics.py does today, extended with a case that takes the field from the grid-imaged route rather than the analytic row's own field, reporting the convergence order across three resolutions; the timing half of the certificate, build-once against per-evaluation, measured on all_debug CPU and drawn beside the existing certificate figure under docs/figures/constraint-augmented-newton-krylov/shafranov-integral as PNG and SVG per the plotting rules, with the receipt.json stating explicitly whether the grid-imaged route is exercised; item (3), ExternalShafranovConstraint.observed and benchmarks/shafranov_pair_receipt.py, is outside this node because nova/equilibrium/constraint.py and that benchmark are held by live nodes tonight, so record what the wiring needs under follow_ons and do not touch them; the toroidal volume term Z is the solved state's own integral until the lead rules otherwise and the receipt says so; one all_debug job for the gate (JAX_PLATFORMS=cpu, the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on a compute node, TMPDIR=/tmp in the submit environment and the payload, scripts inside the worktree), nothing to betelgeuse tonight; the plan landing comment and the evidence anchor in docs/evidence/archive/constraint-augmented-newton-krylov-landed.html; call configure_dtypes before building any array; every uv command carries --no-sync and nothing runs uv sync; py_compile with the project interpreter before each commit; manifest at the first commit; if the fence ends first, commit what holds and name the rest in follow_ons; a wait, if declared, carries wait_condition, wait_probe as a JSON list command, wait_terminal and resume_brief; status words complete, waiting or blocked only</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;pytest tests/test_equilibrium_forward_operator.py tests/test_equilibrium_diagnostics.py on all_debug CPU (70 passed)&quot;,
+  &quot;exit_status&quot;: 0,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/shafranov-field-responses/all-debug-gate.log&quot;,
+  &quot;log_digest&quot;: null
+}</pre>
+<p>Declared negative control: none recorded.</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;field-responses&quot;,
+    &quot;promotion&quot;: 7,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;tests/test_equilibrium_forward_operator.py&quot;,
+      &quot;tests/test_equilibrium_diagnostics.py&quot;
+    ],
+    &quot;limit&quot;: 400,
+    &quot;provenance&quot;: &quot;manifest pytest payload&quot;,
+    &quot;status&quot;: &quot;failed&quot;,
+    &quot;exit_status&quot;: 1,
+    &quot;seconds&quot;: 173.10687141679227,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/field-responses.log&quot;,
+    &quot;failure_ids&quot;: [
+      &quot;tests/test_equilibrium_diagnostics.py::test_shafranov_contour_integrals_equal_their_volume_side[321]&quot;,
+      &quot;tests/test_equilibrium_diagnostics.py::test_shafranov_contour_integrals_equal_their_volume_side[641]&quot;,
+      &quot;tests/test_equilibrium_diagnostics.py::test_shafranov_contour_integrals_equal_their_volume_side[1281]&quot;
+    ],
+    &quot;summary&quot;: &quot;3 failed, 67 passed in 169.28s (0:02:49)&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-07.json</code>, <code>manifest-07.md</code>, <code>core-07.diff</code>, <code>tests-07.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-8-r-20260918t094416317124-cank-flux-function-fit">8. r-20260918T094416317124-cank-flux-function-fit</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>unverifiable</strong>. The core companion hunk reshapes a length-one amplitude to the scalar JVP primal without relaxing shape checks. The original node produced only one of six bank rows and openly lists the five unmeasured rows; scope completion is therefore unverifiable even if its companion tests pass. Nonconverged pressure/ff arms remain reported as nonconverged.</p>
+<p>All promotion commits: <code>337f3bfae177b36e03ecf9b90f7ecd16e3270de6</code>, <code>1a3c017fe89a6b6c14d5643bc63cdcc0c31bdbd8</code>, <code>888ffbf0806c59e59571e66df2b03638386fa802</code>, <code>fa2301a2e4703ef5f518dfe82f143d46f229c188</code>, <code>696cc1e53464948816b517f751c08385f4165375</code>, <code>bbbf199f412e99de3426552bad1c626a9df93be8</code>, <code>0d348b846c82791e7ac5704c072ad72dbaa9ab91</code>, <code>e9f974daba71683d979cc3ac617ef69417dceece</code>, <code>cfe9b7c7f5cc66af583d2c3291e0c2953be2bf52</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; nova/equilibrium/source.py or nova/equilibrium/profile.py gains a projection of an extracted p_prime and ff_prime callable onto PolynomialFluxFunction (shape coefficients plus SI normalisation, the traced arguments of a4de1caf) returning a fit receipt with the residual per component and the order chosen, at an order that keeps the monomial basis conditioned (state the condition number; do not pass degree six without an exact-end-value reformulation), with a test in tests/test_equilibrium_source.py asserting round-trip residual on a synthetic profile and on one bank row's extracted profile; benchmarks/shafranov_pair_receipt.py gains a mode that projects each bank row's profiles, frees the pressure-gradient and ff_prime scales through the existing ProfileAmplitudeUnknown, imposes the Shafranov row with the elongation-corrected minor radius (a times root kappa) in its payload, and runs the six rows in ONE H200 job (betelgeuse, gpu_0003_grpA, gpu:1, 8 cpus, 128G, persistent compilation cache) under docs/figures/constraint-augmented-newton-krylov/flux-function-fit; the deliverable figure shows per row the source p_prime and ff_prime against the adjusted ones on shared axes with the beta_p plus half l_i gap before and after, the terminal residual and converged flag in the caption, and a contour panel per the plotting rules (line contours on shared levels, both null sets, the wall); the record states plainly whether scale alone closes the gap on each row or shape is needed; nova/equilibrium/constraint.py is NOT in scope (another node holds it): a shape-coefficient unknown is designed in the record and left as a follow-on, and the projection must not edit that file; the evidence record and plan gain the landing (the plan section §4 and the evidence anchor); every uv command carries --no-sync and nothing runs uv sync; on a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the worktree and never invoke uv; python syntax is checked with /home/ITER/mcintos/Code/nova/.venv/bin/python -m py_compile before each commit; call configure_dtypes before building any array; a text-only lane, never Read a PNG; write the manifest at the first commit and park with status waiting and all five wait fields when a job outlives the turn; write records in short paragraphs committed as they are finished</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;pytest tests/test_equilibrium_source.py on all_debug CPU (7 passed) and tests/test_forward_profile_arguments.py compensator selection (2 passed)&quot;,
+  &quot;exit_status&quot;: 0,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/flux-function-fit/source-tests.log&quot;,
+  &quot;log_digest&quot;: null
+}</pre>
+<p>Declared negative control: none recorded.</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;continued-source-projection&quot;,
+    &quot;promotion&quot;: 8,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;tests/test_equilibrium_source.py&quot;
+    ],
+    &quot;limit&quot;: 180,
+    &quot;provenance&quot;: &quot;recovered head pytest payload; checkout/log paths rebound to assigned review&quot;,
+    &quot;status&quot;: &quot;passed&quot;,
+    &quot;exit_status&quot;: 0,
+    &quot;seconds&quot;: 13.947611628100276,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-source-projection.log&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;7 passed in 9.94s&quot;
+  },
+  {
+    &quot;key&quot;: &quot;continued-compensator&quot;,
+    &quot;promotion&quot;: 8,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;tests/test_forward_profile_arguments.py&quot;,
+      &quot;-k&quot;,
+      &quot;compensator&quot;
+    ],
+    &quot;limit&quot;: 1000,
+    &quot;provenance&quot;: &quot;recovered head pytest payload; checkout/log paths rebound to assigned review&quot;,
+    &quot;status&quot;: &quot;failed&quot;,
+    &quot;exit_status&quot;: 1,
+    &quot;seconds&quot;: 21.679991079494357,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-compensator.log&quot;,
+    &quot;failure_ids&quot;: [
+      &quot;tests/test_forward_profile_arguments.py::test_profile_amplitude_compensator_reaches_its_row&quot;
+    ],
+    &quot;summary&quot;: &quot;1 failed, 4 deselected in 17.30s&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-08.json</code>, <code>manifest-08.md</code>, <code>core-08.diff</code>, <code>tests-08.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-9-r-20260918t154507107752-fsa-coil-edit-panel-lcfs-2">9. r-20260918T154507107752-fsa-coil-edit-panel-lcfs-2</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>sound</strong>. The core change passes the achieved axis into traced_spline_contour; the associated topology change repairs crossing identities and saddle-sector pairing. Its persisted-state test and focused branch/contour gate are replayed. The cause is boundary tracing, not a painter choice. Both declared modules, including the two persisted-state cases and their displaced-level negative controls, passed at code identical to current main.</p>
+<p>All promotion commits: <code>92ba4f95ea01091c00e3bd9c142a51e055d605f1</code>, <code>f258917e876578cbd3d3bb1cd47a6b86d1801d6e</code>, <code>ba8651bf7d0f484a37bd06517386342654bfa4ae</code>, <code>2d12a00f54526b7ee8ea122d3d0f3d0524c4cf62</code>, <code>18fd78a70d05863042c4b5d45b119fac0aba82a8</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; the predecessor (merged: painter for assembled branches, boundary assembled from the solved lattice, term-by-term invalidation reporting) found that 16 of 21 raster fields fail assemble_separatrix_branches with no-axis-enclosing-cycle while cycle_component_count is 0 and axis_enclosing_component_count is 1, so the axis-enclosing component exists and is OPEN: the level arc leaves the traced domain before closing, and the repair is at the trace, not at the saddle join; in nova/equilibrium/separatrix_branches.py (or the tracer it calls in forward.py _raster_separatrix and traced_spline_contour) trace the boundary level on the global spline over a domain that reaches the wall on every side so the axis-enclosing cycle closes, with the open saddle-ended legs kept as legs, and record per state which term now fires; a test presents one of the failing persisted states from docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz and asserts a non-zero closed branch enclosing the axis; the coil-edit sweep is re-run once on all_debug and the panel redrawn with the closed branch solid, the saddle legs dashed, levels between axis and boundary flux, the raster masked to the wall interior, both null sets including both admitted saddles, captions naming which set is which and the residual and converged flag per edit, PNG and SVG; the predecessor's uncommitted receipt edits saved at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/coil-edit-panel-lcfs-2/predecessor-uncommitted-receipts.diff (the mechanism groups and restored latency receipt) are applied where they still apply; the plan section 5 landing in docs/plans/forward-solve-api.html and the evidence anchor in docs/evidence/archive/forward-solve-api-landed.html, both your plan's shared landing paths, carry the figures by project-absolute src; a followup on the plan names benchmarks/diiid_poloidal_figures.py as owing the same closed-branch fix; a text-only lane, never Read a PNG, verify the figure through its SVG and the persisted branch arrays; the predecessor's writes were corrupted by its own lane session, so read back every file you write and py_compile before each commit; every uv command carries --no-sync and nothing runs uv sync; manifest at the first commit; status words complete, waiting or blocked only</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;focused gate on tests/test_separatrix_branches.py and tests/test_flux_surface_connectivity.py with slow tests, all_debug CPU (30 passed)&quot;,
+  &quot;exit_status&quot;: 0,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/coil-edit-panel-lcfs-2/gate-6.log&quot;,
+  &quot;log_digest&quot;: null
+}</pre>
+<p>Declared negative control: none recorded.</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;closed-branches&quot;,
+    &quot;promotion&quot;: 9,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;tests/test_separatrix_branches.py&quot;,
+      &quot;tests/test_flux_surface_connectivity.py&quot;,
+      &quot;-m&quot;,
+      &quot;slow or not slow&quot;
+    ],
+    &quot;limit&quot;: 400,
+    &quot;provenance&quot;: &quot;record names files and inclusion of slow tests, flags reconstructed&quot;,
+    &quot;status&quot;: &quot;passed&quot;,
+    &quot;exit_status&quot;: 0,
+    &quot;seconds&quot;: 100.01036710478365,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/closed-branches.log&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;34 passed in 93.05s (0:01:33)&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-09.json</code>, <code>manifest-09.md</code>, <code>core-09.diff</code>, <code>tests-09.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-10-r-20260918t165636099922-msc-forward-solve-lane-regression">10. r-20260918T165636099922-msc-forward-solve-lane-regressions</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>defective</strong>. Ledger gate is failed and manifest was left waiting, although the hook-arity and cache commits are ancestors of head; preserve that status. The hook arity correction is present. The target-current half of the cache-bypass claim still fails during key construction before the bypass.</p>
+<p>All promotion commits: <code>e37e3819435babc86f6200721c6edaf06cc160f6</code>, <code>40bb545535be99bc72f273ff73bf0b898d2b22a9</code>, <code>2ff0e7338c2ef75bcefff1b4f280224f401122ea</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; the pre-warm lane ran tests/test_equilibrium_forward_solve.py twice on the H200 (logs /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/cache-prewarm/lane-20260918.log cold and lane-20260918b.log warm) with the same three failures in both arms, 3 failed 26 passed, so they are not a cache artefact: test_the_accelerator_routes_agree_on_the_fixed_point raises TypeError read_partition() takes from 1 to 4 positional arguments but 5 were given inside ForwardFluxOperator.traced_flux_map_with_shadow; test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap raises jax.errors.UnexpectedTracerError; test_the_moment_map_is_differentiable_against_finite_differences fails assert errors[0] greater than MOMENT_JACOBIAN_TOLERANCE with errors[0] 0.000446 against 0.01. The frozen-partition binding sites are nova/equilibrium/fixed_point.py near line 1918, where the bound map forwards *arguments into partition_read, nova/equilibrium/fixed_point.py near line 3418, and nova/equilibrium/forward_operator.py near lines 3498 and 3541 where read_partition accepts psi, previous_shadow, _external, operator; the commit that last reshaped these signatures is dd7d8286 (trace mesh arrays through solve programs, 2026-09-16); establish for each failure whether it fails on CPU too (JAX_PLATFORMS=cpu, one all_debug job, the three tests by node id) so a device-only failure is recorded as device-qualified evidence rather than repaired by weakening a CPU contract; for the first two, fix the binding so every accelerator route reads the frozen partition with the arguments read_partition declares and no traced value leaks across the portfolio's jit or vmap boundary; for the third, decide from the CPU arm whether the finite-difference ladder ordering is a CPU-only contract, and if it is, mark the assertion device-qualified with the measured GPU ladder recorded rather than widening the tolerance; the gate is the whole file on the H200 with the pre-warmed persistent compilation cache: the reservation gpu_0003_grpA holds 28 of its 30 cores today so submit with --cpus-per-task=2 --gres=gpu:1 --mem=128G, never 8 cores, running the shared environment's interpreter directly (never uv on a compute node), one job, log under your reports fence, and the expected result is 29 passed or 26 passed plus device-qualified skips with their reasons; nova/equilibrium/forward_operator.py is held by another node, so if the fix needs it, make that change in its own one-hunk commit and list it as a companion path; write the plan landing comment on docs/plans/millisecond-converged-solve.html and the anchor text for the evidence record in the manifest; a text-only lane, never Read a PNG; call configure_dtypes before building any array; every uv command carries --no-sync and nothing runs uv sync; py_compile with the project interpreter before each commit; manifest at the first commit; a wait, if declared, carries wait_condition, wait_probe as a JSON list command, wait_terminal and resume_brief; status words complete, waiting or blocked only</p>
+<p>Recorded primary gate:</p>
+<pre>null</pre>
+<p>Declared negative control: none recorded.</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;continued-forward-solve&quot;,
+    &quot;promotion&quot;: 10,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;tests/test_equilibrium_forward_solve.py&quot;
+    ],
+    &quot;limit&quot;: 1000,
+    &quot;provenance&quot;: &quot;recovered head pytest payload; checkout/log paths rebound to assigned review&quot;,
+    &quot;status&quot;: &quot;pending&quot;,
+    &quot;exit_status&quot;: null,
+    &quot;log_path&quot;: null,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-10.json</code>, <code>manifest-10.md</code>, <code>core-10.diff</code>, <code>tests-10.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-11-r-20260919t200510357550-nia-promotion-fallback-nan">11. r-20260919T200510357550-nia-promotion-fallback-nan</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>defective</strong>. Refusal predicate is real but omitted by both wrapper paths; a bound explicit-operand solve executes the refused carry. The declared negative control instead mutates a different target-current guard and fails on a different residual. Full original driver swaps production source files and its slow test renders outside this review fence; that driver is not executed.</p>
+<p>All promotion commits: <code>fd42ffc6516083c9262aa5f15772b9c18d33a9a0</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; Read the followup f-20260908T110200-promotion-fallback-nan on docs/plans/null-identification-authority.html. Commit c5e1498a carries unchanged promotion fallbacks and makes the diverted -300 Solovev rung raise CurrentNormalisationError with a non-finite source amplitude out of current_normalisation_amplitude in nova/equilibrium/forward_operator.py near line 3351, reached through normalised_current_moments_and_observation, while its immediate predecessor e0eb4956 terminates finite and unqualified at residual 0.0256. A carry described as unchanged must change no value, so either the carried quantity is stale where the original recomputed it or the carry reaches a case the original did not. Name which carried quantity becomes non-finite and on which trip, printing the array name with its full shape and its finite count rather than a scalar, with the cell-current sum entering the amplitude as the first suspect since the amplitude is the target current divided by it. Reproduce on CPU with the reduced hex oracle in a fresh process on all_debug, which runs in minutes. Repair so the rung terminates finite with its residual equal to the e0eb4956 value wherever the carry is legitimately unchanged, and add a case driving the carried fallback through the state that produced the non-finite amplitude. Gate: the new case plus tests/test_forward_operator_axes.py in one all_debug job (srun --partition=all_debug --time=00:59:00 --cpus-per-task=8 --mem=64G, TMPDIR=/tmp, JAX_PLATFORMS=cpu, the root environment interpreter directly and never uv), captured once with the exit status, with the base arm stated as a failure set so the delta is a set difference. Commits carry a body. Every uv command carries --no-sync and nothing runs uv sync.</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;srun --partition=all_debug --time=00:59:00 --cpus-per-task=8 --mem=64G bash run-gate.sh (both arms, one allocation)&quot;,
+  &quot;exit_status&quot;: 1,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/nia-promotion-fallback-nan/gate3.log&quot;,
+  &quot;log_digest&quot;: null
+}</pre>
+<p>Declared negative control: revert the repair so the carried fallback reaches the amplitude unrecomputed again; the case pinning a finite amplitude on the diverted -300 rung must redden.</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;continued-fallback&quot;,
+    &quot;promotion&quot;: 11,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;tests/test_promotion_fallback_amplitude.py&quot;,
+      &quot;tests/test_forward_operator_axes.py&quot;
+    ],
+    &quot;limit&quot;: 900,
+    &quot;provenance&quot;: &quot;recovered head pytest payload; checkout/log paths rebound to assigned review&quot;,
+    &quot;status&quot;: &quot;running&quot;,
+    &quot;exit_status&quot;: null,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-fallback.log&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-11.json</code>, <code>manifest-11.md</code>, <code>core-11.diff</code>, <code>tests-11.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-12-r-20260919t223218420452-msc-inert-dispatcher-and-fused-br">12. r-20260919T223218420452-msc-inert-dispatcher-and-fused-branch</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>defective</strong>. Dispatcher deletion is mechanical and the point-arm scaling control is valid. The linear-arm comparator catches the real axis refusal, changes its reference behavior and turns the comparison green. Restoring that reference behavior in memory reproduces NoQualifiedAxisError at the audited head.</p>
+<p>All promotion commits: <code>fdc6abaa830b497dd7198703ba986e89156d6fd9</code>, <code>bed6702c828a679290d89b99387dc3b13748a60d</code>, <code>c74bb75126f6e55b6c070463f92e033dd35a726e</code>, <code>f818534053d899cd2b37cc60e2a3efcfd1024dde</code>, <code>3632df4c6c84bdff4ee6822cce43efd848016ef2</code>, <code>bf3da10affa47694b396bf3fb0ef79a47307be40</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; dispatch_read_requests and the FluxReadRequest/FluxReadAnswer types are gone from nova/equilibrium/forward_operator.py with no remaining reference anywhere in nova, tests or benchmarks; a committed test executes the use_linear_moments branch of the fused same-state read in nova/equilibrium/forward.py and asserts its terminal state matches the unfused read; the census receipt executable-bytes cell reading 590,668,120 is corrected to the measured value, or the manifest states that neither figure is present in the repository and nothing was invented; the gate runs on one all_debug CPU allocation with JAX_PLATFORMS=cpu and reports added failures against the base revision</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;one all_debug CPU allocation, JAX_PLATFORMS=cpu, six files covering the changed module one per process at base 3f1d223a and at head, plus the new test file at head&quot;,
+  &quot;exit_status&quot;: 0,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T223218420452-msc-inert-dispatcher-and-fused-branch/logs/lane-driver.log&quot;,
+  &quot;log_digest&quot;: null
+}</pre>
+<p>Declared negative control: scale one moment returned by the fused same-state read by 1+1e-6; the case comparing the fused and unfused terminal states must redden..</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;fused-equilibrium_forward_operator&quot;,
+    &quot;promotion&quot;: 12,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;-q&quot;,
+      &quot;--no-header&quot;,
+      &quot;-m&quot;,
+      &quot;not slow&quot;,
+      &quot;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/tests/test_equilibrium_forward_operator.py&quot;
+    ],
+    &quot;limit&quot;: 400,
+    &quot;provenance&quot;: &quot;lane.sh head payload, checkout path rebound&quot;,
+    &quot;status&quot;: &quot;passed&quot;,
+    &quot;exit_status&quot;: 0,
+    &quot;seconds&quot;: 125.738450454548,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/fused-equilibrium_forward_operator.log&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;7 passed in 121.55s (0:02:01)&quot;
+  },
+  {
+    &quot;key&quot;: &quot;continued-forward_operator_domain&quot;,
+    &quot;promotion&quot;: 12,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;-q&quot;,
+      &quot;--no-header&quot;,
+      &quot;-m&quot;,
+      &quot;not slow&quot;,
+      &quot;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/tests/test_forward_operator_domain.py&quot;
+    ],
+    &quot;limit&quot;: 360,
+    &quot;provenance&quot;: &quot;recovered head pytest payload; checkout/log paths rebound to assigned review&quot;,
+    &quot;status&quot;: &quot;failed&quot;,
+    &quot;exit_status&quot;: 1,
+    &quot;seconds&quot;: 11.998275121673942,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-forward_operator_domain.log&quot;,
+    &quot;failure_ids&quot;: [
+      &quot;tests/test_forward_operator_domain.py::test_residual_support_has_no_boundary_flux_partition&quot;,
+      &quot;tests/test_forward_operator_domain.py::test_point_cell_arm_uses_profile_owned_support_eager_and_jit&quot;,
+      &quot;tests/test_forward_operator_domain.py::test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit&quot;
+    ],
+    &quot;summary&quot;: &quot;3 failed, 3 passed in 7.96s&quot;
+  },
+  {
+    &quot;key&quot;: &quot;continued-forward_operator_tangent&quot;,
+    &quot;promotion&quot;: 12,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;-q&quot;,
+      &quot;--no-header&quot;,
+      &quot;-m&quot;,
+      &quot;not slow&quot;,
+      &quot;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/tests/test_forward_operator_tangent.py&quot;
+    ],
+    &quot;limit&quot;: 360,
+    &quot;provenance&quot;: &quot;recovered head pytest payload; checkout/log paths rebound to assigned review&quot;,
+    &quot;status&quot;: &quot;passed&quot;,
+    &quot;exit_status&quot;: 0,
+    &quot;seconds&quot;: 84.70682617463171,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-forward_operator_tangent.log&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;1 passed in 79.10s (0:01:19)&quot;
+  },
+  {
+    &quot;key&quot;: &quot;continued-forward_operator_arguments&quot;,
+    &quot;promotion&quot;: 12,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;-q&quot;,
+      &quot;--no-header&quot;,
+      &quot;-m&quot;,
+      &quot;not slow&quot;,
+      &quot;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/tests/test_forward_operator_arguments.py&quot;
+    ],
+    &quot;limit&quot;: 360,
+    &quot;provenance&quot;: &quot;recovered head pytest payload; checkout/log paths rebound to assigned review&quot;,
+    &quot;status&quot;: &quot;passed&quot;,
+    &quot;exit_status&quot;: 0,
+    &quot;seconds&quot;: 92.07173366472125,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-forward_operator_arguments.log&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;4 passed in 87.54s (0:01:27)&quot;
+  },
+  {
+    &quot;key&quot;: &quot;continued-forward_profile_arguments&quot;,
+    &quot;promotion&quot;: 12,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;-q&quot;,
+      &quot;--no-header&quot;,
+      &quot;-m&quot;,
+      &quot;not slow&quot;,
+      &quot;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/tests/test_forward_profile_arguments.py&quot;
+    ],
+    &quot;limit&quot;: 360,
+    &quot;provenance&quot;: &quot;recovered head pytest payload; checkout/log paths rebound to assigned review&quot;,
+    &quot;status&quot;: &quot;failed&quot;,
+    &quot;exit_status&quot;: 1,
+    &quot;seconds&quot;: 28.08666150085628,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-forward_profile_arguments.log&quot;,
+    &quot;failure_ids&quot;: [
+      &quot;tests/test_forward_profile_arguments.py::test_profile_component_image_is_the_normalisation_tangent&quot;
+    ],
+    &quot;summary&quot;: &quot;1 failed, 3 passed, 1 deselected in 23.28s&quot;
+  },
+  {
+    &quot;key&quot;: &quot;continued-forward_operator_axes&quot;,
+    &quot;promotion&quot;: 12,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;-q&quot;,
+      &quot;--no-header&quot;,
+      &quot;-m&quot;,
+      &quot;not slow&quot;,
+      &quot;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/tests/test_forward_operator_axes.py&quot;
+    ],
+    &quot;limit&quot;: 360,
+    &quot;provenance&quot;: &quot;recovered head pytest payload; checkout/log paths rebound to assigned review&quot;,
+    &quot;status&quot;: &quot;failed&quot;,
+    &quot;exit_status&quot;: 1,
+    &quot;seconds&quot;: 147.66077372059226,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-forward_operator_axes.log&quot;,
+    &quot;failure_ids&quot;: [
+      &quot;tests/test_forward_operator_axes.py::test_tensor_product_grid_class_margin_is_read_on_the_spline&quot;
+    ],
+    &quot;summary&quot;: &quot;1 failed, 2 passed in 140.89s (0:02:20)&quot;
+  },
+  {
+    &quot;key&quot;: &quot;continued-fused_same_state_read&quot;,
+    &quot;promotion&quot;: 12,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;-q&quot;,
+      &quot;--no-header&quot;,
+      &quot;-m&quot;,
+      &quot;not slow&quot;,
+      &quot;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/tests/test_fused_same_state_read.py&quot;
+    ],
+    &quot;limit&quot;: 360,
+    &quot;provenance&quot;: &quot;recovered head pytest payload; checkout/log paths rebound to assigned review&quot;,
+    &quot;status&quot;: &quot;running&quot;,
+    &quot;exit_status&quot;: null,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/continued-fused_same_state_read.log&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-12.json</code>, <code>manifest-12.md</code>, <code>core-12.diff</code>, <code>tests-12.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-13-r-20260919t234730758244-cca-production-clip-takes-the-typ">13. r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle</h3>
+<p>Review status: <strong>in-progress</strong>. Verdict: <strong>unverifiable</strong>. The saddle keyword and structural guard are sound, and the focused gate is replayed. The full declared numeric/region-consumer gate is not met (1.388e-1 vs 1e-13 at 110, larger rows unmeasured, region profiles not consumed); preserve the explicit ruling accepting the handoff only. The green ledger field cites the red log.</p>
+<p>All promotion commits: <code>d90a522fe8ac53d4a26477bf920aeb8ac367be47</code>, <code>3d0b2f494bd5da2dcb5115e4803cf346cc68a5ed</code>, <code>156bff654384b72925d23fbfdf9a010a4840f37b</code>, <code>fa7db0d675a0bceb8b8edf85a13df4832da7b59c</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; the forward operator passes the typed census saddle to the clip as its saddle vertex, the four region-owned moment profiles are consumed by the plasma-cell partition and by the null read, and the oracle is made independent of the carrier by integrating the analytic current over the region bounded by the separatrix branches and the cell edges rather than over the carrier own emitted polygons; one all_debug CPU allocation, --cpus-per-task=8 --mem=64G --time=00:59:00, TMPDIR=/tmp in the submit environment and in the payload, JAX_PLATFORMS=cpu, the shared root interpreter run directly and uv never invoked on the compute node, runs that independent oracle at 110, 300 and 500 cells in one job and never as an array, and the core-side current agrees with the analytic wedge integral to within 1e-13 relative at each resolution; the certificate re-solve half of this section gate is NOT attempted and is reported as deferred, because the quality-of-service caps this account at four cards and the model serve holds all four, so a GPU job cannot schedule; committed cases pin the saddle vertex reaching the clip and the four profiles reaching both consumers, the gate reports added failures against the base revision, and the declared negative control reddens</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;PYTHONPATH=&lt;worktree&gt; JAX_PLATFORMS=cpu .venv/bin/python -m pytest -p no:cacheprovider -q tests/test_xpoint_cell_wedge_clip.py&quot;,
+  &quot;exit_status&quot;: 0,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle/negative-control.red.log&quot;,
+  &quot;log_digest&quot;: null
+}</pre>
+<p>Declared negative control: NEGATIVE CONTROL: forward_operator._profile_support mutated by deleting the single line 'saddle_vertex=topology.x_point,' so the production spline-chain clip receives no typed census saddle; the pinning test must redden..</p>
+<p>Current-head replay outcomes:</p>
+<pre>[
+  {
+    &quot;key&quot;: &quot;typed-saddle&quot;,
+    &quot;promotion&quot;: 13,
+    &quot;argv&quot;: [
+      &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python&quot;,
+      &quot;-m&quot;,
+      &quot;pytest&quot;,
+      &quot;-p&quot;,
+      &quot;no:cacheprovider&quot;,
+      &quot;-q&quot;,
+      &quot;tests/test_xpoint_cell_wedge_clip.py&quot;
+    ],
+    &quot;limit&quot;: 300,
+    &quot;provenance&quot;: &quot;ledger pytest payload; environment rebound&quot;,
+    &quot;status&quot;: &quot;passed&quot;,
+    &quot;exit_status&quot;: 0,
+    &quot;seconds&quot;: 41.52485312521458,
+    &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-fixed-point-and-newton-routes/typed-saddle.log&quot;,
+    &quot;failure_ids&quot;: [],
+    &quot;summary&quot;: &quot;14 passed in 37.05s&quot;
+  }
+]</pre>
+<p>Inputs: <code>promotion-13.json</code>, <code>manifest-13.md</code>, <code>core-13.diff</code>, <code>tests-13.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-14-r-20260920t181701895943-fsri-the-trips-are-a-scan-not-a-l">14. r-20260920T181701895943-fsri-the-trips-are-a-scan-not-a-loop</h3>
+<p>Review status: <strong>deferred-to-an-independent-lane</strong>. Verdict: <strong>none</strong>. Coordinator ruling: this run and all three listed commits are deferred-to-an-independent-lane for a sol seat. No verdict is authored here. Earlier observations/logs remain retained as inputs only.</p>
+<p>All promotion commits: <code>d8bbc0491e72df29ddaabc1e6d76f704c4c8dc2d</code>, <code>a999eff40521e428d4c09a3b0d3adea5724a17b2</code>, <code>8dc6be23ae6d0c3f76b6bd20e9821733200f23db</code>.</p>
+<p>Done-when as recorded:</p>
+<p>&gt; the lead design constraint governs every clause: these processes never loop, they are designed as efficient maps. In nova/equilibrium/fixed_point.py and nova/equilibrium/reduced_newton.py the trip loop and the Newton step loop run as lax.scan or lax.while_loop with fixed-capacity telemetry slots, and the operator read in nova/equilibrium/forward_operator.py is evaluated once per trip rather than inlined per trip; the serialized executable bytes of the weak-rotation-reactor-static 300-cell certificate row, measured through the existing serialized executable measure the census already records, fall from the committed 443,217,410 to under 100,000,000, with both numbers in the record and the compile wall beside them; the terminal state of that row is bit-identical to the committed base state digest f9598a166437ef23dc46e6d9f5d6cbade584fe299b5ee0771f071332eaf914ed, or if it is not the record states the maximum absolute difference and why the scan changed arithmetic order; the mapping count through the load, read with benchmarks.compile_abort_probe, is reported beside the earlier 16,789 to 17,620 per-load figure; one all_debug CPU allocation with --cpus-per-task=8 --mem=64G --time=00:59:00, TMPDIR=/tmp in the submit environment and in the payload, JAX_PLATFORMS=cpu, the shared root interpreter run directly and uv never invoked on the compute node, each measurement in its own process so the abort cannot take the series; committed cases in tests/test_solve_trips_are_a_scan.py pin that the trip body appears once in the lowered program and that telemetry slots are fixed capacity; the focused suite shows zero added failures against the base revision; the declared negative control reddens; benchmarks/solve_program_size_gate.py is outside this fence because an interim node holds it, so the executable-size gate itself lands in a follow-on</p>
+<p>Recorded primary gate:</p>
+<pre>{
+  &quot;command&quot;: &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_fixed_point.py tests/test_route_default_wiring.py tests/test_default_wiring.py tests/test_solve_trips_are_a_scan.py&quot;,
+  &quot;exit_status&quot;: 0,
+  &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T181701895943-fsri-the-trips-are-a-scan-not-a-loop/after-suite.log&quot;,
+  &quot;log_digest&quot;: null
+}</pre>
+<p>Declared negative control: Replace _active_set_newton_krylov with the base-revision implementation that executes the first trip outside the loop..</p>
+<p>Current-head replay outcomes:</p>
+<pre>[]</pre>
+<p>Inputs: <code>promotion-14.json</code>, <code>manifest-14.md</code>, <code>core-14.diff</code>, <code>tests-14.diff</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-findings-and-scoped-repair-handoffs">Findings and scoped repair handoffs</h3>
+<h4 id="fsa-audit-solver-fixed-point-and-newton-routes-preserve-the-frozen-partition-refusal-across-map-bindings">Preserve the frozen-partition refusal across map bindings</h4>
+<p><code>fd42ffc651</code> — <code>nova/equilibrium/fixed_point.py:1914</code> — guard lost at wrapper boundary.</p>
+<p>The fd42ffc651 predicate is attached in forward_operator.py:3798 but _bind_traced_map_arguments at fixed_point.py:1914-1924 copies only the read, map and shadow hooks; flux_map_with_shadow has the same omission. _active_set_newton_krylov treats a missing predicate as True. At 0322e911a the positive control without explicit operands makes 5 plain and 0 carried evaluations; the same refused partition with traced operands loses the hook and makes 0 plain and 5 carried evaluations. Preserve _frozen_partition_usable through both binding layers and add a production-boundary test with explicit external/operator/target operands, an unusable read, and a usable positive control. Do not weaken the refusal to match the passing synthetic unbound test.</p>
+<p>Evidence: <code>guard-probe.py</code>, <code>guard-probe.log</code>, <code>guard-probe.json</code>.</p>
+<h4 id="fsa-audit-solver-fixed-point-and-newton-routes-apply-the-declared-refusal-repair-negative-control">Apply the declared refusal-repair negative control</h4>
+<p><code>fd42ffc651</code> — <code>tests/test_promotion_fallback_amplitude.py:125</code> — negative control mutates a different guard.</p>
+<p>The ledger declares reverting the repair so the fallback reaches the amplitude unrecomputed. ab2-300.log instead enables the carry on the target-normalised route by removing target_current is None; run-negative-control.sh explicitly calls that a different guard. It fails on residual 6.3706933429737305 != 2.248351582217136, not a non-finite amplitude, while the manifest says the new refusal leaves that residual unchanged. Revert only the introduced usability predicate and its wiring in an isolated control, drive the bound solver route, and require the finite-amplitude/refusal assertion to redden for that mechanism. Keep the carry-on residual test separately labelled.</p>
+<p>Evidence: <code>control-inputs.json</code>, <code>manifest-11.md</code>.</p>
+<h4 id="fsa-audit-solver-fixed-point-and-newton-routes-keep-the-axis-refusal-visible-in-the-fused-read-comparison">Keep the axis refusal visible in the fused-read comparison</h4>
+<p><code>c74bb7512</code> — <code>tests/test_fused_same_state_read.py:106</code> — comparator suppresses a production refusal.</p>
+<p>c74bb7512 catches NoQualifiedAxisError in the unfused comparator and substitutes the fused partition's masks/topology. This changes the reference behavior the test claims to preserve. At 0322e911a restoring the actual unfused comparator in memory, without changing an assertion or production code, fails the terminal-state comparison with NoQualifiedAxisError at forward_operator.py:2841/topology.py:184. Establish the intended policy for unqualified terminal reads, repair the owning production route, and compare against the unsuppressed two-read implementation. The recorded 1+1e-6 negative control correctly detects the point-current perturbation but does not qualify this linear-arm exception substitution.</p>
+<p>Evidence: <code>strict-fused-probe.py</code>, <code>strict-fused-probe.log</code>.</p>
+<h4 id="fsa-audit-solver-fixed-point-and-newton-routes-avoid-host-conversion-when-a-current-target-is-traced">Avoid host conversion when a current target is traced</h4>
+<p><code>40bb545535</code> — <code>nova/equilibrium/forward.py:1921</code> — tracer refusal before cache bypass.</p>
+<p>a4de1caf adds argument_layout(target_current) using np.asarray; 40bb545535 detects a traced target but builds that key before its cache bypass. A concrete scalar float64 target constructs a program, whereas jax.make_jaxpr with the same scalar reaches forward.py:1921 and raises TracerArrayConversionError. Read static shape/dtype without value conversion or avoid key construction entirely for traced inputs, and cover both traced current targets and requested classes through _accelerated_history_program. The hook-arity repair remains a separate valid change.</p>
+<p>Evidence: <code>target-trace-probe.py</code>, <code>target-trace-confirmed.log</code>.</p>
+<h4 id="fsa-audit-solver-fixed-point-and-newton-routes-restore-an-honest-exact-clip-terminal-identity-contract">Restore an honest exact-clip terminal identity contract</h4>
+<p><code>617b657c19</code> — <code>tests/test_exact_clip_memory.py:534</code> — bit identity replaced by tolerance.</p>
+<p>The memory promotion's done-when requires exact-300 terminal bit identity. Commit 617b657c19 replaces array equality over every terminal field with max flux delta/span &lt;= 1e-10; 7e1456e418 additionally removes convergence and absolute residual assertions, retaining only residual difference &lt;= 1e-13. The delivered manifest reports a nonzero 1.080878e-10 Wb state delta. Record the arithmetic change and obtain an explicit contract ruling or recover exact identity; retain an actual prior-revision reference and test all promised fields. A passing fast subset does not exercise the slow terminal comparison.</p>
+<p>Evidence: <code>tests-02.diff</code>, <code>manifest-02.md</code>, <code>clip-memory.log</code>.</p>
+<h4 id="fsa-audit-solver-fixed-point-and-newton-routes-revalidate-the-historical-mesh-and-profile-identity-claims-a">Revalidate the historical mesh and profile identity claims across revisions</h4>
+<p><code>dd7d828678</code> — <code>benchmarks/solve_program_size_gate.py:1606</code> — same-revision control presented as cross-revision evidence.</p>
+<p>Current repaired driver location: benchmarks/solve_program_size_gate.py:1606; historical driver near line 1075 at the promoted revisions. The original mesh/profile/request-set promotions cite four-row bit identity, but the owning plan's reviewed finding establishes that their certificate driver built both arms at head. Such a control can test call signatures and cannot establish invariance against the recorded base commit. The later cross-revision driver repair does not retroactively produce those measurements. Replay each original promotion's base and head (or validated immutable terminal arrays) using the repaired certificate driver and attach both revisions and state digests. Preserve the acknowledged executable-size deferrals; do not mistake those for numerical identity evidence.</p>
+<p>Evidence: <code>manifest-03.md</code>, <code>manifest-04.md</code>, <code>manifest-06.md</code>.</p>
+<h4 id="fsa-audit-solver-fixed-point-and-newton-routes-complete-the-independent-saddle-region-oracle-and-region-con">Complete the independent saddle-region oracle and region consumers</h4>
+<p><code>d90a522fe8</code> — <code>nova/equilibrium/forward_operator.py:3091</code> — focused structural gate substituted for numerical contract.</p>
+<p>The typed saddle keyword is present and its declared deletion control fails for the expected missing-keyword assertion. The recorded done-when also requires four region-owned profiles in both consumers and independent core-current agreement &lt;= 1e-13 at 110, 300 and 500 cells. The worker's independent reconstruction fails at 110 with 1.388e-1 error and stops; the four region profiles remain unconsumed. The recorded owner ruling accepted only the saddle handoff, so preserve that partial landing and finish the region reconstruction/consumer work separately. The ledger also points its green gate_check at the red negative-control log; attach the actual green result rather than a contradictory log.</p>
+<p>Evidence: <code>manifest-13.md</code>, <code>typed-saddle.log</code>.</p>
+<h4 id="fsa-audit-solver-fixed-point-and-newton-routes-replay-unreproduced-promotion-gates-with-immutable-command-r">Replay unreproduced promotion gates with immutable command records</h4>
+<p><code>0322e911a</code> — <code>docs/state/nova/crew.json:8673</code> — gate replay unavailable.</p>
+<p>Several promoted gate_check.command fields are prose, scheduler job summaries or source-swapping shell drivers, and the certificate/render gates write outside this review's fence. The audit replays recoverable pytest payloads in fresh CPU processes and labels substitutions, failures, missing tests and timeouts separately. Dispatch a verification node with explicit write ownership for immutable baseline artifacts and figure outputs, one all_debug allocation per audit measure, exact argv per gate, and a budget covering the long solver modules. Preserve historical failed/waiting run status rather than converting incomplete evidence to a pass.</p>
+<p>Evidence: <code>replay-commands.json</code>, <code>inventory.json</code>.</p>
+<h4 id="fsa-audit-solver-fixed-point-and-newton-routes-resolve-the-three-merged-head-contour-volume-failures">Resolve the three merged-head contour-volume failures</h4>
+<p><code>796df3501</code> — <code>tests/test_equilibrium_diagnostics.py:452</code> — current-head gate failure without baseline attribution.</p>
+<p>The gate promoted with 796df3501 now returns 3 failed and 67 passed at audit head 0322e911a: test_shafranov_contour_integrals_equal_their_volume_side at 321, 641 and 1281 exceeds the unchanged 5e-4 bound, with maxima 0.0007173192006160823, 0.0006415557775379364 and 0.000627177830842935. This audit does not attribute those failures to the field-response commit without a matched baseline. Reproduce and localise the contour/volume mechanism in the owning test/diagnostic scope; preserve the tolerance while repairing or obtaining a physics ruling.</p>
+<p>Evidence: <code>field-responses.log</code>.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-negative-controls-in-this-seat">Negative controls in this seat</h3>
+<table><thead><tr><th>Promotion</th><th>Applied mutation versus declaration</th><th>Actual red reason</th><th>Assessment</th></tr></thead><tbody>
+<tr><td>11</td><td>Declares reverting the refusal repair; instead enables carried partitions on target-normalised route</td><td>residual 6.3706933429737305 != 2.248351582217136</td><td>different guard and different claimed mechanism</td></tr>
+<tr><td>12</td><td>Fused cell_current multiplied by 1.000001</td><td>point-current moments and total current differ</td><td>declared mutation matches; linear comparator gap remains</td></tr>
+<tr><td>13</td><td>Deletes saddle_vertex=topology.x_point</td><td>missing keyword assertion</td><td>declared structural mutation matches; not proof of region-current accuracy</td></tr>
+</tbody></table>
+<p>The scan run and its three commits have no verdict here. Historical scan observations are retained under <code>scan-focused.log</code>, <code>scan-control-probe.log</code> and <code>historical-scan-array-comparison.json</code> for the assigned independent reviewer.</p>
+<h3 id="fsa-audit-solver-fixed-point-and-newton-routes-remaining-evidence-limits">Remaining evidence limits</h3>
+<p>The original seed/memory records combine CPU and H200 gates. A CPU replay cannot reproduce a GPU allocator measurement verbatim. Full importer censuses and physical certificate solves can exceed the remaining fixed fence; incomplete attempts have their own exit/status and log. Source-swapping producer drivers are not run verbatim against this read-only scope: their recoverable head test payload is run directly, and any fixture that attempts a repository write is visibly refused. These limits keep the affected promotion unverifiable; they do not stop unrelated rows.</p>
+<p>The recorded field-response gate at the audited head fails three contour/volume cases (321, 641, 1281), each above the unchanged 5e-4 bound. Attribution to an individual promotion requires a matched baseline; no tolerance or production code was changed here.</p>
+<p>Promotions reviewed: 13; defective: 7; sound: 2; unverifiable: 4; deferred-to-an-independent-lane: 1 run / 3 commits, with no verdict. Defect classes: bit identity replaced by tolerance; comparator suppresses a production refusal; current-head gate failure without baseline attribution; focused structural gate substituted for numerical contract; gate replay unavailable; guard lost at wrapper boundary; negative control mutates a different guard; same-revision control presented as cross-revision evidence; tracer refusal before cache bypass.</p>
+</section>
+<section class="audit-directory" id="fsa-audit-solver-test-pins-section">
+<h2 id="fsa-audit-solver-test-pins">Solver test-pin promotion audit</h2>
+<p>Audit revision: <code>0322e911a52588e116bb76a2243ff0dc728cc655</code>. Scope: promotions since 2026-09-16 whose commit SHA appears in <code>git log --all --since=2026-09-16</code> for the ten named test paths and in <code>docs/state/nova/crew.json</code>. The review lane is independent of the locally served producing lane.</p>
+<p>One complete <code>all_debug</code> allocation ran every gate available at current main in a fresh Python process with <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>, the shared root interpreter, and no <code>uv</code> on the node. Result: <strong>13 promotions reviewed; 9 defective, 4 sound; 8 current-main gates green, 2 red, 3 cannot run because the promoted commits are not in current main.</strong> The two red gates fail on the same <code>AttributeError</code>: <code>forward_operator.py:3091</code> requires <code>topology.x_point</code> from a helper namespace that does not carry it.</p>
+<p>No figure was created: the relationship is a textual promotion-by-promotion comparison with exact commands and verdicts, for which a semantic table and detailed rows are clearer than an image.</p>
+<h3 id="fsa-audit-solver-test-pins-file-census">File census</h3>
+<table><thead><tr><th>file</th><th>promotions joined</th><th>what the current file pins</th></tr></thead><tbody>
+<tr><td><code>tests/test_forward_census.py</code></td><td>4</td><td>census qualification, exact diverted-oracle fixture, spline wedge-current oracle, and bank-backed refusal; two bank cases skip when <code>NOVA_FORWARD_CENSUS_BANK</code> is absent</td></tr>
+<tr><td><code>tests/test_limiter_spline_minimum.py</code></td><td>0</td><td>spline minimum, reachability, bit identity, class-wall and shadowing contracts; no in-window promotion</td></tr>
+<tr><td><code>tests/test_forward_operator_axes.py</code></td><td>0</td><td>cell axes, batch shape, topology margin and diversion shape; no in-window promotion</td></tr>
+<tr><td><code>tests/test_connectivity_class_reader.py</code></td><td>0</td><td>connectivity class-wall reader and topology consistency; no in-window promotion</td></tr>
+<tr><td><code>tests/test_xpoint_cell_wedge_clip.py</code></td><td>4</td><td>saddle admission, branch/root pairing, four region moments, typed-saddle call shape, traversal frame, winding and area closure</td></tr>
+<tr><td><code>tests/test_certificate_baseline_revision.py</code></td><td>2</td><td>cross-revision arm identity, refusal semantics, state-array persistence and measurable-vs-unmeasured differences</td></tr>
+<tr><td><code>tests/test_solve_trips_are_a_scan.py</code></td><td>1</td><td>lowered body count and fixed-capacity telemetry, but the promoted file is absent from current main</td></tr>
+<tr><td><code>tests/test_coil_edit_persistence_guard.py</code></td><td>1</td><td>real twenty-state guard firing, repaired synthetic writer acceptance, and short-row refusal</td></tr>
+<tr><td><code>tests/test_centroid_constraint_lattice_guard.py</code></td><td>1</td><td>cell-count pool slice and refusal of the pre-fix physical prefix, but the promoted file is absent from current main</td></tr>
+<tr><td><code>tests/test_bank_drift_paired_probe.py</code></td><td>3</td><td>merge coverage, unpaired arms, compile evidence, per-archive wall, shared contour levels, null vocabulary and unfilled contour kind</td></tr>
+</tbody></table>
+<h3 id="fsa-audit-solver-test-pins-promotion-rows">Promotion rows</h3>
+<h4 id="fsa-audit-solver-test-pins-r-20260917t200541067292-nia-drift-probe-remainder-and-panels">r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2 — defective</h4>
+<ul>
+<li>Plan / node: <code>null-identification-authority §1</code> / <code>nia-drift-probe-remainder-and-panels-2</code></li>
+<li>Commits: <code>a2563494ec3cbd9c1e42c3dee61d2c6fb58fadbc</code>, <code>0c255b56023c75e86da6d9fcc8c9ab2590cec64e</code>, <code>f884b659bc98a4a6fbd0b29676acf96d82051cce</code>, <code>80e78f517280d614563e18961951e15e6ab83132</code>, <code>915c4cee32a6181ff7a4400f559a9e36a7963109</code>, <code>b8d0bcbb9863b187e01c6242cedd3c43c6bcfc33</code>, <code>5397a93933d2c6e6d8740e18694bb845e57243ec</code>, <code>d85874f89840aaa57b1e0981ccd8834bbec73a1a</code></li>
+<li>Test paths: tests/test_bank_drift_paired_probe.py</li>
+<li>Reachability: ancestor</li>
+<li>Current-main gate: exit 0; 11 passed in 5.36 s. Log: <code>gates/nia-drift-probe-remainder-and-panels-2.log</code></li>
+<li>Diff-by-anomaly verdict: Commit 915c4cee claims to pin the two-archive panel and shared levels, but lines 206-221 assert only status 0 and a non-empty output file. A per-panel-level mutant and a filled-contour mutant both survive that easy-attribute check; later commit 7efd909c supplies the discriminating fixture and artist assertions.</li>
+<li>Negative control: none recorded</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; ONE H200 job on betelgeuse under reservation gpu_0003_grpA (--gres=gpu:1, 8 cores, --mem=128G, TMPDIR=/tmp exported at submit and inside the payload, the root interpreter with PYTHONPATH set to the worktree, no uv on the node, JAX_PLATFORMS=cuda,cpu, persistent compilation cache, time limit 02:00:00 because the current tree compiles jit_solve once per arm at about 12.6 minutes) runs benchmarks/bank_drift_paired_probe.py for the two 22086/43 arms on the current tree only (the producer-tree emissions already exist under the reports fence arms directory), persisting each arm as it lands; the merged receipt docs/figures/null-identification-authority/bank-drift-probe/receipt.json is regenerated with rows_present 12 and rows_missing 0, its paths relative to the repository (the predecessor's commit 1d7f4bc3 already does this), and the compile-line count stated once with its marker named; a panel pair docs/figures/null-identification-authority/bank-drift-probe/21978-35-pure-panels.png shows the producer-tree converged terminal state beside the current-tree non-converged state as line contours on shared levels with both null sets and the wall, rendered on all_debug with the committed nova.media painters from the terminal states the arm emissions carry (or from one re-solve per tree inside the same H200 job, stated); a committed test in tests/test_bank_drift_paired_probe.py pins the merge row-count contract and the unpaired-arm path on synthetic emissions; the evidence anchor and the plan section carry the twelve-row verdict; every uv command carries --no-sync and nothing runs uv sync; write files in short pieces and run /home/ITER/mcintos/Code/nova/.venv/bin/python -m py_compile on each before committing</p>
+<p>&lt;/details&gt;</p>
+<h4 id="fsa-audit-solver-test-pins-r-20260918t080721770101-nia-drift-probe-record-repairs-defec">r-20260918T080721770101-nia-drift-probe-record-repairs — defective</h4>
+<ul>
+<li>Plan / node: <code>null-identification-authority</code> / <code>nia-drift-probe-record-repairs</code></li>
+<li>Commits: <code>1892b73f675167c9dc3896ffcc9061785fc01b69</code></li>
+<li>Test paths: tests/test_bank_drift_paired_probe.py</li>
+<li>Reachability: ancestor</li>
+<li>Current-main gate: exit 0; 11 passed in 4.79 s. Log: <code>gates/nia-drift-probe-record-repairs.log</code></li>
+<li>Diff-by-anomaly verdict: Commit 1892b73f lines 369-395 writes both archives on the same default grid, reconstructs expected levels from that same producer archive, and checks only one collection carrying levels. It cannot distinguish per-panel level selection and does not require an unfilled contour. The declared panel-composition mechanism is therefore not pinned; 7efd909c later reproduced and repaired both mutants.</li>
+<li>Negative control: none recorded</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; benchmarks/bank_drift_paired_probe.py _panel draws each panel's wall from its own resolved archive or records in the receipt that the two archives' wall geometry is bit-identical and one polygon is drawn; the merged receipt under docs/figures/null-identification-authority/bank-drift-probe/ records repository-relative roots that resolve from the checkout root at any worktree depth instead of a five-deep relative left.root; the receipt gains the compile-line count of the current-tree 22086/43 job log (462 lines, 2 Compiling) as an explicit field with the log path so a reader can find it; tests/test_bank_drift_paired_probe.py pins the panel composition (line contours on the shared level array, both null sets in their styles, the wall drawn) by inspecting the figure's artists rather than exit status; the panel is re-rendered on an all_debug job from the existing arm emissions with no new solve and the log is under the reports fence; the evidence record and plan are NOT edited by this node (another node holds them) and the manifest states the two record sentences the coordinator must correct (the 22086/43 pure arm records active_set_settled, not a non-converged cycle; the compile-line count lives in the job log, not a receipt field); a text-only lane: never Read a PNG; every uv command carries --no-sync and nothing runs uv sync; python syntax is checked with /home/ITER/mcintos/Code/nova/.venv/bin/python -m py_compile before each commit</p>
+<p>&lt;/details&gt;</p>
+<h4 id="fsa-audit-solver-test-pins-r-20260918t202207266011-cca-xpoint-cell-treatment-defective">r-20260918T202207266011-cca-xpoint-cell-treatment — defective</h4>
+<ul>
+<li>Plan / node: <code>cut-cell-current-attribution §3</code> / <code>cca-xpoint-cell-treatment</code></li>
+<li>Commits: <code>0e18d6df1388361ae42f2d5d8bbe1dfa538a0f35</code>, <code>6ef263161270298af0e377ee58d60926a7c2a72b</code>, <code>1f21b58c372b26f21ec06ca8cf2ec7c7888c0fb8</code>, <code>aca7dda6e25dac0631ffba8c3c00e9be55100c38</code>, <code>9b941292ef62b0fbcc1481e52f43751c0a173003</code></li>
+<li>Test paths: tests/test_xpoint_cell_wedge_clip.py; tests/test_forward_census.py</li>
+<li>Reachability: ancestor</li>
+<li>Current-main gate: exit 0; 17 passed in 52.57 s. Log: <code>gates/cca-xpoint-cell-treatment.log</code></li>
+<li>Diff-by-anomaly verdict: Commit 1f21b58c computes the expected current from _support_vertices(wedges, slot), the carrier's own emitted polygons, then accepts relative error &lt;= 1e-6 at lines 488-514 although the observed errors were 7.6e-14 to 3.9e-13. It verifies quadrature over the carrier output, not the claimed independent wedge geometry or the production forward route.</li>
+<li>Negative control: none recorded</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; followup f-cca-002 on the plan, designed in comment c-cca-xpoint-cell-design (read it first, it carries line-verified pointers at a2a5f90d): in nova/equilibrium/separatrix_clip.py _traced_clip admits a saddle at the four-crossing cell only when curve_evaluator is None, and the production exact mode is the spline-chain route (forward_operator.py near line 2949, arc_tracer=_implicit_traced_level_arc), so no X-point cell is split in production today; make the spline-chain route admit the saddle vertex too, taking the saddle from _FixedDesignNull2D.read_census (type column 3) or stencil_nulls.xpoint_candidates, never from chord inference; pair the four edge roots by branch through _ordered_saddle_wedges, emit the core, private-flux and two common-SOL wedges as fixed-capacity polygons with exact-zero padding (traced_polygon_vertex_capacity holds per lobe when the branch split precedes the arc expansion; a single two-arc polygon overflows and is dropped), integrate moments per wedge with that wedge's profile through SaddleCellWedges and padded_linear_current_moments, and let the plasma-cell partition and null census see the split cell; the closed-form polygon_moments module is the host-side oracle, not the production route; the gate tonight is the oracle half of the section's done-when: one all_debug job (JAX_PLATFORMS=cpu, the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on a compute node, TMPDIR=/tmp in the submit environment and the payload, scripts inside the worktree) on the single-null certificate case at 110, 300 and 500 cells reporting the X-point cell's core-side current within 1e-6 relative of the analytic wedge integral and exactly zero private-flux and common-SOL current for the confined profile, through tests/test_xpoint_cell_wedge_clip.py and tests/test_forward_census.py; the H200 half (four diverted rows re-solved with the four limited rows as the bit-identical negative control) cannot run tonight because the gpu_0003_grpA reservation is fully held, so record it under follow_ons with the launcher ready rather than waiting on it; a poloidal panel of the 300-cell X-point cell with its four wedges drawn as polygons over the flux contours, the saddle marked, per the plotting rules, PNG and SVG under docs/figures/cut-cell-current-attribution/xpoint-cell; nova/equilibrium/forward_operator.py is held by another node until its review lands, so make any change there in its own commit and list it as a companion path; the plan landing comment and the evidence anchor in docs/evidence/archive/cut-cell-current-attribution-landed.html; call configure_dtypes before building any array; every uv command carries --no-sync and nothing runs uv sync; py_compile with the project interpreter before each commit; manifest at the first commit; if the fence ends before the oracle gate passes, commit what holds and write the manifest with follow_ons naming the rest; a wait, if declared, carries wait_condition, wait_probe as a JSON list command, wait_terminal and resume_brief; status words complete, waiting or blocked only</p>
+<p>&lt;/details&gt;</p>
+<h4 id="fsa-audit-solver-test-pins-r-20260919t140106096257-nia-panel-test-strength-sound">r-20260919T140106096257-nia-panel-test-strength — sound</h4>
+<ul>
+<li>Plan / node: <code>null-identification-authority</code> / <code>nia-panel-test-strength</code></li>
+<li>Commits: <code>7efd909c4b475468afb4a7b8e5b0eb32be0f1f3e</code>, <code>4d91bd2e9ad6171a15b753e08855bb2c8d9fa01e</code></li>
+<li>Test paths: tests/test_bank_drift_paired_probe.py</li>
+<li>Reachability: ancestor</li>
+<li>Current-main gate: exit 0; 11 passed in 5.39 s. Log: <code>gates/nia-panel-test-strength.log</code></li>
+<li>Diff-by-anomaly verdict: Commit 7efd909c makes the two archive grids yield different level arrays, asserts that discrimination at line 406, and requires ContourSet with filled false at lines 416-417. The archived per-panel-level and filled-contour mutants each fail for the intended assertion.</li>
+<li>Negative control: Two done-when mutants (not serialized in the ledger negative_control field) both red for the declared reason.</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; In tests/test_bank_drift_paired_probe.py near lines 394 and 395 the two fixture archives are written on different radius and height grids so the shared-level assertion discriminates a mutant that computes each panel's levels from its own archive, and the line-contour assertion checks the collection is an unfilled line contour rather than counting a collection carrying levels. Both mutants are applied by hand once, the test shown red under each and green at head, and the three logs kept in the reports directory. Gate: the module in one fresh process on all_debug (srun --partition=all_debug --time=00:30:00 --cpus-per-task=4 --mem=32G) captured once with the exit status. Test-only edits. Every uv command carries --no-sync and nothing runs uv sync; on a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with TMPDIR=/tmp and JAX_PLATFORMS=cpu, one job, never an array. Commits carry a body. The plan comment and the landed-record anchor state only what was measured.</p>
+<p>&lt;/details&gt;</p>
+<h4 id="fsa-audit-solver-test-pins-r-20260919t140543659843-msc-diverted-oracle-census-linearrin">r-20260919T140543659843-msc-diverted-oracle-census-linearring — sound</h4>
+<ul>
+<li>Plan / node: <code>millisecond-converged-solve</code> / <code>msc-diverted-oracle-census-linearring</code></li>
+<li>Commits: <code>b85d1d70a55a9d0c4af1810126358f4de71889c7</code></li>
+<li>Test paths: tests/test_forward_census.py</li>
+<li>Reachability: ancestor</li>
+<li>Current-main gate: exit 1; 1 failed, 9 passed, 2 bank-data skips. Log: <code>gates/msc-diverted-oracle-census-linearring.log</code></li>
+<li>Diff-by-anomaly verdict: Commit b85d1d70 diagnoses the analytic source boundary and takes the done-when's explicit legitimate-empty alternative, asserting the unqualified census row. Its test now catches a later regression: current main fails in forward_operator.py:3091 because d90a522f unconditionally reads topology.x_point from a SimpleNamespace that has no such field. The red current gate is attributable to that later promotion, not this diff.</li>
+<li>Negative control: none recorded</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; tests/test_forward_census.py::test_forward_census_exact_diverted_oracle passes at head and fails at base 8004814f with ValueError, a linearring requires at least 4 coordinates. The repair is at the source: the boundary handed to shapely.Polygon in nova/equilibrium/moment.py near line 183 by the census path is diagnosed first by printing its full shape and finite count (name the array), and the fix makes the assembled closed branch or the branch selection correct for the diverted oracle rather than guarding the constructor; if the boundary is legitimately empty for that state the census reports the row as unqualified with the reason and the test asserts that. The diverted-oracle census row the failure masked is recorded on the landed record with its figures. Gate: tests/test_forward_census.py in one all_debug job (srun --partition=all_debug --time=00:59:00 --cpus-per-task=8 --mem=64G), with the base arm run first in the same job by checking out the base copy of the changed source into a scratch directory, both logs kept, zero added failures. Every uv command carries --no-sync and nothing runs uv sync; on a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with TMPDIR=/tmp and JAX_PLATFORMS=cpu, one job, never an array. Commits carry a body. The plan comment and the landed-record anchor state only what was measured.</p>
+<p>&lt;/details&gt;</p>
+<h4 id="fsa-audit-solver-test-pins-r-20260919t141620037986-fsa-persistence-guard-positive-contr">r-20260919T141620037986-fsa-persistence-guard-positive-control — sound</h4>
+<ul>
+<li>Plan / node: <code>forward-solve-api §5</code> / <code>fsa-persistence-guard-positive-control</code></li>
+<li>Commits: <code>8bfcff1da1e99f969a2b464c1fe6be8a7964b689</code>, <code>c5580facbc250126cb94f94fa8cf1661e6b2fdf9</code></li>
+<li>Test paths: tests/test_coil_edit_persistence_guard.py</li>
+<li>Reachability: ancestor</li>
+<li>Current-main gate: exit 0; 3 passed in 39.16 s. Log: <code>gates/fsa-persistence-guard-positive-control.log</code></li>
+<li>Diff-by-anomaly verdict: Commit 8bfcff1d exercises the guard on the retained twenty-state archive, proves every state exceeds the tolerance and state 0 reproduces 2.249e-2 Wb, proves the repaired writer's synthetic archive passes, and refuses a short flux row. It makes the guarded defect happen instead of checking only a helper attribute.</li>
+<li>Negative control: none recorded; the retained defective archive is a positive control that fires the guard</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; Read /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/review-of-fsa-sweep-persistence/review-of-fsa-sweep-persistence.md sections 2 and 4 first. In benchmarks/coil_edit_latency.py the assertion in _write_panel_data no longer compares the tensor-spline level with its own evaluation; instead, after np.savez_compressed the archive is reloaded and, for every persisted state, an independent fit of the stored psi is evaluated at the stored xpoint coordinate and compared with the stored xpoint_flux, raising on a residual above SADDLE_FLUX_TOLERANCE and persisting the archived-lattice-minus-raster delta (the 2.249e-2 Wb at state 0) as its own field so the audit trail carries the disagreement the repair removed; the two independent range conditions on x_points and flux row counts become one, so a state with fewer flux rows than coordinate rows cannot persist a raster coordinate beside an unoverwritten flux. A test module tests/test_coil_edit_persistence_guard.py runs the read-back check on the retained regenerated fixture at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/fsa-coil-edit-records/regenerated-fixture-evidence/panel-states.npz and asserts it fires on all twenty states (the positive control), and on a small synthetic archive written by the repaired writer asserts it passes. The plan followup f-fsa-regenerate-coil-edit-fixture body and the landed-record anchor for the sweep-persistence repair are corrected in place from 14 of 20 closed to 12 of 20 drawn closed (closed_candidate_count 1 and well_formed) with states 4 and 13 named as carrying a cycle but admitting nothing, and eight open states. Gate: JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_coil_edit_persistence_guard.py on the login node (light work), captured once with the exit status. Commits carry a body. Every uv command carries --no-sync and nothing runs uv sync.</p>
+<p>&lt;/details&gt;</p>
+<h4 id="fsa-audit-solver-test-pins-r-20260919t223350107712-msc-certificate-baseline-from-base-r">r-20260919T223350107712-msc-certificate-baseline-from-base-revision — sound</h4>
+<ul>
+<li>Plan / node: <code>millisecond-converged-solve</code> / <code>msc-certificate-baseline-from-base-revision</code></li>
+<li>Commits: <code>6b9b56114536c0935b5f6eb8cd60ef6f960e6124</code>, <code>400745e557f95999797c09a42f727a8656f1e4ba</code></li>
+<li>Test paths: tests/test_certificate_baseline_revision.py</li>
+<li>Reachability: ancestor</li>
+<li>Current-main gate: exit 0; 38 passed in 7.55 s. Log: <code>gates/msc-certificate-baseline-from-base-revision.log</code></li>
+<li>Diff-by-anomaly verdict: Commit 6b9b5611 pins distinct baseline/candidate revision keys, the recorded base revision, different sources, and refusal of foreign, digestless, and unlabelled records. Its archived mutation makes both arms use the candidate revision and fails the two key-selection cases.</li>
+<li>Negative control: matched: restoring the baseline arm to head produces 2 failed and 5 passed; failures name the differing-revision and base-key assertions</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; benchmarks/solve_program_size_gate.py sources its baseline arm from the recorded base revision, through a persisted terminal state keyed by that revision or a base-checkout run, and carries the revision key on each arm of the emitted receipt; a committed test asserts the two arms carry different revision keys and that the baseline key equals the recorded base revision; one all_debug CPU allocation with JAX_PLATFORMS=cpu exercises the arm-selection path on the smallest certificate row and the log is captured once with its exit status; the gate reports added failures against the base revision</p>
+<p>&lt;/details&gt;</p>
+<h4 id="fsa-audit-solver-test-pins-r-20260919t234730758244-cca-production-clip-takes-the-typed-">r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle — defective</h4>
+<ul>
+<li>Plan / node: <code>cut-cell-current-attribution §7</code> / <code>cca-production-clip-takes-the-typed-saddle</code></li>
+<li>Commits: <code>d90a522fe8ac53d4a26477bf920aeb8ac367be47</code>, <code>3d0b2f494bd5da2dcb5115e4803cf346cc68a5ed</code>, <code>156bff654384b72925d23fbfdf9a010a4840f37b</code>, <code>fa7db0d675a0bceb8b8edf85a13df4832da7b59c</code></li>
+<li>Test paths: tests/test_xpoint_cell_wedge_clip.py</li>
+<li>Reachability: ancestor</li>
+<li>Current-main gate: exit 0; 14 passed in 31.51 s (narrow gate), while the owning node's broader oracle remained failed. Log: <code>gates/cca-production-clip-takes-the-typed-saddle.log</code></li>
+<li>Diff-by-anomaly verdict: Commit d90a522f lines 81-99 parses source text and proves only that one _traced_clip call has a saddle_vertex keyword equal to topology.x_point. It never executes the forward route or a topology object without x_point. Current full census fails on exactly that incompatibility at forward_operator.py:3091. The node outcome also says the independent oracle failed, yet the ledger records gate passed and binds its green command to the red negative-control log.</li>
+<li>Negative control: matched: deleting saddle_vertex=topology.x_point fails the AST pin, 1 failed and 11 deselected</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; the forward operator passes the typed census saddle to the clip as its saddle vertex, the four region-owned moment profiles are consumed by the plasma-cell partition and by the null read, and the oracle is made independent of the carrier by integrating the analytic current over the region bounded by the separatrix branches and the cell edges rather than over the carrier own emitted polygons; one all_debug CPU allocation, --cpus-per-task=8 --mem=64G --time=00:59:00, TMPDIR=/tmp in the submit environment and in the payload, JAX_PLATFORMS=cpu, the shared root interpreter run directly and uv never invoked on the compute node, runs that independent oracle at 110, 300 and 500 cells in one job and never as an array, and the core-side current agrees with the analytic wedge integral to within 1e-13 relative at each resolution; the certificate re-solve half of this section gate is NOT attempted and is reported as deferred, because the quality-of-service caps this account at four cards and the model serve holds all four, so a GPU job cannot schedule; committed cases pin the saddle vertex reaching the clip and the four profiles reaching both consumers, the gate reports added failures against the base revision, and the declared negative control reddens</p>
+<p>&lt;/details&gt;</p>
+<h4 id="fsa-audit-solver-test-pins-r-20260920t153733162419-cca-repair-the-independent-oracle-re">r-20260920T153733162419-cca-repair-the-independent-oracle-reconstruction — defective</h4>
+<ul>
+<li>Plan / node: <code>cut-cell-current-attribution §7</code> / <code>cca-repair-the-independent-oracle-reconstruction</code></li>
+<li>Commits: <code>e9fd5a1e397c9fcaf0f455112ab22a7130a96e51</code>, <code>1693bc6319e6c35f726b3f7eaabcf6a13835044e</code>, <code>79b3a5899f81aa7ac8512f53d3c7740ae9b261b2</code></li>
+<li>Test paths: tests/test_xpoint_cell_wedge_clip.py; tests/test_forward_census.py</li>
+<li>Reachability: ancestor</li>
+<li>Current-main gate: exit 1; 1 failed, 23 passed, 2 bank-data skips. Log: <code>gates/cca-repair-the-independent-oracle-reconstruction.log</code></li>
+<li>Diff-by-anomaly verdict: Commit e9fd5a1e adds meaningful traversal-frame, winding, area-bound, and closure pins, and its negative control is sound. Promotion nevertheless recorded passed while the archived gate_check exit_status is 1 and the log fails test_forward_census_exact_diverted_oracle on the topology.x_point AttributeError. The same command remains red at current main, so this was a false-pass promotion rather than an unverifiable historical failure.</li>
+<li>Negative control: matched: reading fractions against the clockwise polygon makes the sectors close to -4.588e-02 m2 instead of partitioning the cell</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; the oracle in benchmarks/xpoint_cell_wedge_oracle.py reconstructs sectors that wind consistently, none of which exceeds the cell interior area, whose two confined sectors are the carrier core and private-flux wedges to within 1e-13 relative, and whose core selection lands on the same quad the carrier calls core; the repair addresses the root pairing and the orientation first, because a sector spanning 2.05e-02 square metres against a far smaller cell interior says roots are joined across the wrong branch, and the core selection is re-judged only after the sectors are right; one all_debug CPU allocation with --cpus-per-task=8 --mem=64G --time=00:59:00, TMPDIR=/tmp in the submit environment and in the payload, JAX_PLATFORMS=cpu, the shared root interpreter run directly and uv never invoked on the compute node, runs the oracle at 110, 300 and 500 cells in one job and never as an array, and the core-side current agrees with the analytic wedge integral to 1e-13 relative at each resolution; committed cases pin the winding and the area bound so a reconstruction that inverts again reddens; the gate reports added failures against the base revision and the declared negative control reddens</p>
+<p>&lt;/details&gt;</p>
+<h4 id="fsa-audit-solver-test-pins-r-20260920t153922912568-msc-persist-the-baseline-state-array">r-20260920T153922912568-msc-persist-the-baseline-state-array — defective</h4>
+<ul>
+<li>Plan / node: <code>millisecond-converged-solve</code> / <code>msc-persist-the-baseline-state-array</code></li>
+<li>Commits: <code>87b3c929e87d4e46478e8a394140f1307224f937</code>, <code>33c0e4d3db46287c7712a3debf8224f53ef584d0</code></li>
+<li>Test paths: tests/test_certificate_baseline_revision.py</li>
+<li>Reachability: ancestor</li>
+<li>Current-main gate: exit 0; 43 passed in 7.78 s. Log: <code>gates/msc-persist-the-baseline-state-array.log</code></li>
+<li>Diff-by-anomaly verdict: The code-level tests and mutation are sound, but the promotion receipt is not: docs/state/nova/crew.json:214737 binds the green gate command and exit 0 to logs/negative_control.log, whose receipt is deliberately red. A red negative-control log cannot evidence a green gate, so the promotion record is defective even though the current gate passes.</li>
+<li>Negative control: matched: digest-only difference forced to 0.0 fails the two unmeasured-difference cases, 2 failed and 12 passed</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; benchmarks/solve_program_size_gate.py persists each row terminal state array beside its digest and reports maximum_absolute_state_difference for every row it compares, so a last-bit reordering and a change in the solution are distinguishable; the baseline arm can be taken from a base checkout rather than a recorded digest and the receipt names which of the two it used per row; a committed case asserts that a row compared against an array reports a finite maximum difference and that a row compared against a digest reports the difference as unmeasured with its reason rather than as zero; the focused suite reports zero added failures against the base revision on one all_debug CPU allocation with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and in the payload, the shared root interpreter run directly and uv never invoked on the compute node; no certificate rows are re-solved in this node, because the driver aborts in compilation and that is measured elsewhere; the declared negative control reddens</p>
+<p>&lt;/details&gt;</p>
+<h4 id="fsa-audit-solver-test-pins-r-20260920t154610428813-msc-give-the-containment-rule-a-posi">r-20260920T154610428813-msc-give-the-containment-rule-a-positive-control — defective</h4>
+<ul>
+<li>Plan / node: <code>millisecond-converged-solve</code> / <code>msc-give-the-containment-rule-a-positive-control</code></li>
+<li>Commits: <code>39fc89aea65561ef9912e44c89aca917f6b675ab</code>, <code>c464e90b6fccf9200060a8c74663c99370485d0d</code>, <code>f4ed7fb14c962be69d122161870b12e634ed2ba3</code></li>
+<li>Test paths: tests/test_forward_census.py</li>
+<li>Reachability: not an ancestor of current main</li>
+<li>Current-main gate: cannot run at current main; promoted node id absent. Log: <code>gates/msc-give-the-containment-rule-a-positive-control.log</code></li>
+<li>Diff-by-anomaly verdict: Commits 39fc89ae, c464e90b, and f4ed7fb14 are ledgered as promoted but are not ancestors of current main. The half-pitch mutation is applied as declared, but the red log says it fails the wall clause at rung 110; it does not cross the 0.25-pitch containment window and therefore does not redden for the claimed containment reason. This is the re-control of the earlier assertion inversion, and it is still not a mechanism control.</li>
+<li>Negative control: wrong reason: +0.5 pitch reds on saddle_inside_carrier_wall; the containment-distance assertion remains on the same side of its threshold</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; the census gains a rung whose pitch brings the divertor X-point inside a stencil ring on the diverted oracle fixture, so the containment rule has a positive control that is a saddle rather than only the axis pair, and a committed case asserts a saddle is admitted at that rung; or, if no pitch reachable within one all_debug allocation brings the saddle inside a ring, the record states the pitches tried with the ring-centre distance to the saddle at each, expressed in cell pitches, and says plainly that the diverted oracle cannot exercise the containment rule so the control moves to a fixture that can, naming it; either way the answer is written on this plan and referenced from the topology plan saddle-detector section rather than left in one of them; one all_debug CPU allocation with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and in the payload, the shared root interpreter run directly and uv never invoked on the compute node; the gate reports added failures against the base revision and the declared negative control reddens</p>
+<p>&lt;/details&gt;</p>
+<h4 id="fsa-audit-solver-test-pins-r-20260920t181701895943-fsri-the-trips-are-a-scan-not-a-loop">r-20260920T181701895943-fsri-the-trips-are-a-scan-not-a-loop — defective</h4>
+<ul>
+<li>Plan / node: <code>forward-solver-route-integrity §2</code> / <code>fsri-the-trips-are-a-scan-not-a-loop</code></li>
+<li>Commits: <code>d8bbc0491e72df29ddaabc1e6d76f704c4c8dc2d</code>, <code>a999eff40521e428d4c09a3b0d3adea5724a17b2</code>, <code>8dc6be23ae6d0c3f76b6bd20e9821733200f23db</code></li>
+<li>Test paths: tests/test_solve_trips_are_a_scan.py</li>
+<li>Reachability: not an ancestor of current main</li>
+<li>Current-main gate: cannot run at current main; file absent. Log: <code>gates/fsri-the-trips-are-a-scan-not-a-loop.log</code></li>
+<li>Diff-by-anomaly verdict: Commit d8bbc049 contains meaningful lowered-body-count and fixed-capacity telemetry pins, and its archived base-implementation mutation fails with two trip bodies. But d8bbc049, a999eff4, and 8dc6be23 are ledgered as promoted without being ancestors of current main, so the named integrated gate cannot exist.</li>
+<li>Negative control: matched: restoring the first trip outside the scan yields barrier count 2 for both trip budgets</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; the lead design constraint governs every clause: these processes never loop, they are designed as efficient maps. In nova/equilibrium/fixed_point.py and nova/equilibrium/reduced_newton.py the trip loop and the Newton step loop run as lax.scan or lax.while_loop with fixed-capacity telemetry slots, and the operator read in nova/equilibrium/forward_operator.py is evaluated once per trip rather than inlined per trip; the serialized executable bytes of the weak-rotation-reactor-static 300-cell certificate row, measured through the existing serialized executable measure the census already records, fall from the committed 443,217,410 to under 100,000,000, with both numbers in the record and the compile wall beside them; the terminal state of that row is bit-identical to the committed base state digest f9598a166437ef23dc46e6d9f5d6cbade584fe299b5ee0771f071332eaf914ed, or if it is not the record states the maximum absolute difference and why the scan changed arithmetic order; the mapping count through the load, read with benchmarks.compile_abort_probe, is reported beside the earlier 16,789 to 17,620 per-load figure; one all_debug CPU allocation with --cpus-per-task=8 --mem=64G --time=00:59:00, TMPDIR=/tmp in the submit environment and in the payload, JAX_PLATFORMS=cpu, the shared root interpreter run directly and uv never invoked on the compute node, each measurement in its own process so the abort cannot take the series; committed cases in tests/test_solve_trips_are_a_scan.py pin that the trip body appears once in the lowered program and that telemetry slots are fixed capacity; the focused suite shows zero added failures against the base revision; the declared negative control reddens; benchmarks/solve_program_size_gate.py is outside this fence because an interim node holds it, so the executable-size gate itself lands in a follow-on</p>
+<p>&lt;/details&gt;</p>
+<h4 id="fsa-audit-solver-test-pins-r-20260920t183703371948-cco-persist-the-terminal-state-and-g">r-20260920T183703371948-cco-persist-the-terminal-state-and-guard-the-lattice-order — defective</h4>
+<ul>
+<li>Plan / node: <code>centroid-constrained-oracle-solve</code> / <code>cco-persist-the-terminal-state-and-guard-the-lattice-order</code></li>
+<li>Commits: <code>d1638f274ce653f435088eafa2cd36fd16dcba29</code>, <code>591ee7c68540ec9b28cb130edbf9a18e5ac1417c</code></li>
+<li>Test paths: tests/test_centroid_constraint_lattice_guard.py</li>
+<li>Reachability: not an ancestor of current main</li>
+<li>Current-main gate: cannot run at current main; file absent. Log: <code>gates/cco-persist-the-terminal-state-and-guard-the-lattice-order.log</code></li>
+<li>Diff-by-anomaly verdict: Commit d1638f27 contains a mechanism-level refusal and its archived pre-fix mutation fails for the intended missing ValueError, but d1638f27 and 591ee7c6 are ledgered as promoted without being ancestors of current main. The claimed landed guard test is absent from the integrated tree.</li>
+<li>Negative control: matched: restoring prefix slicing fails test_pre_fix_prefix_indexing_is_refused because ValueError is not raised</li>
+</ul>
+<p>&lt;details&gt;&lt;summary&gt;Recorded done-when&lt;/summary&gt;</p>
+<p>&gt; benchmarks/centroid_constrained_fixture_receipt.py saves the terminal state before the receipt is written so the state exists beside the banked receipt, and the three figures under docs/figures/centroid-constrained-oracle-solve are re-rendered from that persisted state as PNG and SVG under the plotting rules (line contours on shared levels, both null sets, the wall, no axes) on one all_debug allocation without a betelgeuse solve; level_error_wb is replaced in the receipt and captions by the level row scaled residual as the gauge-free physical error, or dropped, and the record says which; the lattice-order guard in nova/equilibrium/constraint.py near line 1200 compares the sampled pool slice against the cell count the stencil convention states so that the pre-fix indexing fails it, pinned by a committed case in tests/test_centroid_constraint_lattice_guard.py that applies the pre-fix indexing and reddens; the two-module all_debug lane with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and the payload, the root interpreter run directly and uv never invoked on the node, reports zero added failures against the stated base revision; the declared negative control reddens</p>
+<p>&lt;/details&gt;</p>
+<h3 id="fsa-audit-solver-test-pins-negative-control-census">Negative-control census</h3>
+<p>Seven ledger rows record a negative control. Six logs repeat and apply the declared mutation and redden for the claimed mechanism. The containment row applies the declared half-pitch shift but fails the wall-membership assertion rather than the containment-distance assertion. All seven ledger objects also carry the internally inconsistent reason <code>node-writes-no-test-path</code> while naming a non-empty <code>test_paths</code> array; verdicts above use the declaration and red log, not that reason string.</p>
+<h3 id="fsa-audit-solver-test-pins-final-counts">Final counts</h3>
+<ul>
+<li>Promotions reviewed: <strong>13</strong></li>
+<li>Defective promotions: <strong>9</strong></li>
+<li>Sound promotions: <strong>4</strong></li>
+<li>Current-main gate results: <strong>8 green, 2 red, 3 cannot run</strong></li>
+<li>Defect classes: easy-attribute assertion; non-discriminating fixture; circular oracle / tolerance that does not establish the claimed mechanism; gate-log misbinding; false-pass promotion; wrong-reason negative control; promoted-but-unlanded commit; current integrated regression.</li>
+</ul>
+<p>Candidate commits <code>2710b2ea</code> and <code>74f00821</code> appeared in <code>git log --all</code> but did not join to a committed promotion row by commit SHA, so they are not counted. Merge commits <code>1dd9b680</code> and <code>a5b8ba1d</code> likewise are not ledger promotion commits and are not double-counted.</p>
+</section>
+<section class="audit-directory" id="fsa-audit-solver-wall-read-section">
+<h2 id="fsa-audit-solver-wall-read">Connectivity and wall-read promotion audit</h2>
+<p>Review base: <code>0322e911a52588e116bb76a2243ff0dc728cc655</code> (current <code>main</code> and <code>origin/main</code> when the audit began). Files in scope: <code>nova/equilibrium/connectivity_boundary.py</code> and <code>nova/equilibrium/topology.py</code>. History query: <code>git log --since=2026-09-16 -- &lt;both files&gt;</code>, joined to <code>docs/state/nova/crew.json</code> by full commit SHA.</p>
+<p>The history contains four matching commits, all in <code>topology.py</code>, grouped into three promotion rows. No promotion since 2026-09-16 touched <code>connectivity_boundary.py</code>.</p>
+<h3 id="fsa-audit-solver-wall-read-promotion-verdicts">Promotion verdicts</h3>
+<table><thead><tr><th>ledger run</th><th>commits touching the scope</th><th>original gate record</th><th>merged-head rerun</th><th>verdict</th><th>reason</th></tr></thead><tbody>
+<tr><td><code>r-20260918T201949355073-nia-limited-boundary-touches-wall-2</code></td><td><code>8fdc71ef5f358399ec434827821192d34e402802</code></td><td>ledger says <code>passed</code>, but stores exit 1; named log: 30 passed, 3 failed</td><td>34 passed in 343.56 s, exit 0; <code>logs/r-20260918T201949355073-gate.log</code></td><td><strong>defective</strong></td><td>The diff unifies spline and contour flux authority, but selects the strongest wall extremum without proving that its level's axis-enclosing component reaches the fitted contact. The persisted MAST contact therefore lands on a detached private lobe; the next promotion exists specifically to repair that defect. Independently, the ledger is false-green: its own exit status and log contradict <code>gate: passed</code>.</td></tr>
+<tr><td><code>r-20260919T075817963210-nia-containment-aware-anchor</code></td><td><code>a491e6de65e2c97919aaadc61d6fedbc45e74347</code></td><td>33 passed, exit 0</td><td>34 passed in 344.39 s, exit 0; <code>logs/r-20260919T075817963210-gate.log</code></td><td><strong>defective</strong></td><td>The diff adds axis-connected candidate screening, but computes <code>containment_required</code> once from a provisional class-free pass and reuses it in both later passes. The public class-free read can therefore retain the detached divertor contact. Commit <code>822b0f9b3</code> was commissioned specifically because this promotion left that defect.</td></tr>
+<tr><td><code>r-20260919T112327157134-trcr-class-free-containment</code></td><td><code>822b0f9b32fe9346b106725f3597c857fe482490</code>, <code>b55d94c5f63108daafe8457e0ba805435f48a585</code></td><td>34 passed, exit 0; an earlier intermediate criterion produced 32 passed, 2 failed</td><td>34 passed in 351.33 s, exit 0; <code>logs/r-20260919T112327157134-gate.log</code></td><td><strong>sound</strong></td><td><code>822b0f9b3</code> moves containment evaluation into each class-free pass. Its first <code>any reachable candidate</code> criterion incorrectly moved the diverted wall diagnostic; <code>b55d94c5f</code> binds containment only when the axis-connected contact outranks the pass' saddle. The final diff matches the done-when and its two red intermediate controls fail for the claimed diverted-contact displacement. The ledger nevertheless records no negative-control object and only a prose gate summary.</td></tr>
+</tbody></table>
+<p>Quantitative result: <strong>3 promotions reviewed; 2 defective; 1 sound; 0 unverifiable.</strong> Defect classes: false-green ledger gate; detached-lobe wall authority; containment state reused across passes. The current-head reruns measure only the merged state and do not erase the two defective historical promotions.</p>
+<h3 id="fsa-audit-solver-wall-read-recorded-done-whens">Recorded done-whens</h3>
+<p>The strings below are copied from each joined <code>node_definition.done_when</code>. Their SHA-256 digests are included so later ledger normalisation cannot silently change what was reviewed.</p>
+<h4 id="fsa-audit-solver-wall-read-r-20260918t201949355073-nia-limited-boundary-touches-wall-2"><code>r-20260918T201949355073-nia-limited-boundary-touches-wall-2</code></h4>
+<p>Digest: <code>a779afcb6fedd94b93a4883cd442f7588d7c4b30e1f5c9e071a1d7bd6743dd31</code>.</p>
+<p>&gt; the lead reviewed docs/figures/null-identification-authority/contained-anchor/relabel-27079-flagged/row-16-35ms.png (MAST 27079, t 35 ms, converged, class limited) and ruled it fiction: the public read's closed boundary sits at R 0.30 to 0.55 m while its fitted wall anchor is at R 0.195 m on the centre column, so the contour drawn at the boundary flux 0.28983 Wb (axis 0.29799 Wb) never reaches the wall it is anchored to and the enclosed area is a quarter of the reconstruction's; the receipt is contained-route-replay.json in that directory with boundary_route contained and nearest_fully_contained_candidate_ratio 0.72; no terminal flux raster is persisted there, so first re-solve rows 16 and 17 on all_debug with the recipe that pins these rows near 1e-10: scripts.labeller_batch.shard.prepare_labeller(), _slice_inputs(group, row), _slices_seed(group, row, full_r, full_z), _requested_class, then reduced_newton.solve_reduced_newton(operator, seed, requested_class, target_current, prescribed_current, tolerance=shard.FIXED_POINT_CRITERION, newton_steps=shard.NEWTON_STEPS), raster state[:grid.node_number].reshape(nr, nz).T on operator.raster_geometry(), topology read operator._fixed_design_read(physical, requested) returning (masks, TopologyState, connected, admitted); assert converged before analysing (a predecessor on the local lane ran the labeller batch path on CPU and got every row not converged in 1.4 s, which reproduced nothing; its log is /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/limited-touch/reproduce.slurm.log); persist the terminal raster as an npz beside your receipt so the unit test needs no solve; then root-cause on that state by sampling the field at the fitted anchor through the same route the boundary contour is traced on (the global spline on the solved lattice) and comparing with the wall-target flux _wall_anchor_selection in nova/equilibrium/topology.py (near line 492) publishes; if the two disagree at one point name the routes and the size; if they agree the contained route (nearest_fully_contained_candidate_ratio) moves the level inward and that shrink is the defect; the predecessor's untested hypothesis, that the wall-length quadratic fit publishes a level above the bracket's own extremum which the wall never carries, is preserved as a diff at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/limited-touch/clive-bounded-wall-flux-hypothesis.diff, test it rather than adopt it (a parabola overshoot between adjacent wall nodes cannot by itself move a boundary 10 cm and shrink the area to a quarter); fix the read so the limited boundary is the contour through the wall contact at the contact's own flux with the class rule in the docstring (diverted with its boundary through the admitted X-point, or limited with its boundary touching the wall, nothing else is a valid read); the unit test tests/test_limited_boundary_touches_wall.py asserts for every limited terminal state in the twelve-arm bank, the four Solovev limited certificate rows and the persisted 27079 row 16 state that the minimum distance from the traced boundary contour to the wall polyline is below one cell pitch and the boundary flux equals the field sampled at the contact point within 1e-9 relative, and for every diverted state that the boundary passes through the admitted X-point within one pitch; gate in one all_debug job with JAX_PLATFORMS=cpu through the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python directly (never uv on a compute node), TMPDIR=/tmp in the submit environment and the payload, scripts inside the worktree; the figure under docs/figures/null-identification-authority/limited-touch shows row 16 before and after per the plotting rules (line contours on shared levels, both null sets, the wall, the contact point marked) as PNG and SVG; docs/plans/null-identification-authority.html gains the landing comment and docs/evidence/archive/null-identification-authority-landed.html the anchor; nova/equilibrium/forward_operator.py is held by another node, so if the fix needs it make that change in its own commit and list it as a companion path; the H200 reservation cannot start nova jobs tonight so nothing goes to betelgeuse; call configure_dtypes before building any array; every uv command carries --no-sync and nothing runs uv sync; py_compile with the project interpreter before each commit; manifest at the first commit; if the fence ends before the test lands, commit what holds and write the manifest with follow_ons naming the rest; a wait, if declared, carries wait_condition, wait_probe as a JSON list command, wait_terminal and resume_brief; status words complete, waiting or blocked only</p>
+<p>Anomaly against that done-when: the code changed wall flux authority but did not test that the selected fitted contact belonged to the axis-enclosing component. The new persisted-row assertion showed a wall distance below one pitch, but measured a different object from the detached contact; the final gate remained red on three pre-existing contracts and the ledger promoted it as green.</p>
+<h4 id="fsa-audit-solver-wall-read-r-20260919t075817963210-nia-containment-aware-anchor"><code>r-20260919T075817963210-nia-containment-aware-anchor</code></h4>
+<p>Digest: <code>e8c598e2b7f508f3df181f0fb568b6bfd261eb6eb33e325502ea7ddca16ec5ab</code>.</p>
+<p>&gt; followup f-nia-containment-aware-anchor on the plan: your predecessor node nia-limited-boundary-touches-wall-2 (your own session) unified the two flux routes, and its review (stored at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T201949355073-nia-limited-boundary-touches-wall-2.json, read it first) showed from the persisted fixtures docs/figures/null-identification-authority/limited-touch/row-16-terminal-state.npz and row-16-before.npz that at the published level 0.2585036 Wb the level set has three components inside the vessel, the contact (R 0.599, Z 1.728) sits on a detached three-node lobe in the upper divertor 0.893 m from the axis-enclosing contour, and that contour's own closest approach to the wall is 0.0128 m at R 0.208, Z -0.048 on the centre column, so the plasma still floats and the true limiter contact is inboard; replace the argmax over polarity times wall flux in _wall_anchor_selection (nova/equilibrium/topology.py) with a containment-aware selection that takes, among wall nodes, the extreme of polarity times flux over those whose level's axis-enclosing component passes through the node (the same saddle-aware flood or connected-component labelling the read already uses for the X-point, applied at each candidate wall level, or a cheaper monotone equivalent you justify in the docstring), so the published contact is on the plasma boundary; keep the traced program fixed-shape; fix tests/test_limited_boundary_touches_wall.py so for every limited state it asserts with an independent spline evaluation that the published contact lies on the axis-enclosing component of the boundary level set within one pitch and that this component's closest approach to the wall is at the contact (drop the tautological equality the review named at line 124 and the distance assertion at 134 that measures a different object), fix the receipt so contour_min_wall_distance_m is measured to the contact, and rewrite the three tests still carrying the wall-zone semantics (tests/test_jax_topology.py traversed-reference psi_norm, tests/test_topology_limiter_contact.py 1e-6 contact flux and second-order refinement) to the spline-authored contact rather than deleting them; gate on the two persisted fixtures, the twelve-arm bank and the four Solovev limited rows in one all_debug job with JAX_PLATFORMS=cpu through /home/ITER/mcintos/Code/nova/.venv/bin/python directly (never uv on a compute node), TMPDIR=/tmp in the submit environment and the payload, scripts inside the worktree, expected all green in the three topology test files; redraw docs/figures/null-identification-authority/limited-touch/row-16-before-after.png and .svg with the contact on the plasma boundary and both null sets, the wall and shared levels; the plan landing comment and the evidence anchor; commit at the first passing test and before any long wait; nothing to betelgeuse; call configure_dtypes before any array; every uv command carries --no-sync and nothing runs uv sync; py_compile with the project interpreter before each commit; if the fence ends first, commit what holds and name the rest under follow_ons; a wait carries wait_condition, wait_probe as a JSON list, wait_terminal and resume_brief; status words complete, waiting or blocked only</p>
+<p>Anomaly against that done-when: candidate containment is correctly added, but <code>containment_required</code> is derived once from a provisional class-free boundary and supplied to both passes. The follow-on persisted class-free fixture proves that the public read can still publish the detached divertor contact even while the pinned limited read is correct.</p>
+<h4 id="fsa-audit-solver-wall-read-r-20260919t112327157134-trcr-class-free-containment"><code>r-20260919T112327157134-trcr-class-free-containment</code></h4>
+<p>Digest: <code>ad4281d0df4976c97ee9782dab63cd139a38ad8473e0c167cedc03d7756a7240</code>.</p>
+<p>&gt; section 1 of the plan: containment_required in nova/equilibrium/topology.py (near line 1140) is computed once from the provisional pass and reused by both containment passes, so a class-free read (requested_class None) on the persisted fixture docs/figures/null-identification-authority/limited-touch/row-16-terminal-state.npz keeps the detached divertor contact (R 0.599, Z 1.728) and classifies diverted, where the class-pinned limited read publishes the centre-column contact R 0.19524 m Z -0.01179 m at 0.256735 Wb (the review r-20260919T090130854993 measured this; read it first); compute containment inside each pass, keep the traced program fixed-shape, and add a test in tests/test_limited_boundary_touches_wall.py that the class-free read on the persisted fixture publishes the centre-column contact within one pitch and classifies limited; redraw docs/figures/null-identification-authority/limited-touch/row-16-before-after.png and .svg so only the axis-enclosing component is drawn in boundary style and the detached divertor lobes are drawn faint with a caption word; give contour_min_wall_distance_m one meaning across the before and after rows of receipt.json (the before rows read 0.272 and 0.210 under an earlier definition where the new one gives 0.874 for the before contact) and name the gate as four files; the gate is the four topology test files (tests/test_limited_boundary_touches_wall.py, tests/test_jax_topology.py, tests/test_topology_limiter_contact.py, tests/test_limiter_topology_receipts.py) in one all_debug job, all green; the evidence record docs/evidence/archive/topology-read-containment-and-rebank-landed.html does not exist yet, create it with reckon-type evidence and plan-evidence-for topology-read-containment-and-rebank and one anchor for this section; a text-only lane, never Read a PNG, verify figures through their SVG; call configure_dtypes before building any array; every uv command carries --no-sync and nothing runs uv sync; heavy work runs in one all_debug job with JAX_PLATFORMS=cpu through the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python directly (never uv on a compute node), TMPDIR=/tmp in the submit environment and the payload, scripts inside the worktree; nothing goes to betelgeuse; py_compile with the project interpreter before each commit; manifest at the first commit; a wait, if declared, carries wait_condition, wait_probe as a JSON list command, wait_terminal and a filled resume_brief; status words complete, waiting or blocked only; figures follow the plotting rules (line contours on shared levels, both null sets, the wall, no axes) as PNG and SVG; the plan landing comment and the evidence anchor are yours to write</p>
+<p>Anomaly review: the first commit's <code>jnp.any(eligible)</code> criterion was too broad and the worker's first gate correctly reddened two diverted-contact contracts. The second commit changes the criterion to <code>polarity * (screened_contact_flux - x_point_flux) &gt; 0</code>, matching the mechanism the pass' own boundary selector applies. The final four-file gate was green. This promotion is sound as a pair, not if <code>822b0f9b3</code> is read alone.</p>
+<h3 id="fsa-audit-solver-wall-read-negative-control-audit">Negative-control audit</h3>
+<p>The three joined ledger rows contain no <code>negative_control</code> or <code>negative_control_check</code> value. Therefore the count of ledger-recorded negative controls to compare is <strong>zero</strong>. This is an evidence limitation, not a claim that no worker ran a red arm.</p>
+<p>The third worker manifest cites <code>gate1.log</code> as a red intermediate criterion. It is real: 32 passed and two diverted-contact tests failed because the <code>any reachable candidate</code> criterion moved the contact by 0.0248156 m across refinements and 0.159439 m from the analytic extremum. It is not ledger-linked, and its first line does not repeat a declared mutation. It therefore supports the final design choice but does not satisfy a ledger negative-control contract.</p>
+<p>The first two promotion manifests contain no negative-control log. Neither assertion flipping, a stub gate, a widened tolerance, a self-disabling guard, nor captioning around a physics claim was found in their scoped diffs. The first promotion's false-green ledger classification is the process finding instead.</p>
+<h3 id="fsa-audit-solver-wall-read-two-unpromoted-local-commits">Two unpromoted local commits</h3>
+<h4 id="fsa-audit-solver-wall-read-74f00821cf6b1b0e5c649022b5eca55f6d2d3f31"><code>74f00821cf6b1b0e5c649022b5eca55f6d2d3f31</code></h4>
+<p>Verdict: <strong>the tracer repair is technically sound in isolation, but the commit is not sound to promote as completion of its node</strong>.</p>
+<p>The previously recorded defect still reproduces when the three array promotions are reverted while the tests remain: <code>TracerArrayConversionError</code> on a traced wall index, three failures in 140.99 s. The negative-control log's first line repeats the declared source-reversion mutation and the failures are for that claimed reason. The log's summary line incorrectly says <code>exit=0</code> because the worker's shell captured the status after a command substitution; the pytest summary itself is visibly red, and the manifest discloses the instrumentation defect.</p>
+<p>The patch itself is narrow and correct: <code>jnp.asarray</code> is applied before traced indexing in <code>_sample_wall_polyline</code>, <code>_select_reachable_wall_limiter</code>, and <code>_wall_anchor_candidates</code>. Its two trace pins go green. Promotion is nevertheless withheld because the node's semantic goal is not met: the grid fixture still returns <code>class_u_wall = inf</code>, the MAST contact is unresolved, no panels or landing records exist, the importer sweep is incomplete, and merged-head verification is absent. Eight unmet clauses are explicitly listed in its manifest. A coordinator may split a newly scoped tracer-only promotion; it must not promote this node as if the contact repair landed.</p>
+<h4 id="fsa-audit-solver-wall-read-44ecd9443cbd106d4acef14ba8fe1921d69f759b"><code>44ecd9443cbd106d4acef14ba8fe1921d69f759b</code></h4>
+<p>Verdict: <strong>defective; do not promote</strong>.</p>
+<p>Its negative control is correctly constructed: base-revision <code>connectivity_boundary.py</code> with the fixture assertion unmodified fails <code>inf != -0.31887492472951007</code>, exit 1. The candidate makes that grid gate green by recovering a whole-wall level when the supplied contact has no reachable support. It simultaneously adds a failure to <code>test_diverted_mast_row_polishes_only_its_census_wall_candidate</code>; the independent separation probe confirms the candidate bit can remain false while <code>class_u_wall</code> becomes finite, but the MAST pin explicitly requires that level to remain infinite. This is a semantic contradiction, not a tolerance issue. The lead's ruling that both reachability verdicts are discretisation artifacts means the next repair must change the contact/reachability mechanism, not pick one existing pin and weaken the other.</p>
+<h3 id="fsa-audit-solver-wall-read-convergence-atlas-mechanism">Convergence-atlas mechanism</h3>
+<p>The 22086/43 mixed panel is converged (<code>terminal_residual = 1.7364758673167596e-14</code>) and its receipt marks an admitted saddle at <code>(0.56481685, 1.25802216)</code> m. The stored red curve closes at Z <code>[-0.73576, 0.79994]</code> m and does not pass through that saddle.</p>
+<p>The numeric probe in <code>atlas-level-probe.txt</code> first proves the instrument sees known-present, distinct values: the saddle, upper wall point, lower wall candidate, and all 487 boundary points evaluate finite. The boundary points form one near-isoflux set, mean <code>0.0177760953</code> Wb with standard deviation <code>1.858e-05</code> Wb. The saddle is <code>-0.1220793233</code> Wb, 0.139855 Wb away; the upper and lower wall candidates are <code>0.0195717508</code> and <code>0.0165463691</code> Wb, only 0.001796 and 0.001230 Wb away. The curve is therefore a wall-contact-level boundary, not the admitted-saddle separatrix.</p>
+<p>The rule that produced it is in the core path, not the painter:</p>
+<ol>
+<li><code>generate_topology_visuals.py:269</code> calls <code>operator.read(state)</code> without a requested class.</li>
+<li>At the renderer base, the class-free topology read lets <code>Topology.boundary</code> compare the saddle and wall contact; when the wall wins, <code>boundary_flux = data_w[2]</code>.</li>
+<li><code>generate_topology_visuals.py:364,375</code> uses that <code>topology.boundary_flux</code> for the atomic signed flux and <code>assemble_separatrix_branches</code>, persisting the resulting curve as <code>nova_boundary</code>.</li>
+<li><code>poloidal_convergence_atlas.py:490</code> then labels <strong>any nonempty</strong> <code>nova_boundary</code> as <code>diverted</code>; it never reads the topology class or checks that the level equals the saddle flux.</li>
+</ol>
+<p>Thus the panel faithfully draws the core method's wall-level output and misstates its class. Per the lead's 2026-09-21 ruling, this is a mechanism defect with a diagnostic figure, not a painter defect. The repair is to carry and enforce the governed class and boundary level, then regenerate the panel.</p>
+<h3 id="fsa-audit-solver-wall-read-followups">Followups</h3>
+<p><code>findings.json</code> contains four complete <code>edit_plan</code> append items: false-green gate integrity on <code>figure-and-solver-audit</code>; atlas regeneration, completion/splitting of <code>74f00821c</code>, and replacement of <code>44ecd9443</code> under <code>null-identification-authority</code>. Each body names the commit, file, line, defect, and repair.</p>
+</section>
   </main>
 </body>
 </html>

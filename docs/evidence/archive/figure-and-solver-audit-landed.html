@@ -1061,6 +1061,79 @@
 <li>SVGs were rasterised read-only to <code>/tmp/fsa_svg</code> with <code>rsvg-convert -w 1800</code>; nothing was written into the repository and no figure was regenerated.</li>
 </ul>
 </section>
+<section class="audit-directory" id="solver-wall-read">
+<h2>Solver audit — connectivity and wall read</h2>
+<p>Node <code>fsa-audit-solver-wall-read</code>, plan <code>nova:figure-and-solver-audit</code> §2.
+Review base <code>0322e911a52588e116bb76a2243ff0dc728cc655</code>, which was current
+<code>main</code> and <code>origin/main</code> when the review began. The history query since
+2026-09-16 found four commits touching the scoped files, grouped into three promotion rows; all four
+touch <code>nova/equilibrium/topology.py</code> and none touches
+<code>nova/equilibrium/connectivity_boundary.py</code>.</p>
+<table>
+<thead><tr><th>promotion run</th><th>scoped commits</th><th>recorded gate</th><th>merged-head rerun</th><th>verdict</th><th>anomaly against done-when</th></tr></thead>
+<tbody>
+<tr><td><code>r-20260918T201949355073-nia-limited-boundary-touches-wall-2</code></td><td><code>8fdc71ef5</code></td><td>Ledger says passed while storing exit 1; named log: 30 passed, 3 failed.</td><td>34 passed in 343.56 s, exit 0; <code>reviews/.../logs/r-20260918T201949355073-gate.log</code>.</td><td><strong>defective</strong></td><td>The spline authority is unified, but the selected contact is not proven to belong to the axis-enclosing component; the persisted contact sits on a detached private lobe. The promotion is also false-green in the ledger.</td></tr>
+<tr><td><code>r-20260919T075817963210-nia-containment-aware-anchor</code></td><td><code>a491e6de6</code></td><td>33 passed, exit 0.</td><td>34 passed in 344.39 s, exit 0; <code>reviews/.../logs/r-20260919T075817963210-gate.log</code>.</td><td><strong>defective</strong></td><td>Candidate containment is added, but <code>containment_required</code> is computed once from a provisional class-free pass and reused by both later passes, so the public class-free read can retain the detached divertor contact.</td></tr>
+<tr><td><code>r-20260919T112327157134-trcr-class-free-containment</code></td><td><code>822b0f9b3</code>, <code>b55d94c5f</code></td><td>34 passed, exit 0; the rejected intermediate criterion produced 32 passed, 2 failed.</td><td>34 passed in 351.33 s, exit 0; <code>reviews/.../logs/r-20260919T112327157134-gate.log</code>.</td><td><strong>sound as the pair</strong></td><td>Containment is evaluated inside each pass; the corrective commit binds it only when the axis-connected contact outranks that pass' saddle. The intermediate red log fails the two diverted-contact contracts for the claimed displacement.</td></tr>
+</tbody>
+</table>
+<p><strong>Promotion totals:</strong> 3 reviewed, 2 defective, 1 sound, 0 unverifiable.
+Defect classes: false-green ledger gate; detached-lobe wall authority; containment state reused across
+topology passes. The current-head reruns were three fresh processes in one <code>all_debug</code>
+allocation with <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in submit and payload
+environments, and <code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code> invoked directly. Each
+ran the declared four-file topology gate. Passing at merged head proves the combined current state,
+not the soundness of either earlier promotion.</p>
+<h3>Negative controls</h3>
+<p>All three joined ledger rows carry null <code>negative_control</code> and
+<code>negative_control_check</code> values: the number of ledger-recorded controls available for the
+declared mutation comparison is zero. The third manifest cites a genuine red intermediate criterion
+(32 passed, 2 failed), but its first log line does not repeat a declared mutation and the ledger does
+not link it as a negative control. No assertion flip, stub gate, widened tolerance, self-disabling
+guard or caption-around repair appears in the scoped promotion diffs. The evidence limitation is the
+missing ledger record.</p>
+<h3>Unpromoted worktree verdicts</h3>
+<ul>
+<li><code>74f00821cf6b1b0e5c649022b5eca55f6d2d3f31</code>: the three
+<code>jnp.asarray</code> promotions before traced wall indexing are technically sound, and reverting
+them while keeping the new tests reproduces three <code>TracerArrayConversionError</code> failures in
+140.99 s. <strong>Not sound to promote as completion of its node:</strong> its manifest records eight
+unmet done-when clauses, including the still-infinite grid margin, unrepaired MAST contact, absent
+panels and landing records, incomplete importer sweep and no merged-head verification. Split a
+tracer-only node or finish the exact node; do not promote this node as complete.</li>
+<li><code>44ecd9443cbd106d4acef14ba8fe1921d69f759b</code>: <strong>defective; keep
+discarded.</strong> It turns the grid margin gate green by recovering a finite whole-wall level when
+the supplied contact is unreachable, but adds a failure to the pinned diverted MAST contract. The
+separation probe proves the candidate-valid bit and wall level can be split mechanically; the MAST
+pin expressly forbids that finite level. Under the lead's ruling that both reachability verdicts are
+discretisation artifacts, the replacement must repair spline-level contact reachability rather than
+weaken either assertion.</li>
+</ul>
+<h3>The convergence-atlas boundary is a core-method wall level</h3>
+<p>The converged 22086/43 mixed receipt reports residual
+<code>1.7364758673167596e-14</code> and an admitted saddle at
+<code>(0.56481685, 1.25802216)</code> m. A cubic-spline probe over its committed 33 by 33 field sees
+all operands as finite and distinct: saddle flux <code>-0.1220793233</code> Wb, published upper wall
+point <code>0.0195717508</code> Wb and lower wall candidate <code>0.0165463691</code> Wb. The 487
+stored boundary points form a near-isoflux curve at mean <code>0.0177760953</code> Wb with standard
+deviation <code>1.858e-05</code> Wb and close inside Z
+<code>[-0.73576, 0.79994]</code> m. The curve is 0.139855 Wb from the saddle but only 0.001230 Wb
+from the lower wall candidate. The instrument therefore sees a known-present saddle and wall level;
+the wall-level verdict is not inferred from an empty result.</p>
+<p>The producing rule is the defect. <code>generate_topology_visuals.py:269</code> calls
+<code>operator.read(state)</code> without a requested class. The class-free topology path lets
+<code>Topology.boundary</code> compare the saddle and wall contact; when the wall wins it publishes
+<code>data_w[2]</code>. The producer then traces <code>topology.boundary_flux</code> at lines 364 and
+375. Finally <code>poloidal_convergence_atlas.py:490</code> labels any nonempty stored boundary
+<code>diverted</code>, without reading <code>topology.diverted</code> or checking equality with the
+saddle flux. The panel faithfully diagnoses the core method's wall-level output and misstates its
+class; this is not a painter defect. Repair means carrying and enforcing the governed class and level,
+then regenerating the atlas rather than recaptioning the existing curve.</p>
+<p>The full record with verbatim ledger done-whens, commit-by-commit anomaly notes and absolute log
+paths is <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-wall-read/review.md</code>.
+Machine-readable followups ready for <code>edit_plan</code> append operations are beside it in
+<code>findings.json</code>; the numeric mechanism receipt is <code>atlas-level-probe.txt</code>.</p>
+</section>
   </main>
 </body>
 </html>

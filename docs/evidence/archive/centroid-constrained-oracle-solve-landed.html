@@ -685,5 +685,94 @@
     <code>benchmarks/centroid_field_response_probe.py</code>, which lies outside
     this node's write scope and is reported rather than taken.</p>
   </section>
+
+  <section id="guard-and-figure-repairs">
+    <h2>Guard case, persisted-state re-render and the repaired lane</h2>
+    <p><strong>Commit <code>d1638f274</code>.</strong> The lattice-order guard was
+    committed but not pinned: no committed case applied the pre-fix prefix
+    indexing, so only a stub comparing node counts the defect never touched
+    covered the shift. <code>tests/test_centroid_constraint_lattice_guard.py</code>
+    adds three cases on a three-cell carrier whose state carries one extra
+    physical node between the carried cells and the sampling nodes.</p>
+    <table>
+      <thead><tr><th>Case</th><th>What it asserts</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>test_the_pool_slice_is_the_cell_count_the_stencil_states</code></td>
+          <td>the slice handed over is the stencil convention's cell count, and
+          the state carries more than its cells (4 physical nodes, 3 cells)</td>
+          <td>passes</td>
+        </tr>
+        <tr>
+          <td><code>test_pre_fix_prefix_indexing_is_refused</code></td>
+          <td>sizing the pool from the physical prefix raises
+          <code>ValueError: a point-sampled pool carries the operator's cells
+          first…</code></td>
+          <td>passes; <strong>reddens under the declared negative control</strong></td>
+        </tr>
+        <tr>
+          <td><code>test_pre_fix_prefix_indexing_shifts_the_read_off_its_own_cell</code></td>
+          <td>built by hand over the prefix slice, the same query on the owning
+          cell answers <code>7.1</code> where the owning cell's own mixture is
+          <code>12.1</code></td>
+          <td>passes</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Declared negative control:</strong> <em>restore the pre-fix pool
+    slice indexing in the lattice-order guard; the case asserting the guard
+    refuses it must redden.</em> With both refusals removed from
+    <code>_sampled_cell_pool</code> the run is <code>1 failed, 2 passed</code>,
+    failing exactly <code>test_pre_fix_prefix_indexing_is_refused</code>. Log:
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/cco-persist-terminal-state/negative_control.log</code>
+    (first line repeats the declared mutation verbatim). The guard was restored to its
+    committed form afterwards (<code>git diff</code> on
+    <code>nova/equilibrium/constraint.py</code> empty).</p>
+    <p><strong>Verified at HEAD rather than reimplemented:</strong> the receipt
+    driver saves <code>control-&lt;arm&gt;-state.npy</code> before
+    <code>_write_json</code> writes the receipt, so the state exists beside the
+    banked receipt; and no <code>level_error_wb</code> key remains in the driver
+    — the mixed subtraction is dropped, the level row's scaled residual being
+    the gauge-free physical error, as the earlier record states.</p>
+    <h3 id="guard-and-figure-repairs-render">The panel re-rendered from the persisted state</h3>
+    <p>The negative arm's terminal state survives at the review-repair output
+    root (<code>cco-review-repairs/control-cpu/control-negative-state.npy</code>,
+    digest <code>e59af771756bfe9a…</code>). Its panel was re-rendered from that
+    state on one <code>all_debug</code> allocation
+    (<code>98dci4-clu-3141</code>, <code>--time=00:20:00</code>, 4 CPUs, 32 G,
+    <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code>), with no betelgeuse
+    solve and uv never invoked on the node.</p>
+    <p><img src="/nova/figures/centroid-constrained-oracle-solve/control-negative.png" alt="Negative arm re-rendered from its persisted terminal state: solved contours against the analytic field on shared line-contour levels, both null sets drawn, the first wall drawn for closure."></p>
+    <p>The emitted PNG is <strong>byte-identical</strong> to the banked panel
+    (<code>git status</code> reports only the SVG modified), so the re-render
+    from the state reproduces the recorded figure rather than replacing it with
+    a fresh reading. The SVG companion is written from the same figure object
+    before the PNG, and the state's digest is checked against the digest its
+    receipt records before anything is drawn.</p>
+    <h3 id="guard-and-figure-repairs-gate">The lane at the node's head</h3>
+    <p>One fresh <code>all_debug</code> process per module, the root interpreter
+    run directly: <code>tests/test_centroid_constraint_lattice_guard.py</code>
+    <strong>3 passed</strong> in <code>5.11 s</code>;
+    <code>tests/test_centroid_constrained_fixture.py</code> <strong>9 passed</strong>
+    in <code>6.95 s</code>; <code>tests/test_equilibrium_constraint_protocol.py</code>
+    <strong>15 passed, 2 failed</strong> in <code>75.34 s</code>. Both failures
+    are the base-pre-existing eliminated-constraint ids
+    (<code>test_eliminated_constraint_runs_through_typed_solve_with_outer_trace</code>,
+    <code>test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows</code>),
+    each <code>AttributeError: '_LinearOperator' object has no attribute
+    'program_identity'</code> raised by the test's own stub at
+    <code>nova/equilibrium/forward.py:2597</code> — <strong>zero added
+    failures</strong> against the stated base. Log:
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/cco-persist-terminal-state/lane.log</code>.</p>
+    <p><strong>Open.</strong> <code>control-positive.svg</code> is not produced:
+    no persisted positive state exists anywhere on this workstation, and the
+    positive arm aborts inside LLVM compiling <code>jit_scan</code> on
+    <code>all_debug</code>, so the panel cannot be re-rendered from a state
+    without the solve that the program-size section of
+    forward-solver-route-integrity owns. The <code>field-response</code> panels'
+    vector companions still need an SVG emitter in
+    <code>benchmarks/centroid_field_response_probe.py</code>, outside this node's
+    write scope.</p>
+  </section>
 </main>
 </html>

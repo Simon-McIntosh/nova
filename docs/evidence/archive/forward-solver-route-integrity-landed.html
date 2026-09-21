@@ -942,6 +942,14 @@ No driving followup is resolved, and no plan metadata or status is changed.</p>
 </section>
 <section id="shared-promotion-byte-census">
 <h2>Shared initial and retried promotions: 88.289 MB with the exact terminal state</h2>
+<p><strong>Complete on the coordinator's acceptance ruling.</strong> The binding gates
+are the serialized executable below 100,000,000 bytes, the bit-identical
+<code>d730c294</code> terminal state, a CPU compile-and-run witness, and the mapping
+count. The measured 88,289,094 bytes, exact identity, 157 passing tests and both
+duplication guards refusing the negative control meet those gates. The failed global
+optimized-HLO counting positive control is retained below as an instrument result;
+the remaining complete-read proof is a nonblocking follow-on. This writeback uses the
+existing receipts and launches no additional allocation.</p>
 <p><strong>The physical executable ceiling is met; the complete-read body proof remains open.</strong>
 The coordinator clarified the static target as one optimized primal operator-read body and
 one optimized linearized body per shared scan body, with executed trips a separate runtime
@@ -1070,7 +1078,7 @@ empty-cache <code>argmax</code> index mismatch, int32 against the actual int64 i
 x64. It produced 44 tracing failures, not 44 independent numerical defects. The initializer
 now obtains its index from the same <code>argmax</code> operation, and the passing 157-case
 run follows that correction. The unsuccessful compile and suite logs are preserved.</p>
-<p><strong>The whole-read marker is not a qualified acceptance instrument.</strong>
+<p><strong>The whole-read marker is not a qualified body-count instrument.</strong>
 A separate structural probe introduces a named sine at the physical read input and expects
 one sine and one differentiated cosine for a known single read. A name-filter attempt
 missed the differentiated scope and falsely returned zero; the corrected opcode census
@@ -1082,14 +1090,23 @@ pass is claimed from this failed control.</p>
 <p>The unperturbed optimized source-frame census falls from 22 primal, three JVP and two
 transpose read-provenance frames to 14 primal, two JVP and one transpose frames. Those are
 provenance counts across the compiled-computation fan, not certified complete-body counts.
-The exact remaining work is to qualify a complete-read census that distinguishes those
-fused descendants from distinct evaluator roots, then use it to establish or finish the
-one-primal/one-linearized criterion. The remaining explicit evaluator regions are the
+The remaining explicit evaluator regions are the
 Newton linearization, candidate ladders, continuation and damped-normal scoring, descent's
 independent gradient read, and live-mask reconciliation. Reusing the current exact tangent
 for the descent gradient and routing the separate candidate/reconciliation requests through
 one evaluator are concrete remaining sharing opportunities. The 100 MB size gate itself
 requires no further reduction.</p>
+<p><strong>Nonblocking follow-on: repair and qualify the global body-count instrument.</strong>
+In <code>benchmarks/program_scope_census.py</code>, group complete evaluator roots from
+the optimized computation/caller graph and operator-read primal/derivative provenance;
+distinguish fused descendant clones from separately emitted complete evaluator roots.
+Require a known single-read control to count one primal and one linearized root, and a
+deliberately duplicated evaluator-root control to count two of each. Only after both
+controls pass should the instrument count the unperturbed full solve, reporting executed
+trips separately. Raw marker opcode counts, source-frame counts and StableHLO call counts
+cannot substitute for those qualified root counts. The census source is outside this
+worker's write fence. The coordinator explicitly classifies this repair and proof as
+follow-on work rather than a blocker to the completed executable reduction.</p>
 
 <h3>CPU witness and durable artifacts</h3>
 <p>The resumed work uses one <code>all_debug</code> allocation, job <code>1275130</code>

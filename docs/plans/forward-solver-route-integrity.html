@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.3">
 </head>
@@ -162,6 +162,11 @@
     <h4 class="r-fu-title">Section 2 first: the solve never loops, and compiles to under 50 MB</h4>
     <div class="r-fu-body"><p>Supersedes the ordering in the earlier followup. Deliver section 2 ahead of everything else on this plan, on the strongest lane available, under the lead's constraint that the solve never loops and is designed as efficient maps. The first node takes the trips: trips and Newton steps as scan or while_loop with fixed telemetry slots and the read evaluated once per trip, proven by the serialized executable bytes of the 300-cell weak certificate row before and after, and by a bit-identical terminal state on that row. The executable-size gate beside the memory gate lands in a follow-on node once the certificate driver file is free, because an interim node on the compile-abort plan holds it.</p></div>
     <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity section 2</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-audit-land-scan-pin" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="solver test-pins review (codex sol)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship forward-solver-route-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Update the loop inventory for the scan route</h4>
+    <div class="r-fu-body"><p>From review <code>solver test-pins review (codex sol)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-test-pins</code>.</p><p>Commits <code>d8bbc0491e72df29ddaabc1e6d76f704c4c8dc2d</code>, <code>a999eff40521e428d4c09a3b0d3adea5724a17b2</code>, and <code>8dc6be23ae6d0c3f76b6bd20e9821733200f23db</code>, <code>tests/test_solve_trips_are_a_scan.py</code> lines 48-61 and <code>benchmarks/program_scope_census.py</code> line 1054: the integrated scan gate passes 146 tests and the archived base implementation correctly produces two lowered trip bodies, but the loop inventory still searches for the removed <code>jax.lax.fori_loop(1, active_set_steps</code> source marker. Both certificate gates that include <code>tests/test_solve_program_size.py</code> now fail there. Repair: inventory the <code>lax.scan</code> form by mechanism, add that test to the route gate, and require the certificate gates to return green at the integrated head.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

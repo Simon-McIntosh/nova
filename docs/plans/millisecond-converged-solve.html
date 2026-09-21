@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="129">
+<meta name="plan-version" content="130">
 </head>
 <body>
 <main class="plan-doc">
@@ -270,7 +270,17 @@
     </article>
 <article class="r-fu" data-id="f-fsa-audit-mesh-size-threshold" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="solver census-and-certificate-drivers review (codex luna)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship millisecond-converged-solve" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Close the executable-size threshold before promoting the mesh argument change</h4>
-    <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Promotion run r-20260916T065036630331-msc-mesh-arguments-plumbing, commit 4cd74aed, benchmarks/solve_program_size_gate.py and its size receipt, records 210159751 effective bytes against the done-when ceiling of 50000000 and still marks the node complete. Repair the remaining unrolled Newton-step/trip payload or revise the owning plan&#x27;s threshold with a fresh measurement; do not promote the implementation row while the declared size gate is red. recommends_skill=/reckon-ship millisecond-converged-solve §2.</p></div>
+    <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Promotion run r-20260916T065036630331-msc-mesh-arguments-plumbing, commit 4cd74aed, benchmarks/solve_program_size_gate.py and its size receipt, records 210159751 effective bytes against the done-when ceiling of 50000000 and still marks the node complete. Repair the remaining unrolled Newton-step/trip payload or revise the owning plan's threshold with a fresh measurement; do not promote the implementation row while the declared size gate is red. recommends_skill=/reckon-ship millisecond-converged-solve §2.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve</pre>
+    </article>
+<article class="r-fu" data-id="f-msc-audit-baseline-log-binding" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="solver test-pins review (codex sol)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship millisecond-converged-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Bind the state-array promotion to its green gate</h4>
+    <div class="r-fu-body"><p>From review <code>solver test-pins review (codex sol)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-test-pins</code>.</p><p>Commit <code>87b3c929e87d4e46478e8a394140f1307224f937</code>, <code>docs/state/nova/crew.json</code> line 214737: the code-level state-array cases and declared digest-only mutation are sound, but the ledger binds the green command and exit 0 to <code>logs/negative_control.log</code>, which is intentionally red. Repair: attach the archived <code>after_suite.log</code> and its digest as the gate receipt, retain the negative-control log only under the negative-control field, and verify both receipts name their own exit status.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve</pre>
+    </article>
+<article class="r-fu" data-id="f-msc-audit-containment-control" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="solver test-pins review (codex sol)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship millisecond-converged-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the containment control fail on containment</h4>
+    <div class="r-fu-body"><p>From review <code>solver test-pins review (codex sol)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-test-pins</code>.</p><p>Commits <code>39fc89aea65561ef9912e44c89aca917f6b675ab</code>, <code>c464e90b6fccf9200060a8c74663c99370485d0d</code>, and <code>f4ed7fb14c962be69d122161870b12e634ed2ba3</code>, <code>tests/test_forward_census.py</code> lines 488-557 at <code>c464e90b6</code>: the integrated gate passes, and the declared half-pitch shift is applied, but its red log fails <code>saddle_inside_carrier_wall</code> at rung 110 while the nearest ring remains 2.01 pitches away, so the containment threshold is unchanged. Repair: construct a mutation that crosses the 0.25-pitch containment window without changing wall membership and require the saddle-admission clause to fail; if this fixture cannot do that, record <code>none</code> and move the control to the named single-null fixture.</p></div>
     <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve</pre>
     </article>
 </section>

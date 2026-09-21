@@ -70,9 +70,11 @@ def test_operand_cache_records_and_enforces_source_identity(tmp_path):
     generator = _generator()
     cache = tmp_path / "operands.npz"
     current_identity = "sha256:current"
+    row = _operand()
+    row["solve_topology_class"] = "limited"
     generator._write_cache(
         cache,
-        [_operand()],
+        [row],
         {
             "source_path": "benchmarks/current_authority.py",
             "source_identity": current_identity,
@@ -84,6 +86,7 @@ def test_operand_cache_records_and_enforces_source_identity(tmp_path):
         "source_path": "benchmarks/current_authority.py",
         "source_identity": current_identity,
     }
+    assert metadata["rows"][0]["solve_topology_class"] == "limited"
     assert generator._read_cache(cache, current_identity)[0]["identity"] == "fixture"
 
     with pytest.raises(
@@ -195,26 +198,22 @@ def test_persisted_boundary_flux_follows_the_recorded_class():
     assert generator._class_boundary_flux(read, None) == pytest.approx(contact_flux)
 
 
-def test_recorded_class_is_read_from_the_atlas_receipt(tmp_path):
-    generator = _generator()
-    receipt = tmp_path / "convergence-atlas.json"
-    receipt.write_text(
-        json.dumps(
-            {
-                "panels": [
-                    {"identity": "22086/43 mixed", "class": "diverted"},
-                    {"identity": "21978/35 pure", "class": "unclassified"},
-                ]
-            }
-        )
-    )
+class _SynthesisedSolveReceipt:
+    def __init__(self, diverted):
+        self.topology_read = type("TopologyRead", (), {"diverted": diverted})()
 
-    assert (
-        generator._recorded_topology_class(receipt, "22086/43 mixed")
-        == generator.TopologyClass.DIVERTED
+
+def test_limited_solve_receipt_governs_label_and_boundary_without_an_atlas(tmp_path):
+    generator = _generator()
+    receipt = _SynthesisedSolveReceipt(diverted=False)
+    requested_class = generator._solve_receipt_topology_class(receipt)
+    assert requested_class == generator.TopologyClass.LIMITED
+    assert generator._topology_class_label(requested_class) == "limited"
+    read = _SynthesisedTopologyRead(0.0177761, -0.1220793, 0.0177761)
+    assert generator._class_boundary_flux(read, requested_class) == pytest.approx(
+        0.0177761
     )
-    assert generator._recorded_topology_class(receipt, "21978/35 pure") is None
-    assert generator._recorded_topology_class(receipt, "22086/43 other") is None
+    assert not (tmp_path / "convergence-atlas.json").exists()
 
 
 def test_healthy_boundary_reports_integer_counts_with_true_availability(tmp_path):

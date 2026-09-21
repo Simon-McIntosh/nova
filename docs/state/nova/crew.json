@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T06:31:14",
+  "updated": "2026-09-21T07:41:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7317,6 +7317,15 @@
         "id": "s19o-audit-rest",
         "harness": "claude-opus",
         "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
+      },
+      {
+        "id": "s19o-cca-diag",
+        "harness": "claude-opus",
+        "role": "investigate",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -220888,6 +220897,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3009
+    "_version": 3010
   }
 }

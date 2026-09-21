@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T21:19:10",
+  "updated": "2026-09-21T05:46:54",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7213,6 +7213,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-10"
+      },
+      {
+        "id": "s19o-audit-cank",
+        "harness": "claude-opus",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
       },
       {
         "id": "s19r-bob",
@@ -218129,6 +218138,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2990
+    "_version": 2991
   }
 }

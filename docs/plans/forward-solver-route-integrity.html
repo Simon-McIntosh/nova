@@ -132,6 +132,19 @@
     lowered solve still has 73 read-entry markers. See the
     <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#shared-live-read-bodies">candidate measurements, unchanged terminal field and remaining evaluator work</a>.</p>
 
+    <h3 id="s2-read-body-counter-boundary">Read-count acceptance requires an optimized-body definition</h3>
+    <p>The unchanged assigned base reproduces 126,313,582 serialized bytes with
+    136.081234 s compile wall and all 1,529 terminal values matching the current
+    <code>d730c294</code> pin exactly. Its 73 StableHLO read-entry markers coexist
+    with three executed trips in 16 slots. Commit <code>bafd2a8a0</code> adds an
+    optimized-body counter control that sees three executable copies behind one
+    lowered callee; substituting a StableHLO-only counter fails at
+    <code>assert 1 == 3</code>. The evaluator rewrite is held for the coordinator
+    to confirm one optimized static body independently of runtime trip count.
+    The sub-100 MB target and full operator-body sharing remain unmet. See the
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#read-body-counter-boundary">baseline, mapping receipt, counter refusal and pending definition</a>.
+    This entry leaves the section and its driving followup open.</p>
+
     <h2 id="s3">§3 — Carry every solve evaluation through one traced operator state machine</h2>
     <p>The frozen-topology interim reduced the 300- and 1000-cell optimised solves from 654,832 and 662,331
     instructions to 203,078 and 204,531 and cut the cold 300-cell compile from 370 s to 60 s, but it could not

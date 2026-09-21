@@ -1696,6 +1696,29 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   pre-repair disagreement between the two reconstructions; whoever closes the
   remaining clause should regenerate it against the repaired oracle.</p>
 </section>
+
+<section id="outboard-hole-booking-gate">
+  <h2 id="outboard-hole-booking-gate-h">The outboard-hole booking gate: committed and green at HEAD. The recorded outboard hole is absent at HEAD.</h2>
+  <p>Commit <code>8a33b741b</code> lands <code>tests/test_outboard_hole_census_gate.py</code>. The module reuses the unit-amplitude census helpers on the committed terminal flux state of the weak-rotation 110-cell row, reading that state from the committed control part rather than by re-solving, and it draws no figure. It exposes <code>terminal_booked_currents()</code>, returning the chord and exact booked totals beside the per-cell booked current for cells 83, 104, 106, 108 and 116, so the booking repair node can re-run it against its after values.</p>
+  <p><strong>Receipt.</strong> One <code>all_debug</code> allocation (job 1274786, host 98dci4-clu-3141, 4 cpus, 32 GB, <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in the payload and in the submit environment, the root interpreter run directly, <code>uv</code> never invoked on the node) recorded the gate green at exit 0 with 3 passed in 129.55 s. The declared source-mutation control recorded 2 failed at exit 1, and the census module was restored clean. The control prescribed for this node, asserting that cells 106, 104, 108 and 116 book nonzero in chord mode, recorded exit 0: it passes rather than reddening.</p>
+<p><strong>The pinned values.</strong> Measured on the committed terminal state:</p>
+  <table>
+    <thead><tr><th>quantity</th><th>census receipt, 28a49bcb</th><th>this revision</th></tr></thead>
+    <tbody>
+      <tr><td>chord booked total</td><td>15,540,896.52 A</td><td>15,868,149.094491 A</td></tr>
+      <tr><td>exact booked total</td><td>15,148,862.10 A</td><td>15,491,114.132435 A</td></tr>
+      <tr><td>cell 83, both clips</td><td>0.0 A</td><td>113,536.532289 A</td></tr>
+      <tr><td>cell 104, both clips</td><td>0.0 A</td><td>192,269.940302 A</td></tr>
+      <tr><td>cell 106, both clips</td><td>0.0 A</td><td>192,343.790435 A</td></tr>
+<tr><td>cell 108, both clips</td><td>0.0 A</td><td>192,269.940302 A</td></tr>
+      <tr><td>cell 116, both clips</td><td>0.0 A</td><td>112,093.466421 A</td></tr>
+    </tbody>
+  </table>
+  <p>The chord and exact clips book identical values for each of the five cells, with identical clip vertex counts, so the two modes agree on these cells rather than one of them dropping the cell. None of the five books zero in either mode, so the receipt's outboard hole is not present on this state.</p>
+  <p>The instrument is not degenerate: on the same state 41 of 135 cells still differ between the two clips and 16 cells book zero in chord mode, so the curved clip does clip. The exact clip books 0.950 of the analytic 16,314,773.31 A target, so the total remains short for reasons other than these five cells.</p>
+  <p>The analytic fixture still cannot run unbridged. The exact clip branch reads the census saddle unconditionally at nova/equilibrium/forward_operator.py:3091, while the fixture topology carries no x_point, so the gate bridges that single read inside the module for the duration of its fixtures and changes nothing under nova/equilibrium or scripts/. The defect stands as the plan's typed-saddle findings, whose blast radius this gate extends to the census module's own measure() entry point.</p>
+</section>
+
 </main>
 </body>
 </html>

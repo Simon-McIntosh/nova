@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T08:38:43",
+  "updated": "2026-09-21T08:38:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7335,9 +7335,11 @@
         "id": "s19o-cca-diag",
         "harness": "claude-opus",
         "role": "investigate",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "ed78097b-7c8e-4a80-b01d-6e42d51e9aef",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "ed78097b-7c8e-4a80-b01d-6e42d51e9aef"
+        },
         "created": "2026-09-21"
       },
       {
@@ -221911,6 +221913,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3018
+    "_version": 3019
   }
 }

@@ -435,10 +435,20 @@ def _panel(
             axes, nova_boundary[:, 0], nova_boundary[:, 1], style=DEFAULT_INK
         )
     boundary_failure = record.get("boundary_generation_failure")
-    if boundary_failure is not None:
-        reason = str(
-            record.get("boundary_generation_failure_reason") or "unknown reason"
+    if (
+        boundary_failure is None
+        and record.get("solve_topology_class") == "diverted"
+        and nova_boundary.shape[0] < 3
+    ):
+        boundary_failure = "BoundaryGenerationFailure"
+    boundary_failure_reason = record.get("boundary_generation_failure_reason")
+    if boundary_failure is not None and boundary_failure_reason is None:
+        boundary_failure_reason = (
+            "the class-governed diverted state has no closed branch in the "
+            "persisted boundary operand"
         )
+    if boundary_failure is not None:
+        reason = str(boundary_failure_reason or "unknown reason")
         axes.text(
             0.5,
             0.96,
@@ -522,9 +532,7 @@ def _panel(
         "boundary_point_count": int(nova_boundary.shape[0]),
         "boundary_generation_failure": boundary_failure,
         "boundary_generation_failure_reason": (
-            record.get("boundary_generation_failure_reason")
-            if boundary_failure is not None
-            else None
+            boundary_failure_reason if boundary_failure is not None else None
         ),
         "axis": [float(v) for v in axis],
         "admitted_x": [float(v) for v in admitted_x],

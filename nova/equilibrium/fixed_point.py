@@ -383,7 +383,7 @@ class FixedPointResult(NamedTuple):
     ``promotion_recovery_outcomes`` names that result and is not-applicable for
     promotions decided by the Newton ladder.
     ``promotion_model_rebuild_activations`` is one when radius exhaustion
-    triggers a fresh linearization, and ``promotion_model_rebuild_damping``
+    activates an exact local tangent model, and ``promotion_model_rebuild_damping``
     records its accepted Levenberg damping or the last refused value.
     ``promotion_descent_activations`` is one when both recovery models exhaust
     and the smooth relative-sup gradient ladder runs.  Its selected absolute step
@@ -649,7 +649,7 @@ class _BacktrackingScores(NamedTuple):
 
 
 class _RebuiltModelPromotion(NamedTuple):
-    """One fixed-trip Levenberg search on a freshly linearized model."""
+    """One fixed-trip Levenberg search on a locally linearized model."""
 
     state: jax.Array
     residual: jax.Array
@@ -1272,7 +1272,7 @@ def _rebuilt_model_promotion(
     linearization: tuple[jax.Array, Callable[[jax.Array], jax.Array]] | None = None,
     normal_rhs: jax.Array | None = None,
 ) -> _RebuiltModelPromotion:
-    """Re-linearize and seek a window-decreasing Levenberg-damped step."""
+    """Reuse or form an exact local model and seek a decreasing damped step."""
     acceptance_map_fn = map_fn if acceptance_map_fn is None else acceptance_map_fn
     if linearization is None:
         mapped, tangent = jax.linearize(map_fn, state)
@@ -1479,7 +1479,7 @@ def _complete_newton_promotion(
     convergence_tolerance: float,
     observe_shadows: bool,
     stream_inner_iterations: bool,
-    reuse_rejected_score: bool = False,
+    reuse_rejected_score: jax.Array | bool = False,
 ) -> _NewtonIterationState:
     """Record one promotion while preserving every existing receipt decision."""
 
@@ -1598,15 +1598,12 @@ def _complete_newton_promotion(
     def score_candidate(_):
         return _smooth_relative_sup_merit(frozen_map(candidate), candidate)
 
-    if reuse_rejected_score:
-        candidate_merit = jax.lax.cond(
-            promotion_accepted,
-            score_candidate,
-            lambda _: current_merit,
-            operand=None,
-        )
-    else:
-        candidate_merit = score_candidate(None)
+    candidate_merit = jax.lax.cond(
+        promotion_accepted | ~jnp.asarray(reuse_rejected_score),
+        score_candidate,
+        lambda _: current_merit,
+        operand=None,
+    )
     candidate_model_error_fraction = _nonlinear_model_error_fraction(
         _smooth_relative_sup_merit(local_model(candidate), candidate),
         candidate_merit,
@@ -2635,8 +2632,8 @@ def _newton_krylov_inner(
     update uses a fixed-trip masked loop, and the receipts record the Newton
     reductions, recovery activation, outcome, and radius trajectory.  Once the
     carried radius reaches its numerical floor, the recovery rebuilds the
-    local linearization at the unchanged iterate and solves a fixed ladder of
-    Levenberg-damped normal models.  That fresh-model step is tested against
+    local model from the exact tangent at the unchanged iterate and solves a
+    fixed ladder of Levenberg-damped normal models. That damped step is tested against
     the same bounded merit envelope; its activation and selected damping are
     retained in the promotion receipts.  If both recovery models exhaust, a
     final fixed ladder follows the negative gradient of the relative
@@ -2943,278 +2940,216 @@ def _newton_krylov_inner(
                 def local_model(candidate):
                     return mapped + tangent(candidate - state)
 
-                promotion_scores = _backtracking_scores(
-                    frozen_map,
-                    local_model,
-                    state,
-                    step,
-                    reference_merit,
-                    model_trust_selection,
-                    acceptance_map_fn=acceptance_map,
-                    own_mask_acceptance=own_mask_acceptance,
+                factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=state.dtype)
+                empty_values = jnp.zeros_like(factors)
+                empty_scalar = jnp.asarray(0.0, dtype=state.dtype)
+                empty_scores = _BacktrackingScores(
+                    factors=factors,
+                    candidates=jnp.zeros((factors.size, state.size), dtype=state.dtype),
+                    merits=empty_values,
+                    residuals=empty_values,
+                    incumbent_merit=empty_scalar,
+                    incumbent_residual=empty_scalar,
+                    acceptance_reference=empty_scalar,
+                    predicted_merits=empty_values,
+                    predicted_current_merit=empty_scalar,
+                    ladder_selected=jnp.argmax(empty_values),
+                    ladder_accepted=jnp.asarray(False),
+                    ladder_distrusted=jnp.asarray(False),
                 )
-                promotion = _backtracked_promotion(
-                    frozen_map,
-                    local_model,
-                    state,
-                    step,
-                    relaxation * residual_vector,
-                    nonlinear_residual,
-                    reference_merit,
-                    measured.recovery_radius,
-                    model_trust_selection,
-                    acceptance_map_fn=acceptance_map,
-                    own_mask_acceptance=own_mask_acceptance,
-                    scores=promotion_scores,
+                empty_descent = _SteepestDescentPromotion(
+                    state=state,
+                    residual=nonlinear_residual,
+                    accepted=jnp.asarray(False),
+                    scale=jnp.asarray(jnp.nan, dtype=state.dtype),
                 )
                 minimum_radius = jnp.sqrt(jnp.finfo(state.dtype).eps)
-                rebuild_activated = (
-                    promotion.recovery_activated
-                    & ~promotion.accepted
-                    & (
-                        (promotion.recovery_radius <= minimum_radius)
-                        | promotion.model_distrusted
-                    )
-                )
+                accepted_before = measured.accepted
 
-                def rebuild_model(_):
-                    return _rebuilt_model_promotion(
-                        frozen_map,
-                        state,
-                        nonlinear_residual,
-                        reference_merit,
-                        gmres_iterations=gmres_iterations,
-                        maximum_step=jnp.where(
-                            step_cap_activated,
-                            cap,
-                            jnp.asarray(jnp.inf, dtype=state.dtype),
-                        ),
-                        initial_damping=measured.model_rebuild_damping,
-                        model_trust_selection=model_trust_selection,
-                        acceptance_map_fn=acceptance_map,
-                        own_mask_acceptance=own_mask_acceptance,
-                    )
+                def continue_promotions(sequence):
+                    return sequence[-1]
 
-                def skip_rebuild(_):
-                    return _RebuiltModelPromotion(
-                        state=state,
-                        residual=nonlinear_residual,
-                        accepted=jnp.asarray(False),
-                        damping=jnp.asarray(jnp.nan, dtype=state.dtype),
-                        next_damping=measured.model_rebuild_damping,
-                    )
-
-                rebuilt = jax.lax.cond(
-                    rebuild_activated, rebuild_model, skip_rebuild, operand=None
-                )
-                descent_activated = rebuild_activated & ~rebuilt.accepted
-
-                def descend(_):
-                    return _steepest_descent_promotion(
-                        frozen_map,
-                        state,
-                        nonlinear_residual,
-                        reference_merit,
-                        model_trust_selection,
-                        acceptance_map_fn=acceptance_map,
-                        own_mask_acceptance=own_mask_acceptance,
-                    )
-
-                def skip_descent(_):
-                    return _SteepestDescentPromotion(
-                        state=state,
-                        residual=nonlinear_residual,
-                        accepted=jnp.asarray(False),
-                        scale=jnp.asarray(jnp.nan, dtype=state.dtype),
-                    )
-
-                descent = jax.lax.cond(
-                    descent_activated, descend, skip_descent, operand=None
-                )
-                first = _complete_newton_promotion(
-                    measured,
-                    state,
-                    mapped,
-                    tangent,
-                    nonlinear_residual,
-                    current_merit,
-                    qualified_step,
-                    step,
-                    step_cap_activated,
-                    step_cap_factor,
-                    promotion,
-                    rebuilt,
-                    descent,
-                    rebuild_activated,
-                    descent_activated,
-                    frozen_map,
-                    promoted_shadow,
-                    newton_steps=newton_steps,
-                    warmup=warmup,
-                    stride=stride,
-                    convergence_tolerance=convergence_tolerance,
-                    observe_shadows=observe_shadows,
-                    stream_inner_iterations=stream_inner_iterations,
-                )
-
-                full_fallback_refused = descent_activated & ~descent.accepted
-                if not carry_unchanged_fallback:
-                    return first
-
-                def carry_fallback_sequence(_):
-                    transpose_action = jax.linear_transpose(
-                        linear_action, jnp.zeros_like(state)
-                    )
-                    normal_rhs = transpose_action(residual_vector)[0]
-                    accepted_before = measured.accepted
-
-                    def continue_carried(carried):
-                        return (
-                            carried.active
-                            & (carried.accepted == accepted_before)
-                            & (carried.attempted < newton_steps)
-                        )
-
-                    def carried_attempt(carried):
-                        carried_qualified = _requalify_krylov_step(
+                def promotion_attempt(sequence):
+                    current, cached_scores, cached_descent, first, _active = sequence
+                    qualification = jax.lax.cond(
+                        first,
+                        lambda: qualified_step,
+                        lambda: _requalify_krylov_step(
                             qualified_step,
                             nonlinear_residual,
                             condition_ratio_limit=krylov_condition_limit,
-                            preceding_condition_baseline=carried.condition_baseline,
+                            preceding_condition_baseline=current.condition_baseline,
+                        ),
+                    )
+                    proposed_step = qualification.step
+                    proposed_norm = jnp.max(jnp.abs(proposed_step))
+                    cap_factor = jnp.where(
+                        step_cap_activated & (proposed_norm > cap),
+                        cap / jnp.maximum(proposed_norm, 1.0e-300),
+                        jnp.asarray(1.0, dtype=state.dtype),
+                    )
+                    proposed_step = jnp.where(
+                        step_cap_activated & (proposed_norm > cap),
+                        proposed_step * (cap / jnp.maximum(proposed_norm, 1.0e-300)),
+                        proposed_step,
+                    )
+                    scores = jax.lax.cond(
+                        ~first & jnp.all(proposed_step == step),
+                        lambda: cached_scores,
+                        lambda: _backtracking_scores(
+                            frozen_map,
+                            local_model,
+                            state,
+                            proposed_step,
+                            reference_merit,
+                            model_trust_selection,
+                            acceptance_map_fn=acceptance_map,
+                            own_mask_acceptance=own_mask_acceptance,
+                        ),
+                    )
+                    promotion = _backtracked_promotion(
+                        frozen_map,
+                        local_model,
+                        state,
+                        proposed_step,
+                        relaxation * residual_vector,
+                        nonlinear_residual,
+                        reference_merit,
+                        current.recovery_radius,
+                        model_trust_selection,
+                        acceptance_map_fn=acceptance_map,
+                        own_mask_acceptance=own_mask_acceptance,
+                        scores=scores,
+                    )
+                    rebuild_activated = (
+                        promotion.recovery_activated
+                        & ~promotion.accepted
+                        & (
+                            (promotion.recovery_radius <= minimum_radius)
+                            | promotion.model_distrusted
                         )
-                        carried_step = carried_qualified.step
-                        carried_norm = jnp.max(jnp.abs(carried_step))
-                        carried_cap_factor = jnp.where(
-                            step_cap_activated & (carried_norm > cap),
-                            cap / jnp.maximum(carried_norm, 1.0e-300),
-                            jnp.asarray(1.0, dtype=state.dtype),
+                    )
+
+                    def rebuild_model(_):
+                        return _rebuilt_model_promotion(
+                            frozen_map,
+                            state,
+                            nonlinear_residual,
+                            reference_merit,
+                            gmres_iterations=gmres_iterations,
+                            maximum_step=jnp.where(
+                                step_cap_activated,
+                                cap,
+                                jnp.asarray(jnp.inf, dtype=state.dtype),
+                            ),
+                            initial_damping=current.model_rebuild_damping,
+                            model_trust_selection=model_trust_selection,
+                            acceptance_map_fn=acceptance_map,
+                            own_mask_acceptance=own_mask_acceptance,
+                            linearization=(mapped, tangent),
                         )
-                        carried_step = jnp.where(
-                            step_cap_activated & (carried_norm > cap),
-                            carried_step * (cap / jnp.maximum(carried_norm, 1.0e-300)),
-                            carried_step,
+
+                    def skip_rebuild(_):
+                        return _RebuiltModelPromotion(
+                            state=state,
+                            residual=nonlinear_residual,
+                            accepted=jnp.asarray(False),
+                            damping=jnp.asarray(jnp.nan, dtype=state.dtype),
+                            next_damping=current.model_rebuild_damping,
                         )
-                        carried_scores = jax.lax.cond(
-                            jnp.all(carried_step == step),
-                            lambda _: promotion_scores,
-                            lambda _: _backtracking_scores(
+
+                    rebuilt = jax.lax.cond(
+                        rebuild_activated, rebuild_model, skip_rebuild, operand=None
+                    )
+                    descent_activated = rebuild_activated & ~rebuilt.accepted
+
+                    def descend(_):
+                        return jax.lax.cond(
+                            first,
+                            lambda: _steepest_descent_promotion(
                                 frozen_map,
-                                local_model,
                                 state,
-                                carried_step,
+                                nonlinear_residual,
                                 reference_merit,
                                 model_trust_selection,
                                 acceptance_map_fn=acceptance_map,
                                 own_mask_acceptance=own_mask_acceptance,
                             ),
-                            operand=None,
-                        )
-                        carried_promotion = _backtracked_promotion(
-                            frozen_map,
-                            local_model,
-                            state,
-                            carried_step,
-                            relaxation * residual_vector,
-                            nonlinear_residual,
-                            reference_merit,
-                            carried.recovery_radius,
-                            model_trust_selection,
-                            acceptance_map_fn=acceptance_map,
-                            own_mask_acceptance=own_mask_acceptance,
-                            scores=carried_scores,
-                        )
-                        carried_rebuild_activated = (
-                            carried_promotion.recovery_activated
-                            & ~carried_promotion.accepted
-                            & (
-                                (carried_promotion.recovery_radius <= minimum_radius)
-                                | carried_promotion.model_distrusted
-                            )
+                            lambda: cached_descent,
                         )
 
-                        def rebuild_carried(_):
-                            return _rebuilt_model_promotion(
-                                frozen_map,
-                                state,
-                                nonlinear_residual,
-                                reference_merit,
-                                gmres_iterations=gmres_iterations,
-                                maximum_step=jnp.where(
-                                    step_cap_activated,
-                                    cap,
-                                    jnp.asarray(jnp.inf, dtype=state.dtype),
-                                ),
-                                initial_damping=carried.model_rebuild_damping,
-                                model_trust_selection=model_trust_selection,
-                                acceptance_map_fn=acceptance_map,
-                                own_mask_acceptance=own_mask_acceptance,
-                                linearization=(mapped, tangent),
-                                normal_rhs=normal_rhs,
-                            )
-
-                        def skip_carried_rebuild(_):
-                            return _RebuiltModelPromotion(
-                                state=state,
-                                residual=nonlinear_residual,
-                                accepted=jnp.asarray(False),
-                                damping=jnp.asarray(jnp.nan, dtype=state.dtype),
-                                next_damping=carried.model_rebuild_damping,
-                            )
-
-                        carried_rebuilt = jax.lax.cond(
-                            carried_rebuild_activated,
-                            rebuild_carried,
-                            skip_carried_rebuild,
-                            operand=None,
-                        )
-                        carried_descent_activated = (
-                            carried_rebuild_activated & ~carried_rebuilt.accepted
-                        )
-                        carried_descent = jax.lax.cond(
-                            carried_descent_activated,
-                            lambda _: descent,
-                            skip_descent,
-                            operand=None,
-                        )
-                        return _complete_newton_promotion(
-                            carried,
-                            state,
-                            mapped,
-                            tangent,
-                            nonlinear_residual,
-                            current_merit,
-                            carried_qualified,
-                            carried_step,
-                            step_cap_activated,
-                            carried_cap_factor,
-                            carried_promotion,
-                            carried_rebuilt,
-                            carried_descent,
-                            carried_rebuild_activated,
-                            carried_descent_activated,
-                            frozen_map,
-                            promoted_shadow,
-                            newton_steps=newton_steps,
-                            warmup=warmup,
-                            stride=stride,
-                            convergence_tolerance=convergence_tolerance,
-                            observe_shadows=observe_shadows,
-                            stream_inner_iterations=stream_inner_iterations,
-                            reuse_rejected_score=True,
-                        )
-
-                    return jax.lax.while_loop(
-                        continue_carried,
-                        carried_attempt,
-                        first,
+                    descent = jax.lax.cond(
+                        descent_activated,
+                        descend,
+                        lambda _: empty_descent,
+                        operand=None,
+                    )
+                    result = _complete_newton_promotion(
+                        current,
+                        state,
+                        mapped,
+                        tangent,
+                        nonlinear_residual,
+                        current_merit,
+                        qualification,
+                        proposed_step,
+                        step_cap_activated,
+                        cap_factor,
+                        promotion,
+                        rebuilt,
+                        descent,
+                        rebuild_activated,
+                        descent_activated,
+                        frozen_map,
+                        promoted_shadow,
+                        newton_steps=newton_steps,
+                        warmup=warmup,
+                        stride=stride,
+                        convergence_tolerance=convergence_tolerance,
+                        observe_shadows=observe_shadows,
+                        stream_inner_iterations=stream_inner_iterations,
+                        reuse_rejected_score=~first,
+                    )
+                    full_fallback_refused = descent_activated & ~descent.accepted
+                    repeat = (
+                        carry_unchanged_fallback
+                        & (~first | full_fallback_refused)
+                        & result.active
+                        & (result.accepted == accepted_before)
+                        & (result.attempted < newton_steps)
+                    )
+                    cached_scores = jax.tree.map(
+                        lambda observed, cached: jnp.where(first, observed, cached),
+                        scores,
+                        cached_scores,
+                    )
+                    cached_descent = jax.tree.map(
+                        lambda observed, cached: jnp.where(first, observed, cached),
+                        descent,
+                        cached_descent,
+                    )
+                    return (
+                        result,
+                        cached_scores,
+                        cached_descent,
+                        jnp.asarray(False),
+                        repeat,
                     )
 
-                return jax.lax.cond(
-                    full_fallback_refused,
-                    carry_fallback_sequence,
-                    lambda _: first,
-                    operand=None,
+                # The first promotion enters the same body as unchanged-state retries.
+                # Its live evaluations fill the caches only after they have run.
+                result, *_cached = jax.lax.while_loop(
+                    continue_promotions,
+                    promotion_attempt,
+                    (
+                        measured,
+                        empty_scores,
+                        empty_descent,
+                        jnp.asarray(True),
+                        jnp.asarray(True),
+                    ),
                 )
+                return result
 
             def refused_state(_):
                 decision = jnp.asarray(

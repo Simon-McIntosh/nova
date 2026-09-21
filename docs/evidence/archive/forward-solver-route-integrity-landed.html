@@ -858,6 +858,287 @@ receipts for the rejected experiment. Both allocations completed. Next work must
 remaining live evaluator bodies; it must not repair non-convergence or reinstate the void
 historical terminal pin as this node's gate.</p>
 </section>
+<section id="read-body-counter-boundary">
+<h2>Read-body acceptance held on the static-versus-runtime count</h2>
+<p><strong>The evaluator rewrite is not delivered.</strong> At assigned revision
+<code>0d188445b21148dc5ea0407f6e5804794a94386a</code>, the unchanged
+weak-rotation-reactor-static 300-cell census reproduces the executable defect.
+The literal reproduction is <code>serialized_bytes: 126313582</code>,
+<code>compile_seconds: 136.08123354800045</code>,
+<code>control_read_markers: 1</code>, and <code>solve_read_markers: 73</code>.
+The 125-byte difference from the preceding 126,313,707-byte receipt is an
+unchanged-source remeasurement, not a code-size improvement.</p>
+<table>
+<caption>Captured census signature; historical measurements retain their original provenance.</caption>
+<thead><tr><th>Arm</th><th>Serialized bytes</th><th>Compile seconds</th><th>Mappings added by load</th><th>Peak process mappings</th></tr></thead>
+<tbody>
+<tr><td>Historical shared trip scan</td><td>146,456,085</td><td>198.668563</td><td>11,456</td><td>28,410</td></tr>
+<tr><td>Retained live acceptance sharing</td><td>126,313,707</td><td>136.919963</td><td>10,445</td><td>26,388</td></tr>
+<tr><td>Assigned-base reproduction</td><td>126,313,582</td><td>136.081234</td><td>10,446</td><td>26,380</td></tr>
+</tbody></table>
+<p>The CPU executable compiles and runs to completion. The terminal digest is
+<code>d730c294b7aa7c1a7a9d9fdcf92a301f856ff066d3d7a50bb05cbf216b2b790b</code>.
+All 1,529 binary64 values match the retained acceptance-sharing array exactly;
+maximum absolute difference is 0 Wb. The state remains nonconverged at
+residual 0.05393078396762727, with three executed trips, 16 trip slots,
+30 attempted Newton promotions and 11 accepted promotions. The
+<a href="#shared-live-read-bodies">shared-level flux contours, both null sets and wall in the preceding record</a>
+therefore depict this same state. No new convergence claim or arithmetic-order exception is made.</p>
+<p><strong>Acceptance-definition question.</strong> The node asks for a static
+read-marker count equal to the trip count, while the current solve executes three
+trips within a 16-slot scan. A single shared scan body has one static copy regardless
+of how many dynamic trips execute. In addition, the inherited 73-marker counter reads
+StableHLO; the <a href="/nova/research/single-evaluator-state-machine-design#d6">design's optimized-HLO gate</a>
+explicitly rejects that as sufficient evidence. The coordinator was asked to confirm
+one optimized body with runtime trips reported separately, or specify the literal
+trip-count target and its treatment of primal and derivative bodies. The worker leaves
+this decision open and does not replace the requested implementation with a wrapper.</p>
+<p><strong>Delivered guard.</strong> Commit
+<code>bafd2a8a0c74f5776813cdfaa3c136cf5d49e845</code> adds
+<code>test_read_body_counter_rejects_lowered_call_sharing</code> in
+<code>tests/test_solve_trips_are_a_scan.py</code>. Its known-present control sees one
+sine instruction for one read, three optimized sine instructions behind one shared
+lowered callee, and one optimized sine instruction when a single map serves three
+requests. The two evaluation forms return identical values. This is an instrument
+regression, not evidence that the production solve meets the one-body requirement.</p>
+<table><thead><tr><th>Controlled form</th><th>StableHLO read definitions</th><th>Optimized read instructions</th></tr></thead>
+<tbody><tr><td>One call</td><td>1</td><td>1</td></tr>
+<tr><td>Three calls sharing one JIT callee</td><td>1</td><td>3</td></tr>
+<tr><td>One map over three requests</td><td>1</td><td>1</td></tr></tbody></table>
+<p>A scratch read-boundary experiment reports 15 StableHLO read-entry markers
+against the base's 73. It is not an accepted reduction: no physical size or terminal
+claim is based on that counter. Independent small probes of default JIT, late XLA
+inlining and an inlineability metadata annotation each retain three optimized bodies.
+Those experiments modify only their own processes; all solver modules remain unchanged.</p>
+<p><strong>Validation.</strong> The base focused suite passes 151 tests in 154.71 s.
+The changed test file passes 14 tests in 22.06 s. The final full focused suite passes 152 tests in 130.46 s, exit 0, with zero added failures.
+The declared negative control is <q>Replace the optimized-HLO read-body counter with a StableHLO-only counter.</q>
+Its log starts with that exact declaration and the guard fails at
+<code>assert 1 == 3</code>, exit 1. This confirms the guard refuses the actual
+false-positive counting method.</p>
+<p>All numerical work, compilation and test processes run within one CPU
+<code>all_debug</code> allocation, job <code>1275112</code> on
+<code>98dci4-clu-3142</code>, with
+<code>--cpus-per-task=8 --mem=64G --time=00:59:00</code>.
+<code>TMPDIR=/tmp</code> is set in submission and payload,
+<code>JAX_PLATFORMS=cpu</code> is explicit, and the shared root interpreter is invoked
+directly with no uv on the compute node. Every measurement has its own process.
+The unchanged census serialized-executable helper supplies the byte measure;
+<code>benchmarks.compile_abort_probe</code> samples mappings every 0.5 s. Its precompile
+positive control is 5,485 mappings; 15,931 mappings remain after compile against a
+65,530 limit. The final sampled zero comes from process exit and is not used as a load measurement.</p>
+<p>Artifacts are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T135548855711-fsri-one-read-body-per-trip-under-100-mb</code>:
+<code>baseline-measure.json</code>, <code>baseline-measure.npy</code>,
+<code>baseline-probe.json</code>, <code>baseline-count.json</code>,
+<code>terminal-comparison.json</code>, <code>baseline-suite.log</code>,
+<code>after-suite.log</code>, <code>counter-suite.log</code>,
+<code>negative-control.log</code>, <code>inline-probe.log</code>, and
+<code>read-boundary-probe.json</code>. The manifest records the exact commands and exits.</p>
+<p><strong>Remaining work.</strong> Confirm the body-count definition, then resume the
+live evaluator state-machine implementation and measure its optimized bodies, sub-100 MB
+executable and unchanged terminal state. No production after-arm exists in this landing.
+No driving followup is resolved, and no plan metadata or status is changed.</p>
+</section>
+<section id="shared-promotion-byte-census">
+<h2>Shared initial and retried promotions: 88.289 MB with the exact terminal state</h2>
+<p><strong>Complete on the coordinator's acceptance ruling.</strong> The binding gates
+are the serialized executable below 100,000,000 bytes, the bit-identical
+<code>d730c294</code> terminal state, a CPU compile-and-run witness, and the mapping
+count. The measured 88,289,094 bytes, exact identity, 157 passing tests and both
+duplication guards refusing the negative control meet those gates. The failed global
+optimized-HLO counting positive control is retained below as an instrument result;
+the remaining complete-read proof is a nonblocking follow-on. This writeback uses the
+existing receipts and launches no additional allocation.</p>
+<p><strong>The physical executable ceiling is met; the complete-read body proof remains open.</strong>
+The coordinator clarified the static target as one optimized primal operator-read body and
+one optimized linearized body per shared scan body, with executed trips a separate runtime
+quantity. That retires the preceding definition hold. Retained commit
+<code>faf2a7e014eade3cb0bd28a707169b26de667c6d</code> removes the separate first-promotion
+and carried-retry bodies in <code>nova/equilibrium/fixed_point.py</code>. The first attempt
+enters the same traced loop as every unchanged-state retry. Its candidate score ladder and
+descent result populate caches only after evaluation, its condition baseline is requalified
+for each retry, and a model rebuild consumes the existing exact tangent at the same state.
+Every candidate still receives its own live normalized-current read. No wrapper, frozen
+partition, solver-budget change or benchmark-driver change supplies the reduction.</p>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="promotion-sharing-title" viewBox="0 0 760 220" style="max-width:100%;height:auto">
+<title id="promotion-sharing-title">Initial and retried promotions enter one compiled evaluation body</title>
+<defs><marker id="promotion-sharing-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" fill="#536273"/></marker></defs>
+<g fill="none" stroke="#536273" stroke-width="1.5">
+<rect x="12" y="25" width="190" height="46" rx="5"/>
+<rect x="12" y="127" width="190" height="46" rx="5"/>
+<rect x="286" y="61" width="246" height="77" rx="5"/>
+<rect x="614" y="76" width="132" height="46" rx="5"/>
+<path d="M 202 48 L 248 48 L 248 86 L 282 86" marker-end="url(#promotion-sharing-arrow)"/>
+<path d="M 202 150 L 248 150 L 248 112 L 282 112" marker-end="url(#promotion-sharing-arrow)"/>
+<path d="M 532 99 L 610 99" marker-end="url(#promotion-sharing-arrow)"/>
+<path d="M 408 138 L 408 191 L 108 191 L 108 177" marker-end="url(#promotion-sharing-arrow)"/>
+</g>
+<g font-family="sans-serif" font-size="14" text-anchor="middle" fill="#253444">
+<text x="107" y="53">First promotion</text>
+<text x="107" y="155">Unchanged-state retry</text>
+<text x="409" y="85">One compiled promotion body</text>
+<text x="409" y="108">Live scores · recovery · rebuild</text>
+<text x="409" y="127" font-size="12">Exact tangent retained at this state</text>
+<text x="680" y="104">Accepted / stopped</text>
+<text x="278" y="213" font-size="12">Refused, active, and budget remains</text>
+</g>
+</svg>
+<figcaption>The first promotion populates its score and descent caches inside the same body
+used by retries. The return edge is bounded by the original Newton budget and retains only
+the unchanged state's tangent and reusable results; candidate topology reads remain live.</figcaption>
+</figure>
+
+<table>
+<caption>Same captured-array weak-rotation-reactor-static 300-cell certificate signature.</caption>
+<thead><tr><th>Arm</th><th>Serialized bytes</th><th>Compile wall, s</th><th>Execution wall, s</th><th>Mappings added by load</th><th>Peak process mappings</th></tr></thead>
+<tbody>
+<tr><td>Pinned assigned-base reproduction</td><td>126,313,582</td><td>136.081234</td><td>67.667038</td><td>10,446</td><td>26,380</td></tr>
+<tr><td>Fresh base capture for byte census</td><td>126,313,598</td><td>147.005831</td><td>70.084373</td><td>10,444</td><td>26,382</td></tr>
+<tr><td>Shared initial/retried promotions</td><td><strong>88,289,094</strong></td><td>140.948557</td><td>72.179381</td><td>8,125</td><td>21,743</td></tr>
+</tbody></table>
+<p>The retained change saves 38,024,488 bytes against the specified 126,313,582-byte
+baseline, a 30.10% reduction, and clears 100,000,000 by 11,710,906 bytes. The 16-byte
+variation between unchanged base captures is retained as remeasurement variability.
+The compile and execution walls are single measurements on CPU; executable shrinkage
+is not reported as a runtime-latency improvement.</p>
+<p>The candidate completes compilation and execution on CPU. All 1,529 terminal binary64
+values are bit-identical, changed values 0, maximum absolute difference 0 Wb, digest
+<code>d730c294b7aa7c1a7a9d9fdcf92a301f856ff066d3d7a50bb05cbf216b2b790b</code>.
+The result remains nonconverged at residual 0.05393078396762727, with three executed trips,
+16 trip slots, 30 attempted and 11 accepted Newton promotions. The existing
+<a href="#shared-live-read-bodies">shared-level solved/reference flux panel with both null sets and the wall</a>
+depicts exactly this unchanged state. No arithmetic-order exception is needed.</p>
+
+<h3>Actual serialized computation bytes, not output-buffer estimates</h3>
+<p>The instrument uses the parser and source-frame helpers from
+<code>benchmarks/program_scope_census.py</code>, then reads each computation's actual
+protobuf wire span. It does not allocate total executable bytes by instruction share,
+and it does not confuse the census's output-shape byte tally with executable storage.
+The complete optimized HLO module occurs byte-for-byte in each serialized executable at
+offset 1,101; this positive identity check establishes that the computation spans below
+are bytes in the executable. Field identities follow the
+<a href="https://github.com/openxla/xla/blob/main/xla/service/hlo.proto">HLO protobuf schema</a>.
+The separate capture includes the entire executable and optimized HLO protobuf and text.</p>
+<table><thead><tr><th>Serialized component</th><th>Base bytes</th><th>Shared-promotion bytes</th></tr></thead>
+<tbody>
+<tr><td>Complete optimized HLO module</td><td>111,741,009</td><td>77,869,755</td></tr>
+<tr><td>Computation messages, including their wire headers</td><td>108,704,843</td><td>75,732,237</td></tr>
+<tr><td>Remaining serialized executable payload outside the HLO module</td><td>14,572,589</td><td>10,419,339</td></tr>
+<tr><td>Number of optimized computations</td><td>24,270</td><td>16,121</td></tr>
+</tbody></table>
+<p>The remaining payload is reported separately, not assigned to source-addressable native
+functions without an instrument that supports that attribution.</p>
+<table>
+<caption>Largest base computations: direct wire bytes count each computation once.</caption>
+<thead><tr><th>Computation</th><th>Direct bytes</th><th>Attribution</th></tr></thead>
+<tbody>
+<tr><td><code>wide.region_223.5347.clone</code></td><td>13,119,932</td><td>Trip-scan container dominated by captured constants</td></tr>
+<tr><td><code>region_225.5345.clone</code></td><td>543,905</td><td>Active trip and reconciliation region</td></tr>
+<tr><td><code>region_1153.3177.clone.clone</code></td><td>433,245</td><td>Initial model rebuild</td></tr>
+<tr><td><code>region_716.5069.clone.clone.clone.clone</code></td><td>371,588</td><td>Initial promotion, including the carried fallback</td></tr>
+<tr><td><code>region_2362.4964.clone.clone.clone</code></td><td>344,838</td><td>Carried model rebuild</td></tr>
+<tr><td><code>region_1509.4381.clone.clone</code></td><td>324,913</td><td>Relative-merit descent</td></tr>
+</tbody></table>
+<p>The largest computation is not itself the duplicate evaluator: three of its constant
+instructions occupy 2,916,683 bytes each and three more occupy 935,816 bytes each.
+The retained signature carries those constants. Its candidate counterpart,
+<code>wide.region_223.4712.clone</code>, remains 13,116,852 bytes.</p>
+<table>
+<caption>Reachable computation bytes locate the sharing opportunity. These inclusive rows overlap and must not be summed.</caption>
+<thead><tr><th>Region</th><th>Base computation</th><th>Base reachable bytes</th><th>Retained counterpart and reachable bytes</th></tr></thead>
+<tbody>
+<tr><td>Initial promotion and its carried fallback</td><td><code>region_716.5069.clone.clone.clone.clone</code></td><td>77,774,137</td><td>Shared promotion <code>wide.wide.wide.wide.region_718.4432.clone.clone.clone.clone.clone.clone</code>: 45,205,753</td></tr>
+<tr><td>Separate carried fallback</td><td><code>wide.wide.wide.wide.region_2161.5066.clone.clone.clone.clone.clone.clone.clone.clone</code></td><td>32,800,551</td><td>Shares the same promotion region</td></tr>
+<tr><td>Initial model rebuild</td><td><code>region_1153.3177.clone.clone</code></td><td>16,442,199</td><td>Shared rebuild <code>region_1161.3122.clone.clone.clone</code>: 15,317,163</td></tr>
+<tr><td>Carried model rebuild</td><td><code>region_2362.4964.clone.clone.clone</code></td><td>15,271,775</td><td>Shares the same rebuild region</td></tr>
+<tr><td>Initial continuation recovery</td><td><code>region_1050.2680.clone.clone.clone</code></td><td>6,652,414</td><td>Shared recovery <code>region_1058.2688.clone.clone.clone</code>: 6,842,244</td></tr>
+<tr><td>Carried continuation recovery</td><td><code>region_2259.4710.clone.clone.clone</code></td><td>7,168,891</td><td>Shares the same recovery region</td></tr>
+<tr><td>Relative-merit descent</td><td><code>region_1509.4381.clone.clone</code></td><td>12,142,833</td><td><code>region_1458.4327.clone.clone</code>: 13,115,152</td></tr>
+</tbody></table>
+<p>This is the fan-versus-source-site distinction: a small parent computation reaches
+thousands of fused descendants. The change shares the duplicated parent region rather
+than renaming a source call or counting a single lowered callee as a reduction. The descent
+region grew, and that increase is preserved beside the larger net reduction.</p>
+
+<h3>Tests, refusal and the remaining global body proof</h3>
+<p>The unchanged focused base passes 152 cases and the separate unchanged-state fallback
+suite passes three cases. Two added optimized-body cases first fail on that implementation
+with <code>assert 2 == 1</code>, independently for backtracking and model rebuild. The
+retained candidate passes all 157 cases in 137.39 s with no added failures: the four assigned
+focused files and <code>tests/test_unchanged_state_fallback_carry.py</code>, which directly
+covers the changed behavior. The latter checks every receipt leaf bit for bit for rejected,
+conditioned and eventually accepted carried sequences.</p>
+<p>The declared negative mutation is
+<q>Replace _newton_krylov_inner with the base implementation that lowers initial and retried promotions separately.</q>
+The log starts with that exact sentence; both added optimized guards fail at
+<code>assert 2 == 1</code>, exit 1. The first implementation attempt also exposed an
+empty-cache <code>argmax</code> index mismatch, int32 against the actual int64 index under
+x64. It produced 44 tracing failures, not 44 independent numerical defects. The initializer
+now obtains its index from the same <code>argmax</code> operation, and the passing 157-case
+run follows that correction. The unsuccessful compile and suite logs are preserved.</p>
+<p><strong>The whole-read marker is not a qualified body-count instrument.</strong>
+A separate structural probe introduces a named sine at the physical read input and expects
+one sine and one differentiated cosine for a known single read. A name-filter attempt
+missed the differentiated scope and falsely returned zero; the corrected opcode census
+finds 27 primal sine instructions and three derivative cosine instructions for that same
+single read, spread across fused computations. The positive control therefore refuses the
+instrument before it can interpret the full solve. The perturbed program is never used for
+physical size, terminal state or performance evidence. No global one-primal/one-linearized
+pass is claimed from this failed control.</p>
+<p>The unperturbed optimized source-frame census falls from 22 primal, three JVP and two
+transpose read-provenance frames to 14 primal, two JVP and one transpose frames. Those are
+provenance counts across the compiled-computation fan, not certified complete-body counts.
+The remaining explicit evaluator regions are the
+Newton linearization, candidate ladders, continuation and damped-normal scoring, descent's
+independent gradient read, and live-mask reconciliation. Reusing the current exact tangent
+for the descent gradient and routing the separate candidate/reconciliation requests through
+one evaluator are concrete remaining sharing opportunities. The 100 MB size gate itself
+requires no further reduction.</p>
+<p><strong>Nonblocking follow-on: repair and qualify the global body-count instrument.</strong>
+In <code>benchmarks/program_scope_census.py</code>, group complete evaluator roots from
+the optimized computation/caller graph and operator-read primal/derivative provenance;
+distinguish fused descendant clones from separately emitted complete evaluator roots.
+Require a known single-read control to count one primal and one linearized root, and a
+deliberately duplicated evaluator-root control to count two of each. Only after both
+controls pass should the instrument count the unperturbed full solve, reporting executed
+trips separately. Raw marker opcode counts, source-frame counts and StableHLO call counts
+cannot substitute for those qualified root counts. The census source is outside this
+worker's write fence. The coordinator explicitly classifies this repair and proof as
+follow-on work rather than a blocker to the completed executable reduction.</p>
+
+<h3>CPU witness and durable artifacts</h3>
+<p>The resumed work uses one <code>all_debug</code> allocation, job <code>1275130</code>
+on <code>98dci4-clu-3142</code>, with
+<code>--cpus-per-task=8 --mem=64G --time=00:59:00</code>. Every measurement has its own
+process. <code>TMPDIR=/tmp</code> is set in submission and payload,
+<code>JAX_PLATFORMS=cpu</code> is explicit, and the shared root interpreter runs directly,
+without uv on the compute node. The allocation exits normally. The preceding orientation
+turn used and completed job 1275112; it is not represented as the same allocation.</p>
+<p><code>benchmarks.compile_abort_probe</code> samples every 0.5 s. The retained candidate
+has a nonzero precompile control of 5,488 mappings, 13,613 after compilation, an 8,125 load
+delta, and a 21,743 peak against 65,530. The measurement's HEAD field names
+<code>26b4af642</code> because the process began before the source commit; its measured
+solver implementation is the retained <code>faf2a7e01</code> worktree content. Later comment
+wrapping changes no executable behavior.</p>
+<p>All resumed artifacts are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T135548855711-fsri-one-read-body-per-trip-under-100-mb/census-sharing</code>:
+<code>base-measure.json</code>, <code>base-measure-census.json</code>,
+<code>base-measure-regions.json</code>, <code>shaped-promotion-measure.json</code>,
+<code>shaped-promotion-measure-census.json</code>,
+<code>shaped-promotion-measure-regions.json</code>,
+<code>shaped-promotion-measure-comparison.json</code>,
+<code>shaped-promotion-probe.json</code>, <code>shaped-promotion-suite.log</code>,
+<code>negative-control.log</code>, <code>promotion-reproduction.log</code>,
+<code>optimized-read-count.log</code>, <code>optimized-read-count-corrected.log</code>,
+and <code>read-control.hlo</code>. Both physical arms retain their
+<code>.executable</code>, <code>.hlo-proto</code>, <code>.hlo</code> and <code>.npy</code>
+files; <code>measure.py</code>, <code>census.py</code>, <code>regions.py</code> and
+<code>lane.sh</code> make the capture and attribution reviewable. The manifest names the
+commands, exits, commits and assigned paths. No plan metadata, driving followup, peer-owned
+file or benchmark source is changed.</p>
+</section>
 </main>
 </body>
 </html>

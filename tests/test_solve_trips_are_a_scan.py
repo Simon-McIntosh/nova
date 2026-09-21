@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from functools import partial
+import re
 
 import jax
 import jax.numpy as jnp
@@ -99,6 +100,63 @@ def _barrier_count(function, *arguments):
     return str(lowered.compiler_ir(dialect="stablehlo")).count(
         "stablehlo.optimization_barrier"
     )
+
+
+def _optimized_read_body_count(function, *arguments):
+    """Count the distinctive read operation after the compiler has inlined calls."""
+    compiled = jax.jit(function).lower(*arguments).compile()
+    return len(re.findall(r"^\s*(?:ROOT )?%\S+ = .* sine\(", compiled.as_text(), re.M))
+
+
+def test_read_body_counter_rejects_lowered_call_sharing():
+    """A shared lowered callee must not hide its optimized copies."""
+
+    @jax.jit
+    def read(state):
+        return jnp.sin(state)
+
+    def repeated(first, second, third):
+        return read(first), read(second), read(third)
+
+    def shared(states):
+        return jax.lax.map(read, states)
+
+    states = jnp.arange(51, dtype=jnp.float64).reshape(3, 17) / 51.0
+    lowered = jax.jit(repeated).lower(*states)
+    assert str(lowered.compiler_ir(dialect="stablehlo")).count("stablehlo.sine") == 1
+    assert _optimized_read_body_count(read, states[0]) == 1
+    assert _optimized_read_body_count(repeated, *states) == 3
+    assert _optimized_read_body_count(shared, states) == 1
+    np.testing.assert_array_equal(
+        np.stack(jax.jit(repeated)(*states)), jax.jit(shared)(states)
+    )
+
+
+@pytest.mark.parametrize(
+    "helper", ["_backtracked_promotion", "_rebuilt_model_promotion"]
+)
+def test_initial_and_retried_promotions_share_one_optimized_body(monkeypatch, helper):
+    original = getattr(fixed_point, helper)
+
+    def marked(*args, **kwargs):
+        result = original(*args, **kwargs)
+        return result._replace(state=jnp.sin(result.state))
+
+    monkeypatch.setattr(fixed_point, helper, marked)
+
+    def solve(initial):
+        return fixed_point.newton_krylov(
+            lambda state: jnp.tanh(state) + 0.5,
+            initial,
+            newton_steps=3,
+            gmres_iterations=2,
+            warmup=0,
+            precision=Precision.DOUBLE,
+        )
+
+    initial = jnp.linspace(0.1, 0.9, 17, dtype=jnp.float64)
+    assert _optimized_read_body_count(jnp.sin, initial) == 1
+    assert _optimized_read_body_count(solve, initial) == 1
 
 
 @pytest.mark.parametrize("use_incumbent", [False, True])

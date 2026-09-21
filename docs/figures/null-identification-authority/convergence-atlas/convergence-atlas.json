@@ -1,10 +1,10 @@
 {
   "schema": "nova-poloidal-convergence-atlas",
-  "renderer_revision": "51e4d08017667d14fc340027a5176ea7ebb28267",
+  "renderer_revision": "fea024be41cc35b8df895fca5902dbf12c35f2a9",
   "panel_count": 17,
   "per_frame_render_cost": {
-    "mean_seconds": 0.12005240470170975,
-    "max_seconds": 1.1290676351636648,
+    "mean_seconds": 0.09687516071340617,
+    "max_seconds": 0.6330420337617397,
     "count": 17
   },
   "panels": [
@@ -47,7 +47,7 @@
       "shadow_private_wall_nodes": 10,
       "shadow_private_drawn_segments": 12,
       "revision": "e6a83802b",
-      "render_seconds": 1.1290676351636648,
+      "render_seconds": 0.6330420337617397,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21978-35-pure.png"
     },
     {
@@ -89,7 +89,7 @@
       "shadow_private_wall_nodes": 10,
       "shadow_private_drawn_segments": 12,
       "revision": "e6a83802b",
-      "render_seconds": 0.03458545170724392,
+      "render_seconds": 0.04275678098201752,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21978-35-mixed.png"
     },
     {
@@ -131,7 +131,7 @@
       "shadow_private_wall_nodes": 7,
       "shadow_private_drawn_segments": 9,
       "revision": "e6a83802b",
-      "render_seconds": 0.16381590068340302,
+      "render_seconds": 0.08119612373411655,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21983-35-pure.png"
     },
     {
@@ -173,7 +173,7 @@
       "shadow_private_wall_nodes": 8,
       "shadow_private_drawn_segments": 10,
       "revision": "e6a83802b",
-      "render_seconds": 0.033350104466080666,
+      "render_seconds": 0.04227634705603123,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21983-35-mixed.png"
     },
     {
@@ -215,7 +215,7 @@
       "shadow_private_wall_nodes": 10,
       "shadow_private_drawn_segments": 12,
       "revision": "e6a83802b",
-      "render_seconds": 0.033059122040867805,
+      "render_seconds": 0.04223046079277992,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21985-51-pure.png"
     },
     {
@@ -257,7 +257,7 @@
       "shadow_private_wall_nodes": 5,
       "shadow_private_drawn_segments": 6,
       "revision": "e6a83802b",
-      "render_seconds": 0.032962460070848465,
+      "render_seconds": 0.042505400255322456,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21985-51-mixed.png"
     },
     {
@@ -299,7 +299,7 @@
       "shadow_private_wall_nodes": 5,
       "shadow_private_drawn_segments": 6,
       "revision": "e6a83802b",
-      "render_seconds": 0.05534448102116585,
+      "render_seconds": 0.07064445689320564,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21986-46-pure.png"
     },
     {
@@ -341,7 +341,7 @@
       "shadow_private_wall_nodes": 10,
       "shadow_private_drawn_segments": 12,
       "revision": "e6a83802b",
-      "render_seconds": 0.033179279416799545,
+      "render_seconds": 0.041397467255592346,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21986-46-mixed.png"
     },
     {
@@ -383,7 +383,7 @@
       "shadow_private_wall_nodes": 10,
       "shadow_private_drawn_segments": 12,
       "revision": "e6a83802b",
-      "render_seconds": 0.03313629515469074,
+      "render_seconds": 0.041967565193772316,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21989-55-pure.png"
     },
     {
@@ -425,7 +425,7 @@
       "shadow_private_wall_nodes": 5,
       "shadow_private_drawn_segments": 6,
       "revision": "e6a83802b",
-      "render_seconds": 0.07688643224537373,
+      "render_seconds": 0.1068532895296812,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/21989-55-mixed.png"
     },
     {
@@ -467,7 +467,7 @@
       "shadow_private_wall_nodes": 5,
       "shadow_private_drawn_segments": 6,
       "revision": "e6a83802b",
-      "render_seconds": 0.032948436215519905,
+      "render_seconds": 0.04137882776558399,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/22086-43-pure.png"
     },
     {
@@ -509,7 +509,7 @@
       "shadow_private_wall_nodes": 10,
       "shadow_private_drawn_segments": 12,
       "revision": "e6a83802b",
-      "render_seconds": 0.03251144289970398,
+      "render_seconds": 0.04199274070560932,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/22086-43-mixed.png"
     },
     {
@@ -551,7 +551,7 @@
       "shadow_private_wall_nodes": 0,
       "shadow_private_drawn_segments": 0,
       "revision": "diiid:d3d_shot_00000c4a7b",
-      "render_seconds": 0.20768514089286327,
+      "render_seconds": 0.24601837247610092,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/d3d_shot_00000c4a7b-179.png"
     },
     {
@@ -593,7 +593,7 @@
       "shadow_private_wall_nodes": 0,
       "shadow_private_drawn_segments": 0,
       "revision": "diiid:d3d_shot_0003ff34e7",
-      "render_seconds": 0.03525736927986145,
+      "render_seconds": 0.042556287720799446,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/d3d_shot_0003ff34e7-44.png"
     },
     {
@@ -635,7 +635,7 @@
       "shadow_private_wall_nodes": 1,
       "shadow_private_drawn_segments": 2,
       "revision": "diiid:d3d_shot_001554e054",
-      "render_seconds": 0.03629204444587231,
+      "render_seconds": 0.04355038143694401,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/d3d_shot_001554e054-144.png"
     },
     {
@@ -677,7 +677,7 @@
       "shadow_private_wall_nodes": 0,
       "shadow_private_drawn_segments": 0,
       "revision": "diiid:d3d_shot_002495e835",
-      "render_seconds": 0.03580988943576813,
+      "render_seconds": 0.04408867284655571,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/d3d_shot_002495e835-146.png"
     },
     {
@@ -719,7 +719,7 @@
       "shadow_private_wall_nodes": 0,
       "shadow_private_drawn_segments": 0,
       "revision": "diiid:d3d_shot_0040ca9bdc",
-      "render_seconds": 0.03499939478933811,
+      "render_seconds": 0.042422523722052574,
       "png_path": "/nova/figures/null-identification-authority/convergence-atlas/d3d_shot_0040ca9bdc-137.png"
     }
   ]

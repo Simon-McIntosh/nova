@@ -45,6 +45,7 @@ from benchmarks import mast_response_carrier_warm as response_carrier
 from nova.catalog.mast_geometry import shaped_section_vertices
 from nova.equilibrium.forward import _lattice_cells
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
+from nova.equilibrium.source import PolynomialFluxFunction
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import (
     configure_dtypes,
@@ -72,6 +73,9 @@ BOUNDARY_SAMPLES = 12
 #: Coils are context, not subject: a faint outline the contours read through.
 COIL_EDGE_COLOR = "#b8b8b8"
 COIL_LINEWIDTH = 0.45
+#: p-prime scales by 1+offset and ff-prime by 1-offset, so the pinned net
+#: plasma current is unchanged and only its radial distribution moves.
+RATIO_OFFSETS = (-0.30, -0.15, 0.0, 0.15, 0.30)
 #: Drawn plasma tessellation; the wall fit decides the delivered count.
 DEFAULT_HEX_CELLS = 4000
 CPU_PROVENANCE_MARKER = "NOVA_CENTROID_PANELS_CPU_PROVENANCE"
@@ -184,6 +188,48 @@ def _branches(profile: Any, state: Any, topology: Any) -> dict[str, np.ndarray]:
         "open_branch_valid": np.asarray(assembled["open_branch_valid"], bool),
         "well_formed": np.asarray(bool(np.asarray(assembled["well_formed"]))),
     }
+
+
+def _class_label(achieved: dict[str, Any]) -> str:
+    """Return the one-word topology the read derived, or its refusal."""
+    if achieved.get("read_status") != "qualified":
+        return str(achieved.get("read_status", "unread"))
+    return str(achieved.get("class", "unread"))
+
+
+def _varied_source(source: Any, pressure_scale: float, field_scale: float) -> Any:
+    """Return the source with its two flux-function amplitudes rescaled.
+
+    The plasma is supported by two low-degree flux functions, and the solve
+    pins the net plasma current, so scaling the pair in OPPOSITE directions
+    leaves the current where it was and changes only how that current is
+    distributed: p-prime enters the toroidal density weighted by R and
+    ff-prime weighted by 1/R, so the ratio is the radial shape knob. The
+    coefficient vectors and the evaluator are untouched, which is what lets
+    one compiled program serve every member of a series.
+
+    The field-by-field copy is the same construction the operator's own
+    profile-amplitude tangent uses; the frozen dataclasses validate on their
+    normal constructor and this path deliberately rebuilds around already
+    validated leaves.
+    """
+    core = object.__new__(type(source.core))
+    for name, value in source.core.__dict__.items():
+        object.__setattr__(core, name, value)
+    for field, scale in (("p_prime", pressure_scale), ("ff_prime", field_scale)):
+        function = getattr(source.core, field)
+        object.__setattr__(
+            core,
+            field,
+            PolynomialFluxFunction(
+                function.coefficients, function.normalisation * scale
+            ),
+        )
+    varied = object.__new__(type(source))
+    for name, value in source.__dict__.items():
+        object.__setattr__(varied, name, value)
+    object.__setattr__(varied, "core", core)
+    return varied
 
 
 def _timed_solve(
@@ -619,10 +665,241 @@ def panels(
         )
 
 
+def series(
+    receipt_path: Path,
+    figure_path: Path,
+    carrier_path: Path,
+    grid_points: int | None,
+    hex_cells: int,
+) -> None:
+    """Solve one frame repeatedly with the flux-function pair rescaled.
+
+    Every member carries the same conductor currents and the same pinned net
+    plasma current; only the ratio of the two low-degree flux-function
+    amplitudes moves. p-prime enters the toroidal current density weighted by
+    R and ff-prime weighted by 1/R, so the ratio redistributes a fixed current
+    radially, which is the lever on the boundary shape and on whether the
+    plasma reaches a saddle or leans on the wall.
+
+    The pair cannot break up-down symmetry by itself -- both are functions of
+    normalised flux alone -- so an upper against lower saddle can only move
+    here by changing WHICH of the machine's own saddles the boundary reaches
+    first. That is a real mechanism on a near-double-null frame and no
+    mechanism at all on a frame far from one; the receipt records both saddles
+    so the reader can see which case this is.
+    """
+    configure_dtypes()
+    if jax.config.jax_enable_x64 is not True:
+        raise RuntimeError("extended precision did not take before any array was built")
+    _require_host()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    started = time.perf_counter()
+    profile, prepared, carrier = edit._prepare_case(carrier_path, grid_points)
+    operator = profile.operator
+    lattice = profile.lattice
+    node_count = int(operator.grid.node_number)
+    requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    target_current = float(prepared["target_current"])
+    base_current = jnp.asarray(prepared["prescribed_current"])
+    pairs = (prepared["vertical_centroid_pair"],)
+    seed = prepared["initial"]
+    units = edit._wall_units(operator)
+    coils = _coil_outlines(edit.SHOT)
+
+    members: list[dict[str, Any]] = []
+    panels_data: list[dict[str, Any]] = []
+    program = None
+    for offset in RATIO_OFFSETS:
+        varied = _varied_source(profile.source, 1.0 + offset, 1.0 - offset)
+        member_profile = profile._with_source(varied)
+        result, wall = _timed_solve(
+            member_profile,
+            seed,
+            base_current,
+            requested,
+            target_current,
+            program,
+            pairs,
+        )
+        program = result.program
+        record = _solve_record(result, wall)
+        record["ratio_offset"] = float(offset)
+        record["pressure_scale"] = 1.0 + float(offset)
+        record["field_function_scale"] = 1.0 - float(offset)
+        try:
+            _masks, achieved = member_profile.operator.read(result.state)
+        except Exception as error:  # noqa: BLE001 - recorded, not swallowed
+            record["read_error"] = f"{type(error).__name__}: {error}"
+            members.append(record)
+            continue
+        nulls = edit._null_points(member_profile, result.state)
+        record["achieved_class"] = edit._achieved_class(member_profile, result.state)
+        record["axis_rz"] = [float(value) for value in nulls["axis"]]
+        record["x_points_rz"] = np.asarray(nulls["x_points"], float).tolist()
+        record["x_point_flux"] = np.asarray(nulls["x_point_flux"], float).tolist()
+        record["saddle_index"] = int(nulls["saddle_index"])
+        record["boundary_flux"] = float(np.asarray(achieved.boundary_flux))
+        record["axis_flux"] = float(np.asarray(achieved.axis_flux))
+        members.append(record)
+        panels_data.append(
+            {
+                "offset": float(offset),
+                "flux": np.asarray(result.state, float)[:node_count],
+                "branches": _branches(member_profile, result.state, achieved),
+                "nulls": nulls,
+                "boundary_flux": float(np.asarray(achieved.boundary_flux)),
+                "converged": bool(np.asarray(result.converged)),
+                "class": _class_label(record["achieved_class"]),
+            }
+        )
+        print(
+            f"MEMBER offset={offset:+.2f} wall_s={wall:.3f} "
+            f"residual={record['terminal_residual']:.3e} "
+            f"converged={record['converged']} "
+            f"class={_class_label(record['achieved_class'])}",
+            flush=True,
+        )
+
+    _render_series(
+        panels_data, lattice, units, coils, figure_path, hex_cells, node_count
+    )
+    receipt = {
+        "artifact": "flux-function ratio series at one pinned net plasma current",
+        "identity": f"{edit.SHOT}/{edit.SLICE_INDEX} mixed",
+        "source_revision": _source_revision(),
+        "runtime": _provenance(),
+        "evidence_inputs": {
+            "response_carrier": carrier,
+            "persistent_compilation_cache": cache.receipt(),
+            "grid_points": grid_points,
+            "lattice_shape": [int(value) for value in np.asarray(lattice.shape)],
+        },
+        "measurement_contract": {
+            "fixed": (
+                "conductor currents, the vertical current-centroid row, and the "
+                "pinned net plasma current"
+            ),
+            "varied": (
+                "the two flux-function normalisations, scaled by 1+offset and "
+                "1-offset, coefficient vectors and evaluator untouched"
+            ),
+            "target_current_a": target_current,
+            "ratio_offsets": [float(value) for value in RATIO_OFFSETS],
+            "program_reuse": (
+                "one compiled program serves every member; the flux-function "
+                "amplitudes cross the program boundary as traced scalars"
+            ),
+        },
+        "members": members,
+        "summary": {
+            "member_count": len(members),
+            "converged_count": int(sum(bool(m.get("converged")) for m in members)),
+            "classes": sorted(
+                {
+                    _class_label(m["achieved_class"])
+                    for m in members
+                    if "achieved_class" in m
+                }
+            ),
+            "elapsed_seconds": float(time.perf_counter() - started),
+        },
+    }
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, default=str) + "\n",
+        encoding="utf-8",
+    )
+    print("RECEIPT=" + str(receipt_path), flush=True)
+
+
+def _render_series(
+    panels_data: list[dict[str, Any]],
+    lattice: Any,
+    units: tuple[Any, ...],
+    coils: np.ndarray,
+    figure_path: Path,
+    hex_cells: int,
+    node_count: int,
+) -> None:
+    """Draw the series as one strip on a single shared level array."""
+    from nova.media.sources.plasma_mesh import clip_to_boundary, hex_mesh
+
+    if not panels_data:
+        raise RuntimeError("the series produced no drawable member")
+    shape = tuple(int(value) for value in np.asarray(lattice.shape))
+    radius = np.asarray(lattice.radius, float)
+    height = np.asarray(lattice.height, float)
+    maps = [item["flux"].reshape(shape).T for item in panels_data]
+    # One physical level array across the whole strip: a member drawn on its
+    # own levels would show a shape change that is only a change of scale.
+    levels = poloidal.contour_levels(
+        np.concatenate([item.ravel() for item in maps]),
+        LEVEL_COUNT,
+        boundary=panels_data[len(panels_data) // 2]["boundary_flux"],
+    )
+    mesh, _provenance = hex_mesh(units, cells=hex_cells)
+    figure, axes = plt.subplots(
+        1,
+        len(panels_data),
+        figsize=(3.1 * len(panels_data), 6.4),
+        facecolor=DEFAULT_INK.figure_facecolor,
+    )
+    axes = np.atleast_1d(axes)
+    for panel, item, flux in zip(axes, panels_data, maps):
+        poloidal_axes(panel)
+        poloidal.draw_coils(
+            panel, coils, edgecolor=COIL_EDGE_COLOR, linewidth=COIL_LINEWIDTH
+        )
+        boundary = poloidal.sample_cubic_controls(
+            item["branches"]["closed_controls_rz"],
+            item["branches"]["closed_valid"],
+            BOUNDARY_SAMPLES,
+        )
+        if boundary.shape[0] >= 3:
+            poloidal.draw_plasma_cells(
+                panel, clip_to_boundary(mesh, boundary), alpha=CELL_ALPHA
+            )
+        poloidal.draw_flux_contours(panel, radius, height, flux, levels)
+        poloidal.draw_separatrix_branches(
+            panel,
+            item["branches"],
+            closed_color=DEFAULT_INK.contour_color,
+            open_color=DEFAULT_INK.contour_color,
+            closed_linewidth=BOUNDARY_LINEWIDTH,
+            open_linewidth=BOUNDARY_LINEWIDTH,
+        )
+        x_points = np.asarray(item["nulls"]["x_points"], float).reshape(-1, 2)
+        saddle = int(item["nulls"]["saddle_index"])
+        poloidal.draw_nulls(
+            panel,
+            magnetic_axis=np.asarray(item["nulls"]["axis"], float),
+            x_points=x_points[saddle : saddle + 1] if x_points.size else None,
+            other_x_points=(
+                np.delete(x_points, saddle, axis=0) if x_points.shape[0] > 1 else None
+            ),
+            contain=units,
+        )
+        mark = "" if item["converged"] else "  (not converged)"
+        panel.set_title(
+            f"p'x{1.0 + item['offset']:.2f}  FF'x{1.0 - item['offset']:.2f}\n"
+            f"{item['class']}{mark}",
+            fontsize=8,
+        )
+        panel.set_xlim(float(radius.min()), float(radius.max()))
+        panel.set_ylim(float(height.min()), float(height.max()))
+    figure_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(figure_path, dpi=200, bbox_inches="tight")
+    figure.savefig(figure_path.with_suffix(".svg"), bbox_inches="tight")
+    plt.close(figure)
+    print(f"SERIES_FIGURE={figure_path} members={len(panels_data)}", flush=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
-    for name in ("run", "panels"):
+    for name in ("run", "panels", "series"):
         item = subparsers.add_parser(name)
         item.add_argument("--state", type=Path, default=DEFAULT_STATE)
         item.add_argument("--receipt", type=Path, default=DEFAULT_RECEIPT)
@@ -633,7 +910,15 @@ def main() -> None:
         item.add_argument("--hex-cells", type=int, default=DEFAULT_HEX_CELLS)
         item.add_argument("--grid-points", type=int, default=None)
     arguments = parser.parse_args()
-    if arguments.command == "run":
+    if arguments.command == "series":
+        series(
+            arguments.receipt,
+            arguments.figure,
+            arguments.carrier,
+            arguments.grid_points,
+            arguments.hex_cells,
+        )
+    elif arguments.command == "run":
         measure(
             arguments.state,
             arguments.receipt,

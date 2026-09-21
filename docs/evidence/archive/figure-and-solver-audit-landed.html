@@ -2750,6 +2750,82 @@ ROW2_EXIT=139</pre>
 <p><strong>Excluded from promotion counts:</strong> <code>r-20260920T180231259880-cca-one-certificate-row-per-process</code> is explicitly described in the census review as local and unpromoted; its useful measurement and defective receipt are not counted as a promotion.</p>
 
 </section>
+<section class="audit-directory" id="fsa-re-verify-the-class-governed-atlas-read">
+<h2>Class-governed MAST atlas second bookend — reject, 64/100</h2>
+<p>The source-level circular authority is removed: the renderer no longer reads
+<code>convergence-atlas.json</code> and maps each refreshed
+<code>ForwardSolveReceipt.topology_read.diverted</code> value to the class-pinned read and
+persisted label. The atlas-level repair remains incomplete. Only <code>22086/43 pure</code>
+and <code>22086/43 mixed</code> carry <code>solve_topology_class=diverted</code>; the other ten
+committed MAST operands omit that solve-owned field and the repaired atlas consequently labels
+them <code>unclassified</code>.</p>
+
+<table>
+<caption>Second-bookend disposition of the three first-review findings.</caption>
+<thead><tr><th>Finding</th><th>Measured result</th><th>Disposition</th></tr></thead>
+<tbody>
+<tr><th scope="row">class authority circular</th><td>The old-atlas read is gone, but only 2 of 12 bank rows persist the solve-owned class; the committed atlas has 2 diverted and 10 unclassified MAST rows. The named gate prints the legacy <code>class</code> field and therefore misleadingly reports 12 diverted rows.</td><td>not closed at atlas level</td></tr>
+<tr><th scope="row">two diverted panels silently empty</th><td><code>21983/35 pure</code> and <code>21986/46 pure</code> each persist and visibly draw <code>BoundaryGenerationFailure</code> with the reason that no closed branch exists. Their boundary-point count remains zero.</td><td>closed</td></tr>
+<tr><th scope="row">axes visible</th><td>All twelve original-resolution PNGs were opened; all have axes, ticks, labels and gridlines off. Glyph forms were judged under the producing worker's pre-<code>2b12b210a</code> statement.</td><td>closed</td></tr>
+</tbody>
+</table>
+
+<p>Ten nonempty rows carry a branch through the admitted saddle: distances are 0 for
+<code>21978/35 pure</code>, <code>21978/35 mixed</code>, <code>21983/35 mixed</code> and
+<code>21985/51 pure</code>; <code>7.146146075861307e-14 m</code> for
+<code>21985/51 mixed</code>; <code>2.482534153247273e-16 m</code> for
+<code>21986/46 mixed</code>; <code>1.836534403909607e-13 m</code> and
+<code>3.809718782917855e-13 m</code> for the two <code>21989/55</code> rows; and
+<code>3.820199830714189e-15 m</code> and <code>2.132398574419467e-13 m</code> for the two
+<code>22086/43</code> rows.</p>
+
+<p>One <code>all_debug</code> CPU allocation (job <code>1275429</code>) ran the named gate,
+the test file in a fresh process, and the scratch negative control at
+<code>fea024be41cc35b8df895fca5902dbf12c35f2a9</code>. It used
+<code>TMPDIR=/tmp</code> in the submit environment and payload, set
+<code>JAX_PLATFORMS=cpu</code>, invoked the root interpreter directly and did not invoke
+<code>uv</code> on the node. The gate receipt reads <code>RENDERER_EXIT=0</code>,
+<code>ATLAS_EXIT=0</code> and <code>MEASURE_EXIT=0</code>; the fresh test process reads
+8 passed in 39.92 s. The mutation “the solve topology class is read from the pre-existing atlas
+instead of the solve receipt” reddens the intended limited test at 1 failed and 7 passed.</p>
+
+<p><strong>Promotion blockers.</strong> Regenerate all twelve MAST operands from their solve
+receipts and require 12 of 12 non-null <code>solve_topology_class</code> values; replace the
+helper-only limited test at <code>tests/test_topology_visual_generator.py:201-216</code> with a
+case that reaches the renderer, cache and publisher; and make the gate census read the solve-owned
+field rather than the legacy label. The current test separately calls the receipt-class, label and
+flux helpers, so it does not prove the claimed end-to-end seam. No figure is added to this record:
+the decision is a three-finding evidence comparison with scalar counts and is clearer as the
+semantic table above.</p>
+
+<h3>Findings JSON</h3>
+<pre>{
+  &quot;verdict&quot;: &quot;reject&quot;,
+  &quot;score&quot;: 64,
+  &quot;reviewed_tip&quot;: &quot;fea024be41cc35b8df895fca5902dbf12c35f2a9&quot;,
+  &quot;class_census&quot;: {
+    &quot;mast_rows&quot;: 12,
+    &quot;solve_topology_class_present&quot;: 2,
+    &quot;solve_topology_class_missing&quot;: 10,
+    &quot;atlas_diverted&quot;: 2,
+    &quot;atlas_unclassified&quot;: 10
+  },
+  &quot;gate&quot;: {
+    &quot;job_id&quot;: 1275429,
+    &quot;renderer_exit&quot;: 0,
+    &quot;atlas_exit&quot;: 0,
+    &quot;measure_exit&quot;: 0,
+    &quot;test_result&quot;: &quot;8 passed in 39.92 s&quot;,
+    &quot;negative_control_result&quot;: &quot;1 failed, 7 passed&quot;
+  },
+  &quot;findings&quot;: [
+    {&quot;id&quot;: &quot;solve-class-bank-incomplete&quot;, &quot;severity&quot;: &quot;high&quot;, &quot;promotion_blocking&quot;: true},
+    {&quot;id&quot;: &quot;limited-case-is-helper-level&quot;, &quot;severity&quot;: &quot;high&quot;, &quot;promotion_blocking&quot;: true},
+    {&quot;id&quot;: &quot;gate-reads-legacy-class&quot;, &quot;severity&quot;: &quot;medium&quot;, &quot;promotion_blocking&quot;: true}
+  ],
+  &quot;closed_findings&quot;: [&quot;old-atlas-read-removed&quot;, &quot;empty-boundaries-explicit&quot;, &quot;axes-off&quot;]
+}</pre>
+</section>
   </main>
 </body>
 </html>

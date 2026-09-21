@@ -6,4 +6,4 @@ plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
 collected 15 items
 
-tests/test_exact_clip_memory.py .............
+tests/test_exact_clip_memory.py .............F

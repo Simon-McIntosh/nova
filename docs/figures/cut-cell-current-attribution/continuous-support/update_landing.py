@@ -100,6 +100,9 @@ paired = (
     else []
 )
 for result in paired:
+    if not result["completed"]:
+        result["passed_count"] = None
+        continue
     log = Path(result["log_path"]).read_text()
     result["failure_ids"] = re.findall(r"^FAILED\s+(\S+)", log, re.M)
     if result["exit_status"] and not result["failure_ids"]:
@@ -111,17 +114,33 @@ for result in paired:
         if re.findall(r"(\d+) passed", log)
         else 0
     )
-complete_modules = len(paired) == 12
+expected_targets = {
+    "tests/test_xpoint_cell_wedge_clip.py",
+    "tests/test_clipped_support_quadrature.py",
+    "tests/test_solovev_certificate_builder.py",
+    "tests/test_exact_clip_moments.py",
+    "tests/test_moment_path_separatrix_test.py",
+    "tests/test_exact_clip_memory.py",
+}
+expected_arms = {
+    (variant, target)
+    for variant in ("baseline", "after")
+    for target in expected_targets
+}
+completed_arms = {
+    (result["variant"], result["target"]) for result in paired if result["completed"]
+}
+complete_modules = completed_arms == expected_arms
 baseline_failures = {
     failure
     for result in paired
-    if result["variant"] == "baseline"
+    if result["variant"] == "baseline" and result["completed"]
     for failure in result["failure_ids"]
 }
 after_failures = {
     failure
     for result in paired
-    if result["variant"] == "after"
+    if result["variant"] == "after" and result["completed"]
     for failure in result["failure_ids"]
 }
 added_failures = sorted(after_failures - baseline_failures)
@@ -130,7 +149,11 @@ acceptance = {
     "tests": paired,
     "complete_module_delta": complete_modules,
     "added_failures": added_failures,
+    "added_failure_count": len(added_failures) if complete_modules else None,
+    "failure_delta_scope": "Completed module processes only; the full delta is unknown until every expected arm completes.",
     "tangent_rung_accepted": True,
+    "worker_delivery_complete": True,
+    "remaining_validation_owner": "Separate coordinator-owned test node",
     "delivery_gate_complete": complete_modules and not added_failures,
     "coordinator_acceptance": "Retain the improved tangent rung; cold-seed convergence is not accepted. The outside-centroid share is accepted as no material rise.",
     "accepted": complete_modules
@@ -194,11 +217,32 @@ global cold-seed convergence.</p>
 """
 )
 body += (
-    f"<p>Imported-module gate: {len(paired)} of 12 baseline/after module processes completed; complete delta {str(complete_modules).lower()}. "
+    f"<p>Imported-module gate: {len(completed_arms)} of 12 baseline/after module processes completed; complete delta {str(complete_modules).lower()}. "
     + link(ROOT / "acceptance.json", "current numerical and test acceptance receipt")
     + ". A canceled initial baseline run is excluded because its child interpreters bypassed the import pin; the paired wrapper pins those child imports too.</p>"
 )
-body += f"<p>The imported-module inventory is six modules, each run against baseline and candidate: twelve fresh processes. The two interrupted processes are the baseline and candidate arms of <code>tests/test_exact_clip_memory.py</code>. Their completion allocation is 1275237 on all_debug, 59 minutes, eight CPUs and 64 GiB, with TMPDIR=/tmp in both submit and payload, JAX_PLATFORMS=cpu and the root interpreter invoked directly. Complete delta: {str(complete_modules).lower()}; newly added failures: {len(added_failures)}. The earlier 25-minute timeout is retained as interrupted evidence, not a pass.</p>"
+body += "<p>The imported-module inventory is six modules, each run against baseline and candidate: twelve fresh processes. Completion allocation 1275237 used all_debug, 59 minutes, eight CPUs and 64 GiB, with TMPDIR=/tmp in both submit and payload, JAX_PLATFORMS=cpu and the root interpreter invoked directly. It ended TIMEOUT after 59m26s. Its scheduler exit field is 0:0; that is not a successful pytest exit. The baseline <code>tests/test_exact_clip_memory.py</code> process ends with thirteen pass markers and one failure marker, without a traceback or session summary. The candidate process never started. Neither <code>completed-suite.json</code> nor <code>gate-exit.json</code> was written; the available allocation and baseline logs establish that the log inventory sees files known to be present.</p>"
+body += (
+    "<p><strong>Worker delivery complete for the accepted tangent-repair rung; "
+    "the full imported-module gate remains incomplete.</strong> "
+    "The five completed module pairs contain 30 baseline passes and 30 candidate "
+    "passes, with zero added failures in those pairs. The full added-failure "
+    "count is unknown. Incomplete arms are explicitly marked completed=false "
+    "and do not qualify merely because twelve rows are present. A separate "
+    "coordinator-owned test node is running the baseline and candidate arms of "
+    "<code>tests/test_exact_clip_memory.py</code>. The baseline arm was "
+    "interrupted; the candidate arm was not started in this allocation. "
+    "No additional allocation or out-of-scope test repair was attempted here. "
+    + link(ROOT / "completion-allocation.log", "allocation timeout log")
+    + "; "
+    + link(
+        ROOT / "paired-baseline-test_exact_clip_memory.log",
+        "incomplete baseline log",
+    )
+    + "; "
+    + link(ROOT / "paired-suite.json", "all completed and incomplete arm receipts")
+    + ". The earlier 25-minute timeout remains interrupted evidence.</p>"
+)
 body += "<p>Compute: H200 solve job 1275180 is coordinator-owned and was left untouched; titan is the GPU fallback and every quoted GPU wall belongs to its P100. Each certificate row runs in its own process, within one allocation per measurement. The first CPU fallback was submitted while titan lacked the required four cores. Compiler-event wall and remaining execution-plus-host wall are separate receipt fields; the latter is not asserted to be pure device time.</p>"
 for row in rows:
     if row.get("completed"):
@@ -273,7 +317,8 @@ print(
                 {key: value for key, value in row.items() if key != "timing"}
                 for row in rows
             ],
-            "test_processes": len(paired),
+            "recorded_test_arms": len(paired),
+            "completed_test_processes": len(completed_arms),
             "panels": len(figures),
         },
         indent=2,

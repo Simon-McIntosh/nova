@@ -523,8 +523,8 @@ class Topology(Pytree):
             brackets = jnp.where(closed[:, jnp.newaxis], closed_brackets, open_brackets)
             fitted = (ends - starts) >= 3
 
-        coordinate = self.wall.coordinate[brackets]
-        values = wall_flux[brackets]
+        coordinate = jnp.asarray(self.wall.coordinate)[brackets]
+        values = jnp.asarray(wall_flux)[brackets]
 
         def fit_one(points, samples):
             length = select.length_2d(points[:, 0], points[:, 1], array_namespace=jnp)

@@ -22,6 +22,15 @@ def _generator():
     return module
 
 
+def _atlas():
+    path = Path(__file__).parents[1] / "benchmarks/poloidal_convergence_atlas.py"
+    spec = spec_from_file_location("poloidal_convergence_atlas", path)
+    assert spec is not None and spec.loader is not None
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def _operand() -> dict[str, object]:
     point = np.asarray(((0.0, 0.0),))
     cells = np.asarray(((0.0, 0.0), (2.0, 2.0)))
@@ -205,15 +214,101 @@ class _SynthesisedSolveReceipt:
 
 def test_limited_solve_receipt_governs_label_and_boundary_without_an_atlas(tmp_path):
     generator = _generator()
+    atlas = _atlas()
     receipt = _SynthesisedSolveReceipt(diverted=False)
-    requested_class = generator._solve_receipt_topology_class(receipt)
-    assert requested_class == generator.TopologyClass.LIMITED
-    assert generator._topology_class_label(requested_class) == "limited"
     read = _SynthesisedTopologyRead(0.0177761, -0.1220793, 0.0177761)
-    assert generator._class_boundary_flux(read, requested_class) == pytest.approx(
-        0.0177761
+
+    class Operator:
+        def __init__(self):
+            self.requested_classes = []
+
+        def read(self, state, *, requested_class):
+            assert state == "limited-state"
+            self.requested_classes.append(requested_class)
+            return object(), read
+
+    operator = Operator()
+    (
+        requested_class,
+        class_label,
+        _masks,
+        topology,
+        boundary_flux,
+    ) = generator._governed_topology_read(operator, "limited-state", receipt)
+    assert requested_class == generator.TopologyClass.LIMITED
+    assert operator.requested_classes == [generator.TopologyClass.LIMITED]
+    assert class_label == "limited"
+    assert boundary_flux == pytest.approx(0.0177761)
+    assert topology is read
+
+    radius = np.asarray((0.0, 1.0, 2.0))
+    height = np.asarray((-1.0, 0.0, 1.0))
+    cells = np.asarray([(r, z) for r in radius for z in height])
+    wall_contact = np.asarray(((2.0, 0.0),))
+    boundary = np.asarray(
+        ((0.5, -0.5), (2.0, -0.5), (2.0, 0.0), (2.0, 0.5), (0.5, 0.5))
     )
-    assert not (tmp_path / "convergence-atlas.json").exists()
+    row = _operand()
+    row.update(
+        {
+            "machine": "MAST",
+            "identity": "1/2 limited",
+            "arm": "limited",
+            "cell_rz": cells,
+            "domain_labels": np.ones(len(cells), dtype=np.int8),
+            "per_cell_flux_values": np.asarray(
+                [(r - 1.0) ** 2 + z**2 for r, z in cells]
+            ),
+            "selected_o": np.asarray(((1.0, 0.0),)),
+            "selected_x": np.asarray(((1.0, 1.0),)),
+            "x_candidates": np.asarray(((1.0, 1.0),)),
+            "wall_point": wall_contact,
+            "wall": np.asarray(
+                ((0.0, -1.0), (2.0, -1.0), (2.0, 1.0), (0.0, 1.0), (0.0, -1.0))
+            ),
+            "nova_boundary": boundary,
+            "efit_axis": np.asarray(((1.0, 0.0),)),
+            "efit_x": np.asarray(((1.0, 1.0),)),
+            "efit_lcfs": boundary,
+            "class": class_label,
+            "solve_topology_class": class_label,
+            "terminal_residual": 0.0,
+        }
+    )
+    cache = tmp_path / "mast-operands.npz"
+    authority = {"source_path": "fixture.py", "source_identity": "sha256:fixture"}
+    generator._write_cache(cache, [row], authority)
+    cached = generator._read_cache(cache, authority["source_identity"])
+    assert cached[0]["solve_topology_class"] == "limited"
+
+    atlas_receipt = tmp_path / "atlas/convergence-atlas.json"
+    assert not atlas_receipt.exists()
+    diiid_cache = tmp_path / "diiid-operands.npz"
+    np.savez_compressed(diiid_cache)
+    diiid_cache.with_suffix(".metadata.json").write_text('{"rows": []}\n')
+    atlas.MAST_TOPOLOGY = cache
+    atlas.MAST_METADATA = cache.with_suffix(".metadata.json")
+    atlas.DIIID_TOPOLOGY = diiid_cache
+    atlas.DIIID_METADATA = diiid_cache.with_suffix(".metadata.json")
+    atlas.OUT_DIR = atlas_receipt.parent
+    atlas._git_revision = lambda: "fixture-revision"
+    drawn_boundaries = []
+    draw_boundary = atlas.poloidal.draw_boundary
+
+    def record_boundary(axes, r, z, **kwargs):
+        drawn_boundaries.append(np.column_stack((r, z)))
+        return draw_boundary(axes, r, z, **kwargs)
+
+    atlas.poloidal.draw_boundary = record_boundary
+    payload = atlas.run(atlas_receipt)
+
+    assert atlas_receipt.is_file()
+    assert payload["panels"][0]["class"] == "limited"
+    assert payload["panels"][0]["boundary_point_count"] == len(boundary)
+    assert any(
+        np.any(np.all(np.isclose(points, wall_contact[0]), axis=1))
+        for points in drawn_boundaries
+    )
 
 
 def test_healthy_boundary_reports_integer_counts_with_true_availability(tmp_path):

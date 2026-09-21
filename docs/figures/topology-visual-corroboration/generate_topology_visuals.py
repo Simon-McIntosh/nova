@@ -206,6 +206,20 @@ def _class_boundary_flux(topology, requested_class) -> float:
     raise ValueError(f"unsupported requested topology class {requested_class!r}")
 
 
+def _governed_topology_read(operator, state, solve_receipt):
+    """Read topology under the class achieved by the solve receipt."""
+
+    requested_class = _solve_receipt_topology_class(solve_receipt)
+    masks, topology = operator.read(state, requested_class=requested_class)
+    return (
+        requested_class,
+        _topology_class_label(requested_class),
+        masks,
+        topology,
+        _class_boundary_flux(topology, requested_class),
+    )
+
+
 def _stationary_records(
     source_o: np.ndarray,
     source_x: np.ndarray,
@@ -325,8 +339,14 @@ def _mast_rows(
                 source_o, source_x = jax.device_get(
                     profile.operator._fixed_design_topology.grid(grid_flux)
                 )
-                masks, topology = profile.operator.read(
-                    state, requested_class=requested_class
+                (
+                    requested_class,
+                    solve_topology_class,
+                    masks,
+                    topology,
+                    boundary_flux,
+                ) = _governed_topology_read(
+                    profile.operator, state, solve_receipts[arm]
                 )
                 geometry = reachability._grid_geometry(profile, state)
                 flux = np.asarray(geometry["flux"], dtype=float)
@@ -421,7 +441,6 @@ def _mast_rows(
                     vertices = np.asarray(polygon, dtype=float)
                     padded_polygons[polygon_index, : len(vertices)] = vertices
                 shared_flux = moment_geometry.shared_node_flux(grid_flux)
-                boundary_flux = _class_boundary_flux(topology, requested_class)
                 signed_flux = profile.operator.polarity * (shared_flux - boundary_flux)
                 print(
                     f"MAST_REPLAY_FIELDS_READY {shot}/{slice_index} {arm}",

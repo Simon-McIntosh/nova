@@ -1351,6 +1351,43 @@ ROW2_EXIT=139</pre>
 <li><code>masks.profile_participation</code> is the domain the profile <strong>owns</strong>, not the current-carrying set, so 135 of 135 is neither a collapsed nor an inflated support.</li>
 </ul>
 </section>
+<section class="audit-directory" id="cca-verify-the-separatrix-test-repair-section">
+<h2 id="cca-verify-the-separatrix-test-repair">Separatrix test repair review</h2>
+<p>Verdict: <strong>promote with corrected criteria</strong>. Score: <strong>88/100</strong>.</p>
+<p>Repair reviewed: <code>a493a1f4f11102ee20a4af6e7869a42cbbc27b4d</code> on base <code>7c97f916d81c041fda079d82ee963f7788863e20</code>. The commit changes <code>ForwardSource.current_moments</code> to hand <code>_FluxSelectedProfile(self.core, self.common_sol)</code> to quadrature unconditionally and adds <code>tests/test_moment_path_separatrix_test.py</code>; no other production path changes. <code>_FluxSelectedProfile.current_density</code> returns exactly zero for <code>psi_norm &gt; 1</code> when no common-SOL continuation exists and preserves the core density at and below the separatrix.</p>
+<h3 id="cca-verify-the-separatrix-test-repair-reproduction-and-negative-control">Reproduction and negative control</h3>
+<p>The defect reproduces against the base source with the repair's test: <code>test_moment_path_applies_the_separatrix_test_at_the_seed</code> fails because the captured quadrature profile is a bare <code>DomainProfile</code>, not <code>_FluxSelectedProfile</code>. The source-level negative control, <code>MUTATION: restoring the bare self.core selection</code>, fails the same assertion. The repaired source passes the case. This is the required refusal rather than an inference from a passing suite.</p>
+<h3 id="cca-verify-the-separatrix-test-repair-boundary-band-receipt">Boundary-band receipt</h3>
+<p>The original instrument and analyser were loaded from the diagnostic report with SHA-256 <code>08246c10719315b085e1176ee2502bd4b420e9d41ab07e28539c4286a364370e</code> and <code>1be3206af2ed392584801d30ff11f72ba2cb050165e9d6fa0bdb982eba3d6740</code>. One <code>all_debug</code> allocation, job <code>1274492</code>, used <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in submit and payload, the shared root interpreter directly, and the repair worktree on <code>PYTHONPATH</code>.</p>
+<p>The cold-seed receipt is complete and gives:</p>
+<table><thead><tr><th>Measure</th><th>Before</th><th>Repair</th></tr></thead><tbody>
+<tr><td>outside-centroid cells visible to the instrument</td><td>85</td><td>85</td></tr>
+<tr><td>outside-centroid cells carrying current</td><td>85</td><td>12</td></tr>
+<tr><td>current in outside-centroid cells / unscaled total</td><td>55.1%</td><td>4.9144724741%</td></tr>
+<tr><td>unscaled current</td><td>not retained by this review</td><td>8.00491 MA</td></tr>
+<tr><td>target current</td><td>16.3148 MA</td><td>16.3148 MA</td></tr>
+<tr><td>seed amplitude</td><td>0.8968</td><td>2.0380954023</td></tr>
+<tr><td>arithmetic check, target / unscaled</td><td>—</td><td>2.0380954023</td></tr>
+</tbody></table>
+<p>The instrument sees the known-present set of 85 outside-centroid cells, so the reduction is not an empty-census artifact. The twelve survivors are cut cells whose quadrature has confined-side support; counting their legitimate confined current as leakage makes the centroid metric invalid after pointwise clipping. The direct guarded quantity is instead the density evaluated at <code>psi_norm &gt; 1</code>, and the repaired test pins it to exactly zero.</p>
+<p>The amplitude clause is arithmetically reversed. Under pinned plasma current, amplitude is <code>target / unscaled</code>. Removing extrapolated current lowers the unscaled total, so amplitude must rise, here from the recorded <code>0.8968</code> to <code>2.0380954023</code>; movement toward unity is not an acceptance property of this repair. A later allocation/candidacy repair may change the confined unscaled total, but this commit cannot simultaneously remove the former current and preserve the earlier amplitude.</p>
+<p>The max-five-trip process got beyond the earlier 64 GiB failure and printed trip 1 (<code>residual 5.72675e-2</code>, amplitude <code>2.02831</code>) and trip 2 (same residual and amplitude). It later aborted in LLVM allocation after an overlapping 16 GiB test step was started in the same allocation, so no max-five-trip JSON or terminal residual is claimed. The durable seed receipt was written first in a sibling step of the same allocation. This instrumentation failure costs twelve review points and must not be read as a physics failure.</p>
+<h3 id="cca-verify-the-separatrix-test-repair-test-delta">Test delta</h3>
+<table><thead><tr><th>Arm</th><th><code>test_moment_path_separatrix_test.py</code></th><th><code>test_forward_operator_axes.py</code></th></tr></thead><tbody>
+<tr><td>base <code>7c97f916d</code> source</td><td>1 failed</td><td>2 passed, 1 failed</td></tr>
+<tr><td>repair <code>a493a1f4f</code></td><td>1 passed</td><td>2 passed, 1 failed</td></tr>
+</tbody></table>
+<p>The common axes failure is <code>test_tensor_product_grid_class_margin_is_read_on_the_spline</code>, <code>inf</code> against <code>-0.31887492472951007</code>; it is identical on the base and repair arms, so added failures are zero. The repair fixes one previously failing guarded case and adds none.</p>
+<h3 id="cca-verify-the-separatrix-test-repair-corrected-promotion-criteria">Corrected promotion criteria</h3>
+<p>Promote <code>a493a1f4f</code> with the following correction to the recorded gate:</p>
+<ol>
+<li>The pointwise no-continuation profile must return exactly zero above <code>psi_norm = 1</code> and preserve the core density inside; the base and bare-core negative controls must fail this assertion.</li>
+<li>The centroid census is diagnostic only: report total outside-centroid cells, live outside-centroid cells and their confined-current share. Do not require the share to be below one percent or zero, because a clipped cell may have its centroid outside while retaining a real confined polygon.</li>
+<li>Under a pinned target current, require the reported amplitude to equal <code>target_current / unscaled_current</code>; do not require movement toward unity from this repair alone.</li>
+<li>Keep the standing forward-axes failure as a follow-on outside this node. A merged-head verification node owns the combined result.</li>
+</ol>
+<p>No source under <code>nova/</code> was edited or committed by this review.</p>
+</section>
 <section class="audit-directory" id="fsa-audit-solver-census-and-certificate-drivers-section">
 <h2 id="fsa-audit-solver-census-and-certificate-drivers">Solver-driver promotion review</h2>
 <p>Review lane: independent Codex worker, worktree head <code>0322e911a52588e116bb76a2243ff0dc728cc655</code> (<code>main</code>). Review window: promotions whose git history touched the eight requested benchmark paths since 2026-09-16. The ledger join was performed against <code>docs/state/nova/crew.json</code>; it produced 18 promotion rows. <code>benchmarks/forward_census.py</code> is not present at the merged head and has no matching git history, so it has no gate row rather than an invented result.</p>

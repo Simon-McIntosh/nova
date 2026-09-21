@@ -92,6 +92,19 @@
     on the H200 tables kernel count, launch latency share and compute share; terminal states on the committed
     300-cell rows are bit-identical.</p>
 
+    <h3 id="s2-trip-scan-landing">Shared trip body: measured reduction, acceptance remains open</h3>
+    <p>Commit <code>d8bbc0491e72df29ddaabc1e6d76f704c4c8dc2d</code> moves the separately
+    executed first trip into the shared scan. The lowered-program regression sees one
+    trip body instead of two; the focused suite passes 146 cases against 138 at the base,
+    including fixed-capacity telemetry and the already-scanned reduced budgets.
+    The captured-array executable is 146,456,085 bytes versus 597,161,307 at the current base;
+    the explicit production signature falls from 209,534,805 to 135,466,680 bytes, also above the ceiling;
+    all 1,529 terminal values are bit-identical (maximum absolute difference 0). The
+    negative control failed both body-count checks as required. The 100 MB captured-array
+    target, historical identity array, and out-of-scope source-inventory repair remain open, as recorded
+    in the <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#shared-trip-body">cumulative landing record</a>.
+    This entry does not close the section or resolve its driving followup.</p>
+
     <h2 id="s3">§3 — Carry every solve evaluation through one traced operator state machine</h2>
     <p>The frozen-topology interim reduced the 300- and 1000-cell optimised solves from 654,832 and 662,331
     instructions to 203,078 and 204,531 and cut the cold 300-cell compile from 370 s to 60 s, but it could not

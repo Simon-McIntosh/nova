@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T12:31:52",
+  "updated": "2026-09-21T12:31:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5675,6 +5675,15 @@
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a0a908-c4fc-7433-a15d-3543d29739d8"
         },
         "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-pfs-figs-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
       },
       {
         "id": "s19c-pfs-landing-c",
@@ -225470,6 +225479,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3042
+    "_version": 3043
   }
 }

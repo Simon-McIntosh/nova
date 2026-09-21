@@ -277,7 +277,10 @@ def _mast_rows(
         target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
         observed_profile = _ObservedProfile(profile)
         states = reachability._mast_states(
-            observed_profile, jnp.asarray(passive_case["state"]), target_current
+            observed_profile,
+            jnp.asarray(passive_case["state"]),
+            target_current,
+            carrier_identity=carrier["carrier"]["semantic_response_identity"],
         )
         if observed_profile.portfolio is None:
             raise RuntimeError("the MAST solve returned no observable branch portfolio")

@@ -1338,6 +1338,16 @@ benchmarks/solovev_certificate.py:2514: RuntimeError
   carrier identity at both stale call sites, then regenerate the MAST operand bank wholesale (the
   bank's rows carry no class field, so the retained eleven rows and every DIII-D row read
   <code>unclassified</code> until it is refreshed), then run this node's gate for 22086/43 mixed.</p>
+
+  <p>Ruling, and what it changed here. The coordinator brought the missing
+  <code>carrier_identity</code> inside this node's fence, so the argument is now passed at
+  <code>generate_topology_visuals.py:279</code> from the carrier the row already loads; the second stale
+  call site (<code>reachability_grid_final.py:208</code>) stays outside the fence and is reported. The
+  stale bank is explicitly left alone — no regeneration runs in this node, and the single command that
+  refreshes it is recorded in the run manifest instead. The atlas receipt this node's gate had rewritten
+  is restored to its committed content in the worktree (<code>git checkout HEAD --</code> on that one
+  path, inside the worktree), so no class-less rows land. The gate stays unmeasured and the node stays
+  blocked, with the measurement it owes unchanged: regenerate the bank, then run the 22086/43 gate.</p>
 </section>
 </main>
 </body>

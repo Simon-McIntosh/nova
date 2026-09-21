@@ -2675,24 +2675,23 @@ class ForwardFluxOperator:
         self, physical, requested_class=None, private_wall_node_mask=None
     ):
         """Read topology data after admitting a centroid-nearest rescue cell."""
-        initial = self._fixed_design_topology.read_qualification(
-            physical,
-            self.polarity,
-            self.inside_material,
-            requested_class,
-            private_wall_node_mask,
-        )
         grid_flux, _wall_flux = self._fixed_design_topology.split_flux_map(physical)
         vmap_o, _vmap_x = self._fixed_design_topology.grid(grid_flux)
         rescue_axis = self._independent_rescue_axis(vmap_o)
         _seed, material = self.connectivity_axis_seed(rescue_axis)
-        result = self._fixed_design_topology.read_qualification(
-            physical,
-            self.polarity,
-            material,
-            requested_class,
-            private_wall_node_mask,
-        )
+
+        def qualify(inside_material):
+            return self._fixed_design_topology.read_qualification(
+                physical,
+                self.polarity,
+                inside_material,
+                requested_class,
+                private_wall_node_mask,
+            )
+
+        readings = jax.lax.map(qualify, jnp.stack((self.inside_material, material)))
+        initial = jax.tree.map(lambda value: value[0], readings)
+        result = jax.tree.map(lambda value: value[1], readings)
         masks = result.masks
         connected = result.connected
         if isinstance(masks, DomainMasks):

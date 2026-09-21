@@ -41,11 +41,19 @@ DEFAULT_OUTPUT = (
 SHOT = 22086
 #: The two pinned carrier grids, named by the row count of their response.
 GRID_ROWS = (1126, 4262)
-#: One tile: the whole pair space fits well inside a device at these sizes,
-#: so the measurement is not also measuring a tiling strategy.
+#: Quadrature shape.
 PANELS = 16
 NODES = 48
-PAIR_BLOCK = 256
+#: A BATCHED tile is sized from a measurement, not from a byte budget. The
+#: tiled-assembly docstring is explicit that TilePlan.peak_bytes models one
+#: block's working set while mapping the blocks makes the whole tile's
+#: quadrature live at once, and reports the measured high-water mark at the
+#: 16x48 rule: 131 MB at 400 pairs, 864 MB at 1600, 1.4 GB at 6400. 64 x 64 is
+#: 4096 pairs, so roughly a gigabyte, which leaves ample headroom on a 16 GB
+#: card. Asking the byte planner for a batched tile instead returns the whole
+#: pair space and the device refuses the 236 GiB that implies.
+TILE_TARGET = 64
+TILE_SOURCE = 64
 
 
 def _sections(shot: int) -> list[np.ndarray]:
@@ -98,9 +106,16 @@ def _host_block(targets: np.ndarray, sections: list[np.ndarray]) -> tuple[Any, f
 
 
 def _device_block(
-    targets: np.ndarray, sections: list[np.ndarray]
+    targets: np.ndarray, sections: list[np.ndarray], tile_target: int, tile_source: int
 ) -> tuple[Any, dict[str, float | int]]:
-    """Return the same rows through the traced tile kernel, timed in stages."""
+    """Return the same rows through the traced tile kernel, timed in stages.
+
+    The tile shape is a declared input rather than a byte budget, because this
+    is the BATCHED kernel: mapping the quadrature blocks makes the whole tile's
+    temporaries live at once, which the byte planner does not model. Every tile
+    is padded to the plan shape, so one compile serves the build, and the
+    compile count is recorded so a per-tile retrace shows rather than hides.
+    """
     import jax
 
     from nova.biot.polygon import pad_batch
@@ -108,10 +123,12 @@ def _device_block(
     from nova.jax.config import Precision
 
     edge, weight, norm = pad_batch(sections)
+    n_target = int(targets.shape[0])
+    n_source = len(sections)
     plan = TilePlan(
-        target_tile=targets.shape[0],
-        source_tile=len(sections),
-        block=PAIR_BLOCK,
+        target_tile=min(tile_target, n_target),
+        source_tile=min(tile_source, n_source),
+        block=min(tile_target, n_target) * min(tile_source, n_source),
         n_panels=PANELS,
         n_nodes=NODES,
     )
@@ -122,37 +139,61 @@ def _device_block(
         precision=Precision.DOUBLE,
         edge_count=int(edge.shape[0]),
     )
-    geometry = (
-        np.ascontiguousarray(targets[:, 0]),
-        np.ascontiguousarray(targets[:, 1]),
-        edge,
-        weight,
-        norm,
-    )
+    target_r = np.ascontiguousarray(targets[:, 0])
+    target_z = np.ascontiguousarray(targets[:, 1])
+    block = np.empty((n_target, n_source), dtype=np.float64)
+
+    def geometry_of(target_slice: slice, source_slice: slice):
+        return (
+            target_r[target_slice],
+            target_z[target_slice],
+            edge[..., source_slice],
+            weight[:, source_slice],
+            norm[source_slice],
+        )
+
+    tiles = list(plan.tiles(n_target, n_source))
+    first = geometry_of(*tiles[0])
     started = perf_counter()
-    prepared = evaluator.prepare(*geometry, synchronize=True)
+    prepared = evaluator.prepare(*first, synchronize=True)
     transfer_seconds = perf_counter() - started
     started = perf_counter()
     executable = evaluator.compile(prepared)
     compile_seconds = perf_counter() - started
     started = perf_counter()
-    rows = evaluator.launch(prepared, executable)
-    jax.block_until_ready(rows)
-    warm_seconds = perf_counter() - started
-    # A second launch of the same executable is the per-build kernel cost; the
-    # first carries whatever the runtime does once.
-    started = perf_counter()
-    rows = evaluator.launch(prepared, executable)
-    jax.block_until_ready(rows)
-    kernel_seconds = perf_counter() - started
-    values = evaluator.materialize(rows, targets.shape[0], len(sections))
-    return np.asarray(values[0], dtype=np.float64), {
+    jax.block_until_ready(evaluator.launch(prepared, executable))
+    first_launch_seconds = perf_counter() - started
+
+    kernel_seconds = 0.0
+    for target_slice, source_slice in tiles:
+        tile_prepared = evaluator.prepare(
+            *geometry_of(target_slice, source_slice), synchronize=True
+        )
+        started = perf_counter()
+        rows = evaluator.launch(tile_prepared, executable)
+        jax.block_until_ready(rows)
+        kernel_seconds += perf_counter() - started
+        values = evaluator.materialize(
+            rows,
+            target_slice.stop - target_slice.start,
+            source_slice.stop - source_slice.start,
+        )
+        block[target_slice, source_slice] = values[0]
+    return block, {
         "transfer_seconds": transfer_seconds,
         "compile_seconds": compile_seconds,
-        "first_launch_seconds": warm_seconds,
+        "first_launch_seconds": first_launch_seconds,
         "kernel_seconds": kernel_seconds,
         "compile_count": int(evaluator.compile_count),
         "edge_count": int(edge.shape[0]),
+        "tile_count": len(tiles),
+        "tile_target": int(plan.target_tile),
+        "tile_source": int(plan.source_tile),
+        "batched": True,
+        "tile_sizing": (
+            "declared, not from TilePlan.peak_bytes: a batched tile does not "
+            "respect that model"
+        ),
     }
 
 
@@ -169,7 +210,13 @@ def _agreement(host: np.ndarray, device: np.ndarray) -> dict[str, float]:
     }
 
 
-def measure(output: Path, grids: tuple[int, ...], host: bool) -> None:
+def measure(
+    output: Path,
+    grids: tuple[int, ...],
+    host: bool,
+    tile_target: int,
+    tile_source: int,
+) -> None:
     """Time both backends on each pinned grid and record their agreement."""
     import jax
 
@@ -189,7 +236,9 @@ def measure(output: Path, grids: tuple[int, ...], host: bool) -> None:
             "section_count": len(sections),
             "pair_count": int(targets.shape[0] * len(sections)),
         }
-        device_block, timings = _device_block(targets, sections)
+        device_block, timings = _device_block(
+            targets, sections, tile_target, tile_source
+        )
         record["device"] = timings
         if host:
             host_block, host_seconds = _host_block(targets, sections)
@@ -249,8 +298,16 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--rows", type=int, nargs="*", default=list(GRID_ROWS))
     parser.add_argument("--no-host", action="store_true")
+    parser.add_argument("--tile-target", type=int, default=TILE_TARGET)
+    parser.add_argument("--tile-source", type=int, default=TILE_SOURCE)
     arguments = parser.parse_args()
-    measure(arguments.output, tuple(arguments.rows), not arguments.no_host)
+    measure(
+        arguments.output,
+        tuple(arguments.rows),
+        not arguments.no_host,
+        arguments.tile_target,
+        arguments.tile_source,
+    )
 
 
 if __name__ == "__main__":

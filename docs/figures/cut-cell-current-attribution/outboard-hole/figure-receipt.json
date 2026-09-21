@@ -1,0 +1,56 @@
+{
+  "caption": "Hollow red circle area = per-cell current (same scale in every panel); grey cross = zero. Labels identify the eight largest exact-mode deficits.\nAnalytic blue and terminal ochre flux contours share 5, 10, ..., 45 Wb; both axes are solid triangles and the unit-faithful wall is drawn; neither state admits an X-point.\nPersisted terminal residual 0.00744753; converged=False. Current totals are unscaled; no solve or candidacy change was made.",
+  "shared_flux_levels_wb": [
+    5.0,
+    10.0,
+    15.0,
+    20.0,
+    25.0,
+    30.0,
+    35.0,
+    40.0,
+    45.0
+  ],
+  "null_tallies": [
+    {
+      "x_points_drawn": 0,
+      "x_points_dropped_outside_wall": 0,
+      "strike_points_drawn": 0,
+      "other_x_points_drawn": 0
+    },
+    {
+      "x_points_drawn": 0,
+      "x_points_dropped_outside_wall": 0,
+      "strike_points_drawn": 0,
+      "other_x_points_drawn": 0
+    },
+    {
+      "x_points_drawn": 0,
+      "x_points_dropped_outside_wall": 0,
+      "strike_points_drawn": 0,
+      "other_x_points_drawn": 0
+    },
+    {
+      "x_points_drawn": 0,
+      "x_points_dropped_outside_wall": 0,
+      "strike_points_drawn": 0,
+      "other_x_points_drawn": 0
+    },
+    {
+      "x_points_drawn": 0,
+      "x_points_dropped_outside_wall": 0,
+      "strike_points_drawn": 0,
+      "other_x_points_drawn": 0
+    },
+    {
+      "x_points_drawn": 0,
+      "x_points_dropped_outside_wall": 0,
+      "strike_points_drawn": 0,
+      "other_x_points_drawn": 0
+    }
+  ],
+  "figures": [
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-candidacy-from-the-clip-geometry-not-the-label/docs/figures/cut-cell-current-attribution/outboard-hole/booked-versus-analytic.png",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-candidacy-from-the-clip-geometry-not-the-label/docs/figures/cut-cell-current-attribution/outboard-hole/booked-versus-analytic.svg"
+  ]
+}

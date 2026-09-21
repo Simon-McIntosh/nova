@@ -319,7 +319,12 @@ def render():
                     ax,
                     magnetic_axis=null["axis_rz_m"],
                     x_points=null["x_point_rz_m"],
-                    style=DEFAULT_INK.variant(axis_color=color, xpoint_color=color),
+                    style=DEFAULT_INK.variant(
+                        axis_color=color,
+                        xpoint_color=color,
+                        axis_marker="^",
+                        axis_markersize=7.0 if name == "analytic_topology" else 5.0,
+                    ),
                     contain=wall_units,
                 )
             )
@@ -381,7 +386,7 @@ def render():
         "Hollow red circle area = per-cell current (same scale in every panel); "
         "grey cross = zero. Labels identify the eight largest exact-mode deficits.\n"
         "Analytic blue and terminal ochre flux contours share 5, 10, ..., 45 Wb; "
-        "both axis markers and the unit-faithful wall are drawn; "
+        "both axes are solid triangles and the unit-faithful wall is drawn; "
         "neither state admits an X-point.\n"
         f"Persisted terminal residual {residual:.6g}; converged={converged}. "
         "Current totals are unscaled; no solve or candidacy change was made."

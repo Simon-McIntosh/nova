@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T17:13:39",
+  "updated": "2026-09-21T19:37:29",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -233199,6 +233199,373 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T171322254249-fsa-verify-the-vertex-ring-census",
+        "plan": "figure-and-solver-audit",
+        "section": "\u00a73",
+        "node": "fsa-verify-the-vertex-ring-census",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5186,
+                "cached_input_tokens": 382433,
+                "input_tokens": 387651,
+                "output_tokens": 538,
+                "reasoning_output_tokens": 354,
+                "total_tokens": 388189,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the strong-lane bookend of one local-lane investigation. The report is /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-vertex-ring-census-after-the-traced-wall-read/report.md with receipts under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-vertex-ring-census-after-the-traced-wall-read/census and panels under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-vertex-ring-census-after-the-traced-wall-read/panels, produced by driver /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-vertex-ring-census-after-the-traced-wall-read/run_census_cpu.py on base 982a76573 (main after the traced wall read 8e63cd037). Its claims: the own-node quadratic read admits the analytic saddle on 9 of 9 single-null rungs (132 to 2616 realised cells) with position errors 0.016 to 0.092 pitch where the production ring-quadratic read misses at 132 and 340 realised cells; the axis is admitted 15 of 15 with errors 0.001 to 0.010 pitch; zero false candidates before and after the Hessian and containment filter on all fifteen rows; the raw four-sign-change rule finds no saddle candidate on any rung (0 of 9) so the operative candidates come from the own-node quadratic rather than from filtering the raw set; cyclic-origin, smooth-noise at 1e-4 of the axis-to-X span, and manufactured saddle and extremum controls pass; census cost 2.3 to 3.3 times the production read on CPU (11.1, 35.2 and 107 ms per state at 550, 1074 and 2616 cells against 4.81, 11.3 and 32.3). Verify: read the driver and the part receipts by anomaly against the brief (six vertex values minus the centroid, cyclic sign changes, Newton polish on the own-node quadratic fitted from centroid plus vertex values, Hessian classification, dedupe, wall containment and private shadow); state where the candidates actually originate when the raw four-change rule returns none, and whether the reported admission is the census as briefed or a different read; re-run on one all_debug allocation with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and the payload, the root interpreter run directly and uv never invoked on the node, two rungs (132 and 2616 realised) and the three controls in fresh processes, and compare their admission outcomes and position errors to the report's numbers; open the four panels with the image read tool and judge them against the plotting rules (line contours, both null sets in the draw_nulls vocabulary with the census candidate and production read in their own styles, the wall, no axes); give a verdict of promote or reject with a score out of 100 in review.md under the reviews fence with a findings JSON; nothing under nova/ is committed",
+          "estimated_hours": null,
+          "goal": "verify the local-lane vertex-ring census report by re-running two of its rungs and its controls from its own driver, and give it a promotion verdict",
+          "id": "fsa-verify-the-vertex-ring-census",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T17:13:24Z",
+            "read_at": "2026-09-21T17:13:26Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 29.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T171322254249-fsa-verify-the-vertex-ring-census/manifest.md",
+          "negative_control": "none: a review that commits no code; its correctness is the re-run rungs and controls with exit statuses it records",
+          "plan": "figure-and-solver-audit",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-verify-the-vertex-ring-census",
+            "docs/evidence/archive/figure-and-solver-audit-landed.html",
+            "docs/figures/figure-and-solver-audit",
+            "docs/plans/figure-and-solver-audit.html"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19k-audit-tests",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T17:13:49Z",
+        "completed_at": "2026-09-21T17:34:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1238,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1238,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "982a765739a014c75e40dbbd9ae94a06ef5f8b45",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "bookend of the vertex-ring census: reject at 58/100; the numbers are repeatable and all three controls pass on re-run, but the 9-of-9 saddle admission comes from an all-cell quadratic-root scan rather than the four-sign-change census the brief specifies (the census seeds no saddle on any rung), the zero-before zero-after false-candidate claim is not a before-and-after measure of one population, and three static panels crop the wall while the candidate glyphs are not the draw_nulls vocabulary",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T171322254249-fsa-verify-the-vertex-ring-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c4f5-b0d2-7d51-8cef-a2e3fb3ba319",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7407616,
+            "cached_input_tokens_cumulative": 7407616,
+            "input_tokens": 7622778,
+            "input_tokens_cumulative": 7622778,
+            "output_tokens": 28014,
+            "output_tokens_cumulative": 28014,
+            "reasoning_output_tokens": 9198,
+            "reasoning_output_tokens_cumulative": 9198
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T17:34:27Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 30.0,
+              "resets_at": 1790575133,
+              "observed_at": "2026-09-21T17:34:27Z"
+            }
+          ],
+          "notional_cost_usd": 32.2483,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 43,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 78976,
+              "log_fresh": false,
+              "manifest_commits": [
+                "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
+                "0028295f5ba1e4c4d0c3ba0e1c98f0b0fbb4c9d1"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "28b0fa1a9d3559290e36bf25bbedc4839c9ef1861513ab5235f34a953247d5fe",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T180231259880-cca-one-certificate-row-per-process/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan cpu-compile-abort --section '\u00a72' --role review --spec-level exact --node review-of-cca-one-certificate-row-per-process --goal 'attach an independent review to run r-20260920T180231259880-cca-one-certificate-row-per-process' --done-when 'the review for r-20260920T180231259880-cca-one-certificate-row-per-process stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260920T180231259880-cca-one-certificate-row-per-process.json --time-budget 55m --session s19-codex-20260916 --allow-unreconciled-runs --local",
+              "node": "cca-one-certificate-row-per-process",
+              "phase": "complete",
+              "plan": "cpu-compile-abort",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T180231259880-cca-one-certificate-row-per-process",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 78981,
+              "terminal_at": "2026-09-20T19:17:11Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 625,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: Second allocation ran out - job 1274360 aborted at edit 16 on JIT mapping exhaustion with REGEN_DRIVER_EXIT=134 and EXIT_MARKER=134 after 15 of 20 edits; so edits 16 through 20 never ran and the states for edits 14 and 15 were never flushed; seven of the twenty states the done-when needs are absent. The census cannot pass on what landed and CENSUS_AGREES=0; both because 14 states are fewer than the 20 the figures are defined over (drawn_closed 5 of 14 against the required 12 of 20; axis_enclosing_cycle 13 of 14 against 14 of 20) and because the comparison basis itself is unestablished. The comparison basis needs a plan-level answer this worker cannot give - the provenance of the sweep-persistence record and the definition of its level field - and the per-state disagreement is already present at the unedited index 0; so it is not attributable to the constraint; the edit schedule or the level definition. The fixture was therefore not committed and the repository still carries the superseded panel. No resume seam exists in the driver and the archived rows cannot seed one; so completing this node requires the driver capability named in follow_ons before any further allocation is spent.",
+              "elapsed_seconds": 3925,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 44364,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1af882c9ce897d771f68e7158b9f321274358a94",
+                "570ac4bf5782de8353205d4600496e32b41d00a8"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0791ab9295230c76f0e7ba866041563829b22d42afa1542f10d83f009f569795",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint/manifest.md; resolve the blocker before resuming the run",
+              "node": "fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+              "phase": "complete",
+              "plan": "forward-solve-api",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+                "session_id": "63238c6f-d618-43a9-b3b8-e682e544fc9e",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 44456,
+              "terminal_at": "2026-09-21T04:52:36Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+              "elapsed_seconds": 827,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 46297,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none (review role; the fence holds the only deliverable and it is outside the git worktree)"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "dc3aa96a0c2db4290706b18c01eff2defa9b1451056457ee5e71a740fc7e7675",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T035705405532-fsa-audit-figures-cut-cell/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+              "node": "fsa-audit-figures-cut-cell",
+              "phase": "complete",
+              "plan": "figure-and-solver-audit",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T035705405532-fsa-audit-figures-cut-cell",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 46349,
+              "terminal_at": "2026-09-21T04:21:04Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-figures-cut-cell"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 7407616,
+          "cumulative_input_tokens": 15030394,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 37212
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": true,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "review node: commits nothing under nova/; its product is review.md and findings JSON under the reviews fence",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-verify-the-vertex-ring-census",
+          "session_id": "01a0c4f5-b0d2-7d51-8cef-a2e3fb3ba319",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T17:34:27Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.8,
+        "impl_move": {
+          "plan": "figure-and-solver-audit",
+          "at_dispatch": 0.8,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 53.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -233665,6 +234032,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3066
+    "_version": 3067
   }
 }

@@ -1061,6 +1061,85 @@ def _write_tile(bounds):
     return (rows.start, columns.start)
 
 
+#: A batched tile does not respect :attr:`TilePlan.peak_bytes` -- mapping the
+#: quadrature blocks makes the whole tile live at once -- so its shape is taken
+#: from the measured high-water curve above rather than from a byte budget.
+#: 64 x 64 is 4096 pairs, about a gigabyte at the 16x48 rule.
+SECTION_BLOCK_TILE = 64
+
+
+def section_flux_block(
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    sections: list[np.ndarray],
+    *,
+    tile_target: int = SECTION_BLOCK_TILE,
+    tile_source: int = SECTION_BLOCK_TILE,
+    precision: Precision | str = Precision.DOUBLE,
+) -> np.ndarray:
+    """Return per-ampere flux for every (target, section) pair, in memory.
+
+    :func:`assemble` streams a whole operator to a store, which is the right
+    shape for a build too large to hold. A response matrix over a few thousand
+    targets and a few hundred sections is not, and the caller wants the block
+    itself: this returns ``(target, section)`` flux [Wb/A] through the same
+    traced kernel, one compile for the build.
+
+    It exists so a response build stops calling
+    :func:`nova.biot.polygon.polygon_greens` once per section. That host kernel
+    is a Python loop over target blocks with in-place assignment; it cannot take
+    a traced array and cannot reach a device. Measured on one P100 over 938
+    sections and 1126 targets, this path is 369 times the host kernel on the
+    steady launch and 221 times once its single compile is paid, agreeing to
+    1.7e-16 absolute against a peak element of 1.0e-05.
+    """
+    import jax
+
+    from nova.biot.polygon import pad_batch
+
+    edge, weight, norm = pad_batch(sections)
+    n_target = int(np.size(target_r))
+    n_source = len(sections)
+    target_tile = min(int(tile_target), n_target)
+    source_tile = min(int(tile_source), n_source)
+    plan = TilePlan(
+        target_tile=target_tile,
+        source_tile=source_tile,
+        block=target_tile * source_tile,
+        n_panels=16,
+        n_nodes=48,
+    )
+    evaluator = tile_evaluator(
+        plan,
+        batched=True,
+        kernel="quadrature",
+        precision=precision,
+        edge_count=int(edge.shape[0]),
+    )
+    radial = np.ascontiguousarray(np.asarray(target_r, dtype=np.float64).reshape(-1))
+    vertical = np.ascontiguousarray(np.asarray(target_z, dtype=np.float64).reshape(-1))
+    block = np.empty((n_target, n_source), dtype=np.float64)
+    executable = None
+    for target_slice, source_slice in plan.tiles(n_target, n_source):
+        prepared = evaluator.prepare(
+            radial[target_slice],
+            vertical[target_slice],
+            edge[..., source_slice],
+            weight[:, source_slice],
+            norm[source_slice],
+        )
+        if executable is None:
+            executable = evaluator.compile(prepared)
+        rows = evaluator.launch(prepared, executable)
+        jax.block_until_ready(rows)
+        block[target_slice, source_slice] = evaluator.materialize(
+            rows,
+            target_slice.stop - target_slice.start,
+            source_slice.stop - source_slice.start,
+        )[0]
+    return block
+
+
 def assemble(
     path,
     target_r: np.ndarray,

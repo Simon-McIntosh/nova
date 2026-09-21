@@ -136,18 +136,25 @@ class StaleOperandCacheError(RuntimeError):
 
 
 class _ObservedProfile:
-    """Forward a profile while retaining the portfolio returned by its solve."""
+    """Forward a profile while retaining the solve receipts it forwards to.
+
+    The public seam returns a receipt rather than a branch portfolio, so the
+    solve is what gets intercepted: every receipt the wrapped profile returns
+    is kept here, in call order, for the caller to read its terminal state and
+    iteration count from.
+    """
 
     def __init__(self, profile) -> None:
         self._profile = profile
-        self.portfolio = None
+        self.receipts: list[Any] = []
 
     def __getattr__(self, name: str):
         return getattr(self._profile, name)
 
-    def solve_portfolio(self, *args, **kwargs):
-        self.portfolio = self._profile.solve_portfolio(*args, **kwargs)
-        return self.portfolio
+    def solve(self, *args, **kwargs):
+        receipt = self._profile.solve(*args, **kwargs)
+        self.receipts.append(receipt)
+        return receipt
 
 
 def _source_authority(path: Path) -> dict[str, str]:
@@ -282,15 +289,12 @@ def _mast_rows(
             target_current,
             carrier_identity=carrier["carrier"]["semantic_response_identity"],
         )
-        if observed_profile.portfolio is None:
-            raise RuntimeError("the MAST solve returned no observable branch portfolio")
-        pure_branch = jax.tree.map(
-            lambda value: value[int(reachability.TopologyClass.DIVERTED)],
-            observed_profile.portfolio.branches,
-        )
+        if not observed_profile.receipts:
+            raise RuntimeError("the MAST solve returned no observable receipt")
+        pure_receipt = observed_profile.receipts[0]
         active_set_iterations = {
             "pure": int(
-                np.asarray(pure_branch.equilibrium.fixed_point.active_set_iterations)
+                np.asarray(pure_receipt.equilibrium.fixed_point.active_set_iterations)
             ),
             "mixed": 0,
         }

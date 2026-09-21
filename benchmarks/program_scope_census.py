@@ -1053,11 +1053,11 @@ def _loop_inventory() -> list[dict[str, Any]]:
         {
             **_source_line(
                 fixed_point._active_set_newton_krylov,
-                "jax.lax.fori_loop(1, active_set_steps",
+                "outer, _ = jax.lax.scan(",
             ),
             "loop": "certificate active-set budget",
-            "form": "jax.lax.fori_loop",
-            "program_effect": "one while body in optimised HLO",
+            "form": "jax.lax.scan",
+            "program_effect": "one scan body in optimised HLO",
         },
     ]
 

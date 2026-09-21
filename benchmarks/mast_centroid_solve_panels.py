@@ -78,8 +78,11 @@ RATIO_OFFSETS = (-0.30, -0.15, 0.0, 0.15, 0.30)
 #: ff-prime alone, over a wide amplitude range; p-prime is held and the solve
 #: pins the net plasma current, so the current normalisation is the lambda.
 FIELD_FUNCTION_SCALES = (0.40, 0.60, 0.80, 1.00, 1.20, 1.40, 1.60)
-#: The internal shape witness: the q = 3/2 rational surface.
-RATIONAL_ORDER = 1.5
+#: Internal shape witnesses. 3/2 is requested first; on frames whose q minimum
+#: sits above it there is no such surface, and 2/1 is the next one that exists.
+RATIONAL_ORDERS = (1.5, 2.0)
+#: Linestyle per rational order, so two internal surfaces stay distinguishable.
+RATIONAL_STYLES = {"1.5": (0, (1, 1.6)), "2": (0, (5, 2, 1, 2))}
 #: Drawn plasma tessellation; the wall fit decides the delivered count.
 DEFAULT_HEX_CELLS = 4000
 CPU_PROVENANCE_MARKER = "NOVA_CENTROID_PANELS_CPU_PROVENANCE"
@@ -194,20 +197,24 @@ def _branches(profile: Any, state: Any, topology: Any) -> dict[str, np.ndarray]:
     }
 
 
-def _rational_surface_flux(
+def _rational_surfaces(
     lattice: Any,
     source: Any,
     flux: np.ndarray,
     topology: Any,
-    order: float,
-) -> tuple[float, float] | None:
-    """Return the absolute flux and normalised label of one rational surface.
+    orders: tuple[float, ...],
+) -> dict[str, Any]:
+    """Return each requested rational surface, or why it is absent.
 
-    The safety factor is read from the flux-surface-averaged geometry of this
-    member's own map and its own diamagnetic gradient, so the surface moves
-    with the profile rather than being carried over from another member. The
-    OUTERMOST crossing is taken: q rises towards the boundary on these frames,
-    so an inner crossing would be a different surface of the same order.
+    The safety factor is read from this member's own flux-surface-averaged
+    geometry and its own diamagnetic gradient, so a surface moves with the
+    profile rather than being carried over from a neighbour. The OUTERMOST
+    crossing is taken, because q rises towards the boundary on these frames.
+
+    Absence is reported with the q range that produced it rather than as a
+    bare None. A frame whose q minimum sits above the requested order simply
+    has no such surface, and that is a fact about the equilibrium the reader
+    needs; swallowing it leaves a blank curve with no explanation.
     """
     from nova.equilibrium.flux_surface_geometry import (
         FluxSurfaceGeometry,
@@ -225,22 +232,43 @@ def _rational_surface_flux(
             axis=(float(axis[0]), float(axis[1])),
             boundary_flux=boundary_flux,
         )
-    except Exception:  # noqa: BLE001 - absence is reported, not raised
-        return None
+    except Exception as error:  # noqa: BLE001 - reported, never swallowed
+        return {"status": f"{type(error).__name__}: {error}", "surfaces": {}}
     label = np.asarray(geometry.psi_norm, dtype=float)
     factor = np.abs(np.asarray(geometry.safety_factor, dtype=float))
     finite = np.isfinite(label) & np.isfinite(factor)
     label, factor = label[finite], factor[finite]
     if label.size < 2:
-        return None
-    crossings = np.flatnonzero((factor[:-1] - order) * (factor[1:] - order) < 0.0)
-    if crossings.size == 0:
-        return None
-    index = int(crossings[-1])
-    span = factor[index + 1] - factor[index]
-    weight = 0.0 if span == 0.0 else (order - factor[index]) / span
-    psi_norm = float(label[index] + weight * (label[index + 1] - label[index]))
-    return axis_flux + psi_norm * (boundary_flux - axis_flux), psi_norm
+        return {"status": "no finite safety factor", "surfaces": {}}
+    found: dict[str, Any] = {}
+    for order in orders:
+        crossings = np.flatnonzero((factor[:-1] - order) * (factor[1:] - order) < 0.0)
+        if crossings.size == 0:
+            found[f"{order:g}"] = None
+            continue
+        index = int(crossings[-1])
+        span = factor[index + 1] - factor[index]
+        weight = 0.0 if span == 0.0 else (order - factor[index]) / span
+        psi_norm = float(label[index] + weight * (label[index + 1] - label[index]))
+        found[f"{order:g}"] = {
+            "psi_norm": psi_norm,
+            "flux": axis_flux + psi_norm * (boundary_flux - axis_flux),
+        }
+    return {
+        "status": "read",
+        "safety_factor_minimum": float(factor.min()),
+        "safety_factor_maximum": float(factor.max()),
+        "surfaces": found,
+    }
+
+
+def _surface_labels(rational: dict[str, Any]) -> str:
+    """Return one compact log line of which rational surfaces were found."""
+    found = rational.get("surfaces", {})
+    return ",".join(
+        f"{name}:{'absent' if entry is None else round(entry['psi_norm'], 4)}"
+        for name, entry in sorted(found.items())
+    )
 
 
 def _closed_loop(
@@ -1094,24 +1122,27 @@ def family(
         boundary = _closed_loop(
             lattice, flux, record["boundary_flux"], np.asarray(topology.axis, float)
         )
-        rational = _rational_surface_flux(
-            lattice, varied, flux, topology, RATIONAL_ORDER
-        )
-        surface = np.empty((0, 2))
-        if rational is not None:
-            record["rational_psi_norm"] = float(rational[1])
-            record["rational_flux"] = float(rational[0])
-            surface = _closed_loop(
-                lattice, flux, rational[0], np.asarray(topology.axis, float)
+        rational = _rational_surfaces(lattice, varied, flux, topology, RATIONAL_ORDERS)
+        record["rational"] = rational
+        surfaces: dict[str, np.ndarray] = {}
+        for name, entry in rational["surfaces"].items():
+            if entry is None:
+                continue
+            loop = _closed_loop(
+                lattice, flux, entry["flux"], np.asarray(topology.axis, float)
             )
+            if loop.shape[0] >= 2:
+                surfaces[name] = loop
         record["boundary_vertex_count"] = int(boundary.shape[0])
-        record["rational_vertex_count"] = int(surface.shape[0])
+        record["rational_vertex_counts"] = {
+            name: int(loop.shape[0]) for name, loop in surfaces.items()
+        }
         members.append(record)
         curves.append(
             {
                 "scale": float(scale),
                 "boundary": boundary,
-                "rational": surface,
+                "rational": surfaces,
                 "ff_prime": scale * stored["ff_prime"],
                 "converged": bool(np.asarray(result.converged)),
                 "class": record["achieved_class"],
@@ -1121,10 +1152,16 @@ def family(
             f"MEMBER ff_scale={scale:.2f} wall_s={wall:.3f} "
             f"residual={record['terminal_residual']:.3e} "
             f"converged={record['converged']} class={record['achieved_class']} "
-            f"q{RATIONAL_ORDER:g}_psi_n={record.get('rational_psi_norm')}",
+            f"q_range={rational.get('safety_factor_minimum')}"
+            f"..{rational.get('safety_factor_maximum')} "
+            f"surfaces={_surface_labels(rational)}",
             flush=True,
         )
-        state = result.state
+        # Advance the warm start only through a member that converged: seeding
+        # the next member from a failed terminal state carries that failure
+        # forward and reads as a property of the next profile.
+        if bool(np.asarray(result.converged)):
+            state = result.state
 
     _render_family(curves, stored["psi_norm"], units, coils, lattice, figure_path)
     receipt = {
@@ -1152,8 +1189,12 @@ def family(
             "field_function_scales": [float(value) for value in FIELD_FUNCTION_SCALES],
             "external_shape": "separatrix, the axis-enclosing lobe at boundary flux",
             "internal_shape": (
-                f"q = {RATIONAL_ORDER:g} surface, from each member's own "
-                "flux-surface-averaged safety factor, outermost crossing"
+                "rational surfaces at q = "
+                + ", ".join(f"{order:g}" for order in RATIONAL_ORDERS)
+                + ", from each member's own flux-surface-averaged safety "
+                "factor at the outermost crossing; a member whose q minimum "
+                "sits above an order has no such surface and records its own "
+                "q range instead"
             ),
             "program_reuse": (
                 "one compiled program serves every member: the tables cross the "
@@ -1165,9 +1206,19 @@ def family(
             "member_count": len(members),
             "converged_count": int(sum(bool(m.get("converged")) for m in members)),
             "classes": sorted({str(m.get("achieved_class")) for m in members}),
-            "rational_surface_found": int(
-                sum("rational_psi_norm" in m for m in members)
-            ),
+            "rational_surface_found": {
+                f"{order:g}": int(
+                    sum(
+                        bool(
+                            (m.get("rational") or {})
+                            .get("surfaces", {})
+                            .get(f"{order:g}")
+                        )
+                        for m in members
+                    )
+                )
+                for order in RATIONAL_ORDERS
+            },
             "elapsed_seconds": float(time.perf_counter() - started),
         },
     }
@@ -1220,22 +1271,23 @@ def _render_family(
                 linestyle=style,
                 zorder=DEFAULT_INK.zorder_separatrix,
             )
-        if item["rational"].shape[0] >= 2:
-            loop = np.vstack((item["rational"], item["rational"][:1]))
+        for name, surface in item["rational"].items():
+            loop = np.vstack((surface, surface[:1]))
             axes[0].plot(
                 loop[:, 0],
                 loop[:, 1],
                 color=colour,
                 linewidth=1.0,
-                linestyle=(0, (2, 2)),
+                linestyle=RATIONAL_STYLES.get(name, (0, (2, 2))),
                 zorder=DEFAULT_INK.zorder_separatrix,
             )
     axes[0].set_xlim(float(radius.min()), float(radius.max()))
     axes[0].set_ylim(float(height.min()), float(height.max()))
-    axes[0].set_title(
-        f"separatrix (solid) and q = {RATIONAL_ORDER:g} surface (dotted)",
-        fontsize=9,
+    drawn = sorted({name for item in curves for name in item["rational"]})
+    internal = (
+        ", ".join(f"q = {name}" for name in drawn) if drawn else "no rational surface"
     )
+    axes[0].set_title(f"separatrix (solid) and {internal}", fontsize=9)
 
     trace_axes(axes[1])
     for colour, item in zip(colours, curves):

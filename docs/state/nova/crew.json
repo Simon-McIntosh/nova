@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T21:48:29",
+  "updated": "2026-09-22T21:48:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7854,6 +7854,15 @@
       },
       {
         "id": "s19n-cx-1",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-22"
+      },
+      {
+        "id": "s19n-cx-2",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -262901,6 +262910,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3220
+    "_version": 3221
   }
 }

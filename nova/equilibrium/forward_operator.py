@@ -871,6 +871,7 @@ class _FixedDesignNull2D:
     source_edge_end: jax.Array = field(repr=False)
     source_edge_valid: jax.Array = field(repr=False)
     source_pitch: jax.Array = field(repr=False)
+    source_wall_interior: jax.Array = field(repr=False)
     wall_coordinate: jax.Array = field(repr=False)
     wall_offsets: jax.Array = field(repr=False)
     wall_closed: jax.Array = field(repr=False)
@@ -922,7 +923,7 @@ class _FixedDesignNull2D:
             ]
         else:
             polygons = [np.asarray(cell_polygons[index]) for index in source]
-        width = max(len(polygon) for polygon in polygons)
+        width = max(6, max(len(polygon) for polygon in polygons))
         edge_start = np.zeros((len(source), width, 2), dtype=np.float64)
         edge_end = np.zeros_like(edge_start)
         edge_valid = np.zeros((len(source), width), dtype=bool)
@@ -962,6 +963,50 @@ class _FixedDesignNull2D:
             if wall_vessel is None
             else np.asarray(wall_vessel)
         )
+        # A source polygon plus its proximity band fits inside this origin ball.
+        # If the ball cannot touch any wall segment, containment is invariant.
+        origin = np.asarray(fit_locator.physical_origin)
+        radius = (
+            np.asarray(
+                [
+                    np.max(np.linalg.norm(polygon - centre, axis=1))
+                    for polygon, centre in zip(polygons, origin, strict=True)
+                ]
+            )
+            + 0.25 * pitch
+        )
+        wall_interior = np.zeros(len(source), dtype=bool)
+        if len(wall):
+            from shapely.geometry import LineString, Point, Polygon
+
+            vessel_regions = [
+                Polygon(wall[offsets[i] : offsets[i + 1]])
+                for i in range(len(closed))
+                if closed[i] and vessel[i]
+            ]
+            material_regions = [
+                Polygon(wall[offsets[i] : offsets[i + 1]])
+                for i in range(len(closed))
+                if closed[i] and not vessel[i]
+            ]
+            boundaries = [
+                LineString(np.vstack((unit, unit[:1])) if closed[i] else unit)
+                for i in range(len(closed))
+                if len(unit := wall[offsets[i] : offsets[i + 1]]) >= 2
+            ]
+            tolerance = max(
+                1.0e-12, 16 * np.finfo(np.float64).eps * max(1.0, np.max(np.abs(wall)))
+            )
+            for index, centre in enumerate(origin):
+                point = Point(centre)
+                wall_interior[index] = (
+                    any(region.contains(point) for region in vessel_regions)
+                    and not any(region.covers(point) for region in material_regions)
+                    and all(
+                        boundary.distance(point) > radius[index] + tolerance
+                        for boundary in boundaries
+                    )
+                )
         local = np.asarray(fit_locator.local_coordinate_stencil, dtype=np.float64)
         radial = local[..., 0]
         vertical = local[..., 1]
@@ -1000,6 +1045,7 @@ class _FixedDesignNull2D:
             source_edge_end=jnp.asarray(edge_end),
             source_edge_valid=jnp.asarray(edge_valid),
             source_pitch=jnp.asarray(pitch),
+            source_wall_interior=jnp.asarray(wall_interior),
             wall_coordinate=jnp.asarray(wall),
             wall_offsets=jnp.asarray(offsets, dtype=jnp.int32),
             wall_closed=jnp.asarray(closed),
@@ -1079,17 +1125,36 @@ class _FixedDesignNull2D:
         )
         finite = nonsingular & near_cell & jnp.all(jnp.isfinite(result), axis=1)
         if self.wall_coordinate.shape[0]:
-            finite = finite & _points_inside_wall_units(
-                physical[:, 0],
-                physical[:, 1],
+            finite = self._contained_local_roots(physical, finite)
+        masks = jnp.stack((finite & (kind != 0.0), finite & (kind == 0.0)))
+        return result, masks
+
+    def _contained_local_roots(self, physical, eligible):
+        """Check boundary-adjacent eligible roots in bounded wall-test batches."""
+        pending = eligible & ~self.source_wall_interior
+        count = jnp.sum(pending, dtype=jnp.int32)
+        width = min(pending.size, 2 * self.locator.maxsize)
+        # Padding permits a final full-width slice without repeating tail roots.
+        slots = ((pending.size + width - 1) // width) * width
+        index = jnp.where(pending, size=slots, fill_value=0)[0]
+        retained = eligible & self.source_wall_interior
+
+        def check_batch(batch, contained):
+            selected = jax.lax.dynamic_slice_in_dim(index, batch * width, width)
+            active = batch * width + jnp.arange(width) < count
+            points = physical[selected]
+            inside = _points_inside_wall_units(
+                points[:, 0],
+                points[:, 1],
                 self.wall_coordinate[:, 0],
                 self.wall_coordinate[:, 1],
                 self.wall_offsets,
                 self.wall_closed,
                 self.wall_vessel,
             )
-        masks = jnp.stack((finite & (kind != 0.0), finite & (kind == 0.0)))
-        return result, masks
+            return contained.at[selected].max(active & inside)
+
+        return jax.lax.fori_loop(0, (count + width - 1) // width, check_batch, retained)
 
     @staticmethod
     def _root_uncertainty(polish, cell_width, domain_scale):
@@ -1155,37 +1220,36 @@ class _FixedDesignNull2D:
 
     def _seed_representatives(self, candidate, masks, uncertainty):
         """Deduplicate admitted roots in bounded work slots before polishing."""
-        admitted = jnp.any(masks, axis=0)
-        count = jnp.sum(admitted, dtype=jnp.int32)
-        capacity = min(admitted.size, 2 * self.locator.maxsize)
+        # Process the first pending origin and all of its duplicates together.
+        # The loop count follows admitted roots, never the full carrier size;
+        # vmap therefore does not execute a dormant all-origin fallback lane.
+        pending = jnp.any(masks, axis=0)
+        representatives = jnp.zeros_like(masks)
+        multiplicities = jnp.zeros(masks.shape, dtype=jnp.int32)
 
-        def compact(slots):
-            index = jnp.where(admitted, size=slots, fill_value=0)[0]
-            valid = jnp.arange(slots) < count
-            representatives = []
-            multiplicities = []
-            for mask in masks:
-                kept, multiplicity, _parent = self._deduplicate_type(
-                    candidate[index, :2], mask[index] & valid, uncertainty[index]
-                )
-                representatives.append(
-                    jnp.zeros(admitted.size, dtype=jnp.int32)
-                    .at[index]
-                    .add((kept & valid).astype(jnp.int32))
-                    .astype(bool)
-                )
-                multiplicities.append(
-                    jnp.zeros(admitted.size, dtype=jnp.int32)
-                    .at[index]
-                    .add(jnp.where(valid, multiplicity, 0))
-                )
-            return jnp.stack(representatives), jnp.stack(multiplicities)
+        def retain_one(state):
+            remaining, retained, counts = state
+            index = jnp.argmax(remaining).astype(jnp.int32)
+            distance = jnp.linalg.norm(candidate[:, :2] - candidate[index, :2], axis=1)
+            same_type = jnp.any(masks & masks[:, index, None], axis=0)
+            same_root = (
+                remaining
+                & same_type
+                & jnp.isfinite(distance)
+                & (distance <= uncertainty + uncertainty[index])
+            )
+            retained = retained.at[:, index].set(masks[:, index])
+            counts = counts.at[:, index].set(
+                jnp.sum(masks & same_root, axis=1, dtype=jnp.int32)
+            )
+            return remaining & ~same_root, retained, counts
 
-        return jax.lax.cond(
-            count > capacity,
-            lambda: compact(admitted.size),
-            lambda: compact(capacity),
+        _, representatives, multiplicities = jax.lax.while_loop(
+            lambda state: jnp.any(state[0]),
+            retain_one,
+            (pending, representatives, multiplicities),
         )
+        return representatives, multiplicities
 
     def _structured_census(self, psi):
         """Return spline-authored candidates and complete fixed-slot telemetry.
@@ -1590,6 +1654,7 @@ class _FixedDesignNull2D:
             self.source_edge_end,
             self.source_edge_valid,
             self.source_pitch,
+            self.source_wall_interior,
             self.wall_coordinate,
             self.wall_offsets,
             self.wall_closed,
@@ -1615,6 +1680,7 @@ class _FixedDesignNull2D:
             "source_edge_end",
             "source_edge_valid",
             "source_pitch",
+            "source_wall_interior",
             "wall_coordinate",
             "wall_offsets",
             "wall_closed",

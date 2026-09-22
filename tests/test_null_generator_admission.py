@@ -314,3 +314,54 @@ def test_reachable_benchmark_consumers_keep_own_node_samples(
         )
     assert calls
     print(f"benchmark_consumer={consumer} complete_pool_calls={len(calls)}", flush=True)
+
+
+@pytest.mark.parametrize("material", [False, True])
+def test_compact_wall_check_matches_all_origin_control_across_batches(material):
+    """Boundary candidates beyond one work batch retain exact wall admission."""
+    from nova.biot.null import Null2D
+    from nova.equilibrium.connectivity_boundary import _points_inside_wall_units
+    from nova.equilibrium.forward_operator import _FixedDesignNull2D
+
+    configure_dtypes()
+    angle = np.arange(6) * np.pi / 3.0
+    patch = np.vstack((np.zeros(2), np.column_stack((np.cos(angle), np.sin(angle)))))
+    centres = np.column_stack((np.linspace(-5.0, 5.0, 21), np.zeros(21)))
+    coordinates = (patch[None, :, :] + centres[:, None, :]).reshape((-1, 2))
+    stencil = np.arange(len(coordinates)).reshape((-1, 7))
+    wall = np.asarray(((-5.0, -3.0), (5.0, -3.0), (5.0, 3.0), (-5.0, 3.0)))
+    if material:
+        wall = np.vstack((wall, ((-0.3, -0.3), (0.3, -0.3), (0.3, 0.3), (-0.3, 0.3))))
+    fixed = _FixedDesignNull2D.from_locator(
+        Null2D.from_coordinates(coordinates, stencil, maxsize=1),
+        wall_coordinate=wall,
+        wall_offsets=np.asarray((0, 4, 8) if material else (0, 4)),
+        wall_closed=np.asarray((True, True) if material else (True,)),
+        wall_vessel=np.asarray((True, False) if material else (True,)),
+    )
+    points = jnp.asarray(centres + (0.2, 0.1))
+    eligible = jnp.ones(len(centres), dtype=bool)
+    assert np.any(fixed.source_wall_interior)
+    assert np.count_nonzero(~np.asarray(fixed.source_wall_interior)) > 2
+    expected = _points_inside_wall_units(
+        points[:, 0],
+        points[:, 1],
+        fixed.wall_coordinate[:, 0],
+        fixed.wall_coordinate[:, 1],
+        fixed.wall_offsets,
+        fixed.wall_closed,
+        fixed.wall_vessel,
+    )
+    assert np.any(expected) and not np.all(expected)
+    actual = jax.jit(fixed._contained_local_roots)(points, eligible)
+    np.testing.assert_array_equal(actual, expected)
+    batched = jax.jit(jax.vmap(fixed._contained_local_roots))(
+        jnp.stack((points, points)),
+        jnp.stack((eligible, ~eligible)),
+    )
+    np.testing.assert_array_equal(batched[0], expected)
+    assert not np.any(batched[1])
+    print(
+        f"wall_batch_parity material={material} checked={len(points)} "
+        f"inside={int(jnp.sum(expected))} rejected={int(jnp.sum(~expected))}"
+    )

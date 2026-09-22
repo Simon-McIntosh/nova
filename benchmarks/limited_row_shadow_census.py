@@ -36,6 +36,11 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.connectivity_boundary import (
     _canonicalize_reciprocal_hex_edges,
@@ -49,7 +54,8 @@ from nova.equilibrium.flux_surface_connectivity import (
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.jax.config import configure_dtypes
 from nova.media import poloidal
-from nova.media.ink import poloidal_axes
+from nova.media.ink import DEFAULT_INK, poloidal_axes
+from nova.media.sources.frame import inside_wall_units
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_ROOT = ROOT / "docs/figures/cut-cell-current-attribution/limited-shadow"
@@ -861,11 +867,320 @@ def _run(output_root: Path) -> dict[str, Any]:
     return receipt
 
 
+ROUNDOFF_LEVEL_FLOOR = 1e-12
+SHADOW_RENDER_MODE = "chord"
+RENDER_RECEIPT_NAME = "render-receipt.json"
+ANALYTIC_RENDER_COLOR = "#3366cc"
+SOLVED_RENDER_COLOR = "#cc7722"
+FLUX_RENDER_TITLE = (
+    "analytic blue contours and nulls /\n"
+    "solved ochre contours and nulls · shared Wb levels"
+)
+
+
+def _render_title(payload: dict[str, Any]) -> str:
+    """The terminal residual and converged flag the panel carries in its title."""
+
+    solver = payload["solver"]
+    residual = float(solver["terminal_fixed_point_residual"])
+    converged = bool(solver["converged"])
+    return (
+        f"{payload['case']} · {certificate._slug(payload['requested_cells'])} · "
+        f"{solver['qualification']} · residual={residual:.3e} · "
+        f"converged={'yes' if converged else 'no'}"
+    )
+
+
+def _null_points(value: Any) -> np.ndarray:
+    """Return the finite R-Z points of a stored null array, however it is shaped."""
+
+    if value is None:
+        return np.empty((0, 2), dtype=np.float64)
+    array = np.atleast_2d(np.asarray(value, dtype=np.float64))
+    points = np.asarray([row.reshape(-1)[:2] for row in array], dtype=np.float64)
+    return points[np.all(np.isfinite(points), axis=1)]
+
+
+def _axis_is_inside(topology: dict[str, Any], wall: np.ndarray) -> bool:
+    axis = np.asarray(topology["axis_rz_m"], dtype=np.float64).reshape(-1)[:2]
+    if not np.all(np.isfinite(axis)):
+        return False
+    return bool(inside_wall_units(axis[None, :], (wall,))[0])
+
+
+def _draw_null_sets(
+    axis,
+    *,
+    analytic_topology: dict[str, Any],
+    terminal_topology: dict[str, Any],
+    wall: np.ndarray,
+) -> dict[str, int]:
+    """Draw both null sets in their own colours and report the glyphs each drew.
+
+    The count is taken from the painter's own drawn/dropped tally plus the axis
+    containment the painter applies, so the receipt reports what was plotted
+    rather than what was handed over.
+    """
+
+    wall_units = (wall,)
+    drawn: dict[str, int] = {}
+    for name, topology, colour in (
+        ("analytic", analytic_topology, ANALYTIC_RENDER_COLOR),
+        ("solved", terminal_topology, SOLVED_RENDER_COLOR),
+    ):
+        tally = poloidal.draw_nulls(
+            axis,
+            magnetic_axis=topology["axis_rz_m"],
+            x_points=topology["x_point_rz_m"],
+            style=DEFAULT_INK.variant(
+                axis_marker="^",
+                axis_color=colour,
+                xpoint_marker="X",
+                xpoint_color=colour,
+            ),
+            contain=wall_units,
+        )
+        drawn[name] = (
+            (1 if _axis_is_inside(topology, wall) else 0)
+            + tally["x_points_drawn"]
+            + tally["other_x_points_drawn"]
+        )
+    return drawn
+
+
+def _draw_error_panel(
+    axis,
+    *,
+    name: str,
+    coordinates: np.ndarray,
+    values: np.ndarray,
+    wall: np.ndarray,
+    boundary: np.ndarray,
+    analytic_topology: dict[str, Any],
+    terminal_topology: dict[str, Any],
+) -> dict[str, Any]:
+    """Draw one absolute-error panel as line contours above the round-off floor.
+
+    Levels at or below ``ROUNDOFF_LEVEL_FLOOR`` are not contoured: a field whose
+    whole range is round-off would otherwise paint a rich structured map that
+    carries no signal. The count suppressed is recorded so the reader can see
+    the suppression rather than infer it from a blank panel.
+    """
+
+    magnitude = certificate._error_magnitude(values)
+    radial, height, field = certificate._raster_field(coordinates, magnitude, wall)
+    raw_levels = np.asarray(poloidal.contour_levels(field, count=8), dtype=np.float64)
+    levels = np.asarray(
+        [level for level in raw_levels if level >= ROUNDOFF_LEVEL_FLOOR],
+        dtype=np.float64,
+    )
+    if len(levels):
+        poloidal.draw_flux_contours(
+            axis,
+            radial,
+            height,
+            field,
+            levels,
+            color="#7a3e9d",
+            linewidth=0.65,
+        )
+    poloidal.draw_boundary(axis, boundary[:, 0], boundary[:, 1], color="#35b9c8")
+    poloidal.draw_wall(axis, units=(wall,), linewidth=0.8)
+    glyphs = _draw_null_sets(
+        axis,
+        analytic_topology=analytic_topology,
+        terminal_topology=terminal_topology,
+        wall=wall,
+    )
+    poloidal_axes(axis)
+    caption = (
+        f"absolute {name} error · max {float(np.max(magnitude)):.2e}\n"
+        f"round-off floor {ROUNDOFF_LEVEL_FLOOR:.0e} · levels: "
+        + (
+            ", ".join(f"{level:.2e}" for level in levels)
+            if len(levels)
+            else "none (every contour level is below the floor)\n"
+            "this panel is round-off, not signal"
+        )
+    )
+    axis.text(
+        0.02,
+        0.02,
+        caption,
+        transform=axis.transAxes,
+        fontsize=6,
+        va="bottom",
+        bbox=DEFAULT_INK.label_bbox,
+    )
+    axis.set_title(f"absolute {name} error", fontsize=9)
+    return {
+        "name": name,
+        "levels": [float(level) for level in levels],
+        "raw_levels": [float(level) for level in raw_levels],
+        "levels_suppressed_below_floor": int(len(raw_levels) - len(levels)),
+        "max_absolute": float(np.max(magnitude)),
+        "caption": caption,
+        "null_glyphs": glyphs,
+    }
+
+
+def _draw_shadow_panel(
+    payload: dict[str, Any], path: Path, title: str
+) -> tuple[plt.Figure, list[dict[str, Any]]]:
+    """Rebuild one chord solve panel from the part's stored render data.
+
+    Every poloidal panel carries both null sets, the wall, and unfilled line
+    contours on stated levels; the error panels contour only above the round-off
+    floor and say so on the panel. Returns the open figure and the per-panel
+    record the receipt publishes.
+    """
+
+    data = payload["render_data"]
+    coordinates = np.asarray(data["coordinates_rz_m"], dtype=np.float64)
+    terminal = np.asarray(data["terminal_flux_wb"], dtype=np.float64)
+    analytic = np.asarray(data["analytic_flux_wb"], dtype=np.float64)
+    derivative = np.asarray(data["derivative_coordinates_rz_m"], dtype=np.float64)
+    boundary = np.asarray(data["boundary_rz_m"], dtype=np.float64)
+    wall = np.asarray(data["wall_units_rz_m"][0], dtype=np.float64)
+    errors = {
+        name: np.asarray(data["error_fields"][name], dtype=np.float64)
+        for name in certificate.NORM_FIELDS
+    }
+    analytic_topology = data["analytic_topology"]
+    terminal_topology = data["terminal_topology"]
+
+    figure, axes = plt.subplots(2, 2, figsize=(10.5, 9.0), constrained_layout=True)
+    flux_axis = axes[0, 0]
+    radial, height, solved = certificate._raster_field(coordinates, terminal, wall)
+    _, _, reference = certificate._raster_field(coordinates, analytic, wall)
+    levels = np.asarray(
+        poloidal.contour_levels(
+            np.concatenate((solved.ravel(), reference.ravel())), count=12
+        ),
+        dtype=np.float64,
+    )
+    poloidal.draw_flux_contours(
+        flux_axis, radial, height, reference, levels, color=ANALYTIC_RENDER_COLOR
+    )
+    poloidal.draw_flux_contours(
+        flux_axis, radial, height, solved, levels, color=SOLVED_RENDER_COLOR
+    )
+    poloidal.draw_boundary(
+        flux_axis, boundary[:, 0], boundary[:, 1], color=ANALYTIC_RENDER_COLOR
+    )
+    poloidal.draw_wall(flux_axis, units=(wall,), linewidth=0.8)
+    flux_glyphs = _draw_null_sets(
+        flux_axis,
+        analytic_topology=analytic_topology,
+        terminal_topology=terminal_topology,
+        wall=wall,
+    )
+    poloidal_axes(flux_axis)
+    flux_axis.set_title(FLUX_RENDER_TITLE, fontsize=8)
+    panels: list[dict[str, Any]] = [
+        {
+            "name": "flux",
+            "levels": [float(level) for level in levels],
+            "raw_levels": [float(level) for level in levels],
+            "levels_suppressed_below_floor": 0,
+            "max_absolute": None,
+            "caption": FLUX_RENDER_TITLE,
+            "null_glyphs": flux_glyphs,
+        }
+    ]
+    panel_axes = (axes[0, 1], axes[1, 0], axes[1, 1])
+    panel_coordinates = (
+        coordinates[: len(errors["psi"])],
+        derivative,
+        derivative,
+    )
+    for axis, name, points in zip(
+        panel_axes, certificate.NORM_FIELDS, panel_coordinates, strict=False
+    ):
+        panels.append(
+            _draw_error_panel(
+                axis,
+                name=name,
+                coordinates=points,
+                values=errors[name],
+                wall=wall,
+                boundary=boundary,
+                analytic_topology=analytic_topology,
+                terminal_topology=terminal_topology,
+            )
+        )
+    figure.suptitle(title)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    return figure, panels
+
+
+def _render_shadow_rows(output_root: Path) -> dict[str, Any]:
+    """Rebuild the four chord solve panels and their receipt from stored data.
+
+    No forward operator is constructed and no solve is entered: every field is
+    read from the part receipt the driver already committed beside the figures.
+    """
+
+    output_root = Path(output_root).resolve()
+    part_root = output_root / "solve-parts" / SHADOW_RENDER_MODE
+    figure_root = output_root / "solve-panels" / SHADOW_RENDER_MODE
+    parts = sorted(part_root.glob("*.json"))
+    if not parts:
+        raise RuntimeError(f"no persisted solve parts under {part_root}")
+    rows: list[dict[str, Any]] = []
+    for part in parts:
+        payload = json.loads(part.read_text(encoding="utf-8"))
+        if "render_data" not in payload:
+            raise RuntimeError(f"part carries no render data: {part}")
+        title = _render_title(payload)
+        figure_path = figure_root / (
+            f"{payload['case']}-production-route-"
+            f"{certificate._slug(payload['requested_cells'])}.png"
+        )
+        figure, panels = _draw_shadow_panel(payload, figure_path, title)
+        plt.close(figure)
+        rows.append(
+            {
+                "case": payload["case"],
+                "requested_cells": payload["requested_cells"],
+                "part_filesystem_path": str(part.relative_to(ROOT)),
+                "figure_filesystem_path": str(figure_path.relative_to(ROOT)),
+                "figure_project_absolute_src": (
+                    f"/nova/{figure_path.relative_to(ROOT / 'docs')}"
+                ),
+                "title": title,
+                "receipt_residual": float(
+                    payload["solver"]["terminal_fixed_point_residual"]
+                ),
+                "receipt_converged": bool(payload["solver"]["converged"]),
+                "panels": panels,
+            }
+        )
+    receipt = {
+        "schema": "nova.limited-shadow-render-receipt",
+        "source_revision": _source_revision(),
+        "mode": SHADOW_RENDER_MODE,
+        "roundoff_level_floor": ROUNDOFF_LEVEL_FLOOR,
+        "rows": rows,
+    }
+    _write_json(output_root / RENDER_RECEIPT_NAME, receipt)
+    print(
+        "LIMITED_SHADOW_RENDER_EXIT=0 figures="
+        + str(len(rows))
+        + " receipt="
+        + str((output_root / RENDER_RECEIPT_NAME).relative_to(ROOT)),
+        flush=True,
+    )
+    return receipt
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--solve-gate", action="store_true")
+    parser.add_argument("--render-only", action="store_true")
     parser.add_argument("--regenerate-solve-rows", action="store_true")
     parser.add_argument("--cpu-delta-arm", choices=("base", "after"))
     parser.add_argument("--cpu-module", action="append")
@@ -884,6 +1199,9 @@ def main() -> None:
             "LIMITED_SHADOW_CENSUS_DRY_RUN rows="
             + ",".join(str(abs(value)) for value in REQUESTED_CELLS)
         )
+        return
+    if arguments.render_only:
+        _render_shadow_rows(arguments.output_root)
         return
     if arguments.solve_gate:
         _solve_gate(

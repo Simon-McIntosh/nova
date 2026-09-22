@@ -2922,6 +2922,51 @@ ROW2_EXIT=139</pre>
   <p>Nineteen repair followups are staged for the owning plan <code>cut-cell-current-attribution</code>
   in <code>findings-cut-cell-current-attribution.json</code>.</p>
 </section>
+<section class="audit-directory" id="fsa-repair-limited-shadow-chord-panels">
+<h2 id="fsa-repair-limited-shadow-chord-panels">Repair — docs/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord</h2>
+<p>Reviewer anchor: <code>#figure-audit-cut-cell-current-attribution</code>. The four <code>chord</code>
+panels scored 52, 60, 60 and 60 with the reviewer naming three faults: the title carried no terminal
+residual or converged flag, the <code>diverted-single-null</code> absolute-psi-error panel contoured
+machine round-off as a structured map, and the poloidal panels drew one null set where a second is
+handed to the painter.</p>
+<p><strong>What the repair is.</strong> A render-only entry point in
+<em>benchmarks/limited_row_shadow_census.py</em> (<code>--render-only</code>) rebuilds the four panels
+from the committed <code>solve-parts/chord/*.json</code> receipts — no forward operator, no solve —
+and writes a per-figure receipt. Each title now prints the terminal residual and the converged flag
+read from the receipt's own <code>solver.terminal_fixed_point_residual</code> and
+<code>solver.converged</code>; each absolute-error panel contours only levels at or above
+<code>ROUNDOFF_LEVEL_FLOOR</code> 1e-12 and its caption names the floor; every poloidal panel draws
+the analytic and the solved null set in their own colours, and the receipt records the glyph count
+each set drew.</p>
+<p><strong>Receipt.</strong>
+<code>docs/figures/cut-cell-current-attribution/limited-shadow/render-receipt.json</code>
+(<code>schema nova.limited-shadow-render-receipt</code>, four rows). Titles, as published:
+<code>diverted-single-null · cells-500 · qualified · residual=2.423e-17 · converged=yes</code>;
+<code>moderate-rotation-conventional-static · cells-1000 · qualified · residual=5.875e-16 ·
+converged=yes</code>; <code>strong-rotation-compact-static · cells-1000 · qualified ·
+residual=2.913e-16 · converged=yes</code>; <code>weak-rotation-reactor-static · cells-1000 ·
+qualified · residual=1.388e-15 · converged=yes</code>. The control's psi panel is the round-off
+case: <code>max_absolute</code> 8.153e-17, <code>levels</code> empty,
+<code>levels_suppressed_below_floor</code> 8, caption <em>round-off floor 1e-12 · levels: none
+(every contour level is below the floor) / this panel is round-off, not signal</em>. Every one of the
+sixteen rendered panels reports at least one glyph per null set (the control 2 analytic / 2 solved;
+the three limited rows 1 / 1).</p>
+<p><strong>Gate.</strong> <code>python -m pytest -p no:cacheprovider
+tests/test_limited_row_shadow_render.py</code> at the node's base revision: 4 passed in 13.64 s, log
+<code>render-receipt-check.log</code>. The check reads the committed receipt, compares each title's
+<code>residual=</code> against the part receipt's own field, requires no contour level below the
+floor on any error panel and the caption to name it, requires both null sets on every panel, and
+additionally rebuilds the control panel in memory and reads the axes.</p>
+<p><strong>Negative control.</strong> Declared mutation <code>sub-floor-level</code> — restore the
+diverted psi error panel's unfiltered contour levels, so a level below the 1e-12 floor is contoured
+as signal. Applied, the check reddens with <code>diverted-single-null/psi: contour levels below the
+round-off floor 1e-12: [4.72e-20]</code>, <code>1 failed, 3 passed</code>, log
+<code>render-receipt-check-negative-control.log</code>.</p>
+<p><strong>Figures regenerated</strong> under the plotting rules: the four
+<code>solve-panels/chord/*.png</code>, on the login node only, from the persisted receipts alone
+(render 2.1 s, import 13.1 s). No SVG companion existed for these four before this repair and none
+was created.</p>
+</section>
   </main>
 </body>
 </html>

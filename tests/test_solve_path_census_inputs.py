@@ -7,6 +7,7 @@ from dataclasses import replace
 import json
 import os
 from pathlib import Path
+from types import SimpleNamespace
 
 import jax
 import jax.numpy as jnp
@@ -146,15 +147,12 @@ def test_solve_path_prefix_slices_do_not_feed_the_null_census():
     assert observed == _CONSTRAINT_PREFIX_ALLOWLIST
 
 
-@pytest.mark.slow
-@pytest.mark.parametrize(
-    "case_name,requested_cells",
-    [("diverted-single-null", -110), ("weak-rotation-reactor-static", -110)],
+@pytest.fixture(
+    scope="module",
+    params=["diverted-single-null", "weak-rotation-reactor-static"],
     ids=["single-null", "discriminator-row"],
 )
-def test_exact_mode_solve_retains_census_samples(
-    case_name, requested_cells, monkeypatch
-):
+def analytic_carrier(request):
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
     from benchmarks import solovev_certificate as certificate
@@ -170,8 +168,10 @@ def test_exact_mode_solve_retains_census_samples(
     previous_mode = support_clip_mode()
     set_support_clip_mode("exact")
     try:
+        case_name = request.param
         if case_name == "diverted-single-null":
             case_name = certificate.DIVERTED_CASE_NAME
+        requested_cells = -110
         carrier_case, source_case, exact = certificate._case(case_name)
         machine = certificate._case_machine(
             case_name, carrier_case, exact, requested_cells
@@ -195,13 +195,15 @@ def test_exact_mode_solve_retains_census_samples(
                 case_name, source_case, operator, moments
             )
         )
-        request = certificate._certificate_solve_request(
+        solve_request = certificate._certificate_solve_request(
             profile,
             jnp.asarray(analytic, dtype=jnp.float64),
             float(target_current),
             carrier_identity=f"analytic-hex:{case_name}:{requested_cells}",
         )
-        request = replace(request, policy=replace(request.policy, active_set_steps=1))
+        solve_request = replace(
+            solve_request, policy=replace(solve_request.policy, active_set_steps=1)
+        )
         positive = operator._fixed_design_topology.grid.candidate_table_status(
             operator.null_flux_pool(jnp.asarray(analytic))
         )
@@ -213,62 +215,124 @@ def test_exact_mode_solve_retains_census_samples(
             f"retained={np.asarray(positive['retained_count']).tolist()}",
             flush=True,
         )
-        visits = []
-        read_receipt = ForwardProfile._terminal_polish_receipt
-
-        def observe_receipt(self, equilibrium):
-            visits.append(equilibrium.flux.shape[0])
-            print(f"TERMINAL_RECEIPT_INPUT values={visits[-1]}", flush=True)
-            return read_receipt(self, equilibrium)
-
-        monkeypatch.setattr(ForwardProfile, "_terminal_polish_receipt", observe_receipt)
-        receipt = profile.solve(request)
-        assert visits == [operator.node_number]
-        assert visits[0] > operator.physical_node_number
-        polish = receipt.polish_receipt
-        assert polish is not None
-        position = np.asarray(polish["selected_position_rz"])
-        value = np.asarray(polish["selected_value"])
-        assert np.all(np.isfinite(position[0])) and np.isfinite(value[0])
-        valid = np.isfinite(value)
-        assert np.all(np.isfinite(position[valid]))
-        terminal = np.asarray(receipt.equilibrium.flux)
-        assert np.all(np.isfinite(terminal))
-        history = receipt.equilibrium.fixed_point
-        print(
-            f"SOLVE_POLISH_RECEIPT case={case_name} realised={len(machine.node)} "
-            f"finite_landmarks={int(np.sum(valid))} "
-            f"residual={float(history.residual):.12g} "
-            f"converged={bool(history.converged)}",
-            flush=True,
+        yield SimpleNamespace(
+            case_name=case_name,
+            machine=machine,
+            coordinates=coordinates,
+            analytic=analytic,
+            operator=operator,
+            profile=profile,
+            solve_request=solve_request,
+            positive=positive,
         )
-        destination = os.environ.get("NOVA_SOLVE_PATH_EVIDENCE")
-        if destination:
-            output = Path(destination)
-            output.mkdir(parents=True, exist_ok=True)
-            _reference_masks, reference_topology = operator.read(analytic)
-            _reference_o, reference_x = operator._fixed_design_topology.grid(
-                operator.null_flux_pool(analytic)
-            )
-            _terminal_o, terminal_x = operator._fixed_design_topology.grid(
-                operator.null_flux_pool(terminal)
-            )
-            np.savez(
-                output / f"{case_name}.npz",
-                coordinates=coordinates,
-                grid_count=len(machine.node),
-                analytic=analytic,
-                terminal=terminal,
-                wall=machine.wall_node,
-                axis=np.asarray(receipt.equilibrium.topology.axis),
-                x_point=np.asarray(receipt.equilibrium.topology.x_point),
-                reference_axis=np.asarray(reference_topology.axis),
-                reference_x_point=np.asarray(reference_topology.x_point),
-                reference_candidates=np.asarray(reference_x[:, :2]),
-                terminal_candidates=np.asarray(terminal_x[:, :2]),
-                residual=float(history.residual),
-                converged=bool(history.converged),
-                finite_landmarks=int(np.sum(valid)),
-            )
     finally:
         set_support_clip_mode(previous_mode)
+
+
+def _finite_polish_count(polish):
+    assert polish is not None
+    position = np.asarray(polish["selected_position_rz"])
+    value = np.asarray(polish["selected_value"])
+    assert np.all(np.isfinite(position[0])) and np.isfinite(value[0])
+    valid = np.isfinite(value)
+    assert np.all(np.isfinite(position[valid]))
+    return int(np.sum(valid))
+
+
+def test_terminal_polish_receipt_keeps_direct_samples(analytic_carrier):
+    case = analytic_carrier
+    equilibrium = SimpleNamespace(
+        flux=case.analytic,
+        topology=SimpleNamespace(axis=case.positive["retained_candidate"][0, 0, :2]),
+    )
+    assert equilibrium.flux.size == case.operator.node_number
+    assert equilibrium.flux.size > case.operator.physical_node_number
+    polish = case.profile._terminal_polish_receipt(equilibrium)
+    finite = _finite_polish_count(polish)
+    print(
+        f"TERMINAL_SEAM case={case.case_name} "
+        f"state_values={equilibrium.flux.size} finite_landmarks={finite}",
+        flush=True,
+    )
+
+
+def test_reduced_newton_acceptance_read_keeps_direct_samples(analytic_carrier):
+    case = analytic_carrier
+    _masks, topology, _connected, admitted = case.operator._fixed_design_read(
+        jnp.asarray(case.analytic), None
+    )
+    assert bool(admitted)
+    assert np.all(np.isfinite(np.asarray(topology.axis)))
+    assert np.isfinite(float(topology.axis_flux))
+    with pytest.raises(ValueError, match="requires the direct sampling flux values"):
+        case.operator._fixed_design_read(
+            jnp.asarray(case.analytic)[: case.operator.physical_node_number], None
+        )
+    print(
+        f"ACCEPTANCE_SEAM case={case.case_name} axis_admitted={bool(admitted)} "
+        f"state_values={len(case.analytic)} truncated_input_refused=True",
+        flush=True,
+    )
+
+
+@pytest.mark.slow
+@pytest.mark.skipif(
+    not any(device.platform == "gpu" for device in jax.devices()),
+    reason="the full exact-mode solve requires a GPU backend",
+)
+def test_exact_mode_solve_retains_census_samples(analytic_carrier, monkeypatch):
+    from nova.equilibrium.forward import ForwardProfile
+
+    case = analytic_carrier
+    operator = case.operator
+    visits = []
+    read_receipt = ForwardProfile._terminal_polish_receipt
+
+    def observe_receipt(self, equilibrium):
+        visits.append(equilibrium.flux.shape[0])
+        print(f"TERMINAL_RECEIPT_INPUT values={visits[-1]}", flush=True)
+        return read_receipt(self, equilibrium)
+
+    monkeypatch.setattr(ForwardProfile, "_terminal_polish_receipt", observe_receipt)
+    receipt = case.profile.solve(case.solve_request)
+    assert visits == [operator.node_number]
+    assert visits[0] > operator.physical_node_number
+    finite = _finite_polish_count(receipt.polish_receipt)
+    terminal = np.asarray(receipt.equilibrium.flux)
+    assert np.all(np.isfinite(terminal))
+    history = receipt.equilibrium.fixed_point
+    print(
+        f"SOLVE_POLISH_RECEIPT case={case.case_name} "
+        f"realised={len(case.machine.node)} finite_landmarks={finite} "
+        f"residual={float(history.residual):.12g} "
+        f"converged={bool(history.converged)} backend={jax.default_backend()}",
+        flush=True,
+    )
+    destination = os.environ.get("NOVA_SOLVE_PATH_EVIDENCE")
+    if destination:
+        output = Path(destination)
+        output.mkdir(parents=True, exist_ok=True)
+        _reference_masks, reference_topology = operator.read(case.analytic)
+        _reference_o, reference_x = operator._fixed_design_topology.grid(
+            operator.null_flux_pool(case.analytic)
+        )
+        _terminal_o, terminal_x = operator._fixed_design_topology.grid(
+            operator.null_flux_pool(terminal)
+        )
+        np.savez(
+            output / f"{case.case_name}.npz",
+            coordinates=case.coordinates,
+            grid_count=len(case.machine.node),
+            analytic=case.analytic,
+            terminal=terminal,
+            wall=case.machine.wall_node,
+            axis=np.asarray(receipt.equilibrium.topology.axis),
+            x_point=np.asarray(receipt.equilibrium.topology.x_point),
+            reference_axis=np.asarray(reference_topology.axis),
+            reference_x_point=np.asarray(reference_topology.x_point),
+            reference_candidates=np.asarray(reference_x[:, :2]),
+            terminal_candidates=np.asarray(terminal_x[:, :2]),
+            residual=float(history.residual),
+            converged=bool(history.converged),
+            finite_landmarks=finite,
+        )

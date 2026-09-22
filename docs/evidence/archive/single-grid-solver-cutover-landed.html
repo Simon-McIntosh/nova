@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="single-grid-solver-cutover-landed">
   <meta name="plan-title" content="Single-grid solver cutover — cumulative execution evidence">
-  <meta name="plan-summary" content="Landed receipts for the single-grid solver cutover: the H200 solve profile, and the device-control arm for the coil-edit sweep at the banked revision.">
+  <meta name="plan-summary" content="Landed receipts for the single-grid solver cutover: the H200 solve profile, and the coil-edit sweep reproduced on the H200 at the banked revision.">
   <meta name="plan-evidence-for" content="single-grid-solver-cutover">
   <meta name="plan-verifies" content="single-grid-solver-cutover#s4">
   <title>Single-grid solver cutover — landed evidence | nova</title>
@@ -23,20 +23,56 @@
     are display roundings of the receipt fields they cite.</p>
   </header>
 
-  <section id="s4-titan-device-control">
-    <h2>§4 Node — coil-edit sweep, titan device control at the banked revision</h2>
+  <section id="s4-coil-edit-reproducibility">
+    <h2>§4 Node — coil-edit sweep reproduced on the H200 at the banked revision</h2>
     <p><strong>Node:</strong> <code>sgc-sweep-control-at-the-banked-revision</code>.
-    <strong>Revision:</strong> <code>d384919244f7a9e2d84df43a32a5d738b6785c68</code>.
-    <strong>Status:</strong> blocked — the mandated titan command line cannot execute at
-    this revision, and the obstacle is a device-qualification guard outside the node's write
-    scope. No edit was measured and no commit was made.</p>
+    <strong>Revision:</strong> <code>d384919244f7a9e2d84df43a32a5d738b6785c68</code>;
+    the receipt's <code>source_revision</code> field stamps <code>9c203931e</code> (see the
+    code-identity note below). <strong>Status:</strong> delivered — the twenty-edit
+    unconstrained sweep reproduces the banked H200 arm on every discrete outcome, on the
+    same device. Nothing was committed for the measurement.</p>
 
-    <h3>What was asked, and what happened</h3>
-    <p>The node was to run the unconstrained twenty-edit coil-edit sweep on the
-    <code>titan</code> partition (1&times; Tesla P100-PCIE-16GB) at the revision whose H200
-    run is banked at 10 of 20, so that the titan reading would have a same-device paired
-    arm. Two clauses of the mandated command line are unsatisfiable at this revision, and
-    both were reproduced on the mandated device in job <code>1275965</code>
+    <table>
+      <caption>The delivered arm against the banked arm at the same revision</caption>
+      <thead><tr><th></th><th>banked (job 1273580)</th><th>delivered (job 1275980)</th></tr></thead>
+      <tbody>
+        <tr><td>device</td><td>NVIDIA H200 NVL</td><td>NVIDIA H200 NVL</td></tr>
+        <tr><td>partition / reservation</td><td>betelgeuse / gpu_0003_grpA</td><td>betelgeuse / gpu_0003_grpA</td></tr>
+        <tr><td>cpus / mem</td><td>8 / 128 G</td><td>8 / 128 G</td></tr>
+        <tr><td><code>JAX_PLATFORMS</code></td><td>cuda,cpu</td><td>cuda,cpu</td></tr>
+        <tr><td><code>converged_edit_count</code></td><td>10 of 20</td><td>10 of 20</td></tr>
+        <tr><td>failing points</td><td>1,2,4,6,8,10,16,17,18,19</td><td>1,2,4,6,8,10,16,17,18,19</td></tr>
+        <tr><td>verdict</td><td>FAIL</td><td>FAIL</td></tr>
+        <tr><td>median warm wall</td><td>370.367 ms</td><td>340.992 ms</td></tr>
+        <tr><td>max boundary displacement</td><td>0.4722807398543636 m</td><td>0.4722807398543636 m</td></tr>
+      </tbody>
+    </table>
+
+    <p>Because the device is the same as the banked run, this arm measures
+    <em>reproducibility</em> at this revision rather than cross-device behaviour; the paired
+    arm at <code>a3f2429b</code> runs the same recipe on the same H200 device. Only the
+    latency column differs — an 8.0&nbsp;% spread on a device-shared H200 — while every
+    discrete outcome is identical.</p>
+
+    <h3>Code identity: why the <code>9c203931e</code> stamp is the same code</h3>
+    <p><code>source_revision</code> is <code>git rev-parse HEAD</code> in the repo root with
+    no override, and this node's landing record was committed before the measurement, so
+    HEAD had advanced by a docs-only commit when the sweep ran. Three hashes in the
+    delivered receipt are byte-identical to the banked <code>d3849192</code> receipt:</p>
+    <table>
+      <thead><tr><th>field</th><th>banked d3849192</th><th>delivered</th></tr></thead>
+      <tbody>
+        <tr><td><code>forward_module.sha256</code></td><td>e000f158aa438cf0…</td><td>e000f158aa438cf0…</td></tr>
+        <tr><td><code>reduced_newton_module.sha256</code></td><td>63dfdbd2bec1bcfe…</td><td>63dfdbd2bec1bcfe…</td></tr>
+        <tr><td><code>driver.sha256</code></td><td>664c2031d18d690a…</td><td>664c2031d18d690a…</td></tr>
+      </tbody>
+    </table>
+
+    <h3>The titan arm is not runnable at any revision</h3>
+    <p>The node was originally to run this sweep on the <code>titan</code> partition
+    (1&times; Tesla P100-PCIE-16GB), so that the titan reading would have a same-device
+    paired arm. Two clauses of the mandated command line are unsatisfiable at this revision,
+    and both were reproduced on the mandated device in job <code>1275965</code>
     (<code>98dci4-gpu-0002</code>, partition <code>titan</code>, 4 CPUs, 64 G,
     <code>JAX_PLATFORMS</code> unset, <code>TMPDIR=/tmp</code>).</p>
 
@@ -58,9 +94,21 @@
 
     <p>The guard was introduced with the benchmark itself (<code>dea563908</code>,
     2026-09-02, <code>git log -S"_require_measurement_host"</code>): this benchmark has never
-    had a titan-capable revision, so no earlier revision reaches a different code path.</p>
+    had a titan-capable revision, so no earlier revision reaches a different code path. The
+    coordinator adjudicated the control onto the guard-mandated device with the guard
+    untouched — no bypass and no no-op.</p>
 
-    <h3>The H200 paired arm at this revision</h3>
+    <p>Two further interface facts were forced by the driver and are recorded because each
+    cost a job. The <code>--figure</code> path must lie inside the worktree root
+    (<code>_receipt_document</code>, <code>:1548</code>, calls
+    <code>figure.relative_to(ROOT)</code>), so an out-of-tree figure aborts at receipt
+    assembly <em>after</em> the full sweep has run; H200 job <code>1275975</code> was lost
+    that way (<code>EXIT_MARKER=1</code>, <code>ValueError</code>) in four minutes of
+    measurement. And the raster figure has no CLI flag at all, so the driver wrote it and
+    its other default outputs into the worktree's own docs paths with nothing committed,
+    which satisfies the fence: the fence was about commits, not worktree files.</p>
+
+    <h3>The banked H200 arm at this revision</h3>
     <p>Job <code>1273580</code>, device <code>NVIDIA H200 NVL</code>,
     <code>converged_edit_count: 10</code> of 20, median warm wall 370.367&nbsp;ms (max
     445.605, min 333.484), trip median 2 (max 4); failing points
@@ -71,41 +119,44 @@
     and in <code>s19-local/coil-edit-panel-lcfs-2/predecessor-uncommitted-receipts.diff</code>.</p>
 
     <table>
-      <caption>Per-edit control table: the titan column was not measured</caption>
-      <thead><tr><th>edit</th><th>fraction</th><th>H200 converged</th><th>H200 termination</th><th>H200 trips</th><th>titan converged</th><th>titan termination</th><th>titan trips</th></tr></thead>
+      <caption>Per-edit: the banked arm beside the delivered arm. Twenty of twenty rows agree exactly.</caption>
+      <thead><tr><th>edit</th><th>fraction</th><th>banked conv</th><th>banked termination</th><th>banked trips</th><th>delivered conv</th><th>delivered termination</th><th>delivered trips</th></tr></thead>
       <tbody>
-        <tr><td>0</td><td>-0.18</td><td>True</td><td>converged</td><td>4</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>1</td><td>-0.16</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>2</td><td>-0.14</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>3</td><td>-0.12</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>4</td><td>-0.10</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>5</td><td>-0.08</td><td>True</td><td>converged</td><td>3</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>6</td><td>-0.06</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>7</td><td>-0.04</td><td>True</td><td>converged</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>8</td><td>-0.02</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>9</td><td>-0.00</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>10</td><td>+0.02</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>11</td><td>+0.04</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>12</td><td>+0.06</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>13</td><td>+0.08</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>14</td><td>+0.10</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>15</td><td>+0.12</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>16</td><td>+0.14</td><td>False</td><td>active_set_settled</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>17</td><td>+0.16</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>18</td><td>+0.18</td><td>False</td><td>active_set_settled</td><td>3</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>19</td><td>+0.20</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>0</td><td>-0.18</td><td>True</td><td>converged</td><td>4</td><td>True</td><td>converged</td><td>4</td></tr>
+        <tr><td>1</td><td>-0.16</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+        <tr><td>2</td><td>-0.14</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+        <tr><td>3</td><td>-0.12</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+        <tr><td>4</td><td>-0.10</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+        <tr><td>5</td><td>-0.08</td><td>True</td><td>converged</td><td>3</td><td>True</td><td>converged</td><td>3</td></tr>
+        <tr><td>6</td><td>-0.06</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+        <tr><td>7</td><td>-0.04</td><td>True</td><td>converged</td><td>1</td><td>True</td><td>converged</td><td>1</td></tr>
+        <tr><td>8</td><td>-0.02</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+        <tr><td>9</td><td>-0.00</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+        <tr><td>10</td><td>+0.02</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+        <tr><td>11</td><td>+0.04</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+        <tr><td>12</td><td>+0.06</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+        <tr><td>13</td><td>+0.08</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+        <tr><td>14</td><td>+0.10</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+        <tr><td>15</td><td>+0.12</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+        <tr><td>16</td><td>+0.14</td><td>False</td><td>active_set_settled</td><td>2</td><td>False</td><td>active_set_settled</td><td>2</td></tr>
+        <tr><td>17</td><td>+0.16</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+        <tr><td>18</td><td>+0.18</td><td>False</td><td>active_set_settled</td><td>3</td><td>False</td><td>active_set_settled</td><td>3</td></tr>
+        <tr><td>19</td><td>+0.20</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
       </tbody>
     </table>
 
-    <p>The titan column is empty because the control was not measured, not because it agreed.
-    No figure is drawn here: the deliverable is two tables of per-row flags and clause
-    outcomes, which is what a table is for.</p>
+    <p>The failing set is <code>{1,2,4,6,8,10,16,17,18,19}</code> on both arms, and every
+    <code>(converged, termination, trip_count)</code> triple matches. Only wall-clock moves:
+    median 340.992&nbsp;ms against 370.367&nbsp;ms. No figure is drawn here: the deliverable
+    is two tables of per-row flags and clause outcomes, which is what a table is for.</p>
 
     <h3>Artifacts</h3>
     <ul>
-      <li><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/sgc-sweep-control-at-the-banked-revision/report.md</code> — full report, options and leaning</li>
-      <li><code>…/titan-refusal-1275965.log</code> — the device-qualified reproduction, verbatim</li>
-      <li><code>…/titan-control-refusal.sbatch</code> — the three-probe driver</li>
+      <li><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/sgc-sweep-control-at-the-banked-revision/report.md</code> — full report</li>
+      <li><code>…/coil-edit-latency-h200-reproducibility.json</code> — the delivered receipt</li>
+      <li><code>…/h200-reproducibility-1275980.log</code> — job log, <code>EXIT_MARKER=2</code> (the FAIL verdict)</li>
+      <li><code>…/titan-refusal-1275965.log</code> — the device-qualified titan refusal, verbatim</li>
+      <li><code>…/h200-reproducibility-1275975.log</code> — the lost <code>--figure</code>-outside-ROOT attempt</li>
     </ul>
   </section>
 </main>

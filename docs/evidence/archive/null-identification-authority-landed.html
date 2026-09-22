@@ -1453,6 +1453,36 @@ benchmarks/solovev_certificate.py:2514: RuntimeError
   1 failed / 7 passed red result. The generated receipt and panels land in
   <code>b51d96717</code>. A wholesale re-generation is still required before the remaining ten
   bank rows can carry <code>solve_topology_class</code> rather than their legacy class field.</p>
+
+  <p><strong>Final bookend closure (2026-09-22).</strong> The wholesale Titan regeneration
+  (job <code>1275465</code>) returned <code>RENDERER_EXIT=0</code>, twelve replay-ready rows
+  and <code>refreshed_rows=12</code>; the resulting bank has twelve of twelve non-null
+  <code>solve_topology_class</code> values, all <code>diverted</code>, at commit
+  <code>6b0530baa</code>. The acceptance replay and publication ran together in one
+  <code>all_debug</code> CPU allocation from commit <code>ee2ad2d69</code> (job
+  <code>1275502</code>, <code>00:09:21</code>, exit <code>0:0</code>) with
+  <code>TMPDIR=/tmp</code> in submit and payload, <code>JAX_PLATFORMS=cpu</code>, the root
+  interpreter directly and no <code>uv</code> on the node. It records
+  <code>RENDERER_EXIT=0</code>, <code>ATLAS_EXIT=0</code>,
+  <code>MEASURE_EXIT=0</code>, and 9 passed focused tests. The 22086/43 mixed row has 676
+  boundary points, class <code>diverted</code>, admitted saddle (0.5849783456,
+  1.2305027322) m and a minimum boundary-to-saddle distance of
+  <strong>2.1324e-13 m</strong>, below one lattice pitch.</p>
+
+  <p>The end-to-end limited fixture deliberately carries legacy <code>class=diverted</code>
+  beside solve-owned <code>solve_topology_class=limited</code>, crosses the class-pinned
+  read, operand cache and atlas publisher with no pre-existing atlas, and checks the drawn
+  boundary reaches the wall contact. Under the declared mutation, “the solve topology
+  class is read from the pre-existing atlas instead of the solve receipt”, that case alone
+  fails because the publisher emits <code>diverted</code> (job <code>1275503</code>, pytest
+  exit 1 as expected); the production case remains green. Original-resolution image reads
+  confirm 22086/43 mixed draws the red branch through the upper admitted saddle with axes
+  off. The two states with no traceable branch, 21983/35 pure and 21986/46 pure, retain the
+  wall, contours and null marks and show a wrapped <code>BoundaryGenerationFailure</code>
+  caption carrying the complete reason; commit <code>da402ccc9</code> keeps that reason
+  inside the panel. Gate logs are <code>gate-bookend-final.log</code>,
+  <code>negative-control-final.log</code> and <code>atlas-caption-final.log</code> in this
+  node's durable run directory.</p>
 </section>
 </main>
 </body>

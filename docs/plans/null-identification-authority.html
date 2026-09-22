@@ -206,6 +206,24 @@ disabled so the wall carries the spatial scale. Commits <code>bb89552ad</code>,
 receipt and panel updates. The fresh-process focused gate passes 8 tests with zero added failures;
 the declared wall-contact mutation remains red at 1 failed and 7 passed.</p>
 
+<p><strong>The bookend findings now close on the solve-owned bank (2026-09-22).</strong>
+The final Titan regeneration (job <code>1275465</code>) completed with
+<code>RENDERER_EXIT=0</code> and twelve replay-ready rows; all twelve now persist
+<code>solve_topology_class=diverted</code> from their own solve receipts (commit
+<code>6b0530baa</code>). One <code>all_debug</code> CPU allocation then replayed the
+22086/43 pair, published the seventeen-panel atlas and ran the focused test file from
+commit <code>ee2ad2d69</code> (job <code>1275502</code>, exit <code>0:0</code>): renderer,
+atlas and measurement exits were zero, all nine tests passed, and 22086/43 mixed
+persisted a 676-point diverted boundary whose minimum distance to the admitted saddle at
+(0.584978, 1.230503) m is <code>2.13e-13</code> m, below one lattice pitch. The limited
+end-to-end fixture carries an intentionally opposing legacy label; changing the publisher
+to read that legacy field reddens the fixture alone (job <code>1275503</code>, one failed),
+while the production publisher emits <code>limited</code> and draws its wall contact without
+an atlas file. Direct image reads show the decisive red branch passing through the upper
+saddle, axes off; 21983/35 pure and 21986/46 pure instead show the explicit
+<code>BoundaryGenerationFailure</code> and its complete wrapped reason, because neither
+terminal state yields a closed branch (caption repair <code>da402ccc9</code>).</p>
+
 <h2 id="s2"><span class="badge badge-shipped">✓ landed 2026-09-04</span> §2 — Connected, contained stationary points on the read the solve uses</h2>
 <p class="landed-summary">The solve's own read path is containment-aware for the single closed ring: X candidates are masked by first-wall containment before the flux ranking (<code>nova/equilibrium/topology.py</code> lines 352–368, commit <code>54e8911b</code>), O admission uses one shared seed mask and requires a material-connected component rather than accepting a private well (lines 754–812), the fixed-shape candidate census keeps overflow visible instead of truncating (<code>nova/equilibrium/forward_operator.py</code> lines 404–412, 620–652), private wall anchors are masked (<code>20f3a40c</code>), and the out-of-vessel saddle regression is pinned (<code>tests/test_stationary_point_admission.py</code>). The generalisation from one ring to the occupiable region of a multi-unit wall is owned by <code>multi-unit-limiter-wall</code> §3. Record: <a href="/nova/evidence/archive/null-identification-authority-landed">landed evidence</a>.</p>
 

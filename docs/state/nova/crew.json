@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T08:50:45",
+  "updated": "2026-09-22T08:53:11",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -240446,6 +240446,399 @@
           "status": "failed",
           "error": "IntegrityError: UNIQUE constraint failed: runs.run_id"
         }
+      },
+      {
+        "run_id": "r-20260922T060056781862-nia-the-jacobian-null-benchmark-passes-the-carrier-identity",
+        "plan": "null-identification-authority",
+        "section": "",
+        "node": "nia-the-jacobian-null-benchmark-passes-the-carrier-identity",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1554,
+                "cached_input_tokens": 787787,
+                "input_tokens": 789373,
+                "output_tokens": 78,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 789451,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "PRESCRIBED NODE, one artifact, thirty minutes. The reachability-grid repair (commit 0f56a51a5, worktree nia-the-reachability-grid-passes-the-carrier-identity) found that benchmarks/jacobian_null_direction.py line 804 still calls settled.reachability._mast_states(observed, jnp.asarray(passive_case[\"state\"]), target_current) with no carrier_identity, so it raises the same TypeError against the regenerated bank, and that the plan section 1 statement that this file already passes the identity is wrong (only bank_drift_paired_probe.py and efit_topology_corroboration.py do). The persisted response cache is unpacked at line 779 as response_cache, carrier_evidence. Change that one call to pass carrier_identity=carrier_evidence[\"carrier\"][\"semantic_response_identity\"] the way generate_topology_visuals.py and reachability_grid_final.py now do, nothing else in the file; add a new tests/test_jacobian_null_direction_driver.py with a case that monkeypatches the state request, runs this call path on a synthesised passive case and asserts the keyword equals the case carrier identity; correct the plan section 1 sentence in the landing record you append rather than editing the section text. Gate on the login node in a fresh process (seconds, no solve): the new case passes; the declared negative control reddens; the manifest names the gate command, exit status and log path and negative_control_log as a bare absolute path whose first line repeats the declared mutation verbatim",
+          "estimated_hours": null,
+          "goal": "pass the carrier identity to the MAST state request in the Jacobian null-direction benchmark, the third stale call site the reachability repair found",
+          "id": "nia-the-jacobian-null-benchmark-passes-the-carrier-identity",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-22T06:00:59Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T060056781862-nia-the-jacobian-null-benchmark-passes-the-carrier-identity/manifest.md",
+          "negative_control": "mutation: remove `carrier_identity=carrier_evidence[\"carrier\"][\"semantic_response_identity\"]` from the `_mast_states` call in benchmarks/jacobian_null_direction.py",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/jacobian_null_direction.py",
+            "tests/test_jacobian_null_direction_driver.py",
+            "docs/plans/null-identification-authority.html",
+            "docs/evidence/archive/null-identification-authority-landed.html",
+            "docs/figures/null-identification-authority"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-rows-c",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-22T06:01:19Z",
+        "completed_at": "2026-09-22T06:06:06.696Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 279,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 287,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "3ecafdf5a770830f0d951831cc8b1a650427e6fe",
+        "commits": [
+          "c9d6f44965f8356a9f50c2f320e00a4b56dcff34",
+          "222997d4f623a267ed6b4d2b3b0177d37ae71189"
+        ],
+        "changed_lines": {
+          "added": 248,
+          "removed": 1,
+          "files": 4
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD MPLBACKEND=Agg uv run --no-sync pytest -p no:cacheprovider -q tests/test_jacobian_null_direction_driver.py (login node, fresh process, 1 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T060056781862-nia-the-jacobian-null-benchmark-passes-the-carrier-identity/gate-trial.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T060056781862-nia-the-jacobian-null-benchmark-passes-the-carrier-identity/manifest.md",
+        "scope_changed": false,
+        "session_id": "e9ee7f7b-0625-4080-bebf-74562fa630cc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 4396038,
+            "input_tokens_cumulative": 4396038,
+            "output_tokens": 21137,
+            "output_tokens_cumulative": 21137,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-22T06:06:06.696Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 43,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 125027,
+              "log_fresh": false,
+              "manifest_commits": [
+                "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
+                "0028295f5ba1e4c4d0c3ba0e1c98f0b0fbb4c9d1"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "28b0fa1a9d3559290e36bf25bbedc4839c9ef1861513ab5235f34a953247d5fe",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T180231259880-cca-one-certificate-row-per-process/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan cpu-compile-abort --section '\u00a72' --role review --spec-level exact --node review-of-cca-one-certificate-row-per-process --goal 'attach an independent review to run r-20260920T180231259880-cca-one-certificate-row-per-process' --done-when 'the review for r-20260920T180231259880-cca-one-certificate-row-per-process stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260920T180231259880-cca-one-certificate-row-per-process.json --time-budget 55m --session s19-codex-20260916 --allow-unreconciled-runs --local",
+              "node": "cca-one-certificate-row-per-process",
+              "phase": "complete",
+              "plan": "cpu-compile-abort",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T180231259880-cca-one-certificate-row-per-process",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 125032,
+              "terminal_at": "2026-09-20T19:17:11Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 625,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: Second allocation ran out - job 1274360 aborted at edit 16 on JIT mapping exhaustion with REGEN_DRIVER_EXIT=134 and EXIT_MARKER=134 after 15 of 20 edits; so edits 16 through 20 never ran and the states for edits 14 and 15 were never flushed; seven of the twenty states the done-when needs are absent. The census cannot pass on what landed and CENSUS_AGREES=0; both because 14 states are fewer than the 20 the figures are defined over (drawn_closed 5 of 14 against the required 12 of 20; axis_enclosing_cycle 13 of 14 against 14 of 20) and because the comparison basis itself is unestablished. The comparison basis needs a plan-level answer this worker cannot give - the provenance of the sweep-persistence record and the definition of its level field - and the per-state disagreement is already present at the unedited index 0; so it is not attributable to the constraint; the edit schedule or the level definition. The fixture was therefore not committed and the repository still carries the superseded panel. No resume seam exists in the driver and the archived rows cannot seed one; so completing this node requires the driver capability named in follow_ons before any further allocation is spent.",
+              "elapsed_seconds": 3925,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 90415,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1af882c9ce897d771f68e7158b9f321274358a94",
+                "570ac4bf5782de8353205d4600496e32b41d00a8"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0791ab9295230c76f0e7ba866041563829b22d42afa1542f10d83f009f569795",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint/manifest.md; resolve the blocker before resuming the run",
+              "node": "fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+              "phase": "complete",
+              "plan": "forward-solve-api",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+                "session_id": "63238c6f-d618-43a9-b3b8-e682e544fc9e",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 90507,
+              "terminal_at": "2026-09-21T04:52:36Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+              "elapsed_seconds": 827,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 92348,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none (review role; the fence holds the only deliverable and it is outside the git worktree)"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "dc3aa96a0c2db4290706b18c01eff2defa9b1451056457ee5e71a740fc7e7675",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T035705405532-fsa-audit-figures-cut-cell/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+              "node": "fsa-audit-figures-cut-cell",
+              "phase": "complete",
+              "plan": "figure-and-solver-audit",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T035705405532-fsa-audit-figures-cut-cell",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 92400,
+              "terminal_at": "2026-09-21T04:21:04Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-figures-cut-cell"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 4396038,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 283.895,
+          "generated_tokens": 21137,
+          "generation_seconds": 209.296,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 27.1,
+          "machine_seconds": 74.599,
+          "peak_input_tokens": 130292,
+          "tokens_per_second": 100.99,
+          "wall_tokens_per_second": 74.45
+        },
+        "follow_on_paths": [
+          "docs/figures/null-identification-authority"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-the-jacobian-null-benchmark-passes-the-carrier-identity",
+          "session_id": "e9ee7f7b-0625-4080-bebf-74562fa630cc",
+          "session_source": "stream",
+          "retained_at": "2026-09-22T06:06:06.696Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.9995,
+        "impl_move": {
+          "plan": "null-identification-authority",
+          "at_dispatch": 0.9995,
+          "at_complete": 0.9995,
+          "verdict": "waived",
+          "reason": "a prescribed repair inside the landed section of null-identification-authority at 0.9995; the impl is held for the plan owner"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "test_paths": [
+            "tests/test_jacobian_null_direction_driver.py"
+          ],
+          "declaration": "mutation: remove `carrier_identity=carrier_evidence[\"carrier\"][\"semantic_response_identity\"]` from the `_mast_states` call in benchmarks/jacobian_null_direction.py",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T060056781862-nia-the-jacobian-null-benchmark-passes-the-carrier-identity/negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T060056781862-nia-the-jacobian-null-benchmark-passes-the-carrier-identity/negative-control.log"
+        },
+        "review_waiver": {
+          "reason": "independently reviewed by codex run fsa-verify-the-jacobian-null-carrier-identity under the reviews fence at 92/100"
+        },
+        "tool_steps": 49.0,
+        "orientation_input_tokens": 852584.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -240912,6 +241305,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3083
+    "_version": 3084
   }
 }

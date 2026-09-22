@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T12:34:33",
+  "updated": "2026-09-22T12:44:01",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6412,6 +6412,15 @@
       },
       {
         "id": "s19f-local-3",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-22"
+      },
+      {
+        "id": "s19f-local-4",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -243282,6 +243291,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3099
+    "_version": 3100
   }
 }

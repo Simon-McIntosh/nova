@@ -21,11 +21,11 @@
 <meta name="plan-depends-on" content="solve-default-wiring">
 <meta name="plan-blocks" content="batched-operator-boundary,imas-ambix:physics-carried-playable-plasma">
 <title>Forward solve API | nova</title>
-<meta name="plan-impl" content="0.97">
+<meta name="plan-impl" content="0.98">
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-22">
-<meta name="plan-version" content="90">
+<meta name="plan-version" content="91">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -298,6 +298,7 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260922T151506577261-review-of-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint" data-who="reckon-ship" data-when="2026-09-22T15:25:01.253Z">
     <div class="r-comment-body"><p>review role: scored fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint 78 of 100</p></div>
+</div>
 <div class="r-comment" data-section="s5" data-id="c-fsa-fixture-driver-port-20260922" data-who="fsa-port-the-regenerated-fixture-onto-the-current-driver" data-when="2026-09-22T19:15:00+02:00">
     <div class="r-comment-body"><p>The promoted five-commit constrained-fixture tip <code>269bcbaac</code> is merged onto the current driver in <code>ca714ffda</code>. The resolved driver retains current-main <code>grid_points</code> frame selection and general off-host provenance alongside the promoted <code>--without-vertical-centroid</code> control, conditional constraint tuple, per-edit persistence, strict titan provenance and archive-count gate. One <code>all_debug</code> allocation measured base guard 3 passed, merged guard 4 passed, connectivity 43 passed, parser/control forwarding <code>grid_points=33</code> with zero constraint pairs, and the twenty-state census at 11 drawn closed and 19 cycles with <code>CENSUS_AGREES=1</code>; the unconditional-tuple negative control fails on <code>constraint_pairs=(None,)</code>. Full record: <a href="/nova/evidence/archive/forward-solve-api-landed#coil-edit-fixture-driver-port">driver-port evidence</a>. The driving followup remains for coordinator closure.</p></div>
 </div>

@@ -283,6 +283,8 @@ def row(case, cells):
         )
 
     before, after = physical(before), physical(after)
+    assert np.all(np.isfinite(before)) and np.all(np.isfinite(after))
+    assert np.all(np.linalg.norm(before, axis=1) > np.finfo(float).tiny)
     relative = np.linalg.norm(after - before, axis=1) / np.maximum(
         np.linalg.norm(before, axis=1), np.finfo(float).tiny
     )
@@ -313,6 +315,13 @@ def row(case, cells):
 
     image_before, image_after = image(before_current), image(after_current)
     image_delta = float(np.max(np.abs(image_after - image_before)) / abs(span))
+    perturbed = before_current._replace(
+        cell_current=before_current.cell_current.at[cells_index[0]].multiply(1.01)
+    )
+    image_positive_control = float(
+        np.max(np.abs(image(perturbed) - image_before)) / abs(span)
+    )
+    assert image_positive_control > 1e-12, "image instrument missed changed current"
     refused_count = support.refused_cells()
     refusal_message = None
     if refused_count:
@@ -345,6 +354,7 @@ def row(case, cells):
             )
         ),
         "frozen_image_sup_over_span": image_delta,
+        "image_positive_control_sup_over_span": image_positive_control,
         "image_floor": 1.52e-15,
         "moment_tolerance": 1e-12,
         "passed": bool(

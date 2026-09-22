@@ -78,14 +78,67 @@ def _single_null_flux(radius, height):
     return (local**2 + (height - offset) ** 2) * (local**2 + (height + offset) ** 2)
 
 
+def _independent_spline_wall_anchor(surface, wall_coordinate, polarity):
+    """Fit the extremal wall-node bracket without the production selector.
+
+    The spline is sampled at every wall node, the signed extremal node chooses
+    its cyclic neighbours, and a quadratic in local arc length supplies the
+    stationary coordinate.  The returned coordinate bound propagates one
+    binary64 rounding unit in the three sampled flux values through that fit,
+    then adds the binary64 interpolation floor at the measured node spacing.
+    """
+    coordinate = np.asarray(wall_coordinate, dtype=np.float64)
+    wall_flux = np.asarray(
+        surface(
+            jnp.asarray(coordinate[:, 0]),
+            jnp.asarray(coordinate[:, 1]),
+        ),
+        dtype=np.float64,
+    )
+    winner = int(np.argmax(float(polarity) * wall_flux))
+    bracket = np.mod(winner + np.asarray([-1, 0, 1]), wall_flux.size)
+    points = coordinate[bracket]
+    samples = wall_flux[bracket]
+    node_spacing = np.linalg.norm(np.diff(points, axis=0), axis=1)
+    arc_length = np.r_[0.0, np.cumsum(node_spacing)]
+    system = np.column_stack((arc_length**2, arc_length, np.ones_like(arc_length)))
+    coefficients = np.linalg.solve(system, samples)
+    stationary_length = -coefficients[1] / (2.0 * coefficients[0])
+    radius = np.interp(stationary_length, arc_length, points[:, 0])
+    height = np.interp(stationary_length, arc_length, points[:, 1])
+    selected_flux = float(np.asarray(surface(radius, height)))
+    kind = -np.sign(coefficients[0])
+
+    binary64_epsilon = np.finfo(np.float64).eps
+    sampled_flux_roundoff = binary64_epsilon * np.max(np.abs(samples))
+    inverse_system = np.linalg.inv(system)
+    coefficient_roundoff = np.abs(inverse_system) @ np.full(3, sampled_flux_roundoff)
+    curvature_roundoff, slope_roundoff = coefficient_roundoff[:2]
+    curvature_margin = abs(coefficients[0]) - curvature_roundoff
+    assert curvature_margin > 0.0
+    stationary_length_roundoff = (
+        slope_roundoff * abs(coefficients[0])
+        + abs(coefficients[1]) * curvature_roundoff
+    ) / (2.0 * abs(coefficients[0]) * curvature_margin)
+    interpolation_roundoff = binary64_epsilon * (
+        np.max(np.abs(points)) + np.max(node_spacing)
+    )
+    coordinate_roundoff_bound = np.nextafter(
+        stationary_length_roundoff + interpolation_roundoff,
+        np.inf,
+    )
+    return (
+        jnp.asarray([radius, height, selected_flux, kind], dtype=jnp.float64),
+        coordinate_roundoff_bound,
+    )
+
+
 def _containment_stationary_read(operator, physical):
     """Select boundary state from zero-/four-crossing containment candidates.
 
-    The wall read mirrors the production selector: the tensor spline is
-    evaluated at the wall nodes before the arc-length quadratic extremum is
-    selected through ``wall_anchor_data``.  Feeding the direct wall-zone
-    samples instead leaves the coordinate separated only by reordered
-    binary64 roundoff, even though the labels remain identical.
+    The wall read independently reproduces the mechanism introduced by
+    ``9f0692fb``: tensor-spline samples at the wall nodes precede an arc-length
+    quadratic through the extremal node and its two cyclic neighbours.
     """
     topology = operator._fixed_design_topology
     radial = np.unique(np.asarray(operator.grid.coordinate)[:, 0])
@@ -125,7 +178,11 @@ def _containment_stationary_read(operator, physical):
         retained[1, saddle_index],
         jnp.full(4, jnp.nan),
     )
-    wall = topology.wall_anchor_data(wall_flux, operator.polarity, surface=surface)
+    wall, wall_roundoff_bound = _independent_spline_wall_anchor(
+        surface,
+        operator.wall.coordinate,
+        operator.polarity,
+    )
 
     saddle_heights = jnp.where(saddle_valid, retained[1, :, 1], jnp.nan)
     lower_saddle = jnp.nanmin(saddle_heights)
@@ -172,6 +229,7 @@ def _containment_stationary_read(operator, physical):
         "ring_crossing_count": census["ring_crossing_count"],
         "representative_mask": census["representative_mask"],
         "surface": surface,
+        "wall_roundoff_bound": wall_roundoff_bound,
     }
 
 
@@ -291,12 +349,17 @@ def test_raster_fixture_labels_are_bitwise_equal_to_independent_oracle():
         np.testing.assert_array_equal(crossing_count, census["ring_crossing_count"])
         np.testing.assert_array_equal(state.axis, stationary["axis"][:2])
         np.testing.assert_array_equal(state.x_point, stationary["x_point"][:2])
-        np.testing.assert_array_equal(
+        boundary_roundoff_bound = stationary["wall_roundoff_bound"]
+        np.testing.assert_allclose(
             state.boundary,
             stationary["boundary"][:2],
+            rtol=0.0,
+            atol=boundary_roundoff_bound,
             err_msg=(
                 "9f0692fb moved the limited-wall authority to tensor-spline "
-                "samples before the arc-length quadratic selector"
+                "samples before the independently reconstructed arc-length "
+                "quadratic selector; binary64 wall-flux and node-spacing "
+                f"roundoff bound={boundary_roundoff_bound:.17e} m"
             ),
         )
         differing = np.flatnonzero(np.asarray(actual.label) != np.asarray(expected))

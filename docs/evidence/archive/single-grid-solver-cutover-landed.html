@@ -59,17 +59,14 @@
 </tbody>
 </table>
 
-<p><strong>The agreement is exhaustive, not approximate.</strong> All twenty edits agree between titan and the H200 on the converged flag, the termination reason and the trip count, and all twenty agree on the centroid qualification too. The maximum boundary displacement is <code>0.151322961309616</code> m on both, agreeing to the last displayed digit. The only quantity that moves is the wall.</p>
+<p><strong>The agreement is exhaustive, not approximate.</strong> (Tolerance, added at promotion: the boundary-displacement agreement is at binary64 roundoff, maximum absolute difference 3.47e-16 m with 5 of 20 edits differing near 1e-15 relative, so it is roundoff agreement rather than bit identity.) All twenty edits agree between titan and the H200 on the converged flag, the termination reason and the trip count, and all twenty agree on the centroid qualification too. The maximum boundary displacement is <code>0.151322961309616</code> m on both, agreeing to the last displayed digit. The only quantity that moves is the wall.</p>
 
 <figure>
 <img src="/nova/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png" alt="A converged and a non-converged edit drawn as line contours on shared levels, with the wall and the null markers">
 <figcaption>The titan run's terminal states, drawn by the committed painters: a converged edit beside a non-converged one on one physical level array, wall units and admitted nulls marked, the converged residual <code>4.13e-09</code> and the non-converged one stalling at <code>6.51e-03</code> after sixteen trips on the iteration budget. Vector form for review: <a href="/nova/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.svg">titan-converged-vs-nonconverged.svg</a>.</figcaption>
 </figure>
 
-<figure>
-<img src="/nova/figures/single-grid-solver-cutover/titan-terminal-raster-flux.png" alt="Terminal raster flux of the sweep as unfilled line contours">
-<figcaption>The sweep's terminal raster flux, line contours on stated levels with the stationary points marked (unfilled marker vocabulary). The per-edit panel data is <a href="/nova/figures/single-grid-solver-cutover/titan-coil-edit-nonconvergence.json">titan-coil-edit-nonconvergence.json</a>.</figcaption>
-</figure>
+<p><strong>Figure withheld.</strong> The driver writes a terminal raster flux image of its own (<code>titan-terminal-raster-flux.png</code>) as a filled colour map with axes, ticks and no wall, which breaks the plotting rules, so it is not shown here; the independent review of this record caught the mismatch between the earlier caption and the artifact. The per-edit panel data and the paired terminal-state panels stand as the figures of record; a rules-compliant redraw of the terminal flux is a follow-on for the driver owner.</p>
 
 <p><strong>What this record does not establish.</strong> That the drop originates in the vertical current-centre row rather than in the response-kernel port: both landed between <code>d3849192</code> and <code>a3f2429b</code>, and the unconstrained cell cannot be produced at <code>a3f2429b</code> without a source change. The claim this record does support is narrow and sufficient for the question asked: at revision <code>a3f2429b</code> the convergence outcome is a property of the revision, reproducible to the flag on a second device with a different fp64 rate, and the device moves only the wall.</p>
 </section>

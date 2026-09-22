@@ -200,7 +200,12 @@ def row(case, cells):
         return {
             "vertices": vertices,
             "crossings": vertices[live][:, (0, 128)],
-            "moments": np.asarray(moments),
+            "current": np.asarray(moments[0]),
+            "radial_moment": np.asarray(moments[1]),
+            "vertical_moment": np.asarray(moments[2]),
+            "area": np.asarray(support.area),
+            "first_area_moment": np.asarray(support.first_area_moment),
+            "second_area_moment": np.asarray(support.second_area_moment),
             "counts": counts,
             "live": live,
             "refused": np.asarray(support.refused_cell_count),

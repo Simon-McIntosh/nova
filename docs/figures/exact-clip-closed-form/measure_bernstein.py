@@ -278,8 +278,24 @@ def main():
     parser.add_argument("--suite", nargs=2)
     parser.add_argument("--suite-set", choices=("baseline", "candidate"))
     parser.add_argument("--row", nargs=2)
+    parser.add_argument("--negative-tests", action="store_true")
     args = parser.parse_args()
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    if args.negative_tests:
+        print(MUTATION, flush=True)
+        configure()
+        original_evaluator()
+        import pytest
+
+        return pytest.main(
+            [
+                str(ROOT / "tests/test_flux_surface_extraction.py")
+                + "::test_bicubic_derivatives_lower_to_static_polynomials",
+                "-q",
+                "-p",
+                "no:cacheprovider",
+            ]
+        )
     if args.program:
         program(args.program)
         return 0

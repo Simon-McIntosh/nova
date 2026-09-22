@@ -773,6 +773,8 @@ def test_bicubic_derivatives_lower_to_static_polynomials():
     for actual, reference in zip(values, expected, strict=True):
         np.testing.assert_allclose(actual, reference, atol=4e-15, rtol=4e-15)
     text = function.lower(coefficient, radial, vertical).compile().as_text()
+    assert "Bernstein.binom" not in text, (
+        "traced binomial evaluation remains in optimized HLO"
+    )
     assert "bernstein_basis" in text
-    assert "Bernstein.binom" not in text
     assert "lgamma" not in text

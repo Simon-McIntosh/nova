@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T20:41:22",
+  "updated": "2026-09-22T20:51:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -261052,6 +261052,299 @@
           "status": "failed",
           "error": "IntegrityError: UNIQUE constraint failed: runs.run_id"
         }
+      },
+      {
+        "run_id": "r-20260922T162949223287-pta-full-state-solve-path-callers",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a75",
+        "node": "pta-full-state-solve-path-callers",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1763,
+                "cached_input_tokens": 835600,
+                "input_tokens": 837395,
+                "output_tokens": 85,
+                "reasoning_output_tokens": 58,
+                "total_tokens": 837480,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "forward.py _terminal_polish_receipt (line 2618) passes the full state to read_qualification (no physical-prefix slice), and forward.py:1401 and forward.py:1475 are each audited with one sentence in the record saying whether their slice reaches a census (they feed the raster connectivity read and split_flux_map only, so they are expected to stand); reduced_newton.py:2329 is NOT touched (claimed by a parked S19 run; its one-line patch is already handed to that coordinator) and forward_operator.py:3120 is recorded as needing no patch; a NEW test file tests/test_solve_path_census_inputs.py (tests/test_null_generator_admission.py is claimed by a live S19 node and must not be edited) carries a regression that drives a ForwardProfile solve on the analytic single-null hex carrier at 110 requested cells in exact clip mode (the configuration benchmarks/exact_clip_low_state_discriminator.py row 110 uses) through _terminal_polish_receipt and asserts a finite polish receipt and no exception, plus a source-scanning regression listing every line under nova/equilibrium/forward.py, forward_operator.py and topology.py where a [: ...physical_node_number] slice feeds read_qualification, _fixed_design_read, read_census, candidate_table_status or the locator, asserting the list is empty for forward.py and recording reduced_newton.py:2329 as the one known remaining offender through an explicit allowlist naming it; consumer-migration.json gains forward.py:2618 as landed and reduced_newton.py:2329 as claim-blocked with its patch; the 17-file CPU lane plus tests/test_forward_secondary_null.py and the new file reports zero added failure IDs against the base revision in one fresh process on all_debug via sbatch with both logs recorded; the declared negative control is applied, the solve regression is observed to fail, and its log is recorded; the manifest is written before any wait with wait_probe as a JSON argument vector printing IN_QUEUE or LEFT_QUEUE and wait_terminal LEFT_QUEUE",
+          "estimated_hours": 1.0,
+          "goal": "repair the production caller in forward.py that slices the state to the physical prefix before the topology read so exact-mode solves on own-node carriers no longer raise at the terminal-polish receipt",
+          "id": "pta-full-state-solve-path-callers",
+          "lane_declaration": {
+            "backend": "codex-astra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-22T16:29:52Z",
+            "read_at": "2026-09-22T16:29:53Z",
+            "resolved_backend": "codex-astra",
+            "utilisation_pct": 59.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/manifest.md",
+          "negative_control": "restore the physical-prefix slice at forward.py _terminal_polish_receipt and observe the exact-mode 110-cell solve regression fail",
+          "plan": "plasma-cell-topology-authority",
+          "requested_backend": "codex-astra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward.py",
+            "tests/test_solve_path_census_inputs.py",
+            "docs/figures/plasma-cell-topology-authority/consumer-migration.json",
+            "docs/plans/plasma-cell-topology-authority.html",
+            "docs/evidence/archive/plasma-cell-topology-authority-landed.html",
+            "docs/figures/plasma-cell-topology-authority"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s18-pta-adopt-a",
+        "backend": "codex-astra",
+        "local": false,
+        "agent": {
+          "alias": "astra6",
+          "backend": "codex-astra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-6-astra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-22T16:30:23Z",
+        "completed_at": "2026-09-22T17:53:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4973,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4973,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "397f6b3fcf3f0d0cefc707526659c8cc3e54b7db",
+        "commits": [
+          "643f27a264834ab557a5695d78412f895b34b132",
+          "aec49acdc72034d73c893f4d2700bd2c7f00fd1a",
+          "547e754f8f6a6c53f63399d8ac77607150c4ce13",
+          "57176d345111d7c286b46be851c9f0e35950d399",
+          "2248637d341f91cb06672d010f928b12a1ad3005",
+          "61f98d8d9a60258e36601e2dc154cad5471154a9",
+          "d062f2eb63523a1a05cea87621ed87597e40cfbb",
+          "bb076f460113ef46fce157844a8f47356ecce9a4",
+          "d516d3a71a616454ddc16f906e1f25fb9c5534f3",
+          "05c899f483946927bcd54146825c8e8e9e1f9c5d",
+          "172a37a1929af66858ba66d446fe347562f49191",
+          "22fe37aaff76071881c5db36c86635feb4819e21",
+          "110ecf8f2f52aae3b82d14ed7cfd9b6a78d38438"
+        ],
+        "changed_lines": {
+          "added": 891,
+          "removed": 4,
+          "files": 11
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -p no:randomly -vv -s tests/test_solve_path_census_inputs.py -k exact_mode_solve (one H200, job 1276041)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/device-evidence.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c8dd-9e70-7051-90df-2da180732e37",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 20664832,
+            "cached_input_tokens_cumulative": 53007744,
+            "input_tokens": 21387497,
+            "input_tokens_cumulative": 54663801,
+            "output_tokens": 122259,
+            "output_tokens_cumulative": 278706,
+            "reasoning_output_tokens": 61666,
+            "reasoning_output_tokens_cumulative": 122286
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-22T17:53:16Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 63.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-22T17:53:16Z"
+            }
+          ],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "notional_cost_usd": "no_dated_rate",
+            "rate_basis": "no_dated_rate"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1992,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1405,
+              "log_fresh": false,
+              "manifest_commits": [
+                "94e4a0991f0da98cbf6fa7103cad3dcebc71a04b"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "6d7e7424e41c2b45d5144ff231cde5fefa8ff51efab1aca7302fc30828d16764",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan single-grid-solver-cutover --section '\u00a74' --role review --spec-level exact --node review-of-sgc-sweep-control-at-the-four-of-twenty-revision --goal 'attach an independent review to run r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision' --done-when 'the review for r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision.json --time-budget 55m --session s18-fable-20260922 --allow-unreconciled-runs --local",
+              "node": "sgc-sweep-control-at-the-four-of-twenty-revision",
+              "phase": "complete",
+              "plan": "single-grid-solver-cutover",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision",
+              "session": "s18-fable-20260922",
+              "terminal_age_seconds": 1434,
+              "terminal_at": "2026-09-22T16:06:10Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/sgc-sweep-control-at-the-four-of-twenty-revision"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 15,
+            "evidence": 19,
+            "fit": 18,
+            "goal_fidelity": 18,
+            "scope_discipline": 18
+          },
+          "absent": [],
+          "total": 88
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 53007744,
+          "cumulative_input_tokens": 54663801,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 400992,
+          "generation_seconds": 21884.411,
+          "machine_seconds": 1348.921,
+          "tokens_per_second": 18.32
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-full-state-solve-path-callers",
+          "session_id": "01a0c8dd-9e70-7051-90df-2da180732e37",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T17:53:16Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.98,
+        "impl_move": {
+          "plan": "plasma-cell-topology-authority",
+          "at_dispatch": 0.98,
+          "at_complete": 0.99,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "test_paths": [
+            "tests/test_solve_path_census_inputs.py"
+          ],
+          "declaration": "restore the physical-prefix slice at forward.py _terminal_polish_receipt and observe the exact-mode 110-cell solve regression fail",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/lane-split-negative.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/lane-split-negative.log"
+        },
+        "tool_steps": 196.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -261518,6 +261811,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3201
+    "_version": 3202
   }
 }

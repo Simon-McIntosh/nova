@@ -2921,6 +2921,37 @@ ROW2_EXIT=139</pre>
   </table>
   <p>Nineteen repair followups are staged for the owning plan <code>cut-cell-current-attribution</code>
   in <code>findings-cut-cell-current-attribution.json</code>.</p>
+  <h4 id="figures-cut-cell-repair-exact-clip-seed-panels">Repair &mdash; the twelve <code>exact-clip-seed</code> panels state their terminal state and draw both null sets</h4>
+  <p>The twelve panels scored 66 each above; F7 named them as printing no residual and no converged
+  flag, and F3 as missing half the null vocabulary. All twelve were rebuilt from the committed
+  <code>parts/*.json</code> receipts with no solve, and each title now states
+  <code>residual=&hellip; &middot; converged=&hellip;</code> read from that row's persisted
+  <code>solver</code> block: 12 of 12, residuals <code>1.20e-13</code>&ndash;<code>6.71e-13</code>
+  (<code>1.1998637468319157e-13</code> low, <code>6.711667497659967e-13</code> high),
+  every row <code>converged True</code> and <code>class: limited</code> with one magnetic axis and no
+  admitted saddle. Every poloidal panel, the three error panels of the 2&times;2 production-route
+  template included, now draws both the analytic and the solved null set in the
+  <code>draw_nulls</code> vocabulary &mdash; solid triangle for the axis, filled cross for the
+  admitted saddle, hollow markers for other qualified nulls &mdash; in the two contour colours
+  (<code>#3366cc</code> analytic, <code>#cc7722</code> solved), and an in-panel caption names which
+  colour is which.</p>
+  <p>The reading is a render receipt (<code>render-receipt.json</code>) written by the render-only
+  entry point and read back by a check in <code>tests/test_exact_clip_seed_render.py</code>: 12
+  figures, each title's residual and converged flag equal both to its part receipt and to the seed
+  receipt's row, each figure's digest equal to the file on disk, and per poloidal panel both null
+  sets recorded with all three glyph kinds. The receipt's own counts are one axis and no saddle per
+  set for every row, so the vocabulary is exercised by its own cases in the same file: a positive
+  control that tells the three glyph kinds apart, and a containment case that drops a saddle outside
+  the vessel. The declared negative control strips <code>residual=</code> from one title in the
+  receipt and the check is observed to refuse it, naming that figure.</p>
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-production-route-reduced.png"
+         alt="Rebuilt 2x2 production-route panel: solved and analytic flux contours, three error panels, both null sets drawn on all four, the terminal residual and converged flag in the title.">
+    <figcaption><code>exact-clip-seed/panels/weak-rotation-reactor-static-production-route-reduced.png</code>
+    &mdash; rebuilt from its part receipt with no solve; the title carries
+    <code>residual=3.419964981783324e-13 &middot; converged</code> read from the row, all four panels
+    are poloidal and all four draw both null sets.</figcaption>
+  </figure>
 </section>
 <section class="audit-directory" id="fsa-repair-limited-shadow-chord-panels">
 <h2 id="fsa-repair-limited-shadow-chord-panels">Repair — docs/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord</h2>

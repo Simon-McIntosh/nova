@@ -147,7 +147,8 @@
           "with": "    grid_flux = operator.null_flux_pool(physical)"
         }
       ],
-      "follow_on_action": "Apply both replacements within _saddle_wall_coupling after the live claim releases; the existing read_census(grid_flux) then receives the complete pool."
+      "follow_on_action": "Apply both replacements within _saddle_wall_coupling after the live claim releases; the existing read_census(grid_flux) then receives the complete pool.",
+      "patch_validation": "Replacement text matches this worktree; applying and executing the deferred patch belongs to the claim-release follow-on."
     },
     {
       "path": "benchmarks/held_tip_trip_diagnosis.py",
@@ -177,7 +178,16 @@
         "replace": "        physical = jnp.asarray(flux)[: self.operator.physical_node_number]\n        grid_flux, _wall_flux = self.operator.topology.split_flux_map(physical)",
         "with": "        physical = jnp.asarray(flux)\n        grid_flux = self.operator.null_flux_pool(physical)"
       },
-      "follow_on_action": "Land these two replacement lines immediately after the live claim releases. Alternatively delegate the method body to return self.operator.secondary_x_point(flux, topology), preserving its existing caller signature."
+      "follow_on_action": "Land these two replacement lines immediately after the live claim releases. Alternatively delegate the method body to return self.operator.secondary_x_point(flux, topology), preserving its existing caller signature.",
+      "fixture_follow_on": {
+        "path": "tests/test_forward_secondary_null.py",
+        "reason": "The manufactured raster operator is a SimpleNamespace without null_flux_pool; when the production seam lands, expose that public method on the test shell so its two containment tests still exercise the selector.",
+        "exact_patch": {
+          "replace": "            physical_node_number=grid_nodes,",
+          "with": "            physical_node_number=grid_nodes,\n            null_flux_pool=lambda flux: jnp.asarray(flux)[:grid_nodes],"
+        }
+      },
+      "patch_validation": "Replacement text matches this worktree; applying and executing the deferred patch belongs to the claim-release follow-on."
     }
   ],
   "reviewed_revision": "e46e5378bf28252e3f4e4f86bd6fd00473dcfb5c",

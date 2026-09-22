@@ -1,0 +1,14 @@
+revision=b64a3db64119ab3805b5a6e3b47358cae9708e5c tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-why-the-342-cell-terminal-fails-the-tangent-check command=/home/ITER/mcintos/Code/nova/.venv/bin/python -u docs/figures/cut-cell-current-attribution/merit-model/endpoint_tangent.py --cells 300 --output /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-342-cell-terminal-fails-the-tangent-check
+BASE merit=0.0546254885059 nonzero=177 classes={'outside': 0, 'cut': 0, 'inside': 342} clip=chord
+ROW analytic h=1e-06 fd=814992 jvp=373.702 rel=0.99956518 confined_flips=3 open_flips=3 support_pm=0/0 nominal_error=2.93067e+08
+ROW analytic h=1e-07 fd=8.14673e+06 jvp=373.702 rel=0.9999565 confined_flips=3 open_flips=3 support_pm=0/0 nominal_error=2.93067e+09
+ROW analytic h=1e-08 fd=373.702 jvp=373.702 rel=2.5031438e-07 confined_flips=0 open_flips=0 support_pm=0/0 nominal_error=0.00255091
+ROW analytic h=0.0001 fd=8501.51 jvp=373.702 rel=0.95822062 confined_flips=3 open_flips=3 support_pm=0/0 nominal_error=2.93068e+06
+ROW newton h=1e-06 fd=818138 jvp=3850.3 rel=0.99571582 confined_flips=3 open_flips=3 support_pm=0/0 nominal_error=2.93066e+08
+ROW newton h=1e-07 fd=8.14987e+06 jvp=3850.3 rel=0.9995701 confined_flips=3 open_flips=3 support_pm=0/0 nominal_error=2.93067e+09
+ROW newton h=1e-08 fd=8.14672e+07 jvp=3850.3 rel=0.99995699 confined_flips=3 open_flips=3 support_pm=0/0 nominal_error=2.93067e+10
+ROW map_defect h=1e-06 fd=814563 jvp=102.053 rel=1.0000924 confined_flips=3 open_flips=3 support_pm=0/0 nominal_error=2.93068e+08
+ROW map_defect h=1e-07 fd=8.1463e+06 jvp=102.053 rel=1.0000092 confined_flips=3 open_flips=3 support_pm=0/0 nominal_error=2.93067e+09
+ROW map_defect h=1e-08 fd=8.14637e+07 jvp=102.053 rel=1.0000009 confined_flips=3 open_flips=3 support_pm=0/0 nominal_error=2.93067e+10
+COMPLETED cells=342 seconds=54.54 controls={"classification_detector_single_flip": 1, "support_detector_nonzero_cells": 177, "control_increment_flip_count": 3, "control_increment_support_change": 0}
+ROW_EXIT cells=300 status=0

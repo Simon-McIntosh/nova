@@ -1,0 +1,106 @@
+{
+  "historical": {
+    "full_analytic": {
+      "actual_merit": 9.626740263946309e-05,
+      "predicted_merit": 0.34807153052010525,
+      "accepted": true,
+      "model_unreliable": true,
+      "selected_index": 0
+    },
+    "half_defect": {
+      "actual_merit": 0.06212994549430234,
+      "predicted_merit": 0.062442816397444124,
+      "accepted": true,
+      "model_unreliable": false,
+      "selected_index": 1
+    }
+  },
+  "authoritative": [
+    {
+      "cells": 135,
+      "analytic": {
+        "actual_merit": 9.62674026394669e-05,
+        "predicted_merit": 0.2710495257343574,
+        "residual": 9.53950481602883e-05,
+        "accepted": true,
+        "model_unreliable": true,
+        "selected_index": 0
+      },
+      "newton_candidates_refused": 7,
+      "newton_production_selector_verdicts": [
+        {
+          "fraction": 1.0,
+          "accepted": false
+        },
+        {
+          "fraction": 0.5,
+          "accepted": false
+        },
+        {
+          "fraction": 0.25,
+          "accepted": false
+        },
+        {
+          "fraction": 0.125,
+          "accepted": false
+        },
+        {
+          "fraction": 0.0625,
+          "accepted": false
+        },
+        {
+          "fraction": 0.01,
+          "accepted": false
+        },
+        {
+          "fraction": 0.001,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "cells": 342,
+      "analytic": {
+        "actual_merit": 7.580669184312513e-05,
+        "predicted_merit": 0.2919545630109301,
+        "residual": 9.596265389770724e-05,
+        "accepted": true,
+        "model_unreliable": true,
+        "selected_index": 0
+      },
+      "newton_candidates_refused": 7,
+      "newton_production_selector_verdicts": [
+        {
+          "fraction": 1.0,
+          "accepted": false
+        },
+        {
+          "fraction": 0.5,
+          "accepted": false
+        },
+        {
+          "fraction": 0.25,
+          "accepted": false
+        },
+        {
+          "fraction": 0.125,
+          "accepted": false
+        },
+        {
+          "fraction": 0.0625,
+          "accepted": false
+        },
+        {
+          "fraction": 0.01,
+          "accepted": false
+        },
+        {
+          "fraction": 0.001,
+          "accepted": false
+        }
+      ]
+    }
+  ],
+  "production_direction_note": "Only measured analytic witnesses use pessimistic-model admission; all sampled Newton candidates worsen actual merit and remain refused.",
+  "selector_kernel": "nova.equilibrium.fixed_point._select_backtracking_candidate"
+}

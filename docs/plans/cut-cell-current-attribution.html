@@ -245,6 +245,41 @@ Commits <code>a2c8836289ab399e3ed836f94c904ce111852ea4</code>,
 <code>4303ed756cf6cd7beab7729b27d1cf5cdcbfdb98</code>.
 The driving followup and section state remain unchanged for coordinator adjudication.</p>
 
+<h3 id="measured-candidate-acceptance">Measured candidate acceptance under a pessimistic model</h3>
+<p><strong>Worker landing, 2026-09-22; no followup resolution or section closure.</strong>
+Commits <code>0e7f35e882e917904dabf4c02e475ae25ad002a6</code> and
+<code>d86218c8e7b37a06f99920bb9b4630073b3744f2</code> admit an already measured candidate
+when the finite local model predicts no decrease only if its actual merit is at or below the
+incumbent times <code>1 - 1e-4 × fraction</code> and its sup residual strictly decreases on the
+incumbent's own mask. An out-of-mask decrease alone cannot admit it. The admission marks the
+model unreliable and carries an explicit rebuild requirement into the next Newton trip, which
+uses the existing rebuilt-model promotion path. Positive predicted decrease still uses the
+existing realized-versus-predicted trust test and requests no rebuild; no budget, factor,
+current pin or tolerance changed.</p>
+<p>The receipt replay calls the exact production selector kernel. It accepts the historical full
+analytic witness and both authoritative full analytic candidates at selector index zero,
+preserves the historical trusted half-defect acceptance at index one, and refuses all fourteen
+actually worsening Newton candidates across the two rows. The committed eager and JIT cases
+also refuse an otherwise qualifying candidate whose residual decrease exists only outside the
+own mask. A promotion-sequence case counts one rebuild after pessimistic admission and none
+after trusted admission.</p>
+<p>One all_debug job <code>1275537</code> ran five fresh pytest processes: 10 measured-candidate,
+41 fixed-point, 28 route-wiring, 69 default-wiring and 16 scan-shape cases, all 164 passing with
+zero failures against 154 baseline passes. The production-selector replay and terminal process
+both returned zero. The declared restored-veto control failed the intended eager and JIT
+acceptance cases, exit one.</p>
+<p>The final weak-rotation 300-requested-cell production row realizes 342 cells and terminates
+non-converged after all sixteen active-set trips at residual <code>0.05529921020198606</code>,
+termination reason <code>10</code>, and digest <code>bfdc797c…</code>. This supersedes the
+selector-only intermediate <code>69f8805e…</code> terminal, which converged in two trips before
+the unreliable-model flag caused the next rebuild. Its movement from that intermediate, the
+historical <code>d730c294…</code> digest and continuous-support <code>3e9fa335…</code> terminal
+is explained by the forced existing rebuild path. This is a measured single-row effect, not the
+locked cross-row convergence claim: production still generates only Newton directions, and the
+other authoritative row plus the locked position, null and joint-qualification criteria remain
+unmeasured here.
+<a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#measured-candidate-acceptance">Full selector, control and terminal record</a>.</p>
+
 <h2 id="s6">§6 — Rung A: reinstate the signed-flux clip of the profile support and re-verify every consumer bank</h2>
 <p>Replace the all-ones clip in the profile support with the clip against the signed flux of the current iterate on the confined side (the behaviour before c9a89e58), with the profile participation label deciding candidacy only, and book each cut cell's current to the side its clipped polygon lies on. Gate in order, one job per gate, receipts persisted per row: the plasma current amplitude at seed and terminal within one percent of unity and every cut cell participating with a clipped polygon on the weak, moderate and strong 110-cell rows (all_debug); the sixteen certificate rows re-solved in one H200 job with residual, axis error, X-point error, joint qualification and amplitude beside the committed rows and contour panels drawn; the transport machine's scrape-off-layer fraction re-measured and its expected-failure marker removed when it turns red; the twelve MAST bank rows and the DIII-D gate frames regenerated with their deltas recorded. Restoring the clip changes the physics of every forward solve since 27 August, so no consumer bank is asserted identical.</p>
 

@@ -2436,6 +2436,69 @@ as a production whole-cell mode defect.</p>
 <p>One all_debug allocation (1275512), eight CPUs and 96 GiB, ran the rows in separate processes with the root interpreter directly, JAX_PLATFORMS=cpu and TMPDIR=/tmp in both submit and payload. No uv ran on the compute node. The numerical processes both exit zero: the fine exit is independently recorded from process status in <a href="/nova/figures/cut-cell-current-attribution/direction-generators/numerical-process-exit.json">the numerical exit receipt</a>. Its redundant 1050-second timeout wrapper was suspended to allow completion within the existing 37-minute scheduler bound, then resumed after Python exited. The queued alarm yields wrapper exit 124 and aggregate exit 1; SLURM reports FAILED, 1:0, after 27m09s. This is not a green aggregate gate. <a href="/nova/figures/cut-cell-current-attribution/direction-generators/allocation.log">Allocation log</a>; <a href="/nova/figures/cut-cell-current-attribution/direction-generators/cells-110.log">coarse process log</a>; <a href="/nova/figures/cut-cell-current-attribution/direction-generators/cells-300.log">fine process log</a>; <a href="/nova/figures/cut-cell-current-attribution/direction-generators/watchdog.json">bounded wrapper intervention</a>. The completed numerical receipts, controls and figures establish the measurement. CPU measurements are not GPU timings. The input and raw hashes, revision and exact commands are retained. No cold solve, production repair, changed solver budget or tolerance is claimed. The separately scoped fine tangent discrepancy remains open.</p>
 <p><a href="/nova/figures/cut-cell-current-attribution/direction-generators/report.md">Full report and all fraction tables</a>; <a href="/nova/figures/cut-cell-current-attribution/direction-generators/method.md">generator definitions</a>; <a href="/nova/figures/cut-cell-current-attribution/direction-generators/cells-135.json">135-cell receipt</a>; <a href="/nova/figures/cut-cell-current-attribution/direction-generators/cells-342.json">342-cell receipt</a>. The instrument commits are <code>c68cbae898a0d34a7f0e4cac4d615ffbbc4fa057</code> and <code>2502e08b50f955f45e826ed933522efec6b98bd8</code>; the coarse evidence was banked at <code>68c743bdf4cda067a6422c19f4c3da0f4f5c56c8</code>. Coordinator adjudication owns the next production design and node closure.</p>
 </section>
+<section id="measured-candidate-acceptance">
+<h2>Measured candidate acceptance under a pessimistic model</h2>
+<p><strong>Landed 2026-09-22 in commits <code>0e7f35e882e917904dabf4c02e475ae25ad002a6</code>,
+<code>d86218c8e7b37a06f99920bb9b4630073b3744f2</code> and
+<code>a6148b1367a9fa299088ccd1787d8156593f4867</code>.</strong>
+Before the repair, the production rule still reported <code>actual_ok=true</code>,
+<code>model_trusted=false</code>, <code>selector_accepted=false</code> for the authoritative
+135-cell analytic candidate: merit <code>9.626740264e-5</code> from incumbent
+<code>0.0399490213834</code>, predicted merit <code>0.2710495257</code>, and own-mask residual
+<code>9.539504816e-5</code> from <code>0.0451931554866</code>.</p>
+<p>The selector now permits that finite, actually decreasing candidate when the model-predicted
+decrease is nonpositive, while retaining both unchanged actual gates: incumbent-relative
+sufficient merit decrease and strict sup-residual decrease on the incumbent's own mask. The
+same apparent decrease outside that mask alone is refused. The accepted prediction is marked
+unreliable and carries a rebuild requirement into the next Newton trip, where the existing
+rebuilt-model promotion path runs. A model predicting positive decrease retains the existing
+trust ratio and requests no rebuild. The current pin, sufficient-decrease slope, residual guard,
+six backtracking factors, ten Newton steps, thirty Krylov iterations and sixteen active-set
+trips are unchanged.</p>
+<p>The recorded-state replay calls the same
+<code>nova.equilibrium.fixed_point._select_backtracking_candidate</code> kernel as production
+backtracking; it does not maintain a second implementation of the rule. The three analytic
+witnesses select index zero and mark the model unreliable, while the historical half defect
+selects index one under the trusted-model rule. Every Newton verdict below is produced by that
+kernel.</p>
+<table><thead><tr><th>Witness</th><th>Actual merit</th><th>Predicted merit</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>Historical full analytic</td><td>9.62674026395e-5</td><td>0.348071530520</td><td>index 0; accepted; model unreliable</td></tr>
+<tr><td>Authoritative 135-cell full analytic</td><td>9.62674026395e-5</td><td>0.271049525734</td><td>index 0; accepted; model unreliable</td></tr>
+<tr><td>Authoritative 342-cell full analytic</td><td>7.58066918431e-5</td><td>0.291954563011</td><td>index 0; accepted; model unreliable</td></tr>
+<tr><td>Historical half defect</td><td>0.0621299454943</td><td>0.0624428163974</td><td>index 1; accepted by existing trusted rule</td></tr>
+<tr><td>Measured Newton ladders</td><td colspan="2">seven candidates per row, all worsen actual merit</td><td>14 of 14 refused</td></tr>
+</tbody></table>
+<p>The committed synthetic boundary cases refuse an otherwise qualifying pessimistic candidate
+when its measured residual decrease exists only outside the incumbent's own mask, in eager and
+JIT execution. A separate promotion-sequence case counts exactly one rebuilt-model invocation
+after pessimistic admission and zero after ordinary trusted admission.</p>
+<p>The final weak-rotation 300-requested-cell production row realizes 342 cells and terminates
+after all sixteen active-set trips at relative sup residual <code>0.05529921020198606</code>,
+converged false, termination reason <code>10</code>, with SHA-256
+<code>bfdc797c2b9cc85a36ed04124019b8d4baf7ad0af145d861e88b6808fcd5a5b7</code>.
+It supersedes the selector-only intermediate digest <code>69f8805e…</code>, which converged in
+two trips before the unreliable-model flag was made causal. The movement from that intermediate,
+the historical pointwise-quadrature <code>d730c294…</code> digest and the continuous-support
+<code>3e9fa335…</code> terminal is explained by forcing the existing rebuilt-model path on the
+trip after pessimistic admission.</p>
+<p>This is not a cross-row convergence claim. Production still generates Newton directions; the
+selector only admits an already evaluated candidate and the rebuild only changes the next model.
+The second authoritative row, analytic axis and null position bounds, joint qualification and
+the complete locked convergence gate remain outside this node.</p>
+<p><strong>Gate.</strong> all_debug job <code>1275537</code> completed in 44m33s with scheduler
+exit 0:0 and aggregate gate exit 0,
+the root interpreter, <code>JAX_PLATFORMS=cpu</code>, and <code>TMPDIR=/tmp</code> in submit and
+payload. Five fresh pytest processes passed 10, 41, 28, 69 and 16 cases respectively: 164 total
+and zero failures against 154 passes at base <code>192fa3b15ccafc80f3874c69bcdd7ca9734c0271</code>.
+The exact production-selector replay and terminal measurement each returned zero. The scratch
+mutation <q>Require model trust even when a finite candidate passes strict measured decrease.</q>
+restored the veto and produced the required two focused failures, exit 1.</p>
+<p><a href="/nova/figures/cut-cell-current-attribution/measured-candidate-acceptance/report.md">Report</a>;
+<a href="/nova/figures/cut-cell-current-attribution/measured-candidate-acceptance/selector-receipt.json">selector receipt</a>;
+<a href="/nova/figures/cut-cell-current-attribution/measured-candidate-acceptance/terminal-receipt.json">terminal receipt</a>.
+The exact decision relationship is a table; an additional figure would add no spatial or sequential information.</p>
+</section>
+
 </main>
 </body>
 </html>

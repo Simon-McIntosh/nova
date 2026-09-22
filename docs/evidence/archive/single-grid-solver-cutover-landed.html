@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<title>single-grid-solver-cutover — landed evidence</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body>
+<main class="plan-doc">
+<header>
+<h1>Single-grid solver cutover — landed evidence</h1>
+<p class="lede">Cumulative record. Each landed node appends one <code>section</code>; a node never rewrites a predecessor's section. The plan <a href="/nova/plans/single-grid-solver-cutover.html">single-grid-solver-cutover</a> owns the semantics.</p>
+</header>
+
+<section id="titan-twenty-edit-stride-sweep">
+<h2>The twenty-edit stride sweep at revision a3f2429b is device-independent</h2>
+
+<p><strong>Verdict.</strong> The twenty-edit coil-edit sweep at revision <code>a3f2429b</code> converges <strong>4 of 20</strong> on a Tesla P100 exactly as it does on the H200: every edit carries the same converged flag, the same termination reason, the same trip count, and the same vertical-centroid qualification. The drop from the banked 10 of 20 to 4 of 20 therefore follows the revision, not the device. The per-edit warm wall does move with the device (median 3117.1 ms on the P100 against 2060.6 ms on the H200, 1.51x), so the revision change is the cause of the convergence loss and the device is the cause of the wall difference.</p>
+
+<p><strong>Run.</strong> One titan allocation, job <code>1275968</code> on <code>98dci4-gpu-0002.iter.org</code> (partition <code>titan</code>, <code>--gres=gpu:1 --cpus-per-task=4 --mem=64G --time=02:00:00</code>, no reservation), admitted off the H200 measurement host only because the run named its reason in <code>NOVA_COIL_EDIT_OFF_HOST_PROVENANCE</code>. The root interpreter was invoked directly with <code>PYTHONPATH</code> set to the worktree and <code>TMPDIR=/tmp</code>; <code>uv</code> was never invoked. Receipt: <a href="/nova/figures/single-grid-solver-cutover/titan-coil-edit-latency.json">titan-coil-edit-latency.json</a> — <code>source_revision a3f2429b</code>, device <code>Tesla P100-PCIE-16GB</code>, twenty edits, elapsed 817.2 s, <code>converged_edit_count 4</code>, median warm wall 3117.1 ms.</p>
+
+<p><strong>Configuration caveat, recorded because it changes how the drop reads.</strong> The brief for this run specified "no vertical current-centre constraint". At revision <code>a3f2429b</code> that configuration is unreachable through the driver's command line: <code>run()</code> sets <code>constraint_pairs</code> unconditionally to the prepared vertical-centroid row (<code>benchmarks/coil_edit_latency.py:2456</code>), the row was introduced by the commit that imposes the vertical current-centre on the coil-edit sweep, and the documented unconstrained fallback ("when no rows are supplied") can only be reached by changing source, which is outside this node's write scope. This run is therefore the plain driver invocation with the six declared output arguments and no constraint switch — the same invocation the H200 receipt at this revision was produced by. It is centroid-constrained, and so is the H200 receipt: all twenty of its edits carry a <code>vertical_centroid</code> row. That matched configuration is what makes the same-revision comparison below valid. The <em>banked</em> 10-of-20 receipt (revision <code>d3849192</code>, job 1273580) is the unconstrained one — its edits carry no <code>vertical_centroid</code> row at all — so the 10-to-4 drop spans a configuration change as well as the response-kernel port, and this node does not split those two.</p>
+
+<h3>Per edit, three receipts</h3>
+<p>Each cell reads <code>converged / termination / trip_count / warm wall ms / centroid qualified</code>. Column A is this node's titan run at a3f2429b; column B is the H200 receipt at the same revision (<a href="/nova/figures/single-grid-solver-cutover/h200-coil-edit-latency-at-a3f2429b.json">h200-coil-edit-latency-at-a3f2429b.json</a>, job 1274510); column C is the banked receipt at revision d3849192 (job 1273580). The last column states whether A and B agree on the converged flag, the termination reason and the trip count.</p>
+
+<table>
+<thead><tr><th>edit</th><th>fraction</th><th>A: titan @a3f2429b</th><th>B: H200 @a3f2429b</th><th>C: banked @d3849192 (unconstrained)</th><th>A vs B</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>-0.18</td><td>yes / converged / 4 / 134928 / y</td><td>yes / converged / 4 / 247979 / y</td><td>yes / converged / 4 / 25030 / -</td><td>match</td></tr>
+<tr><td>1</td><td>-0.16</td><td>no / active_set_settled / 2 / 3066 / n</td><td>no / active_set_settled / 2 / 2061 / n</td><td>no / active_set_settled / 1 / 446 / -</td><td>match</td></tr>
+<tr><td>2</td><td>-0.14</td><td>yes / converged / 2 / 2861 / y</td><td>yes / converged / 2 / 1864 / y</td><td>no / active_set_settled / 1 / 370 / -</td><td>match</td></tr>
+<tr><td>3</td><td>-0.12</td><td>no / active_set_settled / 1 / 3117 / n</td><td>no / active_set_settled / 1 / 1921 / n</td><td>yes / converged / 2 / 363 / -</td><td>match</td></tr>
+<tr><td>4</td><td>-0.10</td><td>no / active_set_settled / 5 / 5286 / n</td><td>no / active_set_settled / 5 / 3315 / n</td><td>no / active_set_settled / 1 / 349 / -</td><td>match</td></tr>
+<tr><td>5</td><td>-0.08</td><td>no / active_set_settled / 1 / 2010 / n</td><td>no / active_set_settled / 1 / 1195 / n</td><td>yes / converged / 3 / 367 / -</td><td>match</td></tr>
+<tr><td>6</td><td>-0.06</td><td>no / active_set_settled / 1 / 1991 / n</td><td>no / active_set_settled / 1 / 1185 / n</td><td>no / active_set_settled / 1 / 400 / -</td><td>match</td></tr>
+<tr><td>7</td><td>-0.04</td><td>no / active_set_iteration_budget_exhausted / 16 / 14110 / n</td><td>no / active_set_iteration_budget_exhausted / 16 / 8976 / n</td><td>yes / converged / 1 / 333 / -</td><td>match</td></tr>
+<tr><td>8</td><td>-0.02</td><td>no / active_set_settled / 4 / 6540 / n</td><td>no / active_set_settled / 4 / 4240 / n</td><td>no / active_set_settled / 1 / 363 / -</td><td>match</td></tr>
+<tr><td>9</td><td>-0.00</td><td>no / active_set_settled / 1 / 2387 / n</td><td>no / active_set_settled / 1 / 1540 / n</td><td>yes / converged / 2 / 370 / -</td><td>match</td></tr>
+<tr><td>10</td><td>+0.02</td><td>no / active_set_settled / 1 / 1584 / n</td><td>no / active_set_settled / 1 / 1026 / n</td><td>no / active_set_settled / 1 / 387 / -</td><td>match</td></tr>
+<tr><td>11</td><td>+0.04</td><td>no / active_set_settled / 1 / 1587 / n</td><td>no / active_set_settled / 1 / 964 / n</td><td>yes / converged / 2 / 405 / -</td><td>match</td></tr>
+<tr><td>12</td><td>+0.06</td><td>no / active_set_settled / 1 / 1799 / n</td><td>no / active_set_settled / 1 / 1073 / n</td><td>yes / converged / 2 / 420 / -</td><td>match</td></tr>
+<tr><td>13</td><td>+0.08</td><td>yes / converged / 2 / 3127 / y</td><td>yes / converged / 2 / 2111 / y</td><td>yes / converged / 2 / 404 / -</td><td>match</td></tr>
+<tr><td>14</td><td>+0.10</td><td>no / active_set_settled / 1 / 3388 / y</td><td>no / active_set_settled / 1 / 2234 / y</td><td>yes / converged / 2 / 416 / -</td><td>match</td></tr>
+<tr><td>15</td><td>+0.12</td><td>no / active_set_settled / 1 / 3282 / y</td><td>no / active_set_settled / 1 / 2073 / y</td><td>yes / converged / 2 / 428 / -</td><td>match</td></tr>
+<tr><td>16</td><td>+0.14</td><td>no / active_set_settled / 1 / 1985 / n</td><td>no / active_set_settled / 1 / 1314 / n</td><td>no / active_set_settled / 2 / 393 / -</td><td>match</td></tr>
+<tr><td>17</td><td>+0.16</td><td>yes / converged / 2 / 3464 / y</td><td>yes / converged / 2 / 2227 / y</td><td>no / active_set_settled / 1 / 340 / -</td><td>match</td></tr>
+<tr><td>18</td><td>+0.18</td><td>no / active_set_settled / 1 / 3357 / y</td><td>no / active_set_settled / 1 / 2265 / y</td><td>no / active_set_settled / 3 / 366 / -</td><td>match</td></tr>
+<tr><td>19</td><td>+0.20</td><td>no / active_set_settled / 1 / 3176 / y</td><td>no / active_set_settled / 1 / 2102 / y</td><td>no / active_set_settled / 1 / 356 / -</td><td>match</td></tr>
+</tbody>
+</table>
+
+<p><strong>The agreement is exhaustive, not approximate.</strong> All twenty edits agree between titan and the H200 on the converged flag, the termination reason and the trip count, and all twenty agree on the centroid qualification too. The maximum boundary displacement is <code>0.151322961309616</code> m on both, agreeing to the last displayed digit. The only quantity that moves is the wall.</p>
+
+<figure>
+<img src="/nova/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png" alt="A converged and a non-converged edit drawn as line contours on shared levels, with the wall and the null markers">
+<figcaption>The titan run's terminal states, drawn by the committed painters: a converged edit beside a non-converged one on one physical level array, wall units and admitted nulls marked, the converged residual <code>4.13e-09</code> and the non-converged one stalling at <code>6.51e-03</code> after sixteen trips on the iteration budget. Vector form for review: <a href="/nova/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.svg">titan-converged-vs-nonconverged.svg</a>.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/single-grid-solver-cutover/titan-terminal-raster-flux.png" alt="Terminal raster flux of the sweep as unfilled line contours">
+<figcaption>The sweep's terminal raster flux, line contours on stated levels with the stationary points marked (unfilled marker vocabulary). The per-edit panel data is <a href="/nova/figures/single-grid-solver-cutover/titan-coil-edit-nonconvergence.json">titan-coil-edit-nonconvergence.json</a>.</figcaption>
+</figure>
+
+<p><strong>What this record does not establish.</strong> That the drop originates in the vertical current-centre row rather than in the response-kernel port: both landed between <code>d3849192</code> and <code>a3f2429b</code>, and the unconstrained cell cannot be produced at <code>a3f2429b</code> without a source change. The claim this record does support is narrow and sufficient for the question asked: at revision <code>a3f2429b</code> the convergence outcome is a property of the revision, reproducible to the flag on a second device with a different fp64 rate, and the device moves only the wall.</p>
+</section>
+
+</main>
+</body>
+</html>

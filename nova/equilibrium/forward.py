@@ -897,15 +897,17 @@ class ForwardProfile:
         where the sum is the operator's unscaled clipped current.  The grid
         and direct-sample values define the seed field, while a uniform shift
         of its wall values chooses the limited boundary level without moving
-        the wall extremum.  Bisection selects the level where ``a = 1`` before
-        the first nonlinear trip, so current normalisation does not double a
-        profile merely because the cold disc and exact clip began on different
-        supports.
+        the wall extremum.  The bracket search bisects past non-finite support
+        transitions and expands beyond the axis-to-boundary interval when its
+        finite samples do not straddle unit amplitude.  Bisection then selects
+        the level where ``a = 1`` before the first nonlinear trip, so current
+        normalisation does not double a profile merely because the cold disc
+        and exact clip began on different supports.
 
         Other clip modes return the input bit-for-bit.  Exact mode fails closed
-        when the axis-to-boundary interval does not bracket the declared
-        current, because silently accepting that seed would restore the
-        inconsistent state this construction excludes.
+        when no finite sampled interval brackets the declared current, because
+        silently accepting that seed would restore the inconsistent state this
+        construction excludes.
         """
 
         state = jnp.asarray(seed)
@@ -926,44 +928,104 @@ class ForwardProfile:
                 float(level_fraction) * boundary_span
             )
 
+        target = float(target_current)
+
         def current_error(level_fraction: float) -> float:
             moments = self.operator.cell_current_moments(
                 shifted(level_fraction), requested_class=requested_class
             )
             booked_current = float(jnp.sum(moments.cell_current))
-            return booked_current - float(target_current)
+            return booked_current - target
 
-        lower_error = current_error(0.0)
-        lower_amplitude = float(target_current) / (lower_error + float(target_current))
-        if np.isfinite(lower_amplitude) and abs(lower_amplitude - 1.0) <= 1.0e-2:
-            return state
-        upper_error = current_error(1.0)
-        if (
-            not np.isfinite(lower_error)
-            or not np.isfinite(upper_error)
-            or lower_error * upper_error > 0.0
-        ):
-            upper_amplitude = float(target_current) / (
-                upper_error + float(target_current)
+        trials: dict[float, tuple[float, float]] = {}
+
+        def trial(level_fraction: float) -> tuple[float, float]:
+            fraction = float(level_fraction)
+            if fraction not in trials:
+                error = current_error(fraction)
+                with np.errstate(divide="ignore", invalid="ignore"):
+                    amplitude = float(np.divide(target, error + target))
+                trials[fraction] = error, amplitude
+            return trials[fraction]
+
+        def accepted(level_fraction: float) -> bool:
+            _error, amplitude = trial(level_fraction)
+            return np.isfinite(amplitude) and abs(amplitude - 1.0) <= 1.0e-2
+
+        def finite_bracket() -> tuple[tuple[float, float], tuple[float, float]] | None:
+            finite = sorted(
+                (fraction, error)
+                for fraction, (error, _amplitude) in trials.items()
+                if np.isfinite(error)
             )
+            candidates = [
+                (left, right)
+                for left, right in zip(finite, finite[1:])
+                if left[1] * right[1] <= 0.0
+            ]
+            if not candidates:
+                return None
+            return min(candidates, key=lambda pair: pair[1][0] - pair[0][0])
+
+        for endpoint in (0.0, 1.0):
+            trial(endpoint)
+            if accepted(endpoint):
+                return shifted(endpoint)
+
+        bracket = finite_bracket()
+        for depth in range(1, 6):
+            if bracket is not None:
+                break
+            denominator = 2**depth
+            for numerator in range(1, denominator, 2):
+                fraction = numerator / denominator
+                trial(fraction)
+                if accepted(fraction):
+                    return shifted(fraction)
+            bracket = finite_bracket()
+
+        for depth in range(6):
+            if bracket is not None:
+                break
+            extent = float(2**depth)
+            for fraction in (-extent, 1.0 + extent):
+                trial(fraction)
+                if accepted(fraction):
+                    return shifted(fraction)
+            bracket = finite_bracket()
+
+        lower_error, lower_amplitude = trials[0.0]
+        upper_error, upper_amplitude = trials[1.0]
+        if bracket is None:
             raise ValueError(
                 "exact clip seed boundary level does not bracket unit amplitude: "
                 f"a(0)={lower_amplitude:.8g}, "
                 f"a(1)={upper_amplitude:.8g}"
             )
-        lower_fraction = 0.0
-        upper_fraction = 1.0
-        amplitude = lower_amplitude
+
+        (lower_fraction, lower_error), (upper_fraction, upper_error) = bracket
+        amplitude = float("nan")
         level_fraction = lower_fraction
-        for _ in range(8):
-            level_fraction = lower_fraction - lower_error * (
-                upper_fraction - lower_fraction
-            ) / (upper_error - lower_error)
-            candidate_error = current_error(level_fraction)
-            booked_current = candidate_error + float(target_current)
-            amplitude = float(target_current) / booked_current
-            if np.isfinite(amplitude) and abs(amplitude - 1.0) <= 1.0e-2:
-                return shifted(level_fraction)
+        for _ in range(12):
+            width = upper_fraction - lower_fraction
+            denominator = upper_error - lower_error
+            secant = lower_fraction - lower_error * width / denominator
+            candidates = [secant, lower_fraction + 0.5 * width]
+            for depth in range(2, 7):
+                offset = width / 2**depth
+                candidates.extend((lower_fraction + offset, upper_fraction - offset))
+            for candidate_fraction in candidates:
+                if not lower_fraction < candidate_fraction < upper_fraction:
+                    continue
+                candidate_error, amplitude = trial(candidate_fraction)
+                if not np.isfinite(candidate_error):
+                    continue
+                level_fraction = candidate_fraction
+                if np.isfinite(amplitude) and abs(amplitude - 1.0) <= 1.0e-2:
+                    return shifted(level_fraction)
+                break
+            else:
+                break
             if candidate_error * lower_error > 0.0:
                 lower_fraction = level_fraction
                 lower_error = candidate_error

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T10:16:39",
+  "updated": "2026-09-22T10:19:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -241975,6 +241975,399 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T040900457300-cca-accept-the-measured-candidate-under-a-pessimistic-model",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a75",
+        "node": "cca-accept-the-measured-candidate-under-a-pessimistic-model",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 379,
+                "cached_input_tokens": 664874,
+                "input_tokens": 665257,
+                "output_tokens": 29,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 665286,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the merit-model record (docs/figures/cut-cell-current-attribution/merit-model/report.md on main, followup f-cca-actual-candidate-acceptance) measured that the production acceptance refuses the full analytic-direction candidate on the 135-cell stalled state (actual merit 9.62674026e-5 against the incumbent 0.03994902, residual 9.54e-5) solely on model trust because the linear model predicts 0.348, and that the historical half-defect candidate is accepted (merit 0.0626216340 to 0.0621299455). Change the candidate selector in nova/equilibrium/fixed_point.py (and reduced_newton.py only if the rule lives there) so that when the model-predicted decrease is nonpositive but the candidate passes the finite checks, merit at or below incumbent times (1 minus 1e-4 times the fraction) and a strict own-mask sup-residual decrease, the measured candidate is promoted, the model is marked unreliable and rebuilt on the next trip; the sufficient-decrease rule, the residual guard and every budget are unchanged, and no candidate that the actual tests refuse is admitted. Gate on one all_debug allocation with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and the payload, the root interpreter run directly and uv never invoked on the node, the manifest written before the wait with wait_condition, wait_probe as a JSON argument vector that prints a token when run (a bash -c string testing whether squeue -h -j with the id sbatch printed -o %T still prints a line, echoing IN_QUEUE when it does and LEFT_QUEUE when it does not), wait_terminal listing LEFT_QUEUE, and resume_brief: the selector, driven through the production rule on the recorded stalled states (receipts under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-merit-model-refuses-the-analytic-direction), accepts the historical full analytic witness and both authoritative full analytic-direction candidates and refuses every actually worsening Newton candidate of the measured ladder on both rows, with the historical half-defect acceptance unchanged; a committed case in tests/test_fixed_point.py or a new tests/test_measured_candidate_acceptance.py pins those three outcomes on a synthesised map; the terminal digest of the weak-rotation 300-cell certificate row is reported (d730c294 before) with the difference explained by the rule if it moved; the focused suites tests/test_fixed_point.py tests/test_route_default_wiring.py tests/test_default_wiring.py tests/test_solve_trips_are_a_scan.py show zero added failures against the base revision; the negative control reddens; the manifest names the gate command, exit status and log path and negative_control_log as a bare absolute path whose first line repeats the declared mutation verbatim. This is not a convergence claim: production still proposes only Newton directions, and the record says so",
+          "estimated_hours": null,
+          "goal": "promote a measured candidate that passes sufficient decrease and strict own-mask residual decrease even when the local model predicts no decrease, marking the model unreliable",
+          "id": "cca-accept-the-measured-candidate-under-a-pessimistic-model",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-22T04:09:03Z",
+            "read_at": "2026-09-22T04:09:04Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 36.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T040900457300-cca-accept-the-measured-candidate-under-a-pessimistic-model/manifest.md",
+          "negative_control": "Require model trust even when a finite candidate passes strict measured decrease.",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "nova/equilibrium/reduced_newton.py",
+            "tests/test_fixed_point.py",
+            "tests/test_measured_candidate_acceptance.py",
+            "docs/plans/cut-cell-current-attribution.html",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/figures/cut-cell-current-attribution"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19k-audit-tests",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-22T04:09:28Z",
+        "completed_at": "2026-09-22T07:07:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 10700,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "192fa3b15ccafc80f3874c69bcdd7ca9734c0271",
+        "commits": [
+          "0e7f35e882e917904dabf4c02e475ae25ad002a6",
+          "6e9d1e055222f45e3fcca32335b9d03f22ace3e9",
+          "d86218c8e7b37a06f99920bb9b4630073b3744f2",
+          "a6148b1367a9fa299088ccd1787d8156593f4867",
+          "7df47ac491345129e6ea0e7a5ff6142799c21ce7"
+        ],
+        "changed_lines": {
+          "added": 841,
+          "removed": 31,
+          "files": 10
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sbatch run-repair-gate.sh (all_debug job 1275537, JAX_PLATFORMS=cpu): five fresh root-interpreter pytest processes over tests/test_measured_candidate_acceptance.py and the four focused suites (164 passed), production-selector replay exit 0, terminal measurement exit 0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T040900457300-cca-accept-the-measured-candidate-under-a-pessimistic-model/repair-final-test_solve_trips_are_a_scan.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T040900457300-cca-accept-the-measured-candidate-under-a-pessimistic-model/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c74d-ef2c-74b0-a1bb-70c659cee813",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 43891200,
+            "cached_input_tokens_cumulative": 43891200,
+            "input_tokens": 44949886,
+            "input_tokens_cumulative": 44949886,
+            "output_tokens": 100088,
+            "output_tokens_cumulative": 100088,
+            "reasoning_output_tokens": 27001,
+            "reasoning_output_tokens_cumulative": 27001
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-22T07:07:48Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 39.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-22T07:07:48Z"
+            }
+          ],
+          "notional_cost_usd": 269.2394,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 43,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 118313,
+              "log_fresh": false,
+              "manifest_commits": [
+                "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
+                "0028295f5ba1e4c4d0c3ba0e1c98f0b0fbb4c9d1"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "28b0fa1a9d3559290e36bf25bbedc4839c9ef1861513ab5235f34a953247d5fe",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T180231259880-cca-one-certificate-row-per-process/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan cpu-compile-abort --section '\u00a72' --role review --spec-level exact --node review-of-cca-one-certificate-row-per-process --goal 'attach an independent review to run r-20260920T180231259880-cca-one-certificate-row-per-process' --done-when 'the review for r-20260920T180231259880-cca-one-certificate-row-per-process stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260920T180231259880-cca-one-certificate-row-per-process.json --time-budget 55m --session s19-codex-20260916 --allow-unreconciled-runs --local",
+              "node": "cca-one-certificate-row-per-process",
+              "phase": "complete",
+              "plan": "cpu-compile-abort",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T180231259880-cca-one-certificate-row-per-process",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 118318,
+              "terminal_at": "2026-09-20T19:17:11Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 625,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: Second allocation ran out - job 1274360 aborted at edit 16 on JIT mapping exhaustion with REGEN_DRIVER_EXIT=134 and EXIT_MARKER=134 after 15 of 20 edits; so edits 16 through 20 never ran and the states for edits 14 and 15 were never flushed; seven of the twenty states the done-when needs are absent. The census cannot pass on what landed and CENSUS_AGREES=0; both because 14 states are fewer than the 20 the figures are defined over (drawn_closed 5 of 14 against the required 12 of 20; axis_enclosing_cycle 13 of 14 against 14 of 20) and because the comparison basis itself is unestablished. The comparison basis needs a plan-level answer this worker cannot give - the provenance of the sweep-persistence record and the definition of its level field - and the per-state disagreement is already present at the unedited index 0; so it is not attributable to the constraint; the edit schedule or the level definition. The fixture was therefore not committed and the repository still carries the superseded panel. No resume seam exists in the driver and the archived rows cannot seed one; so completing this node requires the driver capability named in follow_ons before any further allocation is spent.",
+              "elapsed_seconds": 3925,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 83700,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1af882c9ce897d771f68e7158b9f321274358a94",
+                "570ac4bf5782de8353205d4600496e32b41d00a8"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0791ab9295230c76f0e7ba866041563829b22d42afa1542f10d83f009f569795",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint/manifest.md; resolve the blocker before resuming the run",
+              "node": "fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+              "phase": "complete",
+              "plan": "forward-solve-api",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+                "session_id": "63238c6f-d618-43a9-b3b8-e682e544fc9e",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 83793,
+              "terminal_at": "2026-09-21T04:52:36Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+              "elapsed_seconds": 827,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 85634,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none (review role; the fence holds the only deliverable and it is outside the git worktree)"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "dc3aa96a0c2db4290706b18c01eff2defa9b1451056457ee5e71a740fc7e7675",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T035705405532-fsa-audit-figures-cut-cell/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+              "node": "fsa-audit-figures-cut-cell",
+              "phase": "complete",
+              "plan": "figure-and-solver-audit",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T035705405532-fsa-audit-figures-cut-cell",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 85685,
+              "terminal_at": "2026-09-21T04:21:04Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-figures-cut-cell"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 43891200,
+          "cumulative_input_tokens": 88841086,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 127089
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-accept-the-measured-candidate-under-a-pessimistic-model",
+          "session_id": "01a0c74d-ef2c-74b0-a1bb-70c659cee813",
+          "session_source": "stream",
+          "retained_at": "2026-09-22T07:07:48Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.8,
+        "impl_move": {
+          "plan": "cut-cell-current-attribution",
+          "at_dispatch": 0.8,
+          "at_complete": 0.85,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "test_paths": [
+            "tests/test_fixed_point.py",
+            "tests/test_measured_candidate_acceptance.py"
+          ],
+          "declaration": "Require model trust even when a finite candidate passes strict measured decrease.",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T040900457300-cca-accept-the-measured-candidate-under-a-pessimistic-model/repair-final-negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T040900457300-cca-accept-the-measured-candidate-under-a-pessimistic-model/repair-final-negative-control.log"
+        },
+        "review_waiver": {
+          "reason": "independently reviewed twice by codex runs fsa-verify-the-measured-candidate-acceptance (68) and fsa-re-verify-the-measured-candidate-acceptance (promote 94/100) under the reviews fence"
+        },
+        "tool_steps": 94.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -242441,6 +242834,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3087
+    "_version": 3088
   }
 }

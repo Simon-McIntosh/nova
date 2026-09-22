@@ -6,7 +6,8 @@ from pathlib import Path
 import re
 import measure_clip_body as measure
 
-ROOT, OUTPUT = measure.ROOT, measure.OUTPUT
+ROOT = measure.ROOT
+OUTPUT = Path(__file__).resolve().parent / "clip-body-audit"
 
 
 def suite(arm):
@@ -77,7 +78,7 @@ def main():
         gates=gates,
         measurements_completed=True,
         passed=all(gates.values()),
-        candidate_source="23a8522b6b0ab27216c46db7d150e2b96433f347",
+        candidate_source="0c685775797acfc1648cbf375033391f62456603",
     )
     (OUTPUT / "summary.json").write_text(json.dumps(result, indent=2) + "\n")
     print(

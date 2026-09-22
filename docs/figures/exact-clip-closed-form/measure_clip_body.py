@@ -204,6 +204,7 @@ def row(case, cells):
         relative = 0.0 if equal else (error / norm if norm else error)
         comparison[name] = dict(
             array_equal=bool(equal),
+            dtype_equal=a.dtype == b.dtype,
             relative_l2=relative,
             baseline_norm=norm,
             max_absolute=float(np.max(np.abs(b.astype(float) - a.astype(float)))),
@@ -224,7 +225,10 @@ def row(case, cells):
             base=BASE,
             comparisons=comparison,
             wedge_reference_policy="admitted-saddle-only",
-            passed=all(v["relative_l2"] <= 1e-14 for v in comparison.values()),
+            passed=all(
+                v["relative_l2"] <= 1e-14 and v["dtype_equal"]
+                for v in comparison.values()
+            ),
         ),
     )
 

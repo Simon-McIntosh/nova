@@ -1,0 +1,22 @@
+Full unabridged log archived at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/original-artifacts/rows-titan/solve-110.log
+E0921 17:27:20.590439 3029581 numa_hwloc.cc:121] Call to hwloc_set_cpubind() failed: Invalid argument [22]
+BUILT requested=-110 realised=135 seconds=19.04 cache={'store': '/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_110.zarr', 'semantic_key': 'af85caeb3e86e4a1', 'hit': True, 'lock_wait_seconds': 0.0, 'load_seconds': 0.16842735931277275, 'build_seconds': 0.0, 'store_seconds': 0.0}
+SNAPSHOT analytic-input residual=9.539504816e-05 amplitude=1.00007131 unscaled=16313609.98 support=135 band=41 axis_error=0.01512310414612017
+SNAPSHOT analytic-mapped residual=7.405814373e-05 amplitude=1.000132326 unscaled=16312614.72 support=135 band=41 axis_error=0.015142038525188587
+SNAPSHOT 0 residual=0.1467684108 amplitude=2.036588547 unscaled=8010834.264 support=135 band=28 axis_error=0.032848254086278145
+ANALYTIC_CHECKS {"analytic_pinned": {"relative_sup": 9.539504816028166e-05, "absolute_sup_wb": 0.004741413007736672, "worst_index": 185}, "analytic_unpinned": {"relative_sup": 0.00033166485083595493, "absolute_sup_wb": 0.016480427465117464, "worst_index": 186}, "pin_changes_analytic_image_max_wb": 0.013785220741510784}
+POSITIVE_CONTROLS {"seed_vs_analytic_shadow_difference_indices": [], "seed_vs_analytic_nonzero_current_difference_cells": [2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 14, 15, 16, 26, 28, 35, 36, 38, 50, 52, 54, 62, 63, 64, 68, 69, 70, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 85, 89, 113, 114, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 128, 130, 131, 134], "seed_vs_analytic_current_max_difference_a": 184595.82360540127, "analytic_has_supported_cells": true, "analytic_has_boundary_band_cells": true}
+PRODUCTION_SOLVE_START {"route": "newton_krylov", "newton_steps": 10, "gmres_iterations": 30, "warmup": 0, "relaxation": 0.5, "step_cap": 10.0, "active_set_steps": 16, "kernel_tolerance": 1e-12, "qualification_tolerance": 1e-12, "current_pin": true, "settled_exit": true, "own_mask_acceptance": true, "continuation": true, "best_iterate_retention": true, "stagnation_stop": true, "exact_kernels": true, "cached_machine": true, "compilation_cache": true}
+E0921 17:33:38.408952 3029592 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0921 17:34:19.774446 3029068 slow_operation_alarm.cc:140] The operation took 2m41.365581312s
+
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+CAPTURED_TRIP 1 residual=0.0522771874
+CAPTURED_TRIP 2 residual=0.0522771874
+SNAPSHOT 1 residual=0.0522771874 amplitude=1.736462751 unscaled=9395406.436 support=135 band=30 axis_error=0.1054197370270484
+SNAPSHOT 2 residual=0.0522771874 amplitude=1.736462751 unscaled=9395406.436 support=135 band=30 axis_error=0.1054197370270484

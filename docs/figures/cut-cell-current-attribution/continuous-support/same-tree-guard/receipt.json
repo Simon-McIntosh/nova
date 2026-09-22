@@ -1,0 +1,145 @@
+{
+  "test_commit": "9c4459dbe45c5226bb3413bd461e849c7cabc257",
+  "scope_extension": "tests/test_exact_clip_memory.py, item 15 only, by coordinator ruling",
+  "same_tree_equality": true,
+  "terminal_identity": {
+    "keys_bit_identical": {
+      "flux": true,
+      "flux_span": true,
+      "residual": true,
+      "amplitude": true,
+      "converged": true,
+      "realised_cells": true
+    },
+    "flux_values": 2226,
+    "max_abs_flux_difference_wb": 0.0,
+    "residual": 1.1674095287798803e-15,
+    "converged": true,
+    "realised_cells": 550
+  },
+  "checks": [
+    {
+      "name": "whole-cell",
+      "command": [
+        "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_exact_clip_memory.py::test_whole_cell_terminal_state_ignores_polish_jvp"
+      ],
+      "exit_status": 0,
+      "expected_exit_status": 0,
+      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/same-tree-guard/whole-cell.log",
+      "completed": true,
+      "wall_seconds": 643.0091353058815,
+      "raw_log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/same-tree-gate/whole-cell.log"
+    },
+    {
+      "name": "continuous-moments",
+      "command": [
+        "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_continuous_confined_moments.py"
+      ],
+      "exit_status": 0,
+      "expected_exit_status": 0,
+      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/same-tree-guard/continuous-moments.log",
+      "completed": true,
+      "wall_seconds": 53.60690484009683,
+      "raw_log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/same-tree-gate/continuous-moments.log"
+    },
+    {
+      "name": "separatrix",
+      "command": [
+        "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_moment_path_separatrix_test.py"
+      ],
+      "exit_status": 0,
+      "expected_exit_status": 0,
+      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/same-tree-guard/separatrix.log",
+      "completed": true,
+      "wall_seconds": 19.494064945727587,
+      "raw_log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/same-tree-gate/separatrix.log"
+    },
+    {
+      "name": "guard-control",
+      "command": [
+        "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/same-tree-gate/guard_control.py"
+      ],
+      "exit_status": 1,
+      "expected_exit_status": 1,
+      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/same-tree-guard/guard-control.log",
+      "completed": true,
+      "wall_seconds": 1447.8337185066193,
+      "raw_log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/same-tree-gate/guard-control.log"
+    }
+  ],
+  "guard_control": {
+    "mutation": "Zero the moving-support vertex JVP only in the scratch whole_cell_guard branch.",
+    "exit_status": 1,
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/same-tree-guard/guard-control.log",
+    "scratch_source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/same-tree-gate/test_exact_clip_memory.py",
+    "mutated_lines": 1,
+    "scratch_loader_verified": true,
+    "failure_id": "tests/test_exact_clip_memory.py::test_whole_cell_terminal_state_ignores_polish_jvp",
+    "assertion": "Arrays are not equal",
+    "mismatched_flux_values": 2226,
+    "max_abs_difference_wb": 0.44478477,
+    "exit_line": "EXIT=1"
+  },
+  "cross_tree_physics_difference": {
+    "fixture": "diverted-single-null",
+    "requested_cells": 500,
+    "flux_values": 2226,
+    "max_abs_difference_wb": 0.44403898,
+    "base_seconds": 466.03,
+    "after_seconds": 470.06,
+    "original_report": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-slow-exact-clip-items-on-sirius/report.md",
+    "classification": "Current-moment physics difference between main and the repair, not a same-tree guard defect"
+  },
+  "common_failure": {
+    "id": "tests/test_exact_clip_memory.py::test_exact_clip_terminal_state_matches_reference_fixed_point",
+    "base_exit": 1,
+    "after_exit": 1,
+    "timeout_seconds": 3500,
+    "source_unchanged": true,
+    "report": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-slow-exact-clip-items-on-sirius/report.md"
+  },
+  "cold_seed_convergence_accepted": false,
+  "allocation": {
+    "job_id": 1275467,
+    "partition": "all_debug",
+    "state": "COMPLETED",
+    "exit_code": "0:0",
+    "elapsed": "00:36:06",
+    "node": "98dci4-clu-3141",
+    "gate_exit": {
+      "completed": true,
+      "expected_exits": true,
+      "exit_status": 0
+    },
+    "submit_command": [
+      "env",
+      "TMPDIR=/tmp",
+      "sbatch",
+      "--parsable",
+      "--partition=all_debug",
+      "--time=00:59:00",
+      "--cpus-per-task=8",
+      "--mem=64G",
+      "--output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/same-tree-gate/allocation.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/same-tree-gate/run_checks.sh"
+    ]
+  },
+  "added_failure_count": 0,
+  "completion_basis": "Three requested normal processes passed; deliberately mutated scratch control failed array equality. Historical incomplete module processes are not relabeled complete."
+}

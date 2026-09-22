@@ -547,7 +547,7 @@ def test_whole_cell_terminal_state_ignores_polish_jvp(tmp_path):
         output_root / "single-null-500-implicit-fixed-root-guarded-current.npz"
     )
     for checkout, output, mode in (
-        (MAIN_CHECKOUT, reference_path, "whole_cell"),
+        (WORKTREE, reference_path, "whole_cell"),
         (WORKTREE, current_path, "whole_cell_guard"),
     ):
         _run_terminal_driver(

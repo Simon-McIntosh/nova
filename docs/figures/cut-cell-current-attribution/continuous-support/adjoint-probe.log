@@ -1,0 +1,27 @@
+{
+  "backend": "cpu",
+  "devices": "[CpuDevice(id=0)]",
+  "revision": "73d9fe53b1cde3bc9ee78ab182c40c2317b8cb48",
+  "quadrature_sha256": "3cb3b6ad05ec1748225fd0fe3c5fa5963ca7df4d4e6d0329d09d0b0e1dc0d0b1",
+  "map_tangent_max_wb": 6.383330668944794,
+  "control_error": 8.881784197001252e-16,
+  "steps": [
+    {
+      "step": 1e-06,
+      "fd_max_wb": 6.383330656944963,
+      "relative_error": 5.641466859036359e-09,
+      "map_jump_wb": 6.383330514836416e-06,
+      "cell_66_delta_a": -0.029190984438173473
+    },
+    {
+      "step": 1e-08,
+      "fd_max_wb": 6.383329775871971,
+      "relative_error": 3.700395903951231e-07,
+      "map_jump_wb": 6.383331196957442e-08,
+      "cell_66_delta_a": -0.00029190999339334667
+    }
+  ],
+  "adjoint_finite": true,
+  "duality_relative_error": 4.945189279185338e-16,
+  "wall_seconds": 56.98187800683081
+}

@@ -1,0 +1,58 @@
+Full unabridged log archived at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/original-artifacts/rows-titan-adjoint/solve-110.log
+COMPILE_EVENT {"event": "/jax/core/compile/backend_compile_duration", "seconds": 6.221358060836792, "fun_name": "jit(read_qualification)"}
+COMPILE_EVENT {"event": "/jax/core/compile/backend_compile_duration", "seconds": 6.311946392059326, "fun_name": "jit(read_qualification)"}
+BUILT requested=-110 realised=135 seconds=21.39 cache={'store': '/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_110.zarr', 'semantic_key': 'af85caeb3e86e4a1', 'hit': True, 'lock_wait_seconds': 0.0, 'load_seconds': 0.17150451615452766, 'build_seconds': 0.0, 'store_seconds': 0.0}
+COMPILE_EVENT {"event": "/jax/core/compile/backend_compile_duration", "seconds": 6.24433708190918, "fun_name": "jit(read_qualification)"}
+COMPILE_EVENT {"event": "/jax/core/compile/backend_compile_duration", "seconds": 7.2752978801727295, "fun_name": "jit(mapped)"}
+SNAPSHOT analytic-input residual=9.539504816e-05 amplitude=1.00007131 unscaled=16313609.98 support=135 band=41 axis_error=0.01512310414612017
+COMPILE_EVENT {"event": "/jax/core/compile/backend_compile_duration", "seconds": 7.547764778137207, "fun_name": "jit(mapped)"}
+SNAPSHOT analytic-mapped residual=7.405814373e-05 amplitude=1.000132326 unscaled=16312614.72 support=135 band=41 axis_error=0.015142038525188587
+SNAPSHOT 0 residual=0.1467684108 amplitude=2.036588547 unscaled=8010834.264 support=135 band=28 axis_error=0.032848254086278145
+ANALYTIC_CHECKS {"analytic_pinned": {"relative_sup": 9.539504816028166e-05, "absolute_sup_wb": 0.004741413007736672, "worst_index": 185}, "analytic_unpinned": {"relative_sup": 0.00033166485083595493, "absolute_sup_wb": 0.016480427465117464, "worst_index": 186}, "pin_changes_analytic_image_max_wb": 0.013785220741510784}
+POSITIVE_CONTROLS {"seed_vs_analytic_shadow_difference_indices": [], "seed_vs_analytic_nonzero_current_difference_cells": [2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 14, 15, 16, 26, 28, 35, 36, 38, 50, 52, 54, 62, 63, 64, 68, 69, 70, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 85, 89, 113, 114, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 128, 130, 131, 134], "seed_vs_analytic_current_max_difference_a": 184595.82360540127, "analytic_has_supported_cells": true, "analytic_has_boundary_band_cells": true}
+PRODUCTION_SOLVE_START {"route": "newton_krylov", "newton_steps": 10, "gmres_iterations": 30, "warmup": 0, "relaxation": 0.5, "step_cap": 10.0, "active_set_steps": 16, "kernel_tolerance": 1e-12, "qualification_tolerance": 1e-12, "current_pin": true, "settled_exit": true, "own_mask_acceptance": true, "continuation": true, "best_iterate_retention": true, "stagnation_stop": true, "exact_kernels": true, "cached_machine": true, "compilation_cache": true}
+COMPILE_EVENT {"event": "/jax/core/compile/jaxpr_trace_duration", "seconds": 18.89084506034851, "fun_name": "solve"}
+COMPILE_EVENT {"event": "/jax/core/compile/jaxpr_to_mlir_module_duration", "seconds": 5.3844006061553955, "fun_name": "jit(solve)"}
+E0921 17:40:51.667542 3035282 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0921 17:41:01.247796 3035241 slow_operation_alarm.cc:140] The operation took 2m9.580399772s
+
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+COMPILE_EVENT {"event": "/jax/core/compile/backend_compile_duration", "seconds": 318.2122254371643, "fun_name": "jit(solve)"}
+CAPTURED_TRIP 1 residual=0.04968315941
+CAPTURED_TRIP 2 residual=0.04847351453
+CAPTURED_TRIP 3 residual=0.04773343988
+CAPTURED_TRIP 4 residual=0.04708297644
+CAPTURED_TRIP 5 residual=0.04633051092
+CAPTURED_TRIP 6 residual=0.04584999163
+CAPTURED_TRIP 7 residual=0.04566089458
+CAPTURED_TRIP 8 residual=0.04551107705
+CAPTURED_TRIP 9 residual=0.04543758669
+CAPTURED_TRIP 10 residual=0.04532664532
+CAPTURED_TRIP 11 residual=0.04527412655
+CAPTURED_TRIP 12 residual=0.04519987565
+CAPTURED_TRIP 13 residual=0.04519487037
+CAPTURED_TRIP 14 residual=0.045193736
+CAPTURED_TRIP 15 residual=0.04519316275
+CAPTURED_TRIP 16 residual=0.04519315549
+COMPILE_EVENT {"event": "/jax/core/compile/backend_compile_duration", "seconds": 1.4788191318511963, "fun_name": "jit(multiply)"}
+SNAPSHOT 1 residual=0.04968315941 amplitude=1.726992246 unscaled=9446929.104 support=135 band=30 axis_error=0.11446690874679465
+SNAPSHOT 2 residual=0.04847351453 amplitude=1.721246025 unscaled=9478466.803 support=135 band=34 axis_error=0.12107028287511797
+SNAPSHOT 3 residual=0.04773343988 amplitude=1.724980929 unscaled=9457944.166 support=135 band=33 axis_error=0.12642935611659625
+SNAPSHOT 4 residual=0.04708297644 amplitude=1.723031247 unscaled=9468646.225 support=135 band=33 axis_error=0.13093183987384463
+SNAPSHOT 5 residual=0.04633051092 amplitude=1.724923687 unscaled=9458258.029 support=135 band=33 axis_error=0.13580876397797398
+SNAPSHOT 6 residual=0.04584999163 amplitude=1.72018793 unscaled=9484297.053 support=135 band=34 axis_error=0.1383233176847773
+SNAPSHOT 7 residual=0.04566089458 amplitude=1.723887306 unscaled=9463944.223 support=135 band=34 axis_error=0.14102042364424086
+SNAPSHOT 8 residual=0.04551107705 amplitude=1.721262264 unscaled=9478377.38 support=135 band=34 axis_error=0.14159041550414123
+SNAPSHOT 9 residual=0.04543758669 amplitude=1.721983174 unscaled=9474409.248 support=135 band=34 axis_error=0.14231995640017683
+SNAPSHOT 10 residual=0.04532664532 amplitude=1.720166061 unscaled=9484417.63 support=135 band=34 axis_error=0.1426330332845596
+SNAPSHOT 11 residual=0.04527412655 amplitude=1.721328514 unscaled=9478012.583 support=135 band=34 axis_error=0.143247776766026
+SNAPSHOT 12 residual=0.04519987565 amplitude=1.720152244 unscaled=9484493.81 support=135 band=34 axis_error=0.14352522074550977
+SNAPSHOT 13 residual=0.04519487037 amplitude=1.720234602 unscaled=9484039.73 support=135 band=34 axis_error=0.1435628687418642
+SNAPSHOT 14 residual=0.045193736 amplitude=1.720228116 unscaled=9484075.491 support=135 band=34 axis_error=0.1435629274893286
+SNAPSHOT 15 residual=0.04519316275 amplitude=1.72022549 unscaled=9484089.97 support=135 band=34 axis_error=0.14356317674923666
+SNAPSHOT 16 residual=0.04519315549 amplitude=1.720226232 unscaled=9484085.879 support=135 band=34 axis_error=0.14356344111812633

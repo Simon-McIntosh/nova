@@ -1,0 +1,141 @@
+{
+  "case": "weak-rotation-reactor-static",
+  "requested_cells": -110,
+  "realised_cells": 135,
+  "target_current_a": 16314773.311828371,
+  "map_checks": {
+    "analytic_pinned": {
+      "relative_sup": 9.539504816028166e-05,
+      "absolute_sup_wb": 0.004741413007736672,
+      "worst_index": 185
+    },
+    "analytic_unpinned": {
+      "relative_sup": 0.00033166485083595493,
+      "absolute_sup_wb": 0.016480427465117464,
+      "worst_index": 186
+    },
+    "pin_changes_analytic_image_max_wb": 0.013785220741510784
+  },
+  "positive_controls": {
+    "seed_vs_analytic_shadow_difference_indices": [],
+    "seed_vs_analytic_nonzero_current_difference_cells": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11,
+      13,
+      14,
+      15,
+      16,
+      26,
+      28,
+      35,
+      36,
+      38,
+      50,
+      52,
+      54,
+      62,
+      63,
+      64,
+      68,
+      69,
+      70,
+      71,
+      72,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      83,
+      85,
+      89,
+      113,
+      114,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      128,
+      130,
+      131,
+      134
+    ],
+    "seed_vs_analytic_current_max_difference_a": 184595.82360540127,
+    "analytic_has_supported_cells": true,
+    "analytic_has_boundary_band_cells": true
+  },
+  "wall_seconds": 473.5963230282068,
+  "raw_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/rows-titan/record/cells-110/receipt.json",
+  "raw_sha256": "eb417b135502459a71680106d69014353d15981892b5c1660c4a98ad17213616",
+  "completed": true,
+  "terminal": {
+    "residual": 0.052277187401972014,
+    "converged": false,
+    "trips": 2,
+    "state_digest": "edff74639827352c833c0da07db7bb9421babc61fc0565d494ea75aad32693a3",
+    "termination_reason": "10",
+    "termination": "active_set_settled"
+  },
+  "per_trip_residual_history": [
+    {
+      "trip": 1,
+      "live_relative_residual": 0.052277187401972014,
+      "mask_difference_cells": 0,
+      "cycle_damping_activated": false
+    },
+    {
+      "trip": 2,
+      "live_relative_residual": 0.052277187401972014,
+      "mask_difference_cells": 0,
+      "cycle_damping_activated": false
+    }
+  ],
+  "trips": [
+    {
+      "trip": 0,
+      "residual": 0.14676841082730255,
+      "converged": false,
+      "axis_error_m": 0.032848254086278145,
+      "state_digest": "70fe16dc66f38b8cbd7ebefb829283234815a680d28704e61de2284383718707",
+      "analytic_max_abs_error_wb": 63.35232135830477,
+      "nonzero_current_cells": 64
+    },
+    {
+      "trip": 1,
+      "residual": 0.052277187401972014,
+      "converged": false,
+      "axis_error_m": 0.1054197370270484,
+      "state_digest": "edff74639827352c833c0da07db7bb9421babc61fc0565d494ea75aad32693a3",
+      "analytic_max_abs_error_wb": 40.77183161421755,
+      "nonzero_current_cells": 72
+    },
+    {
+      "trip": 2,
+      "residual": 0.052277187401972014,
+      "converged": false,
+      "axis_error_m": 0.1054197370270484,
+      "state_digest": "edff74639827352c833c0da07db7bb9421babc61fc0565d494ea75aad32693a3",
+      "analytic_max_abs_error_wb": 40.77183161421755,
+      "nonzero_current_cells": 72
+    }
+  ],
+  "outside_centroid_fraction": 0.049133998227454546,
+  "characteristic_pitch_m": 0.4660634103582032
+}

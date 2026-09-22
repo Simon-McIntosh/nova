@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Plasma-cell topology authority — flood fill, null census and private mask on the current mesh">
 <meta name="plan-summary" content="Move the saddle-aware flood, the sign-change null census and the private mask onto the plasma cells, removing the raster-to-cell transfer seam.">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-owner" content="Simon McIntosh">
@@ -24,10 +24,10 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="93">
-<meta name="plan-impl" content="0.99">
+<meta name="plan-version" content="94">
+<meta name="plan-impl" content="1.0">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
-<meta name="plan-section-declarations" content="{&quot;currency&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;currency&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;}">
 </head>
 <body>
 <main class="plan-doc">
@@ -194,10 +194,11 @@
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-pta-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-d8-cutover-authoring" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship plasma-cell-topology-authority" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pta-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-d8-cutover-authoring" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship plasma-cell-topology-authority" data-resolved-at="2026-09-22T19:35:42+00:00" data-resolved-by="s18-fable-20260922">
     <h4 class="r-fu-title">Cut the topology authority over to the plasma cells behind a parity harness</h4>
     <div class="r-fu-body">Re-derive the saddle-aware flood cut on the plasma-cell hex adjacency, run the sign-change census as the primary null identifier with one split-spline polish step, and produce the private mask and wall machinery on the same cells. The cutover is gated by a parity harness against the incumbent raster authority on every committed operand: identical private masks (the prototype measured zero differing cells on MAST 22086/43 mixed), identical selected primaries, and identical retained-failure classifications, with any difference quantified per cell and adjudicated rather than absorbed. The two measured seam symptoms this plan removes are recorded on separatrix-spline-extraction: the one-cell label mismatches on the 21985/51 panels and the historical rim-current scatter defect. Telemetry surfaces (per-trip mask differences, stagnation exit, checkpointing) migrate with the mask.</div>
     <pre class="r-fu-prompt">/reckon-ship plasma-cell-topology-authority</pre>
+    <p class="r-fu-outcome">Shipped: the flood, census and private mask run on the plasma cells behind the twelve-row parity harness (0 differing cells on every row), the null generator is adopted with its solve-path callers reading the full state, and the adopted read costs about a fifth of the pre-adoption read. The cutover of the single-grid solver proceeds on single-grid-solver-cutover behind the S19 clip-mode gate.</p>
     </article>
 <article class="r-fu" data-id="f-pta-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship s18-pta" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship solver-convergence-regression" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Hex reference machine: seven forward-reference solver-convergence failures now visible (foreign-owner: solver-convergence-regression)</h4>
@@ -429,6 +430,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260922-solve-path-repair-review-findings" data-who="" data-when="">
     <div class="r-comment-body">Solve-path repair review (local lane, 88 of 100) attached and the run promoted; four non-blocking findings carried here so the read-cost node's successor picks them up: the prefix-slice scanner in tests/test_solve_path_census_inputs.py recognises only the canonical slice form (a zero lower bound or a locally bound limit escapes it); its census-read list is a fixed seven names, so a caller reaching the raster census through an internal callee is outside the scan and rests on prose; no control constructs the moment-geometry-absent branch of the connectivity read, so the claim that the sampling carrier has no direct-sampling suffix is a reading of construction sites; and the safe-prefix audit row for that site carries a string where its siblings carry a boolean. None changes the receipt: two exact-mode public solves reach terminal polish on the H200 with finite landmarks. The re-pin of the one remaining red split-polish contract (published value must differ from the raw census bytes, a coincidence proxy the adopted exact quadratic breaks by reproducing a paraboloid value exactly) is dispatched on the local lane; the raster-oracle and MAST-saddle contracts pass at 20088ff80 per the cost node's eighteen-file lane.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260922-read-cost-and-repin-landed" data-who="" data-when="">
+    <div class="r-comment-body">§5 closes. The adopted read's cost is landed at 2b228af7a (worktree tip b6d7e6cfd, review 91 of 100): wall containment is decided once at construction for source regions the wall safely contains and checked in fixed-width batches for the rest, and deduplication loops over admitted roots only so vmap no longer traces a dormant carrier-sized fallback. On one titan job (1276069) the reduced read measures 0.122, 0.145 and 0.187 times the like-for-like pre-adoption read at 550, 1074 and 2616 cells against a reproduced pre-reduction cost of 3.38, 6.30 and 17.24 times; the ladder (132/340/550 at or below 0.10 pitch), rescaling invariance, raster parity 0/646 and the twelve-row bank replay (0 differing cells) hold at the reduced head, and the eighteen-file CPU lane adds zero failure IDs against base 20088ff80. The declared whole-wall negative control stayed inside the bound (0.228 at 2616 cells): containment was never the cost carrier, recorded as a finding; the coordinator-substituted deduplication control leaves the bound at 17.18. The review notes the reference arm carries about ten percent cross-process spread, retained in the receipt rather than smoothed. The last red split-polish contract is re-pinned at 281a486f6 (tests/test_split_polish_nulls.py: the census slot now carries a value offset from the map value at the seed and the published value must equal the map's own value there; 15 passed on all_debug job 1276079); the raster-oracle and MAST-saddle contracts were already green at 20088ff80. A merged-head eighteen-file lane at 2b228af7a is queued as job 1276086 and its result is appended to this record when it lands.</div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260922T123445789415-review-of-pta-null-generator-adoption" data-who="reckon-ship" data-when="2026-09-22T12:52:11Z">
     <div class="r-comment-body"><p>review 81/100 of the adoption at e46e5378: two high findings (flux-scale-dependent determinant floor; forward.py secondary-X caller still grid-only) returned to the same worker before promotion; raster oracle judged self-agreement for the generator, ladder and negative control judged independent</p></div>

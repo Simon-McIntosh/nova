@@ -992,6 +992,20 @@ def run_operator_requests(
     return responses
 
 
+def _operator_scores(map_fn, states, kind):
+    """Score a candidate family through the common live request body."""
+    body = operator_request_body(lambda state, _shadow: map_fn(state))
+    requests = OperatorRequest(
+        jnp.full(states.shape[0], int(kind), dtype=jnp.int32),
+        states,
+        jnp.zeros_like(states),
+        jnp.zeros_like(states, dtype=bool),
+        jnp.ones(states.shape[0], dtype=bool),
+    )
+    responses = run_operator_requests(body, requests)
+    return responses.merit, responses.residual
+
+
 def _relative_residual(mapped: jax.Array, state: jax.Array) -> jax.Array:
     """Relative sup-norm fixed-point residual ``max|g−x| / max|g|``."""
     return jnp.max(jnp.abs(mapped - state)) / jnp.maximum(
@@ -1220,15 +1234,10 @@ def _backtracking_scores(
     factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=state.dtype)
     candidates = state[None, :] + factors[:, None] * step[None, :]
 
-    def score(candidate):
-        mapped = acceptance_map_fn(candidate)
-        return (
-            _smooth_relative_sup_merit(mapped, candidate),
-            _relative_residual(mapped, candidate),
-        )
-
-    all_merits, all_residuals = jax.lax.map(
-        score, jnp.concatenate((candidates, state[None, :]), axis=0)
+    all_merits, all_residuals = _operator_scores(
+        acceptance_map_fn,
+        jnp.concatenate((candidates, state[None, :]), axis=0),
+        OperatorRequestKind.ACCEPTANCE,
     )
     merits, incumbent_merit = all_merits[:-1], all_merits[-1]
     residuals, incumbent_residual = all_residuals[:-1], all_residuals[-1]
@@ -1637,17 +1646,13 @@ def _steepest_descent_promotion(
     scales = jnp.asarray(_STEEPEST_DESCENT_SCALES, dtype=state.dtype)
     candidates = state[None, :] + scales[:, None] * direction[None, :]
 
-    def score(candidate):
-        mapped = acceptance_map_fn(candidate)
-        return (
-            _smooth_relative_sup_merit(mapped, candidate),
-            _relative_residual(mapped, candidate),
-        )
-
-    merits, residuals = jax.lax.map(score, candidates)
-    incumbent_mapped = acceptance_map_fn(state)
-    incumbent_merit = _smooth_relative_sup_merit(incumbent_mapped, state)
-    incumbent_residual = _relative_residual(incumbent_mapped, state)
+    all_merits, all_residuals = _operator_scores(
+        acceptance_map_fn,
+        jnp.concatenate((candidates, state[None, :]), axis=0),
+        OperatorRequestKind.RECOVERY,
+    )
+    merits, incumbent_merit = all_merits[:-1], all_merits[-1]
+    residuals, incumbent_residual = all_residuals[:-1], all_residuals[-1]
     acceptance_reference = jnp.where(
         own_mask_acceptance, incumbent_merit, reference_merit
     )
@@ -3750,6 +3755,8 @@ def _active_set_newton_krylov(
         matches = jnp.all(mask_history == mask[None, :], axis=1)
         return jnp.any(populated & matches)
 
+    live_body = operator_request_body(shadowed_map_fn, promoted_shadow_mask_fn)
+
     def reconcile(
         index,
         state,
@@ -3763,6 +3770,24 @@ def _active_set_newton_krylov(
         previous_live_residual,
     ):
         solved_state = inner_result.state
+        damped_state = state + _ACTIVE_SET_CYCLE_DAMPING * (solved_state - state)
+        if not freeze_topology:
+            candidates = jnp.stack((solved_state, damped_state, state))
+            requests = OperatorRequest(
+                jnp.asarray(
+                    [
+                        OperatorRequestKind.RECONCILIATION,
+                        OperatorRequestKind.RECONCILIATION,
+                        OperatorRequestKind.MERIT,
+                    ],
+                    dtype=jnp.int32,
+                ),
+                candidates,
+                jnp.zeros_like(candidates),
+                jnp.broadcast_to(mask, (3, mask.size)),
+                jnp.asarray([False, False, True]),
+            )
+            responses = run_operator_requests(live_body, requests)
         if freeze_topology:
             observed_partition = partition_read(solved_state, mask)
             observed_carried = usable_partition(observed_partition)
@@ -3781,9 +3806,9 @@ def _active_set_newton_krylov(
                 lambda: shadowed_map_fn(solved_state, observed_mask),
             )
         else:
-            observed_mask = jnp.ravel(promoted_shadow_mask_fn(solved_state, mask))
+            observed_mask = responses.shadow[0]
             observed_partition = observed_mask
-            observed_mapped = shadowed_map_fn(solved_state, observed_mask)
+            observed_mapped = responses.mapped[0]
         observed_difference = jnp.sum(observed_mask != mask, dtype=jnp.int32)
         observed_residual = _relative_residual(observed_mapped, solved_state)
         observed_finite = jnp.isfinite(observed_residual)
@@ -3798,7 +3823,6 @@ def _active_set_newton_krylov(
             & ~converged
         )
 
-        damped_state = state + _ACTIVE_SET_CYCLE_DAMPING * (solved_state - state)
         if freeze_topology:
             damped_mask = observed_mask
             damped_mapped = jax.lax.cond(
@@ -3807,8 +3831,8 @@ def _active_set_newton_krylov(
                 lambda: shadowed_map_fn(damped_state, damped_mask),
             )
         else:
-            damped_mask = jnp.ravel(promoted_shadow_mask_fn(damped_state, mask))
-            damped_mapped = shadowed_map_fn(damped_state, damped_mask)
+            damped_mask = responses.shadow[1]
+            damped_mapped = responses.mapped[1]
         damped_residual = _relative_residual(damped_mapped, damped_state)
         damped_finite = jnp.isfinite(damped_residual)
         damping_repeats = mask_seen(damped_mask, mask_history, history_count)
@@ -3827,7 +3851,7 @@ def _active_set_newton_krylov(
                 lambda: shadowed_map_fn(state, mask),
             )
             if freeze_topology
-            else shadowed_map_fn(state, mask)
+            else responses.mapped[2]
         )
         incoming_residual = _relative_residual(incoming_mapped, state)
         incoming_merit = _smooth_relative_sup_merit(incoming_mapped, state)
@@ -3838,7 +3862,7 @@ def _active_set_newton_krylov(
                 lambda: shadowed_map_fn(selected_state, selected_mask),
             )
             if freeze_topology
-            else shadowed_map_fn(selected_state, selected_mask)
+            else jnp.where(repeated, responses.mapped[1], responses.mapped[0])
         )
         selected_merit = _smooth_relative_sup_merit(selected_mapped, selected_state)
         retain_incoming = (

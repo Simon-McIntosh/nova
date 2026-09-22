@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T14:08:39",
+  "updated": "2026-09-22T14:10:13",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6525,6 +6525,15 @@
       },
       {
         "id": "s19f-sol-inv",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-22"
+      },
+      {
+        "id": "s19f-sol-inv-2",
         "harness": "codex",
         "role": "investigate",
         "session_id": null,
@@ -245158,6 +245167,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3116
+    "_version": 3117
   }
 }

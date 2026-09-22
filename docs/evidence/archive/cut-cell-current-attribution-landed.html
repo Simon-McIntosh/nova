@@ -2393,6 +2393,51 @@ as a production whole-cell mode defect.</p>
 <p>Commits: a2c8836289ab399e3ed836f94c904ce111852ea4 (measurement); 492b895770bd10b7e14ec379b4f9d89fc428977f (coarse evidence); 4303ed756cf6cd7beab7729b27d1cf5cdcbfdb98 (fine evidence). The final landing commit is recorded in the manifest after it exists. Nothing under nova/ was changed.</p><p><a href="/nova/figures/cut-cell-current-attribution/merit-model/report.md">Full investigation report</a>; <a href="/nova/figures/cut-cell-current-attribution/merit-model/method.md">Method and equations</a>; <a href="/nova/figures/cut-cell-current-attribution/merit-model/cells-135.json">135-cell receipt</a>; <a href="/nova/figures/cut-cell-current-attribution/merit-model/cells-342.json">342-cell receipt</a>; <a href="/nova/figures/cut-cell-current-attribution/merit-model/allocation.log">allocation exit</a>; <a href="/nova/figures/cut-cell-current-attribution/merit-model/cells-110.log">coarse process log</a>; <a href="/nova/figures/cut-cell-current-attribution/merit-model/cells-300.log">fine process log</a>; <a href="/nova/figures/cut-cell-current-attribution/merit-model/measure.py">measurement driver</a>.</p>
 </section>
 
+<section id="measured-candidate-acceptance">
+<h2>Measured candidate acceptance under a pessimistic model</h2>
+<p><strong>Landed 2026-09-22 in commit <code>0e7f35e882e917904dabf4c02e475ae25ad002a6</code>.</strong>
+Before the repair, the production rule still reported <code>actual_ok=true</code>,
+<code>model_trusted=false</code>, <code>selector_accepted=false</code> for the authoritative
+135-cell analytic candidate: merit <code>9.626740264e-5</code> from incumbent
+<code>0.0399490213834</code>, predicted merit <code>0.2710495257</code>, and own-mask residual
+<code>9.539504816e-5</code> from <code>0.0451931554866</code>.</p>
+<p>The selector now permits that finite, actually decreasing candidate when the model-predicted
+decrease is nonpositive, while retaining both unchanged actual gates: incumbent-relative
+sufficient merit decrease and strict own-mask sup-residual decrease. The accepted prediction
+is marked unreliable, and the next Newton iteration forms a fresh linearization at the promoted
+state. A model predicting positive decrease retains the existing trust ratio. The current pin,
+sufficient-decrease slope, residual guard, six backtracking factors, ten Newton steps, thirty
+Krylov iterations and sixteen active-set trips are unchanged.</p>
+<table><thead><tr><th>Witness</th><th>Actual merit</th><th>Predicted merit</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>Historical full analytic</td><td>9.62674026395e-5</td><td>0.348071530520</td><td>accepted; model unreliable</td></tr>
+<tr><td>Authoritative 135-cell full analytic</td><td>9.62674026395e-5</td><td>0.271049525734</td><td>accepted; model unreliable</td></tr>
+<tr><td>Authoritative 342-cell full analytic</td><td>7.58066918431e-5</td><td>0.291954563011</td><td>accepted; model unreliable</td></tr>
+<tr><td>Historical half defect</td><td>0.0621299454943</td><td>0.0624428163974</td><td>accepted by existing trusted rule</td></tr>
+<tr><td>Measured Newton ladders</td><td colspan="2">seven candidates per row, all worsen actual merit</td><td>14 of 14 refused</td></tr>
+</tbody></table>
+<p>The weak-rotation 300-requested-cell production row terminates after two active-set trips at
+relative sup residual <code>2.7049292596435537e-15</code>, converged true, with SHA-256
+<code>69f8805e240e6472209b0a27ce73132bf35c5ab0e239e68c7558472242adcdff</code>.
+It differs from the historical pointwise-quadrature <code>d730c294…</code> digest and the later
+continuous-support <code>3e9fa335…</code> terminal. The selector is this node's only production
+change, so that movement is the measured effect of admitting an actually decreasing candidate
+despite its pessimistic local prediction.</p>
+<p>This is not a cross-row convergence claim. Production still generates Newton directions; the
+selector only admits an already evaluated candidate. The second authoritative row, analytic
+axis and null position bounds, joint qualification and the complete locked convergence gate
+remain outside this node.</p>
+<p><strong>Gate.</strong> all_debug job <code>1275519</code> completed in 7m20s with exit 0,
+the root interpreter, <code>JAX_PLATFORMS=cpu</code>, and <code>TMPDIR=/tmp</code> in submit and
+payload. The focused after-suite passed 160 tests in 122.11s against 154 passes at base
+<code>192fa3b15ccafc80f3874c69bcdd7ca9734c0271</code>: zero added failures. The scratch
+mutation <q>Require model trust even when a finite candidate passes strict measured decrease.</q>
+restored the veto and produced the required two focused failures, exit 1.</p>
+<p><a href="/nova/figures/cut-cell-current-attribution/measured-candidate-acceptance/report.md">Report</a>;
+<a href="/nova/figures/cut-cell-current-attribution/measured-candidate-acceptance/selector-receipt.json">selector receipt</a>;
+<a href="/nova/figures/cut-cell-current-attribution/measured-candidate-acceptance/terminal-receipt.json">terminal receipt</a>.
+The exact decision relationship is a table; an additional figure would add no spatial or sequential information.</p>
+</section>
+
 </main>
 </body>
 </html>

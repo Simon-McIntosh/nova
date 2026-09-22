@@ -239,6 +239,27 @@ Commits <code>a2c8836289ab399e3ed836f94c904ce111852ea4</code>,
 <code>4303ed756cf6cd7beab7729b27d1cf5cdcbfdb98</code>.
 The driving followup and section state remain unchanged for coordinator adjudication.</p>
 
+<h3 id="measured-candidate-acceptance">Measured candidate acceptance under a pessimistic model</h3>
+<p><strong>Worker landing, 2026-09-22; no followup resolution or section closure.</strong>
+Commit <code>0e7f35e882e917904dabf4c02e475ae25ad002a6</code> admits an already measured
+candidate when the finite local model predicts no decrease only if its actual merit is at or
+below the incumbent times <code>1 - 1e-4 × fraction</code> and its own-mask sup residual
+strictly decreases. The model is marked unreliable and the next Newton iteration rebuilds
+the linearization at the promoted state. Positive predicted decrease still uses the existing
+realized-versus-predicted trust test; no budget, factor, current pin or tolerance changed.</p>
+<p>The exact receipt replay accepts the historical full analytic witness and both authoritative
+full analytic candidates, preserves the historical trusted half-defect acceptance, and refuses
+all fourteen actually worsening Newton candidates across the two rows. One all_debug job
+<code>1275519</code> passed the 160-test focused suite with zero failures against 154 baseline
+passes, and the declared restored-veto control failed both eager and JIT acceptance cases.</p>
+<p>The weak-rotation 300-requested-cell production row moves from the historical
+<code>d730c294…</code> digest and the later continuous-support <code>3e9fa335…</code> terminal
+to <code>69f8805e…</code>, converged in two active-set trips at residual
+<code>2.70492925964e-15</code>. This is a measured single-row effect, not the locked cross-row convergence
+claim: production still generates Newton directions, and the other authoritative row plus the
+locked position, null and joint-qualification criteria remain unmeasured here.
+<a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#measured-candidate-acceptance">Full selector, control and terminal record</a>.</p>
+
 <h2 id="s6">§6 — Rung A: reinstate the signed-flux clip of the profile support and re-verify every consumer bank</h2>
 <p>Replace the all-ones clip in the profile support with the clip against the signed flux of the current iterate on the confined side (the behaviour before c9a89e58), with the profile participation label deciding candidacy only, and book each cut cell's current to the side its clipped polygon lies on. Gate in order, one job per gate, receipts persisted per row: the plasma current amplitude at seed and terminal within one percent of unity and every cut cell participating with a clipped polygon on the weak, moderate and strong 110-cell rows (all_debug); the sixteen certificate rows re-solved in one H200 job with residual, axis error, X-point error, joint qualification and amplitude beside the committed rows and contour panels drawn; the transport machine's scrape-off-layer fraction re-measured and its expected-failure marker removed when it turns red; the twelve MAST bank rows and the DIII-D gate frames regenerated with their deltas recorded. Restoring the clip changes the physics of every forward solve since 27 August, so no consumer bank is asserted identical.</p>
 

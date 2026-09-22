@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T15:15:41",
+  "updated": "2026-09-22T15:15:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6468,6 +6468,15 @@
       },
       {
         "id": "s19f-claude-rev-2",
+        "harness": "claude",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-22"
+      },
+      {
+        "id": "s19f-claude-rev-3",
         "harness": "claude",
         "role": "review",
         "session_id": null,
@@ -246416,6 +246425,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3131
+    "_version": 3132
   }
 }

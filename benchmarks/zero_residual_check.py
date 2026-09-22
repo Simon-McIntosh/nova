@@ -639,6 +639,18 @@ def _render_panels(
         poloidal_axes(residual_axis)
         residual_axis.set_title(f"{residual_title}\n{marker}", fontsize=8)
 
+        finite_flux = np.asarray(flux, dtype=np.float64)
+        finite_flux = finite_flux[np.isfinite(finite_flux)]
+        raster_min = float(finite_flux.min()) if finite_flux.size else None
+        raster_max = float(finite_flux.max()) if finite_flux.size else None
+        levels_inside = (
+            0
+            if raster_min is None
+            else int(
+                sum(1 for level in flux_level_array if raster_min < level < raster_max)
+            )
+        )
+
         panels.append(
             {
                 "case": name,
@@ -647,6 +659,9 @@ def _render_panels(
                 "persisted_raster_present": bool(flux_level_array),
                 "level_count": len(flux_level_array),
                 "levels_wb": flux_level_array,
+                "raster_min_wb": raster_min,
+                "raster_max_wb": raster_max,
+                "levels_inside_raster": levels_inside,
                 "reference_receipt": payload.get("reference_receipt"),
                 "null_glyphs": {
                     "solved_axis": int(solved_axis is not None),

@@ -548,7 +548,9 @@ def _vertical_centroid_pair(
     return pair, actuator
 
 
-def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, Any]]:
+def _prepare_case(
+    carrier_path: Path, *, impose_vertical_centroid: bool = True
+) -> tuple[Any, dict[str, Any], dict[str, Any]]:
     response_cache, carrier = _response_cache(carrier_path)
     selected = {"shot": SHOT, "slice_index": SLICE_INDEX}
     case, context = parity._mast_case_from_selection(
@@ -670,19 +672,29 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
     reference_centroid_z = float(np.asarray(reference_centroid.centroid_z))
     if not np.isfinite(reference_centroid_z):
         raise RuntimeError("the reference frame carries no vertical current centre")
-    vertical_pair, vertical_actuator = _vertical_centroid_pair(
-        profile,
-        policy,
-        mixed_seed.state,
-        requested_class=jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8),
-        target_current=target_current,
-        target=reference_centroid_z,
-    )
-    reference_panel["vertical_centroid"] = {
-        "reference_m": reference_centroid_z,
-        "target_m": reference_centroid_z,
-        "tolerance_m": VERTICAL_CENTROID_TOLERANCE,
-    }
+    # The reference's own centre is measured on both arms: it is the quantity
+    # the constrained arm holds every edit to, and the quantity the
+    # unconstrained arm records that it was not held to, so the two arms state
+    # one number and differ only in whether a row was added to the solve.
+    if impose_vertical_centroid:
+        vertical_pair, vertical_actuator = _vertical_centroid_pair(
+            profile,
+            policy,
+            mixed_seed.state,
+            requested_class=jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8),
+            target_current=target_current,
+            target=reference_centroid_z,
+        )
+        reference_panel["vertical_centroid"] = {
+            "reference_m": reference_centroid_z,
+            "target_m": reference_centroid_z,
+            "tolerance_m": VERTICAL_CENTROID_TOLERANCE,
+        }
+    else:
+        # An arm run without the constraint persists no centroid row, so its
+        # panel caption states the absence rather than a target it never held.
+        vertical_pair = None
+        vertical_actuator = None
     prepared = {
         "initial": mixed_seed.state,
         "vertical_centroid_pair": vertical_pair,
@@ -2206,6 +2218,14 @@ def _receipt_document(
         "measurement_state": measurement_state,
         "verdict": verdict,
         "gates": gates,
+        "gate_notes": _gate_notes(rows),
+        "vertical_centroid_constraint": {
+            # Read off the prepared pair rather than off a run argument, so the
+            # receipt cannot disagree with what the solve was given.
+            "imposed": prepared["vertical_centroid_pair"] is not None,
+            "reference_m": prepared["reference_centroid_z"],
+            "tolerance_m": VERTICAL_CENTROID_TOLERANCE,
+        },
         "interactive_path": {
             "route": "compiled slice (reduced fixed point, one fixed-shape "
             "program re-entered per edit)",
@@ -2358,6 +2378,38 @@ def _receipt_document(
     }
 
 
+def _compile_witness_note(rows: list[dict[str, Any]]) -> str:
+    """State what the first-edit compile gate does and does not witness.
+
+    The gate holds when the persistent compilation cache misses on the first
+    edit. An allocation served from a pre-warmed cache never misses there: the
+    program it re-enters was compiled by an earlier job, so reading the gate as
+    evidence that this run compiled anything is wrong on such a rung. The note
+    carries the first row's own cache outcome, so the caveat is a measurement
+    rather than a claim about rungs in general.
+    """
+    if not rows:
+        return "no edit was recorded, so this gate witnesses nothing"
+    first = rows[0]
+    return (
+        "first edit reported compilation_cache=%r with "
+        "persistent_cache_miss_count=%d and persistent_cache_hit_count=%d; the "
+        "gate records a persistent-cache outcome on the first edit rather than "
+        "a compile, so on a rung served by the pre-warmed cache it is not a "
+        "compile witness"
+        % (
+            first["compilation_cache"],
+            first["persistent_cache_miss_count"],
+            first["persistent_cache_hit_count"],
+        )
+    )
+
+
+def _gate_notes(rows: list[dict[str, Any]]) -> dict[str, str]:
+    """Return the note each gate needs to be read at its real strength."""
+    return {"first_edit_compiles_program": _compile_witness_note(rows)}
+
+
 def run(
     output: Path,
     figure: Path,
@@ -2366,6 +2418,7 @@ def run(
     panel_data: Path,
     panel_figure: Path,
     raster_figure: Path = DEFAULT_RASTER_FIGURE,
+    impose_vertical_centroid: bool = True,
 ) -> dict[str, Any]:
     """Compile once and measure successive warm prescribed-current edits."""
     total_started = time.perf_counter()
@@ -2380,7 +2433,9 @@ def run(
     )
     reporter.start()
     try:
-        profile, prepared, carrier = _prepare_case(carrier_path)
+        profile, prepared, carrier = _prepare_case(
+            carrier_path, impose_vertical_centroid=impose_vertical_centroid
+        )
         _preflight_panel_wall(profile)
         solve_persistent_hits_start = int(cache_events["hits"])
         solve_persistent_misses_start = int(cache_events["misses"])
@@ -2398,7 +2453,10 @@ def run(
 
         rows: list[dict[str, Any]] = []
         panel_states: list[dict[str, Any]] = []
-        constraint_pairs = (prepared["vertical_centroid_pair"],)
+        constraint_pair = prepared["vertical_centroid_pair"]
+        constraint_pairs: tuple[ConstraintPair, ...] = (
+            () if constraint_pair is None else (constraint_pair,)
+        )
         state = initial
         program = None
         probe_program = None
@@ -2995,6 +3053,15 @@ def main() -> None:
     run_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
     )
+    run_parser.add_argument(
+        "--without-vertical-centroid",
+        action="store_true",
+        help=(
+            "run the sweep without the vertical current-centre row, so the "
+            "unconstrained control arm is measured on the same code as the "
+            "constrained arm it is compared against"
+        ),
+    )
     for name in ("sbatch", "submit"):
         job_parser = subparsers.add_parser(name)
         job_parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
@@ -3047,6 +3114,7 @@ def main() -> None:
             arguments.panel_data,
             arguments.panel_figure,
             arguments.raster_figure,
+            impose_vertical_centroid=not arguments.without_vertical_centroid,
         )
     elif arguments.command == "panel":
         print(

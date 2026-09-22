@@ -1,0 +1,227 @@
+{
+  "scope": "Four reachable benchmark consumers migrated and the production secondary caller landed under coordinator-authorized disjoint scope. Only the limiter audit remains claim-blocked. Raster-only authored drivers remain inventoried.",
+  "reachability_rule": "Whether the authored entry point currently constructs an own-node carrier. Generic helpers can require migration before reuse on another carrier even when their current driver is raster-only.",
+  "construction_evidence": [
+    "benchmarks/efit_forward_parity_slice.py:2576 (_mast_case_from_selection)",
+    "benchmarks/efit_forward_parity_slice.py:486 (DeclaredAnchorOperator without sample target)",
+    "benchmarks/efit_forward_parity_slice.py:2883 (_passive_inclusive_case replaces currents only)",
+    "scripts/labeller_batch/shard.py:242 (prepare_labeller)",
+    "tests/test_connectivity_boundary.py:95 (raster fixture)",
+    "scripts/analytic_oracle_fixtures/measure.py:890 (direct sample target)"
+  ],
+  "callers": [
+    {
+      "path": "benchmarks/xpoint_cell_allocation_rca.py",
+      "lines": [
+        769,
+        771
+      ],
+      "can_reach_own_node_carrier": true,
+      "reason": "_candidate_table is called with analytic-oracle operators built by oracle_fixture.forward_operator; these declare six direct sampling vertices per cell.",
+      "status": "migrated",
+      "migration": "Pass the complete state through operator.null_flux_pool(state); preserve grid-only arrays solely for centroid-ring diagnostics. Full topology reads also retain the complete state."
+    },
+    {
+      "path": "benchmarks/topology_read_resolution_ladder.py",
+      "lines": [
+        310,
+        315
+      ],
+      "can_reach_own_node_carrier": true,
+      "reason": "_machine_and_field builds the analytic single-null hex carrier and its direct sampling targets.",
+      "status": "migrated",
+      "migration": "Pass the complete state through operator.null_flux_pool(state); preserve grid-only arrays solely for centroid-ring diagnostics. Full topology reads also retain the complete state."
+    },
+    {
+      "path": "benchmarks/axis_seed_census.py",
+      "lines": [
+        100,
+        117
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "Authored driver uses _mast_case_from_selection and _passive_inclusive_case. build_profile constructs a tensor raster with use_linear_moments=False and no sample target; connectivity_grid_axes also requires a tensor lattice.",
+      "status": "raster-only-driver-inventoried"
+    },
+    {
+      "path": "benchmarks/traced_selection_seam.py",
+      "lines": [
+        151,
+        158
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "All three authored families come from tests.test_connectivity_boundary._forward_operator, which constructs a FluxLattice, no sample target and use_linear_moments=False.",
+      "status": "raster-only-driver-inventoried"
+    },
+    {
+      "path": "benchmarks/wall_resolution_ladder.py",
+      "lines": [
+        424,
+        425
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "Authored MAST wall rungs replace only the wall of the same raster passive profile; the grid has no direct sample targets.",
+      "status": "raster-only-driver-inventoried"
+    },
+    {
+      "path": "benchmarks/reversed_current_guard_diagnosis.py",
+      "lines": [
+        138,
+        139
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "prepare_labeller delegates to the shared MAST raster profile; _prepared_with_polarity only changes polarity, so it introduces no own-node sample geometry.",
+      "status": "raster-only-driver-inventoried"
+    },
+    {
+      "path": "benchmarks/null_census_assertion.py",
+      "lines": [
+        189,
+        191,
+        552
+      ],
+      "can_reach_own_node_carrier": true,
+      "reason": "load_row rebuilds the cached analytic hex carrier with oracle_fixture.forward_operator and then strips the terminal state to its grid prefix.",
+      "status": "migrated",
+      "migration": "Pass the complete state through operator.null_flux_pool(state); preserve grid-only arrays solely for centroid-ring diagnostics. Full topology reads also retain the complete state."
+    },
+    {
+      "path": "benchmarks/polish_support_performance.py",
+      "lines": [
+        433,
+        435
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "_profile_and_seed uses the passive MAST raster profile; its tensor-fit benchmark assumes that raster shape.",
+      "status": "raster-only-driver-inventoried"
+    },
+    {
+      "path": "benchmarks/pinned_branch_contrast.py",
+      "lines": [
+        119,
+        126
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "Authored driver uses the passive MAST raster profile and a reshaped tensor connectivity read.",
+      "status": "raster-only-driver-inventoried"
+    },
+    {
+      "path": "benchmarks/global_spline_read_on_hex.py",
+      "lines": [
+        485,
+        489,
+        491
+      ],
+      "can_reach_own_node_carrier": true,
+      "reason": "The benchmark reads analytic hex machines with direct sampling targets; it truncates before both _fixed_design_read and read_census.",
+      "status": "migrated",
+      "migration": "Pass the complete state through operator.null_flux_pool(state); preserve grid-only arrays solely for centroid-ring diagnostics. Full topology reads also retain the complete state."
+    },
+    {
+      "path": "benchmarks/newton_cycle_mask_switch.py",
+      "lines": [
+        141,
+        142
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "Authored driver builds the passive MAST raster profile. Its topology snapshot then requires connectivity_grid_axes.",
+      "status": "raster-only-driver-inventoried"
+    },
+    {
+      "path": "benchmarks/limiter_read_resolution_audit.py",
+      "lines": [
+        781,
+        784,
+        786
+      ],
+      "can_reach_own_node_carrier": true,
+      "reason": "The wall-coupling diagnostic operates on cached analytic hex carrier machines with direct sampling targets and truncates before read and census.",
+      "status": "claim-blocked",
+      "claim": "live S19 claim named by coordinator",
+      "exact_patch": [
+        {
+          "replace": "    physical = jnp.asarray(analytic)[: operator.physical_node_number]",
+          "with": "    physical = jnp.asarray(analytic)"
+        },
+        {
+          "replace": "    grid_flux, _wall_flux = operator._fixed_design_topology.split_flux_map(physical)",
+          "with": "    grid_flux = operator.null_flux_pool(physical)"
+        }
+      ],
+      "follow_on_action": "Apply both replacements within _saddle_wall_coupling after the live claim releases; the existing read_census(grid_flux) then receives the complete pool.",
+      "patch_validation": "Replacement text matches this worktree; applying and executing the deferred patch belongs to the claim-release follow-on."
+    },
+    {
+      "path": "benchmarks/held_tip_trip_diagnosis.py",
+      "lines": [
+        227,
+        228,
+        295,
+        387,
+        394
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "_profile_and_seed supplies the shared passive MAST raster profile. The legacy helper and structured helper both accept grid-only values; a future own-node input would need migration.",
+      "status": "raster-only-driver-inventoried"
+    },
+    {
+      "path": "nova/equilibrium/forward.py",
+      "lines": [
+        1371,
+        1373
+      ],
+      "can_reach_own_node_carrier": true,
+      "reason": "ForwardProfile._secondary_x_point can receive own-node carriers and now passes the full state through operator.null_flux_pool before candidate selection.",
+      "status": "landed",
+      "claim": "ecq-repair-the-exact-cold-seed-amplitude-bracket",
+      "remaining_production_caller": false,
+      "exact_patch": {
+        "replace": "        physical = jnp.asarray(flux)[: self.operator.physical_node_number]\n        grid_flux, _wall_flux = self.operator.topology.split_flux_map(physical)",
+        "with": "        physical = jnp.asarray(flux)\n        grid_flux = self.operator.null_flux_pool(physical)"
+      },
+      "follow_on_action": "None for this caller; merged-head verification remains coordinator-owned.",
+      "fixture_follow_on": {
+        "path": "tests/test_forward_secondary_null.py",
+        "reason": "The manufactured raster operator now exposes null_flux_pool while retaining the two containment tests unchanged.",
+        "exact_patch": {
+          "replace": "            physical_node_number=grid_nodes,",
+          "with": "            physical_node_number=grid_nodes,\n            null_flux_pool=lambda flux: jnp.asarray(flux)[:grid_nodes],"
+        },
+        "status": "landed",
+        "landed_commit": "233c56a328ec118bca69041097e2fe9d4940d3f6"
+      },
+      "patch_validation": "Exact two-line replacement and one-line fixture seam committed; fresh CPU process: 22 passed, zero failures, exit 0. The real 132-cell production caller also completes and matches the operator helper.",
+      "landed_commit": "233c56a328ec118bca69041097e2fe9d4940d3f6",
+      "claim_resolution": "The holding coordinator consented to this disjoint two-line patch; its amplitude bracket remains untouched.",
+      "gate": {
+        "revision": "233c56a328ec118bca69041097e2fe9d4940d3f6",
+        "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T112528428825-pta-null-generator-adoption/secondary-seam-gate.py",
+        "exit_status": 0,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T112528428825-pta-null-generator-adoption/secondary-seam-gate.log",
+        "completed": true,
+        "passed": 22,
+        "failure_count": 0,
+        "failure_ids": [],
+        "added_failure_ids": [],
+        "baseline_subset": {
+          "revision": "2e38dc87702f4ebaa594da2f809daf960b176acc",
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T112528428825-pta-null-generator-adoption/review-suite.log",
+          "matched_case_count": 22,
+          "failure_count": 0
+        },
+        "positive_control": "Real 132-cell production _secondary_x_point completes through the public pool and matches the operator helper.",
+        "pytest_arguments": [
+          "-p",
+          "no:cacheprovider",
+          "-p",
+          "no:randomly",
+          "-vv",
+          "-s",
+          "tests/test_forward_secondary_null.py",
+          "tests/test_null_generator_admission.py"
+        ]
+      }
+    }
+  ],
+  "reviewed_revision": "e46e5378bf28252e3f4e4f86bd6fd00473dcfb5c",
+  "public_secondary_helper": "ForwardFluxOperator.secondary_x_point(state, topology): uses null_flux_pool(state), selects a distinct contained saddle from one census, and never repeats operator.read."
+}

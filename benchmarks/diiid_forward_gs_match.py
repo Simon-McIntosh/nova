@@ -659,6 +659,13 @@ def _array_sha256(values: np.ndarray) -> str:
     return identity.hexdigest()
 
 
+def _census_flux_pool(operator, state):
+    """Use the operator's authored pool, or a grid-only diagnostic adapter."""
+    if hasattr(operator, "null_flux_pool"):
+        return operator.null_flux_pool(state)
+    return operator.topology.split_flux_map(jnp.asarray(state))[0]
+
+
 def candidate_flux_margins(
     operator, physical: Any, *, polarity: float
 ) -> dict[str, Any]:
@@ -672,9 +679,9 @@ def candidate_flux_margins(
     null and the count stands.
     """
 
-    grid_flux = operator.topology.split_flux_map(jnp.asarray(physical))[0]
+    flux_pool = _census_flux_pool(operator, physical)
     table = operator._fixed_design_topology.grid
-    status = jax.device_get(table.candidate_table_status(grid_flux))
+    status = jax.device_get(table.candidate_table_status(flux_pool))
     candidates = np.asarray(status["retained_candidate"], dtype=float)
     valid = np.asarray(status["retained_valid"], dtype=bool)
     count = np.asarray(status["candidate_count"], dtype=int)
@@ -3307,7 +3314,9 @@ def _terminal_xpoint_diagnostics(profile, state, topology) -> dict[str, Any]:
     if coordinate.shape != expected.shape or not np.array_equal(coordinate, expected):
         raise ValueError("margin diagnostics require a tensor-product grid")
     grid_flux, wall_flux = operator.topology.split_flux_map(physical)
-    _vmap_o, vmap_x = operator._fixed_design_topology.grid(grid_flux)
+    _vmap_o, vmap_x = operator._fixed_design_topology.grid(
+        _census_flux_pool(operator, state)
+    )
     classification_wall = jnp.concatenate(
         (topology.wall_point, topology.wall_point_flux[None])
     )

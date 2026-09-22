@@ -3514,6 +3514,63 @@ No figure was added: the evidence is a finite decision table of indices, boolean
   The 12-of-12 census, nine-test pass, discriminating red control and twelve panel reads close the
   second-bookend findings. Nothing under <code>nova/</code> changed.</p>
 </section>
+<section class="audit-directory" id="fsa-verify-the-atlas-null-vocabulary-section">
+<h2 id="fsa-verify-the-atlas-null-vocabulary">Convergence atlas shared-null-vocabulary bookend review</h2>
+<p><strong>Verdict: PROMOTE.</strong> Score: <strong>97 / 100</strong>. Review base <code>3ecafdf5a770830f0d951831cc8b1a650427e6fe</code>; scored implementation commit <code>37961499f8bbc6c962fb2643dd8ae6be46fd6250</code>; redraw commit <code>0bbea30f74e35538e2cf1ccc11c4fbcfcf018c5b</code>. Documentation tip <code>aff562b810e1f2e861ea7051221e7519d2f34977</code> is noted and not judged.</p>
+<p>Worker node <code>fsa-verify-the-atlas-null-vocabulary</code> opened every PNG in <code>docs/figures/null-identification-authority/convergence-atlas</code> at original resolution. The 17/17 visual score is 97 for each panel: the visual contract is satisfied, while three points are deducted uniformly because the named standalone scheduler log is absent even though the manifest, worker stream and render receipt establish the all_debug run.</p>
+<p>The candidate source removes the purpose-built literal-marker painter and routes the axis and qualified nulls through <code>poloidal.draw_nulls(..., style=DEFAULT_INK)</code>. The admitted saddle is passed as <code>x_points</code> and other qualified nulls as hollow, unfiltered <code>other_x_points</code>, preserving the atlas' out-of-wall population. No unrelated contour, wall, shadow, boundary or EFIT reference painter change is present in the scoped diff.</p>
+<p><strong>Visual representatives:</strong> the normal MAST panel shows the shared triangle/filled-cross/hollow-cross vocabulary beside the wall and contours; the failure panel keeps its wrapped failure caption inside the frame; the DIII-D panel distinguishes the red solve nulls from the gray EFIT reference set.</p>
+<p><img src="/nova/figures/null-identification-authority/convergence-atlas/21978-35-mixed.png" alt="MAST mixed convergence atlas panel with shared null vocabulary"><img src="/nova/figures/null-identification-authority/convergence-atlas/21983-35-pure.png" alt="MAST failure panel with an in-frame BoundaryGenerationFailure caption"><img src="/nova/figures/null-identification-authority/convergence-atlas/d3d_shot_00000c4a7b-179.png" alt="DIII-D convergence atlas panel with shared null vocabulary"></p>
+<h3 id="fsa-verify-the-atlas-null-vocabulary-verdicts">Gate and census evidence</h3>
+<table><thead><tr><th>measure</th><th>result</th><th>receipt</th></tr></thead><tbody>
+<tr><td>base focused test</td><td>9 passed, exit 0</td><td><code>/home/ITER/mcintos/.cache/atlas-gate/logs/baseline.log</code></td></tr>
+<tr><td>candidate focused test</td><td>10 passed, exit 0 in 19.54 s in an independent fresh process</td><td><code>fsa-verify-the-atlas-null-vocabulary/fresh-test.log</code></td></tr>
+<tr><td>declared negative control</td><td>1 failed, 9 passed, exit 1; the shared-style identity assertion fails after the dot/lowercase-x mutation</td><td><code>fsa-verify-the-atlas-null-vocabulary/negative-control.log</code></td></tr>
+<tr><td>redraw</td><td>17 panel rows, exit 0; 12 MAST + 5 DIII-D; no new solve; <code>^</code> axis, <code>X</code> admitted, filled admitted, hollow other</td><td><code>/home/ITER/.cache/atlas-gate/logs/render.log</code></td></tr>
+<tr><td>class census</td><td>unchanged: 12 <code>MAST:diverted</code>, 5 <code>DIII-D:unclassified</code></td><td><code>convergence-atlas.json</code> at base and candidate</td></tr>
+<tr><td>failure markers</td><td>unchanged: <code>21983/35 pure</code> and <code>21986/46 pure</code>, both retaining the same no-closed-branch reason</td><td><code>convergence-atlas.json</code></td></tr>
+</tbody></table>
+<p>The producer manifest and worker stream record one <code>all_debug</code> allocation with the root interpreter, CPU platform, no new solve and no <code>uv</code> invocation on the compute node. The first node-local <code>/tmp</code> attempt failed; the corrected shared-cache launch ended <code>SRUN_EXIT=0</code> and <code>ALL_DONE</code>. The named <code>/home/ITER/mcintos/.cache/atlas-gate/logs/srun.log</code> is absent, so this is a low, non-blocking evidence finding rather than a claim of a missing allocation.</p>
+<h3 id="fsa-verify-the-atlas-null-vocabulary-panel-table">Per-panel table</h3>
+<table><thead><tr><th>panel</th><th>machine/class</th><th>score</th><th>scoped finding</th></tr></thead><tbody>
+<tr><td><code>21978-35-pure.png</code></td><td>MAST / diverted</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>21978-35-mixed.png</code></td><td>MAST / diverted</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>21983-35-pure.png</code></td><td>MAST / diverted</td><td>97</td><td>failure caption retained inside frame</td></tr>
+<tr><td><code>21983-35-mixed.png</code></td><td>MAST / diverted</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>21985-51-pure.png</code></td><td>MAST / diverted</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>21985-51-mixed.png</code></td><td>MAST / diverted</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>21986-46-pure.png</code></td><td>MAST / diverted</td><td>97</td><td>failure caption retained inside frame</td></tr>
+<tr><td><code>21986-46-mixed.png</code></td><td>MAST / diverted</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>21989-55-pure.png</code></td><td>MAST / diverted</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>21989-55-mixed.png</code></td><td>MAST / diverted</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>22086-43-pure.png</code></td><td>MAST / diverted</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>22086-43-mixed.png</code></td><td>MAST / diverted</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>d3d_shot_00000c4a7b-179.png</code></td><td>DIII-D / unclassified</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>d3d_shot_0003ff34e7-44.png</code></td><td>DIII-D / unclassified</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>d3d_shot_001554e054-144.png</code></td><td>DIII-D / unclassified</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>d3d_shot_002495e835-146.png</code></td><td>DIII-D / unclassified</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+<tr><td><code>d3d_shot_0040ca9bdc-137.png</code></td><td>DIII-D / unclassified</td><td>97</td><td>line contours, wall, axes off, shared glyphs</td></tr>
+</tbody></table>
+<p><strong>Directory totals:</strong> 17/17 opened; mean 97/100; 0 under 70; 0 scoped null-vocabulary physics misrepresentations.</p>
+<h3 id="fsa-verify-the-atlas-null-vocabulary-findings">Findings JSON</h3>
+<pre>{
+  &quot;schema_version&quot;: 1,
+  &quot;review_node&quot;: &quot;fsa-verify-the-atlas-null-vocabulary&quot;,
+  &quot;base_revision&quot;: &quot;3ecafdf5a770830f0d951831cc8b1a650427e6fe&quot;,
+  &quot;candidate_commit&quot;: &quot;37961499f8bbc6c962fb2643dd8ae6be46fd6250&quot;,
+  &quot;redraw_commit&quot;: &quot;0bbea30f74e35538e2cf1ccc11c4fbcfcf018c5b&quot;,
+  &quot;verdict&quot;: &quot;promote&quot;,
+  &quot;score&quot;: 97,
+  &quot;candidate_gate_exit&quot;: 0,
+  &quot;negative_control_exit&quot;: 1,
+  &quot;render_exit&quot;: 0,
+  &quot;panel_count&quot;: 17,
+  &quot;class_census&quot;: {&quot;MAST:diverted&quot;: 12, &quot;DIII-D:unclassified&quot;: 5},
+  &quot;failure_markers&quot;: [&quot;21983/35 pure&quot;, &quot;21986/46 pure&quot;],
+  &quot;findings&quot;: [{&quot;severity&quot;: &quot;low&quot;, &quot;class&quot;: &quot;missing-standalone-scheduler-log&quot;, &quot;promotion_blocking&quot;: false, &quot;summary&quot;: &quot;The named srun.log is absent, while the manifest, worker stream and render receipt establish one all_debug allocation ending SRUN_EXIT=0 and ALL_DONE.&quot;}],
+  &quot;follow_ons&quot;: [&quot;pre-existing MAST boundary-versus-admitted-saddle physics issue belongs to the topology repair&quot;, &quot;jt60sa-wall-units.png remains outside this node's exclusive figure scope&quot;]
+}</pre>
+</section>
   </main>
 </body>
 </html>

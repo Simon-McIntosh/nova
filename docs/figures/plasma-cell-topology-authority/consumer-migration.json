@@ -1,0 +1,146 @@
+{
+  "scope": "Read-only caller census; follow-on node owns all listed source paths.",
+  "reachability_rule": "Whether the authored entry point currently constructs an own-node carrier. Generic helpers can require migration before reuse on another carrier even when their current driver is raster-only.",
+  "construction_evidence": [
+    "benchmarks/efit_forward_parity_slice.py:2576 (_mast_case_from_selection)",
+    "benchmarks/efit_forward_parity_slice.py:486 (DeclaredAnchorOperator without sample target)",
+    "benchmarks/efit_forward_parity_slice.py:2883 (_passive_inclusive_case replaces currents only)",
+    "scripts/labeller_batch/shard.py:242 (prepare_labeller)",
+    "tests/test_connectivity_boundary.py:95 (raster fixture)",
+    "scripts/analytic_oracle_fixtures/measure.py:890 (direct sample target)"
+  ],
+  "callers": [
+    {
+      "path": "benchmarks/xpoint_cell_allocation_rca.py",
+      "lines": [
+        769,
+        771
+      ],
+      "can_reach_own_node_carrier": true,
+      "reason": "_candidate_table is called with analytic-oracle operators built by oracle_fixture.forward_operator; these declare six direct sampling vertices per cell."
+    },
+    {
+      "path": "benchmarks/topology_read_resolution_ladder.py",
+      "lines": [
+        310,
+        315
+      ],
+      "can_reach_own_node_carrier": true,
+      "reason": "_machine_and_field builds the analytic single-null hex carrier and its direct sampling targets."
+    },
+    {
+      "path": "benchmarks/axis_seed_census.py",
+      "lines": [
+        100,
+        117
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "Authored driver uses _mast_case_from_selection and _passive_inclusive_case. build_profile constructs a tensor raster with use_linear_moments=False and no sample target; connectivity_grid_axes also requires a tensor lattice."
+    },
+    {
+      "path": "benchmarks/traced_selection_seam.py",
+      "lines": [
+        151,
+        158
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "All three authored families come from tests.test_connectivity_boundary._forward_operator, which constructs a FluxLattice, no sample target and use_linear_moments=False."
+    },
+    {
+      "path": "benchmarks/wall_resolution_ladder.py",
+      "lines": [
+        424,
+        425
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "Authored MAST wall rungs replace only the wall of the same raster passive profile; the grid has no direct sample targets."
+    },
+    {
+      "path": "benchmarks/reversed_current_guard_diagnosis.py",
+      "lines": [
+        138,
+        139
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "prepare_labeller delegates to the shared MAST raster profile; _prepared_with_polarity only changes polarity, so it introduces no own-node sample geometry."
+    },
+    {
+      "path": "benchmarks/null_census_assertion.py",
+      "lines": [
+        189,
+        191,
+        552
+      ],
+      "can_reach_own_node_carrier": true,
+      "reason": "load_row rebuilds the cached analytic hex carrier with oracle_fixture.forward_operator and then strips the terminal state to its grid prefix."
+    },
+    {
+      "path": "benchmarks/polish_support_performance.py",
+      "lines": [
+        433,
+        435
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "_profile_and_seed uses the passive MAST raster profile; its tensor-fit benchmark assumes that raster shape."
+    },
+    {
+      "path": "benchmarks/pinned_branch_contrast.py",
+      "lines": [
+        119,
+        126
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "Authored driver uses the passive MAST raster profile and a reshaped tensor connectivity read."
+    },
+    {
+      "path": "benchmarks/global_spline_read_on_hex.py",
+      "lines": [
+        485,
+        489,
+        491
+      ],
+      "can_reach_own_node_carrier": true,
+      "reason": "The benchmark reads analytic hex machines with direct sampling targets; it truncates before both _fixed_design_read and read_census."
+    },
+    {
+      "path": "benchmarks/newton_cycle_mask_switch.py",
+      "lines": [
+        141,
+        142
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "Authored driver builds the passive MAST raster profile. Its topology snapshot then requires connectivity_grid_axes."
+    },
+    {
+      "path": "benchmarks/limiter_read_resolution_audit.py",
+      "lines": [
+        781,
+        784,
+        786
+      ],
+      "can_reach_own_node_carrier": true,
+      "reason": "The wall-coupling diagnostic operates on cached analytic hex carrier machines with direct sampling targets and truncates before read and census."
+    },
+    {
+      "path": "benchmarks/held_tip_trip_diagnosis.py",
+      "lines": [
+        227,
+        228,
+        295,
+        387,
+        394
+      ],
+      "can_reach_own_node_carrier": false,
+      "reason": "_profile_and_seed supplies the shared passive MAST raster profile. The legacy helper and structured helper both accept grid-only values; a future own-node input would need migration."
+    },
+    {
+      "path": "nova/equilibrium/forward.py",
+      "lines": [
+        1371,
+        1373
+      ],
+      "can_reach_own_node_carrier": true,
+      "reason": "ForwardProfile._secondary_x_point is generic and can receive an operator with direct authored sample targets; its current split discards those values."
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+revision=775720c77c5443e990a74b52ea464b73ce87b6aa tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_fixed_point.py tests/test_reduced_newton.py -q
+12:42:41 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+.........................................F.Fatal Python error: Aborted
+
+Thread 0x00007f14aeffd640 [asyncio_7] (most recent call first):
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/concurrent/futures/thread.py", line 116 in _worker
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1024 in run
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1082 in _bootstrap_inner
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1044 in _bootstrap
+
+Thread 0x00007f14af7fe640 [asyncio_6] (most recent call first):
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/concurrent/futures/thread.py", line 116 in _worker
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1024 in run
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1082 in _bootstrap_inner
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1044 in _bootstrap
+
+Thread 0x00007f14affff640 [asyncio_5] (most recent call first):
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/concurrent/futures/thread.py", line 116 in _worker
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1024 in run
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1082 in _bootstrap_inner
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1044 in _bootstrap
+
+Thread 0x00007f14ccf2a640 [asyncio_4] (most recent call first):
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/concurrent/futures/thread.py", line 116 in _worker
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1024 in run
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1082 in _bootstrap_inner
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1044 in _bootstrap
+
+Thread 0x00007f14cd72f640 [asyncio_3] (most recent call first):
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/concurrent/futures/thread.py", line 116 in _worker
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1024 in run
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1082 in _bootstrap_inner
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1044 in _bootstrap
+
+Thread 0x00007f14cdf34640 [asyncio_2] (most recent call first):
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/concurrent/futures/thread.py", line 116 in _worker
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1024 in run
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1082 in _bootstrap_inner
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1044 in _bootstrap
+
+Thread 0x00007f14ce739640 [asyncio_1] (most recent call first):
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/concurrent/futures/thread.py", line 116 in _worker
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1024 in run
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1082 in _bootstrap_inner
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1044 in _bootstrap
+
+Thread 0x00007f14cef3e640 [asyncio_0] (most recent call first):
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/concurrent/futures/thread.py", line 116 in _worker
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1024 in run
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1082 in _bootstrap_inner
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1044 in _bootstrap
+
+Thread 0x00007f14cf743640 [zarr_io] (most recent call first):
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/selectors.py", line 452 in select
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/asyncio/base_events.py", line 2008 in _run_once
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/asyncio/base_events.py", line 677 in run_forever
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1024 in run
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1082 in _bootstrap_inner
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1044 in _bootstrap
+
+Thread 0x00007f166fd70b80 [python] (most recent call first):
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/compiler.py", line 350 in backend_compile_and_load
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/profiler.py", line 420 in wrapper
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/compiler.py", line 729 in _compile_and_write_cache
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/compiler.py", line 464 in compile_or_get_cached
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/pxla.py", line 1537 in _cached_compilation
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/pxla.py", line 1757 in from_hlo
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/pxla.py", line 1260 in compile
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 1207 in _pjit_call_impl_python
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 142 in _run_python_pjit
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 266 in cache_miss
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/traceback_util.py", line 195 in reraise_with_filtered_traceback
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/nova/equilibrium/reduced_newton.py", line 1139 in _incumbent_scores
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/nova/equilibrium/reduced_newton.py", line 1199 in _plain_newton_trip
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/nova/equilibrium/reduced_newton.py", line 1374 in _drive_trips
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/nova/equilibrium/reduced_newton.py", line 1939 in solve_reduced_newton
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/tests/test_reduced_newton.py", line 244 in test_prescribed_currents_reuse_one_program
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py", line 167 in pytest_pyfunc_call
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py", line 1707 in runtest
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/runner.py", line 184 in pytest_runtest_call
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/runner.py", line 250 in <lambda>
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/runner.py", line 361 in from_call
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/runner.py", line 249 in call_and_report
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/runner.py", line 139 in runtestprotocol
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/runner.py", line 118 in pytest_runtest_protocol
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/main.py", line 408 in pytest_runtestloop
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/main.py", line 384 in _main
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/main.py", line 330 in wrap_session
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/main.py", line 377 in pytest_cmdline_main
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py", line 229 in _main
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py", line 253 in _console_main
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pytest/__main__.py", line 9 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+
+Current thread's C stack trace (most recent call first):
+EXIT=134

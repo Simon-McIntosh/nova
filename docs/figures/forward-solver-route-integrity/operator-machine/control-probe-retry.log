@@ -1,0 +1,4 @@
+revision=775720c77c5443e990a74b52ea464b73ce87b6aa plus uncommitted measurement prototype; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine; command=python probe.py (control-flow probe)
+direct sine_count 3 result [0.         0.67843048 0.70970004 0.14018878]
+shared sine_count 1 result [0.         0.67843048 0.70970004 0.14018878]
+controls bit-identical

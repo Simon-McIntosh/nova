@@ -191,6 +191,26 @@
     banked beside the census. This is the plan's critical-risk section: it changes the semantics surface of
     every solve, and its gate is the exact certificate, never a tolerance.</p>
 
+    <h3 id="s3-request-machine-boundary">Request-machine boundary measured; implementation held</h3>
+    <p>Commit <code>d8d858ff09a39851885a738c2293544785df32be</code> adds an executable
+    counter control: three dependent nested-JIT calls have one lowered callee and
+    three optimized bodies. A request-machine prototype shares one body on the
+    scalar and control-flow probes, and restoring per-request evaluation raises
+    the count from one to three and fires its refusal. It is not installed in
+    either solver. The full Newton prototype exposes eight operator signatures,
+    255 continuation blocks and 880 registers; after its first unsupported
+    linear-solve boundary was handled, the next attempt timed out at 8:20.
+    The two-attempt fence stops this implementation attempt.</p>
+    <p>The unchanged solver sources measure <strong>342,055 and 344,858 optimized
+    instructions</strong> for the 300- and 1000-cell weak rows on one CPU allocation,
+    above the required 203,078 and 204,531. The baseline suite aborts with exit 134
+    inside <code>test_prescribed_currents_reuse_one_program</code>, after an earlier
+    unreported failure, and a certificate test overwrites two figures outside the
+    assigned scope. Those figures remain untouched and uncommitted for coordinator
+    adjudication. The <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#request-machine-boundary">cumulative record</a>
+    preserves the logs, prototype, negative control, and next design options.
+    No terminal section status or driving followup is changed.</p>
+
     <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>
     <p>Measured 2026-09-18: the pre-warm covers 3292 keys the lane never requests and none of the 1285 keys it
     does, so the lane's 1341 hits all came from that target's own earlier run on the same directory; a lane

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 510" role="img" aria-labelledby="title desc">
+<title id="title">Operator-body sharing: measured boundary and unqualified solver prototype</title>
+<desc id="desc">Nested JIT calls produce three optimized bodies. A toy request machine shares one body. Expanding the full Newton solver creates 255 blocks, 880 registers and eight operator signatures, so production sharing is not established.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8" fill="none" stroke="#657080"/></marker></defs>
+<rect width="1000" height="510" fill="#fff"/>
+<g font-family="sans-serif" fill="#253044">
+<text x="30" y="35" font-size="23">An outlined callee is not an executable sharing boundary</text>
+<text x="30" y="72" font-size="17">Observed nested-JIT control: one lowered callee, three optimized bodies</text>
+<g fill="#edf2f7" stroke="#657080"><rect x="70" y="95" width="210" height="60" rx="5"/><rect x="395" y="95" width="210" height="60" rx="5"/><rect x="720" y="95" width="210" height="60" rx="5"/></g>
+<g font-size="18" text-anchor="middle"><text x="175" y="131">operator(state)</text><text x="500" y="131">operator(result)</text><text x="825" y="131">operator(result)</text></g>
+<path d="M280 125 H390 M605 125 H715" fill="none" stroke="#657080" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="30" y="205" font-size="17">Toy request-machine control: one optimized body; live operands carried each turn</text>
+<g fill="#edf6f0" stroke="#407354"><rect x="70" y="235" width="225" height="75" rx="5"/><rect x="400" y="235" width="220" height="75" rx="5"/><rect x="725" y="235" width="205" height="75" rx="5"/></g>
+<g font-size="18" text-anchor="middle"><text x="182" y="266">request + resume PC</text><text x="182" y="292">current state operands</text><text x="510" y="278">shared operator body</text><text x="827" y="278">resume caller</text></g>
+<path d="M295 272 H395 M620 272 H720 M827 310 V350 H182 V315" fill="none" stroke="#407354" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="30" y="405" font-size="19" fill="#965500">Full Newton expansion remains unqualified</text>
+<text x="30" y="438" font-size="17">255 continuation blocks · 880 carried registers · eight operator signatures</text>
+<text x="30" y="469" font-size="16">The scalar and control probes do not establish one body for the production solver.</text>
+</g></svg>

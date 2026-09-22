@@ -1139,6 +1139,87 @@ files; <code>measure.py</code>, <code>census.py</code>, <code>regions.py</code> 
 commands, exits, commits and assigned paths. No plan metadata, driving followup, peer-owned
 file or benchmark source is changed.</p>
 </section>
+<section id="request-machine-boundary">
+<h2>Nested-JIT boundary proven; generic request-machine prototype not qualified</h2>
+<p>The assigned solver sources at <code>775720c77c5443e990a74b52ea464b73ce87b6aa</code>
+remain unchanged. Commit <code>d8d858ff09a39851885a738c2293544785df32be</code> adds
+<code>test_nested_jit_calls_inline_each_operator_request</code> to
+<code>tests/test_fixed_point.py</code>. The measured reproduction is
+<q>nested_jit_lowered_bodies=1 nested_jit_optimized_bodies=3</q>.
+The CPU test passes (one test, 3.89 s). It establishes that counting lowered
+callees cannot establish executable sharing.</p>
+<figure><img src="/nova/figures/forward-solver-route-integrity/operator-machine/request-flow.svg"
+alt="Three inlined nested-JIT operator bodies compared with a toy shared request body and the unqualified full Newton expansion">
+<figcaption>The single-body toy machine preserves live operands; its successful
+controls do not qualify the much larger Newton continuation expansion.</figcaption></figure>
+<p>The experimental code under
+<code>docs/figures/forward-solver-route-integrity/operator-machine/</code> lowers
+operator requests into a program-counter <code>lax.while_loop</code>, carries live
+operands, and resumes the selected caller. The scalar control measures one
+optimized body versus three per-request bodies. Conditional, forward/reverse scan,
+while-loop and linearization probes return bit-identical outputs. The declared
+negative control, <q>revert the single body to per-request evaluation</q>, raises
+<q>AssertionError: single-body guard refused 3 per-request bodies</q> with exit 1.
+This is a toy-body instrument control, not the required whole-certificate
+instruction-rise control.</p>
+<p>The full Newton probe first refused <code>custom_linear_solve</code>.
+After adding its solve boundary, it did not complete compilation before the
+8:20 allocation timeout (job 1275678); the untransformed toy solve compiled in
+2.212582 s. Its staged continuation census is 255 blocks, 880 carried registers
+and eight distinct operator signatures. No full-solver state or production
+sharing claim follows from this experiment. The two-attempt fence stops further
+implementation; the prototype is retained as evidence, not imported by production.</p>
+<table>
+<thead><tr><th>Requested weak-row cells</th><th>Unchanged-source optimized instructions</th><th>Required ceiling</th><th>CPU compile seconds</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>300</td><td>342,055</td><td>203,078</td><td>177.358552</td><td>Over ceiling</td></tr>
+<tr><td>1000</td><td>344,858</td><td>204,531</td><td>178.647035</td><td>Over ceiling</td></tr>
+</tbody>
+</table>
+<p>Both rows ran as separate fresh Python processes inside one <code>all_debug</code>
+allocation, job 1275682, with four CPUs and 96 GiB. The measurement HEAD is
+<code>d8d858ff09a39851885a738c2293544785df32be</code>, whose only change is the new
+test; both solver files have the same bytes as the assigned base. The combined
+solver source digest is <code>9220784d0817001b7cc03dc5a7782369acc3da85d49c2575cc0d84acacf86bac</code>.
+These are fresh baseline counts, not counts from a changed solver. The optimized
+HLO dumps are retained outside git at
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T103934949557-fsri-one-traced-operator-state-machine/optimized-hlo/</code>.</p>
+<p>The exact two-file baseline command is
+<code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_fixed_point.py tests/test_reduced_newton.py -q</code>.
+It ran in a fresh CPU process at the assigned base and aborted with payload exit
+134 during <code>tests/test_reduced_newton.py::test_prescribed_currents_reuse_one_program</code>
+at line 244, inside JAX <code>backend_compile_and_load</code>. The progress stream
+contains an earlier <code>F</code>, but the abort prevented pytest from emitting
+its test identity or summary; no completed baseline or added-failure count is
+claimed. The remaining duplicate census in that allocation was cancelled after
+the abort. No after-suite was launched.</p>
+<p>The certificate test redirects <code>PART_ROOT</code> to a temporary path but
+leaves <code>FIGURE_ROOT</code> pointing into the checkout. The baseline run therefore
+rewrote the tracked PNG and SVG at
+<code>docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.{png,svg}</code>.
+The SVG diff contains 6,032 inserted and 13,846 deleted lines. These paths are outside
+the exclusive scope; they are preserved, unstaged and uncommitted. The worktree was
+clean at orientation, and neither file has a commit in the preceding two hours.
+The anomaly is reported rather than restored.</p>
+<p>Next options are explicit solver request states, or a common primal/linearized
+operator interface followed by shared request scheduling. Explicit states are the
+preferred next attempt because the generic continuation expansion adds a large
+carried-state product and retains multiple signatures. Resumption must first
+adjudicate the two generated figures and isolate all certificate output roots in
+the test. The baseline abort must then be measured in fresh processes without
+hiding the earlier failure. Production implementation, a completed baseline and
+after-suite comparison, both reduced instruction ceilings, and the whole-program
+negative control remain unmet. Four-row GPU bit identity remains a separate
+follow-on. No plan status or driving followup is closed.</p>
+<p>Artifacts in the directory above: <code>nested-jit.log</code>,
+<code>probe.log</code>, <code>control-probe.log</code>,
+<code>control-probe-retry.log</code>, <code>solver-probe.log</code>,
+<code>solver-probe-retry.log</code>, <code>state-census.log</code>,
+<code>operator-layouts.log</code>, <code>negative-control.log</code>,
+<code>baseline-tests.log</code>, <code>census-300.log</code>,
+<code>census-1000.log</code>, and both <code>baseline-*.json</code> receipts.
+The Python drivers, shell launchers and request-flow SVG accompany the logs.</p>
+</section>
 </main>
 </body>
 </html>

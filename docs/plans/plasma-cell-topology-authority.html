@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="85">
+<meta name="plan-version" content="86">
 <meta name="plan-impl" content="0.99">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 <meta name="plan-section-declarations" content="{&quot;currency&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;}">
@@ -431,6 +431,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260922-s6-landed" data-who="reckon-ship s18-fable-20260922" data-when="2026-09-22T16:35:00+00:00">
     <div class="r-comment-body">Node pta-attribute-stale-contracts merged at 9a1b722c0 (tip 1733691e, 5 commits, codex). Verdicts, both pin-stale: the raster oracle boundary coordinate first fails at 9f0692fb, where tensor-spline samples at the wall nodes precede the arc-length quadratic contact selector (both tests pass at 7bff1d5d and 47b9f996, the historical pair logs are under the run's report fence); the banked MAST 22086/43 saddle first fails at 68cfe15c, where the refreshed bank publishes the same upper branch at its typed-census position (0.00293 m, same candidate, moved position). Re-pins name the commit and mechanism in their assertion messages; the oracle fits its own arc-length quadratic through the extremal wall node and its cyclic neighbours from spline-sampled wall flux with a coordinate bound derived from binary64 roundoff of the three samples and the node spacing, so exact label parity 0/646 stays exact and the coordinate seam is no longer self-agreement. Gate: both owned tests pass in a fresh all_debug process (job 1275993, 2 passed); negative control (stale readings restored) fails both (job 1275995); the 17-file after lane at a9fe994a reports 167 passed, 0 failed, 3 skipped, so the added-failure set is empty by construction, with the only completed same-command baseline being the adoption lane at 2e38dc87 (163 passed, 4 failed) declared as such. Independent codex review 84/100; its high finding (a baseline misdeclared at f9ac69f68) and medium finding (self-agreement at the wall seam) were both repaired before merge. Section 6 is done.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20260922T140423155727-pta-attribute-stale-contracts" data-who="reckon-ship" data-when="2026-09-22T16:30:28Z">
+    <div class="r-comment-body"><p>both moved read contracts attributed pin-stale (raster oracle at 9f0692fb, MAST saddle at 68cfe15c) and re-pinned naming commit and mechanism; oracle regains an independent wall selector with a derived roundoff bound; 0/646 label parity exact; review 84 with both findings repaired; merged 9a1b722c0</p></div>
 </div>
 </section>
 </main>

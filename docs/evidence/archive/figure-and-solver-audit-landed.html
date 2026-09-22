@@ -3829,6 +3829,22 @@ because these discrete guards and receipt identities are clearer as selectable t
 </table>
 <p><strong>Added failures: zero.</strong> The declared control mutation, “The declared mutation reverts the three promotions to the base modules while keeping the new pins”, is the first line of its log and removes only the three promotion sites. Both trace pins and the existing reader case redden for the claimed tracer-conversion reason, proving the guard fires.</p>
 <p>Review, findings JSON, driver, scratch trees, and logs: <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-verify-the-wall-array-promotion/</code>. The reviewer changed no file under <code>nova/</code>.</p>
+<section id="two-prescribed-local-repairs">
+<h2>§3 — Independent bookend for two prescribed local repairs</h2>
+<p>Two code-and-test repairs produced on the locally served lane were re-read by anomaly and replayed from fresh processes on the login node. Each candidate gate was paired with its declared source mutation and with the candidate test run against the unfixed source archived from base revision <code>25c9d7205e72b492dd27578f8709793c3ca5b9bc</code>. Both repairs are recommended for promotion.</p>
+<table>
+<thead><tr><th>repair</th><th>commit</th><th>candidate</th><th>negative control</th><th>base with added test</th><th>score</th><th>verdict</th></tr></thead>
+<tbody>
+<tr><td>sampler process status</td><td><code>c1af3a06d</code></td><td>exit 0; 2 passed</td><td><code>return exit_code</code> changed to <code>return 0</code>: exit 1; <code>assert 0 == 7</code></td><td>exit 1; the same failed-child assertion</td><td>97/100</td><td><strong>promote</strong></td></tr>
+<tr><td>certificate loop inventory</td><td><code>3d6e20d68</code></td><td>exit 0; 1 passed</td><td>scan row relabelled <code>jax.lax.fori_loop</code>: exit 1 on the new form assertion</td><td>exit 1; stale <code>jax.lax.fori_loop(1, active_set_steps</code> source needle not found</td><td>100/100</td><td><strong>promote</strong></td></tr>
+</tbody>
+</table>
+<h3>Sampler status</h3>
+<p>The scoped code commit changes only <code>benchmarks/compile_abort_probe.py</code> and adds <code>tests/test_compile_abort_probe.py</code>. The wrapper now returns the status already written to its JSON summary. Its two subprocess cases discriminate both directions: child status 7 reaches both summary and wrapper, while child status 0 leaves both at zero. The exact declared mutation reproduces the defect, and the new test over the base source fails for the same reason. Three points are deducted for a bounded coverage gap: an actual compiler abort may be a signal death, for which <code>Popen.wait()</code> records a negative value and <code>sys.exit()</code> exposes a modulo-256 status. Failure propagation remains nonzero, so this does not block the prescribed promotion.</p>
+<h3>Loop inventory</h3>
+<p>The scoped code commit changes only the certificate row of <code>benchmarks/program_scope_census.py</code> and the existing inventory test. The row resolves the literal <code>outer, _ = jax.lax.scan(</code> call at <code>nova/equilibrium/fixed_point.py:3864</code>, identifies the form as <code>jax.lax.scan</code>, and leaves both compiled-slice <code>jax.lax.fori_loop</code> rows untouched. Its control reaches the repaired row and fails the new form assertion; its base arm instead reproduces the original missing-source-marker exception.</p>
+<h3>Scope and artifacts</h3>
+<p>The sampler worktree's documentation tip <code>47324a70c</code> and the loop worktree's documentation tip <code>42ac98272</code> were noted but not judged. The scored repair commits are respectively <code>c1af3a06d</code> and <code>3d6e20d68</code>. The durable review, valid findings JSON, and six replay logs are under <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-verify-two-prescribed-local-repairs</code>; the scratch trees were reconstructed from the named immutable revisions and removed after the logs landed. No figure was created because the evidence is a truth table of process exits, exception identity, and source-form resolution; the HTML table is the clearer representation.</p>
 </section>
   </main>
 </body>

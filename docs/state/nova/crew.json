@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T15:02:37",
+  "updated": "2026-09-22T15:05:11",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -245527,6 +245527,204 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T124029178739-review-of-pta-parity-harness-twelve-rows",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "review-of-pta-parity-harness-twelve-rows",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1953,
+                "cached_input_tokens": 504991,
+                "input_tokens": 506976,
+                "output_tokens": 2089,
+                "reasoning_output_tokens": 492,
+                "total_tokens": 509065,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "the review for r-20260922T112326856974-pta-parity-harness-twelve-rows stores a parsed record scoring all 5 dimensions in the range 0..20, reading commits 36fe7ee0 and 5afa24ef in worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-twelve-rows against section 4 of the plan: the replay runs through the production read with no label logic of its own, the marginal flag is read from the governed receipts and fails closed, every row is replayed or named unavailable with its exception, the twelve-row receipt fields (row_count, marginal_unknown_row_count 0, pending 0, differing_cells on non-marginal rows, per-cell adjudication on marginal rows, wall-node census, status, passes, cache sha256 and base_revision), the committed-class source change and the recorded receipt disagreement on 21986/46 pure and 21989/55 pure and mixed, the figure against the plotting rules (line contours on stated levels, both null sets, wall, axis off, one panel per row), the coverage and difference regressions, and whether the negative control was executed and observed to fail",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260922T112326856974-pta-parity-harness-twelve-rows",
+          "id": "review-of-pta-parity-harness-twelve-rows",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-22T12:40:31Z",
+            "read_at": "2026-09-22T12:40:32Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 50.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T124029178739-review-of-pta-parity-harness-twelve-rows/manifest.md",
+          "negative_control": "",
+          "plan": "plasma-cell-topology-authority",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T112326856974-pta-parity-harness-twelve-rows.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s18-pta-review-s2",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-22T12:40:58Z",
+        "completed_at": "2026-09-22T12:58:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1027,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1027,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ec18bddc313a86ae78785342a0fc46476fd0a4f1",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T124029178739-review-of-pta-parity-harness-twelve-rows/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c922-3ca6-7972-85fb-72369d95e8ef",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6850816,
+            "cached_input_tokens_cumulative": 6850816,
+            "input_tokens": 7029015,
+            "input_tokens_cumulative": 7029015,
+            "output_tokens": 23720,
+            "output_tokens_cumulative": 23720,
+            "reasoning_output_tokens": 7980,
+            "reasoning_output_tokens_cumulative": 7980
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-22T12:58:05Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 51.0,
+              "resets_at": 1790575133,
+              "observed_at": "2026-09-22T12:58:05Z"
+            }
+          ],
+          "notional_cost_usd": 28.5905,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 6850816,
+          "cumulative_input_tokens": 7029015,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 31700,
+          "generation_seconds": 925.568,
+          "machine_seconds": 100.183,
+          "tokens_per_second": 34.25
+        },
+        "follow_on_paths": [
+          "absent/null"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/review-of-pta-parity-harness-twelve-rows",
+          "session_id": "01a0c922-3ca6-7972-85fb-72369d95e8ef",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T12:58:05Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.9,
+        "impl_move": {
+          "plan": "plasma-cell-topology-authority",
+          "at_dispatch": 0.9,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 68.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -245993,6 +246191,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3127
+    "_version": 3128
   }
 }

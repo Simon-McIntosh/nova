@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 import argparse
+import hashlib
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -257,6 +259,16 @@ def main():
     if args.program:
         census.SOURCE = prior.revision()
         census.program(args.program)
+        path = OUTPUT / (args.program + "-program.json")
+        receipt = json.loads(path.read_text())
+        receipt["source_sha256"] = {
+            name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+            for name in (*SOURCE_PATHS, "nova/equilibrium/forward_operator.py")
+        }
+        receipt["shared_cell_body_present"] = any(
+            ":_clip_cell" in name for name, _ in receipt["function_ownership"]
+        )
+        prior.persist(path.name, receipt)
         return 0
     if args.suite:
         prior.configure()
@@ -286,7 +298,7 @@ def main():
         row(*args.row)
         return 0
     if args.rows:
-        return max(
+        code = max(
             finish(
                 run_child(["--row", case, str(cells)], f"{case}-{cells}", cpus),
                 f"{case}-{cells}",
@@ -299,6 +311,11 @@ def main():
             )
             for cells in (110, 300)
         )
+        if code == 0:
+            from render_clip_body import render
+
+            render()
+        return code
     assert len(cpus) >= 16
     jobs = [
         (

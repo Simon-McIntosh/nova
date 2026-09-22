@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T13:40:14",
+  "updated": "2026-09-22T13:56:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -8402,11 +8402,13 @@
         "session_id": "c4446ec8-6d1c-44f2-9555-fc84461a35b6",
         "session_model": "deepseek-v4.1-flash",
         "sessions": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "c4446ec8-6d1c-44f2-9555-fc84461a35b6"
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "c4446ec8-6d1c-44f2-9555-fc84461a35b6",
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"read-only\"}": "e7e26909-1d5d-4eae-8544-08e410e835c9"
         },
         "created": "2026-09-22",
         "session_owners": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "s19-codex-20260916"
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "s19-codex-20260916",
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"read-only\"}": "s19-codex-20260916"
         }
       },
       {
@@ -244481,6 +244483,210 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T113341549374-review-of-cca-measure-the-exact-mode-executable-at-head",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a76",
+        "node": "review-of-cca-measure-the-exact-mode-executable-at-head",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 574,
+                "cached_input_tokens": 369849,
+                "input_tokens": 370427,
+                "output_tokens": 575,
+                "reasoning_output_tokens": 99,
+                "total_tokens": 371002,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review for r-20260922T090712671761-cca-measure-the-exact-mode-executable-at-head stores a parsed record scoring all 5 dimensions in the range 0..20",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260922T090712671761-cca-measure-the-exact-mode-executable-at-head",
+          "id": "review-of-cca-measure-the-exact-mode-executable-at-head",
+          "lane_declaration": {
+            "backend": "claude",
+            "headroom": "unknown",
+            "metered": true,
+            "observed_at": "2026-09-06T13:07:37.684Z",
+            "read_at": "2026-09-22T11:33:44Z",
+            "resolved_backend": "claude",
+            "utilisation_pct": 55.00000000000001
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T113341549374-review-of-cca-measure-the-exact-mode-executable-at-head/manifest.md",
+          "negative_control": "",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "claude",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a76",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T090712671761-cca-measure-the-exact-mode-executable-at-head.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "session-337d1d569f61f639eedc",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-22T11:34:06Z",
+        "completed_at": "2026-09-22T11:38:44.245Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 263,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 278,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "1d64bed2d793b6439346789c07c0d4289d53c37d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T113341549374-review-of-cca-measure-the-exact-mode-executable-at-head/manifest.md",
+        "scope_changed": false,
+        "session_id": "e7e26909-1d5d-4eae-8544-08e410e835c9",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 40.0,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-28T20:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 125504,
+            "cache_creation_input_tokens_cumulative": 125504,
+            "cache_read_input_tokens": 3876539,
+            "cache_read_input_tokens_cumulative": 3876539,
+            "inference_geo": "not_available",
+            "input_tokens": 66,
+            "input_tokens_cumulative": 66,
+            "output_tokens": 14955,
+            "output_tokens_cumulative": 14955,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.4270058,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.4270058
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-22T11:38:44.245Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 3876539,
+          "cumulative_input_tokens": 4002109,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 272.794,
+          "generated_tokens": 14955,
+          "generation_seconds": 227.952,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 14.5,
+          "machine_seconds": 44.842,
+          "peak_input_tokens": 144840,
+          "tokens_per_second": 65.61,
+          "wall_tokens_per_second": 54.82
+        },
+        "follow_on_paths": [
+          "clip/moment",
+          "300/1000"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-cca-measure-the-exact-mode-executable-at-head",
+          "session_id": "e7e26909-1d5d-4eae-8544-08e410e835c9",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T11:38:44.245Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.87,
+        "impl_move": {
+          "plan": "cut-cell-current-attribution",
+          "at_dispatch": 0.87,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 32.0,
+        "orientation_input_tokens": 2467578.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -244947,6 +245153,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3113
+    "_version": 3115
   }
 }

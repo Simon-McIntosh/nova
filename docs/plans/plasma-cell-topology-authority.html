@@ -24,8 +24,8 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="72">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-version" content="73">
+<meta name="plan-impl" content="0.94">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 <meta name="plan-section-declarations" content="{&quot;currency&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 </head>
@@ -382,6 +382,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260922T123445789415-review-of-pta-null-generator-adoption" data-who="reckon-ship" data-when="2026-09-22T12:52:11Z">
     <div class="r-comment-body"><p>review 81/100 of the adoption at e46e5378: two high findings (flux-scale-dependent determinant floor; forward.py secondary-X caller still grid-only) returned to the same worker before promotion; raster oracle judged self-agreement for the generator, ladder and negative control judged independent</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260922-s5-adoption-landed" data-who="reckon-ship s18-fable-20260922" data-when="2026-09-22T14:00:00+00:00">
+    <div class="r-comment-body">Node pta-null-generator-adoption merged at 5ae1e66e0 (worktree tip aefcd762, 13 commits, astra xhigh). Gate: the analytic ladder admits the saddle at 132, 340 and 550 realised cells at 0.064, 0.092 and 0.092 pitch with the crossing-count receipt retained; raster parity 0 differing labels over 646 cells; twelve-row bank replay 0 differing labels over 13068 cells; focused 17-file CPU lane 163 passed with the same four pre-existing failure IDs as the base (zero added); negative control (four-change gate restored) fails exactly 132 and 340 and passes 550; secondary-saddle seam gate 22 passed. Independent codex review 81/100 returned two high findings, both repaired before merge: the absolute 1e-12 determinant floor is replaced by a curvature-relative floor at 64 machine epsilons with a rescaling-invariance regression over five flux scales, and the production secondary-saddle caller in forward.py plus four reachable benchmark callers now take the complete null flux pool through the public ForwardFluxOperator.null_flux_pool. The review judged the raster oracle self-agreement for the generator rule and the ladder plus negative control the independent evidence, which the record now states. Remaining in section 5: the same-device cost receipt and the two-grid MAST frame (measurement node), and one claim-blocked benchmark patch (limiter_read_resolution_audit.py) recorded in consumer-migration.json. Section stays open.</div>
 </div>
 </section>
 </main>

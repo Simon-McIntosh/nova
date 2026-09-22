@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="plasma-cell-read-fidelity">
+<meta name="reckon-type" content="plan">
+<title>plasma-cell-read-fidelity</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Plasma-cell read fidelity — the truncated terminal-state figure and the wall-node private shadow">
+<meta name="plan-summary" content="Replace the one-trip hex-cell terminal-state figure with the converged state, and read the wall-node private shadow from the node itself.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-sprint" content="S18">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-09-22">
+<meta name="plan-effort-hours" content="10.0">
+<meta name="plan-impl" content="0">
+<meta name="plan-version" content="1">
+<meta name="plan-tags" content="topology,equilibrium,convergence">
+<meta name="plan-blocks" content="single-grid-solver-cutover">
+<meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="elevated">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;}">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>Plasma-cell read fidelity</h1>
+<p class="lede">Two defects the lead read off the shipped topology plan's figures on 2026-09-22. The first is a figure that shows a deliberately truncated solve as if it were a terminal state: jagged contours, an X-point eight centimetres off, residual 0.15, and a caption that says converged=False without saying why. The second is a set of magenta wall nodes in the twelve-row parity figure whose private-shadow flag disagrees with the flux they sit in, recorded by the harness on every row and gated by nothing. Both are read defects on the plasma cells, and both are settled by measurement here rather than by argument.</p></header>
+
+<section id="s1"><h2>§1 The terminal-state figure shows one active-set trip, not a solve</h2>
+<p><strong>What the figure is.</strong> <code>docs/figures/plasma-cell-topology-authority/solve-path/device/terminal-polish-contours.png</code> draws the analytic Solov'ev flux beside the state returned by <code>ForwardProfile.solve</code> in <code>tests/test_solve_path_census_inputs.py::test_exact_mode_solve_retains_census_samples</code> on the 132-cell hex mesh (requested 110, exact clip mode). The terminal panel reads residual 0.152, converged=False, the terminal X-point 8.2 cm from the reference and the axis 0.9 cm off; the relative RMS difference between the two node-value fields is 17 percent. The two panels share one Delaunay triangulation of the 730 state nodes and one level array, so the waviness is in the state values, not in the rendering.</p>
+<p><strong>What the receipts already say.</strong> The test replaces the certificate solve request's policy with <code>active_set_steps=1</code> (one active-set trip, chosen to keep the census-input check cheap), so the drawn state is the state after the first trip. The certificate's own receipt for the same case at the same rung, <code>docs/figures/gs-absolute-accuracy/solovev/production-route-parts/diverted-single-null-production-route-reduced.json</code>, reads converged in two trips at 132 cells, and the exact-clip seed receipt for the second test case (<code>weak-rotation-reactor-static</code>, 135 cells) reads converged in two trips as well. The candidate explanation is therefore that the figure records an unfinished solve, not a solver that cannot converge on the hex cells; the certificate at 1074 cells reads converged=False after six trips, which is a separate matter owned by the certificate plan and is not this section's subject.</p>
+<p><strong>The analytic read's saddle cluster.</strong> The same figure draws three qualified saddle candidates within 2.3 cm of each other on the analytic state (reference candidates at (1.511, -1.028), (1.493, -1.019), (1.507, -1.000) m against the reference X-point at (1.493, -1.019)). At the 132-cell pitch three neighbouring cells each root their own quadratic near the one physical saddle, and the representative selection merges two roots only when their separation is within the sum of their uncertainties. Whether these three should have merged, and what the uncertainty radius is at this pitch, is measured here beside the solve.</p>
+<p><strong>Node <code>pcrf-terminal-state-is-one-trip</code>.</strong> Why: a figure of a truncated solve in an evidence record reads as a broken solver, and the lead read it that way. Deliverable: the same construction as the test (exact clip mode, requested 110 cells, both test cases) run on one GPU job with the certificate's default active-set policy and with <code>active_set_steps=1</code>, recording the per-trip residual history, converged flag, trip count, terminal axis and X-point per arm; a replacement figure under <code>docs/figures/plasma-cell-read-fidelity/</code> drawn with the committed <code>nova.media</code> painters (line contours on shared levels per row, analytic beside trip-one beside converged, both null sets in their own styles, the wall units, residual and converged flag in every caption); the three-candidate saddle cluster measured on the analytic state with each candidate's uncertainty radius and the merge decision printed; and the topology evidence record's terminal-polish section amended to cite the converged panel and to say in one sentence that the earlier panel is the first trip. Done when: the receipt shows, for both cases, the default-policy arm converged at the certificate tolerance with its trip count, the one-trip arm reproducing residual 0.152 and 0.047 within one percent, the converged terminal X-point within the certificate's position bound of the reference; the figure exists as PNG with an SVG beside it and obeys the plotting rules; the saddle-cluster measurement names the uncertainty radii and states whether the three candidates lie within the merge criterion; and if the default-policy arm does not converge, the receipt says so with its per-trip residuals and the section's disposition is changed to a solver defect with the certificate plan named as owner, rather than the figure being redrawn. Negative control: run the default-policy arm with the trip budget forced to one and observe the receipt refuse the convergence assertion.</p>
+</section>
+
+<section id="s2"><h2>§2 The wall-node private shadow is read from the nearest cell, not from the node</h2>
+<p><strong>What the magenta circles are.</strong> The parity harness (<code>benchmarks/topology_parity_harness.py</code>) compares, for each of the 37 wall carrier nodes, the private-shadow flag the cell authority publishes (<code>ForwardFluxOperator._carrier_shadow_read</code>, field <code>private_wall_node_mask</code>) against the flag the retained raster read publishes for the same node, and draws a hollow magenta circle where they disagree. The twelve-row replay at 2b228af7a records 2 to 7 differing nodes on every row. Nodes 25 and 26 (R 0.565 m, Z -1.73 and -1.83 m) differ on all twelve rows and nodes 9 and 10 (their mirror at Z +1.73 and +1.83) on eight; on those the raster says private and the cell authority says not private, with the nearest cell carrying label 0. On the 21985 and 21989 pure rows five further nodes (11 to 15, Z 1.55 to 1.73 m) differ the other way, flagged private by the cells and not by the raster, with the nearest cell carrying label 3. The parity pass criterion counts differing cells only, so the wall-node disagreement rode through the twelve-row gate unadjudicated.</p>
+<p><strong>Mechanism.</strong> <code>_wall_carrier_index</code> is the index of the nearest cell centre to each wall node by Euclidean distance, and the node's private flag is that cell's <code>private_flux</code> label. In a narrow private leg, and wherever the nearest cell centre lies across the separatrix leg or in an unflooded exterior cell, the nearest centre is not the cell the node's flux belongs to, so the node inherits a neighbour's label. The raster read evaluates the flux at the node itself, which is why it and the visible geometry agree and the cell authority does not.</p>
+<p><strong>Where it is used.</strong> The flag is live, not decorative: <code>nova/equilibrium/topology.py</code> excludes private wall nodes from the wall-anchor selection when the requested class is LIMITED, so that a limited read cannot pick its contact point inside the private flux, and <code>forward_operator.py</code> feeds the previous trip's wall shadow into the next trip's read. On a diverted read the mask is inert, which is why the twelve MAST rows agree on cells while disagreeing on wall nodes. On a limited or marginal read a node wrongly flagged not-private is eligible as the wall anchor while sitting in the private region, and a node wrongly flagged private is excluded from a contact it may be making; both are the class of error the plan <code>plasma-cell-topology-authority</code> exists to remove.</p>
+<p><strong>Node <code>pcrf-wall-node-shadow-from-the-node</code>.</strong> Why: a private flag taken from the nearest cell centre is a proxy that fails exactly in the narrow private legs where the limited read's exclusion matters. Deliverable: the wall node's private flag derived from the flood at the node's own position, by the cell that contains the node (point-in-polygon over the committed cell polygons, or the flood evaluated at the node's flux against the admitted saddle flux and the X-point height band, whichever the topology read already carries), with the nearest-centre lookup retired; a harness gate that counts differing wall nodes beside differing cells and fails the row on either; the twelve-row replay rerun on one GPU job with the wall-node census at zero differing nodes on every row or each residual disagreement adjudicated in the receipt with the node's flux, the saddle flux and the raster's verdict; a regression test on a synthetic narrow private leg where the nearest cell centre lies across the leg; and the reduced-read-parity figure regenerated without magenta circles. Done when: the harness receipt reads differing wall nodes 0 on every replayable row or names each survivor with its adjudication; the regression test fails against the nearest-centre lookup and passes against the containing-cell read (that is the declared negative control, recorded with its log); the eighteen-file topology CPU lane adds zero failure IDs against the base revision in one all_debug job; and the twelve-row cell parity remains at 0 differing cells.</p>
+</section>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-pcrf-001" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-22" data-recommends-skill="/reckon-ship plasma-cell-read-fidelity">
+<h4 class="r-fu-title">Attribute the truncated terminal state and read the wall shadow from the node</h4>
+<div class="r-fu-body">Run §1 and §2 as two nodes: the GPU measurement that replaces the one-trip figure with the converged state and measures the analytic saddle cluster, and the containing-cell wall-node shadow read with its harness gate and regression test.</div>
+<pre class="r-fu-prompt">/reckon-ship plasma-cell-read-fidelity</pre>
+</article>
+</section>
+
+<section data-reckon="questions" id="questions" class="r-questions">
+<h2><span class="sec">§</span> Open questions</h2>
+</section>
+
+<section data-reckon="comments" id="comments" class="r-comments">
+<h2><span class="sec">§</span> Comments</h2>
+<div class="r-comment" data-section="s1" data-id="c-20260922-lead-read-of-the-figures" data-who="s18-fable-20260922" data-when="2026-09-22">
+<div class="r-comment-body">Opened from the lead's reading of two figures on the shipped topology plan on 2026-09-22 evening. §1's facts come from the stored state <code>diverted-single-null.npz</code> beside the figure (730 nodes, 132 cells, residual 0.152, converged False, X-point 8.2 cm from the reference, relative RMS difference 17 percent) and from the test's <code>active_set_steps=1</code> policy override; the certificate's reduced-rung receipt for the same case converges in two trips. §2's facts come from <code>reduced-read-parity.json</code> at 2b228af7a (wall_node_census on all twelve rows) and from <code>_wall_carrier_index</code> being a nearest-cell-centre lookup.</div>
+</div>
+</section>
+</main>
+</body>
+</html>

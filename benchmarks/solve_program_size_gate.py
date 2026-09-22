@@ -56,9 +56,13 @@ CERTIFICATE_BASELINE_RECEIPT = (
 # kernel's per-process mapping cap and the certificate asks for four, which is
 # why each row is solved in its own process.
 CERTIFICATE_PROGRAM_LOAD_MAPS = (16_789, 17_620)
-# Two loads cannot stay under twice the low end of that step and one cannot
-# reach it, so this separates a child that loaded one program from one that
-# loaded two.  A row solved in its own process loads one program.
+# Two loads cannot stay under twice the low end of that step, so a peak below
+# this ceiling is a child that loaded at most two programs.  It is reported
+# beside the one-load test rather than in its place: a child whose peak sits
+# between one load and two satisfies this ceiling and not one program load, and
+# a field named for the one-load bound that actually held the two-load bound
+# would report the looser measurement under the tighter name.  The one-load
+# test compares the sampled peak against CERTIFICATE_PROGRAM_LOAD_MAPS[1].
 CERTIFICATE_CHILD_MAP_CEILING = 2 * CERTIFICATE_PROGRAM_LOAD_MAPS[0]
 # Receipt fields that describe how the rows were executed rather than what they
 # measured.  Two receipts of the same rows differ in exactly these, so a shape
@@ -85,7 +89,9 @@ class CertificateBaselineRefusal(RuntimeError):
 
 
 def _recorded_state_array(
-    row: dict[str, Any], receipt: Path
+    row: dict[str, Any],
+    receipt: Path,
+    states_directory: Path | None = None,
 ) -> tuple[Any, str] | tuple[None, None]:
     """Read the terminal state array a recorded row carries, if it carries one.
 
@@ -94,6 +100,12 @@ def _recorded_state_array(
     receipt that names it) or inline as a sequence of binary64 values.  The
     returned source names which of the two forms was read, so the emitted row
     can state where its baseline arm came from.
+
+    A relative path is resolved beside the receipt first and, when the receipt's
+    own record names a states directory, inside that directory second.  Both
+    forms are in use: a receipt written before the path was made relative names
+    the array from the receipt's directory, and one written now names it within
+    the states directory the record carries.
     """
     import numpy as np
 
@@ -105,7 +117,11 @@ def _recorded_state_array(
         return None, None
     path = Path(recorded_path)
     if not path.is_absolute():
-        path = Path(receipt).resolve().parent / path
+        beside = Path(receipt).resolve().parent / path
+        if beside.is_file() or states_directory is None:
+            path = beside
+        else:
+            path = Path(states_directory) / path
     if not path.is_file():
         raise CertificateBaselineRefusal(
             f"baseline receipt {receipt} names a terminal state array at {path}, "
@@ -147,6 +163,7 @@ def load_certificate_baseline(
             "two arms of one revision"
         )
     rows: dict[tuple[str, int], dict[str, Any]] = {}
+    recorded_states = certificate.get("state_directory")
     for row in certificate.get("rows", []):
         key = (str(row.get("case")), int(row.get("requested_cells")))
         digest = row.get("baseline_state_sha256_binary64")
@@ -155,7 +172,9 @@ def load_certificate_baseline(
                 f"baseline receipt {path} records no baseline state digest for "
                 f"{key[0]} at {key[1]} cells"
             )
-        state_array, array_source = _recorded_state_array(row, path)
+        state_array, array_source = _recorded_state_array(
+            row, path, None if not recorded_states else Path(recorded_states)
+        )
         if state_array is not None:
             measured_digest = hashlib.sha256(state_array.tobytes()).hexdigest()
             if measured_digest != str(digest):
@@ -1607,17 +1626,24 @@ def _persist_state_array(
     measure the size of a difference rather than only establish that one exists,
     so each row writes its own array by default: the digest it also records is
     what checks that the array read back is the state it describes.
+
+    The recorded path is the array's name within ``directory`` rather than the
+    absolute path it was written at.  A committed receipt outlives the checkout
+    that minted it, so an absolute path names a tree that will not exist when the
+    receipt is next read; the name is resolved against the states directory the
+    receipt records, which is what lets the receipt travel.
     """
     if directory is None:
         return None
     import numpy as np
 
     values = np.asarray(state, dtype=np.float64)
+    directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     path = directory / f"{case_name}_{abs(int(requested_cells))}.npy"
     np.save(path, values)
     return {
-        "path": str(path),
+        "path": path.relative_to(directory).as_posix(),
         "values": int(values.size),
         "sha256_binary64": hashlib.sha256(values.tobytes()).hexdigest(),
     }
@@ -2091,6 +2117,57 @@ def _certificate_rows_in_one_process(
     return receipt
 
 
+def certificate_row_process_entry(
+    case_name: str,
+    requested_cells: int,
+    row_receipt: Path,
+    wrapper_status: int,
+    payload: dict[str, Any] | None,
+    probe: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Describe one row's child process in the receipt the parent merges.
+
+    ``exit_code`` is the status of the process that solved the row.  When the
+    child ran under :mod:`benchmarks.compile_abort_probe` the driver is the
+    wrapper's grandchild, so its status is the one the probe recorded beside its
+    own samples; the wrapper's status is the caller's.  The two are separate
+    fields because they answer different questions: a wrapper killed before it
+    wrote its summary leaves a status that is not the child's, and a receipt
+    that called that status ``exit_code`` would report a row that died inside
+    the compiler as one that completed.
+
+    The sampled peak is reported against both a single program load and the
+    two-load ceiling.  One load adds ``CERTIFICATE_PROGRAM_LOAD_MAPS`` mappings,
+    so a child whose peak stays under the upper end of that step loaded at most
+    one program; the two-load ceiling is the older, looser test and keeps its
+    own field rather than standing in for the one it never measured.
+    """
+    peak_maps = None if probe is None else probe.get("peak_maps")
+    child_status = wrapper_status if probe is None else probe.get("exit_code")
+    return {
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "process_id": None if payload is None else payload.get("process_id"),
+        "exit_code": None if child_status is None else int(child_status),
+        "probe_wrapper_exit": (None if probe is None else int(wrapper_status)),
+        "peak_maps": peak_maps,
+        "max_map_count": None if probe is None else probe.get("max_map_count"),
+        "samples_path": None if probe is None else probe.get("samples_path"),
+        "program_load_maps": list(CERTIFICATE_PROGRAM_LOAD_MAPS),
+        "within_one_program_load": (
+            None
+            if peak_maps is None
+            else bool(int(peak_maps) <= CERTIFICATE_PROGRAM_LOAD_MAPS[1])
+        ),
+        "within_two_program_loads": (
+            None
+            if peak_maps is None
+            else bool(int(peak_maps) <= CERTIFICATE_CHILD_MAP_CEILING)
+        ),
+        "row_receipt": str(row_receipt),
+    }
+
+
 def _certificate_rows_as_processes(
     receipt: dict[str, Any],
     output: Path,
@@ -2156,24 +2233,14 @@ def _certificate_rows_as_processes(
             else None
         )
         child_rows = [] if payload is None else list(payload.get("rows") or [])
-        peak_maps = None if probe is None else probe.get("peak_maps")
-        entry = {
-            "case": case_name,
-            "requested_cells": requested_cells,
-            "process_id": None if payload is None else payload.get("process_id"),
-            "exit_code": int(completed.returncode),
-            "probe_exit_code": None if probe is None else probe.get("exit_code"),
-            "peak_maps": peak_maps,
-            "max_map_count": None if probe is None else probe.get("max_map_count"),
-            "samples_path": None if probe is None else probe.get("samples_path"),
-            "program_load_maps": list(CERTIFICATE_PROGRAM_LOAD_MAPS),
-            "within_one_program_load": (
-                None
-                if peak_maps is None
-                else bool(int(peak_maps) < CERTIFICATE_CHILD_MAP_CEILING)
-            ),
-            "row_receipt": str(row_receipt),
-        }
+        entry = certificate_row_process_entry(
+            case_name,
+            requested_cells,
+            row_receipt,
+            int(completed.returncode),
+            payload,
+            probe,
+        )
         row_processes.append(entry)
         row_receipts.append(row_receipt)
         landed.extend(child_rows)
@@ -2186,7 +2253,7 @@ def _certificate_rows_as_processes(
         else:
             print(
                 f"CERTIFICATE_ROW_FAILED case={case_name} "
-                f"cells={requested_cells} exit={completed.returncode} "
+                f"cells={requested_cells} exit={entry['exit_code']} "
                 f"row_receipt={row_receipt}",
                 flush=True,
             )
@@ -2624,7 +2691,14 @@ def write_semantic_report(
     return result
 
 
-def main() -> int:
+def build_argument_parser() -> argparse.ArgumentParser:
+    """Build the command-line parser the driver and each certificate child parse.
+
+    The certificate entry point is this module, so the arguments a child is
+    handed must be the arguments this parser accepts.  The parser is built here
+    rather than inside :func:`main` so a caller can parse the argv a child will
+    receive without running one.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline-dir", type=Path)
     parser.add_argument("--candidate-dir", type=Path)
@@ -2723,6 +2797,11 @@ def main() -> int:
         default=BASELINE_300_EXECUTABLE_BYTES,
         help="recorded baseline executable bytes for the 300-cell comparison",
     )
+    return parser
+
+
+def main() -> int:
+    parser = build_argument_parser()
     args = parser.parse_args()
     if args.marker_census_output is not None:
         if args.marker_census_hlo_dir is None:
@@ -2777,10 +2856,12 @@ def main() -> int:
             print(
                 f"CERTIFICATE_ROW_PROCESS case={entry['case']} "
                 f"process_id={entry['process_id']} exit={entry['exit_code']} "
+                f"probe_wrapper_exit={entry['probe_wrapper_exit']} "
                 f"peak_maps={entry['peak_maps']} "
                 f"max_map_count={entry['max_map_count']} "
                 f"program_load_maps={entry['program_load_maps']} "
-                f"within_one_program_load={entry['within_one_program_load']}",
+                f"within_one_program_load={entry['within_one_program_load']} "
+                f"within_two_program_loads={entry['within_two_program_loads']}",
                 flush=True,
             )
         print(

@@ -4,7 +4,7 @@
     "source_identity": "sha256:23038d9c17076ab89be916f6aa65fea049e6e2241edba15e334c8b4dcf90e0a3",
     "source_path": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py"
   },
-  "base_revision": "ba9d0f5a3e16cde2b38de11ba3553b8041884957",
+  "base_revision": "ee2ad2d6913082bf921d974b2496ccef9393b09d",
   "producer_commit": "ba9d0f5a3e16cde2b38de11ba3553b8041884957",
   "rows": [
     {
@@ -220,10 +220,10 @@
       "panel_failure_exception_class": null,
       "panel_failure_message": null,
       "qualification": "active_set_settled",
-      "regeneration_elapsed_s_per_shot": 904.3836833070964,
+      "regeneration_elapsed_s_per_shot": 411.79591215215623,
       "shot": 22086,
       "solve_topology_class": "diverted",
-      "terminal_residual": 0.00047749374833591846,
+      "terminal_residual": 0.00047749374833596324,
       "termination_reason": "active_set_settled",
       "time": 0.22999998927116394
     },
@@ -240,10 +240,10 @@
       "panel_failure_exception_class": null,
       "panel_failure_message": null,
       "qualification": "converged",
-      "regeneration_elapsed_s_per_shot": 904.3836833070964,
+      "regeneration_elapsed_s_per_shot": 411.79591215215623,
       "shot": 22086,
       "solve_topology_class": "diverted",
-      "terminal_residual": 7.169964871501041e-16,
+      "terminal_residual": 6.273719262563409e-16,
       "termination_reason": "converged",
       "time": 0.22999998927116394
     }

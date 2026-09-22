@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T20:58:53",
+  "updated": "2026-09-22T21:39:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -261665,6 +261665,283 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T175926155312-pta-adopted-read-cost-reduction",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a75",
+        "node": "pta-adopted-read-cost-reduction",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 358,
+                "cached_input_tokens": 964824,
+                "input_tokens": 965214,
+                "output_tokens": 1900,
+                "reasoning_output_tokens": 88,
+                "total_tokens": 967114,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "a receipt docs/figures/plasma-cell-topology-authority/adopted-read-cost-reduction.json produced on ONE titan allocation (sbatch --partition=titan --gres=gpu:1 --cpus-per-task=4 --mem=64G --time=02:00:00, JAX_PLATFORMS unset, XLA_PYTHON_CLIENT_PREALLOCATE=false, no compilation-cache root, TMPDIR=/tmp in submit environment and payload, the root interpreter run directly, uv never invoked) records per-state warm walls at 550, 1074 and 2616 realised cells for three arms in the same job: the reduced adopted read from this worktree (PYTHONPATH=this worktree), the like-for-like pre-adoption production read_census priced from the provisioned reference worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pre-adoption-reference-da3def20 (PYTHONPATH switched to it in a separate process of the same allocation, never a checkout), and the raw ring candidate caller the earlier receipt used as its reference, each with a positive control re-timing that is enforced (the receipt refuses and exits nonzero when the control drifts beyond 10 percent), warm compile excluded; the reduced adopted read is within 1.10 times the like-for-like pre-adoption read at each of the three cell counts, and the ratio against the raw caller is reported beside it; the ladder regression (132, 340, 550 admitted at or below 0.10 pitch), the rescaling-invariance regression, raster parity 0/646 (tests/test_plasma_cell_topology_read.py label assertion) and the twelve-row bank replay through benchmarks/topology_parity_harness.py (0 differing cells on every row) all hold at the reduced head; the 18-file CPU lane (the solve-path repair lane plus tests/test_solve_path_census_inputs.py) reports zero added failure IDs against the base revision in one fresh all_debug process with both logs recorded; the declared negative control is applied, the cost receipt is observed to leave the 1.10 bound, and its log is recorded; the manifest is written before each wait with wait_probe as a JSON argument vector printing IN_QUEUE or LEFT_QUEUE and wait_terminal LEFT_QUEUE",
+          "estimated_hours": 2.0,
+          "goal": "bring the adopted production topology read within 1.10 times a like-for-like pre-adoption read on the same device while keeping its admission rule and every landed regression",
+          "id": "pta-adopted-read-cost-reduction",
+          "lane_declaration": {
+            "backend": "codex-astra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-22T17:59:34Z",
+            "read_at": "2026-09-22T17:59:36Z",
+            "resolved_backend": "codex-astra",
+            "utilisation_pct": 63.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T175926155312-pta-adopted-read-cost-reduction/manifest.md",
+          "negative_control": "restore the per-read whole-wall containment test over every cell stationary point and observe the cost receipt leave the 1.10 bound at 2616 cells",
+          "plan": "plasma-cell-topology-authority",
+          "requested_backend": "codex-astra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/biot/null.py",
+            "nova/equilibrium/topology.py",
+            "tests/test_null_generator_admission.py",
+            "docs/figures/plasma-cell-topology-authority",
+            "docs/plans/plasma-cell-topology-authority.html",
+            "docs/evidence/archive/plasma-cell-topology-authority-landed.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pta-adopted-read-cost-reduction"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s18-pta-cost-a",
+        "backend": "codex-astra",
+        "local": false,
+        "agent": {
+          "alias": "astra6",
+          "backend": "codex-astra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-6-astra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-22T18:00:04Z",
+        "completed_at": "2026-09-22T18:36:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2175,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2175,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "20088ff805bbf24c73fd143604bf48ad79f2be90",
+        "commits": [
+          "450bab78a55b6178b145de2dcacaa3e479940743",
+          "c6d25a9c3462682c7f607c4e76b94c2a2cddac69",
+          "34c9c3aff04ab0c1e1aa16621bcb2915de6c8a14",
+          "b6d7e6cfd116253233f333eb73182726dc0b5a76"
+        ],
+        "changed_lines": {
+          "added": 5495,
+          "removed": 36,
+          "files": 8
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pta-adopted-read-cost-reduction/cost_control_gate.py (titan job 1276069)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T175926155312-pta-adopted-read-cost-reduction/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T175926155312-pta-adopted-read-cost-reduction/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0ca46-6011-74b2-9122-e33fb955e05a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9624064,
+            "cached_input_tokens_cumulative": 9624064,
+            "input_tokens": 9850739,
+            "input_tokens_cumulative": 9850739,
+            "output_tokens": 55140,
+            "output_tokens_cumulative": 55140,
+            "reasoning_output_tokens": 16776,
+            "reasoning_output_tokens_cumulative": 16776
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-22T18:36:19Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 65.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-22T18:36:19Z"
+            }
+          ],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "notional_cost_usd": "no_dated_rate",
+            "rate_basis": "no_dated_rate"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 18,
+            "evidence": 19,
+            "fit": 18,
+            "goal_fidelity": 17,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 91
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 9624064,
+          "cumulative_input_tokens": 19474803,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 71916
+        },
+        "follow_on_paths": [
+          "tests/test_split_polish_nulls.py::test_accepted_unmoved_polish_preserves_census_value_bits"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction",
+          "session_id": "01a0ca46-6011-74b2-9122-e33fb955e05a",
+          "session_source": "stream",
+          "retained_at": "2026-09-22T18:36:19Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.99,
+        "impl_move": {
+          "plan": "plasma-cell-topology-authority",
+          "at_dispatch": 0.99,
+          "at_complete": 1.0,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "waived",
+          "test_paths": [
+            "tests/test_null_generator_admission.py"
+          ],
+          "declaration": "restore the per-read whole-wall containment test over every cell stationary point and observe the cost receipt leave the 1.10 bound at 2616 cells",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pta-adopted-read-cost-reduction/deduplication-negative.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pta-adopted-read-cost-reduction/deduplication-negative.log",
+          "reason": "the declared whole-wall containment control read 0.228 of the bound at 2616 cells with positive controls passing, showing containment was not the cost carrier; the coordinator substituted the deduplication control (base _seed_representatives lax.cond fallback reinstated), which leaves the bound at 17.18; both are recorded in adopted-read-cost-reduction.json and the plan comment c-20260922-read-cost-and-repin-landed"
+        },
+        "lane_advisory": {
+          "backend": "codex-astra",
+          "burn_multiple": 2.939047530892766,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "'codex-astra' is projected to exhaust at 2026-09-24T14:54:04Z, which is after this node's 3300s horizon ending 2026-09-22T18:54:36.048565+00:00",
+          "horizon_ends_at": "2026-09-22T18:54:36.048565+00:00",
+          "horizon_seconds": 3300,
+          "metered": true,
+          "observed_at": "2026-09-22T17:59:34Z",
+          "precedes_horizon": false,
+          "projected_exhaustion_at": "2026-09-24T14:54:04Z",
+          "resets_at": "2026-09-28T05:58:53Z",
+          "seconds_until_reset": 475158,
+          "state": "quiet",
+          "utilisation_pct": 63.0
+        },
+        "lane_declaration": {
+          "backend": "codex-astra",
+          "headroom": "known",
+          "metered": true,
+          "observed_at": "2026-09-22T17:59:34Z",
+          "read_at": "2026-09-22T17:59:36Z",
+          "resolved_backend": "codex-astra",
+          "utilisation_pct": 63.0
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "backend declares no lane document",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 136.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -262131,6 +262408,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3203
+    "_version": 3204
   }
 }

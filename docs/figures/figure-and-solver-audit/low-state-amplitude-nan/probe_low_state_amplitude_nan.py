@@ -4,7 +4,7 @@ Reproduces the weak 300-cell row's arm-B reference-seed read of
 ``benchmarks/exact_clip_low_state_discriminator.py`` at the tree's revision and
 stages the production moment path one stage at a time on that state, recording
 each array the pipeline carries.  The report names which of the guard's two
-inputs to ``ForwardOperatorBatch.current_normalisation_amplitude`` is nan, the
+inputs to ``ForwardFluxOperator.current_normalisation_amplitude`` is nan, the
 first nan array, the function that produced it, and the state (realised cells,
 reference trip count, arm) it was reached from.
 
@@ -132,7 +132,7 @@ def main():
 
         import benchmarks.exact_clip_low_state_discriminator as disc
         import nova.equilibrium.forward_operator as opmod
-        from nova.equilibrium.forward_operator import ForwardOperatorBatch
+        from nova.equilibrium.forward_operator import ForwardFluxOperator
         from nova.jax.config import (
             configure_dtypes,
             configure_persistent_compilation_cache,
@@ -168,7 +168,7 @@ def main():
             "terminal_flux_finite": bool(np.all(np.isfinite(state))),
         }
 
-        original_amplitude = ForwardOperatorBatch.current_normalisation_amplitude
+        original_amplitude = ForwardFluxOperator.current_normalisation_amplitude
 
         def guarded_amplitude(target_current, unscaled_current):
             payload["amplitude_calls"].append({
@@ -179,7 +179,7 @@ def main():
             })
             return original_amplitude(target_current, unscaled_current)
 
-        ForwardOperatorBatch.current_normalisation_amplitude = staticmethod(guarded_amplitude)
+        ForwardFluxOperator.current_normalisation_amplitude = staticmethod(guarded_amplitude)
 
         original_field = opmod.flux_field_polynomial
         original_moments = opmod.clipped_support_current_moments

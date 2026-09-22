@@ -4,21 +4,16 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import re
 
 import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RECEIPT = (
-    ROOT / "docs/figures/constraint-augmented-newton-krylov/edge-constraint/"
-    "receipt.json"
-)
-RENDER_RECEIPT = (
-    ROOT
-    / "docs/figures/constraint-augmented-newton-krylov/edge-constraint/"
-    "edge-contours-render.json"
-)
-EXPECTED_TITLES = ("2.94e-09", "1.79e-10", "1.73e-14")
+DIRECTORY = ROOT / "docs/figures/constraint-augmented-newton-krylov/edge-constraint"
+RECEIPT = DIRECTORY / "receipt.json"
+RENDER_RECEIPT = DIRECTORY / "edge-contours-render.json"
+EXPONENT_TITLE = re.compile(r"error \d\.\d\de[+-]\d{2} mm")
 
 
 @pytest.fixture(scope="module")
@@ -40,12 +35,14 @@ def test_panel_titles_print_the_receipt_error_in_exponent_form(receipts) -> None
     errors = [command["terminal_position_error_mm"] for command in payload["commands"]]
     panels = render["panels"]
     assert len(panels) == len(errors) == 3
-    for panel, error, expected in zip(panels, errors, EXPECTED_TITLES, strict=True):
-        expected_text = f"error {error:.3g} mm"
-        assert expected_text in panel["title"], (
-            f"panel title {panel['title']!r} does not carry {expected_text!r}"
+    for panel, error in zip(panels, errors, strict=True):
+        expected = f"error {error:.3g} mm"
+        assert expected in panel["title"], (
+            f"panel title {panel['title']!r} does not carry {expected!r}"
         )
-        assert expected in panel["title"]
+        assert EXPONENT_TITLE.search(panel["title"]), (
+            f"panel title {panel['title']!r} is not in exponent form"
+        )
     assert len({panel["title"] for panel in panels}) == 3
 
 
@@ -53,14 +50,13 @@ def test_every_panel_records_both_null_sets(receipts) -> None:
     """Each panel records the reference and the solved null set."""
     _payload, render = receipts
     for panel in render["panels"]:
-        reference = panel["reference_null_set"]
-        solved = panel["solved_null_set"]
-        for name, null_set in (("reference", reference), ("solved", solved)):
+        for name in ("reference", "solved"):
+            null_set = panel[f"{name}_null_set"]
             axis = null_set["magnetic_axis_rz_m"]
             assert len(axis) == 2, f"{name} axis is not a point: {axis!r}"
             assert all(value == value for value in axis)
             assert len(null_set["x_point_rz_m"]) >= 1, f"{name} records no x-point"
-        assert panel["reference_null_tally"]["x_points_drawn"] >= 0
+        assert "reference_null_tally" in panel and "solved_null_tally" in panel
 
 
 def test_every_panel_has_the_axis_off(receipts) -> None:
@@ -83,4 +79,4 @@ def test_nulls_and_markers_are_keyed(receipts) -> None:
         "commanded edge point",
         "achieved edge point",
     ):
-        assert any(label.split()[0] in key for key in keys), label
+        assert label in keys, (label, keys)

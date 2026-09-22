@@ -3570,6 +3570,50 @@ No figure was added: the evidence is a finite decision table of indices, boolean
   &quot;findings&quot;: [{&quot;severity&quot;: &quot;low&quot;, &quot;class&quot;: &quot;missing-standalone-scheduler-log&quot;, &quot;promotion_blocking&quot;: false, &quot;summary&quot;: &quot;The named srun.log is absent, while the manifest, worker stream and render receipt establish one all_debug allocation ending SRUN_EXIT=0 and ALL_DONE.&quot;}],
   &quot;follow_ons&quot;: [&quot;pre-existing MAST boundary-versus-admitted-saddle physics issue belongs to the topology repair&quot;, &quot;jt60sa-wall-units.png remains outside this node's exclusive figure scope&quot;]
 }</pre>
+<section class="audit-directory" id="fsa-verify-census-drift-repairs">
+<h2>Independent verification — outboard census gate and bank-drift resume</h2>
+<p>Review base: <code>fe471757a0ed8f12d951b87d6787ba752b4cdd64</code>. The reviewer changed no
+file under <code>nova/</code>, <code>benchmarks/</code> or <code>tests/</code>. The complete scored
+review and machine-readable findings are under
+<code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-verify-the-census-gate-and-the-drift-resume-repairs/</code>.</p>
+<table><thead><tr><th>repair</th><th>commits</th><th>gate</th><th>control</th><th>score</th><th>verdict</th></tr></thead><tbody>
+<tr><td>repeatable outboard-hole census gate</td><td><code>8a33b741b</code>, <code>16705cad5</code></td><td>3 passed in 133.67 s, exit 0, one <code>all_debug</code> allocation</td><td>five-cell nonzero control passed; recorded 1.01 booking mutation failed two exact-value pins at relative error 0.01</td><td><strong>94/100</strong></td><td><strong>promote</strong></td></tr>
+<tr><td>bank-drift resume repair</td><td><code>4a6964cfb</code>, <code>17aeed772</code></td><td>12 passed in 14.33 s, exit 0, fresh process</td><td>base revision and restored empty-list rebind each failed the asked-identities assertion</td><td><strong>99/100</strong></td><td><strong>promote</strong></td></tr>
+</tbody></table>
+<h3>Census measurements and bridge judgment</h3>
+<p>The passing assertions reproduce the committed weak-rotation 110-cell terminal state: analytic
+target <strong>16,314,773.311828371 A</strong>, chord booked total
+<strong>15,868,149.094491 A</strong>, exact booked total
+<strong>15,491,114.132435 A</strong>, with cells 83, 104, 106, 108 and 116 nonzero in both
+clip modes. The same state remains discriminating: the candidate receipt records 41 of 135 cells
+differing between chord and exact modes and 16 zero-chord cells. The original five-cell nonzero
+control passes. The candidate negative-control receipt begins with its declared mutation, scales
+every booked cell current by 1.01, and fails both the total and per-cell pins at exactly the claimed
+1% displacement.</p>
+<p>The absent-saddle bridge is honest for this gate. It wraps only
+<code>ForwardFluxOperator._profile_support</code>, supplies non-finite <code>x_point</code> fields
+only when the analytic fixture lacks them, and restores the original method after the module
+fixture. The pre-bridge <code>AttributeError</code> at <code>forward_operator.py:3091</code> remains
+an explicitly recorded regression; no production file is changed and no production repair is
+claimed. <code>terminal_booked_currents()</code> is suitable for the candidacy node: it reads the
+committed terminal state, calls the census helpers without rendering, and returns the two totals
+plus the five per-cell values. A standalone caller must invoke the documented bridge installer,
+which accounts for the six-point deduction.</p>
+<h3>Drift resume reproduction and repair</h3>
+<p>The candidate keeps the rows returned by <code>_resume_rows(out_path)</code>, constructs the done
+set from them, skips each completed identity before solve work, and writes carried plus newly
+completed rows. Its test records only <code>21990/35</code> reaching the stub solver, preserves the
+two checkpoint row objects, and emits all three identities exactly once.</p>
+<p>An initial base replay passed because pytest placed the candidate checkout ahead of the overlay;
+it was rejected as an instrument failure. The corrected instrument named the imported base file,
+confirmed the empty rebind present and the resume skip absent, and then ran with
+<code>--import-mode=importlib</code>. At base revision
+<code>0f1162076c2f902e10fd86f4a6fcd4418249c13e</code> the test failed: the stub was asked for
+<code>['21978/35', '21990/35', '21983/35']</code> instead of only
+<code>['21990/35']</code>. The negative-control log starts with
+<code>restore the empty-list rebind</code> and fails on that same assertion.</p>
+<p><strong>Promotion verdict:</strong> both prescribed landings are independently verified and may
+be promoted. This record closes neither driving followup; section closure remains coordinator-owned.</p>
 </section>
   </main>
 </body>

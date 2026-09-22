@@ -1,5 +1,5 @@
 {
-  "scope": "Four reachable benchmark consumers migrated under coordinator authorization; two reachable callers remain claim-blocked with exact patches. Raster-only authored drivers remain inventoried.",
+  "scope": "Four reachable benchmark consumers migrated and the production secondary caller landed under coordinator-authorized disjoint scope. Only the limiter audit remains claim-blocked. Raster-only authored drivers remain inventoried.",
   "reachability_rule": "Whether the authored entry point currently constructs an own-node carrier. Generic helpers can require migration before reuse on another carrier even when their current driver is raster-only.",
   "construction_evidence": [
     "benchmarks/efit_forward_parity_slice.py:2576 (_mast_case_from_selection)",
@@ -170,24 +170,56 @@
         1373
       ],
       "can_reach_own_node_carrier": true,
-      "reason": "ForwardProfile._secondary_x_point is generic and can receive an operator with direct authored sample targets; its current split discards those values.",
-      "status": "claim-blocked",
+      "reason": "ForwardProfile._secondary_x_point can receive own-node carriers and now passes the full state through operator.null_flux_pool before candidate selection.",
+      "status": "landed",
       "claim": "ecq-repair-the-exact-cold-seed-amplitude-bracket",
-      "remaining_production_caller": true,
+      "remaining_production_caller": false,
       "exact_patch": {
         "replace": "        physical = jnp.asarray(flux)[: self.operator.physical_node_number]\n        grid_flux, _wall_flux = self.operator.topology.split_flux_map(physical)",
         "with": "        physical = jnp.asarray(flux)\n        grid_flux = self.operator.null_flux_pool(physical)"
       },
-      "follow_on_action": "Land these two replacement lines immediately after the live claim releases. Alternatively delegate the method body to return self.operator.secondary_x_point(flux, topology), preserving its existing caller signature.",
+      "follow_on_action": "None for this caller; merged-head verification remains coordinator-owned.",
       "fixture_follow_on": {
         "path": "tests/test_forward_secondary_null.py",
-        "reason": "The manufactured raster operator is a SimpleNamespace without null_flux_pool; when the production seam lands, expose that public method on the test shell so its two containment tests still exercise the selector.",
+        "reason": "The manufactured raster operator now exposes null_flux_pool while retaining the two containment tests unchanged.",
         "exact_patch": {
           "replace": "            physical_node_number=grid_nodes,",
           "with": "            physical_node_number=grid_nodes,\n            null_flux_pool=lambda flux: jnp.asarray(flux)[:grid_nodes],"
-        }
+        },
+        "status": "landed",
+        "landed_commit": "233c56a328ec118bca69041097e2fe9d4940d3f6"
       },
-      "patch_validation": "Replacement text matches this worktree; applying and executing the deferred patch belongs to the claim-release follow-on."
+      "patch_validation": "Exact two-line replacement and one-line fixture seam committed; fresh CPU process: 22 passed, zero failures, exit 0. The real 132-cell production caller also completes and matches the operator helper.",
+      "landed_commit": "233c56a328ec118bca69041097e2fe9d4940d3f6",
+      "claim_resolution": "The holding coordinator consented to this disjoint two-line patch; its amplitude bracket remains untouched.",
+      "gate": {
+        "revision": "233c56a328ec118bca69041097e2fe9d4940d3f6",
+        "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T112528428825-pta-null-generator-adoption/secondary-seam-gate.py",
+        "exit_status": 0,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T112528428825-pta-null-generator-adoption/secondary-seam-gate.log",
+        "completed": true,
+        "passed": 22,
+        "failure_count": 0,
+        "failure_ids": [],
+        "added_failure_ids": [],
+        "baseline_subset": {
+          "revision": "2e38dc87702f4ebaa594da2f809daf960b176acc",
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T112528428825-pta-null-generator-adoption/review-suite.log",
+          "matched_case_count": 22,
+          "failure_count": 0
+        },
+        "positive_control": "Real 132-cell production _secondary_x_point completes through the public pool and matches the operator helper.",
+        "pytest_arguments": [
+          "-p",
+          "no:cacheprovider",
+          "-p",
+          "no:randomly",
+          "-vv",
+          "-s",
+          "tests/test_forward_secondary_null.py",
+          "tests/test_null_generator_admission.py"
+        ]
+      }
     }
   ],
   "reviewed_revision": "e46e5378bf28252e3f4e4f86bd6fd00473dcfb5c",

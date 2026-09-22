@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T15:50:36",
+  "updated": "2026-09-22T15:53:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -246449,6 +246449,246 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T115147348762-fsa-repair-terminal-flux-panel",
+        "plan": "figure-and-solver-audit",
+        "section": "\u00a73",
+        "node": "fsa-repair-terminal-flux-panel",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4908,
+                "cached_input_tokens": 470858,
+                "input_tokens": 475768,
+                "output_tokens": 1911,
+                "reasoning_output_tokens": 1359,
+                "total_tokens": 477679,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "576a27e3-ea0d-439c-9e63-3058761859c6",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "Conditions: the terminal flux panel either records a nonzero contour-level count with its stated level array and both null sets, or records a caption stating no persisted flux raster exists and names the receipt checked; every panel title contains residual= and converged=. the driver rebuilds the named figures from the committed receipts in the figure directory with no solve (render-only entry point or flag, run on the login node only if it reads receipts alone and finishes in seconds, else one all_debug allocation); a render receipt render-receipt.json in that directory lists per figure every title line and, per poloidal panel, the count of null glyphs drawn per null set; a check in the named test file asserts the conditions below against that receipt, its passing output is recorded, the declared negative control is applied, the check is observed to fail, and that log is recorded; the regenerated PNGs (and SVG companions where they existed) are staged with git add -f; the landing record cites the reviewer anchor docs/evidence/archive/figure-and-solver-audit-landed.html#figure-audit-cut-cell-current-attribution.",
+          "estimated_hours": null,
+          "goal": "repair zero-residual/panels/zero-residual-map.png per followup f-cca-repair-empty-terminal-flux-panel on cut-cell-current-attribution so the panel titled terminal flux (persisted) draws unfilled flux contours on stated levels from the persisted state with its nulls, the wall, residual and converged printed, or states in its caption that no persisted flux raster exists",
+          "id": "fsa-repair-terminal-flux-panel",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-22T11:51:49Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T115147348762-fsa-repair-terminal-flux-panel/manifest.md",
+          "negative_control": "skip the contour call on the persisted panel and observe the level-count check fail",
+          "plan": "figure-and-solver-audit",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/zero_residual_check.py",
+            "tests/test_zero_residual_render.py",
+            "docs/figures/cut-cell-current-attribution/zero-residual",
+            "docs/plans/figure-and-solver-audit.html",
+            "docs/evidence/archive/figure-and-solver-audit-landed.html",
+            "docs/figures/figure-and-solver-audit"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19f-local-5",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-22T11:52:11Z",
+        "completed_at": "2026-09-22T13:10:39.599Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4696,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4708,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "6a1b3121951b4f8d4fef32d444cf0bfd438f3b8d",
+        "commits": [
+          "ac561a686b462f89ab2b8979dff30bc8bfd31861",
+          "0013758a7db8bee5c2fb1e02a3351b456efa839d",
+          "9d62c8f4cf31bae5b105ef32e17860b5dde6877e",
+          "d089f930d1ae67721f01cde12472c0144f643ddb",
+          "0d3e09301fcd8c1e8e4173cf8501caa4385db34e"
+        ],
+        "changed_lines": {
+          "added": 1041,
+          "removed": 216,
+          "files": 14
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "python -m pytest -p no:cacheprovider -q tests/test_zero_residual_render.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T115147348762-fsa-repair-terminal-flux-panel/test_pass.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "the terminal flux (persisted) panel draws stated-level contours with both null sets and the wall or states that no raster exists, residual and converged on every panel; review 89/100 notes the sup_where empty-selection guard has no dedicated test, carried as a followup; merged 673378ebf",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T115147348762-fsa-repair-terminal-flux-panel/manifest.md",
+        "scope_changed": false,
+        "session_id": "9af7bc1d-4e1f-43bc-9577-b089dbc056b4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 19327272,
+            "input_tokens_cumulative": 19327272,
+            "output_tokens": 81441,
+            "output_tokens_cumulative": 81441,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-22T13:10:39.599Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 14,
+            "evidence": 18,
+            "fit": 18,
+            "goal_fidelity": 19,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 89
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 19661878,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 4704.02,
+          "generated_tokens": 100406,
+          "generation_seconds": 4413.313,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.7,
+          "machine_seconds": 290.707,
+          "peak_input_tokens": 166405,
+          "tokens_per_second": 22.75,
+          "wall_tokens_per_second": 21.34
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-terminal-flux-panel",
+          "session_id": "9af7bc1d-4e1f-43bc-9577-b089dbc056b4",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T13:10:39.599Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.85,
+        "impl_move": {
+          "plan": "figure-and-solver-audit",
+          "at_dispatch": 0.85,
+          "at_complete": 0.88,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "waived",
+          "test_paths": [
+            "tests/test_zero_residual_render.py"
+          ],
+          "declaration": "skip the contour call on the persisted panel and observe the level-count check fail",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T115147348762-fsa-repair-terminal-flux-panel/negative_control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T115147348762-fsa-repair-terminal-flux-panel/negative_control.log",
+          "reason": "the worker replaced the terminal-flux level array with the union-derived array the defect produced rather than skipping the contour call; the check failed on stated levels not matching the counted levels (0 vs 8), the same guard the declared mutation targets"
+        },
+        "tool_steps": 155.0,
+        "orientation_input_tokens": 2959929.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -246915,6 +247155,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3136
+    "_version": 3137
   }
 }

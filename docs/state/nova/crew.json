@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T19:58:12",
+  "updated": "2026-09-22T20:09:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -258710,6 +258710,330 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T174418825270-review-of-ecq-one-vmapped-per-cell-clip-body",
+        "plan": "exact-clip-moment-quadrature",
+        "section": "\u00a73",
+        "node": "review-of-ecq-one-vmapped-per-cell-clip-body",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1773,
+                "cached_input_tokens": 807785,
+                "input_tokens": 809590,
+                "output_tokens": 2439,
+                "reasoning_output_tokens": 350,
+                "total_tokens": 812029,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "576a27e3-ea0d-439c-9e63-3058761859c6",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review for r-20260922T160021090834-ecq-one-vmapped-per-cell-clip-body stores a parsed record scoring all 5 dimensions in the range 0..20, having read the executable census before and after, the bit-identity table and the negative-control log",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260922T160021090834-ecq-one-vmapped-per-cell-clip-body",
+          "id": "review-of-ecq-one-vmapped-per-cell-clip-body",
+          "lane_declaration": {
+            "backend": "claude",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-22T16:45:10.365Z",
+            "read_at": "2026-09-22T17:44:21Z",
+            "resolved_backend": "claude",
+            "utilisation_pct": 78.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T174418825270-review-of-ecq-one-vmapped-per-cell-clip-body/manifest.md",
+          "negative_control": "",
+          "plan": "exact-clip-moment-quadrature",
+          "requested_backend": "claude",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T160021090834-ecq-one-vmapped-per-cell-clip-body.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19f-claude-rev-1",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-22T17:44:42Z",
+        "completed_at": "2026-09-22T17:54:59.195Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 604,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 617,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "d769e0d1d14741f786bfe0d47ee464323ce07fb3",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T174418825270-review-of-ecq-one-vmapped-per-cell-clip-body/manifest.md",
+        "scope_changed": false,
+        "session_id": "7f8bf5d0-dfdc-4123-ad08-d68aa5ff12f5",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 82.0,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-27T06:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 104679,
+            "cache_creation_input_tokens_cumulative": 319947,
+            "cache_read_input_tokens": 2489750,
+            "cache_read_input_tokens_cumulative": 11283916,
+            "inference_geo": "not_available",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 76,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 18647,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.7231932000000025,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 8.232776200000002
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-22T17:54:59.195Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: Final-attempt acceptance refused. Optimized counts remain 302553 > 203078 and 304913 > 204531; complete global operator sharing is not implemented. Both reduced module processes abort before completion and their observed prefixes differ by one failure; whose isolated pass leaves the cause unresolved. The committed design state is unqualified for promotion. Work stopped within the 55-minute fence after preserving the exact refusals; no compute or provider-availability hold is being asserted.",
+              "elapsed_seconds": 3155,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 20560,
+              "log_fresh": false,
+              "manifest_commits": [
+                "d8d858ff09a39851885a738c2293544785df32be",
+                "7c74bf18b72f1b15d57f006f3eb6462cc6acba7b",
+                "674ad986d155cf5c403d2cbb1201db7a6b15f2a7",
+                "364f92c3663f16f817ca873c573db1d4aa0aef91",
+                "f2d952c89c2183bcad54a311ed866fc67125da73",
+                "a359f8fed22b69798a5668c33a1dc9708f830405",
+                "8dbc6cbb17c78979b108375965a0b63cebd1a081"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "6204f92abb1f618184ac543c2b343485b2d2cd769ed4f700ef869db7c34e8e7c",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T103934949557-fsri-one-traced-operator-state-machine/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T103934949557-fsri-one-traced-operator-state-machine/manifest.md; resolve the blocker before resuming the run",
+              "node": "fsri-one-traced-operator-state-machine",
+              "phase": "complete",
+              "plan": "forward-solver-route-integrity",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260922T103934949557-fsri-one-traced-operator-state-machine",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260922T103934949557-fsri-one-traced-operator-state-machine",
+                "session_id": "01a0c8b3-79e4-7b81-b58c-797e1e2dd1be",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 20697,
+              "terminal_at": "2026-09-22T11:59:28Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2400,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1201,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 5440,
+              "log_fresh": false,
+              "manifest_commits": [
+                "199427458",
+                "51f2bef22"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0e32ae12ddf789cd049459036900b8e9b47adf53991fbb8f9a0c19ea8d48a793",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T120036305507-fsa-repair-low-state-level-array/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan figure-and-solver-audit --section '\u00a73' --role review --spec-level exact --node review-of-fsa-repair-low-state-level-array --goal 'attach an independent review to run r-20260922T120036305507-fsa-repair-low-state-level-array' --done-when 'the review for r-20260922T120036305507-fsa-repair-low-state-level-array stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T120036305507-fsa-repair-low-state-level-array.json --time-budget 40m --session s19-codex-20260916 --allow-unreconciled-runs --local",
+              "node": "fsa-repair-low-state-level-array",
+              "phase": "working",
+              "plan": "figure-and-solver-audit",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260922T120036305507-fsa-repair-low-state-level-array",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 5478,
+              "terminal_at": "2026-09-22T16:13:07Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-low-state-level-array"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 24743541,
+          "cumulative_input_tokens": 25407798,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 611.949,
+          "generated_tokens": 62752,
+          "generation_seconds": 369.401,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 33.9,
+          "machine_seconds": 242.548,
+          "peak_input_tokens": 339283,
+          "tokens_per_second": 169.88,
+          "wall_tokens_per_second": 102.54
+        },
+        "follow_on_paths": [
+          "forward_operator.py",
+          "separatrix_clip.py",
+          "clip_quadrature.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-ecq-one-vmapped-per-cell-clip-body",
+          "session_id": "7f8bf5d0-dfdc-4123-ad08-d68aa5ff12f5",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T17:54:59.195Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.99,
+        "impl_move": {
+          "plan": "exact-clip-moment-quadrature",
+          "at_dispatch": 0.99,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 38.0,
+        "orientation_input_tokens": 10253786.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -259176,6 +259500,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3193
+    "_version": 3194
   }
 }

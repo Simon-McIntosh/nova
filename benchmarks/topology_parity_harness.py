@@ -165,12 +165,19 @@ def committed_class_authority(
 
 
 def marginal_status(qualification: dict[str, object] | None) -> tuple[bool | None, str]:
-    """Read the governed flag and fail closed when it is absent."""
-    if qualification is not None and "marginal_solver_basin" in qualification:
-        return bool(
-            qualification["marginal_solver_basin"]
-        ), "solver_qualification.marginal_solver_basin"
-    return None, "missing solver_qualification.marginal_solver_basin"
+    """Read the governed flag, keeping an absent or null flag unknown.
+
+    Both an absent key and an explicit JSON null mean the receipt has stated no
+    verdict, so neither may be coerced to False: a ``bool(None)`` here would
+    publish a non-marginal verdict that the receipt never gave, and a panel
+    resting on it would report exact parity it never established.
+    """
+    if qualification is None or "marginal_solver_basin" not in qualification:
+        return None, "missing solver_qualification.marginal_solver_basin"
+    value = qualification["marginal_solver_basin"]
+    if value is None:
+        return None, "null solver_qualification.marginal_solver_basin"
+    return bool(value), "solver_qualification.marginal_solver_basin"
 
 
 def differing_cell_indices(committed_labels, replayed_labels) -> np.ndarray:
@@ -325,6 +332,11 @@ def receipt_errors(receipt: dict[str, object]) -> list[str]:
                 f"{row.get('identity', '<unknown>')}: missing {sorted(missing)}"
             )
             continue
+        if row["marginal_solver_basin"] is None:
+            errors.append(
+                f"{row['identity']}: {row['marginal_flag_source']} — an absent or "
+                "null governed flag is not a non-marginal verdict"
+            )
         if not row["replayable"]:
             if not row.get("not_replayable_reason"):
                 errors.append(f"{row['identity']}: missing not-replayable reason")
@@ -728,6 +740,69 @@ def _panel_levels(field: np.ndarray, count: int = 12) -> np.ndarray:
     return np.linspace(low, high, count + 2)[1:-1]
 
 
+def _finite_null(point) -> np.ndarray | None:
+    """The first two coordinates of a finite null, or nothing to draw."""
+    if point is None:
+        return None
+    value = np.asarray(point, dtype=float).reshape(-1)
+    if value.size < 2:
+        return None
+    value = value[:2]
+    return value if bool(np.all(np.isfinite(value))) else None
+
+
+def draw_topology_nulls(
+    axis, census_nulls, committed_nulls, style=DEFAULT_INK
+) -> dict[str, int]:
+    """Draw the replayed null set filled and the committed set hollow.
+
+    Both sets reach the canvas, because a parity panel whose replayed axis has
+    moved must show that it moved. The replayed axis and saddle are drawn
+    through :func:`draw_nulls`; the committed saddle arrives as that painter's
+    ``other_x_points``, and the committed axis is drawn here, hollow, in the
+    same style, because the painter takes a single axis and the second set is
+    distinguished from the first by fill rather than by absence.
+
+    Returns the drawn counts so a coverage check can assert per panel that the
+    committed axis was drawn rather than only named in a caption.
+    """
+    tally = {
+        "replayed_axis_drawn": 0,
+        "committed_axis_drawn": 0,
+        "replayed_x_points_drawn": 0,
+        "committed_x_points_drawn": 0,
+    }
+    if census_nulls:
+        drawn = draw_nulls(
+            axis,
+            magnetic_axis=census_nulls.get("magnetic_axis"),
+            x_points=census_nulls.get("x_points"),
+            other_x_points=committed_nulls.get("x_points"),
+            style=style,
+        )
+        tally["replayed_x_points_drawn"] = int(drawn["x_points_drawn"])
+        tally["committed_x_points_drawn"] = int(drawn["other_x_points_drawn"])
+        tally["replayed_axis_drawn"] = int(
+            _finite_null(census_nulls.get("magnetic_axis")) is not None
+        )
+    committed_axis = (
+        _finite_null(committed_nulls.get("magnetic_axis")) if committed_nulls else None
+    )
+    if committed_axis is not None:
+        axis.plot(
+            committed_axis[0],
+            committed_axis[1],
+            marker=style.axis_marker,
+            markersize=style.axis_markersize,
+            color=style.axis_color,
+            markerfacecolor="none",
+            linestyle="none",
+            zorder=style.zorder_markers,
+        )
+        tally["committed_axis_drawn"] = 1
+    return tally
+
+
 def _plot(rows, path):
     """One poloidal panel per declared row: line contours, nulls, wall, no axes."""
     column_count = min(4, len(rows))
@@ -795,12 +870,8 @@ def _plot(rows, path):
             draw_wall(axis, units=wall)
             census = data["census_nulls"]
             if census:
-                draw_nulls(
-                    axis,
-                    magnetic_axis=census["magnetic_axis"],
-                    x_points=census["x_points"],
-                    other_x_points=data["committed_nulls"].get("x_points"),
-                    style=DEFAULT_INK,
+                draw_topology_nulls(
+                    axis, census, data["committed_nulls"], style=DEFAULT_INK
                 )
             if len(data["differing_wall"]):
                 point = wall[data["differing_wall"]]
@@ -899,17 +970,36 @@ def run(
         ],
         "rows": records,
     }
+    finalize_receipt(receipt, pending)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    if plots:
+        _plot(plots, figure)
+    return receipt
+
+
+def finalize_receipt(receipt: dict[str, object], pending: bool) -> dict[str, object]:
+    """Attach the verdict a receipt is published under.
+
+    ``passes`` is false whenever any validation error stands, so a run that
+    leaves a governed row unknown cannot publish a passing receipt however
+    many rows it replayed; ``status`` records whether the replay itself ran to
+    the end, which is a different fact and is not a substitute for it.
+    """
     errors = receipt_errors(receipt)
     receipt.update(
         validation_errors=errors,
         status="pending" if pending and not errors else "complete",
         passes=not errors,
     )
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
-    if plots:
-        _plot(plots, figure)
     return receipt
+
+
+def exit_code(receipt: dict[str, object]) -> int:
+    """Zero only for a complete receipt that carries no validation error."""
+    if receipt.get("passes") is True and not receipt.get("validation_errors"):
+        return 0 if receipt.get("status") == "complete" else 1
+    return 1
 
 
 def main():
@@ -928,8 +1018,9 @@ def main():
         arguments.cache, arguments.qualification, arguments.output, arguments.figure
     )
     print(json.dumps(receipt, indent=2, sort_keys=True))
-    if not receipt["passes"]:
-        raise SystemExit(1)
+    status = exit_code(receipt)
+    if status:
+        raise SystemExit(status)
 
 
 if __name__ == "__main__":

@@ -1134,10 +1134,18 @@ class Topology(Pytree):
             surface = None
             comparison_flux = psi_grid
         census_authored = structured and hasattr(self.grid, "read_census")
+        null_flux = psi_grid
+        if getattr(self.grid, "direct_sample_count", 0):
+            sample_flux = psi[self.grid.node_number + self.wall.node_number :]
+            if sample_flux.shape[0] != self.grid.direct_sample_count:
+                raise ValueError(
+                    "own-node null census requires the direct sampling flux values"
+                )
+            null_flux = jnp.concatenate((psi_grid, sample_flux))
         if census_authored:
-            (vmap_o, vmap_x), census = self.grid.read_census(psi_grid)
+            (vmap_o, vmap_x), census = self.grid.read_census(null_flux)
         else:
-            vmap_o, vmap_x = self.grid(psi_grid)
+            vmap_o, vmap_x = self.grid(null_flux)
             census = None
         data_w = self.wall_anchor_data(
             psi_wall,

@@ -2921,6 +2921,176 @@ ROW2_EXIT=139</pre>
   </table>
   <p>Nineteen repair followups are staged for the owning plan <code>cut-cell-current-attribution</code>
   in <code>findings-cut-cell-current-attribution.json</code>.</p>
+  <h4 id="figures-cut-cell-repair-exact-clip-seed-panels">Repair &mdash; the twelve <code>exact-clip-seed</code> panels state their terminal state and draw both null sets</h4>
+  <p>The twelve panels scored 66 each above; F7 named them as printing no residual and no converged
+  flag, and F3 as missing half the null vocabulary. All twelve were rebuilt from the committed
+  <code>parts/*.json</code> receipts with no solve, and each title now states
+  <code>residual=&hellip; &middot; converged=&hellip;</code> read from that row's persisted
+  <code>solver</code> block: 12 of 12, residuals <code>1.20e-13</code>&ndash;<code>6.71e-13</code>
+  (<code>1.1998637468319157e-13</code> low, <code>6.711667497659967e-13</code> high),
+  every row <code>converged True</code> and <code>class: limited</code> with one magnetic axis and no
+  admitted saddle. Every poloidal panel, the three error panels of the 2&times;2 production-route
+  template included, now draws both the analytic and the solved null set in the
+  <code>draw_nulls</code> vocabulary &mdash; solid triangle for the axis, filled cross for the
+  admitted saddle, hollow markers for other qualified nulls &mdash; in the two contour colours
+  (<code>#3366cc</code> analytic, <code>#cc7722</code> solved), and an in-panel caption names which
+  colour is which.</p>
+  <p>The reading is a render receipt (<code>render-receipt.json</code>) written by the render-only
+  entry point and read back by a check in <code>tests/test_exact_clip_seed_render.py</code>: 12
+  figures, each title's residual and converged flag equal both to its part receipt and to the seed
+  receipt's row, each figure's digest equal to the file on disk, and per poloidal panel both null
+  sets recorded with all three glyph kinds. The receipt's own counts are one axis and no saddle per
+  set for every row, so the vocabulary is exercised by its own cases in the same file: a positive
+  control that tells the three glyph kinds apart, and a containment case that drops a saddle outside
+  the vessel. The declared negative control strips <code>residual=</code> from one title in the
+  receipt and the check is observed to refuse it, naming that figure.</p>
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-production-route-reduced.png"
+         alt="Rebuilt 2x2 production-route panel: solved and analytic flux contours, three error panels, both null sets drawn on all four, the terminal residual and converged flag in the title.">
+    <figcaption><code>exact-clip-seed/panels/weak-rotation-reactor-static-production-route-reduced.png</code>
+    &mdash; rebuilt from its part receipt with no solve; the title carries
+    <code>residual=3.419964981783324e-13 &middot; converged</code> read from the row, all four panels
+    are poloidal and all four draw both null sets.</figcaption>
+  </figure>
+</section>
+<section class="audit-directory" id="fsa-repair-limited-shadow-chord-panels">
+<h2 id="fsa-repair-limited-shadow-chord-panels">Repair — docs/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord</h2>
+<p>Reviewer anchor: <code>#figure-audit-cut-cell-current-attribution</code>. The four <code>chord</code>
+panels scored 52, 60, 60 and 60 with the reviewer naming three faults: the title carried no terminal
+residual or converged flag, the <code>diverted-single-null</code> absolute-psi-error panel contoured
+machine round-off as a structured map, and the poloidal panels drew one null set where a second is
+handed to the painter.</p>
+<p><strong>What the repair is.</strong> A render-only entry point in
+<em>benchmarks/limited_row_shadow_census.py</em> (<code>--render-only</code>) rebuilds the four panels
+from the committed <code>solve-parts/chord/*.json</code> receipts — no forward operator, no solve —
+and writes a per-figure receipt. Each title now prints the terminal residual and the converged flag
+read from the receipt's own <code>solver.terminal_fixed_point_residual</code> and
+<code>solver.converged</code>; each absolute-error panel contours only levels at or above
+<code>ROUNDOFF_LEVEL_FLOOR</code> 1e-12 and its caption names the floor; every poloidal panel draws
+the analytic and the solved null set in their own colours, and the receipt records the glyph count
+each set drew.</p>
+<p><strong>Receipt.</strong>
+<code>docs/figures/cut-cell-current-attribution/limited-shadow/render-receipt.json</code>
+(<code>schema nova.limited-shadow-render-receipt</code>, four rows). Titles, as published:
+<code>diverted-single-null · cells-500 · qualified · residual=2.423e-17 · converged=yes</code>;
+<code>moderate-rotation-conventional-static · cells-1000 · qualified · residual=5.875e-16 ·
+converged=yes</code>; <code>strong-rotation-compact-static · cells-1000 · qualified ·
+residual=2.913e-16 · converged=yes</code>; <code>weak-rotation-reactor-static · cells-1000 ·
+qualified · residual=1.388e-15 · converged=yes</code>. The control's psi panel is the round-off
+case: <code>max_absolute</code> 8.153e-17, <code>levels</code> empty,
+<code>levels_suppressed_below_floor</code> 8, caption <em>round-off floor 1e-12 · levels: none
+(every contour level is below the floor) / this panel is round-off, not signal</em>. Every one of the
+sixteen rendered panels reports at least one glyph per null set (the control 2 analytic / 2 solved;
+the three limited rows 1 / 1).</p>
+<p><strong>Gate.</strong> <code>python -m pytest -p no:cacheprovider
+tests/test_limited_row_shadow_render.py</code> at the node's base revision: 4 passed in 13.64 s, log
+<code>render-receipt-check.log</code>. The check reads the committed receipt, compares each title's
+<code>residual=</code> against the part receipt's own field, requires no contour level below the
+floor on any error panel and the caption to name it, requires both null sets on every panel, and
+additionally rebuilds the control panel in memory and reads the axes.</p>
+<p><strong>Negative control.</strong> Declared mutation <code>sub-floor-level</code> — restore the
+diverted psi error panel's unfiltered contour levels, so a level below the 1e-12 floor is contoured
+as signal. Applied, the check reddens with <code>diverted-single-null/psi: contour levels below the
+round-off floor 1e-12: [4.72e-20]</code>, <code>1 failed, 3 passed</code>, log
+<code>render-receipt-check-negative-control.log</code>.</p>
+<p><strong>Figures regenerated</strong> under the plotting rules: the four
+<code>solve-panels/chord/*.png</code>, on the login node only, from the persisted receipts alone
+(render 2.1 s, import 13.1 s). No SVG companion existed for these four before this repair and none
+was created.</p>
+</section>
+<section id="figure-audit-cut-cell-current-attribution-terminal-flux-repair">
+  <h3>repair &mdash; the empty terminal-flux panel of <code>zero-residual/panels/zero-residual-map.png</code></h3>
+  <p>Scored 48, misrepresenting physics: the <code>moderate-rotation-conventional-static</code> panel
+  titled <em>terminal flux (persisted)</em> drew no field at all &mdash; only the boundary ring and a
+  faceless axis dot &mdash; so the figure invited the reading that no persisted flux raster existed for
+  that row. Reviewer anchor:
+  <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figure-audit-cut-cell-current-attribution</code>.</p>
+  <h4>What the persisted raster turned out to be</h4>
+  <p>The raster was present and finite for both rows. The measured span is
+  <code>-1.3328</code> Wb for <code>moderate-rotation-conventional-static</code> and
+  <code>-47.5943</code> Wb for <code>weak-rotation-reactor-static</code>, a factor of about 36 apart.
+  The driver resolved one level array over the concatenation of both rasters, so all ten levels landed
+  in the weak row's range; the narrow row contains none of them, and
+  <code>draw_flux_contours</code> drew an empty level set. The defect is a level-array scope defect,
+  not an absent or flat raster.</p>
+  <h4>The repair</h4>
+  <ul>
+    <li>Levels are resolved per raster, so each panel states its own
+      <code>levels=</code> count and is drawn on those levels for the nulls of its own row and the
+      contours of its own raster.</li>
+    <li>Each terminal-flux panel records the finite range of the raster it drew on
+      (<code>raster_min_wb</code>, <code>raster_max_wb</code>) and the number of its stated levels that
+      strictly cross that range (<code>levels_inside_raster</code>). The moderate panel now states 10 levels, 8 of
+      which lie inside <code>[-0.3738, 1.1582]</code> Wb; the weak panel states 10 levels, 8 inside
+      <code>[-12.5714, 41.6496]</code> Wb.</li>
+    <li>Both null sets are drawn and counted. The solved terminal topology is drawn solid through the
+      <code>draw_nulls</code> vocabulary and the analytic reference topology is drawn hollow in a
+      distinct colour, so a solved null on a non-converged state no longer reads as the answer on its
+      own. Both rows are <code>limited</code> with <code>x_candidate_count = 0</code>, so each set is a
+      single magnetic axis: the receipt records <code>solved_axis = 1 and reference_axis = 1</code> per
+      panel.</li>
+    <li>Every panel title carries <code>residual=</code> and <code>converged=</code> on its own line.</li>
+    <li><code>render-receipt.json</code> beside the panels, so the arithmetic above is checkable without
+      opening the PNG.</li>
+    <li>A <code>--render-only</code> entry point rebuilds the panels from persisted render bundles
+      without applying the map: 20.8 s wall on the login node, no solve, no device.</li>
+  </ul>
+  <h4>The gate, its negative control, and what it does not cover</h4>
+  <p><code>tests/test_zero_residual_render.py</code> asserts against the receipt that every panel title
+  carries <code>residual=</code> and <code>converged=</code>, that each terminal-flux panel states as many
+  levels as it lists, that the stated levels cross its own recorded raster range, and that both null sets
+  contributed a glyph. Declared negative control: the moderate panel's level array is replaced with the
+  union-derived array (the historical defect). Applied to the check, the check goes red with
+  <code>stated levels do not match the counted levels inside the raster (0 vs 8)</code>.</p>
+  <p>Two findings this repair does not close, both for the reviewer rather than the repair node.
+  <strong>First</strong>, the shadow census is now empty for both rows:
+  <code>entering_cold</code> equals the whole state (9123 of 9123 carriers for
+  <code>moderate-rotation-conventional-static</code>, 9009 of 9009 for
+  <code>weak-rotation-reactor-static</code>), where the reviewed revision recorded 73 and 54 excluded
+  carriers. The measurement driver had no branch for an empty shadow census and aborted on
+  <code>np.max</code> of an empty selection, overwriting its own acceptance receipt with an incomplete
+  stub; the fix folds the empty selection to null. The shift is in the operator's shadow mask or its
+  clip, not in the operator's carrier set.
+  <strong>Second</strong>, the unmasked supremum moved with it, from <code>1.1236</code> to
+  <code>1.1000</code> Wb for the moderate row and from <code>44.11</code> to <code>42.25</code> Wb for
+  the weak row, so the residual story in the repaired figure is not the story the audit scored. With no
+  shadowed carrier the relative-residual raster is concentrated in a thin shell at the boundary, so the
+  right-hand panels of the repaired figure carry ink only there: their eight levels do
+  cross their own raster and the panel is not the empty-array defect the left panel was, but a reader
+  comparing the two figures would see the residual panel lose its interior structure. The
+  gate below is the node's own change and reads the receipt; verifying the merged result belongs to a
+  separately dispatched test node.</p>
+  <table>
+    <tr><th>gate</th><th>command</th><th>exit</th></tr>
+    <tr><td>render check</td>
+      <td><code>python -m pytest tests/test_zero_residual_render.py</code></td><td>0 (1 passed,
+      5.6 s)</td></tr>
+    <tr><td>negative control</td>
+      <td><code>python tests/test_zero_residual_render.py</code> with the union array substituted for
+      the moderate panel's levels</td><td>1 (assertion red)</td></tr>
+    <tr><td>render-only rebuild</td>
+      <td><code>python -m benchmarks.zero_residual_check --render-only</code></td><td>0 (20.8 s)</td></tr>
+  </table>
+</section>
+<section class="solver-driver-review" id="solver-driver-review">
+<h2 id="solver-driver-review-summary">Solver-driver promotion review — independent lane</h2>
+<p>Reviewer node <code>fsa-audit-solver-census-and-certificate-drivers</code>, worktree head <code>0322e911a52588e116bb76a2243ff0dc728cc655</code>, review lane independent of the locally served implementation lane. The ledger join against <code>docs/state/nova/crew.json</code> found <strong>18</strong> promotions since 2026-09-16 touching the requested benchmark paths. <code>benchmarks/forward_census.py</code> is absent at this head and has no matching history, so it has no fabricated gate row.</p>
+<p>The current-head gate that fit this worker's fence ran in one fresh <code>all_debug</code> allocation with <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in the submit environment and payload, the shared root interpreter directly, and no <code>uv</code> on the node. Four focused modules passed <strong>28 tests, 0 failures</strong> with four dtype warnings; log <code>/tmp/fsa-audit-current/all-debug-gate.log</code>. A second fresh all_debug process ran the compile-abort sampler with a shared summary path: the child exited 7, peak maps were 25 of 65530, one sample was written, and the wrapper returned 0; log <code>/tmp/fsa-audit-current/abort-all-debug.log</code>, receipt <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-census-and-certificate-drivers/current-abort-summary.json</code>. Historical H200 and multi-minute certificate/coil/DIII-D gates were not rerun at this head and are marked unverifiable rather than treated as green.</p>
+<table><thead><tr><th>reviewed promotions</th><th>count</th><th>defect or evidence class</th></tr></thead><tbody>
+<tr><td>sound</td><td>6</td><td>empty-identity refusal, gauge-free negative result, full non-convergence diagnostic, completed 12-row drift successor, edge-root gate, persisted-pair guard</td></tr>
+<tr><td>defective</td><td>11</td><td>red threshold promoted, incomplete or blocked done-when promoted, non-discriminating negative control, missing fixture/sweep evidence, unsettled mapping hypothesis</td></tr>
+<tr><td>unverifiable</td><td>1</td><td>positive constrained control blocked by compile-size failure; no current merged-head confirmation</td></tr>
+<tr><th>total</th><th>18</th><th></th></tr>
+</tbody></table>
+<h3 id="solver-driver-review-findings">Representative findings</h3>
+<ul>
+<li><strong>Threshold mismatch:</strong> the mesh-argument promotion's named size gate measured <code>210159751</code> effective bytes against the <code>50000000</code>-byte done-when ceiling and returned <code>FAIL</code>; the remainder was handed off after promotion.</li>
+<li><strong>Instrument coverage:</strong> <code>benchmarks/bank_drift_paired_probe.py:337-342</code> loads checkpointed rows and then resets them to an empty list, while <code>:477-483</code> iterates only left-tree identities. Synthetic reproductions recorded in the review report show the resume marker disappearing and a right-only identity being omitted.</li>
+<li><strong>Exit masking:</strong> <code>benchmarks/compile_abort_probe.py:149-167</code> records child exit 7 but returns 0; the current all_debug receipt reproduces the mismatch.</li>
+<li><strong>Negative control:</strong> the bounded-row control uses the same displaced seed for its no-row arm, which returns to its own unconstrained fixed point; the recorded arm therefore cannot prove the row's effect.</li>
+<li><strong>Unpromoted certificate run:</strong> the one-process-per-row measurement is withheld. Its observed diff is 31 paths, all under the five declared roots (not 63), but the candidate state path is an absolute removed-worktree path and the probe wrapper/child exits are conflated.</li>
+</ul>
+<p>Ready-to-append repair items, with commit/file/line anchors, are stored beside the review at <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-census-and-certificate-drivers/findings.json</code>. No file under <code>nova/</code> and no test file was edited by this review.</p>
 </section>
   </main>
 </body>

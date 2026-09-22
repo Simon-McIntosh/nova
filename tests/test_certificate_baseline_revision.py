@@ -29,13 +29,18 @@ from benchmarks import solve_program_size_gate as gate_module
 from benchmarks.solve_program_size_gate import (
     CERTIFICATE_BASE_REVISION,
     CERTIFICATE_BASELINE_RECEIPT,
+    CERTIFICATE_CHILD_MAP_CEILING,
     CERTIFICATE_EXECUTION_PROVENANCE_KEYS,
+    CERTIFICATE_PROGRAM_LOAD_MAPS,
     CERTIFICATE_ROWS,
     CertificateBaselineRefusal,
     _persist_state_array,
+    build_argument_parser,
     certificate_baseline_source,
     certificate_identity_arms,
+    certificate_row_command,
     certificate_row_entry,
+    certificate_row_process_entry,
     certificate_state_difference,
     load_certificate_baseline,
     run_certificate_identity,
@@ -483,3 +488,206 @@ def test_rows_solved_by_the_receipts_own_process_are_refused() -> None:
             ],
             parent_process_id,
         )
+
+
+def _row_entry(
+    peak_maps: int,
+    child_status: int = 0,
+    wrapper_status: int = 0,
+) -> dict:
+    """Build one row's process entry as the merge builds it, from a probe summary."""
+    return certificate_row_process_entry(
+        CERTIFICATE_ROWS[0][0],
+        CERTIFICATE_ROWS[0][1],
+        Path("row-0-receipt.json"),
+        wrapper_status,
+        {"process_id": 4242},
+        {
+            "exit_code": child_status,
+            "peak_maps": peak_maps,
+            "max_map_count": 65_530,
+            "samples_path": "row-0-samples.jsonl",
+        },
+    )
+
+
+def test_row_entry_exit_code_carries_the_child_status_not_the_wrappers() -> None:
+    """The row's exit field must name the process that solved the row.
+
+    The driver runs as a grandchild of the probe wrapper, so the wrapper's own
+    return is a different quantity from the child status the probe records.  A
+    receipt that put the wrapper's status under ``exit_code`` reported a row that
+    died inside the compiler as one that completed wherever the two disagreed —
+    which is what the committed receipt at the superseded revision shows, its
+    ``exit_code`` at 0 beside a child that exited 1.
+    """
+    entry = _row_entry(peak_maps=24_750, child_status=7)
+    assert entry["exit_code"] == 7
+    assert entry["probe_wrapper_exit"] == 0
+    assert "probe_exit_code" not in entry
+
+    # A wrapper that dies before it writes its summary returns its own signal
+    # status, so the two fields must be able to disagree in either direction.
+    wrapper_first = _row_entry(peak_maps=24_750, child_status=0, wrapper_status=9)
+    assert wrapper_first["exit_code"] == 0
+    assert wrapper_first["probe_wrapper_exit"] == 9
+
+
+def test_row_entry_without_a_probe_records_the_child_and_no_wrapper() -> None:
+    entry = certificate_row_process_entry(
+        CERTIFICATE_ROWS[0][0],
+        CERTIFICATE_ROWS[0][1],
+        Path("row-0-receipt.json"),
+        3,
+        {"process_id": 4242},
+        None,
+    )
+    assert entry["exit_code"] == 3
+    assert entry["probe_wrapper_exit"] is None
+    assert entry["peak_maps"] is None
+    assert entry["within_one_program_load"] is None
+    assert entry["within_two_program_loads"] is None
+
+
+def test_one_load_flag_compares_against_one_program_load() -> None:
+    """A peak between one load and two satisfies the two-load ceiling and not one."""
+    one = _row_entry(CERTIFICATE_PROGRAM_LOAD_MAPS[1])
+    assert one["within_one_program_load"] is True
+    assert one["within_two_program_loads"] is True
+
+    above_one_load = _row_entry(CERTIFICATE_PROGRAM_LOAD_MAPS[1] + 1)
+    assert above_one_load["within_one_program_load"] is False
+    assert above_one_load["within_two_program_loads"] is True
+
+    two_loads = _row_entry(CERTIFICATE_CHILD_MAP_CEILING)
+    assert two_loads["within_two_program_loads"] is True
+    above_two_loads = _row_entry(CERTIFICATE_CHILD_MAP_CEILING + 1)
+    assert above_two_loads["within_two_program_loads"] is False
+
+    # The row the committed measurement recorded: one process, 24,750 mappings.
+    largest = _row_entry(40_756)
+    assert largest["within_one_program_load"] is False
+    assert largest["within_two_program_loads"] is False
+
+
+def test_row_command_parses_through_the_driver_and_names_the_row(
+    tmp_path: Path,
+) -> None:
+    """The argv a child is handed must be argv the child's own driver accepts.
+
+    The child is this module under the driver's own parser, so a flag the
+    builder emits and the parser does not know, or a row the builder names and
+    the parser reads elsewhere, is a child that dies before it solves anything.
+    Both the plain and the sampler-wrapped form are parsed, because the wrapped
+    form is the one the certificate lane actually runs.
+    """
+    parser = build_argument_parser()
+    states = tmp_path / "states"
+    for index, row in enumerate(CERTIFICATE_ROWS):
+        row_receipt = tmp_path / f"row-{index}.json"
+        plain = certificate_row_command(
+            row,
+            row_receipt,
+            None,
+            None,
+            baseline_receipt=CERTIFICATE_BASELINE_RECEIPT,
+            state_directory=states,
+        )
+        assert plain[:3] == [
+            sys.executable,
+            "-m",
+            "benchmarks.solve_program_size_gate",
+        ]
+        plain_args = parser.parse_args(plain[3:])
+        assert plain_args.certificate_row == row[0]
+        assert plain_args.certificate_output == row_receipt
+        assert plain_args.certificate_state_dir == states
+        assert plain_args.certificate_baseline_receipt == CERTIFICATE_BASELINE_RECEIPT
+
+        wrapped = certificate_row_command(
+            row,
+            row_receipt,
+            tmp_path / f"row-{index}-samples.jsonl",
+            tmp_path / f"row-{index}-probe.json",
+            baseline_receipt=CERTIFICATE_BASELINE_RECEIPT,
+            state_directory=states,
+        )
+        assert wrapped[:3] == [sys.executable, "-m", "benchmarks.compile_abort_probe"]
+        separator = wrapped.index("--")
+        assert wrapped[separator + 1 : separator + 4] == [
+            sys.executable,
+            "-m",
+            "benchmarks.solve_program_size_gate",
+        ]
+        wrapped_args = parser.parse_args(wrapped[separator + 4 :])
+        assert wrapped_args.certificate_row == row[0]
+        assert wrapped_args.certificate_output == row_receipt
+
+
+def test_persisted_state_array_path_is_relative_to_the_states_directory(
+    tmp_path: Path,
+) -> None:
+    """A committed receipt outlives its checkout, so its path must not be absolute."""
+    state = np.array([0.25, -0.5, 1.0], dtype=np.float64)
+    states = tmp_path / "states"
+    persisted = _persist_state_array(states, "case", -300, state)
+    assert persisted is not None
+    assert persisted["path"] == "case_300.npy"
+    assert not Path(persisted["path"]).is_absolute()
+    assert (states / persisted["path"]).is_file()
+
+    # The relative name is resolvable because the receipt records the states
+    # directory it is relative to; without that the receipt would name the array
+    # and no reader could find it.
+    receipt = tmp_path / "certificate.json"
+    receipt.write_text(
+        json.dumps(
+            {
+                "measurement_revision": CERTIFICATE_BASE_REVISION,
+                "state_directory": str(states),
+                "rows": [
+                    {
+                        "case": CERTIFICATE_ROWS[0][0],
+                        "requested_cells": CERTIFICATE_ROWS[0][1],
+                        "baseline_state_sha256_binary64": persisted["sha256_binary64"],
+                        "baseline_state_array_path": persisted["path"],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    recorded = load_certificate_baseline(receipt)["rows"][
+        (CERTIFICATE_ROWS[0][0], CERTIFICATE_ROWS[0][1])
+    ]
+    assert recorded["state_array_source"] == persisted["path"]
+    assert recorded["arm_kind"] == "state array"
+    np.testing.assert_array_equal(recorded["state_array"], state)
+
+
+def test_committed_row_receipt_keeps_its_superseded_field_semantics() -> None:
+    """The committed receipt is annotated, not rewritten, under the new schema.
+
+    Its values are what one all_debug allocation measured, so repairing the
+    field names must not restate the measurement under semantics it was not made
+    with.  The note names the superseded revision beside the fields it applies
+    to, and the fields themselves still read as that revision wrote them.
+    """
+    path = (
+        Path(__file__).resolve().parents[1]
+        / "docs/figures/millisecond-converged-solve/program-size/process-per-row"
+        / "certificate.json"
+    )
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    note = payload["field_semantics_note"]
+    assert "2710b2ea1" in note
+    assert "candidate_state_array_path" in note
+    assert "exit_code" in note
+    assert payload["measurement_revision"].startswith("2710b2ea1")
+
+    for row in payload["rows"]:
+        assert row["candidate_state_array_path"].startswith("/")
+    for entry in payload["row_processes"]:
+        assert "probe_exit_code" in entry
+        assert "probe_wrapper_exit" not in entry
+        assert "within_two_program_loads" not in entry

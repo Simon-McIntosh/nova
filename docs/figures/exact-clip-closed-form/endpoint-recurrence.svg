@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="350" viewBox="0 0 1060 350" role="img" aria-labelledby="title description">
+  <title id="title">Closed-form polygon moments from edge endpoints</title>
+  <desc id="description">Three stages: a fixed-width recurrence builds homogeneous endpoint coefficients; signed triangle moments sum over the polygon edges; the unchanged density fit contracts against the table and shifts moments to the cell centroid. Only the density fit samples points.</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8" fill="none" stroke="#496d79" stroke-width="1.5"/></marker></defs>
+  <rect width="1060" height="350" fill="#faf9f6"/>
+  <g font-family="sans-serif" fill="#25333a">
+    <text x="35" y="38" font-size="23">Exact moments of the same sampled polygon</text>
+    <text x="35" y="66" font-size="15">The polygon and degree-four density fit stay fixed; the edge integration changes.</text>
+    <g fill="none" stroke="#496d79" stroke-width="1.5">
+      <rect x="35" y="96" width="295" height="170" rx="8"/>
+      <rect x="382" y="96" width="295" height="170" rx="8"/>
+      <rect x="729" y="96" width="295" height="170" rx="8"/>
+      <path d="M337 181 H373" marker-end="url(#arrow)"/>
+      <path d="M684 181 H720" marker-end="url(#arrow)"/>
+    </g>
+    <text x="53" y="128" font-size="18">Endpoint recurrence</text>
+    <text x="53" y="163" font-size="16">Pₙ = (bₓu + bᵧv) Pₙ₋₁</text>
+    <text x="53" y="192" font-size="16">Hₙ = (aₓu + aᵧv) Hₙ₋₁ + Pₙ</text>
+    <text x="53" y="235" font-size="14">One fixed-width scan over degree</text>
+    <text x="400" y="128" font-size="18">Signed triangle moments</text>
+    <text x="400" y="163" font-size="16">Mₚq = Σ edges cross(a, b)</text>
+    <text x="420" y="192" font-size="16">× p! q! Hₚq / (p + q + 2)!</text>
+    <text x="400" y="235" font-size="14">Zero padding; either winding</text>
+    <text x="747" y="128" font-size="18">Density contraction</text>
+    <text x="747" y="163" font-size="16">Σ cₚq Mₚ₊ᵢ,q₊ⱼ</text>
+    <text x="747" y="192" font-size="16">Scale and shift to cell centroid</text>
+    <text x="747" y="235" font-size="14">Current and first moments</text>
+    <text x="35" y="306" font-size="16">25 density samples per cell · no edge quadrature samples · geometric table through degree five</text>
+    <text x="35" y="331" font-size="14">Degree six additionally verifies density-weighted second moments against the four-node Gauss reference.</text>
+  </g>
+</svg>

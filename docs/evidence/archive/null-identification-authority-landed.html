@@ -1657,6 +1657,58 @@ REPRO TypeError: missing a required keyword-only argument: 'carrier_identity'</c
   reddens it. The gate ran in a fresh process against the base revision: nine passing cases at
   <code>3ecafdf5a</code>, ten at the change with nothing newly failing.</p>
 </section>
+<section id="the-external-coil-isolation-pin-follows-the-production-census">
+  <h2>The external-coil isolation pin follows the production census (2026-09-22)</h2>
+  <p><strong>Verdict: pin-stale for both parametrizations.</strong> A fresh CPU process at
+  <code>071dbeb386</code> reproduced the two failures before any repair. The coarse production axis
+  was (1.0064725449802572, 0.18466978826118072) m against the test's raw-grid expectation
+  (1.0096852636396698, 0.18645279538409726) m; the fine production axis was
+  (0.9972431622386931, 0.17740956978431402) m against
+  (0.9986607891769985, 0.17424244407984985) m. Both stop on the same axis equality, before the
+  external-coil partition guard runs.</p>
+  <p><strong>The dispatched date bound and all three named suspects are falsified.</strong> Each
+  revision was exported to a separate scratch tree and run in a fresh process; the final nine-row
+  matrix ran under one <code>all_debug</code> allocation. The first 2026-09-15 path landing's parent
+  already fails both cases. So do the first parents of the containment-aware limiter anchor,
+  typed census saddle clip handoff and traced wall-array promotion.</p>
+  <table>
+    <thead><tr><th>Revision</th><th>Subject</th><th>coarse</th><th>fine</th></tr></thead>
+    <tbody>
+      <tr><td><code>7bff1d5d</code></td><td>record the sixth remeasure promotion</td><td>pass</td><td>pass</td></tr>
+      <tr><td><code>47b9f996</code></td><td>Merge the null-identification integration candidate</td><td>fail</td><td>fail</td></tr>
+      <tr><td><code>6f4f14a4</code></td><td>pre-window first parent</td><td>fail</td><td>fail</td></tr>
+      <tr><td><code>fe0689ce</code></td><td>Merge the containment-aware limiter anchor</td><td>fail</td><td>fail</td></tr>
+      <tr><td><code>d90a522f</code></td><td>pass the typed census saddle into the spline-chain clip</td><td>fail</td><td>fail</td></tr>
+      <tr><td><code>192a8ed2</code></td><td>promote wall arrays before traced indexing</td><td>fail</td><td>fail</td></tr>
+    </tbody>
+  </table>
+  <p><strong>The first failing main landing is <code>47b9f996</code>.</strong> That integration made
+  structured production reads consume <code>read_census()</code> and publish the common tensor
+  spline's <code>selected_position_rz</code> and <code>selected_value</code>. The old assertion still
+  compared that output with the raw local-fit candidate from <code>topology.grid()</code>. The exact
+  values introduced there are unchanged at current head, which is why later null-read landings all
+  reproduce the same failure without causing it.</p>
+  <p><strong>The partition check had a separate instrument defect.</strong> It constructed rings in
+  the transposed internal raster order, while <code>DomainMasks.label</code> is returned in the
+  fixture's flat coordinate order. The supposed stable comparison therefore held zero cells at both
+  resolutions. Reading the labels with <code>hex_stencil(shape)</code> yields a positive control and
+  the intended invariant:</p>
+  <table>
+    <thead><tr><th>Case</th><th>In material</th><th>In band</th><th>Interior compared</th><th>Interior changed</th><th>Boundary-local changed</th><th>Stable core → private</th></tr></thead>
+    <tbody>
+      <tr><td>coarse</td><td>327</td><td>262</td><td>65</td><td>0</td><td>17</td><td>0</td></tr>
+      <tr><td>fine</td><td>478</td><td>342</td><td>136</td><td>0</td><td>25</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p>Commit <code>654e63e37</code> repins the two spline-authored axes, cites
+  <code>47b9f996</code> in the assertion message, uses the label-order rings and requires nonempty
+  interior and stable-core sets. Fresh current-head gate: <strong>2 passed in 79.71 s, exit 0</strong>.
+  Declared negative control — the identical repinned file evaluated against pre-landing production
+  <code>7bff1d5d</code>: <strong>2 failed in 75.91 s, exit 1</strong>, on the two old raw-grid axes.
+  Logs and the full transition census are under
+  <code>~/.config/reckon/crew/reports/nova/s19-codex-20260916/nia-attribute-the-coil-null-invariance-failures/</code>.
+  No figure is added: commit order and per-case numeric comparisons are naturally tables.</p>
+</section>
 </main>
 </body>
 </html>

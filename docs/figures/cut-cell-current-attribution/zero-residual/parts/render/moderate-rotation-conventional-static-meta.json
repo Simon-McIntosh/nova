@@ -1,0 +1,49 @@
+{
+  "caption": {
+    "case": "moderate-rotation-conventional-static",
+    "converged": false,
+    "entering_cold": 9123,
+    "entering_promoted": 9123,
+    "recomputed_unmasked_scalar": 0.9375378797078707,
+    "recorded_scalar": 0.002010600391485635,
+    "span_wb": -1.3328285586986954,
+    "sup_all": 1.1003985496500404
+  },
+  "case": "moderate-rotation-conventional-static",
+  "reference_receipt": "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows/moderate-rotation-conventional-static-production-route-cells-2500.json",
+  "reference_topology": {
+    "axis_flux_wb": 1.381216411879898,
+    "axis_rz_m": [
+      1.6998071341963512,
+      -2.4927976349786718e-15
+    ],
+    "boundary_flux_wb": 6.797341186628906e-11,
+    "class": "limited",
+    "exception_text": null,
+    "flux_span_wb": -1.3812164118119246,
+    "o_candidate_count": 1,
+    "o_second_best_flux_margin_wb": null,
+    "read_status": "qualified_axis",
+    "x_candidate_count": 0,
+    "x_point_rz_m": null,
+    "x_second_best_flux_margin_wb": null
+  },
+  "span_wb": -1.3328285586986954,
+  "topology": {
+    "axis_flux_wb": 1.1584668159749338,
+    "axis_rz_m": [
+      1.669584363075094,
+      0.0012688806955203434
+    ],
+    "boundary_flux_wb": -0.1743617427237616,
+    "class": "limited",
+    "exception_text": null,
+    "flux_span_wb": -1.3328285586986954,
+    "o_candidate_count": 1,
+    "o_second_best_flux_margin_wb": null,
+    "read_status": "qualified_axis",
+    "x_candidate_count": 0,
+    "x_point_rz_m": null,
+    "x_second_best_flux_margin_wb": null
+  }
+}

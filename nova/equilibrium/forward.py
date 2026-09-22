@@ -1368,8 +1368,8 @@ class ForwardProfile:
     ) -> jax.Array:
         """Return the next-qualified in-vessel saddle after the selected primary one."""
 
-        physical = jnp.asarray(flux)[: self.operator.physical_node_number]
-        grid_flux, _wall_flux = self.operator.topology.split_flux_map(physical)
+        physical = jnp.asarray(flux)
+        grid_flux = self.operator.null_flux_pool(physical)
         _o_candidates, x_candidates = self.operator._fixed_design_topology.grid(
             grid_flux
         )

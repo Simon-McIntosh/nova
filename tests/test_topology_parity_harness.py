@@ -1,12 +1,23 @@
 """Receipt and boundary-authority rules for the topology parity harness."""
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 from benchmarks.topology_parity_harness import (
     adjudicate_classification,
     adjudicate_difference,
+    committed_class_authority,
+    differing_cell_indices,
+    differing_cell_records,
+    draw_topology_nulls,
+    exit_code,
+    finalize_receipt,
     marginal_status,
+    panel_labels,
     parity_disposition,
     receipt_errors,
 )
+from nova.media.ink import DEFAULT_INK
 
 
 def test_boundary_authority_adjudication_on_manufactured_cell():
@@ -17,12 +28,13 @@ def test_boundary_authority_adjudication_on_manufactured_cell():
     assert row["adjudication"] == "binding-level difference"
 
 
-def _replay_row(marginal):
+def _replay_row(marginal, source="manufactured"):
     row = {
         "identity": "manufactured replay",
         "replayable": True,
+        "replay_completed": True,
         "marginal_solver_basin": marginal,
-        "marginal_flag_source": "manufactured",
+        "marginal_flag_source": source,
         "compared_cell_count": 1,
         "differing_cell_count": 1,
         "differing_cells": [{"index": 0, "adjudication": "binding-level difference"}],
@@ -34,21 +46,56 @@ def _replay_row(marginal):
     return row
 
 
-def test_missing_marginal_flag_is_pending_and_never_an_exact_pass():
-    marginal, source = marginal_status(None)
+def _governed_row(qualification):
+    """A replay row built from a governed receipt through the production read."""
+    marginal, source = marginal_status(qualification)
+    row = _replay_row(marginal, source)
+    receipt = {"schema": "nova.topology-cell-parity", "rows": [row]}
+    finalize_receipt(receipt, pending=True)
+    return row, receipt
+
+
+def test_absent_governed_flag_is_a_validation_error_and_never_a_pass():
+    marginal, source = marginal_status({})
     assert marginal is None
     assert source == "missing solver_qualification.marginal_solver_basin"
-    pending = _replay_row(marginal)
-    receipt = {"schema": "nova.topology-cell-parity", "rows": [pending]}
-    assert pending["disposition"] == "pending marginal qualification"
-    assert receipt_errors(receipt) == []
-    pending["marginal_solver_basin"] = False
-    pending["disposition"] = parity_disposition(pending)
+    row, receipt = _governed_row({})
+    assert row["marginal_solver_basin"] is None
+    assert row["disposition"] == "pending marginal qualification"
+    assert receipt["validation_errors"] == [
+        "manufactured replay: missing solver_qualification.marginal_solver_basin"
+        " — an absent or null governed flag is not a non-marginal verdict"
+    ]
+    assert receipt["passes"] is False
+    assert exit_code(receipt) == 1
+    assert receipt["rows"] == [row]
+
+
+def test_null_governed_flag_is_a_validation_error_and_never_coerced_false():
+    marginal, source = marginal_status({"marginal_solver_basin": None})
+    assert marginal is None
+    assert source == "null solver_qualification.marginal_solver_basin"
+    row, receipt = _governed_row({"marginal_solver_basin": None})
+    assert row["marginal_solver_basin"] is None
+    assert row["disposition"] == "pending marginal qualification"
+    assert receipt["validation_errors"] == [
+        "manufactured replay: null solver_qualification.marginal_solver_basin"
+        " — an absent or null governed flag is not a non-marginal verdict"
+    ]
+    assert receipt["passes"] is False
+    assert exit_code(receipt) == 1
+
+
+def test_non_marginal_flag_reports_every_differing_field():
+    row, receipt = _governed_row({"marginal_solver_basin": False})
+    assert row["marginal_solver_basin"] is False
     assert receipt_errors(receipt) == [
         "manufactured replay: non-marginal labels differ",
         "manufactured replay: non-marginal primary differs",
         "manufactured replay: non-marginal classification differs",
     ]
+    assert receipt["passes"] is False
+    assert exit_code(receipt) == 1
 
 
 def test_classification_disagreement_records_both_authorities_as_marginal():
@@ -70,3 +117,144 @@ def test_classification_disagreement_records_both_authorities_as_marginal():
     assert result["gate"] == "marginal finding"
     assert "production cell authority is diverted" in result["adjudication"]
     assert "retained raster is limited" in result["adjudication"]
+
+
+def _coverage_receipt(rows):
+    return {
+        "schema": "nova.topology-cell-parity",
+        "row_count": len(rows),
+        "replayed_row_count": sum(row.get("replay_completed") is True for row in rows),
+        "unavailable_row_count": sum(
+            row.get("replay_completed") is False for row in rows
+        ),
+        "not_replayable_row_count": sum(not row.get("replayable") for row in rows),
+        "rows": rows,
+    }
+
+
+def test_every_declared_row_missing_from_the_counts_is_a_coverage_defect():
+    rows = [_replay_row(True), _replay_row(True)]
+    receipt = _coverage_receipt(rows)
+    assert receipt_errors(receipt) == []
+    receipt["replayed_row_count"] = 1
+    assert receipt_errors(receipt) == [
+        "every declared row must be replayed or named unavailable"
+    ]
+    kept = rows[0]
+    receipt["row_count"] = 1
+    receipt["replayed_row_count"] = 1
+    receipt["rows"] = [kept]
+    assert receipt_errors(receipt) == []
+    receipt["rows"] = [kept, rows[1]]
+    assert receipt_errors(receipt) == ["row_count does not match the declared rows"]
+
+
+def test_one_cell_label_difference_is_counted_and_adjudicated_never_absorbed():
+    committed = np.array([0, 1, 1, 2, 3])
+    replayed = np.array([0, 1, 0, 2, 3])
+    coordinate = np.c_[np.linspace(0.0, 1.0, 5), np.zeros(5)]
+    values = np.array([0.0, 0.5, 0.9, 1.1, 1.4])
+    indices = differing_cell_indices(committed, replayed)
+    assert indices.tolist() == [2]
+    records = differing_cell_records(
+        indices,
+        coordinate,
+        committed,
+        replayed,
+        values,
+        adjudicate=lambda flux: adjudicate_difference(flux, 0.0, 1.0, 0.8),
+    )
+    assert len(records) == 1
+    cell = records[0]
+    assert cell["index"] == 2
+    assert cell["centroid_m"] == coordinate[2].tolist()
+    assert cell["committed_label"] == 1 and cell["replayed_label"] == 0
+    assert cell["committed_label_name"] != cell["replayed_label_name"]
+    assert cell["psi_norm_census_saddle"] == 0.9
+    assert cell["psi_norm_raster_binding"] == 1.125
+    assert cell["adjudication"] == "binding-level difference"
+
+
+def test_committed_class_reads_the_operand_and_reports_receipt_conflicts():
+    row = {"class": "diverted", "solve_topology_class": "diverted"}
+    variants = {
+        "receipt-a": {"achieved_class": "diverted"},
+        "receipt-b": {"achieved_class": "limited"},
+        "receipt-c": {"achieved_class": None},
+    }
+    committed, source, records, disagreement = committed_class_authority(
+        row, {"achieved_class": "limited"}, variants, np.array([1.0, 2.0])
+    )
+    assert committed == "diverted"
+    assert source == "operand bank metadata class"
+    assert records["operand_metadata"] == "diverted"
+    assert records["receipt-b"] == "limited" and records["receipt-c"] is None
+    assert disagreement is True
+
+    agreed = {"receipt-a": {"achieved_class": "diverted"}}
+    committed, source, _, disagreement = committed_class_authority(
+        row, {"achieved_class": "diverted"}, agreed, np.array([1.0, 2.0])
+    )
+    assert committed == "diverted" and disagreement is False
+
+    _, source, _, _ = committed_class_authority(
+        {}, {"achieved_class": "limited"}, {}, np.array([1.0, 2.0])
+    )
+    assert source == "governed receipt achieved_class"
+
+
+def _axis_marker_artists(data):
+    """Draw one panel's nulls and count its filled and hollow axis markers."""
+    figure, axis = plt.subplots()
+    tally = draw_topology_nulls(axis, data["census_nulls"], data["committed_nulls"])
+    markers = [
+        line for line in axis.lines if line.get_marker() == DEFAULT_INK.axis_marker
+    ]
+    hollow = [
+        line for line in markers if str(line.get_markerfacecolor()).lower() == "none"
+    ]
+    plt.close(figure)
+    return tally, len(markers) - len(hollow), len(hollow)
+
+
+def test_every_declared_row_has_panel_coverage_or_a_visible_annotation():
+    replayed = (
+        {"identity": "row one"},
+        {
+            "coordinate": None,
+            "annotation": None,
+            "census_nulls": {
+                "magnetic_axis": np.array([0.1, 0.2]),
+                "x_points": np.array([[0.9, 0.0]]),
+            },
+            "committed_nulls": {
+                "magnetic_axis": np.array([0.11, 0.2]),
+                "x_points": np.array([[0.9, 0.01]]),
+            },
+        },
+    )
+    annotated = (
+        {"identity": "row two", "replay_exception": "NoQualifiedAxisError"},
+        {
+            "coordinate": None,
+            "annotation": "row two: NoQualifiedAxisError",
+            "census_nulls": {},
+            "committed_nulls": {},
+        },
+    )
+    declared = [replayed, annotated]
+    labels = panel_labels(declared)
+    assert len(labels) == len(declared)
+    assert labels[0] == "row one"
+    assert labels[1].startswith("row two") and "NoQualifiedAxisError" in labels[1]
+    for record, data in declared:
+        tally, filled, hollow = _axis_marker_artists(data)
+        if data["census_nulls"]:
+            assert (filled, hollow) == (1, 1)
+            assert tally["replayed_axis_drawn"] == 1
+            assert tally["committed_axis_drawn"] == 1
+            assert tally["replayed_x_points_drawn"] == 1
+            assert tally["committed_x_points_drawn"] == 1
+        else:
+            assert (filled, hollow) == (0, 0)
+            assert data["annotation"]

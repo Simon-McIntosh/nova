@@ -1,0 +1,75 @@
+{
+  "source_sha256": {
+    "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+    "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+  },
+  "case": "diverted-single-null",
+  "requested_cells": 110,
+  "revision": "ccc09221d1e982026eed45b5ee5cc0f865188d96",
+  "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+  "job": "1275914",
+  "comparisons": {
+    "vertices": {
+      "array_equal": false,
+      "relative_l2": 1.4134238140314675e-13,
+      "max_absolute": 1.971089957919503e-12
+    },
+    "crossings": {
+      "array_equal": false,
+      "relative_l2": 2.337100496505819e-13,
+      "max_absolute": 1.971089957919503e-12
+    },
+    "crossing_mask": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    },
+    "current": {
+      "array_equal": false,
+      "relative_l2": 1.0713334688345263e-12,
+      "max_absolute": 4.604260084306588e-09
+    },
+    "radial_moment": {
+      "array_equal": false,
+      "relative_l2": 1.8654954002624786e-12,
+      "max_absolute": 4.715605683713875e-11
+    },
+    "vertical_moment": {
+      "array_equal": false,
+      "relative_l2": 5.594117012067263e-12,
+      "max_absolute": 1.1519496467826684e-10
+    },
+    "area": {
+      "array_equal": false,
+      "relative_l2": 1.191649155893604e-12,
+      "max_absolute": 2.0264172284623072e-13
+    },
+    "first_area_moment": {
+      "array_equal": false,
+      "relative_l2": 3.8187601649184385e-12,
+      "max_absolute": 5.238593846906836e-15
+    },
+    "second_area_moment": {
+      "array_equal": false,
+      "relative_l2": 1.2423700519499772e-12,
+      "max_absolute": 3.4107645093678363e-16
+    },
+    "counts": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    },
+    "live": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    },
+    "refused": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    }
+  },
+  "previous_route_equivalence_1e14": false,
+  "previous_route_equivalence_is_acceptance_gate": false
+}

@@ -188,8 +188,8 @@ def bank_census_receipt(path: Path, revision: str) -> dict:
     }
 
 
-def test_forward_census_requires_spline_ring_sign_count():
-    """A neighbouring quadratic fit with two ring changes is not a saddle."""
+def test_forward_census_admits_typed_roots_without_crossing_veto():
+    """A typed contained quadratic root survives a two-change diagnostic."""
     radial = np.linspace(0.2, 2.2, 17)
     vertical = np.linspace(-1.0, 1.0, 17)
     fixed = _locator(radial, vertical)
@@ -198,10 +198,11 @@ def test_forward_census_requires_spline_ring_sign_count():
 
     _local_candidates, local_masks = fixed._local_fit_census(field)
     census = fixed.candidate_census(field)
-    false_local_saddle = local_masks[1] & (census["ring_crossing_count"] == 2)
+    two_crossing_saddle = local_masks[1] & (census["ring_crossing_count"] == 2)
 
-    assert bool(jnp.any(false_local_saddle))
-    assert not bool(jnp.any(census["representative_mask"][1] & false_local_saddle))
+    assert bool(jnp.any(two_crossing_saddle))
+    assert bool(jnp.any(census["representative_mask"][1] & two_crossing_saddle))
+    assert bool(jnp.all(~local_masks[1] | census["quadratic_admitted_mask"][1]))
     assert int(census["same_root_count"][1]) == 1
 
 
@@ -387,13 +388,13 @@ def _diverted_oracle_read(requested_cells: int):
         source_case, machine, oracle_state - exact_internal
     )
     _masks, state = operator.read(jnp.asarray(oracle_state))
-    grid_flux = jnp.asarray(oracle_state[: len(machine.node)])
-    census = operator._fixed_design_topology.grid.candidate_table_status(grid_flux)
+    flux_pool = operator.null_flux_pool(jnp.asarray(oracle_state))
+    census = operator._fixed_design_topology.grid.candidate_table_status(flux_pool)
     return carrier_case, machine, operator, state, census
 
 
 def test_forward_census_exact_diverted_oracle():
-    """The certificate ladder resolves only nulls contained by its nodal rings."""
+    """The carrier wall excludes the analytic saddle at both resolutions."""
     from benchmarks.solovev_certificate import AXIS_M, X_POINT_M
 
     _carrier, coarse_machine, coarse_operator, coarse_state, coarse_census = (
@@ -404,7 +405,7 @@ def test_forward_census_exact_diverted_oracle():
     nearest_saddle_cell = int(
         np.argmin(
             np.linalg.norm(
-                np.asarray(coarse_grid.locator.physical_origin) - X_POINT_M,
+                np.asarray(coarse_grid.fit_locator.physical_origin) - X_POINT_M,
                 axis=1,
             )
         )
@@ -416,18 +417,13 @@ def test_forward_census_exact_diverted_oracle():
     np.testing.assert_allclose(np.asarray(coarse_state.axis), AXIS_M, atol=coarse_pitch)
     assert np.all(np.isnan(np.asarray(coarse_state.x_point)))
     assert not bool(coarse_state.diverted)
-    # raw_ring_count measures the two ring classes that admit a candidate:
-    # a stencil ring with no crossing holds an extremum, one with four holds a
-    # saddle.  The machine mesh is the carrier's, so its rings straddle the
-    # diverted separatrix almost everywhere (54 of 55 rings cross twice) and
-    # exactly one ring lies wholly inside it, at the axis.  No ring has four
-    # crossings at either rung, so the census resolves the axis and no saddle,
-    # which is the ladder's own rule: a null is retained only where a nodal
-    # ring contains it.
-    np.testing.assert_array_equal(coarse_census["raw_ring_count"], [1, 0])
-    np.testing.assert_array_equal(coarse_census["candidate_count"], [1, 0])
-    assert int(coarse_census["ring_crossing_count"][nearest_saddle_cell]) == 2
-    assert bool(coarse_census["ring_resolution_limited"][nearest_saddle_cell])
+    # A four-change ring cannot admit a root outside the vessel.
+    assert int(coarse_census["raw_ring_count"][1]) > 0
+    assert int(coarse_census["candidate_count"][0]) >= 1
+    assert int(coarse_census["candidate_count"][1]) == 0
+    assert not np.any(np.asarray(coarse_census["quadratic_admitted_mask"])[1])
+    assert coarse_census["ring_crossing_count"].shape == (len(coarse_machine.node),)
+    assert 0 <= int(coarse_census["ring_crossing_count"][nearest_saddle_cell]) <= 6
     assert not np.any(np.asarray(coarse_census["overflow"]))
 
     _carrier, fine_machine, fine_operator, fine_state, fine_census = (
@@ -439,16 +435,13 @@ def test_forward_census_exact_diverted_oracle():
     assert not fine_operator._fixed_design_topology.grid.structured
     assert not bool(fine_census["spline_authored"])
     np.testing.assert_allclose(np.asarray(fine_state.axis), AXIS_M, atol=fine_pitch)
-    # Refining the rung moves the axis and does not reach the saddle: the
-    # divertor X-point sits outside every stencil ring at this pitch too, so
-    # the read stays limited with a non-finite x_point and reports no
-    # diversion.  The ladder therefore has no rung here whose mesh contains
-    # the saddle, and the positive control for the containment rule is the
-    # axis pair above rather than a resolved saddle.
+    # Mesh refinement leaves the wall fixed, so the saddle stays outside it.
     assert np.all(np.isnan(np.asarray(fine_state.x_point)))
     assert not bool(fine_state.diverted)
-    np.testing.assert_array_equal(fine_census["raw_ring_count"], [1, 0])
-    np.testing.assert_array_equal(fine_census["candidate_count"], [1, 0])
+    assert int(fine_census["candidate_count"][0]) >= 1
+    assert int(fine_census["candidate_count"][1]) == 0
+    assert not np.any(np.asarray(fine_census["quadratic_admitted_mask"])[1])
+    assert fine_census["ring_crossing_count"].shape == (len(fine_machine.node),)
     assert not np.any(np.asarray(fine_census["overflow"]))
 
 

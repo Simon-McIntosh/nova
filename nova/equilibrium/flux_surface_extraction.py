@@ -16,7 +16,7 @@ from nova.biot.arcbandedcoupling import _arc_rule
 from nova.biot.greens import MU0
 from nova.equilibrium.flux_surface_connectivity import flood_fill_core
 from nova.equilibrium.separatrix_clip import _traced_clip
-from nova.linalg.interpolant import Bernstein
+from nova.linalg.interpolant import bernstein_basis
 from nova.linalg.tensor_spline import fit_tensor_spline
 from nova.utilities.importmanager import skip_import
 
@@ -141,13 +141,8 @@ def _tensor_bicubic_coefficients(values):
 
 
 def _bernstein_matrix(coordinate, order):
-    """Evaluate Nova's traced Bernstein basis without changing leading shape."""
-    coordinate = jnp.asarray(coordinate)
-    return (
-        Bernstein(order=order)
-        .coefficent_matrix(coordinate.reshape(-1))
-        .reshape(coordinate.shape + (order + 1,))
-    )
+    """Evaluate a host-specialized basis without changing leading shape."""
+    return bernstein_basis(coordinate, order)
 
 
 def _tensor_bernstein(coefficient, radial, vertical, radial_order, vertical_order):
@@ -552,6 +547,26 @@ def _solve_bicubic_ordinate(
 
 
 def _bicubic_arc_moment_correction(
+    level, coefficient, corner_flux, dr, dz, base_moments, *, detect_even_roots=True
+):
+    """Map one fixed-shape clip body over independent grid cells."""
+
+    def cell(coefficients, corners, moments):
+        result = _bicubic_cell_arc_moments(
+            level,
+            coefficients[None],
+            corners[None],
+            dr,
+            dz,
+            moments[None],
+            detect_even_roots=detect_even_roots,
+        )
+        return tuple(value[0] for value in result)
+
+    return jax.vmap(cell)(coefficient, corner_flux, base_moments)
+
+
+def _bicubic_cell_arc_moments(
     level,
     coefficient,
     corner_flux,

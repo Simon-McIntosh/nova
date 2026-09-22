@@ -1,0 +1,14 @@
+revision=c054dc50fe02add3b03555a99ce66a099485dc72 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-closed-form-polygon-moments-replace-the-gauss-antiderivative command=srun --partition=all_debug --time=00:49:00 --cpus-per-task=4 --mem=96G bash -c [export TMPDIR=/tmp; ulimit -c 0; /home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/exact-clip-closed-form/measure_replacement.py]
+baseline-suite: exit 0
+baseline-program: exit 0
+candidate-suite: exit 0
+candidate-program: exit 0
+negative-program: exit 0
+weak-rotation-reactor-static-110: exit 0
+weak-rotation-reactor-static-300: exit 0
+moderate-rotation-conventional-static-110: exit 0
+moderate-rotation-conventional-static-300: exit 0
+strong-rotation-compact-static-110: exit 0
+strong-rotation-compact-static-300: exit 0
+diverted-single-null-110: exit 0
+diverted-single-null-300: exit 0

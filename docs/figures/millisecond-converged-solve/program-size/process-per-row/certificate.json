@@ -303,5 +303,6 @@
     }
   ],
   "schema": "nova.solve-program-certificate-identity",
+  "field_semantics_note": "Written under the superseded receipt field semantics at revision 2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0 and left as measured rather than rewritten. Two fields read against the names they now carry: candidate_state_array_path holds an absolute worktree path rather than a name relative to the states directory this receipt records, and the per-row exit_code field holds the probe wrapper's status while the status of the child that solved the row is under probe_exit_code. The within_one_program_load flag on each row is the two-load comparison, which is now its own field within_two_program_loads; a receipt minted after the repair reports exit_code as the child status, probe_wrapper_exit as the wrapper's, and both load bounds separately.",
   "state_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/states"
 }

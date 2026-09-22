@@ -1,0 +1,19 @@
+<h3>Measured executable and row comparison</h3>
+<table><thead><tr><th>Arm</th><th>Serialized bytes</th><th>Compile seconds</th><th>Optimized instructions</th><th>Top five HLO operations</th></tr></thead><tbody>
+<tr><td>baseline</td><td>234,138,055</td><td>449.786</td><td>741,991</td><td>parameter: 124,212; broadcast: 89,497; bitcast: 74,875; constant: 74,478; add: 55,569</td></tr>
+<tr><td>candidate</td><td>207,228,014</td><td>400.858</td><td>668,305</td><td>parameter: 121,618; broadcast: 76,195; constant: 70,114; bitcast: 63,927; add: 46,804</td></tr>
+<tr><td>negative</td><td>234,137,743</td><td>433.703</td><td>741,991</td><td>parameter: 124,212; broadcast: 89,497; bitcast: 74,875; constant: 74,478; add: 55,569</td></tr>
+</tbody></table>
+<p>Moment columns are relative L₂ differences against the four-node Gauss reference. Image differences are supremum differences divided by flux span. The moment fence is 1e-12; the image floor is 1.52e-15. A refused cell remains a refusal even when admitted cells agree.</p>
+<table><thead><tr><th>Case / requested cells</th><th>Order 0: current</th><th>Order 1: radial</th><th>Order 1: vertical</th><th>Order 2: radial squared</th><th>Order 2: radial vertical</th><th>Order 2: vertical squared</th><th>Image / span</th><th>Refused cells</th><th>Pass</th></tr></thead><tbody>
+<tr><td>weak-rotation-reactor-static / 110</td><td>2.669e-16</td><td>3.458e-16</td><td>4.746e-16</td><td>2.700e-16</td><td>6.340e-16</td><td>2.895e-16</td><td>1.138e-15</td><td>0</td><td>True</td></tr>
+<tr><td>weak-rotation-reactor-static / 300</td><td>1.844e-16</td><td>3.484e-16</td><td>5.790e-16</td><td>2.018e-16</td><td>5.496e-16</td><td>3.093e-16</td><td>1.138e-15</td><td>0</td><td>True</td></tr>
+<tr><td>moderate-rotation-conventional-static / 110</td><td>1.907e-16</td><td>3.347e-16</td><td>4.507e-16</td><td>2.443e-16</td><td>6.399e-16</td><td>2.234e-16</td><td>1.286e-15</td><td>0</td><td>True</td></tr>
+<tr><td>moderate-rotation-conventional-static / 300</td><td>2.510e-16</td><td>3.655e-16</td><td>3.336e-16</td><td>2.550e-16</td><td>5.087e-16</td><td>2.375e-16</td><td>6.430e-16</td><td>0</td><td>True</td></tr>
+<tr><td>strong-rotation-compact-static / 110</td><td>1.967e-16</td><td>3.055e-16</td><td>3.806e-16</td><td>2.202e-16</td><td>6.157e-16</td><td>2.763e-16</td><td>9.608e-16</td><td>0</td><td>True</td></tr>
+<tr><td>strong-rotation-compact-static / 300</td><td>2.057e-16</td><td>3.598e-16</td><td>4.950e-16</td><td>2.033e-16</td><td>5.039e-16</td><td>2.159e-16</td><td>9.608e-16</td><td>0</td><td>True</td></tr>
+<tr><td>diverted-single-null / 110</td><td>1.612e-16</td><td>4.803e-16</td><td>4.345e-16</td><td>1.900e-16</td><td>5.454e-16</td><td>2.706e-16</td><td>4.861e-15</td><td>0</td><td>False</td></tr>
+<tr><td>diverted-single-null / 300</td><td>2.108e-16</td><td>2.354e-16</td><td>4.018e-16</td><td>2.249e-16</td><td>6.186e-16</td><td>2.313e-16</td><td>4.861e-15</td><td>0</td><td>False</td></tr>
+</tbody></table>
+<p>Restoring the Gauss path changes the byte count by -312 bytes against baseline; the top-five operation counts match: True. The byte reduction of the candidate is 11.49%.</p>
+<p><strong>Full node gate passed: False.</strong> The program-size target is 100,000,000 bytes. Full acceptance also requires removing Bernstein binomial lowering and completing every requested row and the declared negative control.</p>

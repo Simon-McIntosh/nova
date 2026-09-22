@@ -1,162 +1,1174 @@
 {
-  "cache": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-parity-harness-repair/docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
-  "cache_source_identity": "sha256:bd78d3ddaaaef75d32c51af00399337652303aaddcd8aa899a7ecebb54392bae",
-  "exact_non_marginal_pass_count": 0,
-  "exact_non_marginal_row_count": 0,
+  "cache": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
+  "cache_sha256": "dacb1776d361dc80b282b038efd2b0a05937de818a9c1b1017554224fe808644",
+  "cache_source_identity": "sha256:23038d9c17076ab89be916f6aa65fea049e6e2241edba15e334c8b4dcf90e0a3",
+  "committed_class_authority": "the operand bank's own recorded class; governed receipts' achieved_class values are kept per row as a cross-check",
+  "committed_class_disagreement_count": 3,
+  "committed_class_disagreements": [
+    {
+      "committed_class": "diverted",
+      "identity": "21986/46 pure",
+      "records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
+        "operand_metadata": "diverted"
+      }
+    },
+    {
+      "committed_class": "diverted",
+      "identity": "21989/55 pure",
+      "records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
+        "operand_metadata": "diverted"
+      }
+    },
+    {
+      "committed_class": "diverted",
+      "identity": "21989/55 mixed",
+      "records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
+        "operand_metadata": "diverted"
+      }
+    }
+  ],
+  "exact_non_marginal_pass_count": 10,
+  "exact_non_marginal_row_count": 10,
   "marginal_rule": "only solver_qualification.marginal_solver_basin is authoritative; a missing flag is marginal-unknown and pending",
-  "marginal_unknown_row_count": 6,
-  "not_replayable_row_count": 10,
+  "marginal_unknown_row_count": 0,
+  "not_replayable_row_count": 0,
+  "operand_base_revision": "ee2ad2d6913082bf921d974b2496ccef9393b09d",
+  "operand_producer_commit": "ba9d0f5a3e16cde2b38de11ba3553b8041884957",
   "passes": true,
-  "pending_replayable_row_count": 1,
+  "pending_replayable_row_count": 0,
   "production_replay": "ForwardFluxOperator._fixed_design_read with MomentGeometry built from the row's committed cell polygons",
-  "qualification_metadata": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-pta/pta-parity-harness-repair/docs/figures/gs-absolute-accuracy/efit-reproduction.json",
-  "replayable_row_count": 2,
+  "qualification_receipts": [
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json"
+  ],
+  "replayable_row_count": 12,
+  "replayed_row_count": 12,
   "row_count": 12,
   "rows": [
     {
       "arm": "pure",
-      "disposition": "not replayable",
-      "frame": 35,
-      "identity": "21978/35 pure",
-      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
-      "marginal_solver_basin": true,
-      "not_replayable_reason": "no cached per-cell flux for this bank row",
-      "replayable": false,
-      "shot": 21978
-    },
-    {
-      "arm": "mixed",
-      "disposition": "not replayable",
-      "frame": 35,
-      "identity": "21978/35 mixed",
-      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
-      "marginal_solver_basin": null,
-      "not_replayable_reason": "no cached per-cell flux for this bank row",
-      "replayable": false,
-      "shot": 21978
-    },
-    {
-      "arm": "pure",
-      "disposition": "not replayable",
-      "frame": 35,
-      "identity": "21983/35 pure",
-      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
-      "marginal_solver_basin": false,
-      "not_replayable_reason": "no cached per-cell flux for this bank row",
-      "replayable": false,
-      "shot": 21983
-    },
-    {
-      "arm": "mixed",
-      "disposition": "not replayable",
-      "frame": 35,
-      "identity": "21983/35 mixed",
-      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
-      "marginal_solver_basin": null,
-      "not_replayable_reason": "no cached per-cell flux for this bank row",
-      "replayable": false,
-      "shot": 21983
-    },
-    {
-      "arm": "pure",
-      "disposition": "not replayable",
-      "frame": 51,
-      "identity": "21985/51 pure",
-      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
-      "marginal_solver_basin": false,
-      "not_replayable_reason": "no cached per-cell flux for this bank row",
-      "replayable": false,
-      "shot": 21985
-    },
-    {
-      "arm": "mixed",
-      "disposition": "not replayable",
-      "frame": 51,
-      "identity": "21985/51 mixed",
-      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
-      "marginal_solver_basin": null,
-      "not_replayable_reason": "no cached per-cell flux for this bank row",
-      "replayable": false,
-      "shot": 21985
-    },
-    {
-      "arm": "pure",
-      "disposition": "not replayable",
-      "frame": 46,
-      "identity": "21986/46 pure",
-      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
-      "marginal_solver_basin": false,
-      "not_replayable_reason": "no cached per-cell flux for this bank row",
-      "replayable": false,
-      "shot": 21986
-    },
-    {
-      "arm": "mixed",
-      "disposition": "not replayable",
-      "frame": 46,
-      "identity": "21986/46 mixed",
-      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
-      "marginal_solver_basin": null,
-      "not_replayable_reason": "no cached per-cell flux for this bank row",
-      "replayable": false,
-      "shot": 21986
-    },
-    {
-      "arm": "pure",
-      "disposition": "not replayable",
-      "frame": 55,
-      "identity": "21989/55 pure",
-      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
-      "marginal_solver_basin": false,
-      "not_replayable_reason": "no cached per-cell flux for this bank row",
-      "replayable": false,
-      "shot": 21989
-    },
-    {
-      "arm": "mixed",
-      "disposition": "not replayable",
-      "frame": 55,
-      "identity": "21989/55 mixed",
-      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
-      "marginal_solver_basin": null,
-      "not_replayable_reason": "no cached per-cell flux for this bank row",
-      "replayable": false,
-      "shot": 21989
-    },
-    {
-      "arm": "pure",
-      "census_axis_flux": 0.3415261910819879,
-      "census_saddle_flux": -0.12422231793209579,
+      "census_axis_flux": 0.3142914939111877,
+      "census_saddle_flux": -0.0688733772685376,
       "classification": {
-        "adjudication": "production cell authority is diverted at boundary flux -0.12422231793209579 with class margin +Infinity; retained raster is limited at binding flux -0.12439126215921249 with class margin -0.13505893912935463",
-        "cell_boundary_flux": -0.12422231793209579,
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.0688733772685376,
         "cell_class_margin": "+Infinity",
-        "cell_raster_matches": false,
+        "cell_raster_matches": true,
         "committed": "diverted",
-        "finding": true,
-        "gate": "marginal finding",
+        "finding": false,
+        "gate": "exact non-marginal parity",
         "matches_committed": true,
         "replayed_cell_authority": "diverted",
-        "retained_raster": "limited",
-        "retained_raster_boundary_flux": -0.12439126215921249,
-        "retained_raster_class_margin": -0.13505893912935463
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.0688733772685376,
+        "retained_raster_class_margin": "+Infinity"
       },
+      "committed_class": "diverted",
+      "committed_class_disagreement": false,
+      "committed_class_records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "operand_metadata": "diverted"
+      },
+      "committed_class_source": "operand bank metadata class",
       "compared_cell_count": 1089,
       "differing_cell_count": 0,
       "differing_cells": [],
       "disposition": "marginal finding",
-      "frame": 43,
-      "identity": "22086/43 pure",
-      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "figure_panel": "replayed",
+      "frame": 35,
+      "identity": "21978/35 pure",
+      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
       "marginal_solver_basin": true,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
-      "raster_binding_flux": -0.12439126215921249,
+      "raster_binding_flux": -0.0688733772685376,
+      "replay_completed": true,
       "replayable": true,
       "selected_primaries": {
         "axis": {
           "committed_candidate_index": 4,
           "matches": true,
-          "position_residual_m": 1.214306433183765e-16,
+          "position_residual_m": 1.1168440202394181e-16,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 2,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 2
+        }
+      },
+      "shot": 21978,
+      "wall_node_census": {
+        "cell_authority_private_count": 10,
+        "differing_node_count": 4,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 9,
+            "nearest_cell_index": 295,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.8250000476837158
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 10,
+            "nearest_cell_index": 294,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 14
+      },
+      "wall_seconds": 47.00420792028308
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.3147334469601198,
+      "census_saddle_flux": -0.0647077747490628,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.0647077747490628,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.06470777474906281,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "committed_class": "diverted",
+      "committed_class_disagreement": false,
+      "committed_class_records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "operand_metadata": "diverted"
+      },
+      "committed_class_source": "operand bank metadata class",
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "figure_panel": "replayed",
+      "frame": 35,
+      "identity": "21978/35 mixed",
+      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.06470777474906281,
+      "replay_completed": true,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.2224718309267613e-15,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 2,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 2
+        }
+      },
+      "shot": 21978,
+      "wall_node_census": {
+        "cell_authority_private_count": 10,
+        "differing_node_count": 4,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 9,
+            "nearest_cell_index": 295,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.8250000476837158
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 10,
+            "nearest_cell_index": 294,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 14
+      },
+      "wall_seconds": 4.487352218478918
+    },
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.30565551958601833,
+      "census_saddle_flux": -0.09532994589373615,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.09532994589373615,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.09532994589373613,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "committed_class": "diverted",
+      "committed_class_disagreement": false,
+      "committed_class_records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "operand_metadata": "diverted"
+      },
+      "committed_class_source": "operand bank metadata class",
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "figure_panel": "replayed",
+      "frame": 35,
+      "identity": "21983/35 pure",
+      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.09532994589373613,
+      "replay_completed": true,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.3877787807814457e-17,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21983,
+      "wall_node_census": {
+        "cell_authority_private_count": 7,
+        "differing_node_count": 4,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 9,
+            "nearest_cell_index": 295,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.8250000476837158
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 10,
+            "nearest_cell_index": 294,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 11
+      },
+      "wall_seconds": 15.810049654915929
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.3057412674175028,
+      "census_saddle_flux": -0.09500072235468895,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.09500072235468895,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.09500072235468891,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "committed_class": "diverted",
+      "committed_class_disagreement": false,
+      "committed_class_records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "operand_metadata": "diverted"
+      },
+      "committed_class_source": "operand bank metadata class",
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "figure_panel": "replayed",
+      "frame": 35,
+      "identity": "21983/35 mixed",
+      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.09500072235468891,
+      "replay_completed": true,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 6.938893903907228e-18,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 2.220446049250313e-16,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21983,
+      "wall_node_census": {
+        "cell_authority_private_count": 8,
+        "differing_node_count": 4,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 9,
+            "nearest_cell_index": 295,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.8250000476837158
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 10,
+            "nearest_cell_index": 294,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 12
+      },
+      "wall_seconds": 4.511961394920945
+    },
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.3369926551448839,
+      "census_saddle_flux": -0.21253815211080976,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.21253815211080976,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.21253815211080979,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "committed_class": "diverted",
+      "committed_class_disagreement": false,
+      "committed_class_records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "operand_metadata": "diverted"
+      },
+      "committed_class_source": "operand bank metadata class",
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "figure_panel": "replayed",
+      "frame": 51,
+      "identity": "21985/51 pure",
+      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.21253815211080979,
+      "replay_completed": true,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.3877787807814457e-17,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.1102230246251565e-16,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21985,
+      "wall_node_census": {
+        "cell_authority_private_count": 10,
+        "differing_node_count": 7,
+        "differing_nodes": [
+          {
+            "cell_authority_private": true,
+            "index": 11,
+            "nearest_cell_index": 426,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.7835000157356262,
+              1.7280815839767456
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 12,
+            "nearest_cell_index": 426,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.7835000157356262,
+              1.7155816555023193
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 13,
+            "nearest_cell_index": 325,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.5825902819633484,
+              1.5470000505447388
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 14,
+            "nearest_cell_index": 226,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.4165000021457672,
+              1.5470000505447388
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 15,
+            "nearest_cell_index": 161,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.2800000011920929,
+              1.683500051498413
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 7
+      },
+      "wall_seconds": 4.450764432549477
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.33713240940252315,
+      "census_saddle_flux": -0.21126305742088525,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.21126305742088525,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.21126305742088516,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "committed_class": "diverted",
+      "committed_class_disagreement": false,
+      "committed_class_records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "operand_metadata": "diverted"
+      },
+      "committed_class_source": "operand bank metadata class",
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "figure_panel": "replayed",
+      "frame": 51,
+      "identity": "21985/51 mixed",
+      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.21126305742088516,
+      "replay_completed": true,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 2.7755575615628914e-17,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21985,
+      "wall_node_census": {
+        "cell_authority_private_count": 5,
+        "differing_node_count": 2,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 7
+      },
+      "wall_seconds": 4.4090767446905375
+    },
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.34910849476954,
+      "census_saddle_flux": -0.18663029086836322,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.18663029086836322,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.1866302908683632,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "committed_class": "diverted",
+      "committed_class_disagreement": true,
+      "committed_class_records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
+        "operand_metadata": "diverted"
+      },
+      "committed_class_source": "operand bank metadata class",
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "figure_panel": "replayed",
+      "frame": 46,
+      "identity": "21986/46 pure",
+      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.1866302908683632,
+      "replay_completed": true,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 6.938893903907228e-18,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21986,
+      "wall_node_census": {
+        "cell_authority_private_count": 5,
+        "differing_node_count": 2,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 7
+      },
+      "wall_seconds": 4.4646030850708485
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.3480289383769171,
+      "census_saddle_flux": -0.18548836655337933,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.18548836655337933,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.18548836655337939,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "committed_class": "diverted",
+      "committed_class_disagreement": false,
+      "committed_class_records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": null,
+        "operand_metadata": "diverted"
+      },
+      "committed_class_source": "operand bank metadata class",
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "figure_panel": "replayed",
+      "frame": 46,
+      "identity": "21986/46 mixed",
+      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.18548836655337939,
+      "replay_completed": true,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21986,
+      "wall_node_census": {
+        "cell_authority_private_count": 10,
+        "differing_node_count": 4,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 9,
+            "nearest_cell_index": 295,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.8250000476837158
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 10,
+            "nearest_cell_index": 294,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 14
+      },
+      "wall_seconds": 4.429775347933173
+    },
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.332556091762435,
+      "census_saddle_flux": -0.20290750834507923,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.20290750834507923,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.20290750834507917,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "committed_class": "diverted",
+      "committed_class_disagreement": true,
+      "committed_class_records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
+        "operand_metadata": "diverted"
+      },
+      "committed_class_source": "operand bank metadata class",
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "figure_panel": "replayed",
+      "frame": 55,
+      "identity": "21989/55 pure",
+      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.20290750834507917,
+      "replay_completed": true,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.1188630228279524e-16,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 8.881784197001252e-16,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21989,
+      "wall_node_census": {
+        "cell_authority_private_count": 10,
+        "differing_node_count": 7,
+        "differing_nodes": [
+          {
+            "cell_authority_private": true,
+            "index": 11,
+            "nearest_cell_index": 426,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.7835000157356262,
+              1.7280815839767456
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 12,
+            "nearest_cell_index": 426,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.7835000157356262,
+              1.7155816555023193
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 13,
+            "nearest_cell_index": 325,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.5825902819633484,
+              1.5470000505447388
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 14,
+            "nearest_cell_index": 226,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.4165000021457672,
+              1.5470000505447388
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 15,
+            "nearest_cell_index": 161,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.2800000011920929,
+              1.683500051498413
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 7
+      },
+      "wall_seconds": 4.438082799315453
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.3312218814919155,
+      "census_saddle_flux": -0.2022071592500645,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.2022071592500645,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.20220715925006458,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "committed_class": "diverted",
+      "committed_class_disagreement": true,
+      "committed_class_records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
+        "operand_metadata": "diverted"
+      },
+      "committed_class_source": "operand bank metadata class",
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "figure_panel": "replayed",
+      "frame": 55,
+      "identity": "21989/55 mixed",
+      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.20220715925006458,
+      "replay_completed": true,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 2.0816681711721685e-17,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.1102230246251565e-16,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21989,
+      "wall_node_census": {
+        "cell_authority_private_count": 5,
+        "differing_node_count": 2,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 7
+      },
+      "wall_seconds": 4.42728759162128
+    },
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.3414412366373419,
+      "census_saddle_flux": -0.12440216027127877,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.12440216027127877,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.12440216027127877,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "committed_class": "diverted",
+      "committed_class_disagreement": false,
+      "committed_class_records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "operand_metadata": "diverted"
+      },
+      "committed_class_source": "operand bank metadata class",
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "marginal finding",
+      "figure_panel": "replayed",
+      "frame": 43,
+      "identity": "22086/43 pure",
+      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
+      "marginal_solver_basin": true,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.12440216027127877,
+      "replay_completed": true,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 4.002966042486721e-16,
           "replayed_candidate_index": 4
         },
         "x_point": {
@@ -196,48 +1208,58 @@
         ],
         "node_count": 37,
         "retained_raster_private_count": 7
-      }
+      },
+      "wall_seconds": 4.43441566079855
     },
     {
       "arm": "mixed",
-      "census_axis_flux": 0.3416893911447206,
-      "census_saddle_flux": -0.12239191397875913,
+      "census_axis_flux": 0.3415760976477331,
+      "census_saddle_flux": -0.12236763818412649,
       "classification": {
         "adjudication": "committed, cell-authority, and retained raster classes agree",
-        "cell_boundary_flux": -0.12239191397875913,
+        "cell_boundary_flux": -0.12236763818412649,
         "cell_class_margin": "+Infinity",
         "cell_raster_matches": true,
         "committed": "diverted",
         "finding": false,
-        "gate": "pending marginal qualification",
+        "gate": "exact non-marginal parity",
         "matches_committed": true,
         "replayed_cell_authority": "diverted",
         "retained_raster": "diverted",
-        "retained_raster_boundary_flux": -0.12236728180376087,
+        "retained_raster_boundary_flux": -0.12236763818412648,
         "retained_raster_class_margin": "+Infinity"
       },
+      "committed_class": "diverted",
+      "committed_class_disagreement": false,
+      "committed_class_records": {
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "operand_metadata": "diverted"
+      },
+      "committed_class_source": "operand bank metadata class",
       "compared_cell_count": 1089,
       "differing_cell_count": 0,
       "differing_cells": [],
-      "disposition": "pending marginal qualification",
+      "disposition": "exact non-marginal parity",
+      "figure_panel": "replayed",
       "frame": 43,
       "identity": "22086/43 mixed",
-      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
-      "marginal_solver_basin": null,
+      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-merged-head/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
+      "marginal_solver_basin": false,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
-      "raster_binding_flux": -0.12236728180376087,
+      "raster_binding_flux": -0.12236763818412648,
+      "replay_completed": true,
       "replayable": true,
       "selected_primaries": {
         "axis": {
           "committed_candidate_index": 4,
           "matches": true,
-          "position_residual_m": 2.280617143682994e-16,
+          "position_residual_m": 1.6887762462497003e-15,
           "replayed_candidate_index": 4
         },
         "x_point": {
           "committed_candidate_index": 1,
           "matches": true,
-          "position_residual_m": 2.482534153247273e-16,
+          "position_residual_m": 1.1957467920563633e-15,
           "replayed_candidate_index": 1
         }
       },
@@ -293,10 +1315,12 @@
         ],
         "node_count": 37,
         "retained_raster_private_count": 14
-      }
+      },
+      "wall_seconds": 4.426392547786236
     }
   ],
   "schema": "nova.topology-cell-parity",
-  "status": "pending",
+  "status": "complete",
+  "unavailable_row_count": 0,
   "validation_errors": []
 }

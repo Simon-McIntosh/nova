@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from fractions import Fraction
+from math import factorial
 from typing import NamedTuple
 
 import jax
@@ -202,12 +203,7 @@ def test_shifted_first_moment_paths_set_the_required_per_edge_order():
 
 @requires_boundary_route
 def test_order_study_receipt_carries_the_map_the_record_is_transcribed_from():
-    """The receipt the order table is transcribed from holds the map itself.
-
-    The landed record quoted two values wrong from this map, a flux coefficient
-    of 0.4 for 0.2 and an order-one radial defect of 2.53e-3 for 2.53e-1, so the
-    map is pinned here rather than left to prose.
-    """
+    """The independent Gauss reference records its coefficients and defects."""
     import json
     import tempfile
     from pathlib import Path
@@ -248,12 +244,8 @@ def test_arc_route_carries_the_fixed_edge_and_point_bound():
     support = _curved_support(128, capacity=3072)
     edges = cut_capacity_edge_bound()
     assert edges == 149
-    # Four evaluations per edge rather than three: the shifted first-moment
-    # integrands reach degree six in the edge parameter, where a third-order
-    # rule is inexact and a fourth-order rule reaches roundoff. That moves the
-    # fixed cost from 472 to 621 evaluations per cut cell.
-    assert cut_cell_moment_evaluation_bound() == 25 + 4 * edges
-    assert cut_cell_moment_evaluation_bound() == 621
+    # Endpoint moments sample only the density fit, independently of edge count.
+    assert cut_cell_moment_evaluation_bound() == 25
     observed = np.asarray(
         clipped_support_current_moments(
             support,
@@ -265,6 +257,104 @@ def test_arc_route_carries_the_fixed_edge_and_point_bound():
         )
     )
     assert np.all(np.isfinite(observed))
+
+
+def test_endpoint_recurrence_integrates_every_monomial_through_degree_six():
+    from nova.equilibrium.clip_quadrature import _straight_edge_monomial_moments
+
+    vertices = jnp.asarray([[[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]])
+    observed = np.asarray(
+        jax.jit(
+            lambda point: _straight_edge_monomial_moments(
+                point, jnp.asarray([3]), max_degree=6
+            )
+        )(vertices)
+    )[0]
+    expected = np.asarray(
+        [
+            factorial(p) * factorial(total - p) / factorial(total + 2)
+            for total in range(7)
+            for p in range(total + 1)
+        ]
+    )
+    assert len(expected) == 28 and np.all(expected > 0)
+    np.testing.assert_allclose(observed, expected, rtol=2e-15, atol=0)
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_endpoint_moments_ignore_padding_and_match_a_translated_rectangle(reverse):
+    from nova.equilibrium.clip_quadrature import _straight_edge_monomial_moments
+
+    polygon = np.asarray([[0.2, -0.4], [1.3, -0.4], [1.3, 0.8], [0.2, 0.8]])
+    if reverse:
+        polygon = polygon[::-1]
+    vertices = np.full((1, 19, 2), np.nan)
+    vertices[0, :4] = polygon
+    observed = np.asarray(
+        _straight_edge_monomial_moments(vertices, np.asarray([4]), max_degree=6)
+    )[0]
+    expected = np.asarray(
+        [
+            (1.3 ** (p + 1) - 0.2 ** (p + 1))
+            * (0.8 ** (q + 1) - (-0.4) ** (q + 1))
+            / ((p + 1) * (q + 1))
+            for total in range(7)
+            for p in range(total + 1)
+            for q in (total - p,)
+        ]
+    )
+    np.testing.assert_allclose(observed, expected, rtol=3e-14, atol=0)
+
+
+def test_sampled_density_moments_and_vertex_tangent_match_independent_fan():
+    from nova.equilibrium.clip_quadrature import (
+        _DENSITY_POWERS,
+        _sampled_arc_polynomial_moments,
+    )
+
+    polygon = np.asarray(
+        [[0.1, -0.2], [1.3, -0.35], [1.9, 0.6], [1.1, 1.4], [-0.2, 0.9]]
+    )
+    coefficients = np.linspace(0.1, 0.8, len(_DENSITY_POWERS))
+    centre = np.asarray([[2.0, -0.5]])
+    scale = np.asarray([[0.7, 1.3]])
+    moment_centre = np.asarray([[2.1, -0.4]])
+    vertices = centre[:, None] + scale[:, None] * polygon[None]
+
+    def integrate(point):
+        return jnp.stack(
+            _sampled_arc_polynomial_moments(
+                point,
+                jnp.asarray([len(polygon)]),
+                centre,
+                scale,
+                coefficients[None],
+                moment_centre,
+            )
+        )[:, 0]
+
+    def reference(point):
+        local_polygon = (point[0] - centre[0]) / scale[0]
+        points, weights = fixture._polygon_rule(local_polygon, order=8)
+        density = sum(
+            c * points[:, 0] ** p * points[:, 1] ** q
+            for c, (p, q) in zip(coefficients, _DENSITY_POWERS, strict=True)
+        )
+        weighted = density * weights * np.prod(scale)
+        offset = centre + scale * points - moment_centre
+        return np.asarray([np.sum(weighted), *(weighted @ offset)])
+
+    actual = np.asarray(jax.jit(integrate)(jnp.asarray(vertices)))
+    np.testing.assert_allclose(actual, reference(vertices), rtol=2e-14, atol=0)
+    direction = np.linspace(-0.3, 0.4, vertices.size).reshape(vertices.shape)
+    _, tangent = jax.jvp(integrate, (jnp.asarray(vertices),), (jnp.asarray(direction),))
+    epsilon = 1e-5
+    difference = (
+        reference(vertices + epsilon * direction)
+        - reference(vertices - epsilon * direction)
+    ) / (2 * epsilon)
+    assert np.all(np.abs(difference) > 1e-3)
+    np.testing.assert_allclose(tangent, difference, rtol=2e-9, atol=0)
 
 
 @requires_boundary_route

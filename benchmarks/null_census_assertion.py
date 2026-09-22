@@ -163,15 +163,16 @@ def ring_sign_catalogue(fgrid, psi_grid, pitch: float) -> dict:
                 "distance_to_analytic_x_m": float(distance[index]),
                 "distance_in_pitches": float(distance[index] / pitch),
                 "ring_crossings": int(flips[index]),
-                "ring_above_bits": "".join(str(int(bit)) for bit in bits[index].tolist()),
+                "ring_above_bits": "".join(
+                    str(int(bit)) for bit in bits[index].tolist()
+                ),
                 "centre_psi_wb": float(psi_grid[centre_index[index]]),
                 "ring_psi_wb": [float(value) for value in ring_psi[index, 1:].tolist()],
             }
         )
     unique, counts = np.unique(flips, return_counts=True)
     histogram = {
-        str(int(key)): int(value)
-        for key, value in zip(unique, counts, strict=True)
+        str(int(key)): int(value) for key, value in zip(unique, counts, strict=True)
     }
     return {
         "cell_pitch_m": pitch,
@@ -239,9 +240,7 @@ def census_candidates(fgrid, psi_grid) -> dict:
 
 def containment_stage(ftop, vmap_x) -> dict:
     """Run stage 2: first-wall containment of the census saddle rows."""
-    contained = np.asarray(
-        ftop.contained_x_candidates(jnp.asarray(vmap_x)), dtype=bool
-    )
+    contained = np.asarray(ftop.contained_x_candidates(jnp.asarray(vmap_x)), dtype=bool)
     finite = np.all(np.isfinite(vmap_x[:, :3]), axis=1)
     kept = [
         {
@@ -309,7 +308,7 @@ def polish_receipt_stage(ftop, operator, physical) -> dict:
 def production_read(parts: dict, operator) -> dict:
     """Run the complete production read and the banked margin block."""
     terminal = np.asarray(parts["render_data"]["terminal_flux_wb"], dtype=np.float64)
-    physical = jnp.asarray(terminal[: operator.physical_node_number])
+    physical = jnp.asarray(terminal)
     started = perf_counter()
     _masks, topology = operator.read(physical)
     elapsed = perf_counter() - started
@@ -361,6 +360,7 @@ def dropped_reason(parts: dict, census: dict, production: dict) -> str:
 # figures
 # ---------------------------------------------------------------------------
 
+
 def _raster_field(coordinates, values, samples=241):
     """Interpolate one hex-node field onto a regular raster for contours."""
     points = np.asarray(coordinates, dtype=np.float64)
@@ -395,7 +395,9 @@ def _draw_cells_outline(axis, machine, pitch: float) -> None:
         )
 
 
-def render_row_figure(parts, machine, operator, saddle_rows, admitted, output, label, caption):
+def render_row_figure(
+    parts, machine, operator, saddle_rows, admitted, output, label, caption
+):
     """Render the full-map and saddle-region close-up panels for one row."""
     terminal = np.asarray(parts["render_data"]["terminal_flux_wb"], dtype=np.float64)
     psi_grid = terminal[: operator.grid.node_number]
@@ -471,7 +473,9 @@ def render_row_figure(parts, machine, operator, saddle_rows, admitted, output, l
 
     poloidal_axes(full)
     poloidal_axes(close)
-    full.set_title("solved flux contours; analytic nulls; census candidates", fontsize=8)
+    full.set_title(
+        "solved flux contours; analytic nulls; census candidates", fontsize=8
+    )
     close.set_title(
         "saddle-region close-up: cells around the analytic X-point outlined", fontsize=8
     )
@@ -543,14 +547,13 @@ def main() -> int:
         pitch = characteristic_pitch(parts)
         physical = np.asarray(
             parts["render_data"]["terminal_flux_wb"], dtype=np.float64
-        )[: operator.physical_node_number]
+        )
         psi_grid = physical[: operator.grid.node_number]
 
-        census = census_candidates(fgrid, psi_grid)
+        flux_pool = operator.null_flux_pool(jnp.asarray(physical))
+        census = census_candidates(fgrid, flux_pool)
         sign_catalogue = ring_sign_catalogue(fgrid, psi_grid, pitch)
-        vmap_x = np.asarray(
-            jax.device_get(ftop.grid(jnp.asarray(psi_grid))[1]), dtype=np.float64
-        )
+        vmap_x = np.asarray(jax.device_get(ftop.grid(flux_pool)[1]), dtype=np.float64)
         containment = containment_stage(ftop, vmap_x)
         polish = polish_receipt_stage(ftop, operator, physical)
         prod = production_read(parts, operator)
@@ -559,9 +562,7 @@ def main() -> int:
                 s["distance_to_analytic_x_m"] <= pitch for s in census["x_rows"]
             ),
             "defect_stage": (
-                None
-                if prod["x_point_rz_m"] is not None
-                else "1_sign_change_census"
+                None if prod["x_point_rz_m"] is not None else "1_sign_change_census"
             ),
         }
 

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 380" role="img" aria-labelledby="title desc">
+<title id="title">Production stationary-root admission</title>
+<desc id="desc">Direct centroid and sampling values enter a quadratic fit with a curvature-relative nonsingularity test. Hessian type, source-cell proximity and wall containment determine admission. Representatives reach the spline polish only after these tests. Cyclic crossing count is reported on a separate diagnostic branch.</desc>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8" fill="none" stroke="#345570" stroke-width="1.5"/></marker></defs>
+<rect width="1120" height="380" fill="#fff"/>
+<g font-family="sans-serif" fill="#24394b">
+<text x="30" y="40" font-size="23" font-weight="600">Admission follows the fitted field, with crossing count retained as evidence</text>
+<g fill="#f1f5f8" stroke="#57768b" stroke-width="1.5">
+<rect x="30" y="83" width="186" height="112" rx="8"/>
+<rect x="253" y="83" width="175" height="112" rx="8"/>
+<rect x="465" y="83" width="192" height="112" rx="8"/>
+<rect x="694" y="83" width="177" height="112" rx="8"/>
+<rect x="908" y="83" width="182" height="112" rx="8"/>
+</g>
+<g font-size="16" text-anchor="middle">
+<text x="123" y="111" font-weight="600">Authored samples</text><text x="123" y="140">centroid + six vertices</text><text x="123" y="166">direct flux values</text>
+<text x="340" y="111" font-weight="600">Quadratic root</text><text x="340" y="140">closed-form ∇ψ = 0</text><text x="340" y="166">scaled Hessian test</text>
+<text x="561" y="111" font-weight="600">Physical qualification</text><text x="561" y="140">indefinite Hessian</text><text x="561" y="166">near cell, inside wall</text>
+<text x="782" y="111" font-weight="600">Representatives</text><text x="782" y="140">bounded work slots</text><text x="782" y="166">visible overflow</text>
+<text x="999" y="111" font-weight="600">Spline polish</text><text x="999" y="140">supported complete map</text><text x="999" y="166">type + containment</text>
+</g>
+<g fill="none" stroke="#345570" stroke-width="1.7" marker-end="url(#arrow)"><path d="M216 139 H247"/><path d="M428 139 H459"/><path d="M657 139 H688"/><path d="M871 139 H902"/><path d="M123 195 V248 H253"/></g>
+<rect x="259" y="222" width="398" height="55" rx="8" fill="#faf5e8" stroke="#a08746"/>
+<text x="458" y="246" text-anchor="middle" font-size="16">Cyclic crossing count → diagnostic receipt</text>
+<text x="458" y="266" text-anchor="middle" font-size="14">A two-change ring does not veto an admitted saddle.</text>
+<text x="694" y="243" font-size="15">Unsupported map: retain qualified local roots</text><text x="694" y="268" font-size="15">without claiming successful spline polishing.</text>
+<text x="30" y="319" font-size="16" font-weight="600">Missing direct sample values are refused.</text>
+<text x="30" y="345" font-size="15">Every receipt consumer must carry the same centroid + sampling pool as the production read.</text>
+</g></svg>

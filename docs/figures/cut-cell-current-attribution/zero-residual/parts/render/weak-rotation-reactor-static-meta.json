@@ -1,0 +1,49 @@
+{
+  "caption": {
+    "case": "weak-rotation-reactor-static",
+    "converged": true,
+    "entering_cold": 9009,
+    "entering_promoted": 9009,
+    "recomputed_unmasked_scalar": 0.9871334004495274,
+    "recorded_scalar": 0.0,
+    "span_wb": -47.594134605475254,
+    "sup_all": 42.25111943834409
+  },
+  "case": "weak-rotation-reactor-static",
+  "reference_receipt": "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows/weak-rotation-reactor-static-production-route-cells-2500.json",
+  "reference_topology": {
+    "axis_flux_wb": 49.94120235994475,
+    "axis_rz_m": [
+      6.199491982793267,
+      2.2020537098012915e-14
+    ],
+    "boundary_flux_wb": 2.672258221531947e-09,
+    "class": "limited",
+    "exception_text": null,
+    "flux_span_wb": -49.94120235727249,
+    "o_candidate_count": 1,
+    "o_second_best_flux_margin_wb": null,
+    "read_status": "qualified_axis",
+    "x_candidate_count": 0,
+    "x_point_rz_m": null,
+    "x_second_best_flux_margin_wb": null
+  },
+  "span_wb": -47.594134605475254,
+  "topology": {
+    "axis_flux_wb": 41.659787520334795,
+    "axis_rz_m": [
+      6.095776173942807,
+      7.075306581460396e-05
+    ],
+    "boundary_flux_wb": -5.934347085140457,
+    "class": "limited",
+    "exception_text": null,
+    "flux_span_wb": -47.594134605475254,
+    "o_candidate_count": 1,
+    "o_second_best_flux_margin_wb": null,
+    "read_status": "qualified_axis",
+    "x_candidate_count": 0,
+    "x_point_rz_m": null,
+    "x_second_best_flux_margin_wb": null
+  }
+}

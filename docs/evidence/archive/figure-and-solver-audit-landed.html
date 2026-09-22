@@ -3615,6 +3615,68 @@ confirmed the empty rebind present and the resume skip absent, and then ran with
 <code>restore the empty-list rebind</code> and fails on that same assertion.</p>
 <p><strong>Promotion verdict:</strong> both prescribed landings are independently verified and may
 be promoted. This record closes neither driving followup; section closure remains coordinator-owned.</p>
+<section id="fixture-saddle-repair-bookend">
+  <h2>Fixture topology saddle repair — independent promotion bookend</h2>
+  <p><strong>Verdict: promote, 100/100.</strong> Reviewed commits
+  <code>708af70077aa1eb366afece93a973c59c9b6df72</code> and
+  <code>4c6c4f38d6a3647856adfc12a8c997a976b0b3f5</code> at repair-worktree tip
+  <code>4c6c4f38d</code>, against main base
+  <code>fe471757a0ed8f12d951b87d6787ba752b4cdd64</code>.</p>
+  <h3>Diff by anomaly</h3>
+  <p>The implementation commit changes exactly
+  <code>scripts/analytic_oracle_fixtures/measure.py</code> and adds
+  <code>tests/test_analytic_oracle_fixture_topology.py</code>. It adds a named
+  topology constructor and takes the saddle vertex from the analytic reference
+  for a diverted case, or <code>jnp.full(2, jnp.nan)</code> for a limited case.
+  Nothing under <code>nova/equilibrium</code> changed. The second commit contains
+  only the owning plan's landing comment and cumulative evidence anchor.</p>
+  <p>The limited-case representation matches production. At
+  <code>nova/equilibrium/topology.py:417-425</code>, the stationary-point read
+  emits a NaN-filled row when no saddle is admitted and the public X-point is
+  its first two coordinates. At
+  <code>nova/equilibrium/forward_operator.py:2716</code>, saddle presence reads
+  <code>getattr(topology, "x_point", jnp.full(2, jnp.nan))</code>. The fixture
+  therefore mirrors the absent value rather than inventing a vertex.</p>
+  <h3>One-allocation gate</h3>
+  <p>SLURM job <code>1274904</code> ran on <code>all_debug</code> with 8 CPUs,
+  64 GiB, <code>JAX_PLATFORMS=cpu</code>, and <code>TMPDIR=/tmp</code> in the
+  submit environment and payload. It invoked the shared root interpreter
+  directly, never invoked <code>uv</code> on the compute node, and ran every
+  test file or node in its own Python process. The allocation completed in
+  <code>00:03:34</code> with wrapper exit 0.</p>
+  <table>
+    <thead><tr><th>arm</th><th>revision or mutation</th><th>receipt</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td>base reproduction</td><td><code>fe471757a</code>, fixture topology has no <code>x_point</code></td><td><code>baseline-census.log</code></td><td>exit 1; 1 failed in 52.23 s; missing-<code>x_point</code> <code>AttributeError</code> at <code>forward_operator.py:3091</code></td></tr>
+      <tr><td>focused topology arms</td><td><code>708af7007</code></td><td><code>after-fixture-topology.log</code></td><td>exit 0; 2 passed in 7.46 s</td></tr>
+      <tr><td>forward census</td><td><code>708af7007</code></td><td><code>after-census.log</code></td><td>exit 0; 1 passed in 97.67 s</td></tr>
+      <tr><td>negative control</td><td>remove the <code>x_point</code> field from the fixture topology again before the exact diverted oracle reaches the forward clip</td><td><code>negative-control.log</code></td><td>exit 1; 1 failed in 12.47 s; the same missing-<code>x_point</code> <code>AttributeError</code></td></tr>
+    </tbody>
+  </table>
+  <p>The control log's first line states the mutation shown in the table. Its
+  traceback is the original failure, so the red result proves the repair is
+  discriminating rather than merely returning nonzero. Log SHA-256 digests are
+  respectively <code>84a1c64d7c5b33f4cd03978fa6d1b1e12d5c9468e0e509d8e59840b652ceb358</code>,
+  <code>5493938c2eaf72469a72265dfa54c67a139806a605d40bf3f616b553e5dde664</code>,
+  <code>004d6e933bfedd883dba7832fa48a00ac84be1da87add4703b26dba4652f8246</code>,
+  and <code>b0a7a60ef7d735444f0f39bb777e19cf9462a39c1e693e22f7b8e37a3c035a94</code>.</p>
+  <h3>Score and boundary</h3>
+  <table>
+    <thead><tr><th>criterion</th><th>score</th></tr></thead>
+    <tbody>
+      <tr><td>repair correctness and production-contract match</td><td>40/40</td></tr>
+      <tr><td>focused diverted and limited fixture coverage</td><td>25/25</td></tr>
+      <tr><td>independent base reproduction and exact negative control</td><td>20/20</td></tr>
+      <tr><td>diff scope, landing record, and absence of solver-core churn</td><td>15/15</td></tr>
+      <tr><th>total</th><th>100/100</th></tr>
+    </tbody>
+  </table>
+  <p>No findings and no follow-ons. The durable review is
+  <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-verify-the-fixture-saddle-repair/review.md</code>
+  with its machine-readable <code>findings.json</code> beside it. This verdict
+  covers only the repair worktree's two prescribed commits; merged-head
+  verification is separately owned. It does not close this plan section or
+  resolve the driving followup.</p>
 </section>
   </main>
 </body>

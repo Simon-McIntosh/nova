@@ -1,0 +1,17 @@
+symbolisation of the prior abort C stack (baseline-reduced-newton.log, revision 7c74bf18b) against /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jaxlib/libjax_common.so, jaxlib 0.11.0, eu-addr2line -f | c++filt
+0x76a2178  llvm::report_fatal_error(llvm::Twine const&, bool)
+0x76a2019  ??
+0xc77fc2d  llvm::RuntimeDyldImpl::emitSection(llvm::object::ObjectFile const&, llvm::object::SectionRef const&, bool)
+0xc77ea5a  llvm::RuntimeDyldImpl::findOrEmitSection(llvm::object::ObjectFile const&, llvm::object::SectionRef const&, bool, std::map<llvm::object::SectionRef, unsigned int
+0xc77ce0a  llvm::RuntimeDyldImpl::loadObjectImpl(llvm::object::ObjectFile const&)
+0xc788c76  llvm::RuntimeDyldELF::loadObject(llvm::object::ObjectFile const&)
+0xc781d89  llvm::RuntimeDyld::loadObject(llvm::object::ObjectFile const&)
+0xc7823e2  llvm::jitLinkForORC(llvm::object::OwningBinary<llvm::object::ObjectFile>, llvm::RuntimeDyld::MemoryManager&, llvm::JITSymbolResolver&, bool, llvm::unique_functi
+0xc7726ca  llvm::orc::RTDyldObjectLinkingLayer::emit(std::unique_ptr<llvm::orc::MaterializationResponsibility, std::default_delete<llvm::orc::MaterializationResponsibility
+0xc76e3bc  llvm::orc::BasicObjectLayerMaterializationUnit::materialize(std::unique_ptr<llvm::orc::MaterializationResponsibility, std::default_delete<llvm::orc::Materializa
+0xc75070c  llvm::orc::MaterializationTask::run()
+0xc7520e9  llvm::orc::ExecutionSession::dispatchOutstandingMUs()
+0xc748a09  llvm::orc::ExecutionSession::lookup(llvm::orc::LookupKind, std::vector<std::pair<llvm::orc::JITDylib*, llvm::orc::JITDylibLookupFlags>, std::allocator<std::pair
+0xc775e09  (anonymous namespace)::JITDylibSearchOrderResolver::lookup(std::set<llvm::StringRef, std::less<llvm::StringRef>, std::allocator<llvm::StringRef> > const&, llvm:
+0xc781249  llvm::RuntimeDyldImpl::finalizeAsync(std::unique_ptr<llvm::RuntimeDyldImpl, std::default_delete<llvm::RuntimeDyldImpl> >, llvm::unique_function<void (llvm::obje
+0xc7826f1  llvm::jitLinkForORC(llvm::object::OwningBinary<llvm::object::ObjectFile>, llvm::RuntimeDyld::MemoryManager&, llvm::JITSymbolResolver&, bool, llvm::unique_functi

@@ -646,6 +646,7 @@ class _BacktrackingScores(NamedTuple):
     ladder_selected: jax.Array
     ladder_accepted: jax.Array
     ladder_distrusted: jax.Array
+    selected_model_unreliable: jax.Array
 
 
 class _RebuiltModelPromotion(NamedTuple):
@@ -918,6 +919,28 @@ def _model_decrease_is_trusted(
     )
 
 
+def _measured_decrease_accepts_pessimistic_model(
+    predicted_merit: jax.Array,
+    actual_merit: jax.Array,
+    incumbent_merit: jax.Array,
+    predicted_current_merit: jax.Array,
+    candidate_residual: jax.Array,
+    incumbent_residual: jax.Array,
+    fraction: jax.Array,
+) -> jax.Array:
+    """Accept measured strict decrease when the finite local model predicts none."""
+    predicted_decrease = predicted_current_merit - predicted_merit
+    required_merit = incumbent_merit * (1.0 - _SUFFICIENT_DECREASE_SLOPE * fraction)
+    return (
+        jnp.isfinite(predicted_decrease)
+        & (predicted_decrease <= 0.0)
+        & jnp.isfinite(actual_merit)
+        & jnp.isfinite(candidate_residual)
+        & (actual_merit <= required_merit)
+        & (candidate_residual < incumbent_residual)
+    )
+
+
 def _nonlinear_model_error_fraction(
     predicted_merit: jax.Array,
     actual_merit: jax.Array,
@@ -1032,8 +1055,17 @@ def _backtracking_scores(
         incumbent_merit,
         predicted_current_merit,
     )
+    selected_model_unreliable = _measured_decrease_accepts_pessimistic_model(
+        predicted_merits[ladder_selected],
+        merits[ladder_selected],
+        incumbent_merit,
+        predicted_current_merit,
+        residuals[ladder_selected],
+        incumbent_residual,
+        factors[ladder_selected],
+    )
     ladder_accepted = jnp.any(sufficient) & (
-        ~jnp.asarray(model_trust_selection) | ladder_trusted
+        ~jnp.asarray(model_trust_selection) | ladder_trusted | selected_model_unreliable
     )
     ladder_mispredicted = (predicted_merits < predicted_current_merit) & ~jax.vmap(
         lambda predicted, actual: _model_decrease_is_trusted(
@@ -1043,8 +1075,8 @@ def _backtracking_scores(
             predicted_current_merit,
         )
     )(predicted_merits, merits)
-    ladder_distrusted = jnp.asarray(model_trust_selection) & jnp.any(
-        ladder_mispredicted
+    ladder_distrusted = jnp.asarray(model_trust_selection) & (
+        jnp.any(ladder_mispredicted) | selected_model_unreliable
     )
     return _BacktrackingScores(
         factors=factors,
@@ -1059,6 +1091,7 @@ def _backtracking_scores(
         ladder_selected=ladder_selected,
         ladder_accepted=ladder_accepted,
         ladder_distrusted=ladder_distrusted,
+        selected_model_unreliable=selected_model_unreliable,
     )
 
 
@@ -1129,7 +1162,7 @@ def _backtracked_promotion(
                 RecoveryOutcome.NOT_APPLICABLE, dtype=jnp.int32
             ),
             applied_factor=factors[ladder_selected],
-            model_distrusted=jnp.asarray(False),
+            model_distrusted=scores.selected_model_unreliable,
             model_error_fraction=model_error_fraction,
         )
 
@@ -1159,6 +1192,17 @@ def _backtracked_promotion(
                 incumbent_merit,
                 _smooth_relative_sup_merit(model_map_fn(state), state),
             )
+            measured_pessimistic_decrease = (
+                _measured_decrease_accepts_pessimistic_model(
+                    predicted_merit,
+                    candidate_merit,
+                    incumbent_merit,
+                    _smooth_relative_sup_merit(model_map_fn(state), state),
+                    candidate_residual,
+                    incumbent_residual,
+                    radius,
+                )
+            )
             required_merit = acceptance_reference * (
                 1.0 - _SUFFICIENT_DECREASE_SLOPE * radius
             )
@@ -1171,7 +1215,11 @@ def _backtracked_promotion(
                     ~jnp.asarray(own_mask_acceptance)
                     | (candidate_residual < incumbent_residual)
                 )
-                & (~jnp.asarray(model_trust_selection) | trusted)
+                & (
+                    ~jnp.asarray(model_trust_selection)
+                    | trusted
+                    | measured_pessimistic_decrease
+                )
             )
             candidate_distrusted = (
                 jnp.asarray(model_trust_selection)
@@ -1181,7 +1229,7 @@ def _backtracked_promotion(
                     < _smooth_relative_sup_merit(model_map_fn(state), state)
                 )
                 & ~trusted
-            )
+            ) | (jnp.asarray(model_trust_selection) & measured_pessimistic_decrease)
             candidate_model_error = _nonlinear_model_error_fraction(
                 predicted_merit,
                 candidate_merit,
@@ -2956,6 +3004,7 @@ def _newton_krylov_inner(
                     ladder_selected=jnp.argmax(empty_values),
                     ladder_accepted=jnp.asarray(False),
                     ladder_distrusted=jnp.asarray(False),
+                    selected_model_unreliable=jnp.asarray(False),
                 )
                 empty_descent = _SteepestDescentPromotion(
                     state=state,

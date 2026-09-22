@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T07:45:03",
+  "updated": "2026-09-22T07:48:26",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -238431,6 +238431,785 @@
           "status": "failed",
           "error": "IntegrityError: UNIQUE constraint failed: runs.run_id"
         }
+      },
+      {
+        "run_id": "r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class",
+        "plan": "null-identification-authority",
+        "section": "",
+        "node": "nia-the-visual-read-carries-the-receipt-class",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 774,
+                "cached_input_tokens": 769228,
+                "input_tokens": 770034,
+                "output_tokens": 2069,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 772103,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "PRESCRIBED NODE, one artifact, forty minutes. Two sites, nothing else changed. (1) docs/figures/topology-visual-corroboration/generate_topology_visuals.py line 269 calls profile.operator.read(state) with no requested class, so the class-free Topology.boundary lets the wall contact win the boundary level and that level is persisted as nova_boundary at lines 364 and 375; change the call to profile.operator.read(state, requested_class=<the class the banked receipt records for that frame>) where the receipt class is read from the same row the renderer already loads (convergence-atlas.json panels[].class, \"diverted\" or \"limited\", mapped to the TopologyClass value the operator accepts, see benchmarks/poloidal_convergence_atlas.py line 682 for the mapping already used there), so a diverted frame persists its boundary at the admitted saddle flux. (2) benchmarks/poloidal_convergence_atlas.py line 490 sets class_label = \"diverted\" if nova_boundary.shape[0] >= 3 else \"unclassified\"; change it to read the class from the topology record the renderer carries (the same field the receipt class comes from), never from the curve length, with \"unclassified\" only when no class is recorded. Gate, one all_debug allocation with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and the payload, the root interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python run directly, uv never invoked on the node: regenerate the persisted nova_boundary for the single frame 22086/43 mixed from its banked state with the renderer as it now reads (no new solve), and report the minimum distance from the persisted boundary polyline to the admitted saddle (0.5648, 1.2580) m, which must be below one lattice pitch (0.35 to 0.5 m before), together with the class label the atlas row now carries; a committed case in tests/test_topology_visual_generator.py builds a synthesised topology read result with a diverted class and asserts the persisted boundary flux equals the saddle flux, and with a limited class asserts it equals the contact flux; tests/test_topology_visual_generator.py runs in a fresh process with zero added failures against the base revision; the negative control reddens; commit the two source files and the test file only, no figure and no plan; the manifest names the gate command, exit status and log path, and negative_control_log is a bare absolute path on its own line whose first line repeats the declared mutation verbatim",
+          "estimated_hours": null,
+          "goal": "make the topology visuals read with the class the banked receipt records and label the atlas from that class, so a diverted panel persists its boundary at the saddle flux",
+          "id": "nia-the-visual-read-carries-the-receipt-class",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T09:14:28Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/manifest.md",
+          "negative_control": "the solve topology class is read from the pre-existing atlas instead of the solve receipt",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/figures/topology-visual-corroboration/generate_topology_visuals.py",
+            "benchmarks/poloidal_convergence_atlas.py",
+            "tests/test_topology_visual_generator.py",
+            "docs/evidence/archive/null-identification-authority-landed.html",
+            "docs/plans/null-identification-authority.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-atlas-level-c",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T09:14:43Z",
+        "completed_at": "2026-09-21T20:12:01.246Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 29049,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 39438,
+        "stalled": true,
+        "time_budget": "40m",
+        "base_sha": "61f7d79d558ec6219f39272bded5ab6933c666d1",
+        "commits": [
+          "40ee2c0c9eff7351a7f03de181e7cb54280ef7c1",
+          "e399e522f556b84ab4f8a79d3c38133f283b758d",
+          "da402ccc997295409e9d35b537988d53828d5513",
+          "ee2ad2d6913082bf921d974b2496ccef9393b09d",
+          "6b0530baaa77c49a3218de49c6995b030d831bb1",
+          "ba9d0f5a3e16cde2b38de11ba3553b8041884957",
+          "a64a3e80d15129d3e1c813b6d2e0eed8301d2c85",
+          "51e8034909fd079735356b63be9b7a47134dfaab",
+          "fea024be41cc35b8df895fca5902dbf12c35f2a9",
+          "8a375538eaa7652c25c3e10bb736000e151f31b4",
+          "b51d9671765227b34700558167153c1580bb8996",
+          "51e4d08017667d14fc340027a5176ea7ebb28267",
+          "f2334c8ef44c31ec4177a26f1e129e984573f4db",
+          "bb89552ad1fb06dd65dff284ee1578b0dfee7b82",
+          "3d56cb1b0c213864792075259c72922c71fb660e",
+          "68cfe15ced6b66ceef2e3d8da0ef5ce68371bcb6",
+          "3d381ef8b5f5b0c5c49c5627b42c166723402bd0",
+          "24d5f8c5af443647173cb7d3364610fa132420fa",
+          "0f76717bbae677be3603a1f114600e1a3c3fd112",
+          "58955a4bc52ec68747a9c5feee3b121ed577eba2",
+          "fe7d8c053c9acbce8805a9f029e8e5a969182402"
+        ],
+        "changed_lines": {
+          "added": 265,
+          "removed": 869,
+          "files": 25
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "gate.sh and a fresh-process tests/test_topology_visual_generator.py on all_debug job 1275502 (RENDERER_EXIT=0, ATLAS_EXIT=0, MEASURE_EXIT=0, 9 passed), legacy-field control job 1275503 (1 failed as required), caption re-render job 1275505; bank regenerated on titan job 1275465",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/negative-control-final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/manifest.md",
+        "scope_changed": false,
+        "session_id": "5d220c49-83ac-4723-aa76-c6f47110941a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 0,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 0,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 62.476102000000026,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": 62.476102000000026
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T20:12:01.246Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": {
+          "attempt": 12,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-21T20:14:39Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+              "from_backend": "clive",
+              "from_harness": "claude",
+              "reason": "the clive session is exhausted: resume-6 returned Prompt is too long before any tool call, and the remaining work must open a rendered panel with the image tool, which the text-only lane cannot do",
+              "session": "fresh",
+              "session_id": "5d220c49-83ac-4723-aa76-c6f47110941a",
+              "session_source": "pointer",
+              "to_backend": "codex",
+              "to_harness": "codex"
+            },
+            {
+              "changed_at": "2026-09-21T21:26:06Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'codex' to 'codex'",
+              "from_backend": "codex",
+              "from_harness": "codex",
+              "reason": "the sol session that finished the node captured no session id in any authority and a same-backend move is refused, so a fresh session on the luna lane takes the worktree to apply the bookend findings",
+              "session": "fresh",
+              "session_id": null,
+              "session_source": null,
+              "to_backend": "codex-luna",
+              "to_harness": "codex"
+            },
+            {
+              "changed_at": "2026-09-21T22:34:44Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'codex' to 'codex'",
+              "from_backend": "codex-luna",
+              "from_harness": "codex",
+              "reason": "the luna session captured no session id in any authority and a same-backend resume is refused, so a fresh sol session takes the worktree for the third repair turn",
+              "session": "fresh",
+              "session_id": null,
+              "session_source": null,
+              "to_backend": "codex",
+              "to_harness": "codex"
+            },
+            {
+              "changed_at": "2026-09-22T01:24:18Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'codex' to 'codex'",
+              "from_backend": "codex",
+              "from_harness": "codex",
+              "reason": "the sol session captured no session id in any authority, so a fresh session must read the failed titan re-bank and continue",
+              "session": "fresh",
+              "session_id": null,
+              "session_source": null,
+              "to_backend": "codex-luna",
+              "to_harness": "codex"
+            },
+            {
+              "changed_at": "2026-09-22T03:22:02Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'codex' to 'codex'",
+              "from_backend": "codex-luna",
+              "from_harness": "codex",
+              "reason": "the luna session captured no session id in any authority, so a fresh sol session takes the worktree to close the node after the titan re-bank",
+              "session": "fresh",
+              "session_id": null,
+              "session_source": null,
+              "to_backend": "codex",
+              "to_harness": "codex"
+            }
+          ],
+          "root_run_id": "r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 43,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 50234,
+              "log_fresh": false,
+              "manifest_commits": [
+                "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
+                "0028295f5ba1e4c4d0c3ba0e1c98f0b0fbb4c9d1"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "28b0fa1a9d3559290e36bf25bbedc4839c9ef1861513ab5235f34a953247d5fe",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T180231259880-cca-one-certificate-row-per-process/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan cpu-compile-abort --section '\u00a72' --role review --spec-level exact --node review-of-cca-one-certificate-row-per-process --goal 'attach an independent review to run r-20260920T180231259880-cca-one-certificate-row-per-process' --done-when 'the review for r-20260920T180231259880-cca-one-certificate-row-per-process stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260920T180231259880-cca-one-certificate-row-per-process.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "cca-one-certificate-row-per-process",
+              "phase": "complete",
+              "plan": "cpu-compile-abort",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T180231259880-cca-one-certificate-row-per-process",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 50239,
+              "terminal_at": "2026-09-20T19:17:11Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 625,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: Second allocation ran out - job 1274360 aborted at edit 16 on JIT mapping exhaustion with REGEN_DRIVER_EXIT=134 and EXIT_MARKER=134 after 15 of 20 edits; so edits 16 through 20 never ran and the states for edits 14 and 15 were never flushed; seven of the twenty states the done-when needs are absent. The census cannot pass on what landed and CENSUS_AGREES=0; both because 14 states are fewer than the 20 the figures are defined over (drawn_closed 5 of 14 against the required 12 of 20; axis_enclosing_cycle 13 of 14 against 14 of 20) and because the comparison basis itself is unestablished. The comparison basis needs a plan-level answer this worker cannot give - the provenance of the sweep-persistence record and the definition of its level field - and the per-state disagreement is already present at the unedited index 0; so it is not attributable to the constraint; the edit schedule or the level definition. The fixture was therefore not committed and the repository still carries the superseded panel. No resume seam exists in the driver and the archived rows cannot seed one; so completing this node requires the driver capability named in follow_ons before any further allocation is spent.",
+              "elapsed_seconds": 3925,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 15621,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1af882c9ce897d771f68e7158b9f321274358a94",
+                "570ac4bf5782de8353205d4600496e32b41d00a8"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0791ab9295230c76f0e7ba866041563829b22d42afa1542f10d83f009f569795",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint/manifest.md; resolve the blocker before resuming the run",
+              "node": "fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+              "phase": "complete",
+              "plan": "forward-solve-api",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+                "session_id": "63238c6f-d618-43a9-b3b8-e682e544fc9e",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 15714,
+              "terminal_at": "2026-09-21T04:52:36Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: the census read cannot be traced at base 8ccc6ed11: TracerArrayConversionError at nova/equilibrium/topology.py:526 indexing the numpy wall coordinate array with the traced brackets array; reached from the jitted read in benchmarks/vertex_ring_census.py:412; the fix is upstream of this node's write scope (reports fence only)",
+              "elapsed_seconds": 535,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 51912,
+              "log_fresh": false,
+              "manifest_commits": [],
+              "manifest_derived": false,
+              "manifest_digest": "b2f5e09482992ac1b03bf05b340bec9966d4d87bb64de6bda8174d595792ab53",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T184011708535-cca-vertex-ring-census-on-the-analytic-flux/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T184011708535-cca-vertex-ring-census-on-the-analytic-flux/manifest.md; resolve the blocker before resuming the run",
+              "node": "cca-vertex-ring-census-on-the-analytic-flux",
+              "phase": "complete",
+              "plan": "cut-cell-current-attribution",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T184011708535-cca-vertex-ring-census-on-the-analytic-flux",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260920T184011708535-cca-vertex-ring-census-on-the-analytic-flux",
+                "session_id": "55277970-28c7-4bda-bf39-dcb8ff40bf9e",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 51927,
+              "terminal_at": "2026-09-20T18:49:03Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-vertex-ring-census-on-the-analytic-flux"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: UNMET done-when clause: the grid fixture's supplied contact is measured but not repaired - it is still judged by its nearest in-material raster node rather than on the spline, and tests/test_forward_operator_axes.py::test_tensor_product_grid_class_margin_is_read_on_the_spline still fails with `assert inf == -0.31887492472951007 +/- 1.0e-12`.; UNMET done-when clause: on the MAST diverted fixture the supplied contact resolves to node index 10 (met), but its neighbouring wall nodes did not read reachable in the mask measured, and no repair landed that makes a contact lying on a reachable segment reachable.; UNMET done-when clause: the record does not state the per-fixture mechanism, reachable node counts, contact indices, wall operands and class margins - those numbers live in this manifest's checkpoint only, because the plan section and the evidence anchor were not written.; UNMET done-when clause: no poloidal panel per fixture before and after, so no PNG or SVG exists under docs/figures/null-identification-authority/wall-contact-reachability and none is cited.; UNMET done-when clause: zero added failures was shown for three test modules only; the base and after arms were not run over every test module importing the changed files, and the limiter module's base arm is unrun.; UNMET done-when clause: the tests/test_forward_operator_axes.py and tests/test_limiter_spline_minimum.py alternative requires the record to name the failing assertion and the mechanism it measures; the limiter module passes unchanged (met) and the failing assertion and mechanism are named in failure_attribution (met in this manifest), but the plan and evidence record that the clause means was not written.; UNMET done-when clause: verifying the merged result belongs to a separately dispatched test node - nothing is merged, since commit 74f00821c is local to the worktree.; UNMET done-when clause: the landing record and the evidence anchor were not appended, and the commit body carries only the code and test change.; Time fence: the node stopped at about 54 of its 55 minutes rather than pushing on, which is the fence's own stop condition; the remaining clauses are recoverable from this manifest's resume_brief without rebuilding any instrument.",
+              "elapsed_seconds": 214,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 19334,
+              "log_fresh": false,
+              "manifest_commits": [
+                "74f00821cf6b1b0e5c649022b5eca55f6d2d3f31 fix(equilibrium): promote wall arrays before traced indexing"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "37c9b652348e70c42f7f07dc9f9eb6bbaa27575f3d92de989cbb4836b8b5d17f",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T191915583893-nia-the-census-contact-resolves-on-the-wall-it-was-taken-from/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T191915583893-nia-the-census-contact-resolves-on-the-wall-it-was-taken-from/manifest.md; resolve the blocker before resuming the run",
+              "node": "nia-the-census-contact-resolves-on-the-wall-it-was-taken-from",
+              "phase": "complete",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T191915583893-nia-the-census-contact-resolves-on-the-wall-it-was-taken-from",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260920T191915583893-nia-the-census-contact-resolves-on-the-wall-it-was-taken-from",
+                "session_id": "39263b4c-714b-4bbe-82c2-9649f4898c29",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 19422,
+              "terminal_at": "2026-09-21T03:50:48Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-the-census-contact-resolves-on-the-wall-it-was-taken-from"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+              "elapsed_seconds": 827,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 17555,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none (review role; the fence holds the only deliverable and it is outside the git worktree)"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "dc3aa96a0c2db4290706b18c01eff2defa9b1451056457ee5e71a740fc7e7675",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T035705405532-fsa-audit-figures-cut-cell/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+              "node": "fsa-audit-figures-cut-cell",
+              "phase": "complete",
+              "plan": "figure-and-solver-audit",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T035705405532-fsa-audit-figures-cut-cell",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 17607,
+              "terminal_at": "2026-09-21T04:21:04Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-figures-cut-cell"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 1800,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 604,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1240,
+              "log_fresh": false,
+              "manifest_commits": [
+                "c1af3a06d",
+                "47324a70c"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "d09c28acb73a6fa7ac5924ebbdc37f6c8136ecc70c28b49185222ef67b919247",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T084333397482-cca-the-sampler-exit-status-carries-the-child-failure/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan cpu-compile-abort --section '\u00a73' --role review --spec-level exact --node review-of-cca-the-sampler-exit-status-carries-the-child-failure --goal 'attach an independent review to run r-20260921T084333397482-cca-the-sampler-exit-status-carries-the-child-failure' --done-when 'the review for r-20260921T084333397482-cca-the-sampler-exit-status-carries-the-child-failure stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260921T084333397482-cca-the-sampler-exit-status-carries-the-child-failure.json --time-budget 30m --session s19-codex-20260916 --local",
+              "node": "cca-the-sampler-exit-status-carries-the-child-failure",
+              "phase": "complete",
+              "plan": "cpu-compile-abort",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T084333397482-cca-the-sampler-exit-status-carries-the-child-failure",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 1267,
+              "terminal_at": "2026-09-21T08:53:25Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-the-sampler-exit-status-carries-the-child-failure"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 1800,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 664,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1038,
+              "log_fresh": false,
+              "manifest_commits": [
+                "3d6e20d68326c1d4c7878c78fc955fe80d6be666 42ac982727909f5eb2a2fe2985a36638f7a71e21"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "1dbd0526d665613ecafabc3739a8a852fea042369fed4e330fe3151ff08b133c",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T084552350328-fsri-the-loop-inventory-names-the-scan-form/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan forward-solver-route-integrity --section '\u00a72' --role review --spec-level exact --node review-of-fsri-the-loop-inventory-names-the-scan-form --goal 'attach an independent review to run r-20260921T084552350328-fsri-the-loop-inventory-names-the-scan-form' --done-when 'the review for r-20260921T084552350328-fsri-the-loop-inventory-names-the-scan-form stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260921T084552350328-fsri-the-loop-inventory-names-the-scan-form.json --time-budget 30m --session s19-codex-20260916 --local",
+              "node": "fsri-the-loop-inventory-names-the-scan-form",
+              "phase": "complete",
+              "plan": "forward-solver-route-integrity",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T084552350328-fsri-the-loop-inventory-names-the-scan-form",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 1066,
+              "terminal_at": "2026-09-21T08:56:46Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-the-loop-inventory-names-the-scan-form"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 30254871,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 200000",
+          "elapsed_seconds": 0.066,
+          "generated_tokens": 196636,
+          "generation_seconds": 12066.487,
+          "input_budget_tokens": 200000,
+          "tokens_per_second": 16.3,
+          "wall_tokens_per_second": 2979333.33
+        },
+        "follow_on_paths": [
+          "triangle/cross",
+          "docs/figures/primary-xpoint-evidence/reachability_grid_final.py:208"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "lane-change",
+        "attempt": 12,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": [
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/21978-35-mixed.png",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/21978-35-pure.png",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/21983-35-mixed.png",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/21983-35-pure.png",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/21985-51-mixed.png",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/21985-51-pure.png",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/21986-46-mixed.png",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/21986-46-pure.png",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/21989-55-mixed.png",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/21989-55-pure.png",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/22086-43-mixed.png",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/22086-43-pure.png",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/convergence-atlas.json",
+            "reason": "the atlas receipt and MAST panels the brief required under the plotting rules, the figure directory the dispatch pointer omitted"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/d3d_shot_00000c4a7b-179.png",
+            "reason": "DIII-D atlas panel redrawn wholesale by the atlas run that redrew the MAST panels"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/d3d_shot_0003ff34e7-44.png",
+            "reason": "DIII-D atlas panel redrawn wholesale by the atlas run that redrew the MAST panels"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/d3d_shot_001554e054-144.png",
+            "reason": "DIII-D atlas panel redrawn wholesale by the atlas run that redrew the MAST panels"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/d3d_shot_002495e835-146.png",
+            "reason": "DIII-D atlas panel redrawn wholesale by the atlas run that redrew the MAST panels"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/convergence-atlas/d3d_shot_0040ca9bdc-137.png",
+            "reason": "DIII-D atlas panel redrawn wholesale by the atlas run that redrew the MAST panels"
+          },
+          {
+            "path": "docs/figures/topology-visual-corroboration/mast-topology-operands.metadata.json",
+            "reason": "the regenerated MAST visual operand bank the brief required, twelve rows with solve_topology_class, produced on titan job 1275465"
+          },
+          {
+            "path": "docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
+            "reason": "the regenerated MAST visual operand bank the brief required, twelve rows with solve_topology_class, produced on titan job 1275465"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-the-visual-read-carries-the-receipt-class",
+          "session_id": "5d220c49-83ac-4723-aa76-c6f47110941a",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T20:12:01.246Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.9995,
+        "impl_move": {
+          "plan": "null-identification-authority",
+          "at_dispatch": 0.9995,
+          "at_complete": 0.9995,
+          "verdict": "waived",
+          "reason": "null-identification-authority sits at 0.9995 with no section declared open; this node closes the atlas-level followup inside the landed section and the impl is held for the plan owner"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "test_paths": [
+            "tests/test_topology_visual_generator.py"
+          ],
+          "declaration": "the solve topology class is read from the pre-existing atlas instead of the solve receipt",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/negative-control-final.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/negative-control-final.log"
+        },
+        "review_waiver": {
+          "reason": "independently reviewed three times by codex runs fsa-verify-the-class-governed-atlas-read (62), fsa-re-verify-the-class-governed-atlas-read (64) and fsa-third-verify-the-class-governed-atlas-read (promote 100/100) under the reviews fence"
+        },
+        "tool_steps": 97.0,
+        "orientation_input_tokens": 3250049.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -238897,6 +239676,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3079
+    "_version": 3080
   }
 }

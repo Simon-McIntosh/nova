@@ -28,7 +28,7 @@
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.98">
-<meta name="plan-version" content="44">
+<meta name="plan-version" content="45">
 </head>
 <body>
   <main class="plan-doc">
@@ -318,6 +318,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-coord-20260922-bernstein-second-partial" data-who="reckon-ship" data-when="2026-09-22T15:35:00Z">
     <div class="r-comment-body"><p>Coordinator adjudication of run r-20260922T130259778922 (astra): the precomputed Bernstein basis is merged as the second partial reduction. Exact-mode 110/135 executable 207,228,225 to <strong>174,134,951 bytes</strong> on the CPU witness (ceiling 100,000,000 still unmet, gate recorded failed); crossings bit-identical; against an exact-arithmetic reference twelve of sixteen moment quantities are no worse and four differ at 1e-16 absolute (machine epsilon), accepted; 40 tests with zero added failures. Remaining instruction owners: <code>separatrix_clip.py</code> 86,407, <code>clip_quadrature.py</code> 77,276, <code>forward_operator.py</code> 71,548, largest function <code>_traced_clip</code> 51,969. Cumulative: 234 to 174 MB over the two clip-side nodes; the next reduction is the vmapped per-cell clip body in the traced clip.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260922T130259778922-ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program" data-who="reckon-ship" data-when="2026-09-22T15:08:09Z">
+    <div class="r-comment-body"><p>precomputed Bernstein basis merged as the second partial reduction: exact-mode 110/135 executable 207,228,225 to 174,134,951 bytes, ceiling 100,000,000 unmet so the gate is failed; crossings bit-identical, twelve of sixteen moment quantities no worse against an exact reference and four differ at machine epsilon; 40 tests zero added failures; remaining owners separatrix_clip 86,407, clip_quadrature 77,276, forward_operator 71,548 instructions</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s19c-capacity-landed-20260917" data-who="" data-when="">
     <div class="r-comment-body">ecq-capacity-sizing merged (be29cb0a), promotion pending its review. The per-polygon vertex capacity is derived from the realised layout, 128 arc samples plus the straight-edge chain, 158 at most against the former 3840 (152 and 150 on the 300 and 1000 rows against 3072 and 2816), with the fail-closed overflow refusal kept and exercised (258 live vertices against a 136 fixture capacity refuse to included 0, area 0). Exact-clip moments and coupled current-moment images are bit-identical to the fan route at 110, 300 and 1000 cells (maximum absolute difference 0.0, mismatch count 0). The 1000-cell peak temporary falls from 9.0065 to 8.0192 GiB with identical argument and output bytes. The compile wall is unchanged and is itself the finding for the compile-cost priority: 848 s at 110 cells and 965 to 971 s at 300 cells on all_debug from the unchanged memory-scaling instrument, before and after, so the capacity was not what the exact-clip compile was paying for. Two gaps: the section's named warm-cost driver still has no receipt (its production worker needs four arguments the lane script did not pass and refuses the CPU lane), and the largest-intermediate-array census was skipped on both sides, so the memory comparison is the compile-time peak temporary only.</div>

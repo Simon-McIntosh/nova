@@ -433,17 +433,13 @@ def test_threshold_one_reproduces_the_refusal_only_policy(machine):
     assert threshold_one.termination_reason == refusal_only.termination_reason
     assert threshold_one.newton_steps_per_trip == refusal_only.newton_steps_per_trip
     assert (
-        threshold_one.jacobian_builds_per_trip
-        == refusal_only.jacobian_builds_per_trip
+        threshold_one.jacobian_builds_per_trip == refusal_only.jacobian_builds_per_trip
     )
     assert (
         threshold_one.contraction_refreshes_per_trip
         == refusal_only.contraction_refreshes_per_trip
     )
-    assert (
-        threshold_one.rejected_steps_per_trip
-        == refusal_only.rejected_steps_per_trip
-    )
+    assert threshold_one.rejected_steps_per_trip == refusal_only.rejected_steps_per_trip
     assert (
         threshold_one.active_set_mask_differences
         == refusal_only.active_set_mask_differences
@@ -914,3 +910,36 @@ def test_compiled_slice_keeps_a_nonconverged_result_masked(machine):
     assert compiled.termination_reason == host.termination_reason
     assert compiled.active_set_iterations == host.active_set_iterations
     assert compiled.active_set_mask_differences == host.active_set_mask_differences
+
+
+def test_reduced_residual_and_jacobian_use_the_same_live_request_body(machine):
+    """The request tangent agrees with the independently composed moment map."""
+    import jax
+    from nova.equilibrium.fixed_point import OperatorRequestKind, operator_request
+
+    profile, seed = machine
+    operator = profile.operator
+    coordinates = reduced_newton.reduced_coordinates(operator, seed)
+    shadow = jnp.ravel(operator.residual_shadow_mask(seed))
+    kernels = reduced_newton._reduced_kernels(
+        operator, coordinates, operator.external(), None, None
+    )
+    reduced = reduced_newton._gather(coordinates, operator.cell_current_moments(seed))
+
+    def reference(amplitudes):
+        state = kernels["reconstruct"](amplitudes, shadow, seed)
+        moments = operator.cell_current_moments(state)
+        return amplitudes - reduced_newton._gather(coordinates, moments)
+
+    vector = jnp.linspace(-0.5, 0.5, reduced.size, dtype=reduced.dtype)
+    request = operator_request(OperatorRequestKind.JVP, reduced, shadow, vector=vector)
+    observed = kernels["request"](request, seed)
+    expected, tangent = jax.jvp(reference, (reduced,), (vector,))
+    np.testing.assert_allclose(observed.mapped, expected, rtol=1e-13, atol=1e-13)
+    np.testing.assert_allclose(observed.tangent, tangent, rtol=1e-13, atol=1e-13)
+    np.testing.assert_allclose(
+        kernels["jacobian"](reduced, shadow, seed),
+        jax.jacfwd(reference)(reduced),
+        rtol=1e-13,
+        atol=1e-13,
+    )

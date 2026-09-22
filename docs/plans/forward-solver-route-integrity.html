@@ -211,6 +211,31 @@
     preserves the logs, prototype, negative control, and next design options.
     No terminal section status or driving followup is changed.</p>
 
+    <h3 id="s3-explicit-live-requests">Explicit requests committed; whole-solve ceiling still refuses</h3>
+    <p>The adjudicated final attempt defines six request kinds and a fixed payload,
+    with one switch selecting the read authority before the common live map/JVP
+    body. Krylov remains outside that body. Commits <code>674ad986d155cf5c403d2cbb1201db7a6b15f2a7</code>,
+    <code>364f92c3663f16f817ca873c573db1d4aa0aef91</code>,
+    <code>f2d952c89c2183bcad54a311ed866fc67125da73</code>, and
+    <code>a359f8fed22b69798a5668c33a1dc9708f830405</code> retain the request contract,
+    fixed-point scoring/reconciliation streams, real-operator regression, and
+    reduced residual/JVP integration. The real 300-cell operator proves one
+    optimized boundary for one call, three for nested calls, and one for a scan,
+    with the two three-application results bit-identical.</p>
+    <p>The whole programs shrink from 342,055 / 344,858 to
+    <strong>302,553 / 304,913 instructions</strong>, but remain above 203,078 / 204,531.
+    This is a partial design state, not the single body for the entire solve.
+    The fixed-point file passes 44 tests against 42 at the base, with the added
+    real-operator case separately passing. Split baseline processes expose two
+    reduced-file failures and a later compile abort. The candidate reproduces
+    those outcomes and adds a ladder-scoring failure before aborting. That test
+    passes alone, leaving the suite-only failure unresolved; a completed all-file
+    delta is not claimed. The whole-program negative control raises
+    the 300-cell count to 532,366. The <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#explicit-live-requests">detailed record</a>
+    carries the exact refusals, negative control and final test disposition.
+    The generated PNG/SVG are deleted from the worktree as adjudicated and are
+    not committed. This entry changes neither section state nor its followup.</p>
+
     <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>
     <p>Measured 2026-09-18: the pre-warm covers 3292 keys the lane never requests and none of the 1285 keys it
     does, so the lane's 1341 hits all came from that target's own earlier run on the same directory; a lane

@@ -1,0 +1,25 @@
+{
+  "revision": "7c74bf18b72f1b15d57f006f3eb6462cc6acba7b",
+  "requested_cells": 300,
+  "job_id": "1275698",
+  "programs": {
+    "one": {
+      "operator_boundaries": 1,
+      "boundary_operation": "full-flux live residual-shadow select",
+      "compile_seconds": 7.7424648981541395,
+      "instructions": 13677
+    },
+    "nested": {
+      "operator_boundaries": 3,
+      "boundary_operation": "full-flux live residual-shadow select",
+      "compile_seconds": 11.201884347945452,
+      "instructions": 36669
+    },
+    "streamed": {
+      "operator_boundaries": 1,
+      "boundary_operation": "full-flux live residual-shadow select",
+      "compile_seconds": 7.146192114800215,
+      "instructions": 15899
+    }
+  }
+}

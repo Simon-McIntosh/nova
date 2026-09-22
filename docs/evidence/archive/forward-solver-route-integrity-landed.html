@@ -1220,6 +1220,115 @@ follow-on. No plan status or driving followup is closed.</p>
 <code>census-1000.log</code>, and both <code>baseline-*.json</code> receipts.
 The Python drivers, shell launchers and request-flow SVG accompany the logs.</p>
 </section>
+<section id="explicit-live-requests">
+<h2>Explicit live requests: retained design state, refused whole-solve ceiling</h2>
+<p>The coordinator adjudicated the final attempt to use explicit request states,
+leave Krylov outside the operator body, separate the two baseline test files into
+fresh CPU processes on one allocation, and delete the two generated figure
+byproducts without committing them. The retained source commits are
+<code>674ad986d155cf5c403d2cbb1201db7a6b15f2a7</code> (request contract),
+<code>364f92c3663f16f817ca873c573db1d4aa0aef91</code> (fixed-point streams),
+<code>f2d952c89c2183bcad54a311ed866fc67125da73</code> (real-operator counter test),
+and <code>a359f8fed22b69798a5668c33a1dc9708f830405</code> (reduced requests).</p>
+<p><code>OperatorRequestKind</code> defines residual, merit, acceptance, recovery,
+reconciliation and JVP. <code>OperatorRequest</code> carries kind, state, vector,
+shadow and incumbent-authority flag with fixed leaf shapes. One
+<code>lax.switch</code> selects the read authority; the shared map/JVP evaluates
+that request's own state. <code>run_operator_requests</code> serves fixed-capacity
+streams through one scan. The fixed-point route shares candidate-family scoring
+and solved/damped/incoming reconciliation. The reduced route serves residuals
+and Jacobian columns through the common request body. The dense/Krylov solve
+remains in its caller. These integrations still leave distinct caller streams
+in the whole solve; they do not establish its required single body.</p>
+<figure><img src="/nova/figures/forward-solver-route-integrity/explicit-requests/request-flow.svg"
+alt="Fixed request payload, read-authority switch, live map and tangent response, with external linear-solve composition and the remaining whole-solve duplication">
+<figcaption>The shared-body boundary is proved within a request stream. Separate
+streams still inline separate bodies, which the whole-program count refuses.</figcaption></figure>
+<p>The real weak-row operator at 300 requested cells passes its executable
+boundary proof. Its optimized full-flux residual-shadow selection appears once
+for one call, three times for nested dependent calls, and once for a three-step
+scan; the nested and scanned terminal arrays are bit-identical. The new test
+<code>test_real_operator_request_calls_inline_unless_they_share_a_scan</code>
+passes in 48.12 s. The initial optimization-barrier counter saw zero even in its
+known-present control, so it was rejected; XLA removes that barrier. Its failed
+log remains beside the corrected counter, which uses the physical full-flux
+output root and qualifies both single and duplicated controls.</p>
+<table>
+<thead><tr><th>Requested weak-row cells</th><th>Unchanged-source baseline</th><th>Explicit streams</th><th>Required ceiling</th><th>Candidate compile seconds</th></tr></thead>
+<tbody>
+<tr><td>300</td><td>342,055</td><td>302,553</td><td>203,078</td><td>160.183121</td></tr>
+<tr><td>1000</td><td>344,858</td><td>304,913</td><td>204,531</td><td>167.133377</td></tr>
+</tbody>
+</table>
+<p>Both candidate rows and the per-request control run in separate processes on
+one <code>all_debug</code> allocation, job 1275701, four CPUs and 128 GiB. The
+candidate source digest is
+<code>e5fa1479a94cb6f52e549ea2ae5c77bae3e19143dc82cf1f31f3168d8ce7c695</code>,
+identical for both measurements and the committed solver files. The printed HEAD
+changes between measurements because tests and the already-measured reduced
+source were committed; the digest verifies that the measured solver bytes did
+not change. The exact refusing lines are:</p>
+<pre>AssertionError: operator state-machine ceiling refused: 300 cells has 302553 instructions &gt; 203078
+AssertionError: operator state-machine ceiling refused: 1000 cells has 304913 instructions &gt; 204531</pre>
+<p id="explicit-negative-result">The whole-program negative control completes.
+Its first log line is the declared mutation,
+<q>revert the single body to per-request evaluation</q>, and it prints the
+applied unroll counts before compiling. The 300-cell program grows from
+<strong>302,553 to 532,366 optimized instructions</strong>, with 350.545511 s
+compile wall. Its receipt and log report
+<code>NEGATIVE_CONTROL_PASS instructions=532366 shared=302553</code>.
+This confirms that the retained streams share executable bodies, while both
+candidate size ceilings independently remain refused.</p>
+<p>The split baseline allocation 1275692 runs each named file in its own fresh
+CPU process. <code>tests/test_fixed_point.py</code> passes 42 cases in 141.27 s.
+The reduced file records failures in
+<code>test_diverted_normalised_certificate_rung_retains_finite_fallback</code>
+and <code>test_reduced_newton_reaches_the_production_fixed_point</code>, passes
+<code>test_prescribed_currents_reuse_one_program</code>, then aborts with exit
+134 during <code>test_threshold_one_reproduces_the_refusal_only_policy</code>
+at line 425. This is an incomplete baseline, with two named assertion failures
+and a later compile abort, not an empty or green result. The coordinator
+classifies the lane's compile abort as the known LLVM section-memory defect;
+the current log itself records the abort inside compilation.</p>
+<p>The candidate fixed-point file passes all 44 cases in 132.73 s; the subsequently
+added real-operator regression separately passes one case. The independent
+reduced request residual/JVP/Jacobian contract passes one case in 143.23 s.
+The default-wiring gates pass 97 cases in 7.31 s. A fallback prescribed-current
+process also passes one case in 318.95 s, but it starts after the source edit:
+its inherited allocation-start revision header is explicitly corrected at the
+end of its log, and it is candidate evidence, not baseline evidence.</p>
+<p id="explicit-reduced-result">The candidate reduced-file process also aborts
+with SIGABRT during <code>test_threshold_one_reproduces_the_refusal_only_policy</code>.
+Before that abort, it reproduces both named baseline failures and additionally
+fails <code>test_ladder_scoring_evaluates_one_map_per_accepted_step</code>,
+which passed in the base process. The observed prefix therefore has one added
+failure, independently blocking acceptance; this is not dismissed as the known
+compile abort. Both processes stop before the remaining tests, so no completed
+all-file failure census or zero-added-failure claim is made. The same added
+failure passes in isolation (one test, 311.37 s) without any source change.
+Its failure in the suite is therefore unresolved and not independently
+reproduced; no deterministic cause or repaired regression is claimed. The
+observed in-suite delta remains in the manifest and the isolated log is retained.</p>
+<p>The two tracked figure byproducts at
+<code>docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.{png,svg}</code>
+are deleted from this worktree, never staged or committed, as adjudicated.
+Follow-on for the plan owning
+<code>test_diverted_normalised_certificate_rung_retains_finite_fallback</code>:
+the test redirects <code>PART_ROOT</code> but not <code>FIGURE_ROOT</code> or
+<code>DIAGNOSTIC_ROOT</code>, so its outputs are not isolated. That fixture
+repair is recorded rather than folded into this final attempt.</p>
+<p>Artifacts are under
+<code>docs/figures/forward-solver-route-integrity/explicit-requests/</code>:
+the split baseline and candidate logs, <code>split-suites.json</code>,
+<code>operator-boundary.json</code>, both <code>candidate-*.json</code> receipts,
+<code>negative-control.log</code>, the executable drivers and diagram.
+Large optimized HLO dumps are retained outside git in the run's
+<code>optimized-hlo/</code> directory, which the manifest names explicitly.
+The exact live-read and external-linear-solve probes pass where measured;
+whole-solve body sharing, both size ceilings and complete suite evidence remain
+unmet. Four-row GPU bit identity remains a separate follow-on. No section,
+driving followup, sprint or primary branch is changed.</p>
+</section>
 </main>
 </body>
 </html>

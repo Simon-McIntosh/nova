@@ -156,7 +156,7 @@
         "node_count": 37,
         "retained_raster_private_count": 14
       },
-      "wall_seconds": 69.75827067904174
+      "wall_seconds": 79.33745509572327
     },
     {
       "arm": "mixed",
@@ -263,7 +263,7 @@
         "node_count": 37,
         "retained_raster_private_count": 14
       },
-      "wall_seconds": 4.62980249337852
+      "wall_seconds": 4.687972081825137
     },
     {
       "arm": "pure",
@@ -371,7 +371,7 @@
         "node_count": 37,
         "retained_raster_private_count": 11
       },
-      "wall_seconds": 24.68014695495367
+      "wall_seconds": 25.509169237688184
     },
     {
       "arm": "mixed",
@@ -478,7 +478,7 @@
         "node_count": 37,
         "retained_raster_private_count": 12
       },
-      "wall_seconds": 4.562818419188261
+      "wall_seconds": 4.679753517732024
     },
     {
       "arm": "pure",
@@ -619,7 +619,7 @@
         "node_count": 37,
         "retained_raster_private_count": 7
       },
-      "wall_seconds": 4.454885082319379
+      "wall_seconds": 4.716194739565253
     },
     {
       "arm": "mixed",
@@ -704,7 +704,7 @@
         "node_count": 37,
         "retained_raster_private_count": 7
       },
-      "wall_seconds": 4.4217558689415455
+      "wall_seconds": 4.633156314492226
     },
     {
       "arm": "pure",
@@ -790,7 +790,7 @@
         "node_count": 37,
         "retained_raster_private_count": 7
       },
-      "wall_seconds": 4.812637994065881
+      "wall_seconds": 4.83233237080276
     },
     {
       "arm": "mixed",
@@ -897,7 +897,7 @@
         "node_count": 37,
         "retained_raster_private_count": 14
       },
-      "wall_seconds": 4.455679060891271
+      "wall_seconds": 4.592902729287744
     },
     {
       "arm": "pure",
@@ -1038,7 +1038,7 @@
         "node_count": 37,
         "retained_raster_private_count": 7
       },
-      "wall_seconds": 4.434833249077201
+      "wall_seconds": 4.549013812094927
     },
     {
       "arm": "mixed",
@@ -1123,7 +1123,7 @@
         "node_count": 37,
         "retained_raster_private_count": 7
       },
-      "wall_seconds": 4.520664231851697
+      "wall_seconds": 4.586645442992449
     },
     {
       "arm": "pure",
@@ -1209,7 +1209,7 @@
         "node_count": 37,
         "retained_raster_private_count": 7
       },
-      "wall_seconds": 4.756147064268589
+      "wall_seconds": 4.636878589168191
     },
     {
       "arm": "mixed",
@@ -1316,7 +1316,7 @@
         "node_count": 37,
         "retained_raster_private_count": 14
       },
-      "wall_seconds": 4.568110475316644
+      "wall_seconds": 4.51839929074049
     }
   ],
   "schema": "nova.topology-cell-parity",

@@ -180,3 +180,137 @@ def test_banked_consumer_uses_public_complete_flux_pool(monkeypatch):
         candidate_flux_margins(
             operator, state[: operator.physical_node_number], polarity=operator.polarity
         )
+
+
+@pytest.mark.parametrize("carrier", ["analytic_saddle", "ladder"])
+def test_quadratic_admission_is_invariant_under_flux_rescaling(carrier):
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    if carrier == "analytic_saddle":
+        grid, coordinate = _hex_locator()
+        radial, vertical = coordinate.T
+        pool = jnp.asarray((radial - 0.2) ** 2 - (vertical - 0.1) ** 2)
+    else:
+        _machine, operator, state, _exact = census_benchmark._machine_and_field(
+            certificate.DIVERTED_CASE_NAME, 110
+        )
+        grid = operator._fixed_design_topology.grid
+        pool = operator.null_flux_pool(jnp.asarray(state, dtype=jnp.float64))
+    reference = grid.candidate_table_status(pool)
+    assert int(reference["retained_count"][1]) > 0
+    valid = np.asarray(reference["retained_valid"])
+    positions = np.asarray(reference["retained_candidate"])[..., :2][valid]
+    tolerance = 512 * np.finfo(np.float64).eps * max(1.0, np.max(np.abs(positions)))
+    maximum_error = 0.0
+    for amplitude in (1e3, 1.0, 1e-3, 1e-6, 1e-9, -1e3, -1e-9):
+        scaled = grid.candidate_table_status(amplitude * pool)
+        print(
+            f"flux_rescaling carrier={carrier} amplitude={amplitude:g} "
+            f"retained={np.asarray(scaled['retained_count']).tolist()}",
+            flush=True,
+        )
+        for key in ("quadratic_admitted_mask", "representative_mask", "retained_valid"):
+            np.testing.assert_array_equal(scaled[key], reference[key])
+        scaled_positions = np.asarray(scaled["retained_candidate"])[..., :2][valid]
+        maximum_error = max(
+            maximum_error, float(np.max(np.abs(scaled_positions - positions)))
+        )
+        np.testing.assert_allclose(
+            scaled_positions,
+            positions,
+            rtol=0.0,
+            atol=tolerance,
+        )
+    print(
+        f"flux_rescaling_positions carrier={carrier} max_error_m={maximum_error:.12g} "
+        f"roundoff_tolerance_m={tolerance:.12g}",
+        flush=True,
+    )
+
+
+def test_own_node_read_and_public_census_pool_complete(monkeypatch):
+    configure_dtypes()
+    _machine, operator, state, _exact = census_benchmark._machine_and_field(
+        certificate.DIVERTED_CASE_NAME, 110
+    )
+    state = jnp.asarray(state, dtype=jnp.float64)
+    masks, topology = operator.read(state)
+    pool = operator.null_flux_pool(state)
+    census = operator._fixed_design_topology.grid.candidate_table_status(pool)
+    assert masks.label.size == 132
+    assert np.all(np.isfinite(topology.x_point))
+    assert int(census["retained_count"][1]) > 0
+
+    def refuse_second_read(*args, **kwargs):
+        raise AssertionError("secondary selection must reuse the supplied topology")
+
+    monkeypatch.setattr(operator, "read", refuse_second_read)
+    secondary = operator.secondary_x_point(state, topology)
+    assert secondary.shape == (2,)
+    print(
+        f"own_node_read cells={masks.label.size} "
+        f"pool_values={pool.size} saddles={int(census['retained_count'][1])} "
+        f"secondary={np.asarray(secondary).tolist()}",
+        flush=True,
+    )
+
+
+@pytest.mark.parametrize(
+    "consumer", ["candidate_table", "resolution_ladder", "census", "global_spline"]
+)
+def test_reachable_benchmark_consumers_keep_own_node_samples(
+    consumer, monkeypatch, tmp_path
+):
+    from benchmarks import global_spline_read_on_hex, null_census_assertion
+    from benchmarks import topology_read_resolution_ladder, xpoint_cell_allocation_rca
+
+    configure_dtypes()
+    machine, operator, state, _exact = census_benchmark._machine_and_field(
+        certificate.DIVERTED_CASE_NAME, 110
+    )
+    calls = []
+    builder = operator.null_flux_pool
+
+    def record_pool(argument):
+        assert argument.shape == state.shape
+        calls.append(argument.shape)
+        return builder(argument)
+
+    monkeypatch.setattr(operator, "null_flux_pool", record_pool)
+    if consumer == "candidate_table":
+        result = xpoint_cell_allocation_rca._candidate_table(operator, state)
+        assert result["x_candidate_count"] > 0
+    elif consumer == "resolution_ladder":
+        monkeypatch.setattr(
+            topology_read_resolution_ladder,
+            "_allocation",
+            lambda kind: {"test_fixture": True, "kind": kind},
+        )
+        monkeypatch.setattr(
+            topology_read_resolution_ladder,
+            "_machine_and_field",
+            lambda requested: (machine, operator, state),
+        )
+        result = topology_read_resolution_ladder._measure_row(110, tmp_path)
+        assert result["census"]["x_candidate_count"] > 0
+    elif consumer == "census":
+        parts = {"render_data": {"terminal_flux_wb": state}}
+        result = null_census_assertion.production_read(parts, operator)
+        assert result["x_candidate_count"] > 0
+    else:
+        result = global_spline_read_on_hex._production_read(
+            operator,
+            machine,
+            state,
+            axis_reference=np.asarray(certificate.DIVERTED_REFERENCE.magnetic_axis),
+            saddle_reference=np.asarray(certificate.DIVERTED_REFERENCE.x_point),
+            span=float(np.ptp(state)),
+            positive_control=True,
+        )
+        assert result["saddle_rz_m"] is not None
+        assert (
+            result["saddle_ring"]["positive_control"]["published_saddle_displacement_m"]
+            > 0.0
+        )
+    assert calls
+    print(f"benchmark_consumer={consumer} complete_pool_calls={len(calls)}", flush=True)

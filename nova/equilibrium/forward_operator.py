@@ -1019,19 +1019,23 @@ class _FixedDesignNull2D:
         sampled = jnp.asarray(psi, dtype=self.fit_dtype)[self.fit_locator.stencil]
         # Keep the sample reduction identical for scalar and vmapped fields.
         coefficient = jnp.sum(self.fit_weight * sampled[:, None, :], axis=-1)
-        determinant = (
-            4.0 * coefficient[..., 0] * coefficient[..., 1] - coefficient[..., 4] ** 2
+        # Conditioning is relative to curvature, independent of flux amplitude.
+        curvature_scale = jnp.max(jnp.abs(coefficient[..., (0, 1, 4)]), axis=-1)
+        scaled = (
+            coefficient
+            / jnp.where(curvature_scale > 0.0, curvature_scale, 1.0)[..., None]
         )
-        determinant_floor = jnp.asarray(1.0e-12, coefficient.dtype)
-        nonsingular = jnp.abs(determinant) >= determinant_floor
+        determinant = 4.0 * scaled[..., 0] * scaled[..., 1] - scaled[..., 4] ** 2
+        determinant_floor = 64.0 * jnp.finfo(coefficient.dtype).eps
+        nonsingular = (curvature_scale > 0.0) & (
+            jnp.abs(determinant) > determinant_floor
+        )
         safe_determinant = jnp.where(nonsingular, determinant, 1.0)
         local_radial = (
-            coefficient[..., 4] * coefficient[..., 3]
-            - 2.0 * coefficient[..., 1] * coefficient[..., 2]
+            scaled[..., 4] * scaled[..., 3] - 2.0 * scaled[..., 1] * scaled[..., 2]
         ) / safe_determinant
         local_vertical = (
-            coefficient[..., 4] * coefficient[..., 2]
-            - 2.0 * coefficient[..., 0] * coefficient[..., 3]
+            scaled[..., 4] * scaled[..., 2] - 2.0 * scaled[..., 0] * scaled[..., 3]
         ) / safe_determinant
         local_flux = (
             coefficient[..., 0] * local_radial**2
@@ -2889,6 +2893,19 @@ class ForwardFluxOperator:
         return grid_flux
 
     _null_flux_pool = null_flux_pool
+
+    def secondary_x_point(self, state, topology):
+        """Select a distinct contained saddle without repeating the topology read."""
+        _axis_rows, saddles = self._fixed_design_topology.grid(
+            self.null_flux_pool(state)
+        )
+        distance = jnp.linalg.norm(saddles[:, :2] - topology.x_point, axis=1)
+        qualified = self._fixed_design_topology.contained_x_candidates(saddles) & (
+            distance > self._x_qualification_distance
+        )
+        score = self.polarity * (saddles[:, 2] - topology.axis_flux)
+        index = jnp.argmax(jnp.where(qualified, score, -jnp.inf))
+        return jnp.where(jnp.any(qualified), saddles[index, :2], jnp.nan)
 
     def _fixed_design_read(
         self, physical, requested_class=None, private_wall_node_mask=None

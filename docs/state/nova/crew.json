@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T20:36:00",
+  "updated": "2026-09-22T20:39:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -260735,6 +260735,314 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T171937739298-review-of-sgc-sweep-control-at-the-four-of-twenty-revision",
+        "plan": "single-grid-solver-cutover",
+        "section": "\u00a74",
+        "node": "review-of-sgc-sweep-control-at-the-four-of-twenty-revision",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1722,
+                "cached_input_tokens": 920667,
+                "input_tokens": 922421,
+                "output_tokens": 157,
+                "reasoning_output_tokens": 81,
+                "total_tokens": 922578,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "the review for r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision stores a parsed record scoring all 5 dimensions in the range 0..20, reading commit 94e4a099 in worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/sgc-sweep-control-at-the-four-of-twenty-revision and the receipts under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/sgc-sweep-control-at-the-four-of-twenty-revision: whether the titan receipt (job 1275968, revision a3f2429b) matches the H200 receipt at the same revision (job 1274510) edit for edit on converged flag, termination and trip count (recompute the 20-row comparison), whether run() sets constraint_pairs unconditionally at a3f2429b (line 2456, entered at c920e30d9), whether the banked 10-of-20 receipt at d3849192 carries no vertical_centroid rows, how the measurement-host guard was passed on titan and whether the receipt stamps it, and whether committing docs beyond the report-only fence is acceptable as the evidence record",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision",
+          "id": "review-of-sgc-sweep-control-at-the-four-of-twenty-revision",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-22T17:19:39Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T171937739298-review-of-sgc-sweep-control-at-the-four-of-twenty-revision/manifest.md",
+          "negative_control": "",
+          "plan": "single-grid-solver-cutover",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s18-sgc-review-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-22T17:20:02Z",
+        "completed_at": "2026-09-22T17:51:58.545Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1905,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1916,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "89ee1ea39bb309c231adabad243a6f8fc64624ee",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T171937739298-review-of-sgc-sweep-control-at-the-four-of-twenty-revision/manifest.md",
+        "scope_changed": false,
+        "session_id": "2c1ac166-5280-42d5-91e1-bee48b4cbb3a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6369975,
+            "input_tokens_cumulative": 6369975,
+            "output_tokens": 55450,
+            "output_tokens_cumulative": 55450,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-22T17:51:58.545Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1992,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 4388,
+              "log_fresh": false,
+              "manifest_commits": [
+                "94e4a0991f0da98cbf6fa7103cad3dcebc71a04b"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "6d7e7424e41c2b45d5144ff231cde5fefa8ff51efab1aca7302fc30828d16764",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan single-grid-solver-cutover --section '\u00a74' --role review --spec-level exact --node review-of-sgc-sweep-control-at-the-four-of-twenty-revision --goal 'attach an independent review to run r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision' --done-when 'the review for r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision.json --time-budget 55m --session s18-fable-20260922 --allow-unreconciled-runs --local",
+              "node": "sgc-sweep-control-at-the-four-of-twenty-revision",
+              "phase": "complete",
+              "plan": "single-grid-solver-cutover",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision",
+              "session": "s18-fable-20260922",
+              "terminal_age_seconds": 4416,
+              "terminal_at": "2026-09-22T16:06:10Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/sgc-sweep-control-at-the-four-of-twenty-revision"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1703,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 3294,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9c203931e",
+                "2728d5bcd"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "96db00a6d781919c3346f1a1fb55874d9425605fda995e85f23a46c77940de5a",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T153248288729-sgc-sweep-control-at-the-banked-revision/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan single-grid-solver-cutover --section '\u00a74' --role review --spec-level exact --node review-of-sgc-sweep-control-at-the-banked-revision --goal 'attach an independent review to run r-20260922T153248288729-sgc-sweep-control-at-the-banked-revision' --done-when 'the review for r-20260922T153248288729-sgc-sweep-control-at-the-banked-revision stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T153248288729-sgc-sweep-control-at-the-banked-revision.json --time-budget 55m --session s18-fable-20260922 --allow-unreconciled-runs --local",
+              "node": "sgc-sweep-control-at-the-banked-revision",
+              "phase": "working",
+              "plan": "single-grid-solver-cutover",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260922T153248288729-sgc-sweep-control-at-the-banked-revision",
+              "session": "s18-fable-20260922",
+              "terminal_age_seconds": 3319,
+              "terminal_at": "2026-09-22T16:24:27Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/sgc-sweep-control-at-the-banked-revision"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 6537079,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1912.69,
+          "generated_tokens": 67652,
+          "generation_seconds": 1706.367,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.5,
+          "machine_seconds": 206.323,
+          "peak_input_tokens": 165804,
+          "tokens_per_second": 39.65,
+          "wall_tokens_per_second": 35.37
+        },
+        "follow_on_paths": [
+          "benchmarks/coil_edit_latency.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/review-of-sgc-sweep-control-at-the-four-of-twenty-revision",
+          "session_id": "2c1ac166-5280-42d5-91e1-bee48b4cbb3a",
+          "session_source": "stream",
+          "retained_at": "2026-09-22T17:51:58.545Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "single-grid-solver-cutover",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 75.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "failed",
+          "error": "IntegrityError: UNIQUE constraint failed: runs.run_id"
+        }
       }
     ],
     "holds": [
@@ -261201,6 +261509,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3199
+    "_version": 3200
   }
 }

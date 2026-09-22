@@ -220,6 +220,15 @@ def _governed_topology_read(operator, state, solve_receipt):
     )
 
 
+def _sample_closed_boundary(authority, controls: np.ndarray) -> np.ndarray:
+    """Return a shaped empty boundary when the authority has no closed branch."""
+
+    sampled = authority._sample_cubic_controls(controls)
+    if sampled is None:
+        return np.empty((0, 2), dtype=float)
+    return np.asarray(sampled, dtype=float).reshape((-1, 2))
+
+
 def _stationary_records(
     source_o: np.ndarray,
     source_x: np.ndarray,
@@ -455,10 +464,11 @@ def _mast_rows(
                         topology.axis,
                     )
                 )
-                closed = authority._sample_cubic_controls(
+                closed = _sample_closed_boundary(
+                    authority,
                     np.asarray(assembled["closed_controls_rz"])[
                         np.asarray(assembled["closed_valid"], dtype=bool)
-                    ]
+                    ],
                 )
                 boundary_failure_class = None
                 boundary_failure_message = None

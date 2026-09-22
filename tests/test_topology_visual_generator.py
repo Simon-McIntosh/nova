@@ -207,6 +207,23 @@ def test_persisted_boundary_flux_follows_the_recorded_class():
     assert generator._class_boundary_flux(read, None) == pytest.approx(contact_flux)
 
 
+def test_empty_authority_branch_is_an_explicit_boundary_failure():
+    generator = _generator()
+
+    class Authority:
+        @staticmethod
+        def _sample_cubic_controls(controls):
+            assert controls.shape == (0, 4, 2)
+            return None
+
+    boundary = generator._sample_closed_boundary(
+        Authority(), np.empty((0, 4, 2), dtype=float)
+    )
+
+    assert boundary.shape == (0, 2)
+    assert boundary.dtype == np.float64
+
+
 class _SynthesisedSolveReceipt:
     def __init__(self, diverted):
         self.topology_read = type("TopologyRead", (), {"diverted": diverted})()

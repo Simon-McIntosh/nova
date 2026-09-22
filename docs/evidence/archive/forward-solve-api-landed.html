@@ -748,6 +748,131 @@ whose row count is 0. Reported here rather than fixed outside scope.</p>
 <p>Gate: <code>tests/test_coil_edit_persistence_guard.py</code>, the only test file importing the
 changed module, 3 passed in 34.31 s against base 62acf7dc &mdash; added failures none.</p>
 </section>
+<section id="coil-edit-constrained-fixture-regenerated">
+<h2>The constrained fixture regenerated: the row moves the solved set, and the control arm says whose move it is (2026-09-22)</h2>
+<p><strong>What was run.</strong> One titan allocation (job <code>1275764</code>) at revision
+<code>15b3aa2f8</code> ran the twenty-edit sweep of <code>benchmarks/coil_edit_latency.py</code> twice inside one
+allocation: first with the vertical current-centre row imposed, then the same driver with
+<code>--without-vertical-centroid</code>, which keeps the row's pair out of the compiled solve and persists
+no centroid row. Both arms therefore run the same code and differ only in whether the row is imposed.
+Host <code>98dci4-gpu-0002</code>, partition <code>titan</code>, <code>NP4</code> P100, <code>JAX_PLATFORMS=cuda,cpu</code>,
+<code>TMPDIR=/tmp</code> in the submit environment and in the payload, the root interpreter run directly and
+<code>uv</code> never invoked on the node. The fixture this record ships was copied from the constrained arm's
+own scratch output, and all five artifacts (<code>panel-states.npz</code>,
+<code>converged-vs-nonconverged.png</code> and <code>.svg</code>, <code>coil-edit-latency.json</code>,
+<code>coil-edit-nonconvergence.json</code>) compare byte-identical to it.</p>
+<p><strong>The row's effect, measured against its own control rather than against the banked figure.</strong>
+The banked fixture read 10 of 20 converged, 12 drawn closed and 14 axis-enclosing cycles. The control arm
+at this revision reproduces all three exactly — converged <code>[0, 3, 5, 7, 9, 11, 12, 13, 14, 15]</code>,
+12 drawn closed, 14 cycles — so the earlier readings are a property of the unconstrained arm and not of a
+change on <code>main</code>. The constrained arm reads <strong>4 of 20 converged</strong>
+(<code>[0, 2, 13, 17]</code>), <strong>11 drawn closed</strong> and <strong>19 cycles</strong>. Convergence
+differs between the arms on ten states (<code>2, 3, 5, 7, 9, 11, 12, 14, 15, 17</code>) and closedness on
+nine (<code>4, 5, 6, 8, 9, 10, 11, 12, 13</code>). The divergence is therefore the row's own effect, and
+the re-based expectations state it rather than absorbing it into a re-pin.</p>
+<table>
+<thead>
+<tr><th>arm</th><th>converged</th><th>drawn closed</th><th>axis-enclosing cycles</th><th>open states</th><th>cycle admits nothing</th></tr>
+</thead>
+<tbody>
+<tr><td>constrained</td><td>4 &mdash; 0, 2, 13, 17</td><td>11</td><td>19</td><td>0, 1, 2, 3, 8, 9, 10, 11, 12</td><td>0, 1, 2, 8, 9, 10, 11, 12</td></tr>
+<tr><td>unconstrained (control)</td><td>10 &mdash; 0, 3, 5, 7, 9, 11, 12, 13, 14, 15</td><td>12</td><td>14</td><td>0, 1, 2, 3, 4, 5, 6, 13</td><td>4, 13</td></tr>
+</tbody>
+</table>
+<p><strong>The open set and its two mechanisms, corrected.</strong> The persistence-guard section above
+stated eight open states and named states 4 and 13 as carrying a cycle that admits nothing. That is the
+unconstrained arm's description, and it does not hold on this archive. Under the row <strong>nine</strong>
+states draw no admissible closed candidate: eight of them (0, 1, 2, 8, 9, 10, 11, 12) trace a cycle with an
+axis-enclosing component that admits nothing (<code>cycle_component_count</code> 1,
+<code>closed_candidate_count</code> 0, drawn with the unconnected-mark fallback), and the ninth,
+<strong>state 3</strong>, traces no cycle at all (<code>cycle_component_count</code> 0) — a mechanism the
+unconstrained arm does not produce anywhere in its twenty states. The two states the earlier record named
+as admissions-without-a-candidate, <strong>4 and 13, are admitted closed under the row</strong>: state 4
+at 77 closed segments, state 13 at 71, both with two open branches. Eleven states close, spanning 71 to 77
+closed segments and two open branches each; state 19 is the one closed state with no open branch (72
+closed).</p>
+<p><strong>The panel, redrawn from this record and read against it.</strong> The drawn converged side is
+<strong>edit 2</strong> (&minus;14&#37;, terminal residual 4.129e-09 Wb, converged in 2 trips), and it is a
+state whose traced set admits no closed candidate at all: the panel draws it through the
+unconnected-mark fallback (<code>closed_candidate_count</code> 0, <code>well_formed</code> false, one
+axis-enclosing cycle). The drawn failed side is <strong>edit 7</strong> (&minus;4&#37;, terminal residual
+6.514e-03 Wb, <code>active_set_iteration_budget_exhausted</code> after 16 trips), and it is the panel that
+<em>does</em> draw a well-formed closed boundary: 73 closed segments and two open branches. So the file
+name's "converged versus non-converged" is a residual statement and not a closedness statement, and the
+redrawn panel shows that rather than leaving a reader to infer that the converged side is the closed one.
+Both drawn panels admit a saddle <em>above</em> their own axis (edit 2 at +1.235 m against an axis at
++0.023 m; edit 7 at +1.173 m against +0.001 m), the same ordering as the reference (+1.231 m against
++0.022 m), so neither panel closes through a null its reference does not close through — the condition
+that required the earlier panel to be regenerated rather than captioned around is not present here, and
+both panels draw their own null sets and the MAST first wall on shared levels.</p>
+<p><strong>The fence, and the gate that proves it is a gate.</strong> Per-state saddle flux residual over
+the shipped archive: maximum <strong>2.776e-17 Wb</strong> on all 20 states, <strong>zero</strong> above
+the 1.0e-9 Wb tolerance, and the per-state census agrees
+(<code>states=20 drawn_closed=11/20 axis_enclosing_cycle=19/20</code>,
+<code>CENSUS_AGREES=1</code>). The persistence guard on <code>all_debug</code> (job <code>1275858</code>)
+reports 3 passed at revision <code>15b3aa2f8</code> (41.31 s, exit 0) and 4 passed in the working tree
+(45.99 s, exit 0) — zero added failures — the added test being the positive arm that asserts the
+<em>shipped</em> fixture reads back as its own field at every state, so the suite no longer rests on a
+deliberately inconsistent archive alone. The declared negative control (job <code>1275864</code>), the same
+test file against the driver with <code>SADDLE_FLUX_TOLERANCE</code> raised to 1.0e9, reddens
+<strong>2 failed, 2 passed, exit 1</strong>, the two failures being exactly the tests that read the
+tolerance. A guard that fires on everything would have raised the retained inconsistent archive's
+residual, not a muted tolerance.</p>
+<p><strong>One trap worth recording, because it looked like an archive defect and was not.</strong> The
+positive arm first reddened with residuals near 4e-8 to 8e-8 Wb against the 1e-9 Wb tolerance. The cause
+was not the archive: the test module never called <code>configure_dtypes()</code>, so the read-back refit
+ran in single precision while the writer had resolved extended precision. The same consistent pair reads
+back at <strong>1.9e-16 Wb</strong> with x64 on and at <strong>1.1e-7 Wb</strong> with it off — which
+straddles the tolerance and would report a sound archive as corrupt. The fix is to configure dtypes and
+assert the flag in the module, not to widen the tolerance: a refit is a different measurement at a
+different working precision, and slack would hide this everywhere else it occurs.</p>
+<p><strong>What was re-based, and where.</strong> The per-state census predicate carried the unconstrained
+readings (12 drawn closed, 14 cycles) and now carries 11 and 19 with the attribution written beside them.
+<code>PERSISTED_STATE_TERMS</code> in <code>tests/test_flux_surface_connectivity.py</code> was re-pinned to
+cover all twenty states from this archive: the eleven closing ones each with their own segment count and
+open-branch count (4 at 77, 5 at 75, 6 at 75, 7 at 73, 13 at 71, 14 at 71, 15 at 71, 16 at 71, 17 at 73,
+18 at 73, and 19 at 72 with <em>no</em> open branch), and the nine open ones pinned by mechanism (0, 1, 2,
+8, 9, 10, 11 and 12 each carrying one axis-enclosing cycle; 3 carrying none). Pinning all twenty rather
+than a sample is what makes the comment above the dictionary true when it says the segment counts are
+pinned below.</p>
+<p><strong>One state carries a wider displaced-level control, and the reason is a measurement.</strong>
+The suite's control re-assembles each closing state's candidate at a level displaced by 1e-3 Wb and
+requires it to stop validating. State 19 fails that control: its lobe survives the displacement and still
+assembles 72 well-formed segments, and it stops only at 2e-3 Wb. Measured across all eleven closing
+states, 19 is the only one that survives 1e-3 &mdash; every other one breaks there. So state 19 carries
+its own <code>control_displacement: 2.0e-3</code>, read per state with
+<code>expected.get("control_displacement", 1.0e-3)</code>, and the dictionary's comment says the value is
+a statement about how sharply that level is pinned rather than a weaker assertion. The independent
+<code>persisted-terms-constrained.json</code> receipt agrees: it records
+<code>displaced_closed_candidate_count</code> nonzero on state 19 alone.</p>
+<p><strong>Gate.</strong> <code>tests/test_flux_surface_connectivity.py</code> ran on <code>all_debug</code>
+(job 1275907, revision <code>15b3aa2f8</code>, worktree diff one file) at
+<strong>43 passed in 79.00 s, exit 0</strong>; the worktree's own run of the persisted-state tests reported
+<strong>20 passed, 23 deselected</strong> against the archive. That file is outside this node's declared
+write paths; the coordinator's ruling names the symbol, so the ruling is the authority and the extension is
+declared in the node's manifest.</p>
+<p><strong>The regeneration's own gate, repaired.</strong> <code>regen-titan.sbatch</code> now counts the
+state rows in the archive it produced and gates on twenty of twenty. It previously read the driver's exit
+status, and <code>EXIT_MARKER=2</code> is the driver's <em>verdict</em> gate — the sweep is reported
+unconverged, which is a result — rather than an abort, so a run that wrote all twenty states was being
+rejected by its own launcher. The receipt also now states that
+<code>first_edit_compiles_program</code> is not a compile witness on a cached device rung: the first edit
+reports <code>compilation_cache='hit'</code> with <code>persistent_cache_miss_count</code> 0 and
+<code>persistent_cache_hit_count</code> 1, which records a persistent-cache outcome rather than a
+compilation.</p>
+<p><strong>Where the constrained record rides.</strong>
+<code>docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz</code> is the per-edit state
+archive; <code>converged-vs-nonconverged.png</code> and its vector companion are the redrawn panel;
+<code>coil-edit-nonconvergence.json</code> is the per-edit forensics under the row (converged
+<code>[0, 2, 13, 17]</code>, sixteen non-converged in
+<code>partial_walk</code> <code>[1, 4, 7, 8]</code> and <code>stall</code>
+<code>[3, 5, 6, 9, 10, 11, 12, 14, 15, 16, 18, 19]</code> — twelve stalls, and
+<strong>no</strong> refused-first-step edit, where the unconstrained arm had two);
+<code>coil-edit-latency.json</code> in the sibling directory carries the sweep receipt with the imposed
+row recorded (<code>imposed: true</code>, reference 0.031679780923040135 m, tolerance 1e-06 m); and the
+two-arm state-for-state table is preserved beside the run under
+<code>titan-evidence/two-arm-1275764/two-arm-table.txt</code>.</p>
+</section>
 </main>
 </body>
 </html>

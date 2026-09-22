@@ -11,10 +11,12 @@ writer itself produced.
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from types import SimpleNamespace
 
 os.environ.setdefault("JAX_PLATFORMS", "cpu")
 
+import jax
 import numpy as np
 import pytest
 
@@ -25,11 +27,35 @@ from benchmarks.coil_edit_latency import (
     _write_panel_data,
 )
 from nova.equilibrium.wall_mask import WallUnit, pack_wall_units
+from nova.jax.config import configure_dtypes
+
+# The read-back refits the stored field, and an extended-precision refit is a
+# different measurement from a single-precision one: the same consistent pair
+# reads back at 1.9e-16 Wb with x64 on and at 1.1e-7 Wb with it off, which
+# straddles the guard's tolerance and would report a sound archive as corrupt.
+configure_dtypes()
+assert jax.config.jax_enable_x64 is True, (
+    "the read-back guard measures a refit, so the test process must resolve the "
+    "same working precision the writer did"
+)
 
 
 ARCHIVED_FIXTURE = (
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/"
     "fsa-coil-edit-records/regenerated-fixture-evidence/panel-states.npz"
+)
+
+# The fixture this repository ships, drawn under the vertical current-centre
+# row and persisted beside the sweep record it came from.  It is the positive
+# arm of the pair: the retained archive above proves the guard fires, and this
+# one proves it does not fire on the archive the panels are drawn from.
+REFRESHED_FIXTURE = (
+    Path(__file__).resolve().parents[1]
+    / "docs"
+    / "figures"
+    / "forward-solve-api"
+    / "coil-edit-nonconvergence"
+    / "panel-states.npz"
 )
 
 
@@ -162,6 +188,34 @@ def test_read_back_fires_on_the_archived_inconsistent_fixture() -> None:
     )
     with pytest.raises(ValueError, match="not its own field"):
         _refuse_inconsistent_persisted_pairs(np.load(ARCHIVED_FIXTURE))
+
+
+def test_refreshed_fixture_reads_back_consistent_at_every_state() -> None:
+    """The committed fixture is the positive control for the retained one.
+
+    The retained pre-repair archive is deliberately inconsistent, so it proves
+    only that the guard can fire; a guard that fires on everything guards
+    nothing.  The archive this repository ships is what the guard must pass,
+    and every one of its states is asserted here rather than a sample, because
+    the state that disagrees is exactly the one a sample would miss.
+    """
+    if not REFRESHED_FIXTURE.exists():
+        pytest.skip("the coil-edit panel states are absent from this checkout")
+    with np.load(REFRESHED_FIXTURE, allow_pickle=False) as archive:
+        residuals = _persisted_saddle_residuals(archive)
+
+    assert len(residuals) == 20
+    over = {
+        state: value
+        for state, value in residuals.items()
+        if value > SADDLE_FLUX_TOLERANCE
+    }
+    assert not over, (
+        "the committed fixture must read back as its own field at every state, "
+        "over tolerance at %s" % sorted(over)
+    )
+    with np.load(REFRESHED_FIXTURE, allow_pickle=False) as archive:
+        _refuse_inconsistent_persisted_pairs(archive)
 
 
 def test_writer_persists_a_pair_its_own_read_back_accepts(tmp_path) -> None:

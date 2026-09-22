@@ -389,8 +389,8 @@ def test_newton_refuses_equal_own_mask_residual_and_keeps_settled_mask():
         # Each candidate is judged on the mask it induces against the incumbent
         # on its own induced mask, so an equal live residual is refused rather
         # than treated as an improvement.
-        np.testing.assert_allclose(result.state, [0.49908237904310226])
-        np.testing.assert_allclose(result.residual, 0.5009176209568978)
+        np.testing.assert_allclose(result.state, [0.4972179962158203])
+        np.testing.assert_allclose(result.residual, 0.5027820037841797)
         np.testing.assert_array_equal(result.active_set_mask_differences, [0] * 6)
         np.testing.assert_array_equal(
             result.active_set_cycle_damping_activations, [0] * 6

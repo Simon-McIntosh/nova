@@ -793,11 +793,11 @@ def _saddle_wall_coupling(
 ) -> dict[str, Any]:
     """Record every wall-dependent gate around the selected analytic saddle."""
 
-    physical = jnp.asarray(analytic)[: operator.physical_node_number]
+    physical = jnp.asarray(analytic)
     _masks, topology, _connected, admitted = _block_tree(
         operator._fixed_design_read(physical)
     )
-    grid_flux, _wall_flux = operator._fixed_design_topology.split_flux_map(physical)
+    grid_flux = operator.null_flux_pool(physical)
     (vmap_o, vmap_x), census = _block_tree(
         operator._fixed_design_topology.grid.read_census(grid_flux)
     )

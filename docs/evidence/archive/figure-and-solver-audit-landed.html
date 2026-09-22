@@ -2750,6 +2750,41 @@ ROW2_EXIT=139</pre>
 <p><strong>Excluded from promotion counts:</strong> <code>r-20260920T180231259880-cca-one-certificate-row-per-process</code> is explicitly described in the census review as local and unpromoted; its useful measurement and defective receipt are not counted as a promotion.</p>
 
 </section>
+<section class="audit-directory" id="fsa-verify-the-jacobian-null-carrier-identity-section">
+<h2 id="fsa-verify-the-jacobian-null-carrier-identity">Jacobian null carrier identity repair review</h2>
+<p><strong>Verdict: promote, 92/100.</strong> The review judges implementation commit <code>c9d6f44965f8356a9f50c2f320e00a4b56dcff34</code>. Documentation commit <code>222997d4f623a267ed6b4d2b3b0177d37ae71189</code> is noted and not judged. Nothing under <code>nova/</code> was changed or committed by this review.</p>
+
+<h3 id="fsa-verify-the-jacobian-null-carrier-identity-diff">Diff by anomaly</h3>
+<p>Against its parent, the production change is confined to one call in <code>benchmarks/jacobian_null_direction.py:804-809</code>: four formatted argument lines replace one line and add <code>carrier_identity=carrier_evidence["carrier"]["semantic_response_identity"]</code>. No other production call or behavior in that file changes. The only other path in the commit is the new 176-line <code>tests/test_jacobian_null_direction_driver.py</code>, which synthesizes the collaborators, captures the keyword, and asserts that it is the same identity persisted in the receipt.</p>
+
+<h3 id="fsa-verify-the-jacobian-null-carrier-identity-gates">Gate and negative control</h3>
+<table>
+<thead><tr><th>measure</th><th>result</th><th>evidence</th></tr></thead>
+<tbody>
+<tr><td>Focused test, fresh process, <code>MPLBACKEND=Agg</code></td><td><strong>exit 0; 1 passed in 17.58 s</strong></td><td><code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-verify-the-jacobian-null-carrier-identity/positive.log</code></td></tr>
+<tr><td>Scratch control: remove only the carrier keyword</td><td><strong>exit 1; 1 failed in 13.09 s</strong> with <code>TypeError: _record_state_request() missing 1 required keyword-only argument: 'carrier_identity'</code></td><td><code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-verify-the-jacobian-null-carrier-identity/negative-control.log</code>; the log records the scratch module path before pytest runs</td></tr>
+</tbody>
+</table>
+
+<h3 id="fsa-verify-the-jacobian-null-carrier-identity-parity">Carrier parity and follow-on</h3>
+<p>The repaired driver and <code>docs/figures/topology-visual-corroboration/generate_topology_visuals.py</code> both pass <code>["carrier"]["semantic_response_identity"]</code> from the evidence object returned beside the persisted response cache. The other named comparator is not yet equivalent: <code>docs/figures/primary-xpoint-evidence/reachability_grid_final.py:190</code> unpacks that object as <code>_carrier</code>, then lines 208-210 call <code>_mast_states</code> without <code>carrier_identity</code>, while the callee declares that keyword required. This is a high-severity defect in an adjacent driver, but it lies outside the reviewed commit and the node's declared change; under the review fence it is a follow-on, not a repair performed here and not a reason to reject the correct local change.</p>
+
+<h3 id="fsa-verify-the-jacobian-null-carrier-identity-findings">Findings JSON</h3>
+<pre><code>{
+  "reviewed_commit": "c9d6f44965f8356a9f50c2f320e00a4b56dcff34",
+  "verdict": "promote",
+  "score": 92,
+  "findings": [
+    {
+      "id": "reachability-grid-omits-carrier-identity",
+      "severity": "high",
+      "disposition": "follow_on_outside_reviewed_change",
+      "path": "docs/figures/primary-xpoint-evidence/reachability_grid_final.py",
+      "observed": "the persisted carrier evidence is discarded and the required keyword is omitted"
+    }
+  ]
+}</code></pre>
+</section>
   </main>
 </body>
 </html>

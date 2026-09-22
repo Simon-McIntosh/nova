@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 380" role="img" aria-labelledby="title desc">
 <title id="title">Production stationary-root admission</title>
-<desc id="desc">Direct centroid and sampling values enter a quadratic fit. Hessian type, source-cell proximity and wall containment determine admission. Representatives reach the spline polish only after these tests. Cyclic crossing count is reported on a separate diagnostic branch.</desc>
+<desc id="desc">Direct centroid and sampling values enter a quadratic fit with a curvature-relative nonsingularity test. Hessian type, source-cell proximity and wall containment determine admission. Representatives reach the spline polish only after these tests. Cyclic crossing count is reported on a separate diagnostic branch.</desc>
 <defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8" fill="none" stroke="#345570" stroke-width="1.5"/></marker></defs>
 <rect width="1120" height="380" fill="#fff"/>
 <g font-family="sans-serif" fill="#24394b">
@@ -14,7 +14,7 @@
 </g>
 <g font-size="16" text-anchor="middle">
 <text x="123" y="111" font-weight="600">Authored samples</text><text x="123" y="140">centroid + six vertices</text><text x="123" y="166">direct flux values</text>
-<text x="340" y="111" font-weight="600">Quadratic root</text><text x="340" y="140">closed-form ∇ψ = 0</text><text x="340" y="166">finite, nonsingular</text>
+<text x="340" y="111" font-weight="600">Quadratic root</text><text x="340" y="140">closed-form ∇ψ = 0</text><text x="340" y="166">scaled Hessian test</text>
 <text x="561" y="111" font-weight="600">Physical qualification</text><text x="561" y="140">indefinite Hessian</text><text x="561" y="166">near cell, inside wall</text>
 <text x="782" y="111" font-weight="600">Representatives</text><text x="782" y="140">bounded work slots</text><text x="782" y="166">visible overflow</text>
 <text x="999" y="111" font-weight="600">Spline polish</text><text x="999" y="140">supported complete map</text><text x="999" y="166">type + containment</text>

@@ -1520,6 +1520,48 @@ benchmarks/solovev_certificate.py:2514: RuntimeError
   <code>negative-control-final.log</code> and <code>atlas-caption-final.log</code> in this
   node's durable run directory.</p>
 </section>
+
+<section id="the-jacobian-null-benchmark-names-its-carrier">
+<h2>The Jacobian null-direction benchmark names its response carrier (2026-09-22)</h2>
+
+  <p><strong>The third stale MAST-state call site.</strong> The reachability-grid repair
+  (<code>0f56a51a5</code>) found that <code>benchmarks/jacobian_null_direction.py</code> line 804
+  called <code>settled.reachability._mast_states(observed, jnp.asarray(passive_case["state"]),
+  target_current)</code> with no carrier identity. The persisted response cache is unpacked at line
+  779 as <code>response_cache, carrier_evidence = settled._persisted_response_cache(...)</code>, so
+  the carrier was already in scope and the repair is one argument. The §1 sentence that listed this
+  file among the sites that already pass the identity is wrong; it is corrected in the plan's
+  landing record for this node, not by editing the section text.</p>
+
+  <p><strong>Reproduction.</strong> Reverting that single argument reproduces the recorded failure
+  verbatim: <code>TypeError: _mast_states() missing 1 required keyword-only argument:
+  'carrier_identity'</code> at <code>benchmarks/jacobian_null_direction.py:804</code>, 1 failed. The
+  solve entry point declares <code>carrier_identity</code> as a required keyword
+  (<code>docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py:148</code>), so a row
+  loop that omits it fails before any solve runs.</p>
+
+  <p><strong>The fix.</strong> Line 804 now passes
+  <code>carrier_identity=carrier_evidence["carrier"]["semantic_response_identity"]</code>, the same
+  expression <code>generate_topology_visuals.py</code> and
+  <code>reachability_grid_final.py</code> use. Nothing else in the file changed.</p>
+
+  <p><strong>The instrument.</strong> <code>tests/test_jacobian_null_direction_driver.py</code>
+  drives <code>measure</code>'s own row loop on a synthesised passive case with every collaborator
+  monkeypatched — the carrier cache, the slice selection, the case builder, the passive-inclusive
+  case and the observed-profile producer — and records the keyword the MAST state request receives.
+  Because the recorder declares <code>carrier_identity</code> keyword-only, the omission fails on the
+  same <code>TypeError</code> production raised; the case then asserts the recorded keyword equals
+  the case carrier identity and that the receipt's
+  <code>evidence_inputs.response_carrier</code> carries it as well.</p>
+
+  <p><strong>Gate.</strong> Fresh-process login-node run, seconds, no solve and no allocation:
+  <code>UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH=$PWD MPLBACKEND=Agg uv run --no-sync
+  pytest -p no:cacheprovider -q tests/test_jacobian_null_direction_driver.py</code> — 1 passed in
+  10.61 s, exit 0, at commit <code>c9d6f449</code>. The declared negative control, the
+  one-argument revert at line 804, is red at 1 failed. Logs
+  <code>gate-positive.log</code> and <code>negative-control.log</code> sit in this node's durable run
+  directory, <code>r-20260922T060056781862-nia-the-jacobian-null-benchmark-passes-the-carrier-identity</code>.</p>
+</section>
 </main>
 </body>
 </html>

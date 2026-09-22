@@ -232,6 +232,32 @@ saddle, axes off; 21983/35 pure and 21986/46 pure instead show the explicit
 <code>BoundaryGenerationFailure</code> and its complete wrapped reason, because neither
 terminal state yields a closed branch (caption repair <code>da402ccc9</code>).</p>
 
+<h3>The Jacobian null-direction benchmark names its response carrier (2026-09-22)</h3>
+<p>This record also corrects a sentence in the §1 text above rather than editing it. The paragraph
+<em>The regeneration path itself does not run at this revision</em> names
+<code>jacobian_null_direction.py</code> among the call sites that already pass the identity. It did
+not. It was a third stale site beside <code>generate_topology_visuals.py:279</code> and
+<code>reachability_grid_final.py:208</code>, and the reachability repair that found it is the source
+of this node.</p>
+<p><strong>The defect and its reproduction.</strong> Line 804 called
+<code>settled.reachability._mast_states(observed, jnp.asarray(passive_case["state"]), target_current)</code>
+with no carrier identity, while <code>carrier_evidence</code> was already unpacked beside the
+response cache at line 779, so the repair was one argument and nothing else in the file. Reverting
+that one argument reproduces the recorded failure verbatim:
+<code>TypeError: _mast_states() missing 1 required keyword-only argument: 'carrier_identity'</code>
+at <code>benchmarks/jacobian_null_direction.py:804</code>, 1 failed — the same signature the
+regenerated bank raises on the two already-repaired sites. The call now passes
+<code>carrier_identity=carrier_evidence["carrier"]["semantic_response_identity"]</code>, the same
+expression <code>generate_topology_visuals.py</code> and <code>reachability_grid_final.py</code> use.</p>
+<p><strong>Gate and instrument evidence.</strong> The new driver test runs the benchmark's own row
+loop against synthesised collaborators and records the keyword the state request receives, so the
+omission fails on an assertion about the identity rather than on an absent argument; it also asserts
+the receipt's <code>evidence_inputs.response_carrier</code> carries the same identity. Fresh-process
+login-node gate (seconds, no solve, no allocation):
+<code>pytest -p no:cacheprovider -q tests/test_jacobian_null_direction_driver.py</code>,
+1 passed in 10.61 s, exit 0. The declared negative control — the one-argument revert above — reddens
+at 1 failed. Commit <code>c9d6f449</code>.</p>
+
 <h2 id="s2"><span class="badge badge-shipped">✓ landed 2026-09-04</span> §2 — Connected, contained stationary points on the read the solve uses</h2>
 <p class="landed-summary">The solve's own read path is containment-aware for the single closed ring: X candidates are masked by first-wall containment before the flux ranking (<code>nova/equilibrium/topology.py</code> lines 352–368, commit <code>54e8911b</code>), O admission uses one shared seed mask and requires a material-connected component rather than accepting a private well (lines 754–812), the fixed-shape candidate census keeps overflow visible instead of truncating (<code>nova/equilibrium/forward_operator.py</code> lines 404–412, 620–652), private wall anchors are masked (<code>20f3a40c</code>), and the out-of-vessel saddle regression is pinned (<code>tests/test_stationary_point_admission.py</code>). The generalisation from one ring to the occupiable region of a multi-unit wall is owned by <code>multi-unit-limiter-wall</code> §3. Record: <a href="/nova/evidence/archive/null-identification-authority-landed">landed evidence</a>.</p>
 

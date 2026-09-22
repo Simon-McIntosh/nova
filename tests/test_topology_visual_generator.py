@@ -328,6 +328,109 @@ def test_limited_solve_receipt_governs_label_and_boundary_without_an_atlas(tmp_p
     )
 
 
+def test_atlas_panel_draws_the_shared_null_vocabulary(tmp_path, monkeypatch):
+    """The atlas panel draws its nulls through the shared InkStyle painters.
+
+    The vocabulary being pinned is the shared one: a solid triangle for the
+    magnetic axis, a filled cross for the admitted saddle, and hollow markers
+    for every other qualified null. A panel that spells its own markers, or
+    that fills the reference nulls, reads as if every cross were the saddle the
+    solve chose.
+    """
+    generator = _generator()
+    atlas = _atlas()
+    radius = np.asarray((0.0, 1.0, 2.0))
+    height = np.asarray((-1.0, 0.0, 1.0))
+    cells = np.asarray([(r, z) for r in radius for z in height])
+    wall = np.asarray(((0.0, -1.0), (2.0, -1.0), (2.0, 1.0), (0.0, 1.0), (0.0, -1.0)))
+    boundary = np.asarray(
+        ((0.5, -0.5), (1.5, -0.5), (1.5, 0.5), (0.5, 0.5), (0.5, -0.5))
+    )
+    admitted = np.asarray(((1.0, 0.5),))
+    other_inside = (1.4, 0.2)
+    other_outside = (2.6, 0.0)
+    row = _operand()
+    row.update(
+        {
+            "machine": "MAST",
+            "identity": "1/2 diverted",
+            "cell_rz": cells,
+            "domain_labels": np.ones(len(cells), dtype=np.int8),
+            "per_cell_flux_values": np.asarray(
+                [(r - 1.0) ** 2 + z**2 for r, z in cells]
+            ),
+            "selected_o": np.asarray(((1.0, 0.0),)),
+            "selected_x": admitted,
+            "x_candidates": np.asarray((admitted[0], other_inside, other_outside)),
+            "wall_point": np.asarray(((2.0, 0.0),)),
+            "wall": wall,
+            "nova_boundary": boundary,
+            "efit_axis": np.asarray(((1.0, 0.0),)),
+            "efit_x": np.asarray((other_inside, other_outside)),
+            "efit_lcfs": boundary,
+            "solve_topology_class": "diverted",
+            "terminal_residual": 0.0,
+        }
+    )
+    cache = tmp_path / "mast-operands.npz"
+    authority = {"source_path": "fixture.py", "source_identity": "sha256:fixture"}
+    generator._write_cache(cache, [row], authority)
+    atlas_receipt = tmp_path / "atlas/convergence-atlas.json"
+    diiid_cache = tmp_path / "diiid-operands.npz"
+    np.savez_compressed(diiid_cache)
+    diiid_cache.with_suffix(".metadata.json").write_text('{"rows": []}\n')
+    atlas.MAST_TOPOLOGY = cache
+    atlas.MAST_METADATA = cache.with_suffix(".metadata.json")
+    atlas.DIIID_TOPOLOGY = diiid_cache
+    atlas.DIIID_METADATA = diiid_cache.with_suffix(".metadata.json")
+    atlas.OUT_DIR = atlas_receipt.parent
+    atlas._git_revision = lambda: "fixture-revision"
+
+    captured: list = []
+    real_subplots = atlas.plt.subplots
+
+    def capture(*args, **kwargs):
+        figure, axes = real_subplots(*args, **kwargs)
+        captured.append(axes)
+        return figure, axes
+
+    monkeypatch.setattr(atlas.plt, "subplots", capture)
+    null_calls: list[dict] = []
+    real_nulls = atlas.poloidal.draw_nulls
+
+    def record(*args, **kwargs):
+        null_calls.append(kwargs)
+        return real_nulls(*args, **kwargs)
+
+    monkeypatch.setattr(atlas.poloidal, "draw_nulls", record)
+
+    payload = atlas.run(atlas_receipt)
+
+    assert null_calls, "the panel must draw its nulls through draw_nulls"
+    assert all(call["style"] is atlas.DEFAULT_INK for call in null_calls)
+    axes = captured[0]
+    markers: dict[str, list] = {}
+    for line in axes.lines:
+        marker = line.get_marker()
+        if marker not in (None, "None", ""):
+            markers.setdefault(marker, []).append(line)
+    axis_lines = markers.get(atlas.DEFAULT_INK.axis_marker, [])
+    assert axis_lines, "the magnetic axis must carry the shared triangle marker"
+    assert axis_lines[0].get_color() == atlas.DEFAULT_INK.axis_color
+    crosses = markers.get(atlas.DEFAULT_INK.xpoint_marker, [])
+    filled = [line for line in crosses if line.get_markerfacecolor() != "none"]
+    hollow = [line for line in crosses if line.get_markerfacecolor() == "none"]
+    assert len(filled) == 1, "the admitted saddle is exactly one filled cross"
+    assert np.allclose(filled[0].get_xdata(), admitted[0, 0])
+    assert hollow, "every other qualified null is drawn hollow"
+    assert payload["panels"][0]["null_style"] == {
+        "axis_marker": atlas.DEFAULT_INK.axis_marker,
+        "admitted_x_marker": atlas.DEFAULT_INK.xpoint_marker,
+        "admitted_x_fill": "filled",
+        "other_x_fill": "hollow",
+    }
+
+
 def test_healthy_boundary_reports_integer_counts_with_true_availability(tmp_path):
     generator = _generator()
     generator.HERE = tmp_path

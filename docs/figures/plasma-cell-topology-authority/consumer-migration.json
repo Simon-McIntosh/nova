@@ -1,5 +1,5 @@
 {
-  "scope": "Four reachable benchmark consumers migrated and the production secondary caller landed under coordinator-authorized disjoint scope. Only the limiter audit remains claim-blocked. Raster-only authored drivers remain inventoried.",
+  "scope": "Four reachable benchmark consumers and both production ForwardProfile callers are migrated. The reduced-Newton constraint qualification and limiter audit remain claim-blocked; raster-only drivers remain inventoried.",
   "reachability_rule": "Whether the authored entry point currently constructs an own-node carrier. Generic helpers can require migration before reuse on another carrier even when their current driver is raster-only.",
   "construction_evidence": [
     "benchmarks/efit_forward_parity_slice.py:2576 (_mast_case_from_selection)",
@@ -220,8 +220,85 @@
           "tests/test_null_generator_admission.py"
         ]
       }
+    },
+    {
+      "path": "nova/equilibrium/forward.py",
+      "lines": [
+        2618
+      ],
+      "current_lines": [
+        2680,
+        2682
+      ],
+      "function": "ForwardProfile._terminal_polish_receipt",
+      "can_reach_own_node_carrier": true,
+      "reason": "The public solve reads terminal polish telemetry after solving an own-node hex carrier. read_qualification requires the entire terminal state, including direct sampling rows.",
+      "status": "landed",
+      "landed_commit": "aec49acdc72034d73c893f4d2700bd2c7f00fd1a",
+      "exact_patch": {
+        "replace": "        physical = jnp.asarray(equilibrium.flux)[: self.operator.physical_node_number]\n        _seed, material = self.operator.connectivity_axis_seed(topology.axis)\n        qualification = reader.read_qualification(\n            physical,",
+        "with": "        terminal_flux = jnp.asarray(equilibrium.flux)\n        _seed, material = self.operator.connectivity_axis_seed(topology.axis)\n        qualification = reader.read_qualification(\n            terminal_flux,"
+      },
+      "reproduction": "Populated 132-cell analytic carrier: 730 full-state values, 253 physical values, retained=[1,3]; direct terminal receipt raises ValueError: own-node null census requires the direct sampling flux values.",
+      "regression": "tests/test_solve_path_census_inputs.py"
+    },
+    {
+      "path": "nova/equilibrium/reduced_newton.py",
+      "lines": [
+        2329,
+        2330
+      ],
+      "function": "_constraint_qualification",
+      "can_reach_own_node_carrier": true,
+      "reason": "Constraint admission truncates the state before _fixed_design_read, which reaches the own-node census.",
+      "status": "claim-blocked",
+      "claim": "fsri-one-traced-operator-state-machine",
+      "exact_patch": {
+        "replace": "    physical = jnp.asarray(state)[: operator.physical_node_number]",
+        "with": "    physical = jnp.asarray(state)"
+      },
+      "follow_on_action": "The holding coordinator owns this one-line full-state patch. Remove the explicit source-scanner allowlist when it lands.",
+      "patch_validation": "Exact replacement matches the current source; source scanner observes this caller as the sole remaining direct prefix-to-census offender."
     }
   ],
   "reviewed_revision": "e46e5378bf28252e3f4e4f86bd6fd00473dcfb5c",
-  "public_secondary_helper": "ForwardFluxOperator.secondary_x_point(state, topology): uses null_flux_pool(state), selects a distinct contained saddle from one census, and never repeats operator.read."
+  "public_secondary_helper": "ForwardFluxOperator.secondary_x_point(state, topology): uses null_flux_pool(state), selects a distinct contained saddle from one census, and never repeats operator.read.",
+  "safe_prefix_audit": [
+    {
+      "path": "nova/equilibrium/forward.py",
+      "lines": [
+        1401
+      ],
+      "current_lines": [
+        1463
+      ],
+      "function": "_lcfs_polyline",
+      "needs_patch": false,
+      "reaches_census": "Only the raster census in _connectivity_read: the branch requires moment_geometry is None, so its authored carrier has no own-node sampling suffix."
+    },
+    {
+      "path": "nova/equilibrium/forward.py",
+      "lines": [
+        1475
+      ],
+      "current_lines": [
+        1537
+      ],
+      "function": "_strike_points",
+      "needs_patch": false,
+      "reaches_census": false,
+      "reason": "The physical prefix feeds split_flux_map and a wall-level intersection, not a topology qualification or locator."
+    },
+    {
+      "path": "nova/equilibrium/forward_operator.py",
+      "lines": [
+        3120
+      ],
+      "function": "shared_node_flux",
+      "needs_patch": false,
+      "reaches_census": false,
+      "reason": "The physical prefix feeds split_flux_map and shared-node interpolation only."
+    }
+  ],
+  "solve_path_revision": "aec49acdc72034d73c893f4d2700bd2c7f00fd1a"
 }

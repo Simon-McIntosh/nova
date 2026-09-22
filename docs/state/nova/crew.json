@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T16:04:18",
+  "updated": "2026-09-22T16:17:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6502,10 +6502,15 @@
         "id": "s19f-local-1",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-22"
+        "session_id": "b91c3740-321a-4d9b-acdc-37df97a68b5c",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "b91c3740-321a-4d9b-acdc-37df97a68b5c"
+        },
+        "created": "2026-09-22",
+        "session_owners": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19f-local-2",
@@ -246968,6 +246973,245 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T110524996762-cca-certificate-row-receipt-hygiene",
+        "plan": "cpu-compile-abort",
+        "section": "\u00a72",
+        "node": "cca-certificate-row-receipt-hygiene",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2712,
+                "cached_input_tokens": 400354,
+                "input_tokens": 403068,
+                "output_tokens": 1628,
+                "reasoning_output_tokens": 489,
+                "total_tokens": 404696,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "576a27e3-ea0d-439c-9e63-3058761859c6",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "in benchmarks/solve_program_size_gate.py the per-row receipt entry exit_code holds the child process status and the wrapper status is renamed probe_wrapper_exit (a reader of lane.log and the receipt sees the same value); within_one_program_load compares the sampled peak against one program load CERTIFICATE_PROGRAM_LOAD_MAPS[1] and the two-load ceiling keeps its own field within_two_program_loads, both printed per row; candidate_state_array_path in the merged receipt is written relative to the states directory like the baseline arm; tests/test_certificate_baseline_revision.py gains a case that drives certificate_row_command and asserts the argv it builds parses through the driver argparse and names the row, plus a case per renamed or re-semanticised field; the file passes in one fresh process with the count printed (20 or more against the 17 at base, zero added failures, both logs recorded); the declared negative control (restore the two-load comparison under the one-load name) is applied, the one-load case is observed to fail, and its log is recorded; the committed receipt docs/figures/millisecond-converged-solve/program-size/process-per-row/certificate.json is annotated with a note stating it was written under the superseded field semantics at revision 2710b2ea1 rather than rewritten",
+          "estimated_hours": null,
+          "goal": "make the one-row-per-process receipt say what it measured: the per-row exit field carries the child status, the one-load flag compares against one program load, the candidate state path is relative, and the production command builder is covered by a test",
+          "id": "cca-certificate-row-receipt-hygiene",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-22T11:05:27Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T110524996762-cca-certificate-row-receipt-hygiene/manifest.md",
+          "negative_control": "restore the two-load ceiling comparison under the within_one_program_load name and observe the one-load test case fail",
+          "plan": "cpu-compile-abort",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/solve_program_size_gate.py",
+            "tests/test_certificate_baseline_revision.py",
+            "docs/figures/millisecond-converged-solve/program-size/process-per-row/certificate.json",
+            "docs/plans/cpu-compile-abort.html",
+            "docs/evidence/archive/cpu-compile-abort-landed.html",
+            "docs/figures/cpu-compile-abort"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19f-local-1",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-22T11:05:44Z",
+        "completed_at": "2026-09-22T11:38:51.370Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1975,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1987,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e19f8744ae20f026030d83d8eab644f6f2ca77bb",
+        "commits": [
+          "a6b2517327b8ece718de95cee4f06140a0d075ef",
+          "4fcadf6646c48fa99948e5ff869da5754c0608bc"
+        ],
+        "changed_lines": {
+          "added": 442,
+          "removed": 28,
+          "files": 5
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "python -m pytest -p no:cacheprovider -q tests/test_certificate_baseline_revision.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T110524996762-cca-certificate-row-receipt-hygiene/gate-changed-test-file.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T110524996762-cca-certificate-row-receipt-hygiene/manifest.md",
+        "scope_changed": false,
+        "session_id": "b91c3740-321a-4d9b-acdc-37df97a68b5c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 13001378,
+            "input_tokens_cumulative": 13001378,
+            "output_tokens": 54668,
+            "output_tokens_cumulative": 54668,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-22T11:38:51.370Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 19,
+            "evidence": 18,
+            "fit": 19,
+            "goal_fidelity": 19,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 95
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 13168085,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1983.013,
+          "generated_tokens": 63130,
+          "generation_seconds": 1571.131,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.5,
+          "machine_seconds": 411.882,
+          "peak_input_tokens": 165407,
+          "tokens_per_second": 40.18,
+          "wall_tokens_per_second": 31.84
+        },
+        "follow_on_paths": [
+          "docs/evidence/archive/cpu-compile-abort-landed.html#certificate-row-receipt-hygiene"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-certificate-row-receipt-hygiene",
+          "session_id": "b91c3740-321a-4d9b-acdc-37df97a68b5c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T11:38:51.370Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.7,
+        "impl_move": {
+          "plan": "cpu-compile-abort",
+          "at_dispatch": 0.7,
+          "at_complete": 0.8,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "waived",
+          "test_paths": [
+            "tests/test_certificate_baseline_revision.py"
+          ],
+          "declaration": "restore the two-load ceiling comparison under the within_one_program_load name and observe the one-load test case fail",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T110524996762-cca-certificate-row-receipt-hygiene/negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T110524996762-cca-certificate-row-receipt-hygiene/negative-control.log",
+          "reason": "the declared mutation (two-load ceiling under the one-load name) is exactly what the control log records: within_one_program_load compared against CERTIFICATE_CHILD_MAP_CEILING, test_one_load_flag_compares_against_one_program_load red, 1 failed, exit 1, then reverted; only the wording differs from the declaration"
+        },
+        "tool_steps": 117.0,
+        "orientation_input_tokens": 2445357.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -247434,6 +247678,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3141
+    "_version": 3143
   }
 }

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-22">
 <meta name="plan-impl" content="0.8">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 </head>
 <body>
   <main class="plan-doc">
@@ -210,6 +210,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260920T180231259880-cca-one-certificate-row-per-process" data-who="reckon-ship" data-when="2026-09-20T19:17:16.239Z">
     <div class="r-comment-body"><p>four certificate rows each complete in its own child of one all_debug job 1274197 (lane.log: peak mappings 24750 to 40756 of 65530, never above 62 percent of the cap; CERTIFICATE_IDENTITY_GATE=FAIL is the pre-existing digest-baseline arm, out of scope), focused suite 17 passed against base 14 with zero added failures and the declared control red; merged at e126cde2a; review 81 of 100 with three record-hygiene findings carried as followups</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260922T110524996762-cca-certificate-row-receipt-hygiene" data-who="reckon-ship" data-when="2026-09-22T11:38:51.370Z">
+    <div class="r-comment-body"><p>per-row receipt exit_code carries the child status with the wrapper status renamed, within_one_program_load compares against one load with within_two_program_loads beside it, candidate state path relative, command builder covered; control red on the one-load case; review 95/100 (load flags now inclusive at the boundary); merged 4cda35638</p></div>
 </div>
 </section>
 </main>

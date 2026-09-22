@@ -81,12 +81,11 @@ def _single_null_flux(radius, height):
 def _containment_stationary_read(operator, physical):
     """Select boundary state from zero-/four-crossing containment candidates.
 
-    The wall read mirrors the production selector: the arc-length quadratic
-    extremum through the extremal wall node and its neighbours
-    (``wall_anchor_data``).  The earlier oracle called ``topology.wall``, the
-    Null1D blend of the winner bracket with its strongest rival that the
-    production selector retired, leaving the oracle wall one ULP away from
-    the delivered read on the raster fixtures.
+    The wall read mirrors the production selector: the tensor spline is
+    evaluated at the wall nodes before the arc-length quadratic extremum is
+    selected through ``wall_anchor_data``.  Feeding the direct wall-zone
+    samples instead leaves the coordinate separated only by reordered
+    binary64 roundoff, even though the labels remain identical.
     """
     topology = operator._fixed_design_topology
     radial = np.unique(np.asarray(operator.grid.coordinate)[:, 0])
@@ -126,7 +125,7 @@ def _containment_stationary_read(operator, physical):
         retained[1, saddle_index],
         jnp.full(4, jnp.nan),
     )
-    wall = topology.wall_anchor_data(wall_flux, operator.polarity)
+    wall = topology.wall_anchor_data(wall_flux, operator.polarity, surface=surface)
 
     saddle_heights = jnp.where(saddle_valid, retained[1, :, 1], jnp.nan)
     lower_saddle = jnp.nanmin(saddle_heights)
@@ -292,7 +291,14 @@ def test_raster_fixture_labels_are_bitwise_equal_to_independent_oracle():
         np.testing.assert_array_equal(crossing_count, census["ring_crossing_count"])
         np.testing.assert_array_equal(state.axis, stationary["axis"][:2])
         np.testing.assert_array_equal(state.x_point, stationary["x_point"][:2])
-        np.testing.assert_array_equal(state.boundary, stationary["boundary"][:2])
+        np.testing.assert_array_equal(
+            state.boundary,
+            stationary["boundary"][:2],
+            err_msg=(
+                "9f0692fb moved the limited-wall authority to tensor-spline "
+                "samples before the arc-length quadratic selector"
+            ),
+        )
         differing = np.flatnonzero(np.asarray(actual.label) != np.asarray(expected))
         compared += actual.label.size
         differing_count += differing.size

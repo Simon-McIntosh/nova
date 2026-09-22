@@ -1,0 +1,1536 @@
+{
+  "measurements_completed": true,
+  "source_checkpoint": "067ea754ce138a8b93a704f42877ab501957c9ad",
+  "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+  "job": "1275914",
+  "programs": {
+    "baseline": {
+      "revision": "ccc09221d1e982026eed45b5ee5cc0f865188d96",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "arm": "baseline",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program",
+      "job": "1275914",
+      "cpu_affinity": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "completed": true,
+      "lower_seconds": 45.41208826750517,
+      "compile_seconds": 450.7313596047461,
+      "serialized_bytes": 207228225,
+      "serialized_sha256": "e8d4e44c463d8feb5f6c49843016a805a64129ae8c0a8feddee7de3f9496e11d",
+      "top_five_hlo_ops": [
+        [
+          "parameter",
+          121618
+        ],
+        [
+          "broadcast",
+          76195
+        ],
+        [
+          "constant",
+          70114
+        ],
+        [
+          "bitcast",
+          63927
+        ],
+        [
+          "add",
+          46804
+        ]
+      ],
+      "hlo_instructions": 668305,
+      "bernstein_binom_present": true,
+      "static_basis_present": false,
+      "instruction_ownership": [
+        [
+          "nova/linalg/interpolant.py",
+          123326
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py",
+          86407
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py",
+          77276
+        ],
+        [
+          "nova/equilibrium/forward_operator.py",
+          71548
+        ],
+        [
+          "nova/equilibrium/topology.py",
+          42385
+        ],
+        [
+          "nova/equilibrium/fixed_point.py",
+          27180
+        ],
+        [
+          "nova/geometry/select.py",
+          15769
+        ],
+        [
+          "nova/biot/null.py",
+          15041
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py",
+          11774
+        ],
+        [
+          "nova/linalg/split_spline.py",
+          9657
+        ],
+        [
+          "nova/equilibrium/flux_surface_connectivity.py",
+          6941
+        ],
+        [
+          "nova/equilibrium/parallel_components.py",
+          6294
+        ],
+        [
+          "nova/linalg/tensor_spline.py",
+          6251
+        ],
+        [
+          "nova/equilibrium/stencil_mesh.py",
+          6028
+        ],
+        [
+          "nova/equilibrium/rotation.py",
+          4593
+        ],
+        [
+          "nova/equilibrium/convention.py",
+          1391
+        ],
+        [
+          "nova/equilibrium/domain.py",
+          916
+        ],
+        [
+          "nova/biot/target.py",
+          510
+        ],
+        [
+          "nova/equilibrium/source.py",
+          183
+        ]
+      ],
+      "function_ownership": [
+        [
+          "nova/linalg/interpolant.py:Bernstein.binom",
+          91150
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_clip",
+          51969
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments",
+          22054
+        ],
+        [
+          "nova/linalg/interpolant.py:Bernstein.basis",
+          20886
+        ],
+        [
+          "nova/equilibrium/fixed_point.py:_active_set_newton_krylov",
+          18161
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census",
+          16736
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_cell_banked_current_moments",
+          14397
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments",
+          13176
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_quadrature_from_arrays",
+          11985
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.boundary",
+          11054
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_ExactClipLevel.__call__",
+          10871
+        ],
+        [
+          "nova/linalg/interpolant.py:Bernstein.coefficent_matrix",
+          10351
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_pack_traced_vertices",
+          9327
+        ],
+        [
+          "nova/biot/null.py:Null2D.interpolate",
+          8347
+        ],
+        [
+          "nova/linalg/split_spline.py:SplitTensorBSpline._patch_evaluation",
+          6569
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_polished_level_root.<locals>.polish",
+          6166
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.read_qualification",
+          5915
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py:_points_inside_polygon",
+          5869
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_arc",
+          5696
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D.read_census",
+          5645
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_flux_selected_current_moments.<locals>.integrate",
+          5258
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_implicit_traced_level_arc",
+          5257
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_sampled_arc_polynomial_moments",
+          5190
+        ],
+        [
+          "nova/geometry/select.py:wall_coordinate",
+          4807
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_value",
+          4696
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.axis_component",
+          4641
+        ],
+        [
+          "nova/geometry/select.py:traced_quadratic_surface",
+          4304
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_polygon_moments",
+          4299
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology._wall_anchor_selection",
+          3943
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_segment_root",
+          3701
+        ]
+      ],
+      "unowned_instructions": 154835,
+      "ownership_examples": {
+        "nova/linalg/interpolant.py:Bernstein.binom": {
+          "frame_id": 283541,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/linalg/interpolant.py",
+          "function": "Bernstein.binom",
+          "line": 112
+        },
+        "nova/equilibrium/separatrix_clip.py:_traced_clip": {
+          "frame_id": 284732,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/separatrix_clip.py",
+          "function": "_traced_clip",
+          "line": 1197
+        },
+        "nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments": {
+          "frame_id": 286681,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/clip_quadrature.py",
+          "function": "_straight_edge_monomial_moments",
+          "line": 210
+        },
+        "nova/linalg/interpolant.py:Bernstein.basis": {
+          "frame_id": 283539,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/linalg/interpolant.py",
+          "function": "Bernstein.basis",
+          "line": 119
+        },
+        "nova/equilibrium/fixed_point.py:_active_set_newton_krylov": {
+          "frame_id": 40108,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/fixed_point.py",
+          "function": "_active_set_newton_krylov",
+          "line": 3973
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census": {
+          "frame_id": 205228,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D._compatibility_census",
+          "line": 1311
+        },
+        "nova/equilibrium/forward_operator.py:_cell_banked_current_moments": {
+          "frame_id": 286783,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/forward_operator.py",
+          "function": "_cell_banked_current_moments",
+          "line": 412
+        },
+        "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments": {
+          "frame_id": 286579,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/clip_quadrature.py",
+          "function": "clipped_support_current_moments",
+          "line": 806
+        },
+        "nova/equilibrium/clip_quadrature.py:_quadrature_from_arrays": {
+          "frame_id": 287175,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/clip_quadrature.py",
+          "function": "_quadrature_from_arrays",
+          "line": 406
+        },
+        "nova/equilibrium/topology.py:Topology.boundary": {
+          "frame_id": 194878,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/topology.py",
+          "function": "Topology.boundary",
+          "line": 762
+        },
+        "nova/equilibrium/forward_operator.py:_ExactClipLevel.__call__": {
+          "frame_id": 284487,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/forward_operator.py",
+          "function": "_ExactClipLevel.__call__",
+          "line": 530
+        },
+        "nova/linalg/interpolant.py:Bernstein.coefficent_matrix": {
+          "frame_id": 283537,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/linalg/interpolant.py",
+          "function": "Bernstein.coefficent_matrix",
+          "line": 131
+        },
+        "nova/equilibrium/separatrix_clip.py:_pack_traced_vertices": {
+          "frame_id": 287436,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/separatrix_clip.py",
+          "function": "_pack_traced_vertices",
+          "line": 601
+        },
+        "nova/biot/null.py:Null2D.interpolate": {
+          "frame_id": 205227,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/biot/null.py",
+          "function": "Null2D.interpolate",
+          "line": 213
+        },
+        "nova/linalg/split_spline.py:SplitTensorBSpline._patch_evaluation": {
+          "frame_id": 284502,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/linalg/split_spline.py",
+          "function": "SplitTensorBSpline._patch_evaluation",
+          "line": 217
+        }
+      },
+      "source_checkpoint": "067ea754ce138a8b93a704f42877ab501957c9ad",
+      "below_ceiling": false
+    },
+    "candidate": {
+      "revision": "ccc09221d1e982026eed45b5ee5cc0f865188d96",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "arm": "candidate",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program",
+      "job": "1275914",
+      "cpu_affinity": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "completed": true,
+      "lower_seconds": 44.13076936453581,
+      "compile_seconds": 339.3475206270814,
+      "serialized_bytes": 174134951,
+      "serialized_sha256": "fad312f4c223dfe3e09803832c960dab6da019d7b02ff0d38f35abcaae0c35b4",
+      "top_five_hlo_ops": [
+        [
+          "parameter",
+          114644
+        ],
+        [
+          "broadcast",
+          76211
+        ],
+        [
+          "bitcast",
+          60477
+        ],
+        [
+          "constant",
+          50960
+        ],
+        [
+          "compare",
+          32373
+        ]
+      ],
+      "hlo_instructions": 551591,
+      "bernstein_binom_present": false,
+      "static_basis_present": true,
+      "instruction_ownership": [
+        [
+          "nova/equilibrium/separatrix_clip.py",
+          86407
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py",
+          77276
+        ],
+        [
+          "nova/equilibrium/forward_operator.py",
+          71548
+        ],
+        [
+          "nova/equilibrium/topology.py",
+          42385
+        ],
+        [
+          "nova/equilibrium/fixed_point.py",
+          27180
+        ],
+        [
+          "nova/linalg/interpolant.py",
+          21354
+        ],
+        [
+          "nova/geometry/select.py",
+          15769
+        ],
+        [
+          "nova/biot/null.py",
+          15041
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py",
+          11774
+        ],
+        [
+          "nova/linalg/split_spline.py",
+          9657
+        ],
+        [
+          "nova/equilibrium/flux_surface_connectivity.py",
+          6941
+        ],
+        [
+          "nova/linalg/tensor_spline.py",
+          6767
+        ],
+        [
+          "nova/equilibrium/parallel_components.py",
+          6294
+        ],
+        [
+          "nova/equilibrium/stencil_mesh.py",
+          6028
+        ],
+        [
+          "nova/equilibrium/rotation.py",
+          4593
+        ],
+        [
+          "nova/equilibrium/convention.py",
+          1391
+        ],
+        [
+          "nova/equilibrium/domain.py",
+          916
+        ],
+        [
+          "nova/biot/target.py",
+          510
+        ],
+        [
+          "nova/equilibrium/source.py",
+          183
+        ]
+      ],
+      "function_ownership": [
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_clip",
+          51969
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments",
+          22054
+        ],
+        [
+          "nova/equilibrium/fixed_point.py:_active_set_newton_krylov",
+          18161
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census",
+          16736
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_cell_banked_current_moments",
+          14397
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments",
+          13176
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_quadrature_from_arrays",
+          11985
+        ],
+        [
+          "nova/linalg/interpolant.py:bernstein_basis",
+          11282
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.boundary",
+          11054
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_ExactClipLevel.__call__",
+          10871
+        ],
+        [
+          "nova/linalg/interpolant.py:bernstein_basis.<locals>.term_basis",
+          10072
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_pack_traced_vertices",
+          9327
+        ],
+        [
+          "nova/biot/null.py:Null2D.interpolate",
+          8347
+        ],
+        [
+          "nova/linalg/split_spline.py:SplitTensorBSpline._patch_evaluation",
+          6569
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_polished_level_root.<locals>.polish",
+          6166
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.read_qualification",
+          5915
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py:_points_inside_polygon",
+          5869
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_arc",
+          5696
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D.read_census",
+          5645
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_flux_selected_current_moments.<locals>.integrate",
+          5258
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_implicit_traced_level_arc",
+          5257
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_sampled_arc_polynomial_moments",
+          5190
+        ],
+        [
+          "nova/geometry/select.py:wall_coordinate",
+          4807
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_value",
+          4696
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.axis_component",
+          4641
+        ],
+        [
+          "nova/geometry/select.py:traced_quadratic_surface",
+          4304
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_polygon_moments",
+          4299
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology._wall_anchor_selection",
+          3943
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_segment_root",
+          3701
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.x_point_data",
+          3699
+        ]
+      ],
+      "unowned_instructions": 139577,
+      "ownership_examples": {
+        "nova/equilibrium/separatrix_clip.py:_traced_clip": {
+          "frame_id": 282213,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/separatrix_clip.py",
+          "function": "_traced_clip",
+          "line": 1197
+        },
+        "nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments": {
+          "frame_id": 284144,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/clip_quadrature.py",
+          "function": "_straight_edge_monomial_moments",
+          "line": 210
+        },
+        "nova/equilibrium/fixed_point.py:_active_set_newton_krylov": {
+          "frame_id": 40106,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/fixed_point.py",
+          "function": "_active_set_newton_krylov",
+          "line": 3973
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census": {
+          "frame_id": 203538,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D._compatibility_census",
+          "line": 1311
+        },
+        "nova/equilibrium/forward_operator.py:_cell_banked_current_moments": {
+          "frame_id": 284246,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/forward_operator.py",
+          "function": "_cell_banked_current_moments",
+          "line": 412
+        },
+        "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments": {
+          "frame_id": 284042,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/clip_quadrature.py",
+          "function": "clipped_support_current_moments",
+          "line": 806
+        },
+        "nova/equilibrium/clip_quadrature.py:_quadrature_from_arrays": {
+          "frame_id": 284638,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/clip_quadrature.py",
+          "function": "_quadrature_from_arrays",
+          "line": 406
+        },
+        "nova/linalg/interpolant.py:bernstein_basis": {
+          "frame_id": 281087,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/linalg/interpolant.py",
+          "function": "bernstein_basis",
+          "line": 53
+        },
+        "nova/equilibrium/topology.py:Topology.boundary": {
+          "frame_id": 193279,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/topology.py",
+          "function": "Topology.boundary",
+          "line": 762
+        },
+        "nova/equilibrium/forward_operator.py:_ExactClipLevel.__call__": {
+          "frame_id": 281970,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/forward_operator.py",
+          "function": "_ExactClipLevel.__call__",
+          "line": 530
+        },
+        "nova/linalg/interpolant.py:bernstein_basis.<locals>.term_basis": {
+          "frame_id": 281088,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/linalg/interpolant.py",
+          "function": "bernstein_basis.<locals>.term_basis",
+          "line": 49
+        },
+        "nova/equilibrium/separatrix_clip.py:_pack_traced_vertices": {
+          "frame_id": 284899,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/separatrix_clip.py",
+          "function": "_pack_traced_vertices",
+          "line": 601
+        },
+        "nova/biot/null.py:Null2D.interpolate": {
+          "frame_id": 203537,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/biot/null.py",
+          "function": "Null2D.interpolate",
+          "line": 213
+        },
+        "nova/linalg/split_spline.py:SplitTensorBSpline._patch_evaluation": {
+          "frame_id": 281987,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/linalg/split_spline.py",
+          "function": "SplitTensorBSpline._patch_evaluation",
+          "line": 217
+        },
+        "nova/equilibrium/forward_operator.py:_polished_level_root.<locals>.polish": {
+          "frame_id": 282641,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/forward_operator.py",
+          "function": "_polished_level_root.<locals>.polish",
+          "line": 539
+        }
+      },
+      "source_checkpoint": "067ea754ce138a8b93a704f42877ab501957c9ad",
+      "below_ceiling": false
+    }
+  },
+  "suites": {
+    "baseline": [
+      {
+        "module": "test_interpolant.py",
+        "passed": 11,
+        "exit_status": 1,
+        "failure_ids": [
+          "tests/test_interpolant.py::test_static_bernstein_reproduces_constants_and_linear_fields[float32-0]",
+          "tests/test_interpolant.py::test_static_bernstein_reproduces_constants_and_linear_fields[float32-1]",
+          "tests/test_interpolant.py::test_static_bernstein_reproduces_constants_and_linear_fields[float32-3]",
+          "tests/test_interpolant.py::test_static_bernstein_reproduces_constants_and_linear_fields[float32-7]",
+          "tests/test_interpolant.py::test_binomial_lookup_lowers_without_special_functions"
+        ],
+        "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/bernstein-reference/baseline-test_interpolant.log"
+      },
+      {
+        "module": "test_exact_clip_moments.py",
+        "passed": 12,
+        "exit_status": 0,
+        "failure_ids": [],
+        "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/bernstein-reference/baseline-test_exact_clip_moments.log"
+      },
+      {
+        "module": "test_flux_surface_extraction.py",
+        "passed": 11,
+        "exit_status": 1,
+        "failure_ids": [
+          "tests/test_flux_surface_extraction.py::test_bicubic_derivatives_lower_to_static_polynomials"
+        ],
+        "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/bernstein-reference/baseline-test_flux_surface_extraction.log"
+      }
+    ],
+    "candidate": [
+      {
+        "module": "test_interpolant.py",
+        "passed": 16,
+        "exit_status": 0,
+        "failure_ids": [],
+        "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/bernstein-reference-audit/candidate-test_interpolant.log"
+      },
+      {
+        "module": "test_exact_clip_moments.py",
+        "passed": 12,
+        "exit_status": 0,
+        "failure_ids": [],
+        "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/bernstein-reference-audit/candidate-test_exact_clip_moments.log"
+      },
+      {
+        "module": "test_flux_surface_extraction.py",
+        "passed": 12,
+        "exit_status": 0,
+        "failure_ids": [],
+        "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/bernstein-reference-audit/candidate-test_flux_surface_extraction.log"
+      }
+    ]
+  },
+  "analytic_rows": [
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "weak-rotation-reactor-static",
+      "requested_cells": 110,
+      "revision": "ccc09221d1e982026eed45b5ee5cc0f865188d96",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275914",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 2.433749812617173e-14,
+          "max_absolute": 5.426770144367765e-13
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 1.3893455918073441e-14,
+          "max_absolute": 5.426770144367765e-13
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 1.999530876208627e-13,
+          "max_absolute": 1.6056583262979984e-07
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 2.017236555604793e-12,
+          "max_absolute": 2.600745574454777e-08
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 1.5980687244511438e-12,
+          "max_absolute": 1.5045316104078665e-08
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 1.8154892354236001e-13,
+          "max_absolute": 1.863231791077169e-13
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.5343508263400305e-12,
+          "max_absolute": 3.01200037133853e-14
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 2.3013880527264065e-13,
+          "max_absolute": 5.3806785416110614e-15
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "previous_route_equivalence_1e14": false,
+      "previous_route_equivalence_is_acceptance_gate": false
+    },
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "weak-rotation-reactor-static",
+      "requested_cells": 300,
+      "revision": "ccc09221d1e982026eed45b5ee5cc0f865188d96",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275914",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 4.314935366538445e-13,
+          "max_absolute": 2.4573121315540902e-11
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 1.1025379096814643e-12,
+          "max_absolute": 2.4573121315540902e-11
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 2.987461911112779e-13,
+          "max_absolute": 1.1700103641487658e-07
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 2.6306027178060333e-12,
+          "max_absolute": 4.730097202809702e-09
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 2.2785062027138632e-12,
+          "max_absolute": 5.110450729262084e-09
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 2.8782573509345923e-13,
+          "max_absolute": 1.4528656056000955e-13
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 2.2400594868625282e-12,
+          "max_absolute": 6.465856496051803e-15
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 2.9689524068615745e-13,
+          "max_absolute": 9.770016826810002e-16
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "previous_route_equivalence_1e14": false,
+      "previous_route_equivalence_is_acceptance_gate": false
+    },
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "moderate-rotation-conventional-static",
+      "requested_cells": 110,
+      "revision": "ccc09221d1e982026eed45b5ee5cc0f865188d96",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275914",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 2.0364525313374056e-13,
+          "max_absolute": 3.3646629702529167e-12
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 7.470032653836756e-13,
+          "max_absolute": 3.3646629702529167e-12
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 1.8667787477165113e-13,
+          "max_absolute": 1.3318640412762761e-08
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 1.7461245148517573e-12,
+          "max_absolute": 4.882352300228376e-10
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 1.3066847707946727e-12,
+          "max_absolute": 3.518110247568984e-10
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 1.6947079538297256e-13,
+          "max_absolute": 1.2002551730283528e-14
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.3193809476586775e-12,
+          "max_absolute": 4.440621047957505e-16
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.9224529453752868e-13,
+          "max_absolute": 2.1558682573516452e-17
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "previous_route_equivalence_1e14": false,
+      "previous_route_equivalence_is_acceptance_gate": false
+    },
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "moderate-rotation-conventional-static",
+      "requested_cells": 300,
+      "revision": "ccc09221d1e982026eed45b5ee5cc0f865188d96",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275914",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 2.0227073610998218e-13,
+          "max_absolute": 4.027347899615563e-12
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 2.924363834516945e-13,
+          "max_absolute": 4.027347899615563e-12
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 1.9088032083076314e-13,
+          "max_absolute": 6.4221694628940895e-09
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 1.7785383574193788e-12,
+          "max_absolute": 1.3809042798129667e-10
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 1.3698328237492763e-12,
+          "max_absolute": 7.323031070427533e-11
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 1.846234986856429e-13,
+          "max_absolute": 6.368386720745356e-15
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.4343474773372229e-12,
+          "max_absolute": 1.2233103934130782e-16
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.8997093966550576e-13,
+          "max_absolute": 3.870093536004898e-18
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "previous_route_equivalence_1e14": false,
+      "previous_route_equivalence_is_acceptance_gate": false
+    },
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "strong-rotation-compact-static",
+      "requested_cells": 110,
+      "revision": "ccc09221d1e982026eed45b5ee5cc0f865188d96",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275914",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 1.1034436557618406e-13,
+          "max_absolute": 9.297499536690336e-13
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 4.4441646468686295e-13,
+          "max_absolute": 9.297499536690336e-13
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 2.1839905892818623e-13,
+          "max_absolute": 3.1782292353454977e-09
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 2.0768604286439026e-12,
+          "max_absolute": 6.378320094313494e-11
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 1.8261803689324105e-12,
+          "max_absolute": 3.482236721197296e-11
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 2.0154768792589031e-13,
+          "max_absolute": 3.1324769167451194e-15
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.7052798686737505e-12,
+          "max_absolute": 6.279986974238108e-17
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 2.655348854328557e-13,
+          "max_absolute": 1.3542998035412195e-18
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "previous_route_equivalence_1e14": false,
+      "previous_route_equivalence_is_acceptance_gate": false
+    },
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "strong-rotation-compact-static",
+      "requested_cells": 300,
+      "revision": "e22fcb24808bc0fb19a408d308e1b463a6b5ebea",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275914",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 5.621811291751656e-13,
+          "max_absolute": 5.823862225806664e-12
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 2.1613154492222056e-12,
+          "max_absolute": 5.823862225806664e-12
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 7.035355899083787e-13,
+          "max_absolute": 3.2416096473752987e-09
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 5.592020507522123e-12,
+          "max_absolute": 2.588151915006165e-11
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 6.2692627404007805e-12,
+          "max_absolute": 2.998756798433533e-11
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 6.688523325676323e-13,
+          "max_absolute": 3.1838680997209323e-15
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 5.337685577447948e-12,
+          "max_absolute": 3.1572517834193604e-17
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 6.863108956905568e-13,
+          "max_absolute": 3.9389679025285135e-19
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "previous_route_equivalence_1e14": false,
+      "previous_route_equivalence_is_acceptance_gate": false
+    },
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "diverted-single-null",
+      "requested_cells": 110,
+      "revision": "ccc09221d1e982026eed45b5ee5cc0f865188d96",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275914",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 1.4134238140314675e-13,
+          "max_absolute": 1.971089957919503e-12
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 2.337100496505819e-13,
+          "max_absolute": 1.971089957919503e-12
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 1.0713334688345263e-12,
+          "max_absolute": 4.604260084306588e-09
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 1.8654954002624786e-12,
+          "max_absolute": 4.715605683713875e-11
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 5.594117012067263e-12,
+          "max_absolute": 1.1519496467826684e-10
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 1.191649155893604e-12,
+          "max_absolute": 2.0264172284623072e-13
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 3.8187601649184385e-12,
+          "max_absolute": 5.238593846906836e-15
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.2423700519499772e-12,
+          "max_absolute": 3.4107645093678363e-16
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "previous_route_equivalence_1e14": false,
+      "previous_route_equivalence_is_acceptance_gate": false
+    },
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "diverted-single-null",
+      "requested_cells": 300,
+      "revision": "e22fcb24808bc0fb19a408d308e1b463a6b5ebea",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275914",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 9.046027950939554e-14,
+          "max_absolute": 1.3486989303146402e-12
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 1.1375307106383142e-13,
+          "max_absolute": 1.3486989303146402e-12
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 8.631535879743448e-13,
+          "max_absolute": 1.7675745311862556e-09
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 2.0192638121820143e-12,
+          "max_absolute": 9.81859038517996e-12
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 5.797320204675718e-12,
+          "max_absolute": 2.780753405318137e-11
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 9.68726377151609e-13,
+          "max_absolute": 7.921354544526693e-14
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 3.948610896369461e-12,
+          "max_absolute": 1.25427961203059e-15
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 9.80762401821549e-13,
+          "max_absolute": 6.41089591623626e-17
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "previous_route_equivalence_1e14": false,
+      "previous_route_equivalence_is_acceptance_gate": false
+    }
+  ],
+  "independent_reference": {
+    "source_sha256": {
+      "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+      "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+    },
+    "helper_sha256": "6854f39e70c75b175ea50ee410e1a92369f40931475064508cf91ee6fe630ab5",
+    "job": "1275914",
+    "completed": true,
+    "controls": {
+      "longdouble_mantissa_bits": 63,
+      "double_mantissa_bits": 52,
+      "triangle_moment_max_absolute_error": 1.3552527156068805e-20,
+      "linear_root_absolute_error": 2.710505431213761e-20
+    },
+    "production": {
+      "reference": "production-patch-reference",
+      "job": "1275914",
+      "cells": [
+        2,
+        3,
+        4,
+        11,
+        13,
+        14,
+        28,
+        35,
+        36,
+        38,
+        50,
+        52,
+        54,
+        68,
+        71,
+        72,
+        75,
+        76,
+        78,
+        80
+      ],
+      "cell_count": 20,
+      "degree": 6,
+      "coefficient_sha256": "6584f6cb8450a0d691c208733468e70c8d1fb215a14386b8adf3bf38dc6e8953",
+      "maximum_reference_arc_residual": 5.149960319306146e-19,
+      "rows": [
+        {
+          "quantity": "crossing_radial",
+          "baseline_relative_l2": 1.1546855492016737e-16,
+          "candidate_relative_l2": 1.1546855492016737e-16,
+          "candidate_no_worse": true
+        },
+        {
+          "quantity": "crossing_vertical",
+          "baseline_relative_l2": 9.878821886897903e-17,
+          "candidate_relative_l2": 9.878821886897903e-17,
+          "candidate_no_worse": true
+        },
+        {
+          "quantity": "area",
+          "baseline_relative_l2": 7.488144102970363e-16,
+          "candidate_relative_l2": 7.708598810746024e-16,
+          "candidate_no_worse": false
+        },
+        {
+          "quantity": "first_radial",
+          "baseline_relative_l2": 1.2210100875262634e-15,
+          "candidate_relative_l2": 1.3263963897056763e-15,
+          "candidate_no_worse": false
+        },
+        {
+          "quantity": "first_vertical",
+          "baseline_relative_l2": 1.609255285410016e-15,
+          "candidate_relative_l2": 1.3888809121564742e-15,
+          "candidate_no_worse": true
+        },
+        {
+          "quantity": "second_radial",
+          "baseline_relative_l2": 8.399547089559398e-16,
+          "candidate_relative_l2": 9.467551282851415e-16,
+          "candidate_no_worse": false
+        },
+        {
+          "quantity": "second_mixed",
+          "baseline_relative_l2": 2.6630846718192657e-15,
+          "candidate_relative_l2": 2.441937741992741e-15,
+          "candidate_no_worse": true
+        },
+        {
+          "quantity": "second_vertical",
+          "baseline_relative_l2": 7.11293438428993e-16,
+          "candidate_relative_l2": 6.918673549122702e-16,
+          "candidate_no_worse": true
+        }
+      ],
+      "passed": false
+    },
+    "bicubic": {
+      "reference": "bicubic-reference",
+      "job": "1275914",
+      "cells": [
+        2,
+        3,
+        4,
+        11,
+        13,
+        14,
+        28,
+        35,
+        36,
+        38,
+        50,
+        52,
+        54,
+        68,
+        71,
+        72,
+        75,
+        76,
+        78,
+        80
+      ],
+      "cell_count": 20,
+      "degree": 3,
+      "coefficient_sha256": "561b9a08abfdbf1122bfe11829024af70249b41e6a22c2363f1b89e482ddb4b6",
+      "maximum_reference_arc_residual": 4.408806490458633e-19,
+      "rows": [
+        {
+          "quantity": "crossing_radial",
+          "baseline_relative_l2": 6.921916368768183e-17,
+          "candidate_relative_l2": 6.921916368768183e-17,
+          "candidate_no_worse": true
+        },
+        {
+          "quantity": "crossing_vertical",
+          "baseline_relative_l2": 9.023335318760017e-17,
+          "candidate_relative_l2": 9.023335318760017e-17,
+          "candidate_no_worse": true
+        },
+        {
+          "quantity": "area",
+          "baseline_relative_l2": 2.6817149774086177e-16,
+          "candidate_relative_l2": 2.4731605600501704e-16,
+          "candidate_no_worse": true
+        },
+        {
+          "quantity": "first_radial",
+          "baseline_relative_l2": 8.265367584350822e-16,
+          "candidate_relative_l2": 7.370743260111984e-16,
+          "candidate_no_worse": true
+        },
+        {
+          "quantity": "first_vertical",
+          "baseline_relative_l2": 4.690530523149709e-16,
+          "candidate_relative_l2": 6.505999079124688e-16,
+          "candidate_no_worse": false
+        },
+        {
+          "quantity": "second_radial",
+          "baseline_relative_l2": 5.56918372471136e-16,
+          "candidate_relative_l2": 4.713302103801958e-16,
+          "candidate_no_worse": true
+        },
+        {
+          "quantity": "second_mixed",
+          "baseline_relative_l2": 1.6062670380454085e-15,
+          "candidate_relative_l2": 1.4962918270621386e-15,
+          "candidate_no_worse": true
+        },
+        {
+          "quantity": "second_vertical",
+          "baseline_relative_l2": 4.189417801857244e-16,
+          "candidate_relative_l2": 3.235766453631422e-16,
+          "candidate_no_worse": true
+        }
+      ],
+      "passed": false
+    },
+    "passed": false
+  },
+  "numerical_no_worse_passed": false,
+  "baseline_suite_context_job": "1275884",
+  "zero_added_module_failures": true,
+  "serialized_byte_reduction_fraction": 0.15969481956427511,
+  "coordinator_ceiling": {
+    "bytes": 100000000,
+    "measured_candidate_bytes": 174134951,
+    "under_ceiling": false,
+    "verdict_owner": "coordinator"
+  },
+  "numerical_follow_on": "Strict no-worse inequalities remain failed at roundoff scale; coefficient controls did not remove them. Shared root and moment routines require separate source scope.",
+  "negative_control_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/bernstein/negative-program.json"
+}

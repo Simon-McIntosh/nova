@@ -1,0 +1,46 @@
+{
+  "revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+  "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+  "arm": "baseline",
+  "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program",
+  "job": "1275837",
+  "cpu_affinity": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "requested_cells": 110,
+  "realised_cells": 135,
+  "completed": true,
+  "lower_seconds": 41.64808211475611,
+  "compile_seconds": 404.75860085710883,
+  "serialized_bytes": 207227911,
+  "serialized_sha256": "559c430a3a6f16d825f6a7e70c589a0423a66bd6392bd73302817e4a31347d4e",
+  "top_five_hlo_ops": [
+    [
+      "parameter",
+      121618
+    ],
+    [
+      "broadcast",
+      76195
+    ],
+    [
+      "constant",
+      70114
+    ],
+    [
+      "bitcast",
+      63927
+    ],
+    [
+      "add",
+      46804
+    ]
+  ],
+  "hlo_instructions": 668305,
+  "bernstein_binom_present": true,
+  "static_basis_present": false,
+  "below_ceiling": false
+}

@@ -1,0 +1,8 @@
+{
+  "job": "1275837",
+  "reason": "Stopped under repeated-failure contract after vector and scalar host coefficient freezing both failed the weak-row numerical fence.",
+  "scheduler_receipt": "JobID|State|ExitCode|Elapsed\n1275837|CANCELLED by 39486|0:0|00:31:41\n1275837.extern|COMPLETED|0:0|00:31:41\n1275837.0|CANCELLED|0:15|00:31:42\n1275837.1|COMPLETED|0:0|00:00:22\n1275837.2|FAILED|1:0|00:00:01\n1275837.3|FAILED|1:0|00:00:10\n1275837.4|CANCELLED|0:15|00:08:12\n1275837.5|COMPLETED|0:0|00:00:21\n1275837.6|COMPLETED|0:0|00:00:42\n1275837.7|COMPLETED|0:0|00:00:41\n",
+  "main_session_exit": 143,
+  "row_session_exit": 143,
+  "final_source_commit": "067ea754ce138a8b93a704f42877ab501957c9ad"
+}

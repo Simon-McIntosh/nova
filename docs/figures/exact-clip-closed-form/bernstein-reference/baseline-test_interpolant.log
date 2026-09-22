@@ -1,0 +1,112 @@
+revision=8d047a923131e281be5e245d9a404d67b6ce2f0d source_checkpoint=067ea754ce138a8b93a704f42877ab501957c9ad tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/measure_reference.py', '--suite', 'baseline', 'test_interpolant.py']
+16:05:46 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+.......FFFF....F                                                         [100%]
+=================================== FAILURES ===================================
+___ test_static_bernstein_reproduces_constants_and_linear_fields[float32-0] ____
+
+order = 0, dtype = <class 'numpy.float32'>
+
+    @pytest.mark.skipif(not JAX_AVAILABLE, reason="JAX is not installed")
+    @pytest.mark.parametrize("order", [0, 1, 3, 7])
+    @pytest.mark.parametrize("dtype", [np.float32, np.float64])
+    def test_static_bernstein_reproduces_constants_and_linear_fields(order, dtype):
+        from nova.jax.config import configure_dtypes
+    
+        configure_dtypes()
+        x = jnp.asarray([0.0, 0.13, 0.5, 0.91, 1.0], dtype=dtype)
+        matrix = Bernstein(order=order).coefficent_matrix(x)
+>       assert matrix.dtype == x.dtype
+E       AssertionError: assert dtype('float64') == dtype('float32')
+E        +  where dtype('float64') = Array([[1.],\n       [1.],\n       [1.],\n       [1.],\n       [1.]], dtype=float64).dtype
+E        +  and   dtype('float32') = Array([0.  , 0.13, 0.5 , 0.91, 1.  ], dtype=float32).dtype
+
+tests/test_interpolant.py:122: AssertionError
+___ test_static_bernstein_reproduces_constants_and_linear_fields[float32-1] ____
+
+order = 1, dtype = <class 'numpy.float32'>
+
+    @pytest.mark.skipif(not JAX_AVAILABLE, reason="JAX is not installed")
+    @pytest.mark.parametrize("order", [0, 1, 3, 7])
+    @pytest.mark.parametrize("dtype", [np.float32, np.float64])
+    def test_static_bernstein_reproduces_constants_and_linear_fields(order, dtype):
+        from nova.jax.config import configure_dtypes
+    
+        configure_dtypes()
+        x = jnp.asarray([0.0, 0.13, 0.5, 0.91, 1.0], dtype=dtype)
+        matrix = Bernstein(order=order).coefficent_matrix(x)
+>       assert matrix.dtype == x.dtype
+E       AssertionError: assert dtype('float64') == dtype('float32')
+E        +  where dtype('float64') = Array([[1.        , 0.        ],\n       [0.87      , 0.13      ],\n       [0.5       , 0.5       ],\n       [0.08999997, 0.91000003],\n       [0.        , 1.        ]], dtype=float64).dtype
+E        +  and   dtype('float32') = Array([0.  , 0.13, 0.5 , 0.91, 1.  ], dtype=float32).dtype
+
+tests/test_interpolant.py:122: AssertionError
+___ test_static_bernstein_reproduces_constants_and_linear_fields[float32-3] ____
+
+order = 3, dtype = <class 'numpy.float32'>
+
+    @pytest.mark.skipif(not JAX_AVAILABLE, reason="JAX is not installed")
+    @pytest.mark.parametrize("order", [0, 1, 3, 7])
+    @pytest.mark.parametrize("dtype", [np.float32, np.float64])
+    def test_static_bernstein_reproduces_constants_and_linear_fields(order, dtype):
+        from nova.jax.config import configure_dtypes
+    
+        configure_dtypes()
+        x = jnp.asarray([0.0, 0.13, 0.5, 0.91, 1.0], dtype=dtype)
+        matrix = Bernstein(order=order).coefficent_matrix(x)
+>       assert matrix.dtype == x.dtype
+E       AssertionError: assert dtype('float64') == dtype('float32')
+E        +  where dtype('float64') = Array([[1.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.58502996e-01, 2.95190994e-01, 4.410...942e-01, 7.53571093e-01],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.00000000e+00]],      dtype=float64).dtype
+E        +  and   dtype('float32') = Array([0.  , 0.13, 0.5 , 0.91, 1.  ], dtype=float32).dtype
+
+tests/test_interpolant.py:122: AssertionError
+___ test_static_bernstein_reproduces_constants_and_linear_fields[float32-7] ____
+
+order = 7, dtype = <class 'numpy.float32'>
+
+    @pytest.mark.skipif(not JAX_AVAILABLE, reason="JAX is not installed")
+    @pytest.mark.parametrize("order", [0, 1, 3, 7])
+    @pytest.mark.parametrize("dtype", [np.float32, np.float64])
+    def test_static_bernstein_reproduces_constants_and_linear_fields(order, dtype):
+        from nova.jax.config import configure_dtypes
+    
+        configure_dtypes()
+        x = jnp.asarray([0.0, 0.13, 0.5, 0.91, 1.0], dtype=dtype)
+        matrix = Bernstein(order=order).coefficent_matrix(x)
+>       assert matrix.dtype == x.dtype
+E       AssertionError: assert dtype('float64') == dtype('float32')
+E        +  where dtype('float64') = Array([[1.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,\n        0.00000000e+00, 0.00000000e+00, 0.0000...0000e+00, 0.00000000e+00,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.00000000e+00]],      dtype=float64).dtype
+E        +  and   dtype('float32') = Array([0.  , 0.13, 0.5 , 0.91, 1.  ], dtype=float32).dtype
+
+tests/test_interpolant.py:122: AssertionError
+____________ test_binomial_lookup_lowers_without_special_functions _____________
+
+    @pytest.mark.skipif(not JAX_AVAILABLE, reason="JAX is not installed")
+    def test_binomial_lookup_lowers_without_special_functions():
+        from nova.jax.config import configure_dtypes
+    
+        configure_dtypes()
+        terms = jnp.arange(-1, 6)
+        function = jax.jit(lambda term: Bernstein(order=4).binom(term))
+        np.testing.assert_allclose(function(terms), [0, 1, 4, 6, 4, 1, 0], rtol=1e-14)
+        text = function.lower(terms).compile().as_text()
+        assert "constant" in text
+>       assert "lgamma" not in text and "gamma" not in text
+E       assert ('lgamma' not in 'HloModule j...d=40}\n}\n\n'
+E         
+E         'lgamma' is contained here:
+E           id=41}
+E             %lgamma.349 = f64[7]{0} abs(%convert_element_type.29), metadata={op_name="jit(<lambda>)/jit(binom)/lgamma" stack_frame_id=41}
+E         ?    ++++++
+E             %constant.260 = f64[] constant(inf), metadata={op_name="jit(<lambda>)/jit(binom)" stack_frame_id=39}
+E             %broadcast.146 = f64[7]{0} broadcast(%constant.260), dimensions={}, metadata={op_name="jit(<lambda>)/jit(binom)" stack_frame_id=39}...
+E         
+E         ...Full output truncated (299 lines hidden), use '-vv' to show)
+
+tests/test_interpolant.py:150: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_interpolant.py::test_static_bernstein_reproduces_constants_and_linear_fields[float32-0]
+FAILED tests/test_interpolant.py::test_static_bernstein_reproduces_constants_and_linear_fields[float32-1]
+FAILED tests/test_interpolant.py::test_static_bernstein_reproduces_constants_and_linear_fields[float32-3]
+FAILED tests/test_interpolant.py::test_static_bernstein_reproduces_constants_and_linear_fields[float32-7]
+FAILED tests/test_interpolant.py::test_binomial_lookup_lowers_without_special_functions
+5 failed, 11 passed in 14.25s

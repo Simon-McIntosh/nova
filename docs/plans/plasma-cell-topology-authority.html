@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="79">
+<meta name="plan-version" content="81">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 <meta name="plan-section-declarations" content="{&quot;currency&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
@@ -388,6 +388,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260922-s4-merged-head-verified" data-who="reckon-ship s18-fable-20260922" data-when="2026-09-22T15:50:00+00:00">
     <div class="r-comment-body">Verification node pta-parity-harness-merged-head merged at 60325fcc5 (tip 0b496fe3, local lane, one all_debug allocation, job 1275959). At run revision 2998d370d, main after the adoption, the twelve-row replay through the adopted census reads 12 of 12 rows, 0 differing cells, matching primaries and classes on every row, status complete and passes true; compared with the pre-adoption receipt every moved value is a float64-roundoff move at 1e-16 relative (census or raster binding flux, primary position residual) and no label, primary, class or disposition moves, so the adopted read reproduces the parity replay over 13,068 cells. Harness regressions 9 passed in the same allocation. Section 4 is verified on the read that ships. Follow-on recorded by the worker: the harness names its run revision only through the recorded worktree paths, so a run-revision field on the receipt is a small harness follow-on; the three-arm achieved_class disagreement stays with the solver programme.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260922T153047030797-pta-parity-harness-merged-head" data-who="reckon-ship" data-when="2026-09-22T15:46:16.381Z">
+    <div class="r-comment-body"><p>twelve-row parity receipt regenerated under the adopted census at the merged head: 12/12 rows, 0 differing cells, matching primaries and classes, every moved value at float64 roundoff against the pre-adoption replay (reproduced by the 92/100 review); review notes to carry: assert the imported tree in the lane probe, make the before/after comparison a lane step, and state wall_seconds and absolute position moves separately in the record; merged 60325fcc5</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260922T154639741321-review-of-pta-parity-harness-merged-head" data-who="reckon-ship" data-when="2026-09-22T16:06:34.274Z">
+    <div class="r-comment-body"><p>review 92/100 of the merged-head twelve-row replay at 2998d370d: goal and every done-when quantity confirmed in the artifact, roundoff comparison reproduced independently; three untagged notes on lane provenance and record wording, none blocking</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T161311799441" data-who="coordinator" data-when="2026-09-04T16:14:00Z">
     <div class="r-comment-body"><p>Finding from the forward-solve-api route migration (2026-09-04): the topology mask replay route now raises <code>StaleOperandCacheError</code> on main because <code>mast-topology-operands.metadata.json</code> records source authority <code>sha256:5b145295…</code> while the current source authority is <code>sha256:738333…</code>, moved by the census and polish landings since the operands were generated. The replay's request wiring is in place (bare public policy emitted), but no replay can execute until the operands are regenerated on the current authority, which is the regeneration followup already open here; it should run once the integration candidate merges and the bank is rebanked on the public route, so the operands and the bank share one authority.</p></div>

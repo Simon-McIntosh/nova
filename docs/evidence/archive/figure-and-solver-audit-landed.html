@@ -2750,6 +2750,178 @@ ROW2_EXIT=139</pre>
 <p><strong>Excluded from promotion counts:</strong> <code>r-20260920T180231259880-cca-one-certificate-row-per-process</code> is explicitly described in the census review as local and unpromoted; its useful measurement and defective receipt are not counted as a promotion.</p>
 
 </section>
+<section id="figure-audit-cut-cell-current-attribution">
+  <h3>cut-cell-current-attribution &mdash; 114 figures, all opened, mean 67.4, 52 under 70, 11 misrepresenting physics</h3>
+  <p>114 figures (77 PNG, 37 SVG) across 33 sub-directories beside 454 JSON receipts.
+  <strong>All 114 were opened with the image read tool and scored</strong>; the 37 SVGs were rendered
+  with <code>rsvg-convert</code> and opened as images, so the reviewer saw what a reader sees.
+  <strong>Mean 67.4 / 100. 52 of 114 (46%) score under 70. Eleven misrepresent their physics.</strong>
+  40 of the 114 are cited by no document in <code>docs/</code>; 17 of the 37 SVGs carry full
+  matplotlib axis furniture; three sub-directories carry figures and zero receipts.</p>
+  <h4>The eleven physics misrepresentations</h4>
+  <ol>
+    <li><code>gate-c-resolve/diverted-single-null-production-route-cells-1000.png</code> (38) and
+      <code>&hellip;-cells-500.png</code> (38) &mdash; both <code>converged False</code>; the solved field
+      closes on an axis against the outboard wall, outside the analytic separatrix, with no solved
+      X-point marked at all. Neither has a separatrix or an admitted saddle under a
+      <code>diverted-single-null</code> caption.</li>
+    <li><code>wholecell-rows/&hellip;/weak-&hellip;-cells-2500.png</code> (40) &mdash;
+      <code>residual=0.000e+00 &middot; converged=yes</code> beside its own psi-error panel running to
+      <code>3.17e+01</code> Wb. An exact fixed point cannot carry a 31.7 Wb error; the residual
+      reported is not the residual of the state drawn.</li>
+    <li><code>wholecell-rows/&hellip;/diverted-&hellip;-cells-1000.png</code> (45) &mdash; solved axis outside
+      its own separatrix while the saddle is found.</li>
+    <li><code>rung-a-certificate/diverted-single-null-production-route-reduced.png</code> (40) &mdash;
+      <code>residual 6.354e-01</code>, and the solved X-point drawn at the inboard midplane.</li>
+    <li><code>gate-b/absolute-flux-error.svg</code> (45) &mdash; panels quoting
+      <code>max |error| 0.9752 Wb</code> rendered blank, because the levels sit above the stated maximum.</li>
+    <li><code>cut-cell-coupling/weak-110-coupling-errors.svg</code> (50) &mdash; a
+      <code>rms 0.00000</code> panel, empty, in the middle of a before/after sequence.</li>
+    <li><code>positional-stiffness/&hellip;-cells-110-residual.png</code> and
+      <code>&hellip;-cells-300-residual.png</code> (45 each) &mdash; pixel-identical under two different
+      cell counts.</li>
+    <li><code>limiter-read/single-null-contact-shadow.png</code> (30) &mdash; no text of any kind, and the
+      <code>draw_nulls</code> axis triangle placed in the divertor leg.</li>
+    <li><code>zero-residual/panels/zero-residual-map.png</code> (48) &mdash; a panel titled
+      &ldquo;terminal flux (persisted)&rdquo; that draws no flux.</li>
+  </ol>
+  <h4>Cross-cutting</h4>
+  <ul>
+    <li>The shared solve-panel template obeys axes, unfilled contours, stated levels and the wall, and
+      omits half its null vocabulary: no nulls on any error panel, one null set only on several
+      comparison panels, hollow qualified-null markers absent directory-wide.</li>
+    <li>25 figures across five templates print no residual and no converged flag, while five sibling
+      templates print both from the same renderer.</li>
+    <li>Three <code>newton-geometry</code> figures are their <code>chord_live</code> siblings with the
+      residual and trip count stripped from the title; two more figures exist as duplicate PNG/SVG pairs.</li>
+    <li>All fourteen <code>gate-c-resolve</code> figures are <code>unqualified &middot; converged False</code>.</li>
+    <li><code>exact-clip-memory/base-memory-scaling.svg</code> is hand-authored SVG, not a
+      <code>nova.media</code> render, with nothing binding its marks to a receipt.</li>
+    <li>Positive control, and the repair target: <code>limited-shadow/lfs-contours-before-after.png</code>
+      (92) prints residual and converged on all nine subtitles and names in its footnote the row it does
+      not draw and why.</li>
+  </ul>
+  <h4>Per-figure scores</h4>
+  <table>
+    <tr><th>figure</th><th>score</th><th></th></tr>
+    <tr><td><code>limited-shadow/lfs-contours-before-after.png</code></td><td>92</td><td></td></tr>
+    <tr><td><code>limited-shadow/oracle-overlay-error.png</code></td><td>86</td><td></td></tr>
+    <tr><td><code>topology-ladder/unadmitted-cells-110.svg</code></td><td>85</td><td></td></tr>
+    <tr><td><code>topology-ladder/unadmitted-cells-300.svg</code></td><td>85</td><td></td></tr>
+    <tr><td><code>vertex-census/saddle-region-cells-110.svg</code></td><td>85</td><td></td></tr>
+    <tr><td><code>vertex-census/saddle-region-cells-300.svg</code></td><td>85</td><td></td></tr>
+    <tr><td><code>exact-clip-cost/exact-clip-warm-cost-and-memory.svg</code></td><td>82</td><td></td></tr>
+    <tr><td><code>limiter-read/contact-error-vs-wall-resolution.svg</code></td><td>82</td><td></td></tr>
+    <tr><td><code>polish-ladder/polish-error-ladder.svg</code></td><td>82</td><td></td></tr>
+    <tr><td><code>cold-seed/moderate-rotation-conventional-static-production-route-reduced.png</code></td><td>80</td><td></td></tr>
+    <tr><td><code>cold-seed/strong-rotation-compact-static-production-route-reduced.png</code></td><td>80</td><td></td></tr>
+    <tr><td><code>cold-seed/weak-rotation-reactor-static-production-route-reduced.png</code></td><td>80</td><td></td></tr>
+    <tr><td><code>dual-stencil/dual-stencil-error-by-boundary-distance.svg</code></td><td>80</td><td></td></tr>
+    <tr><td><code>xpoint-cell/carrier-vs-independent-cells-110.png</code></td><td>80</td><td></td></tr>
+    <tr><td><code>xpoint-cell/carrier-vs-independent-cells-110.svg</code></td><td>80</td><td></td></tr>
+    <tr><td><code>first-order-coupling/single-cell.svg</code></td><td>78</td><td></td></tr>
+    <tr><td><code>moment-order/moderate-rotation-conventional-static-110.svg</code></td><td>78</td><td></td></tr>
+    <tr><td><code>moment-order/moderate-rotation-conventional-static-300.svg</code></td><td>78</td><td></td></tr>
+    <tr><td><code>moment-order/weak-rotation-reactor-static-110.svg</code></td><td>78</td><td></td></tr>
+    <tr><td><code>moment-order/weak-rotation-reactor-static-300.svg</code></td><td>78</td><td></td></tr>
+    <tr><td><code>oracle-start/diverted-single-null-cells-1000-fixture_exterior_control.png</code></td><td>78</td><td></td></tr>
+    <tr><td><code>oracle-start/diverted-single-null-cells-500-fixture_exterior_control.png</code></td><td>78</td><td></td></tr>
+    <tr><td><code>private-region/private-mask-cost-cells.svg</code></td><td>78</td><td></td></tr>
+    <tr><td><code>gate-c-resolve/moderate-rotation-conventional-static-production-route-cells-1000.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>gate-c-resolve/moderate-rotation-conventional-static-production-route-cells-300.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>gate-c-resolve/moderate-rotation-conventional-static-production-route-cells-500.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>gate-c-resolve/moderate-rotation-conventional-static-production-route-reduced.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>gate-c-resolve/strong-rotation-compact-static-production-route-cells-1000.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>gate-c-resolve/strong-rotation-compact-static-production-route-cells-300.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>gate-c-resolve/strong-rotation-compact-static-production-route-cells-500.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>gate-c-resolve/strong-rotation-compact-static-production-route-reduced.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>gate-c-resolve/weak-rotation-reactor-static-production-route-cells-300.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>gate-c-resolve/weak-rotation-reactor-static-production-route-cells-500.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>gate-c-resolve/weak-rotation-reactor-static-production-route-reduced.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>newton-geometry/moderate-rotation-conventional-static-chord_live-reduced.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>newton-geometry/strong-rotation-compact-static-chord_live-reduced.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>newton-geometry/weak-rotation-reactor-static-chord_live-reduced.png</code></td><td>76</td><td></td></tr>
+    <tr><td><code>reposed-fixture/diverted-single-null-cells-1000.svg</code></td><td>75</td><td></td></tr>
+    <tr><td><code>reposed-fixture/diverted-single-null-cells-500.svg</code></td><td>75</td><td></td></tr>
+    <tr><td><code>reposed-fixture/moderate-rotation-conventional-static-cells-1000.svg</code></td><td>75</td><td></td></tr>
+    <tr><td><code>reposed-fixture/weak-rotation-reactor-static-cells-1000.svg</code></td><td>75</td><td></td></tr>
+    <tr><td><code>gate-c-resolve/weak-rotation-reactor-static-production-route-cells-1000.png</code></td><td>72</td><td></td></tr>
+    <tr><td><code>limiter-subpanel/limiter-wall-contact-read.png</code></td><td>72</td><td></td></tr>
+    <tr><td><code>positional-stiffness/figures/moderate-rotation-conventional-static-cells-300-residual.png</code></td><td>72</td><td></td></tr>
+    <tr><td><code>wholecell-rows/panels/moderate-rotation-conventional-static-production-route-cells-1000.png</code></td><td>72</td><td></td></tr>
+    <tr><td><code>wholecell-rows/panels/moderate-rotation-conventional-static-production-route-cells-2500.png</code></td><td>72</td><td></td></tr>
+    <tr><td><code>wholecell-rows/panels/strong-rotation-compact-static-production-route-cells-1000.png</code></td><td>72</td><td></td></tr>
+    <tr><td><code>wholecell-rows/panels/strong-rotation-compact-static-production-route-cells-2500.png</code></td><td>72</td><td></td></tr>
+    <tr><td><code>wholecell-rows/panels/weak-rotation-reactor-static-production-route-cells-1000.png</code></td><td>72</td><td></td></tr>
+    <tr><td><code>xpoint-cell/single-null-wedges-cells-1000.svg</code></td><td>72</td><td></td></tr>
+    <tr><td><code>xpoint-cell/single-null-wedges-cells-110.svg</code></td><td>72</td><td></td></tr>
+    <tr><td><code>xpoint-cell/single-null-wedges-cells-2500.svg</code></td><td>72</td><td></td></tr>
+    <tr><td><code>xpoint-cell/single-null-wedges-cells-300.svg</code></td><td>72</td><td></td></tr>
+    <tr><td><code>xpoint-cell/single-null-wedges-cells-500.svg</code></td><td>72</td><td></td></tr>
+    <tr><td><code>census-kernel/census-kernel-timing.png</code></td><td>70</td><td></td></tr>
+    <tr><td><code>first-order-coupling/weak-110-errors.svg</code></td><td>70</td><td></td></tr>
+    <tr><td><code>gate-b/weak-110-frozen-prediction-analytic-terminal.svg</code></td><td>70</td><td></td></tr>
+    <tr><td><code>private-region/private-mask-poloidal-1000.svg</code></td><td>70</td><td></td></tr>
+    <tr><td><code>private-region/private-mask-poloidal-1074.svg</code></td><td>70</td><td></td></tr>
+    <tr><td><code>private-region/private-mask-poloidal-2616.svg</code></td><td>70</td><td></td></tr>
+    <tr><td><code>wholecell-rows/panels/diverted-single-null-production-route-cells-2500.png</code></td><td>70</td><td></td></tr>
+    <tr><td><code>xpoint-cell/single-null-wedges-cells-300.png</code></td><td>70</td><td></td></tr>
+    <tr><td><code>exact-clip-low-state/panels/weak-static-110-terminals.png</code></td><td>68</td><td></td></tr>
+    <tr><td><code>exact-clip-low-state/panels/weak-static-300-terminals.png</code></td><td>68</td><td></td></tr>
+    <tr><td><code>limited-shadow/limited-shadow-census.png</code></td><td>68</td><td></td></tr>
+    <tr><td><code>positional-stiffness/figures/translated-40mm.png</code></td><td>68</td><td></td></tr>
+    <tr><td><code>spline-read/saddle-position-error-vs-cell-pitch.svg</code></td><td>68</td><td></td></tr>
+    <tr><td><code>topology-ladder/admitted-saddle-error.svg</code></td><td>68</td><td></td></tr>
+    <tr><td><code>vertex-census/saddle-error-comparison.svg</code></td><td>68</td><td></td></tr>
+    <tr><td><code>exact-clip-memory/solve-panels-final-receipted/weak-rotation-reactor-static-production-route-cells-1000.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>exact-clip-seed/panels/moderate-rotation-conventional-static-110-comparison.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>exact-clip-seed/panels/moderate-rotation-conventional-static-300-comparison.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>exact-clip-seed/panels/moderate-rotation-conventional-static-production-route-cells-300.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>exact-clip-seed/panels/moderate-rotation-conventional-static-production-route-reduced.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>exact-clip-seed/panels/strong-rotation-compact-static-110-comparison.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>exact-clip-seed/panels/strong-rotation-compact-static-300-comparison.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>exact-clip-seed/panels/strong-rotation-compact-static-production-route-cells-300.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>exact-clip-seed/panels/strong-rotation-compact-static-production-route-reduced.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>exact-clip-seed/panels/weak-rotation-reactor-static-110-comparison.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>exact-clip-seed/panels/weak-rotation-reactor-static-300-comparison.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>exact-clip-seed/panels/weak-rotation-reactor-static-production-route-cells-300.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>exact-clip-seed/panels/weak-rotation-reactor-static-production-route-reduced.png</code></td><td>66</td><td></td></tr>
+    <tr><td><code>spline-read/wall-error-vs-knot-extrapolation.svg</code></td><td>62</td><td></td></tr>
+    <tr><td><code>exact-clip-memory/base-memory-scaling.svg</code></td><td>60</td><td></td></tr>
+    <tr><td><code>limited-shadow/solve-panels/chord/moderate-rotation-conventional-static-production-route-cells-1000.png</code></td><td>60</td><td></td></tr>
+    <tr><td><code>limited-shadow/solve-panels/chord/strong-rotation-compact-static-production-route-cells-1000.png</code></td><td>60</td><td></td></tr>
+    <tr><td><code>limited-shadow/solve-panels/chord/weak-rotation-reactor-static-production-route-cells-1000.png</code></td><td>60</td><td></td></tr>
+    <tr><td><code>read-representation/moderate-exact-representations.png</code></td><td>60</td><td></td></tr>
+    <tr><td><code>read-representation/strong-exact-representations.png</code></td><td>60</td><td></td></tr>
+    <tr><td><code>read-representation/weak-exact-representations.png</code></td><td>60</td><td></td></tr>
+    <tr><td><code>rung-a-certificate/moderate-rotation-conventional-static-production-route-reduced.png</code></td><td>58</td><td></td></tr>
+    <tr><td><code>rung-a-certificate/strong-rotation-compact-static-production-route-reduced.png</code></td><td>58</td><td></td></tr>
+    <tr><td><code>rung-a-certificate/weak-rotation-reactor-static-production-route-cells-300.png</code></td><td>58</td><td></td></tr>
+    <tr><td><code>rung-a-certificate/weak-rotation-reactor-static-production-route-reduced.png</code></td><td>58</td><td></td></tr>
+    <tr><td><code>read-representation/single-null-exact-representations.png</code></td><td>55</td><td></td></tr>
+    <tr><td><code>wall-pitch/contact-error-vs-panel-pitch.svg</code></td><td>55</td><td></td></tr>
+    <tr><td><code>limited-shadow/solve-panels/chord/diverted-single-null-production-route-cells-500.png</code></td><td>52</td><td></td></tr>
+    <tr><td><code>cut-cell-coupling/weak-110-coupling-errors.svg</code></td><td>50</td><td><strong>misrepresents physics</strong></td></tr>
+    <tr><td><code>newton-geometry/moderate-rotation-conventional-static-production-route-reduced.png</code></td><td>50</td><td></td></tr>
+    <tr><td><code>newton-geometry/strong-rotation-compact-static-production-route-reduced.png</code></td><td>50</td><td></td></tr>
+    <tr><td><code>newton-geometry/weak-rotation-reactor-static-production-route-reduced.png</code></td><td>50</td><td></td></tr>
+    <tr><td><code>zero-residual/panels/zero-residual-map.png</code></td><td>48</td><td><strong>misrepresents physics</strong></td></tr>
+    <tr><td><code>gate-b/absolute-flux-error.svg</code></td><td>45</td><td><strong>misrepresents physics</strong></td></tr>
+    <tr><td><code>positional-stiffness/figures/weak-rotation-reactor-static-cells-110-residual.png</code></td><td>45</td><td><strong>misrepresents physics</strong></td></tr>
+    <tr><td><code>positional-stiffness/figures/weak-rotation-reactor-static-cells-300-residual.png</code></td><td>45</td><td><strong>misrepresents physics</strong></td></tr>
+    <tr><td><code>wholecell-rows/panels/diverted-single-null-production-route-cells-1000.png</code></td><td>45</td><td><strong>misrepresents physics</strong></td></tr>
+    <tr><td><code>rung-a/moderate-booked-minus-analytic.png</code></td><td>42</td><td></td></tr>
+    <tr><td><code>rung-a/strong-booked-minus-analytic.png</code></td><td>42</td><td></td></tr>
+    <tr><td><code>rung-a/weak-booked-minus-analytic.png</code></td><td>42</td><td></td></tr>
+    <tr><td><code>rung-a-certificate/diverted-single-null-production-route-reduced.png</code></td><td>40</td><td><strong>misrepresents physics</strong></td></tr>
+    <tr><td><code>wholecell-rows/panels/weak-rotation-reactor-static-production-route-cells-2500.png</code></td><td>40</td><td><strong>misrepresents physics</strong></td></tr>
+    <tr><td><code>gate-c-resolve/diverted-single-null-production-route-cells-1000.png</code></td><td>38</td><td><strong>misrepresents physics</strong></td></tr>
+    <tr><td><code>gate-c-resolve/diverted-single-null-production-route-cells-500.png</code></td><td>38</td><td><strong>misrepresents physics</strong></td></tr>
+    <tr><td><code>limiter-read/single-null-contact-shadow.png</code></td><td>30</td><td><strong>misrepresents physics</strong></td></tr>
+  </table>
+  <p>Nineteen repair followups are staged for the owning plan <code>cut-cell-current-attribution</code>
+  in <code>findings-cut-cell-current-attribution.json</code>.</p>
+</section>
   </main>
 </body>
 </html>

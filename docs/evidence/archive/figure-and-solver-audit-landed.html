@@ -2750,6 +2750,63 @@ ROW2_EXIT=139</pre>
 <p><strong>Excluded from promotion counts:</strong> <code>r-20260920T180231259880-cca-one-certificate-row-per-process</code> is explicitly described in the census review as local and unpromoted; its useful measurement and defective receipt are not counted as a promotion.</p>
 
 </section>
-  </main>
+<section class="audit-directory" id="fsa-re-verify-the-measured-candidate-acceptance-section">
+<h2 id="fsa-re-verify-the-measured-candidate-acceptance">Measured-candidate acceptance repair review</h2>
+<p><strong>Verdict: promote, 94/100.</strong> Reviewed source/test commits
+<code>0e7f35e882e917904dabf4c02e475ae25ad002a6</code>,
+<code>d86218c8e7b37a06f99920bb9b4630073b3744f2</code>, and
+<code>a6148b1367a9fa299088ccd1787d8156593f4867</code>. Documentation commits
+<code>6e9d1e055222f45e3fcca32335b9d03f22ace3e9</code> and
+<code>7df47ac491345129e6ea0e7a5ff6142799c21ce7</code> were noted and not judged.
+This verdict covers the repair worktree; merged-head integration remains separately owned.</p>
+
+<h3 id="fsa-re-verify-the-measured-candidate-acceptance-closure">First-bookend finding closure</h3>
+<table><thead><tr><th>Finding</th><th>Executable closure</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>Pessimistic admission lacked own-mask authority</td><td>The shared selector and continuation family both require <code>own_mask_acceptance</code>. The identical candidate with authority disabled retains incumbent state <code>1.0</code> and is refused in eager and JIT modes; with authority enabled it promotes state <code>2.0</code>.</td><td>closed</td></tr>
+<tr><td>Recorded-state replay reimplemented the predicate</td><td>The replay imports and calls production <code>nova.equilibrium.fixed_point._select_backtracking_candidate</code>. Three analytic witnesses select index 0, are accepted, and mark the model unreliable; the historical half-defect remains accepted at index 1 without that flag; all fourteen worsening Newton candidates are refused.</td><td>closed</td></tr>
+<tr><td>Model-unreliable flag did not cause the next rebuild</td><td>The accepted-and-distrusted promotion carries <code>model_rebuild_required</code> into the next trip. A state-dependent two-iteration probe maps the first promotion from <code>0.0</code> to <code>1.0</code>, then returns rebuild input plus one; it records activations <code>[0, 1]</code> and terminal state <code>2.0</code>, proving the rebuild consumed the promoted state.</td><td>closed</td></tr>
+</tbody></table>
+<p>Static inspection confirms the exception fires only for finite nonpositive predicted decrease. Positive predicted decrease still routes through the existing realized-versus-predicted trust rule; the recorded Newton candidates and focused suites show no weakened refusal path.</p>
+
+<h3 id="fsa-re-verify-the-measured-candidate-acceptance-gate">Independent gate</h3>
+<p>One <code>all_debug</code> allocation, job <code>1275554</code>, completed in
+<code>00:46:37</code> with scheduler exit <code>0:0</code> and aggregate
+<code>GATE_EXIT=0</code>. It used <code>--time=00:59:00</code>,
+<code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in submit and payload,
+and the root interpreter directly; <code>uv</code> was not invoked on the compute node.</p>
+<table><thead><tr><th>Fresh process</th><th>Result</th></tr></thead><tbody>
+<tr><td><code>tests/test_measured_candidate_acceptance.py</code></td><td>10 passed</td></tr>
+<tr><td><code>tests/test_fixed_point.py</code></td><td>41 passed</td></tr>
+<tr><td><code>tests/test_route_default_wiring.py</code></td><td>28 passed</td></tr>
+<tr><td><code>tests/test_default_wiring.py</code></td><td>69 passed</td></tr>
+<tr><td><code>tests/test_solve_trips_are_a_scan.py</code></td><td>16 passed</td></tr>
+<tr><th>Total</th><th>164 passed, zero failed</th></tr>
+</tbody></table>
+<p>The production-selector replay, terminal measurement, and state-dependent linearization probe each exited zero. The declared scratch mutation <q>Require model trust even when a finite candidate passes strict measured decrease.</q> exited one with exactly the eager and JIT admission cases red: both retained incumbent state <code>1.0</code> instead of promoting state <code>2.0</code>.</p>
+
+<h3 id="fsa-re-verify-the-measured-candidate-acceptance-terminal">Measured terminal identity</h3>
+<p>The 300-requested-cell case realised 342 cells and terminated at SHA-256
+<code>bfdc797c2b9cc85a36ed04124019b8d4baf7ad0af145d861e88b6808fcd5a5b7</code>,
+residual <code>0.05529921020198606</code>, <code>converged=false</code>, sixteen active-set trips,
+termination reason <code>10</code>. This is not the stale selector-only intermediate
+<code>69f8805e…</code> named in the dispatch brief: that state preceded the repair that made model unreliability causally force the next rebuild. The repair therefore does not support a convergence-improvement claim; this verdict is only for the exact acceptance and rebuild rule.</p>
+
+<h3 id="fsa-re-verify-the-measured-candidate-acceptance-finding">Non-blocking finding and score</h3>
+<p>The committed two-iteration test counts the rebuild, but its rebuild stub returns constant state
+<code>2.0</code>. It would still pass if the rebuild received the pre-promotion state. The independent
+state-dependent probe closes the current behavioral evidence, so this does not block promotion;
+the durable regression should make its rebuild result depend on the input state. Deduction: six points.</p>
+<ul>
+<li>Own-mask authority and nonpositive-prediction boundary: 30/30.</li>
+<li>Production-selector replay and refusal preservation: 25/25.</li>
+<li>Carried rebuild causality at the promoted state: 20/20.</li>
+<li>Focused suites and declared negative control: 15/15.</li>
+<li>Durable next-linearization regression specificity: 4/10.</li>
+</ul>
+<p>Total: <strong>94/100 — promote</strong>. Detailed review and machine-readable findings are under
+<code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-re-verify-the-measured-candidate-acceptance/</code>.
+No figure was added: the evidence is a finite decision table of indices, boolean guards, exits, and one terminal identity, for which selectable semantic text is clearer than a plotted representation.</p>
+</section>
+</main>
 </body>
 </html>

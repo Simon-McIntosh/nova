@@ -49,6 +49,7 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+import textwrap
 import time
 from typing import Any
 
@@ -452,7 +453,7 @@ def _panel(
         axes.text(
             0.5,
             0.96,
-            f"{boundary_failure}: {reason}",
+            textwrap.fill(f"{boundary_failure}: {reason}", width=64),
             transform=axes.transAxes,
             ha="center",
             va="top",

@@ -1,0 +1,4035 @@
+{
+  "revision": "a2c8836289ab399e3ed836f94c904ce111852ea4",
+  "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-why-the-merit-model-refuses-the-analytic-direction",
+  "backend": "cpu",
+  "devices": "[CpuDevice(id=0)]",
+  "realised_cells": 135,
+  "requested_cells": 110,
+  "input_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/rows-titan-adjoint/record/cells-110/receipt.json",
+  "input_sha256": "23243c619c1a97b66b5a0bd08b4d5e57defccd8037113f7e5bb3f499db87a09a",
+  "state_digest": "e08216225e9816340c66e1abb5527bd1c6f4568b6d8cec53490891ddc49b11a5",
+  "reconstruction_error_wb": 0.0,
+  "newton_scope": "Production state-local qualified GMRES(30) with no preceding condition baseline or history-dependent cap; not a replay of the solver's hidden globalization carry.",
+  "wall_seconds": 93.21355866454542,
+  "completed": true,
+  "locked_residual_bound": 1e-12,
+  "characteristic_pitch_m": 0.4660634103582032,
+  "raw_receipt": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-merit-model-refuses-the-analytic-direction/cells-135.json",
+  "raw_sha256": "e7b53e20da6ee422d6695409a58da037918b58533833639be323c453809a440a",
+  "incumbent": {
+    "numerator_wb": 5.495625388056727,
+    "denominator_wb": 137.56595775683553,
+    "merit": 0.03994902138340729,
+    "relative_sup": 0.04519315548658679
+  },
+  "newton_receipt": {
+    "qualification": 1,
+    "projected_condition": 385.26038226320526,
+    "conditioning_applied": false,
+    "condition_baseline": 5.487145594056873,
+    "spectral_baseline": 5.487145594056873,
+    "achieved_reduction": 2.295544638390867e-13,
+    "requested_tolerance": 1e-05
+  },
+  "directions": {
+    "analytic": {
+      "tangent_fd_relative_error": 1.1306448369234229e-09,
+      "moment_image_jvp_identity_error_wb": 3.552713678800501e-15,
+      "positive_controls": {
+        "classification_detector_single_flip": 1,
+        "map_jvp_max_wb": 25.92565527741027,
+        "current_nonzero_cells": 74,
+        "moment_image_control_wb": 235.6465726028009
+      },
+      "ladder": [
+        {
+          "fraction": 1.0,
+          "predicted_over_actual": 2815.58989131005,
+          "raw_current_error_max_a": 202707.61336931447,
+          "scaled_current_error_max_a": 417127.38324058143,
+          "coupling_remainder_max_wb": 8.881784197001252e-14,
+          "raw_curvature_image_max_wb": 22.94275811798622,
+          "normalisation_curvature_image_max_wb": 6.390204970084488,
+          "map_prediction_error_max_wb": 16.59493560384786,
+          "actual_numerator_predicted_denominator_merit": 7.191496457359808e-05,
+          "predicted_numerator_actual_denominator_merit": 0.3628345502750266,
+          "rules": {
+            "sufficient_merit": true,
+            "strict_residual_decrease": true,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "model trust"
+            ],
+            "actual_decrease": 0.039852753980767826,
+            "predicted_decrease": -0.23110050435095014,
+            "actual_over_predicted_decrease": -0.17244771530332653,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 0.007405884008190084,
+            "denominator_wb": 76.93033991917304,
+            "merit": 9.62674026394669e-05,
+            "relative_sup": 9.53950481602883e-05
+          },
+          "predicted": {
+            "numerator_wb": 27.912985287078072,
+            "denominator_wb": 102.98112572399128,
+            "merit": 0.2710495257343574,
+            "relative_sup": 0.2516055121780795
+          },
+          "confined_flip_indices": [
+            3,
+            5,
+            6,
+            7,
+            8,
+            9,
+            13,
+            16,
+            26,
+            28,
+            30,
+            34,
+            38,
+            46,
+            50,
+            52,
+            63,
+            64,
+            65,
+            68,
+            69,
+            70,
+            72,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            83,
+            85,
+            89,
+            90,
+            103,
+            113,
+            114,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            134
+          ],
+          "open_flip_indices": [
+            3,
+            5,
+            6,
+            7,
+            8,
+            9,
+            13,
+            16,
+            26,
+            28,
+            30,
+            34,
+            38,
+            46,
+            50,
+            52,
+            63,
+            64,
+            65,
+            68,
+            69,
+            70,
+            72,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            83,
+            85,
+            89,
+            90,
+            103,
+            113,
+            114,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            134
+          ],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            11,
+            13,
+            14,
+            26,
+            28,
+            35,
+            36,
+            38,
+            50,
+            52,
+            54,
+            64,
+            68,
+            69,
+            71,
+            72,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            83,
+            89,
+            114,
+            116,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            128,
+            130,
+            131,
+            134
+          ],
+          "coupling_component_error_max_wb": [
+            17.312775810696678,
+            0.7522202703227444,
+            1.5282223619859576
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 71.91992750361642,
+              "raw_current_second_directional_max_a": 1379800.4577562097,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 71.91992718862393,
+              "raw_current_second_directional_max_a": 1379800.4220298023,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 15,
+              "error_a": -417127.38324058143,
+              "actual_current_a": 169840.3807894567,
+              "linear_current_a": 586967.7640300381,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 62,
+              "error_a": -417127.2488887969,
+              "actual_current_a": 169840.38078945654,
+              "linear_current_a": 586967.6296782534,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 61,
+              "error_a": -333533.4733756322,
+              "actual_current_a": 177087.38864247786,
+              "linear_current_a": 510620.86201811006,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 82,
+              "error_a": -333532.36472091806,
+              "actual_current_a": 177087.3886424777,
+              "linear_current_a": 510619.75336339575,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 60,
+              "error_a": -249358.1363555606,
+              "actual_current_a": 162929.99869624138,
+              "linear_current_a": 412288.135051802,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -249356.28613348378,
+              "actual_current_a": 162929.99869624138,
+              "linear_current_a": 412286.28482972516,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 115,
+              "error_a": -231461.0217653661,
+              "actual_current_a": 184608.98720470336,
+              "linear_current_a": 416070.00897006947,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 84,
+              "error_a": -231460.09154606998,
+              "actual_current_a": 184608.98720470336,
+              "linear_current_a": 416069.07875077333,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.5,
+          "predicted_over_actual": 1.5403165057491772,
+          "raw_current_error_max_a": 141130.93169578133,
+          "scaled_current_error_max_a": 195053.6943821364,
+          "coupling_remainder_max_wb": 8.659739592076221e-14,
+          "raw_curvature_image_max_wb": 6.015493185271231,
+          "normalisation_curvature_image_max_wb": 1.8221097911664852,
+          "map_prediction_error_max_wb": 4.205468372335432,
+          "actual_numerator_predicted_denominator_merit": 0.0785024736659461,
+          "predicted_numerator_actual_denominator_merit": 0.13495528569445547,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.04298479211622887,
+            "predicted_decrease": -0.08779530043480623,
+            "actual_over_predicted_decrease": 0.489602426363902,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 9.413169494095872,
+            "denominator_wb": 113.50219044415662,
+            "merit": 0.08293381349963616,
+            "relative_sup": 0.08220049762431542
+          },
+          "predicted": {
+            "numerator_wb": 15.317720538337651,
+            "denominator_wb": 119.90920864674929,
+            "merit": 0.12774432181821352,
+            "relative_sup": 0.11264601627699855
+          },
+          "confined_flip_indices": [
+            8,
+            9,
+            16,
+            34,
+            46,
+            63,
+            64,
+            70,
+            79,
+            81,
+            85,
+            90,
+            103,
+            113,
+            117,
+            121
+          ],
+          "open_flip_indices": [
+            8,
+            9,
+            16,
+            34,
+            46,
+            63,
+            64,
+            70,
+            79,
+            81,
+            85,
+            90,
+            103,
+            113,
+            117,
+            121
+          ],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            7,
+            8,
+            26,
+            28,
+            38,
+            50,
+            52,
+            64,
+            68,
+            69,
+            74,
+            79,
+            83,
+            116,
+            121
+          ],
+          "coupling_component_error_max_wb": [
+            4.567215518202472,
+            0.3368409482014939,
+            0.8684127922761263
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 59.354420049633205,
+              "raw_current_second_directional_max_a": 3230082.7331806794,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 59.354420971402526,
+              "raw_current_second_directional_max_a": 3230082.748162385,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 79,
+              "error_a": 195053.6943821364,
+              "actual_current_a": 195053.6943821364,
+              "linear_current_a": 0.0,
+              "confined_flip": true,
+              "support_flip": true
+            },
+            {
+              "cell": 64,
+              "error_a": 195053.5085277946,
+              "actual_current_a": 195053.5085277946,
+              "linear_current_a": 0.0,
+              "confined_flip": true,
+              "support_flip": true
+            },
+            {
+              "cell": 63,
+              "error_a": 180149.92662652791,
+              "actual_current_a": 198496.67149174865,
+              "linear_current_a": 18346.744865220728,
+              "confined_flip": true,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 180149.0798223411,
+              "actual_current_a": 198496.78823030132,
+              "linear_current_a": 18347.708407960217,
+              "confined_flip": true,
+              "support_flip": false
+            },
+            {
+              "cell": 61,
+              "error_a": -145592.89597993362,
+              "actual_current_a": 244730.80403163965,
+              "linear_current_a": 390323.70001157327,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 82,
+              "error_a": -145592.59670423827,
+              "actual_current_a": 244730.80403163942,
+              "linear_current_a": 390323.4007358777,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 15,
+              "error_a": -141123.66591070467,
+              "actual_current_a": 234715.60152462134,
+              "linear_current_a": 375839.267435326,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 62,
+              "error_a": -141123.30551249665,
+              "actual_current_a": 234715.6015246211,
+              "linear_current_a": 375838.90703711775,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.25,
+          "predicted_over_actual": 1.1026060855603093,
+          "raw_current_error_max_a": 38034.162097038556,
+          "scaled_current_error_max_a": 59113.702222452244,
+          "coupling_remainder_max_wb": 7.738254481637341e-14,
+          "raw_curvature_image_max_wb": 1.333774138827222,
+          "normalisation_curvature_image_max_wb": 0.48996308811017547,
+          "map_prediction_error_max_wb": 0.8470606865416386,
+          "actual_numerator_predicted_denominator_merit": 0.06686165179620596,
+          "predicted_numerator_actual_denominator_merit": 0.07522887576556431,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.02759246968410367,
+            "predicted_decrease": -0.03452263769544757,
+            "actual_over_predicted_decrease": 0.799257285249158,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 8.603200397636947,
+            "denominator_wb": 127.37652458749592,
+            "merit": 0.06754149106751096,
+            "relative_sup": 0.06940426926701332
+          },
+          "predicted": {
+            "numerator_wb": 9.582392743642078,
+            "denominator_wb": 128.67167003081926,
+            "merit": 0.07447165907885486,
+            "relative_sup": 0.075202744736846
+          },
+          "confined_flip_indices": [
+            34,
+            46
+          ],
+          "open_flip_indices": [
+            34,
+            46
+          ],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            26,
+            64,
+            69,
+            79
+          ],
+          "coupling_component_error_max_wb": [
+            1.0742194681304884,
+            0.23649885779194874,
+            0.3981961983963461
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 39.54317504479832,
+              "raw_current_second_directional_max_a": 1247172.5068244268,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 39.543175030587456,
+              "raw_current_second_directional_max_a": 1247172.488644719,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 79,
+              "error_a": 59113.702222452244,
+              "actual_current_a": 59113.702222452244,
+              "linear_current_a": 0.0,
+              "confined_flip": false,
+              "support_flip": true
+            },
+            {
+              "cell": 64,
+              "error_a": 59113.39517449559,
+              "actual_current_a": 59113.39517449559,
+              "linear_current_a": 0.0,
+              "confined_flip": false,
+              "support_flip": true
+            },
+            {
+              "cell": 63,
+              "error_a": 58790.47572198199,
+              "actual_current_a": 68111.39444278211,
+              "linear_current_a": 9320.918720800126,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 58790.18956948744,
+              "actual_current_a": 68111.60612835317,
+              "linear_current_a": 9321.416558865732,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 82,
+              "error_a": -52702.30619894073,
+              "actual_current_a": 277472.91822317796,
+              "linear_current_a": 330175.2244221187,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 61,
+              "error_a": -52702.20078512665,
+              "actual_current_a": 277472.9182231782,
+              "linear_current_a": 330175.11900830484,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 60,
+              "error_a": -47057.074573986814,
+              "actual_current_a": 255290.12851172924,
+              "linear_current_a": 302347.20308571606,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -47056.75274096243,
+              "actual_current_a": 255290.12851172924,
+              "linear_current_a": 302346.8812526917,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.125,
+          "predicted_over_actual": 1.0184492627648452,
+          "raw_current_error_max_a": 10140.141489580705,
+          "scaled_current_error_max_a": 16512.97762573627,
+          "coupling_remainder_max_wb": 7.854827899222983e-14,
+          "raw_curvature_image_max_wb": 0.29515763840679526,
+          "normalisation_curvature_image_max_wb": 0.12730249404094426,
+          "map_prediction_error_max_wb": 0.20294792892115154,
+          "actual_numerator_predicted_denominator_merit": 0.052869357380237854,
+          "predicted_numerator_actual_denominator_merit": 0.05405811942117172,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.013024980595890745,
+            "predicted_decrease": -0.014002311878112239,
+            "actual_over_predicted_decrease": 0.9302021487073707,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 7.037142354633295,
+            "denominator_wb": 132.84143337676042,
+            "merit": 0.05297400197929804,
+            "relative_sup": 0.05788251192261398
+          },
+          "predicted": {
+            "numerator_wb": 7.181158069560541,
+            "denominator_wb": 133.1043671293747,
+            "merit": 0.05395133326151953,
+            "relative_sup": 0.05891013861881678
+          },
+          "confined_flip_indices": [
+            34,
+            46
+          ],
+          "open_flip_indices": [
+            34,
+            46
+          ],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            26,
+            64,
+            69,
+            79
+          ],
+          "coupling_component_error_max_wb": [
+            0.24038704891472387,
+            0.07178393817423635,
+            0.11871679805079961
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 35.69601146375945,
+              "raw_current_second_directional_max_a": 1458753.3650395926,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 35.696011910069096,
+              "raw_current_second_directional_max_a": 1458753.336695372,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 63,
+              "error_a": 16512.97762573627,
+              "actual_current_a": 21320.983274326092,
+              "linear_current_a": 4808.005648589824,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 16512.906580061797,
+              "actual_current_a": 21321.17721438029,
+              "linear_current_a": 4808.270634318491,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 60,
+              "error_a": -15636.458649142936,
+              "actual_current_a": 268387.25577555876,
+              "linear_current_a": 284023.7144247017,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -15636.388634209346,
+              "actual_current_a": 268387.25868897676,
+              "linear_current_a": 284023.6473231861,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 82,
+              "error_a": -13311.306720240798,
+              "actual_current_a": 286789.8295449984,
+              "linear_current_a": 300101.1362652392,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 61,
+              "error_a": -13311.15878935589,
+              "actual_current_a": 286789.6697173147,
+              "linear_current_a": 300100.8285066706,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 79,
+              "error_a": 13080.487090421193,
+              "actual_current_a": 13080.487090421193,
+              "linear_current_a": 0.0,
+              "confined_flip": false,
+              "support_flip": true
+            },
+            {
+              "cell": 64,
+              "error_a": 13080.267721246128,
+              "actual_current_a": 13080.267721246128,
+              "linear_current_a": 0.0,
+              "confined_flip": false,
+              "support_flip": true
+            }
+          ]
+        },
+        {
+          "fraction": 0.0625,
+          "predicted_over_actual": 1.003203025443997,
+          "raw_current_error_max_a": 2496.9544944533463,
+          "scaled_current_error_max_a": 4159.504660512648,
+          "coupling_remainder_max_wb": 9.147543833520899e-14,
+          "raw_curvature_image_max_wb": 0.06564971570541821,
+          "normalisation_curvature_image_max_wb": 0.03246323922699014,
+          "map_prediction_error_max_wb": 0.044441063676838866,
+          "actual_numerator_predicted_denominator_merit": 0.04553346103512337,
+          "predicted_numerator_actual_denominator_merit": 0.04571543877799915,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.005602444863591696,
+            "predicted_decrease": -0.005748347368992206,
+            "actual_over_predicted_decrease": 0.9746183561926792,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 6.162123505118239,
+            "denominator_wb": 135.27826901783234,
+            "merit": 0.04555146624699899,
+            "relative_sup": 0.05099156715209402
+          },
+          "predicted": {
+            "numerator_wb": 6.1843054252784135,
+            "denominator_wb": 135.33176185234265,
+            "merit": 0.0456973687523995,
+            "relative_sup": 0.051187429556317894
+          },
+          "confined_flip_indices": [],
+          "open_flip_indices": [],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            26,
+            64,
+            69,
+            79
+          ],
+          "coupling_component_error_max_wb": [
+            0.05343777794166499,
+            0.016760142203849634,
+            0.029712382263835983
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 31.299037199641333,
+              "raw_current_second_directional_max_a": 1331905.3446082762,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 31.29903621568175,
+              "raw_current_second_directional_max_a": 1331905.3002804138,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 63,
+              "error_a": 4159.504660512648,
+              "actual_current_a": 6711.053772997322,
+              "linear_current_a": 2551.549112484674,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 4159.483951634798,
+              "actual_current_a": 6711.1816236796685,
+              "linear_current_a": 2551.6976720448706,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 60,
+              "error_a": -4080.1968841695925,
+              "actual_current_a": 270781.773210025,
+              "linear_current_a": 274861.9700941946,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -4080.175052698585,
+              "actual_current_a": 270781.85530573473,
+              "linear_current_a": 274862.0303584333,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 82,
+              "error_a": -3183.0334111208795,
+              "actual_current_a": 281881.05877567857,
+              "linear_current_a": 285064.09218679945,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 61,
+              "error_a": -3182.950812063762,
+              "actual_current_a": 281880.7324437898,
+              "linear_current_a": 285063.68325585354,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 79,
+              "error_a": 2411.885599181963,
+              "actual_current_a": 2411.885599181963,
+              "linear_current_a": 0.0,
+              "confined_flip": false,
+              "support_flip": true
+            },
+            {
+              "cell": 64,
+              "error_a": 2411.7776668518013,
+              "actual_current_a": 2411.7776668518013,
+              "linear_current_a": 0.0,
+              "confined_flip": false,
+              "support_flip": true
+            }
+          ]
+        },
+        {
+          "fraction": 0.01,
+          "predicted_over_actual": 1.0000514807793062,
+          "raw_current_error_max_a": 64.01618427874308,
+          "scaled_current_error_max_a": 111.64374348864658,
+          "coupling_remainder_max_wb": 7.293563539581549e-14,
+          "raw_curvature_image_max_wb": 0.0016685170664390218,
+          "normalisation_curvature_image_max_wb": 0.0008452843144629502,
+          "map_prediction_error_max_wb": 0.0010678989164389918,
+          "actual_numerator_predicted_denominator_merit": 0.04053449753868893,
+          "predicted_numerator_actual_denominator_merit": 0.040537366859536676,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.0005858674199133995,
+            "predicted_decrease": -0.0005879541875780797,
+            "actual_over_predicted_decrease": 0.9964507988738441,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 5.561659171454926,
+            "denominator_wb": 137.20672081871618,
+            "merit": 0.04053488880332069,
+            "relative_sup": 0.046065213767831854
+          },
+          "predicted": {
+            "numerator_wb": 5.561999177422326,
+            "denominator_wb": 137.20804522484815,
+            "merit": 0.04053697557098537,
+            "relative_sup": 0.04606666403120035
+          },
+          "confined_flip_indices": [],
+          "open_flip_indices": [],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [],
+          "coupling_component_error_max_wb": [
+            0.0011328909819262028,
+            0.00038798548928601473,
+            0.0006931935119157149
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 32.40832570003849,
+              "raw_current_second_directional_max_a": 1275785.7228547074,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 32.408319254251246,
+              "raw_current_second_directional_max_a": 1275785.6332285882,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 60,
+              "error_a": -111.64374348864658,
+              "actual_current_a": 267054.4611130799,
+              "linear_current_a": 267166.10485656856,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -111.64300723886117,
+              "actual_current_a": 267054.6291008021,
+              "linear_current_a": 267166.272108041,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 63,
+              "error_a": 108.57331034968172,
+              "actual_current_a": 764.6989325060292,
+              "linear_current_a": 656.1256221563475,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 108.57267907235189,
+              "actual_current_a": 764.749062807381,
+              "linear_current_a": 656.1763837350292,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 70,
+              "error_a": 56.483223408306,
+              "actual_current_a": 12980.385831619946,
+              "linear_current_a": 12923.90260821164,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 16,
+              "error_a": 56.483197046254645,
+              "actual_current_a": 12980.501076411156,
+              "linear_current_a": 12924.017879364901,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 117,
+              "error_a": 54.38148354265468,
+              "actual_current_a": 1838.2377502600593,
+              "linear_current_a": 1783.8562667174047,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 81,
+              "error_a": 54.38126173483738,
+              "actual_current_a": 1838.3445112458694,
+              "linear_current_a": 1783.963249511032,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.001,
+          "predicted_over_actual": 1.000000387189222,
+          "raw_current_error_max_a": 0.641499811851844,
+          "scaled_current_error_max_a": 1.1412162870983593,
+          "coupling_remainder_max_wb": 8.418738389791638e-14,
+          "raw_curvature_image_max_wb": 1.856224165697439e-05,
+          "normalisation_curvature_image_max_wb": 8.477719953941196e-06,
+          "map_prediction_error_max_wb": 1.2455869349281556e-05,
+          "actual_numerator_predicted_denominator_merit": 0.0399993248446825,
+          "predicted_numerator_actual_denominator_merit": 0.03999934950999782,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -5.0308050277093896e-05,
+            "predicted_decrease": -5.032353758634145e-05,
+            "actual_over_predicted_decrease": 0.9996922452198242,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 5.501113508948182,
+            "denominator_wb": 137.53014330074154,
+            "merit": 0.03999932943368439,
+            "relative_sup": 0.0452802767811516
+          },
+          "predicted": {
+            "numerator_wb": 5.501116270046446,
+            "denominator_wb": 137.53015907916003,
+            "merit": 0.039999344920993635,
+            "relative_sup": 0.04528029197648215
+          },
+          "confined_flip_indices": [],
+          "open_flip_indices": [],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [],
+          "coupling_component_error_max_wb": [
+            1.1736965812592148e-05,
+            4.165353389288538e-06,
+            6.858577740488734e-06
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 24.89097845256527,
+              "raw_current_second_directional_max_a": 1282315.280371804,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 24.890979745695315,
+              "raw_current_second_directional_max_a": 1282315.1724036504,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 60,
+              "error_a": -1.1412162870983593,
+              "actual_current_a": 265845.6724566884,
+              "linear_current_a": 265846.8136729755,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -1.1412084513576701,
+              "actual_current_a": 265845.8580566652,
+              "linear_current_a": 265846.9992651166,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 63,
+              "error_a": 1.0912934279090791,
+              "actual_current_a": 332.28717438511495,
+              "linear_current_a": 331.1958809572059,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 1.091286879455879,
+              "actual_current_a": 332.32116404708364,
+              "linear_current_a": 331.22987716762776,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 70,
+              "error_a": 0.5605848248469556,
+              "actual_current_a": 11567.23431529215,
+              "linear_current_a": 11566.673730467302,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 16,
+              "error_a": 0.5605845635291189,
+              "actual_current_a": 11567.343788081029,
+              "linear_current_a": 11566.7832035175,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 117,
+              "error_a": 0.5401864220821153,
+              "actual_current_a": 1321.6558437710908,
+              "linear_current_a": 1321.1156573490086,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 81,
+              "error_a": 0.540184202918681,
+              "actual_current_a": 1321.7476976669739,
+              "linear_current_a": 1321.2075134640552,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        }
+      ]
+    },
+    "newton": {
+      "tangent_fd_relative_error": 2.1178112960754412e-10,
+      "moment_image_jvp_identity_error_wb": 1.4210854715202004e-14,
+      "positive_controls": {
+        "classification_detector_single_flip": 1,
+        "map_jvp_max_wb": 139.0446159966272,
+        "current_nonzero_cells": 74,
+        "moment_image_control_wb": 235.6465726028009
+      },
+      "ladder": [
+        {
+          "fraction": 1.0,
+          "predicted_over_actual": 2.210746318928267e-14,
+          "raw_current_error_max_a": 1151778.3381255167,
+          "scaled_current_error_max_a": 1756990.1572409743,
+          "coupling_remainder_max_wb": 8.526512829121202e-14,
+          "raw_curvature_image_max_wb": 49.8968187075566,
+          "normalisation_curvature_image_max_wb": 85.98137613210265,
+          "map_prediction_error_max_wb": 39.203764176283016,
+          "actual_numerator_predicted_denominator_merit": 0.4643303961756698,
+          "predicted_numerator_actual_denominator_merit": 1.723990205203606e-14,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.5617946050964848,
+            "predicted_decrease": 0.03994902138339399,
+            "actual_over_predicted_decrease": -14.0627876639304,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 57.1210266636974,
+            "denominator_wb": 94.92585238974053,
+            "merit": 0.6017436264798921,
+            "relative_sup": 0.5584206544033853
+          },
+          "predicted": {
+            "numerator_wb": 1.6365123974051599e-12,
+            "denominator_wb": 123.01806458108085,
+            "merit": 1.3303025071789675e-14,
+            "relative_sup": 1.6710286167922348e-14
+          },
+          "confined_flip_indices": [
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            11,
+            12,
+            13,
+            14,
+            16,
+            19,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            28,
+            30,
+            34,
+            35,
+            36,
+            37,
+            38,
+            41,
+            43,
+            46,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            63,
+            64,
+            65,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            77,
+            79,
+            81,
+            86,
+            87,
+            88,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            117,
+            121,
+            122,
+            123,
+            124,
+            128,
+            129,
+            130,
+            131
+          ],
+          "open_flip_indices": [
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            11,
+            12,
+            13,
+            14,
+            16,
+            19,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            28,
+            30,
+            34,
+            35,
+            36,
+            37,
+            38,
+            41,
+            43,
+            46,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            63,
+            64,
+            65,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            77,
+            79,
+            81,
+            86,
+            87,
+            88,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            117,
+            121,
+            122,
+            123,
+            124,
+            128,
+            129,
+            130,
+            131
+          ],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            11,
+            12,
+            13,
+            14,
+            22,
+            24,
+            25,
+            26,
+            28,
+            35,
+            36,
+            37,
+            38,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            64,
+            68,
+            69,
+            71,
+            72,
+            73,
+            74,
+            75,
+            77,
+            78,
+            79,
+            83,
+            85,
+            86,
+            87,
+            88,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            113,
+            116,
+            119,
+            121,
+            122,
+            123,
+            124,
+            125,
+            128,
+            129,
+            130,
+            131,
+            134
+          ],
+          "coupling_component_error_max_wb": [
+            35.158782322155716,
+            3.9922111141508463,
+            8.056012976158069
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 272.00055025986103,
+              "raw_current_second_directional_max_a": 3823032.673347043,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 272.000542711126,
+              "raw_current_second_directional_max_a": 3823032.5256648934,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 15,
+              "error_a": -1756990.1572409743,
+              "actual_current_a": 249581.99755635145,
+              "linear_current_a": 2006572.1547973256,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 62,
+              "error_a": -1756986.1494584945,
+              "actual_current_a": 249581.99755635118,
+              "linear_current_a": 2006568.1470148456,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 29,
+              "error_a": -1093720.3469375554,
+              "actual_current_a": 221127.81886291894,
+              "linear_current_a": 1314848.1658004744,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 66,
+              "error_a": -1093719.0865443344,
+              "actual_current_a": 221127.81886291897,
+              "linear_current_a": 1314846.9054072534,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 61,
+              "error_a": -955927.4141750999,
+              "actual_current_a": 260231.54207489424,
+              "linear_current_a": 1216158.9562499942,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 82,
+              "error_a": -955925.278705725,
+              "actual_current_a": 260231.542074894,
+              "linear_current_a": 1216156.820780619,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 34,
+              "error_a": -949757.453134659,
+              "actual_current_a": 213374.75454987955,
+              "linear_current_a": 1163132.2076845386,
+              "confined_flip": true,
+              "support_flip": false
+            },
+            {
+              "cell": 46,
+              "error_a": -949757.0216516654,
+              "actual_current_a": 213374.75454987955,
+              "linear_current_a": 1163131.776201545,
+              "confined_flip": true,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.5,
+          "predicted_over_actual": 0.05919889392530557,
+          "raw_current_error_max_a": 708676.4337148621,
+          "scaled_current_error_max_a": 1186185.7800788805,
+          "coupling_remainder_max_wb": 62.18624359911397,
+          "raw_curvature_image_max_wb": 92.69719917435779,
+          "normalisation_curvature_image_max_wb": 31.115977463697778,
+          "map_prediction_error_max_wb": 101.92059131914914,
+          "actual_numerator_predicted_denominator_merit": 2.062624752993374,
+          "predicted_numerator_actual_denominator_merit": 0.014542891793608884,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.6718849377002548,
+            "predicted_decrease": -0.0021907616528167237,
+            "actual_over_predicted_decrease": 306.6901124713378,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 134.4977612822782,
+            "denominator_wb": 188.94541285360427,
+            "merit": 0.7118339590836621,
+            "relative_sup": 0.7354444440866317
+          },
+          "predicted": {
+            "numerator_wb": 2.747812694028724,
+            "denominator_wb": 65.20709163753077,
+            "merit": 0.04213978303622402,
+            "relative_sup": 0.048043504276906
+          },
+          "confined_flip_indices": [
+            19,
+            22,
+            24,
+            32,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            47,
+            48,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            66,
+            67,
+            84,
+            86,
+            87,
+            88,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            115
+          ],
+          "open_flip_indices": [
+            19,
+            22,
+            24,
+            32,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            48,
+            84,
+            86,
+            87,
+            88,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            115
+          ],
+          "shadow_flip_indices": [
+            47,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            66,
+            67
+          ],
+          "nonzero_current_flip_indices": [
+            22,
+            26,
+            30,
+            34,
+            39,
+            40,
+            42,
+            44,
+            45,
+            46,
+            47,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            64,
+            65,
+            66,
+            67,
+            69,
+            79,
+            81,
+            84,
+            85,
+            86,
+            87,
+            88,
+            90,
+            91,
+            93,
+            94,
+            96,
+            97,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            113,
+            115,
+            117
+          ],
+          "coupling_component_error_max_wb": [
+            94.60533332271768,
+            4.12399286119244,
+            5.100649221423094
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 5528.531694530728,
+              "raw_current_second_directional_max_a": 43619434.44116856,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 5528.448385747708,
+              "raw_current_second_directional_max_a": 43619146.99125336,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 18,
+              "error_a": 1186185.7800788805,
+              "actual_current_a": 1241640.8552807067,
+              "linear_current_a": 55455.07520182626,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 20,
+              "error_a": 1137922.834978415,
+              "actual_current_a": 1191121.581285597,
+              "linear_current_a": 53198.746307182155,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 23,
+              "error_a": 1133526.9015028044,
+              "actual_current_a": 1186725.6478099865,
+              "linear_current_a": 53198.746307182126,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 31,
+              "error_a": 1092585.4086463798,
+              "actual_current_a": 1143664.596256329,
+              "linear_current_a": 51079.18760994921,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 62,
+              "error_a": -1085639.1657054138,
+              "actual_current_a": 0.0,
+              "linear_current_a": 1085639.1657054138,
+              "confined_flip": true,
+              "support_flip": true
+            },
+            {
+              "cell": 33,
+              "error_a": 1007538.3902654722,
+              "actual_current_a": 1058617.5778754214,
+              "linear_current_a": 51079.18760994915,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 61,
+              "error_a": -743092.7471275153,
+              "actual_current_a": 0.0,
+              "linear_current_a": 743092.7471275153,
+              "confined_flip": true,
+              "support_flip": true
+            },
+            {
+              "cell": 66,
+              "error_a": -736396.3817257104,
+              "actual_current_a": 0.0,
+              "linear_current_a": 736396.3817257104,
+              "confined_flip": true,
+              "support_flip": true
+            }
+          ]
+        },
+        {
+          "fraction": 0.25,
+          "predicted_over_actual": 0.37021903494988373,
+          "raw_current_error_max_a": 232385.49343615456,
+          "scaled_current_error_max_a": 431278.03684598417,
+          "coupling_remainder_max_wb": 8.565370634983083e-14,
+          "raw_curvature_image_max_wb": 9.345335216619102,
+          "normalisation_curvature_image_max_wb": 10.0216893231715,
+          "map_prediction_error_max_wb": 7.362950684528656,
+          "actual_numerator_predicted_denominator_merit": 0.11652390136039263,
+          "predicted_numerator_actual_denominator_merit": 0.04571794451175121,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.0800068429451854,
+            "predicted_decrease": -0.004460922944903474,
+            "actual_over_predicted_decrease": 17.93504257601934,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 10.814667530838204,
+            "denominator_wb": 90.15538832860895,
+            "merit": 0.11995586432859269,
+            "relative_sup": 0.1319504602265501
+          },
+          "predicted": {
+            "numerator_wb": 4.121719041042726,
+            "denominator_wb": 92.81072298969723,
+            "merit": 0.04440994432831077,
+            "relative_sup": 0.05201655531472663
+          },
+          "confined_flip_indices": [
+            7,
+            8,
+            9,
+            16,
+            26,
+            28,
+            30,
+            34,
+            36,
+            38,
+            46,
+            50,
+            52,
+            54,
+            63,
+            64,
+            65,
+            68,
+            69,
+            70,
+            74,
+            79,
+            81,
+            83,
+            85,
+            90,
+            103,
+            113,
+            116,
+            117,
+            121
+          ],
+          "open_flip_indices": [
+            7,
+            8,
+            9,
+            16,
+            26,
+            28,
+            30,
+            34,
+            36,
+            38,
+            46,
+            50,
+            52,
+            54,
+            63,
+            64,
+            65,
+            68,
+            69,
+            70,
+            74,
+            79,
+            81,
+            83,
+            85,
+            90,
+            103,
+            113,
+            116,
+            117,
+            121
+          ],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            5,
+            6,
+            7,
+            8,
+            13,
+            14,
+            26,
+            28,
+            35,
+            36,
+            38,
+            50,
+            52,
+            54,
+            64,
+            68,
+            69,
+            71,
+            72,
+            74,
+            77,
+            78,
+            79,
+            83,
+            89,
+            114,
+            116,
+            119,
+            121,
+            122,
+            123,
+            124,
+            128
+          ],
+          "coupling_component_error_max_wb": [
+            8.03948315221502,
+            0.9039149947278491,
+            1.7703102713848962
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 268.57703080800377,
+              "raw_current_second_directional_max_a": 12038935.1843443,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 268.577026296235,
+              "raw_current_second_directional_max_a": 12038934.660051016,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 15,
+              "error_a": -431278.03684598417,
+              "actual_current_a": 193898.07998380766,
+              "linear_current_a": 625176.1168297918,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 62,
+              "error_a": -431276.59506689047,
+              "actual_current_a": 193898.0799838075,
+              "linear_current_a": 625174.675050698,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 61,
+              "error_a": -304388.0242060422,
+              "actual_current_a": 202171.6183602337,
+              "linear_current_a": 506559.64256627584,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 82,
+              "error_a": -304387.872916191,
+              "actual_current_a": 202171.6183602335,
+              "linear_current_a": 506559.4912764245,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 29,
+              "error_a": -275379.25898670795,
+              "actual_current_a": 171792.27639944846,
+              "linear_current_a": 447171.5353861564,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 66,
+              "error_a": -275378.8434854904,
+              "actual_current_a": 171792.27639944848,
+              "linear_current_a": 447171.1198849389,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 27,
+              "error_a": -253171.96535988952,
+              "actual_current_a": 178597.8356111883,
+              "linear_current_a": 431769.8009710778,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 67,
+              "error_a": -253171.82008960526,
+              "actual_current_a": 178597.8356111884,
+              "linear_current_a": 431769.65570079366,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.125,
+          "predicted_over_actual": 0.8124231600116638,
+          "raw_current_error_max_a": 95784.32131619814,
+          "scaled_current_error_max_a": 154794.26120974327,
+          "coupling_remainder_max_wb": 8.72635297355373e-14,
+          "raw_curvature_image_max_wb": 2.0523185146251643,
+          "normalisation_curvature_image_max_wb": 2.9274106190093345,
+          "map_prediction_error_max_wb": 1.7601102429328819,
+          "actual_numerator_predicted_denominator_merit": 0.05194419847457872,
+          "predicted_numerator_actual_denominator_merit": 0.04185055761398087,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.011779254241346931,
+            "predicted_decrease": -0.0020762277616098584,
+            "actual_over_predicted_decrease": 5.6733921292977865,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 5.943632197154486,
+            "denominator_wb": 114.9010309230219,
+            "merit": 0.051728275624754225,
+            "relative_sup": 0.061380942078361374
+          },
+          "predicted": {
+            "numerator_wb": 4.808672214549726,
+            "denominator_wb": 114.42340765087125,
+            "merit": 0.04202524914501715,
+            "relative_sup": 0.04807538950557348
+          },
+          "confined_flip_indices": [
+            9,
+            16,
+            30,
+            34,
+            46,
+            63,
+            64,
+            65,
+            70,
+            79,
+            85,
+            90,
+            103,
+            113
+          ],
+          "open_flip_indices": [
+            9,
+            16,
+            30,
+            34,
+            46,
+            63,
+            64,
+            65,
+            70,
+            79,
+            85,
+            90,
+            103,
+            113
+          ],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            8,
+            26,
+            28,
+            38,
+            50,
+            52,
+            64,
+            68,
+            69,
+            79,
+            83,
+            116,
+            121
+          ],
+          "coupling_component_error_max_wb": [
+            2.282413630170927,
+            0.42918361642674896,
+            1.0063736627872228
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 359.28336995971756,
+              "raw_current_second_directional_max_a": 11663909.856103418,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 359.2834184915183,
+              "raw_current_second_directional_max_a": 11663909.656080067,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 15,
+              "error_a": -154794.26120974327,
+              "actual_current_a": 240149.18262545957,
+              "linear_current_a": 394943.44383520284,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 62,
+              "error_a": -154793.24709788064,
+              "actual_current_a": 240149.18262545933,
+              "linear_current_a": 394942.42972333997,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 82,
+              "error_a": -137897.03625196338,
+              "actual_current_a": 250396.2334404287,
+              "linear_current_a": 388293.2696923921,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 61,
+              "error_a": -137896.8568452272,
+              "actual_current_a": 250396.23344042897,
+              "linear_current_a": 388293.09028565616,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 63,
+              "error_a": 131756.2383814905,
+              "actual_current_a": 152763.2229995479,
+              "linear_current_a": 21006.98461805742,
+              "confined_flip": true,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 131755.70927068416,
+              "actual_current_a": 152763.84226021,
+              "linear_current_a": 21008.13298952583,
+              "confined_flip": true,
+              "support_flip": false
+            },
+            {
+              "cell": 79,
+              "error_a": 130972.90630033956,
+              "actual_current_a": 130972.90630033956,
+              "linear_current_a": 0.0,
+              "confined_flip": true,
+              "support_flip": true
+            },
+            {
+              "cell": 64,
+              "error_a": 130972.17467835042,
+              "actual_current_a": 130972.17467835042,
+              "linear_current_a": 0.0,
+              "confined_flip": true,
+              "support_flip": true
+            }
+          ]
+        },
+        {
+          "fraction": 0.0625,
+          "predicted_over_actual": 0.941151934006866,
+          "raw_current_error_max_a": 32862.97584711625,
+          "scaled_current_error_max_a": 52513.22879692793,
+          "coupling_remainder_max_wb": 7.482903185973555e-14,
+          "raw_curvature_image_max_wb": 0.475511760342892,
+          "normalisation_curvature_image_max_wb": 0.7991533553795755,
+          "map_prediction_error_max_wb": 0.5316811857571793,
+          "actual_numerator_predicted_denominator_merit": 0.0436939715804325,
+          "predicted_numerator_actual_denominator_merit": 0.04075087691414169,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.0035469837032009732,
+            "predicted_decrease": -0.000987327925426558,
+            "actual_over_predicted_decrease": 3.5925082354665094,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 5.499216395774777,
+            "denominator_wb": 126.43037871696173,
+            "merit": 0.043496005086608266,
+            "relative_sup": 0.04811444717948889
+          },
+          "predicted": {
+            "numerator_wb": 5.152148801303227,
+            "denominator_wb": 125.85755418574709,
+            "merit": 0.04093634930883385,
+            "relative_sup": 0.04649395294895259
+          },
+          "confined_flip_indices": [
+            34,
+            46
+          ],
+          "open_flip_indices": [
+            34,
+            46
+          ],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            26,
+            50,
+            64,
+            69,
+            79
+          ],
+          "coupling_component_error_max_wb": [
+            0.7568656344406888,
+            0.20968604067568863,
+            0.4065582655792107
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 224.72061012753562,
+              "raw_current_second_directional_max_a": 8994612.210983178,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 224.72076479287392,
+              "raw_current_second_directional_max_a": 8994616.366858825,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 60,
+              "error_a": -52513.22879692793,
+              "actual_current_a": 254835.59538110756,
+              "linear_current_a": 307348.8241780355,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -52512.975846162386,
+              "actual_current_a": 254835.59538110756,
+              "linear_current_a": 307348.57122726995,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 82,
+              "error_a": -52181.269314019766,
+              "actual_current_a": 276978.8895863561,
+              "linear_current_a": 329160.1589003759,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 61,
+              "error_a": -52180.92455898988,
+              "actual_current_a": 276978.8895863564,
+              "linear_current_a": 329159.8141453463,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 63,
+              "error_a": 50465.06072546695,
+              "actual_current_a": 61116.099322685426,
+              "linear_current_a": 10651.038597218472,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 50464.90287683901,
+              "actual_current_a": 61116.53172648755,
+              "linear_current_a": 10651.62884964854,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 27,
+              "error_a": -49434.00039534096,
+              "actual_current_a": 244682.36734382133,
+              "linear_current_a": 294116.3677391623,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 67,
+              "error_a": -49433.86353939169,
+              "actual_current_a": 244682.36734382153,
+              "linear_current_a": 294116.2308832132,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.01,
+          "predicted_over_actual": 0.9895923013701055,
+          "raw_current_error_max_a": 2656.2909565637674,
+          "scaled_current_error_max_a": 3950.411230217811,
+          "coupling_remainder_max_wb": 8.39051050860462e-14,
+          "raw_curvature_image_max_wb": 0.294658484028991,
+          "normalisation_curvature_image_max_wb": 0.022170939187025698,
+          "map_prediction_error_max_wb": 0.3151888059053505,
+          "actual_numerator_predicted_denominator_merit": 0.040655211745134284,
+          "predicted_numerator_actual_denominator_merit": 0.039968714511568644,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.0005729018948541428,
+            "predicted_decrease": -0.00015116192947028928,
+            "actual_over_predicted_decrease": 3.789987974232269,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 5.515973679205502,
+            "denominator_wb": 136.12319537075442,
+            "merit": 0.040521923278261436,
+            "relative_sup": 0.045570327076199936
+          },
+          "predicted": {
+            "numerator_wb": 5.440669134176166,
+            "denominator_wb": 135.6769142855508,
+            "merit": 0.04010018331287758,
+            "relative_sup": 0.045385547416769395
+          },
+          "confined_flip_indices": [],
+          "open_flip_indices": [],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            26,
+            64,
+            69,
+            79
+          ],
+          "coupling_component_error_max_wb": [
+            0.2955371320093032,
+            0.014968591274861394,
+            0.023854774771104467
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 445.54850214166385,
+              "raw_current_second_directional_max_a": 24125046.261699755,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 445.5461392246284,
+              "raw_current_second_directional_max_a": 24124874.554958656,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 15,
+              "error_a": -3950.411230217811,
+              "actual_current_a": 179178.9734499632,
+              "linear_current_a": 183129.384680181,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 62,
+              "error_a": -3950.3938085720874,
+              "actual_current_a": 179178.3702135986,
+              "linear_current_a": 183128.76402217068,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 46,
+              "error_a": -2958.2484105337207,
+              "actual_current_a": 112803.08191505511,
+              "linear_current_a": 115761.33032558883,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 34,
+              "error_a": -2958.2478311069717,
+              "actual_current_a": 112803.14265867835,
+              "linear_current_a": 115761.39048978532,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 29,
+              "error_a": -2905.4145530879905,
+              "actual_current_a": 166609.59910048667,
+              "linear_current_a": 169515.01365357466,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 66,
+              "error_a": -2905.4113898738287,
+              "actual_current_a": 166609.45712792437,
+              "linear_current_a": 169514.8685177982,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 82,
+              "error_a": -2862.482428344607,
+              "actual_current_a": 276625.8634067377,
+              "linear_current_a": 279488.3458350823,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 61,
+              "error_a": -2862.4497413635836,
+              "actual_current_a": 276625.4124461224,
+              "linear_current_a": 279487.86218748597,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.001,
+          "predicted_over_actual": 0.9999871749103654,
+          "raw_current_error_max_a": 13.937333972076885,
+          "scaled_current_error_max_a": 25.493812512781005,
+          "coupling_remainder_max_wb": 8.520349139770622e-14,
+          "raw_curvature_image_max_wb": 0.00022628930243149328,
+          "normalisation_curvature_image_max_wb": 0.00022493739601106582,
+          "map_prediction_error_max_wb": 0.00018522817801880365,
+          "actual_numerator_predicted_denominator_merit": 0.03996452162799632,
+          "predicted_numerator_actual_denominator_merit": 0.039964036655182285,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -1.5514032642501008e-05,
+            "predicted_decrease": -1.5001483893585521e-05,
+            "actual_over_predicted_decrease": 1.0341665366273964,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 5.490198280819297,
+            "denominator_wb": 137.37675725899788,
+            "merit": 0.039964535416049794,
+            "relative_sup": 0.04521257167740458
+          },
+          "predicted": {
+            "numerator_wb": 5.49012976266867,
+            "denominator_wb": 137.3768046549881,
+            "merit": 0.03996402286730088,
+            "relative_sup": 0.045212148510959636
+          },
+          "confined_flip_indices": [],
+          "open_flip_indices": [],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [],
+          "coupling_component_error_max_wb": [
+            0.0002304585276252478,
+            7.600858003392255e-05,
+            0.00015476706087576506
+          ],
+          "curvature": [
+            {
+              "h": 0.0001,
+              "map_second_directional_max_wb": 433.1344343972687,
+              "raw_current_second_directional_max_a": 27407081.06603066,
+              "local_confined_flips": 0
+            },
+            {
+              "h": 1e-05,
+              "map_second_directional_max_wb": 380.82716644332044,
+              "raw_current_second_directional_max_a": 27406961.11586876,
+              "local_confined_flips": 0
+            }
+          ],
+          "dominant_current_errors": [
+            {
+              "cell": 60,
+              "error_a": -25.493812512781005,
+              "actual_current_a": 266341.1095258042,
+              "linear_current_a": 266366.60333831696,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -25.493751537869684,
+              "actual_current_a": 266341.29016748007,
+              "linear_current_a": 266366.78391901794,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 63,
+              "error_a": 22.42860054181631,
+              "actual_current_a": 483.2163132547629,
+              "linear_current_a": 460.7877127129466,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 22.428547830544915,
+              "actual_current_a": 483.2573238398314,
+              "linear_current_a": 460.82877600928646,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 16,
+              "error_a": 11.913692481881299,
+              "actual_current_a": 12173.14060720307,
+              "linear_current_a": 12161.226914721188,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 70,
+              "error_a": 11.913656517770505,
+              "actual_current_a": 12173.027037472799,
+              "linear_current_a": 12161.113380955028,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 81,
+              "error_a": 8.939078943570394,
+              "actual_current_a": 1493.0777541421487,
+              "linear_current_a": 1484.1386751985783,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 117,
+              "error_a": 8.939071956576754,
+              "actual_current_a": 1492.979863803782,
+              "linear_current_a": 1484.0407918472054,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        }
+      ]
+    },
+    "map_defect": {
+      "tangent_fd_relative_error": 5.4862034786482745e-09,
+      "moment_image_jvp_identity_error_wb": 8.881784197001252e-16,
+      "positive_controls": {
+        "classification_detector_single_flip": 1,
+        "map_jvp_max_wb": 5.8285613538624235,
+        "current_nonzero_cells": 74,
+        "moment_image_control_wb": 235.6465726028009
+      },
+      "ladder": [
+        {
+          "fraction": 1.0,
+          "predicted_over_actual": 0.9673478480028516,
+          "raw_current_error_max_a": 19201.82878110418,
+          "scaled_current_error_max_a": 33978.05807564105,
+          "coupling_remainder_max_wb": 9.425793479067579e-14,
+          "raw_curvature_image_max_wb": 0.3538290495998404,
+          "normalisation_curvature_image_max_wb": 0.30893162802422025,
+          "map_prediction_error_max_wb": 0.36319808691668953,
+          "actual_numerator_predicted_denominator_merit": 0.06864048258269387,
+          "predicted_numerator_actual_denominator_merit": 0.06625674131856735,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.028617776065388623,
+            "predicted_decrease": -0.026378922573132846,
+            "actual_over_predicted_decrease": 1.0848728179116787,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 9.957763025781723,
+            "denominator_wb": 145.22718569753746,
+            "merit": 0.06856679744879592,
+            "relative_sup": 0.06315470442721592
+          },
+          "predicted": {
+            "numerator_wb": 9.622280075185284,
+            "denominator_wb": 145.0712852111029,
+            "merit": 0.06632794395654014,
+            "relative_sup": 0.06102647176726044
+          },
+          "confined_flip_indices": [
+            15,
+            29,
+            40,
+            44,
+            62,
+            66
+          ],
+          "open_flip_indices": [
+            15,
+            29,
+            40,
+            44,
+            62,
+            66
+          ],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            9,
+            16,
+            30,
+            63,
+            65,
+            70
+          ],
+          "coupling_component_error_max_wb": [
+            0.3551861273578577,
+            0.16915512093100765,
+            0.08934832621792275
+          ],
+          "curvature": [],
+          "dominant_current_errors": [
+            {
+              "cell": 48,
+              "error_a": -33978.05807564105,
+              "actual_current_a": 237887.11568042962,
+              "linear_current_a": 271865.17375607067,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 32,
+              "error_a": -33977.91190967581,
+              "actual_current_a": 237887.26184639498,
+              "linear_current_a": 271865.1737560708,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 65,
+              "error_a": 27142.499863310146,
+              "actual_current_a": 0.0,
+              "linear_current_a": -27142.499863310146,
+              "confined_flip": false,
+              "support_flip": true
+            },
+            {
+              "cell": 30,
+              "error_a": 27142.410991169032,
+              "actual_current_a": 0.0,
+              "linear_current_a": -27142.410991169032,
+              "confined_flip": false,
+              "support_flip": true
+            },
+            {
+              "cell": 70,
+              "error_a": 10608.400957356216,
+              "actual_current_a": 0.0,
+              "linear_current_a": -10608.400957356216,
+              "confined_flip": false,
+              "support_flip": true
+            },
+            {
+              "cell": 16,
+              "error_a": 10608.274546408813,
+              "actual_current_a": 0.0,
+              "linear_current_a": -10608.274546408813,
+              "confined_flip": false,
+              "support_flip": true
+            },
+            {
+              "cell": 60,
+              "error_a": -10446.92921639228,
+              "actual_current_a": 241309.30839028634,
+              "linear_current_a": 251756.23760667862,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -10446.904540485819,
+              "actual_current_a": 241309.91328670213,
+              "linear_current_a": 251756.81782718794,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.5,
+          "predicted_over_actual": 0.9757946724597468,
+          "raw_current_error_max_a": 5759.736881674209,
+          "scaled_current_error_max_a": 9849.324960717728,
+          "coupling_remainder_max_wb": 9.710288129127775e-14,
+          "raw_curvature_image_max_wb": 0.10693165266337509,
+          "normalisation_curvature_image_max_wb": 0.0752389592076518,
+          "map_prediction_error_max_wb": 0.11262415001063886,
+          "actual_numerator_predicted_denominator_merit": 0.04966208688367576,
+          "predicted_numerator_actual_denominator_merit": 0.04838509787996778,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.009674670696630923,
+            "predicted_decrease": -0.00847351297607693,
+            "actual_over_predicted_decrease": 1.1417543967826795,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 7.017043603224704,
+            "denominator_wb": 141.40510931566502,
+            "merit": 0.049623692080038216,
+            "relative_sup": 0.050367988973598975
+          },
+          "predicted": {
+            "numerator_wb": 6.841900054965995,
+            "denominator_wb": 141.29578605226214,
+            "merit": 0.04842253435948422,
+            "relative_sup": 0.04929884920033441
+          },
+          "confined_flip_indices": [
+            29,
+            40,
+            44,
+            66
+          ],
+          "open_flip_indices": [
+            29,
+            40,
+            44,
+            66
+          ],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            9,
+            30,
+            63,
+            65
+          ],
+          "coupling_component_error_max_wb": [
+            0.11091456944050401,
+            0.05058020052975905,
+            0.02527330597702185
+          ],
+          "curvature": [],
+          "dominant_current_errors": [
+            {
+              "cell": 48,
+              "error_a": -9849.324960717728,
+              "actual_current_a": 255501.55941683296,
+              "linear_current_a": 265350.8843775507,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 32,
+              "error_a": -9849.236877493822,
+              "actual_current_a": 255501.64750005698,
+              "linear_current_a": 265350.8843775508,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 65,
+              "error_a": 8292.555719772758,
+              "actual_current_a": 0.0,
+              "linear_current_a": -8292.555719772758,
+              "confined_flip": false,
+              "support_flip": true
+            },
+            {
+              "cell": 30,
+              "error_a": 8292.488317748272,
+              "actual_current_a": 0.0,
+              "linear_current_a": -8292.488317748272,
+              "confined_flip": false,
+              "support_flip": true
+            },
+            {
+              "cell": 17,
+              "error_a": -2938.468362444488,
+              "actual_current_a": 255790.14724798975,
+              "linear_current_a": 258728.61561043424,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 60,
+              "error_a": -2938.464039219165,
+              "actual_current_a": 255789.76764596385,
+              "linear_current_a": 258728.231685183,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 44,
+              "error_a": -2750.1150819071045,
+              "actual_current_a": 120030.13791053978,
+              "linear_current_a": 122780.25299244688,
+              "confined_flip": true,
+              "support_flip": false
+            },
+            {
+              "cell": 40,
+              "error_a": -2750.113995804917,
+              "actual_current_a": 120030.16583522377,
+              "linear_current_a": 122780.27983102869,
+              "confined_flip": true,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.25,
+          "predicted_over_actual": 0.9927955691335838,
+          "raw_current_error_max_a": 591.5953680515813,
+          "scaled_current_error_max_a": 944.6519488419581,
+          "coupling_remainder_max_wb": 9.21554499377919e-14,
+          "raw_curvature_image_max_wb": 0.025252015016089348,
+          "normalisation_curvature_image_max_wb": 0.018570025521157506,
+          "map_prediction_error_max_wb": 0.03070292899469962,
+          "actual_numerator_predicted_denominator_merit": 0.0425665114298528,
+          "predicted_numerator_actual_denominator_merit": 0.04224083671301759,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": false,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.002607916390846933,
+            "predicted_decrease": -0.0023013178747659443,
+            "actual_over_predicted_decrease": 1.1332273648255442,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 5.934836061888201,
+            "denominator_wb": 139.45637003700517,
+            "merit": 0.042556937774254226,
+            "relative_sup": 0.046348215769226854
+          },
+          "predicted": {
+            "numerator_wb": 5.890753755323295,
+            "denominator_wb": 139.42500483433966,
+            "merit": 0.04225033925817324,
+            "relative_sup": 0.04606357902502921
+          },
+          "confined_flip_indices": [],
+          "open_flip_indices": [],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [
+            9,
+            63
+          ],
+          "coupling_component_error_max_wb": [
+            0.03186962334493147,
+            0.013666099962602799,
+            0.0058554893925987575
+          ],
+          "curvature": [],
+          "dominant_current_errors": [
+            {
+              "cell": 48,
+              "error_a": -944.6519488419581,
+              "actual_current_a": 261149.08773944873,
+              "linear_current_a": 262093.7396882907,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 32,
+              "error_a": -944.6287639641087,
+              "actual_current_a": 261149.11092432667,
+              "linear_current_a": 262093.73968829078,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 60,
+              "error_a": -887.2712477675814,
+              "actual_current_a": 261326.95747666762,
+              "linear_current_a": 262214.2287244352,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -887.2660357291461,
+              "actual_current_a": 261327.24846632825,
+              "linear_current_a": 262214.5145020574,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 65,
+              "error_a": 838.7926681058593,
+              "actual_current_a": 1971.2090201017959,
+              "linear_current_a": 1132.4163519959366,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 30,
+              "error_a": 838.776493040948,
+              "actual_current_a": 1971.2495120030558,
+              "linear_current_a": 1132.4730189621077,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 44,
+              "error_a": -758.7566273048287,
+              "actual_current_a": 138451.71006483835,
+              "linear_current_a": 139210.46669214318,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 40,
+              "error_a": -758.7563029681041,
+              "actual_current_a": 138451.73137647612,
+              "linear_current_a": 139210.48767944422,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.125,
+          "predicted_over_actual": 0.9983118457587821,
+          "raw_current_error_max_a": 131.34283272339962,
+          "scaled_current_error_max_a": 227.50961679662578,
+          "coupling_remainder_max_wb": 7.609971680588856e-14,
+          "raw_curvature_image_max_wb": 0.005840387298930751,
+          "normalisation_curvature_image_max_wb": 0.004613111272704893,
+          "map_prediction_error_max_wb": 0.007474359689297216,
+          "actual_numerator_predicted_denominator_merit": 0.04060608017418457,
+          "predicted_numerator_actual_denominator_merit": 0.04053309303437492,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": true,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.0006548360710798354,
+            "predicted_decrease": -0.000586290496908233,
+            "actual_over_predicted_decrease": 1.1169140119668888,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 5.6236982265771305,
+            "denominator_wb": 138.50157544466643,
+            "merit": 0.04060385745448713,
+            "relative_sup": 0.04514734991218135
+          },
+          "predicted": {
+            "numerator_wb": 5.6138972429061615,
+            "denominator_wb": 138.49399406329331,
+            "merit": 0.040535311880315526,
+            "relative_sup": 0.04508790219516731
+          },
+          "confined_flip_indices": [],
+          "open_flip_indices": [],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [],
+          "coupling_component_error_max_wb": [
+            0.008479226662051113,
+            0.003275511532972941,
+            0.001589424235948147
+          ],
+          "curvature": [],
+          "dominant_current_errors": [
+            {
+              "cell": 60,
+              "error_a": -227.50961679662578,
+              "actual_current_a": 263729.7176272647,
+              "linear_current_a": 263957.2272440613,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -227.50508733367315,
+              "actual_current_a": 263729.9588605353,
+              "linear_current_a": 263957.46394786896,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 44,
+              "error_a": -197.73353933071485,
+              "actual_current_a": 147227.84000266064,
+              "linear_current_a": 147425.57354199135,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 40,
+              "error_a": -197.73345302863163,
+              "actual_current_a": 147227.85815062336,
+              "linear_current_a": 147425.591603652,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 66,
+              "error_a": -193.71414299143362,
+              "actual_current_a": 149597.91611653022,
+              "linear_current_a": 149791.63025952165,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 29,
+              "error_a": -193.7137924177805,
+              "actual_current_a": 149598.07241228165,
+              "linear_current_a": 149791.78620469943,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 63,
+              "error_a": 168.12439459869086,
+              "actual_current_a": 16.68790470402614,
+              "linear_current_a": -151.4364898946647,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 168.12077401654824,
+              "actual_current_a": 16.69664935036838,
+              "linear_current_a": -151.42412466617986,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.0625,
+          "predicted_over_actual": 0.9995729843127424,
+          "raw_current_error_max_a": 32.66211917120381,
+          "scaled_current_error_max_a": 56.141295188921504,
+          "coupling_remainder_max_wb": 7.795825616996321e-14,
+          "raw_curvature_image_max_wb": 0.0014642536636679583,
+          "normalisation_curvature_image_max_wb": 0.0011496382174251525,
+          "map_prediction_error_max_wb": 0.0019704333327013046,
+          "actual_numerator_predicted_denominator_merit": 0.040113311413319204,
+          "predicted_numerator_actual_denominator_merit": 0.04009500553399392,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": true,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -0.00016370134117276586,
+            "predicted_decrease": -0.00014657257931075668,
+            "actual_over_predicted_decrease": 1.1168619802049982,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 5.536824389170763,
+            "denominator_wb": 138.03162720185878,
+            "merit": 0.04011272272458006,
+            "relative_sup": 0.04515604564208769
+          },
+          "predicted": {
+            "numerator_wb": 5.534378856524714,
+            "denominator_wb": 138.02960149862668,
+            "merit": 0.04009559396271805,
+            "relative_sup": 0.04514035481116575
+          },
+          "confined_flip_indices": [],
+          "open_flip_indices": [],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [],
+          "coupling_component_error_max_wb": [
+            0.002217325309081604,
+            0.0008187464309291881,
+            0.0003891364992619525
+          ],
+          "curvature": [],
+          "dominant_current_errors": [
+            {
+              "cell": 60,
+              "error_a": -56.141295188921504,
+              "actual_current_a": 264772.5852086854,
+              "linear_current_a": 264828.72650387435,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -56.14018806628883,
+              "actual_current_a": 264772.79848270846,
+              "linear_current_a": 264828.93867077475,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 44,
+              "error_a": -50.231247877614805,
+              "actual_current_a": 151482.8957190378,
+              "linear_current_a": 151533.1269669154,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 40,
+              "error_a": -50.23122571525164,
+              "actual_current_a": 151482.91234004064,
+              "linear_current_a": 151533.1435657559,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 66,
+              "error_a": -49.02539941869327,
+              "actual_current_a": 153819.7187524258,
+              "linear_current_a": 153868.7441518445,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 29,
+              "error_a": -49.025307230622275,
+              "actual_current_a": 153819.86375247763,
+              "linear_current_a": 153868.88905970825,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 63,
+              "error_a": 41.71274346133718,
+              "actual_current_a": 113.54078670376656,
+              "linear_current_a": 71.82804324242937,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 41.71184965269282,
+              "actual_current_a": 113.56214220522781,
+              "linear_current_a": 71.850292552535,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.01,
+          "predicted_over_actual": 0.999989251200622,
+          "raw_current_error_max_a": 0.8337204132985789,
+          "scaled_current_error_max_a": 1.4241890353732742,
+          "coupling_remainder_max_wb": 7.739164533835871e-14,
+          "raw_curvature_image_max_wb": 3.749875495348462e-05,
+          "normalisation_curvature_image_max_wb": 2.9352925713880333e-05,
+          "map_prediction_error_max_wb": 5.2054520210731425e-05,
+          "actual_numerator_predicted_denominator_merit": 0.039953137071754005,
+          "predicted_numerator_actual_denominator_merit": 0.03995267622961611,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": true,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -4.099991233408318e-06,
+            "predicted_decrease": -3.6705431472258687e-06,
+            "actual_over_predicted_decrease": 1.1169985119251407,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 5.49915339104516,
+            "denominator_wb": 137.64014429509925,
+            "merit": 0.0399531213746407,
+            "relative_sup": 0.04518509674044176
+          },
+          "predicted": {
+            "numerator_wb": 5.499092121219743,
+            "denominator_wb": 137.64009021792037,
+            "merit": 0.03995269192655452,
+            "relative_sup": 0.04518468384621233
+          },
+          "confined_flip_indices": [],
+          "open_flip_indices": [],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [],
+          "coupling_component_error_max_wb": [
+            5.822446484684687e-05,
+            2.076816722595044e-05,
+            9.805096014650595e-06
+          ],
+          "curvature": [],
+          "dominant_current_errors": [
+            {
+              "cell": 60,
+              "error_a": -1.4241890353732742,
+              "actual_current_a": 265559.3616930819,
+              "linear_current_a": 265560.7858821173,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -1.424161191273015,
+              "actual_current_a": 265559.55327682436,
+              "linear_current_a": 265560.97743801563,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 44,
+              "error_a": -1.3045532295363955,
+              "actual_current_a": 154982.1672906221,
+              "linear_current_a": 154983.47184385164,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 40,
+              "error_a": -1.3045526505738962,
+              "actual_current_a": 154982.18266127256,
+              "linear_current_a": 154983.48721392313,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 66,
+              "error_a": -1.2701558487024158,
+              "actual_current_a": 157292.249665547,
+              "linear_current_a": 157293.5198213957,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 29,
+              "error_a": -1.270153395977104,
+              "actual_current_a": 157292.38530451967,
+              "linear_current_a": 157293.65545791565,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 63,
+              "error_a": 1.0606173595716086,
+              "actual_current_a": 260.43086843716003,
+              "linear_current_a": 259.3702510775884,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 1.0605946972844436,
+              "actual_current_a": 260.4613977135399,
+              "linear_current_a": 259.40080301625545,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        },
+        {
+          "fraction": 0.001,
+          "predicted_over_actual": 0.9999998929228575,
+          "raw_current_error_max_a": 0.008335721271578223,
+          "scaled_current_error_max_a": 0.014221682213246822,
+          "coupling_remainder_max_wb": 8.877302664791338e-14,
+          "raw_curvature_image_max_wb": 3.7482593112037104e-07,
+          "normalisation_curvature_image_max_wb": 2.933962634568575e-07,
+          "map_prediction_error_max_wb": 5.237765492438484e-07,
+          "actual_numerator_predicted_denominator_merit": 0.03994905531508755,
+          "predicted_numerator_actual_denominator_merit": 0.03994905072068936,
+          "rules": {
+            "sufficient_merit": false,
+            "strict_residual_decrease": true,
+            "model_trust": false,
+            "accepted_if_considered": false,
+            "refusing_rules": [
+              "sufficient decrease",
+              "model trust"
+            ],
+            "actual_decrease": -3.3773296492789484e-08,
+            "predicted_decrease": -2.9495665819501138e-08,
+            "actual_over_predicted_decrease": 1.1450257369833698,
+            "fallback_same_direction_refused": true,
+            "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+          },
+          "actual": {
+            "numerator_wb": 5.495926173389683,
+            "denominator_wb": 137.57337068001772,
+            "merit": 0.039949055156703786,
+            "relative_sup": 0.04519231206581843
+          },
+          "predicted": {
+            "numerator_wb": 5.495925563112227,
+            "denominator_wb": 137.57337013458834,
+            "merit": 0.03994905087907311,
+            "relative_sup": 0.0451923079178214
+          },
+          "confined_flip_indices": [],
+          "open_flip_indices": [],
+          "shadow_flip_indices": [],
+          "nonzero_current_flip_indices": [],
+          "coupling_component_error_max_wb": [
+            5.851793637823266e-07,
+            2.0733595566868957e-07,
+            9.77753668166207e-08
+          ],
+          "curvature": [],
+          "dominant_current_errors": [
+            {
+              "cell": 60,
+              "error_a": -0.014221682213246822,
+              "actual_current_a": 265686.26755384816,
+              "linear_current_a": 265686.28177553037,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 17,
+              "error_a": -0.014221404620911926,
+              "actual_current_a": 265686.4555767094,
+              "linear_current_a": 265686.46979811403,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 44,
+              "error_a": -0.013080636388622224,
+              "actual_current_a": 155574.94645640432,
+              "linear_current_a": 155574.9595370407,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 40,
+              "error_a": -0.013080630509648472,
+              "actual_current_a": 155574.96161583558,
+              "linear_current_a": 155574.9746964661,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 66,
+              "error_a": -0.012731900904327631,
+              "actual_current_a": 157880.61148998927,
+              "linear_current_a": 157880.62422189018,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 29,
+              "error_a": -0.012731876369798556,
+              "actual_current_a": 157880.74553716058,
+              "linear_current_a": 157880.75826903695,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 63,
+              "error_a": 0.010592789347185771,
+              "actual_current_a": 291.53093663867713,
+              "linear_current_a": 291.52034384932995,
+              "confined_flip": false,
+              "support_flip": false
+            },
+            {
+              "cell": 9,
+              "error_a": 0.010592563013062772,
+              "actual_current_a": 291.5629116587635,
+              "linear_current_a": 291.5523190957504,
+              "confined_flip": false,
+              "support_flip": false
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "historical_reproduction": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-certificate-rows-do-not-converge-after-the-clip/record/cells-110/receipt.json",
+    "passed": true,
+    "scores": {
+      "map_defect": {
+        "factors": [
+          1.0,
+          0.5,
+          0.25,
+          0.125,
+          0.0625,
+          0.03125
+        ],
+        "merits": [
+          0.06397180321343035,
+          0.06212994549430234,
+          0.06202887604908833,
+          0.062237885004182834,
+          0.06240829762774946,
+          0.06250966320810278
+        ],
+        "residuals": [
+          0.057546158504914416,
+          0.053595196299848484,
+          0.05518799047183554,
+          0.05605665153094222,
+          0.05666538171495612,
+          0.05704538124781924
+        ],
+        "incumbent_merit": 0.06262163400888351,
+        "incumbent_residual": 0.05742480629016609,
+        "acceptance_reference": 0.06262163400888351,
+        "predicted_merits": [
+          0.065416722522125,
+          0.062442816397444124,
+          0.0621009127429903,
+          0.062255186732639196,
+          0.06241252001442208,
+          0.06251070521007338
+        ],
+        "predicted_current_merit": 0.06262163400888351,
+        "ladder_selected": 1,
+        "ladder_accepted": true,
+        "ladder_distrusted": false
+      },
+      "toward_analytic": {
+        "factors": [
+          1.0,
+          0.5,
+          0.25,
+          0.125,
+          0.0625,
+          0.03125
+        ],
+        "merits": [
+          9.626740263946309e-05,
+          0.11712637722758266,
+          0.10000891542394574,
+          0.0820303865533949,
+          0.07224983076407077,
+          0.06736910559478894
+        ],
+        "residuals": [
+          9.539504816027937e-05,
+          0.10569885330434774,
+          0.08793421287098827,
+          0.07354090199819731,
+          0.0656041149484473,
+          0.06152739153832564
+        ],
+        "incumbent_merit": 0.06262163400888351,
+        "incumbent_residual": 0.05742480629016609,
+        "acceptance_reference": 0.06262163400888351,
+        "predicted_merits": [
+          0.34807153052010525,
+          0.17464168633414454,
+          0.11043978603605692,
+          0.08419051610957373,
+          0.07272357214310896,
+          0.06747609091865382
+        ],
+        "predicted_current_merit": 0.06262163400888351,
+        "ladder_selected": 0,
+        "ladder_accepted": false,
+        "ladder_distrusted": false
+      }
+    },
+    "decomposition": {
+      "actual": {
+        "numerator_wb": 0.007405884008189089,
+        "denominator_wb": 76.93033991917302,
+        "merit": 9.626740263945398e-05,
+        "relative_sup": 9.539504816028161e-05
+      },
+      "predicted": {
+        "numerator_wb": 39.919390027524955,
+        "denominator_wb": 114.68731719562206,
+        "merit": 0.34807153052010525,
+        "relative_sup": 0.32559791138383737
+      },
+      "coupling_component_error_max_wb": [
+        22.068281091396386,
+        1.5947520412002683,
+        2.494522720231307
+      ],
+      "coupling_remainder_max_wb": 9.237055564881302e-14,
+      "raw_current_error_max_a": 184595.82360540127,
+      "scaled_current_error_max_a": 395986.1014403162,
+      "per_cell_raw_current_error_a": [
+        0.0,
+        0.0,
+        23230.338373243947,
+        78227.44450524918,
+        68564.55167516696,
+        169828.2702700724,
+        162918.38092372875,
+        156427.34316069438,
+        169828.27027007245,
+        162918.3809237286,
+        0.0,
+        22611.79282815393,
+        0.0,
+        125781.11128832359,
+        38976.73966529636,
+        14228.887714595796,
+        156427.3431606943,
+        -137091.37516831292,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        150466.6015729134,
+        -105333.46905837453,
+        112622.24231747436,
+        9378.209918070323,
+        145191.02274724608,
+        0.0,
+        -93459.24673293745,
+        0.0,
+        67212.75116947487,
+        8795.906667933614,
+        45376.01827084344,
+        0.0,
+        72131.46980986232,
+        -12794.668673084976,
+        -236.30393608640588,
+        0.0,
+        0.0,
+        0.0,
+        -170.33125047350768,
+        -12704.684504663874,
+        67065.54632076476,
+        0.0,
+        -93462.27456595717,
+        0.0,
+        80965.33180546417,
+        0.0,
+        72131.46980986233,
+        0.0,
+        45376.018270843626,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -137032.8871228711,
+        -124041.97007967463,
+        14627.65405823887,
+        162918.3809237286,
+        177074.76137302115,
+        145191.02274724594,
+        9319.126853571754,
+        -105368.72419009038,
+        112622.24231747437,
+        150466.6015729134,
+        156427.3431606943,
+        38976.739665296474,
+        125781.11128832353,
+        0.0,
+        156427.34316069423,
+        76382.57740721684,
+        43299.34216710013,
+        177074.76137302103,
+        162663.18119191582,
+        177074.76137302077,
+        44119.47776143972,
+        184595.82360540127,
+        -124072.38938793389,
+        115954.36605156894,
+        -58869.059547053315,
+        71081.00312146996,
+        0.0,
+        1343.7349600147863,
+        0.0,
+        6217.0909867030405,
+        11609.237487567882,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1351.7107062378914,
+        1373.1272159163777,
+        11758.87372407011,
+        -1751.9231221816417,
+        0.0,
+        0.0,
+        0.0,
+        -1807.2349668402921,
+        0.0,
+        1322.9635829605322,
+        0.0,
+        0.0,
+        71394.62441295177,
+        6217.090986703038,
+        -58883.29506095029,
+        115954.36605156916,
+        184595.8236054011,
+        44119.477761439666,
+        162663.18119191605,
+        43299.34216710015,
+        169828.27027007221,
+        177074.76137302106,
+        162918.3809237286,
+        169828.27027007221,
+        78227.4445052493,
+        23230.338373244183,
+        0.0,
+        8795.90666793371,
+        0.0,
+        22611.79282815412,
+        68564.55167516701,
+        0.0,
+        0.0,
+        76382.57740721702
+      ],
+      "per_cell_scaled_current_error_a": [
+        0.0,
+        0.0,
+        23231.99493762352,
+        78233.02293445628,
+        68569.44103976345,
+        169840.3807894567,
+        162929.99869624156,
+        156438.49805480344,
+        169840.38078945677,
+        162929.9986962414,
+        0.0,
+        22613.40528381237,
+        0.0,
+        125790.08078783046,
+        38979.519111618836,
+        -141135.97730512323,
+        156438.49805480335,
+        -395986.1014403162,
+        -37944.55333384877,
+        -39563.6292845243,
+        -36400.68396265176,
+        -37944.553333848744,
+        -39563.6292845243,
+        -36400.68396265176,
+        -37944.553333848715,
+        0.0,
+        150477.33140424328,
+        -322048.1596290572,
+        112630.27345296508,
+        -120024.2222007144,
+        145201.37637501734,
+        -34950.39816394576,
+        -254515.62213325413,
+        -34950.39816394575,
+        -7965.286529959441,
+        8796.533907426989,
+        45379.254052188786,
+        0.0,
+        72136.61353276524,
+        -59778.10751163283,
+        -125124.81657766429,
+        -34950.39816394585,
+        -33618.59588669738,
+        -34950.39816394578,
+        -125007.61373663798,
+        -59593.24196401976,
+        -8227.799513249542,
+        -34950.39816394579,
+        -254432.64414638357,
+        0.0,
+        80971.10547446951,
+        0.0,
+        72136.61353276526,
+        0.0,
+        45379.254052188975,
+        -36400.68396265176,
+        -37944.553333848744,
+        -34950.39816394575,
+        -36400.68396265176,
+        -37944.55333384877,
+        -395959.0877940741,
+        -381746.21571726206,
+        -140441.44604911082,
+        162929.9986962414,
+        177087.38864247795,
+        145201.3763750172,
+        -120137.08739512962,
+        -322097.19861836894,
+        112630.27345296509,
+        150477.33140424328,
+        156438.49805480335,
+        38979.51911161895,
+        125790.0807878304,
+        0.0,
+        156438.4980548033,
+        76388.02427824041,
+        43302.42985987242,
+        177087.38864247783,
+        162674.78076603744,
+        177087.38864247757,
+        44122.62393839722,
+        184608.9872047036,
+        -381628.8425150667,
+        115962.63480208693,
+        -252745.02162617212,
+        -11701.521101269405,
+        -41244.0523763329,
+        -86460.67736700927,
+        -41244.05237633287,
+        6217.53432985662,
+        2232.79263231197,
+        -39563.62928452424,
+        -36400.683962651674,
+        -37944.553333848744,
+        -39563.6292845243,
+        -36400.683962651674,
+        -37944.553333848715,
+        -39563.62928452427,
+        -36400.6839626517,
+        -37944.553333848715,
+        -39563.62928452421,
+        -8009.923873941778,
+        -8012.63749440997,
+        2464.620428336051,
+        -49188.38361963525,
+        -41244.052376332926,
+        -42975.17252561319,
+        -41244.05237633287,
+        -49356.19725428283,
+        -41244.05237633287,
+        -86860.41950913724,
+        -41244.05237633287,
+        -39563.6292845243,
+        -11306.453956077836,
+        6217.534329856618,
+        -252927.50963088387,
+        115962.63480208715,
+        184608.98720470342,
+        44122.62393839717,
+        162674.78076603767,
+        43302.42985987244,
+        169840.38078945654,
+        177087.38864247786,
+        162929.9986962414,
+        169840.38078945654,
+        78233.0229344564,
+        23231.994937623756,
+        0.0,
+        8796.533907427085,
+        0.0,
+        22613.40528381256,
+        68569.4410397635,
+        0.0,
+        0.0,
+        76388.02427824058
+      ],
+      "confined_flip_indices": [
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        13,
+        15,
+        16,
+        17,
+        26,
+        27,
+        28,
+        29,
+        30,
+        34,
+        38,
+        40,
+        44,
+        46,
+        50,
+        52,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        72,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        89,
+        90,
+        103,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        134
+      ],
+      "shadow_flip_indices": [],
+      "curvature": [
+        {
+          "fraction": 0.0,
+          "h": 0.0001,
+          "map_second_directional_max_wb": 34.995898099019485
+        },
+        {
+          "fraction": 0.0,
+          "h": 1e-05,
+          "map_second_directional_max_wb": 34.99589794699886
+        },
+        {
+          "fraction": 1.0,
+          "h": 0.0001,
+          "map_second_directional_max_wb": 113.49494680549022
+        },
+        {
+          "fraction": 1.0,
+          "h": 1e-05,
+          "map_second_directional_max_wb": 113.49494560315419
+        },
+        {
+          "fraction": 0.5,
+          "h": 0.0001,
+          "map_second_directional_max_wb": 70.5580895592206
+        },
+        {
+          "fraction": 0.5,
+          "h": 1e-05,
+          "map_second_directional_max_wb": 70.55809188294403
+        },
+        {
+          "fraction": 0.25,
+          "h": 0.0001,
+          "map_second_directional_max_wb": 56.84146279950397
+        },
+        {
+          "fraction": 0.25,
+          "h": 1e-05,
+          "map_second_directional_max_wb": 56.84146259135047
+        },
+        {
+          "fraction": 0.125,
+          "h": 0.0001,
+          "map_second_directional_max_wb": 43.410209577068315
+        },
+        {
+          "fraction": 0.125,
+          "h": 1e-05,
+          "map_second_directional_max_wb": 43.41020933047445
+        },
+        {
+          "fraction": 0.0625,
+          "h": 0.0001,
+          "map_second_directional_max_wb": 38.889184310946234
+        },
+        {
+          "fraction": 0.0625,
+          "h": 1e-05,
+          "map_second_directional_max_wb": 38.8891840835015
+        },
+        {
+          "fraction": 0.01,
+          "h": 0.0001,
+          "map_second_directional_max_wb": 35.65189140065428
+        },
+        {
+          "fraction": 0.01,
+          "h": 1e-05,
+          "map_second_directional_max_wb": 35.6518912443704
+        },
+        {
+          "fraction": 0.001,
+          "h": 0.0001,
+          "map_second_directional_max_wb": 35.06108159957222
+        },
+        {
+          "fraction": 0.001,
+          "h": 1e-05,
+          "map_second_directional_max_wb": 35.06108144932795
+        }
+      ],
+      "tangent_fd_relative_error": 1.6794147242436417e-09
+    }
+  },
+  "panel_levels_wb": [
+    1.1345091532888318e-15,
+    4.540555950502846,
+    9.081111901005691,
+    13.621667851508535,
+    18.16222380201138,
+    22.702779752514225,
+    27.243335703017067,
+    31.783891653519913,
+    36.32444760402276,
+    40.8650035545256,
+    45.40555950502845,
+    49.94611545553129
+  ]
+}

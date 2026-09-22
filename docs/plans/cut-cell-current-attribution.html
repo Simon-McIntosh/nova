@@ -211,6 +211,34 @@ as a production whole-cell mode defect.</p>
   </tbody>
 </table>
 
+<h3 id="merit-model-refusal-landing">Merit refusal measured: current prediction error and actual-candidate veto</h3>
+<p><strong>Worker landing, 2026-09-22; no production change, no node closure.</strong>
+The historical 135-cell prediction 0.348071531 against actual 9.62674026e-5 reproduces.
+At the authoritative continuous-support terminals, full analytic candidates have actual / predicted
+merit 9.62674026e-5 / 0.271049526 (135 cells) and 7.58066918e-5 / 0.291954563 (342).
+Both pass unchanged actual sufficient decrease and strict residual improvement; model trust alone refuses.</p>
+<p>The signed current-error images reconstruct those analytic map prediction errors to
+8.9e-14 / 1.1e-13 Wb; zeroth-current terms dominate at 17.313 / 18.860 Wb.
+The eighth-norm numerator is wrong by 3769 / 5326 times while its denominator differs by
+1.339 / 1.383 times. The full steps flip 49 / 129 confined classifications.
+Coarse local JVP agreement is 1.13e-9 and JVP-difference curvature is nonzero even within
+unchanged centroid classifications. The fine terminal's local JVP check instead fails
+(relative discrepancy 0.999565 along the analytic direction); some fine curvature estimates
+are increment-sensitive. A branch-resolved fine tangent audit remains necessary.</p>
+<p>The supported refusal repair is to allow an already-evaluated candidate that passes the
+unchanged actual decrease tests when its model predicts an increase, flagging and rebuilding
+that model. A smaller radius alone rejects every sampled shorter analytic move. This is
+not sufficient evidence of cold-seed convergence: every sampled Newton candidate worsens
+actual merit, the analytic direction is an oracle, and the analytic candidate residuals near
+9.5e-5 still fail the locked 1e-12 bound. Keep the budgets, current pin, joint qualification,
+one-pitch null limits and both-row acceptance unchanged.</p>
+<p>One all_debug job 1275504, two fresh row processes, completed 0:0 in 3m46s.
+<a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#merit-model-refusal">Full decomposition, all fraction tables, inspected merit plots, poloidal candidate panel and repair acceptance</a>.
+Commits <code>a2c8836289ab399e3ed836f94c904ce111852ea4</code>,
+<code>492b895770bd10b7e14ec379b4f9d89fc428977f</code> and
+<code>4303ed756cf6cd7beab7729b27d1cf5cdcbfdb98</code>.
+The driving followup and section state remain unchanged for coordinator adjudication.</p>
+
 <h2 id="s6">§6 — Rung A: reinstate the signed-flux clip of the profile support and re-verify every consumer bank</h2>
 <p>Replace the all-ones clip in the profile support with the clip against the signed flux of the current iterate on the confined side (the behaviour before c9a89e58), with the profile participation label deciding candidacy only, and book each cut cell's current to the side its clipped polygon lies on. Gate in order, one job per gate, receipts persisted per row: the plasma current amplitude at seed and terminal within one percent of unity and every cut cell participating with a clipped polygon on the weak, moderate and strong 110-cell rows (all_debug); the sixteen certificate rows re-solved in one H200 job with residual, axis error, X-point error, joint qualification and amplitude beside the committed rows and contour panels drawn; the transport machine's scrape-off-layer fraction re-measured and its expected-failure marker removed when it turns red; the twelve MAST bank rows and the DIII-D gate frames regenerated with their deltas recorded. Restoring the clip changes the physics of every forward solve since 27 August, so no consumer bank is asserted identical.</p>
 

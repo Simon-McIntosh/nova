@@ -1,0 +1,27 @@
+revision=a2c8836289ab399e3ed836f94c904ce111852ea4 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-why-the-merit-model-refuses-the-analytic-direction command=/home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/cut-cell-current-attribution/merit-model/measure.py --cells 300 --output /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-merit-model-refuses-the-analytic-direction
+BUILT 300 realised=342 elapsed=11.27
+BASE merit=0.0546254885059 residual=0.0518511705161
+NEWTON {"qualification": 1, "projected_condition": 250.7393550514506, "conditioning_applied": false, "condition_baseline": 3.921565815210816, "spectral_baseline": 3.921565815210816, "achieved_reduction": 1.9285662379695127e-13, "requested_tolerance": 1e-05}
+ROW analytic fraction=1 actual=7.580669184e-05 predicted=0.291954563 flips=129 refuses=['model trust']
+ROW analytic fraction=0.5 actual=0.09050093564 predicted=0.1461894099 flips=44 refuses=['sufficient decrease', 'model trust']
+ROW analytic fraction=0.25 actual=0.08280937585 predicted=0.09377604063 flips=17 refuses=['sufficient decrease', 'model trust']
+ROW analytic fraction=0.125 actual=0.07016454707 predicted=0.07252786392 flips=10 refuses=['sufficient decrease', 'model trust']
+ROW analytic fraction=0.0625 actual=0.06254629152 predicted=0.06308318803 flips=4 refuses=['sufficient decrease', 'model trust']
+ROW analytic fraction=0.01 actual=0.05586407431 predicted=0.05587710106 flips=0 refuses=['sufficient decrease', 'model trust']
+ROW analytic fraction=0.001 actual=0.0547479077 predicted=0.05474803401 flips=0 refuses=['sufficient decrease', 'model trust']
+ROW newton fraction=1 actual=1.3018572 predicted=1.627217811e-14 flips=169 refuses=['sufficient decrease', 'model trust']
+ROW newton fraction=0.5 actual=0.6033506679 predicted=0.03729121694 flips=185 refuses=['sufficient decrease', 'model trust']
+ROW newton fraction=0.25 actual=0.6588080778 predicted=0.08123486859 flips=112 refuses=['sufficient decrease', 'model trust']
+ROW newton fraction=0.125 actual=0.1208574071 predicted=0.06779272058 flips=81 refuses=['sufficient decrease', 'model trust']
+ROW newton fraction=0.0625 actual=0.05754857353 predicted=0.06039303021 flips=35 refuses=['sufficient decrease', 'model trust']
+ROW newton fraction=0.01 actual=0.05503997129 predicted=0.05545099476 flips=8 refuses=['sufficient decrease', 'model trust']
+ROW newton fraction=0.001 actual=0.05470098925 predicted=0.05470652292 flips=0 refuses=['sufficient decrease', 'model trust']
+ROW map_defect fraction=1 actual=0.06586860587 predicted=0.06217962617 flips=9 refuses=['sufficient decrease', 'model trust']
+ROW map_defect fraction=0.5 actual=0.05735221935 predicted=0.05652491597 flips=7 refuses=['sufficient decrease', 'model trust']
+ROW map_defect fraction=0.25 actual=0.05536545071 predicted=0.05517889786 flips=5 refuses=['sufficient decrease', 'model trust']
+ROW map_defect fraction=0.125 actual=0.05484663737 predicted=0.05480063334 flips=2 refuses=['sufficient decrease', 'model trust']
+ROW map_defect fraction=0.0625 actual=0.05469711514 predicted=0.05468592866 flips=2 refuses=['sufficient decrease', 'model trust']
+ROW map_defect fraction=0.01 actual=0.05463152209 predicted=0.0546312796 flips=1 refuses=['sufficient decrease', 'model trust']
+ROW map_defect fraction=0.001 actual=0.05462600089 predicted=0.05462599848 flips=1 refuses=['sufficient decrease', 'model trust']
+COMPLETED cells=342 seconds=76.85
+ROW_EXIT cells=300 status=0

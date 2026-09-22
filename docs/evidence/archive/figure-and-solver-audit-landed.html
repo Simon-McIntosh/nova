@@ -2750,6 +2750,21 @@ ROW2_EXIT=139</pre>
 <p><strong>Excluded from promotion counts:</strong> <code>r-20260920T180231259880-cca-one-certificate-row-per-process</code> is explicitly described in the census review as local and unpromoted; its useful measurement and defective receipt are not counted as a promotion.</p>
 
 </section>
+<section class="audit-directory" id="fsa-verify-the-reachability-carrier-identity-section">
+<h2 id="fsa-verify-the-reachability-carrier-identity">Verification review — reachability-grid carrier identity</h2>
+<p><strong>Verdict: promote, 100/100.</strong> The independent review judged candidate commit <code>0f56a51a5371ffed362adca0954d0427880f6eb2</code>. The later documentation commit <code>3963b162b</code> identified the candidate worktree revision and was not judged.</p>
+<p>The driver diff matches the prescribed anomaly envelope: one ignored return name changes from <code>_carrier</code> to <code>carrier</code>, and one MAST request gains <code>carrier_identity=carrier["carrier"]["semantic_response_identity"]</code>. Nothing else in the driver changes. The topology-visual driver passes the same field from the same persisted carrier returned by <code>_persisted_response_cache</code>; neither call converts or reconstructs the identity.</p>
+<table>
+<caption>Fresh-process gate and declared negative control.</caption>
+<thead><tr><th>measure</th><th>result</th><th>evidence</th></tr></thead>
+<tbody>
+<tr><td>Candidate test file on the login node</td><td><strong>2 passed in 10.07 s, exit 0</strong></td><td><code>test-reachability-grid-driver.log</code></td></tr>
+<tr><td>Scratch copy with the call reverted to three positional arguments</td><td><strong>2 failed in 13.27 s, exit 1</strong></td><td><code>negative-control.log</code></td></tr>
+</tbody>
+</table>
+<p>The control reached the intercepted request and reddened for the intended omission: <code>AssertionError: the MAST state request omitted carrier_identity</code> and <code>KeyError: 'carrier_identity'</code>. It did not fail during import, collection, or setup. The full scored review and findings JSON are under <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-verify-the-reachability-carrier-identity/</code>.</p>
+<p>No figure was created: this result compares an exact call expression, test counts, and failure reasons, for which semantic HTML and source evidence are clearer than an image. No file under <code>nova/</code> was changed.</p>
+</section>
   </main>
 </body>
 </html>

@@ -25,7 +25,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,efit-fixed-input-reproduction,diiid-residual-stall-mechanism,cut-cell-current-attribution">
 </head>
 <body>
@@ -81,6 +81,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260922-sweep-drop-attributed" data-who="reckon-ship s18-fable-20260922" data-when="2026-09-22T16:15:00+00:00">
     <div class="r-comment-body">The 10-of-20 to 4-of-20 stride sweep drop in the top comment is attributed and is NOT basin sensitivity. Control node sgc-sweep-control-at-the-four-of-twenty-revision (local lane, merged 39d4a7261, record /nova/evidence/archive/single-grid-solver-cutover-landed): a titan P100 rerun at a3f2429b (job 1275968) returns 4 of 20 and agrees with the H200 receipt at the same revision (job 1274510) edit for edit on converged flag, termination reason, trip count and centroid qualification; only the wall moves (3117 against 2061 ms), so the device is exonerated. Cause: at a3f2429b benchmarks/coil_edit_latency.py run() sets constraint_pairs unconditionally to the vertical current-centre row (line 2456, entered at c920e30d9), so the supposedly unconstrained H200 run was constrained on all twenty edits while the banked 10-of-20 at d3849192 carries no constraint row. Its converged set [0, 2, 13, 17] equals the S19 constrained arm (job 1275764) and the banked set equals the S19 unconstrained control, so the drop is the constraint row's own effect and the traced response kernel is exonerated. Constrained fingerprint: 15 of 20 active_set_settled, 12 after one trip. The grid-reshuffle finding in the top comment stands; the 4-of-20 figure is never a solver or grid result. Follow-ons owned by forward-solve-api: a driver flag for the unconstrained path, and the stale committed copy of coil-edit-latency.json (7514edd9, job 1273204) against the d3849192/1273580 pair.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260922T153248288729-sgc-sweep-control-at-the-banked-revision" data-who="reckon-ship" data-when="2026-09-22T16:24:53.246Z">
+    <div class="r-comment-body"><p>H200 rerun at the banked revision d3849192 reproduces the banked ten-of-twenty cell exactly (same converged set, no constraint rows, 341 ms median), so with the four-of-twenty arm the sweep drop is attributed entirely to the vertical current-centre row; review 79 notes three driver defects for forward-solve-api (figure path under ROOT, unconditional raster figure, assembly-time source_revision); record merged f028efd5e (docs committed beyond the report fence, accepted as the cutover evidence record)</p></div>
 </div>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">

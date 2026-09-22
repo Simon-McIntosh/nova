@@ -279,6 +279,7 @@ _DYNAMIC_OPERATOR_STATE_NAMES = (
     "topology",
     "_fixed_design_topology",
     "_wall_carrier_index",
+    "_wall_containing_cell_index",
     "_wall_height_hysteresis",
     "_x_qualification_distance",
     "_support_moment_stencils",
@@ -722,6 +723,26 @@ def _substitute_chord_cell_supports(exact, chord, cell_indices, participation):
         ),
     )
     return mixed.qualify(participation)
+
+
+def _wall_node_cell_owners(wall_coordinate, polygons):
+    """Locate wall nodes in committed polygons, including their boundaries.
+
+    Uncovered nodes retain -1 for the flux-based fallback. Shared polygon
+    boundaries choose the lowest cell index, making ownership independent of
+    the spatial tree's query ordering. Geometry is fixed at construction.
+    """
+    from shapely import STRtree, points
+    from shapely.geometry import Polygon
+
+    regions = [Polygon(polygon) for polygon in polygons]
+    owners = np.full(len(wall_coordinate), len(regions), dtype=np.int32)
+    if regions:
+        node, cell = STRtree(regions).query(
+            points(np.asarray(wall_coordinate)), predicate="covered_by"
+        )
+        np.minimum.at(owners, node, cell)
+    return np.where(owners < len(regions), owners, -1).astype(np.int32)
 
 
 @jax.jit
@@ -2537,6 +2558,13 @@ class ForwardFluxOperator:
         self._wall_carrier_index = _host_array(
             np.argmin(wall_to_cell_distance, axis=1), dtype=np.int32
         )
+        self._wall_containing_cell_index = _host_array(
+            _wall_node_cell_owners(
+                self.wall.coordinate,
+                () if self.moment_geometry is None else self.moment_geometry.polygons,
+            ),
+            dtype=np.int32,
+        )
         wall_heights = np.unique(np.asarray(self.wall.coordinate[:, 1]))
         wall_steps = np.diff(wall_heights)
         positive_steps = wall_steps[wall_steps > 0.0]
@@ -3119,19 +3147,45 @@ class ForwardFluxOperator:
             wall_unit_vessel=self._wall_unit_vessel,
         )
 
-    def _carrier_shadow_read(self, physical, masks: DomainMasks):
+    def _carrier_shadow_read(self, physical, masks: DomainMasks, topology=None):
         """Return wall-shadow operands from the carrier's own topology read."""
-        if not hasattr(self, "_wall_carrier_index"):
+        if not hasattr(self, "_wall_containing_cell_index"):
             # Lightweight composition fixtures supply the operands directly
             # without constructing carrier geometry.
             return self._connectivity_read(physical, None, classify=False)
-        grid_flux, _wall_flux = self.topology.split_flux_map(physical)
+        _grid_flux, wall_flux = self.topology.split_flux_map(physical)
         _vmap_o, vmap_x = self._fixed_design_topology.grid(
             self._null_flux_pool(physical)
         )
+        if topology is None:
+            topology = self._fixed_design_read(physical)[1]
+        admitted = self._fixed_design_topology.contained_x_candidates(vmap_x)
+        lower = jnp.min(jnp.where(admitted, vmap_x[:, 1], jnp.inf))
+        upper = jnp.max(jnp.where(admitted, vmap_x[:, 1], -jnp.inf))
+        lower = jnp.where(lower > topology.axis[1], -jnp.inf, lower)
+        upper = jnp.where(upper < topology.axis[1], jnp.inf, upper)
+        beyond_saddles = (self.wall.coordinate[:, 1] < lower) | (
+            self.wall.coordinate[:, 1] > upper
+        )
+        closed = self.polarity * (wall_flux - topology.x_point_flux) >= 0.0
+        fallback_private = (
+            closed
+            & beyond_saddles
+            & self._private_flux_saddle_present(topology)
+            & jnp.any(admitted)
+        )
+        owner = jnp.asarray(self._wall_containing_cell_index)
+        contained = owner >= 0
+        private = jnp.where(
+            contained, masks.private_flux[jnp.maximum(owner, 0)], fallback_private
+        )
         return {
             "xset": vmap_x[:, :2],
-            "private_wall_node_mask": masks.private_flux[self._wall_carrier_index],
+            "private_wall_node_mask": private,
+            "wall_node_fallback_count": jnp.sum(~contained),
+            "wall_node_fallback_mask": ~contained,
+            "admitted_saddle_flux": topology.x_point_flux,
+            "wall_node_flux": wall_flux,
         }
 
     def topology_margin(self, psi) -> jax.Array:
@@ -3726,7 +3780,7 @@ class ForwardFluxOperator:
         masks = saddle_qualified_domains(
             masks, self._private_flux_saddle_present(topology)
         )
-        reading = self._carrier_shadow_read(physical, masks)
+        reading = self._carrier_shadow_read(physical, masks, topology)
         previous_wall_shadow = self._previous_wall_shadow(previous_shadow)
         if previous_wall_shadow is None:
             previous_wall_shadow = jnp.zeros(self.wall.node_number, dtype=bool)

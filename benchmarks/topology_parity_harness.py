@@ -355,6 +355,8 @@ def receipt_errors(receipt: dict[str, object]) -> list[str]:
         ):
             if key not in row:
                 errors.append(f"{row['identity']}: missing {key}")
+        if row.get("wall_node_census", {}).get("differing_node_count", 0) != 0:
+            errors.append(f"{row['identity']}: wall-node private flags differ")
         if row["marginal_solver_basin"] is False:
             if row.get("differing_cell_count") != 0:
                 errors.append(f"{row['identity']}: non-marginal labels differ")
@@ -613,12 +615,12 @@ def _replay_row(row, governed):
         retained_raster_boundary_flux=raster_flux,
         marginal=marginal,
     )
-    cell_private = np.asarray(
-        operator._carrier_shadow_read(physical, masks)["private_wall_node_mask"],
-        dtype=bool,
-    )
+    shadow = operator._carrier_shadow_read(physical, masks, state)
+    cell_private = np.asarray(shadow["private_wall_node_mask"], dtype=bool)
     raster_private = np.asarray(retained["private_wall_node_mask"], dtype=bool)
     owner = np.asarray(operator._wall_carrier_index, dtype=int)
+    containing = np.asarray(operator._wall_containing_cell_index, dtype=int)
+    fallback = np.asarray(shadow["wall_node_fallback_mask"], dtype=bool)
     wall_differing = np.flatnonzero(cell_private != raster_private)
     wall_rows = [
         {
@@ -626,8 +628,21 @@ def _replay_row(row, governed):
             "position_m": wall[index].tolist(),
             "nearest_cell_index": int(owner[index]),
             "nearest_cell_label": int(replayed[owner[index]]),
+            "containing_cell_index": int(containing[index]),
+            "containing_cell_label": None
+            if fallback[index]
+            else int(replayed[containing[index]]),
+            "node_flux": float(wall_flux[index]),
+            "admitted_saddle_flux": float(shadow["admitted_saddle_flux"]),
+            "used_flux_height_fallback": bool(fallback[index]),
             "cell_authority_private": bool(cell_private[index]),
             "retained_raster_private": bool(raster_private[index]),
+            "adjudication": (
+                "uncontained node: node flux and admitted saddle height band"
+                if fallback[index]
+                else "containing polygon flood label"
+            )
+            + "; retained raster uses nearest in-material raster node",
         }
         for index in wall_differing
     ]
@@ -654,6 +669,11 @@ def _replay_row(row, governed):
             "retained_raster_private_count": int(np.count_nonzero(raster_private)),
             "differing_node_count": int(len(wall_differing)),
             "differing_nodes": wall_rows,
+            "fallback_node_count": int(shadow["wall_node_fallback_count"]),
+            "fallback_node_indices": np.flatnonzero(fallback).tolist(),
+            "containing_cell_indices": containing.tolist(),
+            "cell_authority_private": cell_private.tolist(),
+            "retained_raster_private": raster_private.tolist(),
         },
     )
     record.update(
@@ -885,12 +905,18 @@ def _plot(rows, path):
                 )
             if data.get("annotation"):
                 axis.set_title(data["annotation"], fontsize=7, color="#cc0000")
-        axis.set_title(str(record["identity"]), fontsize=9)
+        census = record.get("wall_node_census", {})
+        counts = (
+            f"\ncells differing: {record.get('differing_cell_count', 'unavailable')}; "
+            f"wall nodes differing: {census.get('differing_node_count', 'unavailable')}"
+        )
+        axis.set_title(str(record["identity"]) + counts, fontsize=9)
         axis.legend(loc="upper right", fontsize=6, frameon=False)
     for axis in flat_axes[len(rows) :]:
         axis.set_visible(False)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
+    figure.savefig(path.with_suffix(".svg"))
     plt.close(figure)
 
 
@@ -921,6 +947,7 @@ def run(
         for row in completed
         if row["marginal_solver_basin"] is False
         and row["differing_cell_count"] == 0
+        and row["wall_node_census"]["differing_node_count"] == 0
         and all(item["matches"] for item in row["selected_primaries"].values())
         and not row["classification"]["finding"]
     ]

@@ -1003,7 +1003,7 @@ def _traced_clip(
         contour_area=jnp.abs(jnp.sum(result.contour_area)),
         patch_area_sum=jnp.sum(result.area),
         vertex_capacity=result.vertex_capacity[0],
-        refused_cell_count=jnp.sum(result.refused_cell_count),
+        refused_cell_count=jnp.sum(result.refused_cell_count, dtype=jnp.int32),
     )
 
 

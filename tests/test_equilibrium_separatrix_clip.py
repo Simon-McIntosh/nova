@@ -713,6 +713,7 @@ def test_spline_clip_refuses_a_polygon_above_the_derived_capacity():
 
     live = int(np.sum(np.asarray(signed) > 0.0))
     assert live >= 2, "the fixture must leave the level set on two runs"
+    assert np.asarray(support.refused_cell_count).dtype == np.dtype("int32")
     assert int(support.refused_cells()) == 1, "the refusal must be counted"
     assert int(np.asarray(support.vertex_capacity)) == capacity
     with pytest.raises(TracedCapacityRefusalError):

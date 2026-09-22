@@ -323,6 +323,11 @@ def main():
                 if code:
                     return code
         row(*(args.row or args.qualified_row))
+        if args.row == ["diverted-single-null", "300"]:
+            while (OUTPUT / "final-validation.request").exists() and not (
+                OUTPUT / "final-validation.done"
+            ).exists():
+                time.sleep(2)
         return 0
     if args.rows:
         code = max(

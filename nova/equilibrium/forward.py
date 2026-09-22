@@ -1003,31 +1003,35 @@ class ForwardProfile:
                 f"a(1)={upper_amplitude:.8g}"
             )
 
-        (lower_fraction, lower_error), (upper_fraction, _upper_error) = bracket
+        (lower_fraction, lower_error), (upper_fraction, upper_error) = bracket
         amplitude = float("nan")
         level_fraction = lower_fraction
         for _ in range(12):
-            level_fraction = 0.5 * (lower_fraction + upper_fraction)
-            candidate_error, amplitude = trial(level_fraction)
-            if not np.isfinite(candidate_error):
-                quarter = 0.25 * (upper_fraction - lower_fraction)
-                for candidate_fraction in (
-                    lower_fraction + quarter,
-                    upper_fraction - quarter,
-                ):
-                    candidate_error, amplitude = trial(candidate_fraction)
-                    if np.isfinite(candidate_error):
-                        level_fraction = candidate_fraction
-                        break
-                else:
+            width = upper_fraction - lower_fraction
+            denominator = upper_error - lower_error
+            secant = lower_fraction - lower_error * width / denominator
+            candidates = [secant, lower_fraction + 0.5 * width]
+            for depth in range(2, 7):
+                offset = width / 2**depth
+                candidates.extend((lower_fraction + offset, upper_fraction - offset))
+            for candidate_fraction in candidates:
+                if not lower_fraction < candidate_fraction < upper_fraction:
                     continue
-            if np.isfinite(amplitude) and abs(amplitude - 1.0) <= 1.0e-2:
-                return shifted(level_fraction)
+                candidate_error, amplitude = trial(candidate_fraction)
+                if not np.isfinite(candidate_error):
+                    continue
+                level_fraction = candidate_fraction
+                if np.isfinite(amplitude) and abs(amplitude - 1.0) <= 1.0e-2:
+                    return shifted(level_fraction)
+                break
+            else:
+                break
             if candidate_error * lower_error > 0.0:
                 lower_fraction = level_fraction
                 lower_error = candidate_error
             else:
                 upper_fraction = level_fraction
+                upper_error = candidate_error
         raise ValueError(
             "exact clip seed boundary solve missed unit amplitude: "
             f"a={amplitude:.8g}, level_fraction={level_fraction:.8g}"

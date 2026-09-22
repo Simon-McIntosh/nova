@@ -16,7 +16,7 @@
 <meta name="plan-sprint" content="S18">
 <meta name="plan-graph-handle" content="hexgrid">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-modified" content="2026-09-22">
 <meta name="plan-effort-hours" content="44.0">
 <meta name="plan-depends-on" content="hex-grid-derisk-gates,split-spline-production-basis,plasma-cell-topology-authority">
 <meta name="plan-blocks" content="efit-baseline-demonstration">
@@ -25,7 +25,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,efit-fixed-input-reproduction,diiid-residual-stall-mechanism">
 </head>
 <body>
@@ -65,6 +65,9 @@
 <div class="r-comment" data-section="s3" data-id="c-20260901T1355-solve-profile" data-who="reckon-ship-s18" data-when="2026-09-01T13:55:00+00:00">
     <div class="r-comment-body">sgc-h200-solve-profile landed (commits aaa1fb1f + 51877347); receipt docs/figures/single-grid-solver-cutover/h200-solve-profile.json + .png (10 warm samples/probe, IQRs, zero host-callback primitives). THE LEAD 1 MS INTUITION MATCHES THE MAP, NOT THE SOLVE: at width 1024 one complete fixed-point map application costs 0.784 ms/member (carrier 0.767, response 0.767, standalone topology 1.030); everything above it is Newton/Krylov ORCHESTRATION - the banked S16 factorial attributes 95.9 percent of solve time to reconciliation + Newton setup + first Krylov action per trip, 3.2 percent to one warmup sweep, 0.9 percent to extra GMRES actions; scan latency is negligible (0.12 ms at 16 trips). Ranked gains toward 1 ms/slice: (1) collapse per-trip reconciliation/Newton-setup/first-Krylov overhead - ideal ceiling saves 41.0 of 42.77 ms but floors at 1.75 ms under the current 16-outer-trip structure; (2) reduce outer trips below 16, since every trip carries the orchestration quantum; (3) warmup and GMRES trims are second-order. Compile (800.6 s) amortizes below 1 ms/slice only past 800k slices - fine for banks, relevant for small lanes. BASELINE PROVENANCE RECONCILED: the committed ladder width-1024 row records 2.675 slices/s = 373.8 ms/member for the FULL settled active-set solve; the 42.77 ms/slice figure is a separate earlier single-slice forward-solve measurement; the profiler stage numbers are independent of both. The 1 ms/slice target therefore reads as: reachable only by restructuring trip orchestration, not by accelerating the map - the map is already there.</div>
 </div>
+<div class="r-comment" data-section="_top" data-id="c-20260922-carrier-and-grid" data-who="reckon-ship" data-when="2026-09-22T10:45:00+00:00">
+    <div class="r-comment-body">Section 2 is substantially landed ahead of any dispatch, and section 4 gains an independent corroboration. CARRIER: the full-axis carrier is built, pinned and rebuilt on the traced kernel (identity 75029bb0, digest eaa48962, shape 4262 by 101, every stored circuit carried, cache-only reload entering no direct Green builder, warm load 0.040 s). The stride-1 carrier guard incident this section exists to not repeat DID recur and was repaired at source: the loader now resolves a carrier's contract from its own identity rather than from a module default, and an identity pinned by no grid still raises. Two recorded figures are stale in our favour: the rebuild cost 1849.6 s on eight CPU cores against the 5768 s budgeted by the S16 session, and the kernel share is now about 4 s. GATES: the twenty-edit coil-edit sweep ran at both grids on one P100 with the same shot, slice and coil (p4_upper, circuit 8). Seven of seventeen edits converged on the full axes against ten of twenty at the stride; matched index for index, three GAIN (2, 10, 16) and six LOSE (3, 5, 7, 13, 14, 15), eight agree. So the grid reshuffles which edits close rather than raising the fraction. A separate three-edit probe at two percent near the base frame went one of three to three of three, so the grid matters for small excursions and does not explain the sweep. The mechanism is drawn rather than inferred in docs/figures/mast-centroid-capability/sweep-full-axis/matched-edit-both-grids.png: the two grids admit DIFFERENT saddles, the stride state anchoring a lower saddle while the reference x-point sits upper and unreached. Read alongside this section's recorded stride-1 DIII-D score of 0.083, the cutover must state its per-machine signature rather than claim an improvement across the board. Receipts: docs/figures/mast-centroid-capability/{full-axis-carrier,kernel-backends,sweep-full-axis}/.</div>
+</div>
 </section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -72,6 +75,26 @@
     <p class="r-dec-q">response-build-route</p>
     <p class="r-dec-ctx">The 5768 s cold-construction figure decomposed to the host-side exact polygon route on a CPU node (see s2 comments). The shipped device-kernel-build plan landed exact Urankar Green matrices on device: Urankar-exact everywhere including the far field, seconds-to-tens-of-seconds class on the H200 with provenance-keyed caches and compiled geometry gradients.</p>
     <p class="r-dec-rat">Lead decision 2026-09-01: fast does not mean inaccurate. The carrier on the new support is built from the exact Urankar integrals evaluated through the device-kernel fast path (device-kernel-build), not the host-side polygon assembly; the host exact polygon route remains available as the equivalence referee. Expected H200 build cost is seconds-class, so the 5768 s cold-CPU bound is not the budget. The digest-pinned durable cache and launch-plus-harvest discipline stand unchanged.</p>
+    </div>
+<div class="r-dec" data-key="full-stored-axes-are-the-default-grid" data-choice="full-axes-default-stride-deprecated-loadable" data-by="lead" data-when="2026-09-22">
+    <p class="r-dec-q">The full stored axes are the default response grid; the stride grid is deprecated but stays loadable</p>
+    <p class="r-dec-ctx">The stored-axis stride grid (33 by 33, 1126 by 101 response) and the full stored axes (65 by 65, 4262 by 101) are both pinned in benchmarks/mast_response_carrier_warm.CARRIER_GRIDS. Measured 2026-09-22: the stride grid loses convergence on edited frames in a way the full axes do not reproduce, and 223 JSON receipts plus 12 HTML records resolve through the coarse identity 1d2c4a2b.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="full-axes-default-stride-deprecated-loadable">full-axes-default-stride-deprecated-loadable</button>
+      <button class="r-opt" data-value="full-axes-default-stride-deleted">full-axes-default-stride-deleted</button>
+      <button class="r-opt" data-value="keep-both-as-equal-choices">keep-both-as-equal-choices</button>
+      </p>
+    <p class="r-dec-rat">Lead 2026-09-22: the coarse grid is a convergence foot-gun, so it stops being the default and carries no new work. It is deprecated rather than deleted because deleting the carrier file would orphan all 235 records that resolve through it, turning a complete provenance chain into dangling references, which is the opposite of the reproducibility case for defaulting to the fine grid. The full-axis grid is identity 75029bb0, digest eaa48962, shape (4262, 101).</p>
+    </div>
+<div class="r-dec" data-key="response-build-uses-the-traced-tile-kernel" data-choice="traced-tile-kernel" data-by="lead" data-when="2026-09-22">
+    <p class="r-dec-q">The prescribed-response build runs through the traced tile kernel, not the host polygon kernel</p>
+    <p class="r-dec-ctx">nova.imas.mast_vacuum_response built the carrier by calling nova.biot.polygon.polygon_greens once per winding-pack section. That kernel is NumPy with a Python loop over target blocks and in-place assignment: it cannot take a traced array and cannot reach a device, which is why the published carrier build ran with slurm_job_gpus 0. nova.biot.tiledassembly ships the traced equivalent and nothing called it.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="traced-tile-kernel">traced-tile-kernel</button>
+      <button class="r-opt" data-value="host-polygon-kernel">host-polygon-kernel</button>
+      <button class="r-opt" data-value="selectable-per-build">selectable-per-build</button>
+      </p>
+    <p class="r-dec-rat">Measured on one P100 over 938 sections and 1126 targets: 1599.74 s host against 2.912 s compile plus 4.3338 s kernel, so 369.1x on the steady launch and 220.8x once the single compile is paid, with one compile serving 270 tiles. Validated elementwise against the published carrier, because the pins do NOT check response values: the semantic identity digests input arrays and the stored response digest is self-consistent, so a changed kernel passes every loader check. Maximum absolute difference 3.597e-16 against a peak element of 8.424e-06 on 98.5 percent of elements, every value finite. Note for implementers: a batched tile does not respect TilePlan.peak_bytes, so its shape is declared from the measured high-water curve; asking plan_tiles for one returns the whole pair space and the device refuses the 236 GiB that implies.</p>
     </div>
 </section>
 </main>

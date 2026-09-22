@@ -982,9 +982,263 @@ def measure_jvp_accuracy(
     return receipt
 
 
+RENDER_SCHEMA = "nova.exact-clip-memory-render-receipt"
+SOURCE_RECEIPT_NAME = "base-memory.json"
+SCALING_FIGURE_STEM = "base-memory-scaling"
+SOLVE_PANEL_DIRECTORY = "solve-panels-final-receipted"
+SOLVE_PANEL_CASE = "weak-rotation-reactor-static"
+SOLVE_PANEL_REQUESTED_CELLS = -1000
+MEMORY_GATE_GIB = 20.0
+GATE_COLOR = "#b24a3a"
+
+
+def _temporary_gib(row: dict[str, Any]) -> float:
+    """Return one rung's XLA temporary memory as GiB, from the receipt alone."""
+
+    size = row["memory_analysis"]["temp_size_in_bytes"]
+    if not isinstance(size, int) or size <= 0:
+        raise RuntimeError("a rung receipt carries no positive temporary byte count")
+    return size / 2**30
+
+
+def _render_scaling_figure(rows: list[dict[str, Any]], path: Path) -> dict[str, Any]:
+    """Plot the XLA temporary memory of every rung against the realised cell count.
+
+    The point coordinates and the printed labels both come from the receipt's
+    byte counts, and both are recorded beside the value they came from, so a
+    reader can compare the two without re-deriving either.
+    """
+
+    import matplotlib.pyplot as plt
+
+    from nova.media.ink import DEFAULT_INK, trace_axes
+
+    cells = [int(row["realised_cells"]) for row in rows]
+    if len(cells) != len(set(cells)):
+        raise RuntimeError("two rungs share a realised cell count")
+    if sorted(cells) != cells:
+        raise RuntimeError("the rungs are not in ascending cell order")
+    plotted = [_temporary_gib(row) for row in rows]
+    figure, axes = plt.subplots(figsize=(7.2, 4.6), constrained_layout=True)
+    trace_axes(axes)
+    axes.plot(
+        cells,
+        plotted,
+        color=DEFAULT_INK.flux_color,
+        marker="o",
+        markersize=6.0,
+        linewidth=1.6,
+    )
+    axes.axhline(MEMORY_GATE_GIB, color=GATE_COLOR, linestyle="--", linewidth=1.2)
+    for cell_count, gib, row in zip(cells, plotted, rows, strict=True):
+        axes.annotate(
+            f"{gib:.2f}",
+            (cell_count, gib),
+            textcoords="offset points",
+            xytext=(0, 8),
+            ha="center",
+            fontsize=8,
+        )
+        axes.annotate(
+            f"{abs(int(row['requested_cells']))} requested",
+            (cell_count, gib),
+            textcoords="offset points",
+            xytext=(0, -14),
+            ha="center",
+            fontsize=7,
+            color="#5c6b76",
+        )
+    axes.text(
+        cells[0],
+        MEMORY_GATE_GIB,
+        f"{MEMORY_GATE_GIB:.0f} GiB gate",
+        color=GATE_COLOR,
+        fontsize=8,
+        va="bottom",
+    )
+    axes.set_xlabel("realised atomic cells")
+    axes.set_ylabel("XLA temporary memory (GiB)")
+    axes.set_ylim(0.0, max(plotted) * 1.18)
+    title_lines = [
+        ("Base exact-clip solve: pairwise JVP state exceeds the gate at every rung"),
+        (
+            f"{len(rows)} compiled rungs, one cell count each; the coordinate of "
+            "every mark and the label beside it come from the same receipt "
+            "byte count. No solve is executed to draw this figure."
+        ),
+    ]
+    axes.set_title("\n".join(title_lines), loc="left", fontsize=7.0)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    png_path = path.with_suffix(".png")
+    figure.savefig(path, format="svg", facecolor=DEFAULT_INK.figure_facecolor)
+    figure.savefig(png_path, dpi=180, facecolor=DEFAULT_INK.figure_facecolor)
+    plt.close(figure)
+
+    points = [
+        {
+            "realised_cells": cell_count,
+            "requested_cells": int(row["requested_cells"]),
+            "receipt_temporary_bytes": int(
+                row["memory_analysis"]["temp_size_in_bytes"]
+            ),
+            "receipt_plotted_gib": gib,
+            "plotted_y_gib": gib,
+            "printed_label": f"{gib:.2f}",
+            "above_gate": bool(gib > MEMORY_GATE_GIB),
+        }
+        for cell_count, gib, row in zip(cells, plotted, rows, strict=True)
+    ]
+    return {
+        "figure": path.name,
+        "companion": png_path.name,
+        "kind": "memory_scaling",
+        "title_lines": title_lines,
+        "points": points,
+        "gate_gib": MEMORY_GATE_GIB,
+        "poloidal_panels": [],
+    }
+
+
+def _null_tally(topology: dict[str, Any]) -> dict[str, Any]:
+    """Count the glyphs one null set contributes to a panel."""
+
+    axis_drawn = topology.get("axis_rz_m") is not None
+    x_points = topology.get("x_point_rz_m")
+    x_drawn = 0 if x_points is None else len(np.atleast_2d(x_points))
+    return {
+        "magnetic_axis": {"drawn": 1 if axis_drawn else 0, "dropped_outside_wall": 0},
+        "admitted_x_points": {"drawn": x_drawn, "dropped_outside_wall": 0},
+    }
+
+
+def _render_solve_panel(
+    part_row: dict[str, Any], path: Path, relative_name: str
+) -> dict[str, Any]:
+    """Rebuild the production-route panel from its part receipt, with no solve.
+
+    The panel title carries the terminal fixed-point residual and the
+    convergence flag the part receipt recorded, so a reader of the figure can
+    see the state it drew without opening the receipt beside it.
+    """
+
+    import matplotlib.pyplot as plt
+
+    data = part_row["render_data"]
+    certificate._validate_render_data(data)
+    errors = {
+        name: np.asarray(data["error_fields"][name]) for name in certificate.NORM_FIELDS
+    }
+    solver = part_row["solver"]
+    residual = float(solver["terminal_fixed_point_residual"])
+    converged = bool(solver["converged"])
+    title = (
+        f"{part_row['case']} · cells={int(part_row['realised_cells'])} · "
+        f"residual={residual:.3e} · "
+        f"converged={'yes' if converged else 'no'}"
+    )
+    figure = certificate._plot(
+        np.asarray(data["coordinates_rz_m"]),
+        np.asarray(data["terminal_flux_wb"]),
+        np.asarray(data["analytic_flux_wb"]),
+        np.asarray(data["derivative_coordinates_rz_m"]),
+        errors,
+        np.asarray(data["boundary_rz_m"]),
+        np.asarray(data["wall_units_rz_m"][0]),
+        data["terminal_topology"],
+        data["analytic_topology"],
+        path,
+        title,
+    )
+    plt.close(figure)
+    terminal = data["terminal_topology"]
+    analytic = data["analytic_topology"]
+    terminal_tally = _null_tally(terminal)
+    analytic_tally = _null_tally(analytic)
+    null_sets = {
+        "terminal_magnetic_axis": terminal_tally["magnetic_axis"],
+        "terminal_admitted_x_points": terminal_tally["admitted_x_points"],
+        "analytic_magnetic_axis": analytic_tally["magnetic_axis"],
+        "analytic_admitted_x_points": analytic_tally["admitted_x_points"],
+    }
+    return {
+        "figure": relative_name,
+        "kind": "poloidal_panel",
+        "realised_cells": int(part_row["realised_cells"]),
+        "title_lines": [
+            title,
+            (
+                "analytic blue contours and nulls / solved ochre contours and "
+                "nulls; shared Wb levels"
+            ),
+            "wall drawn at its unit-faithful closure",
+        ],
+        "terminal_residual": residual,
+        "converged": converged,
+        "terminal_class": terminal.get("class"),
+        "poloidal_panels": [
+            {
+                "null_sets": null_sets,
+                "null_glyph_total": sum(tally["drawn"] for tally in null_sets.values()),
+                "wall_node_count": int(np.asarray(data["wall_units_rz_m"][0]).shape[0]),
+            }
+        ],
+    }
+
+
+def _sha256(path: Path) -> str:
+    import hashlib
+
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def render(figure_directory: Path) -> dict[str, Any]:
+    """Rebuild the memory-scaling figure and the solve panel from their receipts.
+
+    Both operands are committed: the scaling figure reads the memory receipt's
+    byte counts and the panel reads a persisted part receipt's render data.
+    Nothing here builds a machine, calls an operator or enters a solve, which
+    is what lets it run on the login node.
+    """
+
+    figure_directory = figure_directory.resolve()
+    source_path = figure_directory / SOURCE_RECEIPT_NAME
+    source_receipt = json.loads(source_path.read_text(encoding="utf-8"))
+    panel_name = (
+        f"{SOLVE_PANEL_CASE}-production-route-cells-"
+        f"{abs(SOLVE_PANEL_REQUESTED_CELLS)}.png"
+    )
+    panel_path = figure_directory / SOLVE_PANEL_DIRECTORY / panel_name
+    part_path = (
+        figure_directory
+        / "solve-parts-final-receipted"
+        / panel_name.replace(".png", ".json")
+    )
+    part_row = json.loads(part_path.read_text(encoding="utf-8"))
+    scaling_path = figure_directory / f"{SCALING_FIGURE_STEM}.svg"
+    scaling_record = _render_scaling_figure(source_receipt["rows"], scaling_path)
+    panel_record = _render_solve_panel(
+        part_row, panel_path, f"{SOLVE_PANEL_DIRECTORY}/{panel_name}"
+    )
+    render_receipt = {
+        "schema": RENDER_SCHEMA,
+        "completed": True,
+        "source_receipt": source_path.name,
+        "source_receipt_sha256": _sha256(source_path),
+        "render_entry_point": "benchmarks/exact_clip_memory_scaling.py render",
+        "gate_gib": MEMORY_GATE_GIB,
+        "figures": [scaling_record, panel_record],
+    }
+    _atomic_json(figure_directory / "render-receipt.json", render_receipt)
+    print("EXACT_CLIP_MEMORY_RENDER_EXIT=0", flush=True)
+    return render_receipt
+
+
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "operand", nargs="?", choices=("measure", "render"), default="measure"
+    )
+    parser.add_argument("--output", type=Path)
     parser.add_argument("--compiler-root", type=Path)
     parser.add_argument("--part-root", type=Path)
     parser.add_argument("--figure-root", type=Path)
@@ -999,6 +1253,16 @@ def _parse() -> argparse.Namespace:
 
 def main() -> None:
     arguments = _parse()
+    if arguments.operand == "render":
+        directory = arguments.figure_root or arguments.output
+        if directory is None:
+            raise ValueError(
+                "render requires --figure-root naming the figure directory"
+            )
+        render(directory)
+        return
+    if arguments.output is None:
+        raise ValueError("--output is required for memory analysis and solve runs")
     if arguments.execute_solve:
         if len(arguments.cells) != 1:
             raise ValueError("the production solve accepts exactly one cell count")

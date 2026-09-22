@@ -1,0 +1,11 @@
+revision=c054dc50fe02add3b03555a99ce66a099485dc72+candidate-worktree tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-closed-form-polygon-moments-replace-the-gauss-antiderivative command=srun --jobid=1275743 --overlap --cpus-per-task=1 --mem=8G /home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/exact-clip-closed-form/measure_replacement.py --suite candidate
+.................                                                        [100%]
+17 passed in 72.50s (0:01:12)
+.................                                                        [100%]
+17 passed in 79.13s (0:01:19)
+.................                                                        [100%]
+17 passed in 81.90s (0:01:21)
+.................                                                        [100%]
+17 passed in 85.01s (0:01:25)
+
+Invocation inherited task count from the allocation and ran four copies; the canonical candidate-suite.log records the subsequent single-process gate.

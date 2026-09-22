@@ -282,6 +282,61 @@
       exit <code>0</code>, <code>2 passed</code>. This measures the node's own change only; the merged
       result is a separate node's.</p>
     </section>
-  </main>
+  
+<section id="one-row-per-process">
+      <h2><span class="sec">§</span> One certificate row per child process (job 1274197)</h2>
+      <p class="worker-landing"><strong>Measured 2026-09-20, commit <code>2710b2ea1</code>.</strong>
+      The certificate entry point now runs each of the four rows in a child process of the same
+      interpreter and merges the per-row receipts the driver already persists into the one receipt
+      the gate reads. Nothing in the solver changed. One program load adds
+      <strong>16789-17620</strong> mappings against a cap of <strong>65530</strong>, so three loads
+      fit in a process and the fourth does not; giving each row its own process makes the release
+      between rows unconditional rather than dependent on where the allocator happened to be.</p>
+      <p class="worker-landing">One <code>all_debug</code> allocation, job <code>1274197</code>,
+      <code>--cpus-per-task=8 --mem=64G --time=00:59:00</code>, <code>TMPDIR=/tmp</code> in the submit
+      environment and in the payload, <code>JAX_PLATFORMS=cpu</code>, the shared root interpreter
+      invoked directly with <code>uv</code> never called on the compute node. The four rows ran
+      sequentially as four children of that one job, never as an array. Each child ran under
+      <code>benchmarks/compile_abort_probe.py</code> at a 0.2 s tick, so every peak below is a
+      sampled count from that child's own <code>/proc/&lt;pid&gt;/maps</code>.</p>
+      <table>
+        <tr><th>row</th><th>cells</th><th>child pid</th><th>exit</th><th>peak mappings</th><th>one load</th><th>bit-identical</th><th>terminal residual</th></tr>
+        <tr><td><code>weak-rotation-reactor-static</code></td><td>-300</td><td>766515</td><td>1</td><td><strong>24,750</strong></td><td>yes</td><td>False</td><td>2.430e-15</td></tr>
+        <tr><td><code>moderate-rotation-conventional-static</code></td><td>-300</td><td>767153</td><td>1</td><td><strong>40,756</strong></td><td>NO</td><td>False</td><td>1.175e-15</td></tr>
+        <tr><td><code>strong-rotation-compact-static</code></td><td>-300</td><td>768530</td><td>1</td><td><strong>40,752</strong></td><td>NO</td><td>False</td><td>1.457e-15</td></tr>
+        <tr><td><code>diverted-single-null</code></td><td>-500</td><td>769870</td><td>1</td><td><strong>39,095</strong></td><td>NO</td><td>False</td><td>2.092e-01</td></tr>
+      </table>
+      <p class="worker-landing"><strong>No child came near the kernel limit, and what the boundary
+      removes is accumulation.</strong> The largest sampled peak across the four children is
+      <strong>40,756</strong> of the <strong>65,530</strong> the kernel allows — <strong>62% of the cap</strong>
+      — and the smallest is 24,750. The aborting job died inside its fourth load standing at 54147
+      mappings, because that process had already loaded three rows' programs; each of these children
+      begins from a fresh address space, so it can accumulate nothing before its own row starts.</p>
+      <p class="worker-landing"><strong>The measurement does not support "one program load per child",
+      and the receipt says so.</strong> A row's own work can load more than one program — the largest
+      child's count grew by roughly two loads above its starting count — so the receipt's
+      <code>within_one_program_load</code> flag, which tests a child's peak against twice the
+      <strong>16789-17620</strong> a single load costs, reads <strong>false</strong> for <code>moderate-rotation-conventional-static</code>, <code>strong-rotation-compact-static</code>, <code>diverted-single-null</code> and
+      true only for the smallest row. What the remedy establishes is that no process ever holds the
+      four rows' programs at once, which is the condition the abort needed: with a fresh process per
+      row the room available to any one child is a whole cap, and the worst child used 62% of the cap of it.
+      The two rows the aborting job never reached — <code>strong-rotation-compact-static</code> and <code>diverted-single-null</code> — complete here, each in a process
+      of its own with its own terminal state.</p>
+      <p class="worker-landing"><strong>The process shape is enforced rather than described.</strong>
+      A receipt assembled from rows is refused when a row carries the receipt's own process id, when
+      fewer distinct processes solved the rows than there are rows, or when a row wrote no receipt, so
+      the single-process path cannot silently present itself as four. The committed case
+      <code>test_merged_receipt_from_four_child_rows_matches_the_single_process_shape</code> drives four
+      real children through the row selector and asserts the merged receipt equals the one-process
+      receipt row for row and key for key apart from the provenance they differ in by construction, and
+      a second case refuses the three shapes above. Row counts: <strong>17 passed</strong> at this
+      revision against <strong>14 passed</strong> at the base, zero added failures. The declared
+      negative control — run all four rows in the parent again — reddens that case.</p>
+      <p class="worker-landing">The remedy is interim by construction: it bounds what one process
+      loads, not what one program costs. The root repair remains the emitted program, and the followup
+      below stays open for it. Evidence: <a href="/nova/evidence/archive/cpu-compile-abort-landed">the
+      mapping-count record</a>, carrying the four child series and their peaks as a figure.</p>
+    </section>
+</main>
 </body>
 </html>

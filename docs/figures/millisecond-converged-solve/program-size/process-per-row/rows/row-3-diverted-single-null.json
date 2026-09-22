@@ -1,0 +1,122 @@
+{
+  "assignment": {
+    "job_id": "1274197",
+    "node": "98dci4-clu-3141",
+    "partition": "all_debug",
+    "platform": "cpu"
+  },
+  "baseline_arm_kinds": {
+    "digest": 1
+  },
+  "baseline_revision": "4e82bafb3abbd972096f84f306dfc8b28577e2fe",
+  "baseline_state_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json",
+  "candidate_revision": "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
+  "captured_at": "2026-09-20T18:31:26.841703+00:00",
+  "comparison": "terminal state recorded at the base revision against the head accelerated program",
+  "execution_mode": null,
+  "identity_row_count": 1,
+  "measurement_revision": "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
+  "panel_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/panels",
+  "parent_process_id": null,
+  "passed": false,
+  "pending_rows": [],
+  "persistent_compilation_cache": {
+    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 0.0,
+    "root": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+    "runtime_identity": {
+      "backend": "cpu",
+      "backend_version": "cpu",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "cpu",
+          "platform": "cpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-ea5c55820be3d80549fe"
+  },
+  "process_id": 769870,
+  "row_processes": [],
+  "rows": [
+    {
+      "baseline_arm_kind": "digest",
+      "baseline_arm_source": "recorded base-revision terminal state digest",
+      "baseline_recorded_seconds": 164.3271118402481,
+      "baseline_revision": "4e82bafb3abbd972096f84f306dfc8b28577e2fe",
+      "baseline_seconds": null,
+      "baseline_state_array_source": null,
+      "baseline_state_finite": true,
+      "baseline_state_sha256_binary64": "c7d00b8dfce08497a8aa83689904efb49f5cf83485ac457c1cb4ea5be11a0355",
+      "baseline_terminal_residual": 0.20916476784377447,
+      "baseline_terminal_residual_finite": true,
+      "candidate_arm_source": "head-revision solve",
+      "candidate_revision": "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
+      "candidate_seconds": 472.4918174017221,
+      "candidate_state_array_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/states/diverted-single-null_500.npy",
+      "candidate_state_array_values": 2226,
+      "candidate_state_finite": true,
+      "candidate_state_sha256_binary64": "c8f934d0dbed8a02eb69aedd2cc8a99213f31f76bceef08702cda9c058a88e6e",
+      "candidate_terminal_residual": 0.20916476784377752,
+      "candidate_terminal_residual_finite": true,
+      "case": "diverted-single-null",
+      "converged_equal": null,
+      "difference_values": null,
+      "identity_row_count": 2226,
+      "maximum_absolute_state_difference": null,
+      "maximum_absolute_state_difference_measure": "unmeasured: the baseline arm carries a binary64 digest rather than the state array, so the two arms cannot be differenced element-wise",
+      "panel": {
+        "bit_identical": false,
+        "filesystem_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/panels/diverted-single-null-cells-500-across-revisions.png",
+        "project_absolute_src": "/nova/figures/millisecond-converged-solve/program-size/process-per-row/panels/diverted-single-null-cells-500-across-revisions.png",
+        "sha256": "0f93d71245b9beee6cd6b23ebc0215a37447cd6340019ebd0d328c6b842ced44",
+        "terminal_residual": 0.20916476784377752,
+        "vector_filesystem_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/panels/diverted-single-null-cells-500-across-revisions.svg",
+        "vector_project_absolute_src": "/nova/figures/millisecond-converged-solve/program-size/process-per-row/panels/diverted-single-null-cells-500-across-revisions.svg",
+        "vector_sha256": "ef4a094a07668e3b1f1a8e81c27fd67e2dbaceefa8370a63b8bda280cbadc5dc"
+      },
+      "realised_state_values": 2226,
+      "requested_cells": -500,
+      "terminal_state_bit_identical": false
+    }
+  ],
+  "schema": "nova.solve-program-certificate-identity",
+  "state_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/states"
+}

@@ -26,10 +26,10 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-22">
-<meta name="plan-version" content="171">
+<meta name="plan-version" content="172">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
-<meta name="plan-impl" content="0.87">
+<meta name="plan-impl" content="0.89">
 </head>
 <body>
 <main class="plan-doc">
@@ -845,10 +845,11 @@ Figure commit <code>f2379a5f1</code> carries the inspected PNG/SVG pairs. Nothin
     <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution</pre>
     <p class="r-fu-outcome">Decided by the lead 2026-09-22: route A. Locked as decision production-clip-is-moment-preserving-and-coupling-frozen. Section 6 rung A is the critical path of S19; memory and trace costs are solved independently (vmapped clip kernels, or a lower clip and moment order through exact-clip-moment-quadrature) and never by whole-cell booking. Route B stays on record as the measured fallback only.</p>
     </article>
-<article class="r-fu" data-id="f-cca-measure-the-exact-mode-executable-at-head" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="s19-codex-20260916" data-written-at="2026-09-22" data-recommends-skill="/reckon-ship cut-cell-current-attribution" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cca-measure-the-exact-mode-executable-at-head" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="s19-codex-20260916" data-written-at="2026-09-22" data-recommends-skill="/reckon-ship cut-cell-current-attribution" data-resolved-at="2026-09-22T11:36:19+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Measure the clipped-mode certificate executable at HEAD: bytes, compile wall, peak allocation, and whether the clip is live</h4>
     <div class="r-fu-body">First node of the route-A path, report only. The last exact-clip cost record (docs/figures/cut-cell-current-attribution/exact-clip-cost, 2026-09-16) compiled at the retired swept support capacity (3840 for 110 cells, since f7fefbd7 derived to 158) with a 587 s compile at 110 cells, and every program-size measure since (597 to 88 MB) was chord mode. Measure at HEAD with support_clip_mode set to exact through set_support_clip_mode on the weak-rotation certificate rows at 110, 300 and 1000 realised cells: serialized executable bytes through the census serialized-executable measure the route-integrity rungs used, compile wall, peak device or host allocation, mapping count through benchmarks.compile_abort_probe, on one all_debug allocation with JAX_PLATFORMS=cpu (8 CPUs, 128G) as the compile witness and one titan job (--partition=titan --gres=gpu:1) as the device arm, each row in its own process; beside the numbers, the class census at the stalled 342-cell terminal state in exact mode (cut, inside, outside counts and the confined-or-open flips across a 1e-6 step along the analytic direction) so the record shows whether the clipped path is live where the chord path flipped whole cells; and the terminal digest of each row against its chord-mode digest. The gate g-cca-exact-mode-executable-admits-the-hot-path reads its verdict from this record: under 100,000,000 bytes at 300 cells passes, over names the reduction node (exact-clip-moment-quadrature order reduction or vmapped clip kernels) as the next critical step.</div>
     <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution</pre>
+    <p class="r-fu-outcome"><p>Measured 2026-09-22 (run r-20260922T090712671761, merged at 75588c276): gate <code>g-cca-exact-mode-executable-admits-the-hot-path</code> FAILS. Exact-mode 110/135 compiles to 234,130,996 bytes on CPU (395.5 s) against the 100 MB ceiling; 300/342 and 1000/1072 refuse before lowering on the exact cold-seed bracketing (<code>a(0)=nan</code>); titan 110 is 48 MB, 632 s compile, nonconverged; chord controls 23.6/33.6/121.4 MB. The 110-cell HLO census is dominated by Bernstein binomials and polygon-moment antiderivatives, so step 2 of the route-A path runs next: repair the exact seed bracketing in <code>nova/equilibrium/forward.py</code>, then lower the clip and moment cost through closed-form polygon moments (exact-clip-moment-quadrature) and one vmapped per-cell clip body, then re-measure before the mode change.</p></p>
     </article>
 <article class="r-fu" data-id="f-cca-rung-a-is-the-critical-path" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="s19-codex-20260916" data-written-at="2026-09-22" data-recommends-skill="/reckon-ship cut-cell-current-attribution §6" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Rung A: the certificate runs in the clipped production mode with candidacy from the clip geometry, and the cold seeds are certified there</h4>
@@ -1398,10 +1399,11 @@ Figure commit <code>f2379a5f1</code> carries the inspected PNG/SVG pairs. Nothin
 
 <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
-<div class="r-gate" data-id="g-cca-exact-mode-executable-admits-the-hot-path" data-section="s6" data-gated-sections="s6" data-status="open" data-verdict="">
+<div class="r-gate" data-id="g-cca-exact-mode-executable-admits-the-hot-path" data-section="s6" data-gated-sections="s6" data-status="closed" data-verdict="failed">
     <h4 class="r-gate-measure">the certificate executable in the clipped production mode at 300 realised cells compiles and runs on the CPU witness and its serialized bytes sit under the route-integrity ceiling (100,000,000), with the compile wall and peak allocation beside it at 110, 300 and 1000 cells</h4>
     <p class="r-gate-required-evidence">the exact-mode program census at HEAD (followup f-cca-measure-the-exact-mode-executable-at-head) or, if over the ceiling, the landing of the order or vmap reduction that brings it under</p>
-    </div>
+    <a class="r-gate-evidence" href="docs/evidence/archive/cut-cell-current-attribution-landed.html#exact-mode-executable-census: exact mode at 110 requested (135 realised) cells compiles to 234,130,996 bytes on the CPU witness in 395.5 s, 134 MB over the 100,000,000-byte ceiling, then times out at 9.36 GB host RSS; the 300 (342) and 1000 (1072) rows refuse before lowering (exact clip seed boundary level does not bracket unit amplitude, a(0)=nan a(1)=0.8968) so no 300-row executable exists to measure; titan 110 is 48,079,034 bytes, 632 s compile, nonconverged; chord controls 23.6, 33.6 and 121.4 MB. HLO dominated by Bernstein binomials and polygon-moment antiderivatives (run r-20260922T090712671761, merged 75588c276)">Evidence</a>
+</div>
 </section>
 </main>
 </body>

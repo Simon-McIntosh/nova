@@ -2753,7 +2753,7 @@ ROW2_EXIT=139</pre>
 
 <section id="class-governed-atlas-third-bookend">
   <h2>Class-governed MAST atlas — third bookend</h2>
-  <p><strong>Verdict: reject, 82/100.</strong> The candidate at
+  <p><strong>Verdict: promote, 100/100.</strong> The candidate at
   <code>40ee2c0c9eff7351a7f03de181e7cb54280ef7c1</code> closes all three findings from
   the 64/100 second bookend in committed source and data: 12 of 12 MAST operands persist
   <code>solve_topology_class=diverted</code>, the MAST atlas publisher reads that field without a
@@ -2767,22 +2767,25 @@ ROW2_EXIT=139</pre>
   reading diverted is correct for this six-shot bank: the label comes from each solve receipt's
   <code>topology_read.diverted</code>, while the two empty rows are explicit branch-assembly
   failures rather than limited equilibria.</p>
-  <p><strong>Promotion blocker.</strong> The required fresh replay did not complete. One
-  <code>all_debug</code> allocation, job <code>1275510</code>, used <code>TMPDIR=/tmp</code> in the
-  submit environment and payload, <code>JAX_PLATFORMS=cpu</code>, and the root interpreter directly.
-  An archived copy of the candidate was bound over the gate's hard-coded worktree path so the
-  literal <code>gate.sh</code> could run without changing the candidate. The log proved the intended
-  path with <code>MAST_OPERANDS 22086/43</code>, then the step timed out at 20:08 before
-  <code>MAST_STATES_READY</code>; the gate emitted no terminal exits or class census, and pytest plus
-  the legacy-field control were not reached. The read-only persistent cache forced cold CPU
-  compilation. This is absent promotion evidence, not a newly demonstrated source defect.</p>
+  <p><strong>Fresh promotion gate passed.</strong> One <code>all_debug</code> allocation, job
+  <code>1275525</code>, used 8 CPUs, 64 GB, <code>TMPDIR=/tmp</code> in submit, payload and isolation
+  namespace, <code>JAX_PLATFORMS=cpu</code>, and the root interpreter directly; <code>uv</code> was
+  never invoked on the node. It completed in 8:49 with <code>RENDERER_EXIT=0</code>,
+  <code>ATLAS_EXIT=0</code>, and <code>MEASURE_EXIT=0</code>. The gate reported all twelve persisted
+  classes as diverted. The 22086/43 mixed frame has 676 boundary points, admitted saddle
+  <code>[0.5849783456209242, 1.2305027322144644]</code>, minimum boundary-to-saddle distance
+  <code>2.132398574419467e-13 m</code>, and atlas class diverted. The fresh test file reported
+  9 passed in 17.84 seconds. Mutating the publisher to read legacy <code>class</code> instead of
+  <code>solve_topology_class</code> reddened only the end-to-end limited case: 1 failed, 8 passed
+  in 15.92 seconds at the assertion that the published class must remain limited.</p>
   <p>Full scored record and findings JSON:
   <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-third-verify-the-class-governed-atlas-read/review.md</code>.
   Gate log:
-  <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-third-verify-the-class-governed-atlas-read/gate-and-tests.log</code>.
-  A new verification allocation must reproduce the 12-of-12 census, nine-test pass, and
-  legacy-field red control with a writable review-owned compilation-cache root before promotion.
-  Nothing under <code>nova/</code> changed.</p>
+  <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-third-verify-the-class-governed-atlas-read/gate-and-tests-1275525.log</code>.
+  Control log:
+  <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-third-verify-the-class-governed-atlas-read/negative-control-1275525.log</code>.
+  The 12-of-12 census, nine-test pass, discriminating red control and twelve panel reads close the
+  second-bookend findings. Nothing under <code>nova/</code> changed.</p>
 </section>
   </main>
 </body>

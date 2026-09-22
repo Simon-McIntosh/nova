@@ -1,14 +1,18 @@
-"""The sampler wrapper must exit with the status of the child it sampled.
+"""The sampler wrapper's process status must carry the sampled child's status.
 
-The probe exists to keep a trace of a driver that dies inside the compiler, and
-the driver's own status is the only signal that says it died at all.  A wrapper
-that records that status in its summary and then exits zero lets a caller that
-gates on the wrapper's status read an abort as a successful measurement, so the
-recorded status and the process status have to agree.
+The probe exists to leave a trace of a driver that dies inside the compiler, and
+the driver's own status is the signal that says it died at all.  A wrapper that
+records that status in its summary and then exits zero lets a caller gating on
+the wrapper's status read an abort as a successful measurement, so the recorded
+status and the process status have to agree in both directions: a child that
+fails must fail the wrapper, and a child that succeeds must leave it at zero, so
+a wrapper that failed whenever it ran would not pass this file either.
 
-Both directions are asserted: a child that fails must fail the wrapper, and a
-child that succeeds must leave it at zero, so a wrapper that failed whenever it
-ran would not pass this file either.
+The child is a trivial shell command rather than a compile, so each case costs a
+scheduling slice: the wrapper's status is the subject, not the driver's work.
+The arbitrary-status case is kept apart from the two named ones because a wrapper
+that special-cased a single well-known code would satisfy the named pair while
+still discarding every other failure.
 """
 
 from __future__ import annotations
@@ -70,3 +74,10 @@ def test_successful_child_leaves_the_wrapper_at_zero(tmp_path: Path) -> None:
 
     assert summary["exit_code"] == 0
     assert wrapper_status == 0
+
+
+def test_the_wrapper_carries_an_arbitrary_child_status(tmp_path: Path) -> None:
+    wrapper_status, summary = _sample_a_child(tmp_path, "exit 3")
+
+    assert summary["exit_code"] == 3
+    assert wrapper_status == 3

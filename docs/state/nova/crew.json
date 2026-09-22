@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T17:32:37",
+  "updated": "2026-09-22T17:48:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -8576,6 +8576,15 @@
           "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "s19-codex-20260916",
           "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"read-only\"}": "s19-codex-20260916"
         }
+      },
+      {
+        "id": "session-71ebec9b1921ac205409",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-22"
       },
       {
         "id": "shadow-haiku-1",
@@ -250525,6 +250534,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3159
+    "_version": 3160
   }
 }

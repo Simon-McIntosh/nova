@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="single-grid-solver-cutover-landed">
+  <meta name="plan-title" content="Single-grid solver cutover — cumulative execution evidence">
+  <meta name="plan-summary" content="Landed receipts for the single-grid solver cutover: the H200 solve profile, and the device-control arm for the coil-edit sweep at the banked revision.">
+  <meta name="plan-evidence-for" content="single-grid-solver-cutover">
+  <meta name="plan-verifies" content="single-grid-solver-cutover#s4">
+  <title>Single-grid solver cutover — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Single-grid solver cutover — cumulative execution evidence</h1>
+    <p class="lede">Cumulative record for the plan. Each node appends its own section and
+    splices rather than rewrites. Receipt values keep their recorded precision; prose values
+    are display roundings of the receipt fields they cite.</p>
+  </header>
+
+  <section id="s4-titan-device-control">
+    <h2>§4 Node — coil-edit sweep, titan device control at the banked revision</h2>
+    <p><strong>Node:</strong> <code>sgc-sweep-control-at-the-banked-revision</code>.
+    <strong>Revision:</strong> <code>d384919244f7a9e2d84df43a32a5d738b6785c68</code>.
+    <strong>Status:</strong> blocked — the mandated titan command line cannot execute at
+    this revision, and the obstacle is a device-qualification guard outside the node's write
+    scope. No edit was measured and no commit was made.</p>
+
+    <h3>What was asked, and what happened</h3>
+    <p>The node was to run the unconstrained twenty-edit coil-edit sweep on the
+    <code>titan</code> partition (1&times; Tesla P100-PCIE-16GB) at the revision whose H200
+    run is banked at 10 of 20, so that the titan reading would have a same-device paired
+    arm. Two clauses of the mandated command line are unsatisfiable at this revision, and
+    both were reproduced on the mandated device in job <code>1275965</code>
+    (<code>98dci4-gpu-0002</code>, partition <code>titan</code>, 4 CPUs, 64 G,
+    <code>JAX_PLATFORMS</code> unset, <code>TMPDIR=/tmp</code>).</p>
+
+    <table>
+      <caption>The mandated command line against the revision's actual interface</caption>
+      <thead><tr><th>Clause</th><th>Brief requires</th><th>Revision does</th><th>Observed</th></tr></thead>
+      <tbody>
+        <tr><td><code>--raster-figure</code></td><td>a sixth output path under the reports fence</td><td>no such argument; <code>run</code> takes five paths plus <code>--carrier</code> (<code>benchmarks/coil_edit_latency.py:2137-2144</code>)</td><td>exit 2, <code>unrecognized arguments</code></td></tr>
+        <tr><td>measurement host</td><td>titan P100, 4 CPUs, 64 G, <code>JAX_PLATFORMS</code> unset</td><td><code>_require_measurement_host</code> (<code>:157-173</code>) requires an H200 on <code>betelgeuse</code> under <code>gpu_0003_grpA</code>, 8 CPUs, 128 G, <code>JAX_PLATFORMS=cuda,cpu</code></td><td><code>RuntimeError: one H200 is required, got cuda:0</code></td></tr>
+      </tbody>
+    </table>
+
+    <p>The raster path matters beyond the flag name: the raster figure is written
+    unconditionally from the module constant <code>DEFAULT_RASTER_FIGURE</code>
+    (<code>:69-71</code>, written at <code>:1855</code>) which resolves to
+    <code>docs/figures/forward-solve-api/coil-edit-latency/terminal-raster-flux.png</code>,
+    outside this node's write fence. The requirement that nothing under <code>docs/</code>
+    change is therefore not satisfiable by the five existing flags alone.</p>
+
+    <p>The guard was introduced with the benchmark itself (<code>dea563908</code>,
+    2026-09-02, <code>git log -S"_require_measurement_host"</code>): this benchmark has never
+    had a titan-capable revision, so no earlier revision reaches a different code path.</p>
+
+    <h3>The H200 paired arm at this revision</h3>
+    <p>Job <code>1273580</code>, device <code>NVIDIA H200 NVL</code>,
+    <code>converged_edit_count: 10</code> of 20, median warm wall 370.367&nbsp;ms (max
+    445.605, min 333.484), trip median 2 (max 4); failing points
+    <code>1,2,4,6,8,10,16,17,18,19</code>. The copy committed at HEAD still carries the
+    superseded pair (<code>7514edd9</code> / job <code>1273204</code>, also 10 of 20, median
+    353.038&nbsp;ms); the paired receipt survives in the report tree at
+    <code>s19-codex-20260916/cca-heavy-module-arms-for-the-tangent-repair/base-tree/docs/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.json</code>
+    and in <code>s19-local/coil-edit-panel-lcfs-2/predecessor-uncommitted-receipts.diff</code>.</p>
+
+    <table>
+      <caption>Per-edit control table: the titan column was not measured</caption>
+      <thead><tr><th>edit</th><th>fraction</th><th>H200 converged</th><th>H200 termination</th><th>H200 trips</th><th>titan converged</th><th>titan termination</th><th>titan trips</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>-0.18</td><td>True</td><td>converged</td><td>4</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>1</td><td>-0.16</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>2</td><td>-0.14</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>3</td><td>-0.12</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>4</td><td>-0.10</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>5</td><td>-0.08</td><td>True</td><td>converged</td><td>3</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>6</td><td>-0.06</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>7</td><td>-0.04</td><td>True</td><td>converged</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>8</td><td>-0.02</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>9</td><td>-0.00</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>10</td><td>+0.02</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>11</td><td>+0.04</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>12</td><td>+0.06</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>13</td><td>+0.08</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>14</td><td>+0.10</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>15</td><td>+0.12</td><td>True</td><td>converged</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>16</td><td>+0.14</td><td>False</td><td>active_set_settled</td><td>2</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>17</td><td>+0.16</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>18</td><td>+0.18</td><td>False</td><td>active_set_settled</td><td>3</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>19</td><td>+0.20</td><td>False</td><td>active_set_settled</td><td>1</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+      </tbody>
+    </table>
+
+    <p>The titan column is empty because the control was not measured, not because it agreed.
+    No figure is drawn here: the deliverable is two tables of per-row flags and clause
+    outcomes, which is what a table is for.</p>
+
+    <h3>Artifacts</h3>
+    <ul>
+      <li><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/sgc-sweep-control-at-the-banked-revision/report.md</code> — full report, options and leaning</li>
+      <li><code>…/titan-refusal-1275965.log</code> — the device-qualified reproduction, verbatim</li>
+      <li><code>…/titan-control-refusal.sbatch</code> — the three-probe driver</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

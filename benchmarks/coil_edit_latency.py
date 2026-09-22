@@ -98,6 +98,11 @@ BOUNDARY_COIL_FAMILIES = frozenset({"p4_lower", "p4_upper", "p5_lower", "p5_uppe
 # interactive measurement, and the receipt echoes the marker so the lowered
 # provenance travels with the artefact.
 CPU_PROVENANCE_MARKER = "NOVA_COIL_EDIT_CPU_PROVENANCE"
+# A marked P100 rung off the shared reservation, used when the device program
+# is wanted and the H200 reservation is held.  The device program is a
+# different compile from the CPU re-run, so its provenance is named separately
+# and travels in the receipt rather than being read as either one.
+TITAN_PROVENANCE_MARKER = "NOVA_COIL_EDIT_TITAN_PROVENANCE"
 INTERACTIVE_LATENCY_TARGET_MILLISECONDS = 100.0
 # The compiled slice route's own production budgets (the kernel's declared
 # constants), not the parity-driver Newton budgets the endpoint prep uses.
@@ -182,11 +187,12 @@ def _require_measurement_host() -> None:
     """Require the H200 measurement host, or an explicitly marked CPU re-run.
 
     The persisted sweep states can be regenerated while the shared reservation
-    is held, so a run that names its own reason on a CPU platform is accepted;
-    the receipt records the host, the partition, the reservation and the JAX
-    platform of whatever ran, so the lowered provenance is read from the
-    artefact rather than inferred from a field the refusal removed.  An
-    unmarked run off the reservation is still refused.
+    is held, so a run that names its own reason on a CPU platform is accepted,
+    and so is a marked run on the P100 rung; the receipt records the host, the
+    partition, the reservation and the JAX platform of whatever ran, so the
+    lowered provenance is read from the artefact rather than inferred from a
+    field the refusal removed.  An unmarked run off the reservation is still
+    refused.
     """
     if os.environ.get("TMPDIR") != "/tmp":
         raise RuntimeError("TMPDIR=/tmp must be set in the job body")
@@ -197,6 +203,23 @@ def _require_measurement_host() -> None:
             raise RuntimeError(
                 "the CPU provenance marker requires a CPU platform, got "
                 f"{device.platform} on {device.device_kind}"
+            )
+        return
+    titan = os.environ.get(TITAN_PROVENANCE_MARKER, "").strip()
+    if titan:
+        if device.platform != "gpu":
+            raise RuntimeError(
+                "the titan provenance marker requires a gpu platform, got "
+                f"{device.platform} on {device.device_kind}"
+            )
+        if os.environ.get("SLURM_JOB_PARTITION") != "titan":
+            raise RuntimeError(
+                "the titan provenance marker requires the titan partition"
+            )
+        if os.environ.get("SLURM_JOB_RESERVATION") not in (None, "", "(null)"):
+            raise RuntimeError(
+                "the titan provenance marker requires an allocation off the "
+                "shared reservation"
             )
         return
     if device.platform != "gpu" or "H200" not in device.device_kind:
@@ -2215,7 +2238,10 @@ def _receipt_document(
             "platform": jax.devices()[0].platform,
             "jax_platforms": os.environ.get("JAX_PLATFORMS"),
             "tmpdir": os.environ.get("TMPDIR"),
-            "measurement_host_marker": os.environ.get(CPU_PROVENANCE_MARKER),
+            "measurement_host_marker": (
+                os.environ.get(CPU_PROVENANCE_MARKER)
+                or os.environ.get(TITAN_PROVENANCE_MARKER)
+            ),
             "elapsed_seconds": elapsed_seconds,
             "exit_marker": marker,
         },

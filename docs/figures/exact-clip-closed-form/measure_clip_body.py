@@ -162,13 +162,14 @@ def row(case, cells):
         exact = certificate._case(case)[2]
         core = np.asarray(exact.magnetic_axis)
         saddle = np.asarray(kwargs["saddle_vertex"])
-        # Closed rows have no saddle; a finite dummy locates no four-root cell.
+        admitted_saddle = bool(np.all(np.isfinite(saddle)))
+        # A finite inactive operand avoids NaNs; participation carries admission.
         saddle = np.where(np.isfinite(saddle), saddle, core)
         wedges = mesh.traced_saddle_wedges(
             args[5],
             saddle_vertex=saddle,
             core_reference=core,
-            participating_cell=kwargs["participating_cell"],
+            participating_cell=kwargs["participating_cell"] & admitted_saddle,
             curve_evaluator=kwargs["curve_evaluator"],
             arc_tracer=kwargs["arc_tracer"],
         )
@@ -222,6 +223,7 @@ def row(case, cells):
             revision=prior.revision(),
             base=BASE,
             comparisons=comparison,
+            wedge_reference_policy="admitted-saddle-only",
             passed=all(v["relative_l2"] <= 1e-14 for v in comparison.values()),
         ),
     )
@@ -235,6 +237,7 @@ def main():
     parser.add_argument("--suites")
     parser.add_argument("--rows", action="store_true")
     parser.add_argument("--row", nargs=2)
+    parser.add_argument("--qualified-row", nargs=2)
     args = parser.parse_args()
     OUTPUT.mkdir(exist_ok=True)
     if args.guard == "negative":
@@ -293,9 +296,33 @@ def main():
             )
             for name in TESTS
         )
-    if args.row:
+    if args.row or args.qualified_row:
         prior.configure()
-        row(*args.row)
+        if args.row:
+            import shutil
+
+            for receipt in sorted(OUTPUT.glob("*-*.json")):
+                data = json.loads(receipt.read_text())
+                if "case" not in data or data.get("wedge_reference_policy"):
+                    continue
+                archive = OUTPUT / "unqualified-wedge-control"
+                archive.mkdir(exist_ok=True)
+                name = receipt.stem
+                for suffix in (".json", ".npz", ".log", ".exit"):
+                    source = OUTPUT / (name + suffix)
+                    if source.exists() and not (archive / source.name).exists():
+                        shutil.copy2(source, archive / source.name)
+                code = finish(
+                    run_child(
+                        ["--qualified-row", data["case"], str(data["cells"])],
+                        name + "-admitted",
+                        cpus,
+                    ),
+                    name + "-admitted",
+                )
+                if code:
+                    return code
+        row(*(args.row or args.qualified_row))
         return 0
     if args.rows:
         code = max(

@@ -1,0 +1,150 @@
+{
+  "completed": true,
+  "exit_marker": "LIMITER_READ_RENDER_EXIT=0",
+  "figures": [
+    {
+      "figure": "contact-error-vs-wall-resolution.svg",
+      "glyph_markers": {
+        "-1000": "^",
+        "-300": "o",
+        "-500": "s"
+      },
+      "kind": "contact-error-vs-resolution",
+      "legend_entries": [
+        "weak rotation reactor static \u00b7 300 cells",
+        "moderate rotation conventional static \u00b7 300 cells",
+        "diverted single null \u00b7 500 cells",
+        "weak rotation reactor static \u00b7 1000 cells",
+        "moderate rotation conventional static \u00b7 1000 cells",
+        "diverted single null \u00b7 1000 cells"
+      ],
+      "poloidal_panels": [],
+      "title_lines": [
+        "analytic limiter read \u00b7 contact position error against wall-panel / cell-pitch ratio",
+        "24 measured rows over 4 wall resolutions; the exact field is fixed and only the carrier wall sampling varies. No nonlinear solve is entered."
+      ],
+      "titles": [
+        {
+          "loc": "left",
+          "text": "analytic limiter read \u00b7 contact position error against wall-panel / cell-pitch ratio"
+        },
+        {
+          "loc": "left",
+          "text": "24 measured rows over 4 wall resolutions; the exact field is fixed and only the carrier wall sampling varies. No nonlinear solve is entered."
+        }
+      ],
+      "wall_drawn": false
+    },
+    {
+      "figure": "single-null-contact-shadow.png",
+      "glyph_markers": {
+        "admitted_x_point": "X",
+        "excluded_private_wall_nodes": "s",
+        "magnetic_axis": "^",
+        "wall_contact": "D"
+      },
+      "kind": "poloidal-contact-shadow",
+      "legend_entries": [
+        "magnetic_axis",
+        "admitted_x_point",
+        "wall_contact",
+        "excluded_private_wall_nodes",
+        "analytic_flux_contours",
+        "wall"
+      ],
+      "poloidal_panels": [
+        {
+          "excluded_private_wall_glyphs": 18,
+          "null_glyph_total": 2,
+          "null_sets": {
+            "analytic_admitted_x_points": {
+              "drawn": 1,
+              "dropped_outside_wall": 0
+            },
+            "analytic_magnetic_axis": {
+              "drawn": 1,
+              "dropped_outside_wall": 0
+            }
+          },
+          "panel": "analytic flux levels as line contours on shared Wb levels",
+          "wall_contact_glyphs": 1
+        }
+      ],
+      "source_row_key": {
+        "case": "diverted-single-null",
+        "requested_cells": -1000,
+        "wall_nodes": 481
+      },
+      "title_fields": {
+        "cells": {
+          "source_path": "rows[<case,requested_cells,wall_nodes>].realised_cells",
+          "source_value": 1074,
+          "value": "1074"
+        },
+        "converged": {
+          "source_path": "nonlinear_solve_entered",
+          "source_value": false,
+          "value": "n/a"
+        },
+        "fixture": {
+          "source_path": "rows[<case,requested_cells,wall_nodes>].case",
+          "source_value": "diverted-single-null",
+          "value": "diverted-single-null"
+        },
+        "residual": {
+          "source_path": "rows[<case,requested_cells,wall_nodes>].production_contact.level_error_in_span",
+          "source_value": 9.852875804959903e-05,
+          "value": "9.853e-05"
+        }
+      },
+      "title_lines": [
+        "diverted-single-null \u00b7 cells=1074 \u00b7 residual=9.853e-05 \u00b7 converged=n/a",
+        "analytic fixed-design read of the exact diverted single-null field; nominal cell scale 1000 (1074",
+        "realised cells), 481 wall nodes, selected panel/cell pitch 0.2466, contact offset from the exact wall",
+        "extremum 1.908e-03 m",
+        "no nonlinear solve is entered (source receipt nonlinear_solve_entered=False); residual is the",
+        "selected-contact level error in span 9.853e-05 against the exact wall extremum, so no convergence flag",
+        "exists for this analytic read"
+      ],
+      "titles": [
+        {
+          "loc": "left",
+          "text": "diverted-single-null \u00b7 cells=1074 \u00b7 residual=9.853e-05 \u00b7 converged=n/a"
+        },
+        {
+          "loc": "left",
+          "text": "analytic fixed-design read of the exact diverted single-null field; nominal cell scale 1000 (1074"
+        },
+        {
+          "loc": "left",
+          "text": "realised cells), 481 wall nodes, selected panel/cell pitch 0.2466, contact offset from the exact wall"
+        },
+        {
+          "loc": "left",
+          "text": "extremum 1.908e-03 m"
+        },
+        {
+          "loc": "left",
+          "text": "no nonlinear solve is entered (source receipt nonlinear_solve_entered=False); residual is the"
+        },
+        {
+          "loc": "left",
+          "text": "selected-contact level error in span 9.853e-05 against the exact wall extremum, so no convergence flag"
+        },
+        {
+          "loc": "left",
+          "text": "exists for this analytic read"
+        }
+      ],
+      "wall_drawn": true,
+      "wall_node_count": 481
+    }
+  ],
+  "nonlinear_solve_entered": false,
+  "render_entry_point": "benchmarks/limiter_read_resolution_audit.py render",
+  "schema": "nova.limiter-read-render-receipt",
+  "source_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-contact-shadow-figure/docs/figures/cut-cell-current-attribution/limiter-read/receipt.json",
+  "source_receipt_sha256": "941126e9f901aad0a3aea17eed38dbade10cf997bbb3fb3bc211140a4451dbed",
+  "source_revision": "f3de1b8142521417ecc349dc0b21e0b93c8f6e93",
+  "version": 1
+}

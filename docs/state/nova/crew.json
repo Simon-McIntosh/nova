@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T22:04:45",
+  "updated": "2026-09-22T22:11:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -262790,6 +262790,308 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T190135112437-review-of-pta-repin-accepted-unmoved-value-authorship",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a75",
+        "node": "review-of-pta-repin-accepted-unmoved-value-authorship",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 537,
+                "cached_input_tokens": 215952,
+                "input_tokens": 216521,
+                "output_tokens": 399,
+                "reasoning_output_tokens": 278,
+                "total_tokens": 216920,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "the review for r-20260922T184125603144-pta-repin-accepted-unmoved-value-authorship stores a parsed record scoring all 5 dimensions in the range 0..20",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260922T184125603144-pta-repin-accepted-unmoved-value-authorship",
+          "id": "review-of-pta-repin-accepted-unmoved-value-authorship",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-22T19:01:37Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T190135112437-review-of-pta-repin-accepted-unmoved-value-authorship/manifest.md",
+          "negative_control": "",
+          "plan": "plasma-cell-topology-authority",
+          "requested_backend": null,
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T184125603144-pta-repin-accepted-unmoved-value-authorship.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "session-71ebec9b1921ac205409",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-22T19:02:02Z",
+        "completed_at": "2026-09-22T19:57:56.303Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3277,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3354,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "fd5a668af18a1294246650d90e792eedeae1cce6",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T190135112437-review-of-pta-repin-accepted-unmoved-value-authorship/manifest.md",
+        "scope_changed": false,
+        "session_id": "82136814-ff1a-46ff-afd3-4f595b6de358",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 615483,
+            "input_tokens_cumulative": 2988446,
+            "output_tokens": 7881,
+            "output_tokens_cumulative": 55615,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-22T19:57:56.303Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 713,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1525,
+              "log_fresh": false,
+              "manifest_commits": [
+                "450bab78a55b6178b145de2dcacaa3e479940743",
+                "c6d25a9c3462682c7f607c4e76b94c2a2cddac69",
+                "34c9c3aff04ab0c1e1aa16621bcb2915de6c8a14",
+                "b6d7e6cfd116253233f333eb73182726dc0b5a76"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0a8195e25ca5e442d43580cc11c181862dd0a2649ddf2f66949889e423d0bb09",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T175926155312-pta-adopted-read-cost-reduction/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan plasma-cell-topology-authority --section '\u00a75' --role review --spec-level exact --node review-of-pta-adopted-read-cost-reduction --goal 'attach an independent review to run r-20260922T175926155312-pta-adopted-read-cost-reduction' --done-when 'the review for r-20260922T175926155312-pta-adopted-read-cost-reduction stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T175926155312-pta-adopted-read-cost-reduction.json --time-budget 55m --session s18-fable-20260922 --allow-unreconciled-runs --local",
+              "node": "pta-adopted-read-cost-reduction",
+              "phase": "working",
+              "plan": "plasma-cell-topology-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260922T175926155312-pta-adopted-read-cost-reduction",
+              "session": "s18-fable-20260922",
+              "terminal_age_seconds": 1579,
+              "terminal_at": "2026-09-22T18:35:25Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 33822811,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1765.086,
+          "generated_tokens": 507554,
+          "generation_seconds": 1736.332,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 35.1,
+          "machine_seconds": 28.754,
+          "peak_input_tokens": 168288,
+          "tokens_per_second": 292.31,
+          "wall_tokens_per_second": 287.55
+        },
+        "follow_on_paths": [
+          "docs/plans/plasma-cell-topology-authority.html:144",
+          "after_suite.revision",
+          "nova/equilibrium/flux_surface_connectivity.py:1403",
+          "tests/test_split_polish_nulls.py:355"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/review-of-pta-repin-accepted-unmoved-value-authorship",
+          "session_id": "82136814-ff1a-46ff-afd3-4f595b6de358",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T19:57:56.303Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.99,
+        "impl_move": {
+          "plan": "plasma-cell-topology-authority",
+          "at_dispatch": 0.99,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "lane_advisory": {
+          "backend": "clive",
+          "burn_multiple": null,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+          "horizon_ends_at": "2026-09-22T19:41:37.330447+00:00",
+          "horizon_seconds": 2400,
+          "metered": false,
+          "observed_at": null,
+          "precedes_horizon": null,
+          "projected_exhaustion_at": null,
+          "resets_at": null,
+          "seconds_until_reset": null,
+          "state": "quiet",
+          "utilisation_pct": null
+        },
+        "lane_declaration": {
+          "backend": null,
+          "headroom": null,
+          "metered": false,
+          "observed_at": null,
+          "read_at": "2026-09-22T19:01:37Z",
+          "resolved_backend": "clive",
+          "utilisation_pct": null
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "lane document carries no 'binding_observed'",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 21.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -263256,6 +263558,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3223
+    "_version": 3224
   }
 }

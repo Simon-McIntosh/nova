@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T16:01:52",
+  "updated": "2026-09-22T16:04:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4405,6 +4405,15 @@
         "session_owners": {
           "{\"alias\":\"astra6\",\"backend\":\"codex-astra\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-6-astra\",\"sandbox\":\"worktree-full\"}": "s18-fable-20260922"
         }
+      },
+      {
+        "id": "s18-pta-attrib-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-22"
       },
       {
         "id": "s18-pta-harness-c",
@@ -247425,6 +247434,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3140
+    "_version": 3141
   }
 }

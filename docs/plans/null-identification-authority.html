@@ -117,6 +117,120 @@
 <p><strong>Half of the review finding; the coverage half remains open.</strong> The same review also found that the join iterates only left-tree identities, so a right-only identity is omitted while the merge can still report the expected count. That guard is <code>_compare</code> near lines 477–483 and is not touched here, so followup <code>f-fsa-audit-bank-drift-coverage</code> is partly delivered and stays open for it.</p>
 
 <p>Evidence: <a href="/nova/evidence/archive/null-identification-authority-landed#the-drift-campaign-resumes-without-re-emitting-landed-rows">the resume repair's own account</a>.</p>
+<h3>The persisted boundary follows the recorded class, not the stored curve length (2026-09-21)</h3>
+<p>Two sites carry the receipt's class into the plot read, and nothing else changed. The MAST operand
+renderer reads the class recorded for the frame out of the convergence-atlas receipt
+(<code>panels[].class</code>), inverts it through the same label map the atlas already uses, and passes
+it to the operator read as <code>requested_class</code>; the persisted boundary flux is then the
+admitted saddle flux for a diverted frame — bit-identical to <code>x_point_flux</code>, because
+<code>pinned_boundary</code> selects the diverted or limited member — and the wall contact flux for a
+limited one. The atlas stops deriving its label from <code>nova_boundary.shape[0] &gt;= 3</code> and
+reads the class the row carries, with <code>unclassified</code> only when none is recorded. Commit
+<code>fe7d8c053</code>; the unit contract builds a synthesised read and asserts diverted→saddle and
+limited→contact, plus the receipt lookup, and the correlated negative control (a diverted level taken
+from the wall contact flux) reddens the new case.</p>
+<p><strong>The named measurement could not be produced, and neither cause is this change.</strong> The
+gate regenerates the persisted 22086/43 boundary from its banked state through the renderer as it now
+reads, then measures its distance to the admitted saddle (0.5648, 1.2580) m. Two pre-existing faults
+outside this node's two sites stop it. (1) <em>The committed operand bank is stale against its
+authority:</em> the bank records MAST authority source identity <code>sha256:5b14529506daccb2…</code>
+while the committed authority file hashes <code>23038d9c17076ab8…</code>, so <code>_read_cache</code>
+refuses a partial refresh, and no bank row carries a class field at all — every MAST atlas row
+therefore reads <code>unclassified</code> until the bank is regenerated wholesale. The renderer's own
+escape hatch opens only when the requested shot set is the full available set, which is why the first
+gate attempt (one shot) and the second (all six shots) fail differently. (2) <em>The regeneration path
+itself does not run at this revision:</em> on the full-set route the renderer raised
+<code>TypeError: _mast_states() missing 1 required keyword-only argument: 'carrier_identity'</code> at
+generate_topology_visuals.py:279. The keyword was added to the MAST state request and this call site
+was not updated; <code>reachability_grid_final.py:208</code> is a second such site in the same
+authority tree, while <code>efit_topology_corroboration.py:771</code>, <code>bank_drift_paired_probe.py</code>
+and <code>jacobian_null_direction.py</code> do pass it. The carrier is already in scope at line 279
+(<code>carrier["carrier"]["semantic_response_identity"]</code>), so the repair is one argument — but it
+is a third site, outside this node's spec, so it is reported rather than made.</p>
+<p>The distance measured against the unchanged boundary curve is <strong>0.4853 m</strong> from the
+admitted saddle, on the 487-point polyline the bank already carried. That is the pre-change baseline,
+not a verdict on this change: no bank row was refreshed, so the class-pinned read has not yet been
+exercised on a persisted frame. Gate logs and the two drivers:
+<code>~/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/</code>
+(<code>gate.log</code>, job 1274725; <code>gate2.log</code>, job 1274744).</p>
+<p><strong>The ruling on those blockers, and what it changed here.</strong> The coordinator brought the
+second fault inside this node's fence, so the <code>carrier_identity</code> argument is now passed at
+generate_topology_visuals.py:279 from the carrier the row already loads; the
+<code>reachability_grid_final.py:208</code> site stays out of the fence and is reported. The first fault
+is explicitly <em>not</em> repaired here — the MAST operand bank is left stale and the regeneration that
+would refresh it is recorded as a single command in this node's run manifest rather than run, so no
+class-less bank lands; the atlas receipt this node's gate had rewritten is restored to its committed
+content in the worktree. The gate therefore remains unmeasured and the node stays blocked, with the
+measurement it owes unchanged — regenerate the bank, then run the 22086/43 gate.</p>
+<p><strong>Superseding ruling: the regeneration ran here, and it needs more than the debug hour.</strong>
+The coordinator moved the wholesale regeneration inside the fence, so two full-set attempts were
+submitted as one <code>all_debug</code> allocation each (jobs 1275009 and 1275068), with all six shots
+named in the single command and no <code>uv</code> on the node. Both failed and neither wrote a byte to
+disk — the bank and the atlas receipt are written once at the end of a pass, so the worktree carried
+only source. The first raised
+<code>RuntimeError: the MAST solve returned no observable branch portfolio</code> at
+generate_topology_visuals.py:286 after the first row's two solves had already run: the renderer's
+wrapper captured the branch portfolio the old solve returned,
+and production solves now go through <em>profile.solve(request)</em>, on which
+<code>ForwardProfile.solve</code> builds no portfolio at all — so the wrapper's portfolio stayed
+<code>None</code> on every row. That wrapper is repaired in this node (commit <code>24d5f8c5a</code>):
+it intercepts the solve and keeps each receipt in call order, and the iteration count comes from the
+pure arm's own receipt, which is the same solve the portfolio branch carried. The
+second attempt then advanced past the first row — both arms replayed, 21983/35 started — and died in
+XLA compilation (<code>LLVM compilation error: Cannot allocate memory</code>, thousands of lines,
+segmentation fault, <code>RENDERER_EXIT=139</code>) with the job's peak resident set at
+<code>MaxRSS 23.5 GiB</code> of a 64 GiB request, so the request ceiling is not what it hit. One row of
+twelve, at roughly ten minutes of wall per row, against a 59-minute wall: the pass cannot finish in one
+debug allocation, and the subset route is refused by the hatch, which requires the requested set to
+equal the available set. What it needs is one compiled pass over the row set, a pre-warm of
+<em>this</em> driver, or a wall longer than the debug hour. The gate remains
+unmeasured and the node stays blocked; the pre-change baseline (0.4853 m on the 487-point class-free
+curve, the bank unchanged) is not a verdict on the class-pinned read.</p>
+
+<p><strong>The regeneration and the class-governed visual read now complete the receipt.</strong>
+One Titan P100 allocation regenerated all six MAST shots and both arms in <code>03:07:00</code>
+(job <code>1275265</code>, <code>RENDERER_EXIT=0</code>, <code>refreshed_rows=12</code>); all twelve
+persisted rows now carry <code>class=diverted</code>, committed with the refreshed bank at
+<code>68cfe15ce</code>. One subsequent <code>all_debug</code> CPU allocation refreshed 22086/43
+through the class-pinned read and redrew the atlas (job <code>1275321</code>, <code>00:27:04</code>,
+renderer, atlas and measurement exits all zero). The decisive mixed row now carries a 676-point
+boundary, <code>atlas_class=diverted</code>, and a minimum polyline distance of
+<strong>0.0000 m</strong> to its admitted saddle at (0.584978, 1.230503) m, below one lattice pitch
+and down from the stale class-free curve's 0.4853 m. Direct image inspection confirms that the red
+boundary passes through the upper admitted saddle. This worktree predates the later shared null-glyph
+change, so these rendered files literally show a red dot for the axis, a filled <code>X</code> for the
+admitted saddle, hollow circles or squares for other qualified X-points, and grey <code>+</code>
+markers for the EFIT references; the separate open atlas-vocabulary item owns the triangle/cross
+redraw rather than this class-boundary repair.</p>
+
+<p><strong>Review repair landed (2026-09-21).</strong> The class authority now comes from each
+<code>ForwardSolveReceipt.topology_read.diverted</code> value and is persisted beside the banked
+state as <code>solve_topology_class</code>; the renderer no longer reads an older atlas receipt.
+The atlas uses that persisted field for MAST labels and writes an explicit
+<code>BoundaryGenerationFailure</code> with its reason when a MAST panel has no closed boundary,
+so the two empty diverted panels are visible failures rather than silent absences. Its axes are
+disabled so the wall carries the spatial scale. Commits <code>bb89552ad</code>,
+<code>f2334c8ef</code>, <code>51e4d0801</code> and <code>b51d96717</code> carry the source, test,
+receipt and panel updates. The fresh-process focused gate passes 8 tests with zero added failures;
+the declared wall-contact mutation remains red at 1 failed and 7 passed.</p>
+
+<p><strong>The bookend findings now close on the solve-owned bank (2026-09-22).</strong>
+The final Titan regeneration (job <code>1275465</code>) completed with
+<code>RENDERER_EXIT=0</code> and twelve replay-ready rows; all twelve now persist
+<code>solve_topology_class=diverted</code> from their own solve receipts (commit
+<code>6b0530baa</code>). One <code>all_debug</code> CPU allocation then replayed the
+22086/43 pair, published the seventeen-panel atlas and ran the focused test file from
+commit <code>ee2ad2d69</code> (job <code>1275502</code>, exit <code>0:0</code>): renderer,
+atlas and measurement exits were zero, all nine tests passed, and 22086/43 mixed
+persisted a 676-point diverted boundary whose minimum distance to the admitted saddle at
+(0.584978, 1.230503) m is <code>2.13e-13</code> m, below one lattice pitch. The limited
+end-to-end fixture carries an intentionally opposing legacy label; changing the publisher
+to read that legacy field reddens the fixture alone (job <code>1275503</code>, one failed),
+while the production publisher emits <code>limited</code> and draws its wall contact without
+an atlas file. Direct image reads show the decisive red branch passing through the upper
+saddle, axes off; 21983/35 pure and 21986/46 pure instead show the explicit
+<code>BoundaryGenerationFailure</code> and its complete wrapped reason, because neither
+terminal state yields a closed branch (caption repair <code>da402ccc9</code>).</p>
 
 <h2 id="s2"><span class="badge badge-shipped">✓ landed 2026-09-04</span> §2 — Connected, contained stationary points on the read the solve uses</h2>
 <p class="landed-summary">The solve's own read path is containment-aware for the single closed ring: X candidates are masked by first-wall containment before the flux ranking (<code>nova/equilibrium/topology.py</code> lines 352–368, commit <code>54e8911b</code>), O admission uses one shared seed mask and requires a material-connected component rather than accepting a private well (lines 754–812), the fixed-shape candidate census keeps overflow visible instead of truncating (<code>nova/equilibrium/forward_operator.py</code> lines 404–412, 620–652), private wall anchors are masked (<code>20f3a40c</code>), and the out-of-vessel saddle regression is pinned (<code>tests/test_stationary_point_admission.py</code>). The generalisation from one ring to the occupiable region of a multi-unit wall is owned by <code>multi-unit-limiter-wall</code> §3. Record: <a href="/nova/evidence/archive/null-identification-authority-landed">landed evidence</a>.</p>

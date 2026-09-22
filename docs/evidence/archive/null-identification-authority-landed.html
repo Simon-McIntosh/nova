@@ -1309,6 +1309,216 @@ benchmarks/solovev_certificate.py:2514: RuntimeError
 </table>
 <p><strong>Zero added failures.</strong> Both focused modules carry the same result on the head and base arms: <code>tests/test_limiter_spline_minimum.py</code> 10 passed on each, and <code>tests/test_forward_operator_axes.py</code> carries the single pre-existing <code>test_tensor_product_grid_class_margin_is_read_on_the_spline</code> failure at both revisions, so the repair neither causes nor cures it.</p>
 <p><strong>Negative control.</strong> The declared mutation reverts the three promotions to the base modules while keeping the new pins, and the log's first line repeats it verbatim. It reddens 3 of 3 with nine <code>TracerArrayConversionError</code> frames, both new pins among them, so the pins are shown to fire rather than merely to pass. Gate logs and the driver: <code>~/.config/reckon/crew/runs/r-20260921T123729655027-nia-wall-arrays-are-promoted-before-traced-indexing/scratch/logs/</code>. Implementation at commit <code>192a8ed20</code>.</p>
+
+</section>
+<section id="the-persisted-boundary-follows-the-recorded-class">
+  <h2>The persisted boundary follows the recorded class, not the stored curve length (2026-09-21)</h2>
+
+  <p>Two source sites, and nothing else in this change. The MAST operand renderer reads the class the
+  convergence-atlas receipt records for the frame (<code>panels[].class</code>, <code>"diverted"</code>
+  or <code>"limited"</code>), inverts it through the label map the atlas already carries, and passes it
+  to the operator read as <code>requested_class</code>; the level the boundary is traced at is then the
+  admitted saddle flux for a diverted frame and the wall contact flux for a limited one. The atlas reads
+  the class the row carries instead of deriving it from <code>nova_boundary.shape[0] &gt;= 3</code>, and
+  keeps <code>unclassified</code> only where no class is recorded. Implementation at commit
+  <code>fe7d8c053</code>, in <code>docs/figures/topology-visual-corroboration/generate_topology_visuals.py</code>
+  and <code>benchmarks/poloidal_convergence_atlas.py</code>, with the contract in
+  <code>tests/test_topology_visual_generator.py</code> (8 passed, exit 0, in a fresh process under
+  <code>JAX_PLATFORMS=cpu</code>).</p>
+
+  <p><strong>The class-pinned level is the operator's own read, not an approximation of it.</strong>
+  <code>nova/equilibrium/topology.py</code> selects <code>data_x</code> for a diverted frame and
+  <code>data_w</code> for a limited one on a pinned boundary, so the pinned read's
+  <code>boundary_flux</code> is bit-identical to <code>x_point_flux</code> (diverted) or
+  <code>wall_point_flux</code> (limited). The committed case builds a synthesised read carrying the
+  three levels explicitly and asserts the level the renderer persists: saddle flux under the diverted
+  class, contact flux under the limited class, and the read's own <code>boundary_flux</code> when no
+  class is requested. A second case asserts the receipt lookup — the class is taken from the atlas
+  receipt's row for the identity, a row whose class reads <code>unclassified</code> maps to no
+  requested class, and an identity absent from the receipt does the same. The correlated negative
+  control takes the diverted level from the wall contact flux instead of the admitted saddle flux; it
+  reddens the new case (1 failed, 7 passed) rather than passing beside it.</p>
+
+  <p><strong>The named measurement is blocked, and by pre-existing faults.</strong> The gate regenerates
+  the persisted 22086/43 boundary from its banked state through the renderer as it now reads — no new
+  solve of the earlier stage — and reports its distance to the admitted saddle (0.5648, 1.2580) m
+  together with the atlas row's class. Two faults outside this node's two sites stop it, both present at
+  the base revision. First, the committed operand bank is stale against its authority: the bank records
+  MAST authority source identity <code>sha256:5b14529506daccb2…</code> while the committed authority
+  file (<code>docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py</code>, changed by
+  <code>d5354a5a2</code> after the bank's last regeneration at <code>52cad98a5</code>) hashes
+  <code>23038d9c17076ab8…</code>, so <code>_read_cache</code> refuses the refresh outright. The
+  renderer's escape hatch re-raises unless the requested shot set equals the full available set, which
+  is why the one-shot attempt and the six-shot attempt fail differently. Second, the regeneration path
+  cannot run at all at this revision: on the six-shot route it raised
+  <code>TypeError: _mast_states() missing 1 required keyword-only argument: 'carrier_identity'</code> at
+  <code>generate_topology_visuals.py:279</code>. The keyword was added to the MAST state request and
+  this call site was not updated; a second site in the same authority tree
+  (<code>reachability_grid_final.py:208</code>) also omits it, while
+  <code>efit_topology_corroboration.py:771</code>, <code>benchmarks/bank_drift_paired_probe.py</code>
+  and <code>benchmarks/jacobian_null_direction.py</code> pass it. The carrier is already in scope at
+  line 279 (<code>carrier["carrier"]["semantic_response_identity"]</code>), so the repair is one
+  argument — a third site, outside this node's spec, and therefore reported rather than made.</p>
+
+  <p>What the gate did measure is the pre-change baseline, and it is recorded as such rather than as a
+  verdict: the boundary the bank already carries for 22086/43 mixed is the 487-point class-free curve,
+  and its minimum distance to the admitted saddle is <strong>0.4853 m</strong>. The measurement is a
+  distance from that unchanged polyline, so it does not exercise the class-pinned read on a persisted
+  frame; the repaired path owes that measurement. Gate logs and drivers:
+  <code>~/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/</code>
+  (<code>gate.log</code> and <code>gate.sh</code>, job 1274725; <code>gate2.log</code> and
+  <code>gate2.sh</code>, job 1274744; <code>tests-after.log</code>;
+  <code>negative-control.log</code>, whose first line names the declared mutation).</p>
+
+  <p>Follow-on for the coordinator, in the order the repair needs: give the MAST state request its
+  carrier identity at both stale call sites, then regenerate the MAST operand bank wholesale (the
+  bank's rows carry no class field, so the retained eleven rows and every DIII-D row read
+  <code>unclassified</code> until it is refreshed), then run this node's gate for 22086/43 mixed.</p>
+
+  <p>Ruling, and what it changed here. The coordinator brought the missing
+  <code>carrier_identity</code> inside this node's fence, so the argument is now passed at
+  <code>generate_topology_visuals.py:279</code> from the carrier the row already loads; the second stale
+  call site (<code>reachability_grid_final.py:208</code>) stays outside the fence and is reported. The
+  stale bank is explicitly left alone — no regeneration runs in this node, and the single command that
+  refreshes it is recorded in the run manifest instead. The atlas receipt this node's gate had rewritten
+  is restored to its committed content in the worktree (<code>git checkout HEAD --</code> on that one
+  path, inside the worktree), so no class-less rows land. The gate stays unmeasured and the node stays
+  blocked, with the measurement it owes unchanged: regenerate the bank, then run the 22086/43 gate.</p>
+
+  <p><strong>Superseding ruling: the regeneration ran in this node, and it does not fit an hour.</strong>
+  The coordinator moved the wholesale regeneration inside the fence. Two attempts were submitted as one
+  <code>all_debug</code> allocation each, all six shots named in the single command, <code>TMPDIR=/tmp</code>
+  exported before the submit and inside the payload, <code>JAX_PLATFORMS=cpu</code>,
+  <code>NOVA_COMPILATION_CACHE_ROOT</code> pointed at the pinned pre-warm root, the root interpreter run
+  directly and <code>uv</code> never invoked on the node. Both failed, for unrelated causes, and neither
+  wrote anything on disk: the worktree carries only the source change, because the bank and the atlas
+  receipt are written once, at the end of a pass.</p>
+
+  <p><strong>First attempt (job 1275009, 19 min).</strong> The six-shot route cleared the stale-cache
+  hatch — that is what naming the full set buys — and then raised
+  <code>RuntimeError: the MAST solve returned no observable branch portfolio</code> from
+  <code>generate_topology_visuals.py:286</code> on the very first row, 21978/35, after the row's two
+  solves had already run. The cause is a seam that moved under the renderer and left a hook behind, and it
+  is repaired here. The wrapper forwarded a profile while capturing the <em>portfolio</em> the solve
+  returned (<code>_ObservedProfile.solve_portfolio</code>), and the renderer read the diverted branch's
+  iteration count off that portfolio. Production solves now go through the typed request and receipt
+  (<code>profile.solve(request)</code> at
+  <code>docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py:143</code>), and
+  <code>ForwardProfile.solve</code> builds no <code>ForwardPortfolio</code> on that route —
+  <code>solve_portfolio</code> survives on the profile but no production path calls it. So the wrapper's
+  portfolio stayed <code>None</code> on every row and the guard raised on the first one. The wrapper now
+  intercepts <code>solve</code> and keeps each receipt in call order, and the iteration count is read from
+  the pure arm's own receipt, which is the same solve the portfolio branch used to carry. The bank has
+  not been regenerated since that seam moved in <code>384d759ec</code>, which is why the fault went
+  unreported: nothing had run this path in between.</p>
+
+  <p><strong>Second attempt (job 1275068, 29 min).</strong> With the hook repaired the run made progress:
+  row 21978/35 completed both arms and the replay fields were read for each, and the pass advanced to
+  21983/35. There it died in XLA compilation — <code>execution_engine.cc:54] LLVM compilation error:
+  Cannot allocate memory</code>, thousands of lines of it, ending in a segmentation fault
+  (<code>RENDERER_EXIT=139</code>). The job's own peak resident set was <code>MaxRSS 23.5 GiB</code> against
+  a 64 GiB request, so the ceiling the job asked for is not what it hit; the compile of the next row's
+  module did not fit. That is one row of the twelve, against a 59-minute wall and roughly ten minutes of
+  wall per row: the twelve-row pass cannot complete inside a single <code>*_debug</code> allocation on
+  these partitions, which accept no more than the hour. Naming a subset is refused by the hatch above —
+  the requested set has to equal the available set, so a chunked pass cannot take the stale
+  bank as its retained rows. What the regeneration needs is one compiled pass over
+  the row set, or a pre-warm that warms <em>this</em> driver rather than the test lane, or a partition
+  whose wall is longer than the debug hour.</p>
+
+  <p><strong>The longer regeneration and the named gate close this node's measurement.</strong> One
+  Titan P100 allocation regenerated the six MAST shots and both arms in <code>03:07:00</code>
+  (job <code>1275265</code>, <code>RENDERER_EXIT=0</code>, <code>refreshed_rows=12</code>); every
+  regenerated row carries <code>class=diverted</code>. The bank and metadata are durable at
+  <code>68cfe15ce</code>. The acceptance then ran as one <code>all_debug</code> CPU allocation with
+  <code>TMPDIR=/tmp</code> in the submit environment and payload, <code>JAX_PLATFORMS=cpu</code>, the
+  root interpreter invoked directly and no <code>uv</code> on the node (job <code>1275321</code>,
+  <code>00:27:04</code>, exit <code>0:0</code>). Its receipt records <code>RENDERER_EXIT=0</code>,
+  <code>ATLAS_EXIT=0</code> and <code>MEASURE_EXIT=0</code>. For 22086/43 mixed, the refreshed atlas
+  row carries <code>class=diverted</code>, the boundary has 676 points, the admitted saddle is
+  (0.584978, 1.230503) m, and the boundary-to-saddle minimum is <strong>0.0000 m</strong>: below one
+  lattice pitch, where the stale class-free 487-point curve was 0.4853 m away.</p>
+
+  <figure><img src="/nova/figures/null-identification-authority/convergence-atlas/22086-43-mixed.png"
+  alt="MAST 22086 row 43 mixed terminal flux contours, wall, red class-governed boundary passing through the upper admitted saddle, magnetic axis and EFIT reference nulls">
+  <figcaption>The decisive 22086/43 mixed panel after the class-governed redraw. The red boundary
+  visibly passes through the upper admitted saddle. This worktree predates the later shared
+  null-vocabulary change: the literal glyphs here are a red dot for the Nova axis, a filled
+  <code>X</code> for the admitted saddle, hollow circles or squares for the other qualified X-points,
+  and grey <code>+</code> markers for the EFIT axis and X-points. The separate atlas-vocabulary item
+  owns the triangle/cross redraw; this record does not claim those later glyphs for this bitmap.</figcaption></figure>
+
+  <p>Gate log: <code>~/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/gate-final.log</code>.
+  The committed negative control changes the diverted boundary level to the wall contact flux and
+  reddens the class-anchor case (1 failed, 7 passed), while the fresh-process module gate is recorded
+  beside it in the worker manifest.</p>
+
+  <p><strong>Bookend review repairs.</strong> The review found that the prior renderer read
+  <code>panels[].class</code> from the existing atlas, whose MAST label had been inferred from
+  boundary-point presence. The repair removes that circular authority: each MAST solve receipt's
+  <code>topology_read.diverted</code> is mapped to <code>TopologyClass</code>, persisted as
+  <code>solve_topology_class</code>, and used for both the pinned operator read and the atlas label.
+  The limited end-to-end contract is exercised without an atlas file: a synthetic limited receipt
+  produces label <code>limited</code> and persists the wall-contact flux, while the diverted case
+  persists the admitted saddle flux. The source and focused test changes are in
+  <code>bb89552ad</code> and <code>f2334c8ef</code>; the empty-boundary marker is in
+  <code>51e4d0801</code>.</p>
+
+  <p>The two previously silent MAST panels, <code>21983/35 pure</code> and
+  <code>21986/46 pure</code>, remain geometrically empty in the persisted operand rather than being
+  invented. The atlas now draws and records <code>BoundaryGenerationFailure</code> with the reason
+  <code>the class-governed diverted state has no closed branch in the persisted boundary operand</code>,
+  preserving the wall, contours and null marks while making the missing boundary an explicit
+  receipt failure. The twelve refreshed panels use axes-off atlas rendering; this worktree still
+  carries the pre-shared-vocabulary glyphs (red dot axis, filled <code>X</code> admitted saddle,
+  hollow qualified X-points and grey <code>+</code> EFIT references).</p>
+
+  <p><strong>Gate and instrument evidence.</strong> One <code>all_debug</code> CPU allocation
+  (job <code>1275409</code>) exported <code>TMPDIR=/tmp</code> before submission and inside the
+  payload, set <code>JAX_PLATFORMS=cpu</code>, used the root interpreter directly and invoked no
+  <code>uv</code> on the node. The gate log is
+  <code>~/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/gate-repair.log</code>:
+  <code>RENDERER_EXIT=0</code>, <code>ATLAS_EXIT=0</code>, <code>MEASURE_EXIT=0</code>;
+  <code>22086/43 mixed</code> has 676 persisted boundary points, admitted saddle
+  (0.5849783456, 1.2305027322) m, minimum distance <strong>0.0000 m</strong>, and
+  <code>atlas_class=diverted</code>. The legacy metadata <code>class</code> field is
+  <code>diverted</code> for all twelve MAST rows; the refreshed 22086/43 pair additionally carries
+  the new solve-owned <code>solve_topology_class</code> field. The two empty rows are explicitly
+  marked as generation failures in the atlas record. The focused test allocation (job
+  <code>1275404</code>) passes 8 tests in 82.66 s, exit 0; the negative control remains the required
+  1 failed / 7 passed red result. The generated receipt and panels land in
+  <code>b51d96717</code>. A wholesale re-generation is still required before the remaining ten
+  bank rows can carry <code>solve_topology_class</code> rather than their legacy class field.</p>
+
+  <p><strong>Final bookend closure (2026-09-22).</strong> The wholesale Titan regeneration
+  (job <code>1275465</code>) returned <code>RENDERER_EXIT=0</code>, twelve replay-ready rows
+  and <code>refreshed_rows=12</code>; the resulting bank has twelve of twelve non-null
+  <code>solve_topology_class</code> values, all <code>diverted</code>, at commit
+  <code>6b0530baa</code>. The acceptance replay and publication ran together in one
+  <code>all_debug</code> CPU allocation from commit <code>ee2ad2d69</code> (job
+  <code>1275502</code>, <code>00:09:21</code>, exit <code>0:0</code>) with
+  <code>TMPDIR=/tmp</code> in submit and payload, <code>JAX_PLATFORMS=cpu</code>, the root
+  interpreter directly and no <code>uv</code> on the node. It records
+  <code>RENDERER_EXIT=0</code>, <code>ATLAS_EXIT=0</code>,
+  <code>MEASURE_EXIT=0</code>, and 9 passed focused tests. The 22086/43 mixed row has 676
+  boundary points, class <code>diverted</code>, admitted saddle (0.5849783456,
+  1.2305027322) m and a minimum boundary-to-saddle distance of
+  <strong>2.1324e-13 m</strong>, below one lattice pitch.</p>
+
+  <p>The end-to-end limited fixture deliberately carries legacy <code>class=diverted</code>
+  beside solve-owned <code>solve_topology_class=limited</code>, crosses the class-pinned
+  read, operand cache and atlas publisher with no pre-existing atlas, and checks the drawn
+  boundary reaches the wall contact. Under the declared mutation, “the solve topology
+  class is read from the pre-existing atlas instead of the solve receipt”, that case alone
+  fails because the publisher emits <code>diverted</code> (job <code>1275503</code>, pytest
+  exit 1 as expected); the production case remains green. Original-resolution image reads
+  confirm 22086/43 mixed draws the red branch through the upper admitted saddle with axes
+  off. The two states with no traceable branch, 21983/35 pure and 21986/46 pure, retain the
+  wall, contours and null marks and show a wrapped <code>BoundaryGenerationFailure</code>
+  caption carrying the complete reason; commit <code>da402ccc9</code> keeps that reason
+  inside the panel. Gate logs are <code>gate-bookend-final.log</code>,
+  <code>negative-control-final.log</code> and <code>atlas-caption-final.log</code> in this
+  node's durable run directory.</p>
 </section>
 </main>
 </body>

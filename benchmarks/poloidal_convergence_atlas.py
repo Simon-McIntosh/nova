@@ -49,6 +49,7 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+import textwrap
 import time
 from typing import Any
 
@@ -434,6 +435,33 @@ def _panel(
         poloidal.draw_boundary(
             axes, nova_boundary[:, 0], nova_boundary[:, 1], style=DEFAULT_INK
         )
+    boundary_failure = record.get("boundary_generation_failure")
+    if (
+        boundary_failure is None
+        and record.get("machine") == "MAST"
+        and nova_boundary.shape[0] < 3
+    ):
+        boundary_failure = "BoundaryGenerationFailure"
+    boundary_failure_reason = record.get("boundary_generation_failure_reason")
+    if boundary_failure is not None and boundary_failure_reason is None:
+        boundary_failure_reason = (
+            "the class-governed diverted state has no closed branch in the "
+            "persisted boundary operand"
+        )
+    if boundary_failure is not None:
+        reason = str(boundary_failure_reason or "unknown reason")
+        axes.text(
+            0.5,
+            0.96,
+            textwrap.fill(f"{boundary_failure}: {reason}", width=64),
+            transform=axes.transAxes,
+            ha="center",
+            va="top",
+            color="#b00020",
+            fontsize=7,
+            bbox={"facecolor": "#fff1f1", "edgecolor": "#b00020"},
+            zorder=10,
+        )
     painter = NullPainter(axes)
     tally = painter.draw(axis, qualified_x, wall)
     # The admitted saddle is drawn on top of the qualified population.
@@ -469,10 +497,9 @@ def _panel(
             linestyle="none",
             zorder=3,
         )
-    axes.set_xlabel("R [m]")
-    axes.set_ylabel("Z [m]")
     axes.set_xlim(float(np.min(wall[:, 0])) - 0.06, float(np.max(wall[:, 0])) + 0.06)
     axes.set_ylim(float(np.min(wall[:, 1])) - 0.06, float(np.max(wall[:, 1])) + 0.06)
+    axes.set_axis_off()
 
     identity = record["identity"]
     slug = identity.replace("/", "-").replace(" ", "-").replace(":", "-")
@@ -487,7 +514,10 @@ def _panel(
         if isinstance(raw_time, (int, float)) and abs(raw_time) > 100
         else raw_time
     )
-    class_label = "diverted" if nova_boundary.shape[0] >= 3 else "unclassified"
+    class_label = record.get("solve_topology_class")
+    if class_label is None and record.get("machine") != "MAST":
+        class_label = record.get("class")
+    class_label = class_label or "unclassified"
     return {
         "machine": record["machine"],
         "identity": identity,
@@ -501,6 +531,10 @@ def _panel(
         "terminal_residual": record.get("terminal_residual"),
         "qualification": record.get("qualification"),
         "boundary_point_count": int(nova_boundary.shape[0]),
+        "boundary_generation_failure": boundary_failure,
+        "boundary_generation_failure_reason": (
+            boundary_failure_reason if boundary_failure is not None else None
+        ),
         "axis": [float(v) for v in axis],
         "admitted_x": [float(v) for v in admitted_x],
         "wall_point": [float(v) for v in wall_point],

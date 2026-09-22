@@ -28,7 +28,7 @@
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="41">
+<meta name="plan-version" content="42">
 </head>
 <body>
   <main class="plan-doc">
@@ -300,6 +300,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-coord-20260922-closed-form-partial-reduction" data-who="reckon-ship" data-when="2026-09-22T13:00:00Z">
     <div class="r-comment-body"><p>Coordinator adjudication of run r-20260922T120120379147 (astra): the closed-form endpoint moments are merged at 9c585cd99 as a partial reduction. Exact-mode 110/135 executable 234,130,996 to <strong>207,228,014 bytes</strong> on the CPU witness (ceiling 100,000,000 unmet, gate recorded failed); moments agree to 1e-12 on six analytic rows and move the two single-null frozen images by 4.86e-15 of span against the 1.52e-15 fan floor, read as the old Gauss rule error at machine precision and not widened; 17 tests, zero added failures; the negative control restores the size to within 312 bytes of baseline. The optimised HLO still carries <code>Bernstein.binom</code>, which lives in <code>nova/equilibrium/flux_surface_extraction.py</code> (tensor-bicubic coefficients, edge crossings, arc-moment corrections) and <code>nova/linalg/interpolant.py</code>, outside that node; the next node takes it.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260922T120120379147-ecq-closed-form-polygon-moments-replace-the-gauss-antiderivative" data-who="reckon-ship" data-when="2026-09-22T12:54:59Z">
+    <div class="r-comment-body"><p>closed-form endpoint moments merged at 9c585cd99 as a partial reduction: exact-mode 110/135 executable 234,130,996 to 207,228,014 bytes, ceiling 100,000,000 unmet so the gate is failed; moments agree to 1e-12 on six rows and move the single-null images by 4.9e-15 of span; 17 tests zero added failures; Bernstein.binom remains in flux_surface_extraction and interpolant, taken by the next node</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s19c-capacity-landed-20260917" data-who="" data-when="">
     <div class="r-comment-body">ecq-capacity-sizing merged (be29cb0a), promotion pending its review. The per-polygon vertex capacity is derived from the realised layout, 128 arc samples plus the straight-edge chain, 158 at most against the former 3840 (152 and 150 on the 300 and 1000 rows against 3072 and 2816), with the fail-closed overflow refusal kept and exercised (258 live vertices against a 136 fixture capacity refuse to included 0, area 0). Exact-clip moments and coupled current-moment images are bit-identical to the fan route at 110, 300 and 1000 cells (maximum absolute difference 0.0, mismatch count 0). The 1000-cell peak temporary falls from 9.0065 to 8.0192 GiB with identical argument and output bytes. The compile wall is unchanged and is itself the finding for the compile-cost priority: 848 s at 110 cells and 965 to 971 s at 300 cells on all_debug from the unchanged memory-scaling instrument, before and after, so the capacity was not what the exact-clip compile was paying for. Two gaps: the section's named warm-cost driver still has no receipt (its production worker needs four arguments the lane script did not pass and refuses the CPU lane), and the largest-intermediate-array census was skipped on both sides, so the memory comparison is the compile-time peak temporary only.</div>

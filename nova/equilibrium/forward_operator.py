@@ -511,6 +511,14 @@ class _ExactClipLevel(NamedTuple):
     centre: jax.Array
     scale: jax.Array
 
+    def for_cell(self, index):
+        """Bind one local fallback row while sharing the global spline patch."""
+        return self._replace(
+            local_coefficient=jnp.asarray(self.local_coefficient)[index][None, :],
+            centre=jnp.asarray(self.centre)[index][None, :],
+            scale=jnp.asarray(self.scale)[index][None, :],
+        )
+
     def __call__(self, points):
         spline_level = -self.surface._patch_evaluation(
             self.surface.level_set_coefficients,

@@ -1,0 +1,10 @@
+revision=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=/home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/exact-clip-closed-form/measure_clip_body.py --suite baseline test_equilibrium_separatrix_clip.py
+18:07:49 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+.........................                                                [100%]
+=============================== warnings summary ===============================
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; zarr
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+25 passed, 1 warning in 62.70s (0:01:02)

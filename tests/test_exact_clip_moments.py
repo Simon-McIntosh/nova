@@ -415,3 +415,30 @@ def test_cut_cell_bank_overflow_remains_fail_closed():
         cut_cell_capacity=1,
     )
     assert np.all(~np.isfinite(np.asarray(moments)))
+
+
+def test_exact_clip_level_maps_host_geometry_without_array_conversion():
+    """Dynamic cell selection accepts the host arrays stored by the operator."""
+    from types import SimpleNamespace
+    import jax
+    from nova.equilibrium.forward_operator import _ExactClipLevel
+
+    configure_dtypes()
+    surface = SimpleNamespace(
+        fit_executed=False,
+        level_set_coefficients=None,
+        _patch_evaluation=lambda coefficient, radial, vertical: SimpleNamespace(
+            value=jnp.zeros_like(radial)
+        ),
+    )
+    level = _ExactClipLevel(
+        surface,
+        np.asarray([[1.0, 2.0, 3.0, 0.0, 0.0, 0.0], [4.0, 5.0, 6.0, 0.0, 0.0, 0.0]]),
+        np.asarray([[0.0, 0.0], [2.0, 3.0]]),
+        np.ones((2, 2)),
+    )
+    point = jnp.asarray([[[0.25, 0.5]], [[2.25, 3.5]]])
+    values = jax.jit(jax.vmap(lambda index: level.for_cell(index)(point[index][None])))(
+        jnp.arange(2)
+    )
+    np.testing.assert_array_equal(values[:, 0, 0], [3.0, 8.25])

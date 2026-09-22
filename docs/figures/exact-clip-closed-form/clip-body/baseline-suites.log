@@ -1,0 +1,5 @@
+revision=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f base=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/measure_clip_body.py', '--suites', 'baseline']
+baseline-test_equilibrium_separatrix_clip EXIT 1
+baseline-test_exact_clip_moments EXIT 0
+baseline-test_null_generator_admission EXIT 0
+baseline-test_flux_surface_extraction EXIT 0

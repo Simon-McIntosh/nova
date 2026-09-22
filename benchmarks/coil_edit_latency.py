@@ -98,12 +98,15 @@ BOUNDARY_COIL_FAMILIES = frozenset({"p4_lower", "p4_upper", "p5_lower", "p5_uppe
 # interactive measurement, and the receipt echoes the marker so the lowered
 # provenance travels with the artefact.
 CPU_PROVENANCE_MARKER = "NOVA_COIL_EDIT_CPU_PROVENANCE"
-#: Set to the reason a run is on a GPU that is not the H200 measurement host --
-#: the titan rung of the compute hierarchy. Its per-edit walls are that device's
-#: walls and are not the interactive measurement; the receipt echoes both the
-#: marker and the device kind so the lowered provenance travels with the
-#: artefact rather than being inferred from a field the refusal removed.
+#: Set to the reason a run is on a GPU that is not the H200 measurement host.
+#: The receipt carries this marker separately from the stricter titan marker,
+#: so a declared off-host device is never inferred from a relaxed refusal.
 OFF_HOST_PROVENANCE_MARKER = "NOVA_COIL_EDIT_OFF_HOST_PROVENANCE"
+# A marked P100 rung off the shared reservation, used when the device program
+# is wanted and the H200 reservation is held.  The device program is a
+# different compile from the CPU re-run, so its provenance is named separately
+# and travels in the receipt rather than being read as either one.
+TITAN_PROVENANCE_MARKER = "NOVA_COIL_EDIT_TITAN_PROVENANCE"
 INTERACTIVE_LATENCY_TARGET_MILLISECONDS = 100.0
 # The compiled slice route's own production budgets (the kernel's declared
 # constants), not the parity-driver Newton budgets the endpoint prep uses.
@@ -133,14 +136,7 @@ def _archive_scalar(archive: Any, name: str) -> str:
 
 
 def _response_cache(carrier_path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Load the persisted response and its complete input ledger.
-
-    The contract the carrier is held to is the one its own grid declares, found
-    by identity among the pinned grids, so a carrier built on the full stored
-    axes is verified as strictly as the coarse one rather than refused against
-    the other grid's pin.  A carrier whose identity is not pinned anywhere is
-    still refused.
-    """
+    """Load the persisted response against the grid identity it declares."""
     grid = response_carrier.grid_for_carrier(carrier_path)
     response, metadata = response_carrier.load_carrier(
         carrier_path,
@@ -201,11 +197,12 @@ def _require_measurement_host() -> None:
     """Require the H200 measurement host, or an explicitly marked CPU re-run.
 
     The persisted sweep states can be regenerated while the shared reservation
-    is held, so a run that names its own reason on a CPU platform is accepted;
-    the receipt records the host, the partition, the reservation and the JAX
-    platform of whatever ran, so the lowered provenance is read from the
-    artefact rather than inferred from a field the refusal removed.  An
-    unmarked run off the reservation is still refused.
+    is held, so a run that names its own reason on a CPU platform is accepted,
+    and so is a marked run on the P100 rung; the receipt records the host, the
+    partition, the reservation and the JAX platform of whatever ran, so the
+    lowered provenance is read from the artefact rather than inferred from a
+    field the refusal removed.  An unmarked run off the reservation is still
+    refused.
     """
     if os.environ.get("TMPDIR") != "/tmp":
         raise RuntimeError("TMPDIR=/tmp must be set in the job body")
@@ -218,12 +215,25 @@ def _require_measurement_host() -> None:
                 f"{device.platform} on {device.device_kind}"
             )
         return
+    titan = os.environ.get(TITAN_PROVENANCE_MARKER, "").strip()
+    if titan:
+        if device.platform != "gpu":
+            raise RuntimeError(
+                "the titan provenance marker requires a gpu platform, got "
+                f"{device.platform} on {device.device_kind}"
+            )
+        if os.environ.get("SLURM_JOB_PARTITION") != "titan":
+            raise RuntimeError(
+                "the titan provenance marker requires the titan partition"
+            )
+        if os.environ.get("SLURM_JOB_RESERVATION") not in (None, "", "(null)"):
+            raise RuntimeError(
+                "the titan provenance marker requires an allocation off the "
+                "shared reservation"
+            )
+        return
     off_host = os.environ.get(OFF_HOST_PROVENANCE_MARKER, "").strip()
     if off_host:
-        # The titan rung: a GPU that is not the measurement host. It is
-        # admitted only with its reason named, and the H200 checks below are
-        # the ones that do not apply to it -- an unmarked run off the
-        # reservation is refused exactly as before.
         if device.platform != "gpu":
             raise RuntimeError(
                 "the off-host provenance marker requires a GPU platform, got "
@@ -560,12 +570,13 @@ def _prepare_case(
     carrier_path: Path,
     grid_points: int | None = None,
     flux_function_factory: Any = None,
+    *,
+    impose_vertical_centroid: bool = True,
 ) -> tuple[Any, dict[str, Any], dict[str, Any]]:
-    """Prepare the sweep's base frame, optionally on a named axis count.
+    """Prepare the sweep frame on the carrier's declared receiver grid.
 
-    ``grid_points`` selects the uniform per-axis node count the case is built
-    on and must agree with the grid the supplied carrier was built for; the
-    default keeps the stored-axis stride this driver has always used.
+    ``grid_points`` selects a uniform per-axis node count and must agree with
+    the supplied carrier. The default retains the stored-axis stride.
     """
     response_cache, carrier = _response_cache(carrier_path)
     selected = {"shot": SHOT, "slice_index": SLICE_INDEX}
@@ -690,19 +701,29 @@ def _prepare_case(
     reference_centroid_z = float(np.asarray(reference_centroid.centroid_z))
     if not np.isfinite(reference_centroid_z):
         raise RuntimeError("the reference frame carries no vertical current centre")
-    vertical_pair, vertical_actuator = _vertical_centroid_pair(
-        profile,
-        policy,
-        mixed_seed.state,
-        requested_class=jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8),
-        target_current=target_current,
-        target=reference_centroid_z,
-    )
-    reference_panel["vertical_centroid"] = {
-        "reference_m": reference_centroid_z,
-        "target_m": reference_centroid_z,
-        "tolerance_m": VERTICAL_CENTROID_TOLERANCE,
-    }
+    # The reference's own centre is measured on both arms: it is the quantity
+    # the constrained arm holds every edit to, and the quantity the
+    # unconstrained arm records that it was not held to, so the two arms state
+    # one number and differ only in whether a row was added to the solve.
+    if impose_vertical_centroid:
+        vertical_pair, vertical_actuator = _vertical_centroid_pair(
+            profile,
+            policy,
+            mixed_seed.state,
+            requested_class=jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8),
+            target_current=target_current,
+            target=reference_centroid_z,
+        )
+        reference_panel["vertical_centroid"] = {
+            "reference_m": reference_centroid_z,
+            "target_m": reference_centroid_z,
+            "tolerance_m": VERTICAL_CENTROID_TOLERANCE,
+        }
+    else:
+        # An arm run without the constraint persists no centroid row, so its
+        # panel caption states the absence rather than a target it never held.
+        vertical_pair = None
+        vertical_actuator = None
     prepared = {
         "initial": mixed_seed.state,
         "vertical_centroid_pair": vertical_pair,
@@ -866,7 +887,8 @@ def _seed_probe(
     current: jax.Array,
     requested_class: jax.Array,
     target_current: float,
-) -> dict[str, Any]:
+    program: Any = None,
+) -> tuple[dict[str, Any], Any]:
     """Measure the seed's own residual on the edited operator, before any trip.
 
     One trip closed with zero Newton steps evaluates the trip boundary at the
@@ -874,7 +896,10 @@ def _seed_probe(
     edited operator rather than the post-correction residual a full edit
     reports.  The program is not threaded from the sweep: this probe's policy
     key differs from the sweep's, so reusing the sweep program would only add
-    the probe's solver to a chain whose reuse the latency gates measure.
+    the probe's solver to a chain whose reuse the latency gates measure.  Its
+    own program is handed back so the caller can hold it across edits; a fresh
+    program loaded per edit would accumulate the section mappings the process
+    cannot exceed.
     """
     result = _compiled_edit(
         profile,
@@ -882,13 +907,13 @@ def _seed_probe(
         current,
         requested_class,
         target_current,
-        None,
+        program,
         newton_steps=0,
         active_set_steps=1,
     )
     jax.block_until_ready(result.state)
     residuals = [float(value) for value in result.active_set_residuals]
-    return {
+    probe = {
         "residual": float(np.asarray(result.terminal_residual)),
         "trip_count": int(np.asarray(result.active_set_iterations)),
         "termination": result.termination_name,
@@ -900,6 +925,7 @@ def _seed_probe(
         "achieved_class": _achieved_class(profile, state),
         "achieved_class_after_trip": _achieved_class(profile, result.state),
     }
+    return probe, result.program
 
 
 def _equilibrium_receipt(
@@ -1871,9 +1897,7 @@ def _draw_null_set(
     )
 
 
-def _paint_panel(
-    axis: Any, loaded: dict[str, Any], panel: dict[str, Any]
-) -> dict[str, dict[str, int]]:
+def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> None:
     """Draw one edit's terminal flux over the reference field.
 
     Both rasters are masked to the wall interior before contouring, so a level
@@ -1881,12 +1905,6 @@ def _paint_panel(
     Both null sets are drawn in their own styles, each with its admitted saddle
     filled and its remaining qualified nulls hollow, so a solved null is never
     mistaken for the reference one.
-
-    Returns what each painter actually drew, keyed by set. The admitted saddle
-    is dropped when it falls outside the wall and the hollow cup is empty for a
-    set with no second qualified null, so the two sets can be drawn with
-    different glyph vocabularies; carrying the counts out of the painter is what
-    lets the caption state the drawing rather than assert it.
     """
     radius = loaded["radius"]
     height = loaded["height"]
@@ -1917,7 +1935,7 @@ def _paint_panel(
         axis, panel["branches"], "#cc7722", panel["separatrix"]
     )
 
-    loaded["reference_nulls_drawn"] = _draw_null_set(
+    _draw_null_set(
         axis,
         loaded["reference_axis"],
         loaded["reference_xpoints"],
@@ -1925,7 +1943,7 @@ def _paint_panel(
         "#3366cc",
         loaded["wall"],
     )
-    panel["nulls_drawn"] = _draw_null_set(
+    _draw_null_set(
         axis,
         panel["axis"],
         panel["xpoints"],
@@ -1934,10 +1952,6 @@ def _paint_panel(
         loaded["wall"],
     )
     poloidal_axes(axis)
-    return {
-        "reference": dict(loaded["reference_nulls_drawn"]),
-        "solved": dict(panel["nulls_drawn"]),
-    }
 
 
 def _branch_terms(branches: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -1975,7 +1989,6 @@ def _panel_summary(panel: dict[str, Any]) -> dict[str, Any]:
         "termination": panel["termination"],
         "achieved_class": panel["class_name"],
         "branches_drawn": dict(panel.get("branches_drawn", {})),
-        "nulls_drawn": dict(panel.get("nulls_drawn", {})),
         "branches": _branch_terms(panel.get("branches")),
     }
 
@@ -2002,39 +2015,15 @@ def _branch_style_note(drawn: dict[str, int]) -> str:
     return "lobe solid, legs dashed"
 
 
-def _null_style_note(tally: dict[str, int]) -> str:
-    """Return the caption fragment for what a null set was drawn as.
-
-    The caption reads the glyphs off the painter's own tally rather than
-    restating the intent: a set whose only qualified null is the admitted
-    saddle has no hollow cup to draw, and an admitted saddle outside the wall
-    is dropped instead of drawn. A caption claiming hollow markers for a panel
-    that carries none sends the reader looking for a glyph that is not there.
-    """
-    drawn = int(tally.get("x_points_drawn", 0))
-    dropped = int(tally.get("x_points_dropped_outside_wall", 0))
-    other = int(tally.get("other_x_points_drawn", 0))
-    phrase = "as drawn %d admitted filled"
-    arguments = [drawn]
-    if dropped:
-        phrase += ", %d admitted dropped outside the wall"
-        arguments.append(dropped)
-    if other:
-        phrase += ", %d other qualified hollow"
-        arguments.append(other)
-    else:
-        phrase += ", no other qualified nulls"
-    return phrase % tuple(arguments)
-
-
 def _null_ordering(x_points: Any, saddle_index: int, axis: Any) -> str:
     """Compare the admitted saddle's height with the magnetic axis's.
 
-    Both the reference and every solved state carry a qualified null set, and
-    which one is admitted as the boundary saddle differs between them: the
-    reference's sits above its axis, the solved states' below.  The caption
-    states the comparison rather than assuming it, so a regenerated reference
-    whose ordering changed does not silently contradict its own caption.
+    The reference and every solved state carry their own qualified null set,
+    and nothing requires the admitted saddle to sit on the same side of the
+    axis from one set to the next.  The caption therefore reads the comparison
+    out of whichever set it is describing, for the reference and for each drawn
+    panel alike, so a state whose ordering differs from the reference is stated
+    rather than described by a clause written for a different state.
     """
     array = np.atleast_2d(np.asarray(x_points, dtype=float))
     if not 0 <= saddle_index < array.shape[0]:
@@ -2058,10 +2047,9 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
     loaded = _panel_load(data_path)
     figure, axes = plt.subplots(1, 2, figsize=(10.6, 4.6), constrained_layout=True)
 
-    tallies: dict[str, dict[str, dict[str, int]]] = {}
     for axis, label in zip(axes, ("converged", "failed"), strict=True):
         panel = loaded[label]
-        tallies[label] = _paint_panel(axis, loaded, panel)
+        _paint_panel(axis, loaded, panel)
         axis.set_title(
             "edit %d  %+d%%  residual %.3e  converged %s  trips %d"
             % (
@@ -2076,20 +2064,31 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
     reference_note = _saddle_note(
         loaded["reference_xpoints"], loaded["reference_saddle_index"]
     )
-    reference_tally = tallies["converged"]["reference"]
-    solved_note = _saddle_note(
-        loaded["failed"]["xpoints"], loaded["failed"]["saddle_index"]
+    # Both drawn panels report their own admitted saddle and its side of their
+    # own axis: the constrained solve need not place the null where the
+    # reference placed its own, and a caption that said so would describe a
+    # state other than the one drawn.
+    solved_notes = tuple(
+        _saddle_note(loaded[label]["xpoints"], loaded[label]["saddle_index"])
+        for label in ("converged", "failed")
+    )
+    solved_orderings = tuple(
+        _null_ordering(
+            loaded[label]["xpoints"],
+            loaded[label]["saddle_index"],
+            loaded[label]["axis"],
+        )
+        for label in ("converged", "failed")
     )
     constraint_note = _constraint_note(loaded.get("vertical_centroid"))
-    caption = (
+    figure.suptitle(
         "terminal poloidal flux on shared levels between the axis and boundary "
         "flux (%.4f to %.4f Wb)  |  every solved state imposes the "
         "vertical current-centre row %s  |  reference is the unedited "
-        "equilibrium, an "
-        "upper-null state whose admitted saddle sits above its axis, while every "
-        "solved state admits a lower null (blue, admitted saddle %s)  |  "
-        "reference set blue: %s, admitted %s, %s  |  solved set orange: %s, "
-        "admitted %s, %s  |  wall drawn"
+        "equilibrium, its admitted saddle %s (blue set: %s, admitted %s)  |  "
+        "solved sets orange: %s, admitted %s %s in the converged panel "
+        "and %s %s in the failed panel  |  other qualified nulls hollow  |  "
+        "wall drawn"
         % (
             loaded["reference_axis_flux"],
             loaded["reference_boundary_flux"],
@@ -2101,21 +2100,21 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
             ),
             _branch_style_note(loaded.get("reference_branches_drawn", {})),
             reference_note,
-            _null_style_note(reference_tally),
             _branch_style_note(loaded["failed"].get("branches_drawn", {})),
-            solved_note,
-            _null_style_note(tallies["failed"]["solved"]),
-        )
+            solved_notes[0],
+            solved_orderings[0],
+            solved_notes[1],
+            solved_orderings[1],
+        ),
+        fontsize=9,
     )
-    figure.suptitle(caption, fontsize=9)
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(figure_path, dpi=140)
     vector_path = figure_path.with_suffix(".svg")
     figure.savefig(vector_path)
     plt.close(figure)
 
-    receipt_path = figure_path.with_suffix(".json")
-    document = {
+    return {
         "figure": str(figure_path),
         "figure_vector": str(vector_path),
         "levels": [float(value) for value in loaded["levels"]],
@@ -2125,19 +2124,10 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
         },
         "reference_branches": _branch_terms(loaded["reference_branches"]),
         "reference_branches_drawn": dict(loaded.get("reference_branches_drawn", {})),
-        "reference_nulls_drawn": reference_tally,
         "vertical_centroid": loaded.get("vertical_centroid"),
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
     }
-    receipt = dict(document)
-    receipt["caption"] = " ".join(caption.split())
-    receipt["receipt"] = str(receipt_path)
-    receipt_path.write_text(
-        json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
-    return document
-    return document
 
 
 def _declared_path(path: Path) -> str:
@@ -2257,6 +2247,14 @@ def _receipt_document(
         "measurement_state": measurement_state,
         "verdict": verdict,
         "gates": gates,
+        "gate_notes": _gate_notes(rows),
+        "vertical_centroid_constraint": {
+            # Read off the prepared pair rather than off a run argument, so the
+            # receipt cannot disagree with what the solve was given.
+            "imposed": prepared["vertical_centroid_pair"] is not None,
+            "reference_m": prepared["reference_centroid_z"],
+            "tolerance_m": VERTICAL_CENTROID_TOLERANCE,
+        },
         "interactive_path": {
             "route": "compiled slice (reduced fixed point, one fixed-shape "
             "program re-entered per edit)",
@@ -2289,8 +2287,11 @@ def _receipt_document(
             "platform": jax.devices()[0].platform,
             "jax_platforms": os.environ.get("JAX_PLATFORMS"),
             "tmpdir": os.environ.get("TMPDIR"),
-            "measurement_host_marker": os.environ.get(CPU_PROVENANCE_MARKER),
-        "off_host_marker": os.environ.get(OFF_HOST_PROVENANCE_MARKER),
+            "measurement_host_marker": (
+                os.environ.get(CPU_PROVENANCE_MARKER)
+                or os.environ.get(TITAN_PROVENANCE_MARKER)
+            ),
+            "off_host_marker": os.environ.get(OFF_HOST_PROVENANCE_MARKER),
             "elapsed_seconds": elapsed_seconds,
             "exit_marker": marker,
         },
@@ -2407,6 +2408,38 @@ def _receipt_document(
     }
 
 
+def _compile_witness_note(rows: list[dict[str, Any]]) -> str:
+    """State what the first-edit compile gate does and does not witness.
+
+    The gate holds when the persistent compilation cache misses on the first
+    edit. An allocation served from a pre-warmed cache never misses there: the
+    program it re-enters was compiled by an earlier job, so reading the gate as
+    evidence that this run compiled anything is wrong on such a rung. The note
+    carries the first row's own cache outcome, so the caveat is a measurement
+    rather than a claim about rungs in general.
+    """
+    if not rows:
+        return "no edit was recorded, so this gate witnesses nothing"
+    first = rows[0]
+    return (
+        "first edit reported compilation_cache=%r with "
+        "persistent_cache_miss_count=%d and persistent_cache_hit_count=%d; the "
+        "gate records a persistent-cache outcome on the first edit rather than "
+        "a compile, so on a rung served by the pre-warmed cache it is not a "
+        "compile witness"
+        % (
+            first["compilation_cache"],
+            first["persistent_cache_miss_count"],
+            first["persistent_cache_hit_count"],
+        )
+    )
+
+
+def _gate_notes(rows: list[dict[str, Any]]) -> dict[str, str]:
+    """Return the note each gate needs to be read at its real strength."""
+    return {"first_edit_compiles_program": _compile_witness_note(rows)}
+
+
 def run(
     output: Path,
     figure: Path,
@@ -2416,12 +2449,12 @@ def run(
     panel_figure: Path,
     raster_figure: Path = DEFAULT_RASTER_FIGURE,
     grid_points: int | None = None,
+    impose_vertical_centroid: bool = True,
 ) -> dict[str, Any]:
     """Compile once and measure successive warm prescribed-current edits.
 
     ``grid_points`` selects the uniform per-axis node count and must agree
-    with the grid the supplied carrier was built for; the default keeps the
-    stored-axis stride every banked measurement on this driver was taken on.
+    with the grid the supplied carrier was built for.
     """
     total_started = time.perf_counter()
     configure_dtypes()
@@ -2435,7 +2468,11 @@ def run(
     )
     reporter.start()
     try:
-        profile, prepared, carrier = _prepare_case(carrier_path, grid_points)
+        profile, prepared, carrier = _prepare_case(
+            carrier_path,
+            grid_points,
+            impose_vertical_centroid=impose_vertical_centroid,
+        )
         _preflight_panel_wall(profile)
         solve_persistent_hits_start = int(cache_events["hits"])
         solve_persistent_misses_start = int(cache_events["misses"])
@@ -2453,9 +2490,13 @@ def run(
 
         rows: list[dict[str, Any]] = []
         panel_states: list[dict[str, Any]] = []
-        constraint_pairs = (prepared["vertical_centroid_pair"],)
+        constraint_pair = prepared["vertical_centroid_pair"]
+        constraint_pairs: tuple[ConstraintPair, ...] = (
+            () if constraint_pair is None else (constraint_pair,)
+        )
         state = initial
         program = None
+        probe_program = None
         program_reused_from_edit: int | None = None
         reference_raster_separatrix = prepared["reference_raster_separatrix"]
         for index, (fraction, current) in enumerate(
@@ -2467,9 +2508,18 @@ def run(
             # the seed's, not the post-correction residual a full edit
             # reports.  It runs off the clock and before the miss counter is
             # sampled, so the probe's one-off program build lands in neither
-            # an edit's wall or its cache accounting.
-            seed_probe = _seed_probe(
-                profile, state, current, requested_class, target_current
+            # an edit's wall or its cache accounting.  The probe program is
+            # held from edit to edit and re-entered: loading one costs about
+            # seventeen thousand XLA section mappings against a 65,530 cap,
+            # so building a fresh one per edit exhausts the process's mapping
+            # space and aborts the sweep part-way through the chain.
+            seed_probe, probe_program = _seed_probe(
+                profile,
+                state,
+                current,
+                requested_class,
+                target_current,
+                probe_program,
             )
             persistent_misses_before = int(cache_events["misses"])
             persistent_hits_before = int(cache_events["hits"])
@@ -3041,6 +3091,15 @@ def main() -> None:
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
     )
     run_parser.add_argument("--grid-points", type=int, default=None)
+    run_parser.add_argument(
+        "--without-vertical-centroid",
+        action="store_true",
+        help=(
+            "run the sweep without the vertical current-centre row, so the "
+            "unconstrained control arm is measured on the same code as the "
+            "constrained arm it is compared against"
+        ),
+    )
     for name in ("sbatch", "submit"):
         job_parser = subparsers.add_parser(name)
         job_parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
@@ -3094,6 +3153,7 @@ def main() -> None:
             arguments.panel_figure,
             arguments.raster_figure,
             arguments.grid_points,
+            impose_vertical_centroid=not arguments.without_vertical_centroid,
         )
     elif arguments.command == "panel":
         print(

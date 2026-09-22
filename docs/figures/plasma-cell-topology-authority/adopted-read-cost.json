@@ -1,0 +1,235 @@
+{
+  "all_adopted_within_window": false,
+  "allocation": {
+    "cpus": "4",
+    "devices": [
+      "cuda:0"
+    ],
+    "jax_default_backend": "gpu",
+    "jax_platforms": null,
+    "job_id": 1275970,
+    "kind": "gpu",
+    "memory_mb": "65536",
+    "node": "98dci4-gpu-0002",
+    "partition": "titan",
+    "tmpdir": "/tmp"
+  },
+  "arms": {
+    "production_adopted": "ForwardFluxOperator._fixed_design_topology.grid(null_flux_pool(state))",
+    "production_legacy_ring": "ForwardFluxOperator._fixed_design_topology.grid.locator(grid_flux)"
+  },
+  "reference_job_id": 1275658,
+  "reference_receipt": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-ring-read-misses-and-the-twin-loop/timing-gpu-receipt.json",
+  "reference_revision": "da3def20e95b7aa5b2b3c8d18715820c18009698",
+  "rows": [
+    {
+      "adopted_over_reference": 3.1519163577152836,
+      "adopted_within_window": false,
+      "interior_vertices": 833,
+      "legacy_control_within_window": true,
+      "legacy_over_reference": 0.9963459405393502,
+      "measurements": {
+        "production_adopted": {
+          "batch_median_seconds": 0.012983575463294983,
+          "batch_samples_seconds": [
+            0.013052497059106827,
+            0.01285744458436966,
+            0.012983575463294983,
+            0.0128498375415802,
+            0.013074038550257683,
+            0.0130347590893507,
+            0.01286870427429676
+          ],
+          "batch_size": 16,
+          "cell_or_vertex_trip_count_present": true,
+          "compile_seconds": 1.8113769348710775,
+          "lowered_program": {
+            "fusions": 65,
+            "known_trip_counts": [
+              550,
+              550,
+              60,
+              60
+            ],
+            "text_bytes": 338671,
+            "while_loops": 4
+          },
+          "lowered_text_bytes": 363686,
+          "per_state_ms": 0.8114734664559364,
+          "repeat_count": 7,
+          "warm_compile_excluded": true
+        },
+        "production_legacy_ring": {
+          "batch_median_seconds": 0.004104211926460266,
+          "batch_samples_seconds": [
+            0.004104211926460266,
+            0.00409829244017601,
+            0.004144672304391861,
+            0.004100460559129715,
+            0.004150312393903732,
+            0.004144376143813133,
+            0.00408586859703064
+          ],
+          "batch_size": 16,
+          "cell_or_vertex_trip_count_present": false,
+          "compile_seconds": 0.7412001844495535,
+          "lowered_program": {
+            "fusions": 12,
+            "known_trip_counts": [],
+            "text_bytes": 106795,
+            "while_loops": 0
+          },
+          "lowered_text_bytes": 104723,
+          "per_state_ms": 0.25651324540376663,
+          "repeat_count": 7,
+          "warm_compile_excluded": true
+        }
+      },
+      "median_cell_pitch_m": 0.07103816322006608,
+      "pre_adoption_reference_ms": 0.2574539976194501,
+      "realised_cells": 550,
+      "requested_cells": 500
+    },
+    {
+      "adopted_over_reference": 6.07872592453393,
+      "adopted_within_window": false,
+      "interior_vertices": 1735,
+      "legacy_control_within_window": true,
+      "legacy_over_reference": 0.9176589070843343,
+      "measurements": {
+        "production_adopted": {
+          "batch_median_seconds": 0.02482379786670208,
+          "batch_samples_seconds": [
+            0.02478238381445408,
+            0.02482418529689312,
+            0.02489306405186653,
+            0.02486836351454258,
+            0.02482379786670208,
+            0.02333076298236847,
+            0.022633561864495277
+          ],
+          "batch_size": 16,
+          "cell_or_vertex_trip_count_present": true,
+          "compile_seconds": 1.7118355333805084,
+          "lowered_program": {
+            "fusions": 70,
+            "known_trip_counts": [
+              1074,
+              1074,
+              60,
+              60
+            ],
+            "text_bytes": 342802,
+            "while_loops": 4
+          },
+          "lowered_text_bytes": 364663,
+          "per_state_ms": 1.55148736666888,
+          "repeat_count": 7,
+          "warm_compile_excluded": true
+        },
+        "production_legacy_ring": {
+          "batch_median_seconds": 0.003747459501028061,
+          "batch_samples_seconds": [
+            0.0038232840597629547,
+            0.003761034458875656,
+            0.0037536602467298508,
+            0.003747459501028061,
+            0.0037379376590251923,
+            0.0037310663610696793,
+            0.003729056566953659
+          ],
+          "batch_size": 16,
+          "cell_or_vertex_trip_count_present": false,
+          "compile_seconds": 0.5875952783972025,
+          "lowered_program": {
+            "fusions": 12,
+            "known_trip_counts": [],
+            "text_bytes": 107613,
+            "while_loops": 0
+          },
+          "lowered_text_bytes": 104732,
+          "per_state_ms": 0.2342162188142538,
+          "repeat_count": 7,
+          "warm_compile_excluded": true
+        }
+      },
+      "median_cell_pitch_m": 0.050231566935945514,
+      "pre_adoption_reference_ms": 0.25523232761770487,
+      "realised_cells": 1074,
+      "requested_cells": 1000
+    },
+    {
+      "adopted_over_reference": 15.125991423638686,
+      "adopted_within_window": false,
+      "interior_vertices": 4609,
+      "legacy_control_within_window": true,
+      "legacy_over_reference": 0.9935923517484293,
+      "measurements": {
+        "production_adopted": {
+          "batch_median_seconds": 0.058928437530994415,
+          "batch_samples_seconds": [
+            0.05885857902467251,
+            0.05893801338970661,
+            0.05915236659348011,
+            0.059011517092585564,
+            0.058928437530994415,
+            0.058854205533862114,
+            0.05887003242969513
+          ],
+          "batch_size": 16,
+          "cell_or_vertex_trip_count_present": true,
+          "compile_seconds": 1.6303856782615185,
+          "lowered_program": {
+            "fusions": 71,
+            "known_trip_counts": [
+              2616,
+              2616,
+              60,
+              60
+            ],
+            "text_bytes": 344864,
+            "while_loops": 4
+          },
+          "lowered_text_bytes": 364135,
+          "per_state_ms": 3.683027345687151,
+          "repeat_count": 7,
+          "warm_compile_excluded": true
+        },
+        "production_legacy_ring": {
+          "batch_median_seconds": 0.003870876505970955,
+          "batch_samples_seconds": [
+            0.0039052553474903107,
+            0.003884417936205864,
+            0.0038588307797908783,
+            0.0038069598376750946,
+            0.003870876505970955,
+            0.003881571814417839,
+            0.0038703754544258118
+          ],
+          "batch_size": 16,
+          "cell_or_vertex_trip_count_present": false,
+          "compile_seconds": 0.5869759283959866,
+          "lowered_program": {
+            "fusions": 12,
+            "known_trip_counts": [],
+            "text_bytes": 106956,
+            "while_loops": 0
+          },
+          "lowered_text_bytes": 104888,
+          "per_state_ms": 0.24192978162318468,
+          "repeat_count": 7,
+          "warm_compile_excluded": true
+        }
+      },
+      "median_cell_pitch_m": 0.03176923239135864,
+      "pre_adoption_reference_ms": 0.24348997976630926,
+      "realised_cells": 2616,
+      "requested_cells": 2500
+    }
+  ],
+  "schema": "nova.adopted-read-cost",
+  "source_revision": "4112f5f853566ee7f013967330368affbb063f30",
+  "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame",
+  "version": 1,
+  "window": 1.1
+}

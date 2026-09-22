@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-22">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="14">
 <meta name="plan-impl" content="0.0">
 </head>
 <body>
@@ -240,11 +240,31 @@
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260922T131958475620-review-of-fsa-repair-terminal-flux-panel" data-who="reckon-ship" data-when="2026-09-22T13:27:36.576Z">
     <div class="r-comment-body"><p>review role: scored fsa-repair-terminal-flux-panel 89 of 100</p></div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260922T115635336563-fsa-repair-positional-stiffness-figures" data-who="reckon-ship" data-when="2026-09-22T11:56:35Z">
+    <div class="r-comment-body"><p>positional-stiffness figure repair landed on commit c88ef0b91; evidence anchor <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figure-audit-cut-cell-current-attribution</code>. The followups' pixel-identity claim is refuted by measurement: the 110- and 300-cell residual figures both draw from the one committed measurement receipt (sha256 6e0b30e9…23bb) and each draws its own disjoint row selection (135 against 342 realised cells), so they are neither the same receipt read twice nor identical receipts, and both the file and the decoded-pixel digests differ (<code>53b32081…</code>/<code>26c8e842…</code> against <code>46c3c928…</code>/<code>54a54354…</code>). The pair are merely indistinguishable at print size, their arrays differing by under three percent at 40 mm. <code>translated-40mm.png</code> now prints residual= against the analytic span and converged= on all six panels, and states the shared level array it contours both fields on; convergence reads no everywhere at 40 mm because the axis projects 0.0681 to 0.1391 m against a 0.040 m input displacement, so the flag is computed and carries no discriminating power at that amplitude. Drawing is payload-driven and solve-free (login-node, seconds), a render receipt records per figure the title lines and digests and per poloidal panel the glyph count drawn per null set, and five checks pass in <code>tests/test_fixture_positional_stiffness_render.py</code> with a declared negative control that reddens on a duplicated pixel digest.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260922T123943037762-fsa-check-which-unmerged-record-tips-are-already-on-main" data-who="reckon-ship" data-when="2026-09-22T14:22:48.120Z">
+    <div class="r-comment-body"><p>report-only: of 19 audit record tips, 17 with commits beyond main add ids none of which main carries (none-present 17, partly 0, all-present 0), so every one is a merge-tip case; review 96/100</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260922T114849876335-fsa-repair-contact-shadow-figure" data-who="reckon-ship" data-when="2026-09-22T13:40:00Z">
+    <div class="r-comment-body"><p>repaired <code>limiter-read/single-null-contact-shadow.png</code> (audit score 30, misrepresents physics) under followup <code>f-cca-repair-contact-shadow-unlabelled</code>, reviewer anchor <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figure-audit-cut-cell-current-attribution</code>: the poloidal panel now carries a wrapped title read from the source receipt (<code>diverted-single-null · cells=1074 · residual=9.853e-05 · converged=n/a</code>), a legend naming all six drawn families, the wall at its 481 source nodes, and a diamond contact glyph distinct from the axis triangle and the saddle cross. The reproduction the repair answers: <code>single-null-contact-shadow.png</code> was 972×1116 at HEAD with no text of any kind, and no render receipt existed; the regenerated figure is 1404×1116 and <code>render-receipt.json</code> lists per figure every title line and per panel the null glyphs of every null set. A render-only entry point rebuilds both limiter-read figures from the committed receipt with no solve, so the painter lane rule of 2026-09-22 holds; the named checks live in <code>tests/test_limiter_read_render.py</code> and a mutated receipt was audited to observe them fail. Residual and convergence provenance: the source receipt enters no nonlinear solve, so the title's residual is the selected-contact level error in span against the exact wall extremum and the convergence field reads n/a.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260922T153110102042-review-of-fsa-repair-contact-shadow-figure" data-who="reckon-ship" data-when="2026-09-22T15:41:19.924Z">
+    <div class="r-comment-body"><p>review role: scored the contact-shadow repair 95 of 100</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260922T142435030396-review-of-fsa-check-which-unmerged-record-tips-are-already-on-main" data-who="reckon-ship" data-when="2026-09-22T14:28:23.869Z">
+    <div class="r-comment-body"><p>review role: scored fsa-check-which-unmerged-record-tips-are-already-on-main 96 of 100</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260922T143840546914-review-of-fsa-repair-positional-stiffness-figures" data-who="reckon-ship" data-when="2026-09-22T14:44:09.051Z">
+    <div class="r-comment-body"><p>review role: scored fsa-repair-positional-stiffness-figures 86 of 100</p></div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-fsa-20260921-null-vocabulary-was-not-expressible" data-who="" data-when="">
     <div class="r-comment-body">Painter defect found 2026-09-21 by the adjacent nova session while rendering the matched-edit panel under the plotting rules and fixed on main at 2b12b210a (nova/media/ink.py and draw_nulls): InkStyle.xpoint_marker was the line marker x and axis_marker the dot, both faceless, so markerfacecolor none was silently inert, hollow drew identically to filled, and the axis drew as a dot where the rule says a solid triangle. The draw_nulls vocabulary the rules require (solid triangle for the axis, filled cross for the admitted saddle, hollow markers for other qualified nulls) was declared and not expressible. Consequence for this audit: every figure re-rendered under the rules before that commit carries indistinguishable null sets, so the repair followups on the owning plans that re-render flux panels are not closed by a re-render made before 2b12b210a; a pass over the re-rendered panels for null glyphs is owed once the repair queue clears. No test pinned the marker literals (tests/test_solovev_certificate_render.py reads the style rather than hard-coding it), so the change is visible in figures only.</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260921T061551405436-fsa-audit-solver-clip-and-quadrature" data-who="reckon-ship" data-when="2026-09-21T06:38:00+00:00">
+    <div class="r-comment-body"><p>Clip/quadrature audit complete: 8 ledger promotions reviewed, 7 defective and 1 sound. The current-head CPU allocation ran 19 fresh targets (13 pass, 6 fail); all 10 test failures trace to <code>d90a522fe</code> reading a missing <code>topology.x_point</code>. The evidence anchor records the row verdicts, valid typed-saddle negative control, unwired capacity refusal, and repair payloads.</p></div>
 </div>
 </section>
   </main>

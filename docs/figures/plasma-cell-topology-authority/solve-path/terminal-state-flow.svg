@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="500" viewBox="0 0 1120 500" role="img" aria-labelledby="title desc">
+<title id="title">The terminal null census needs the complete state</title>
+<desc id="desc">On the 132-cell analytic carrier the complete flux vector has 730 values: 132 grid, 121 wall and 477 direct sampling values. Truncation to 253 physical values discards the sampling suffix and the census refuses. Keeping all 730 values lets topology construct the 609-value census pool from grid and samples.</desc>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9" fill="#44505d"/></marker></defs>
+<rect width="1120" height="500" fill="#fff"/>
+<g font-family="sans-serif" fill="#17212b">
+<text x="36" y="43" font-size="25" font-weight="600">Preserve direct sampling rows through the terminal receipt</text>
+<text x="36" y="73" font-size="16">Measured analytic carrier: 110 requested cells → 132 realised cells</text>
+<rect x="36" y="104" width="190" height="63" rx="5" fill="#dce7f8"/>
+<rect x="230" y="104" width="190" height="63" rx="5" fill="#ececec"/>
+<rect x="424" y="104" width="465" height="63" rx="5" fill="#dcefe2"/>
+<text x="57" y="141" font-size="19">Grid: 132</text><text x="251" y="141" font-size="19">Wall: 121</text><text x="448" y="141" font-size="19">Direct sampling: 477</text>
+<text x="915" y="141" font-size="21" font-weight="600">730 values</text>
+<text x="36" y="227" font-size="18" font-weight="600">Truncated receipt input</text>
+<rect x="36" y="243" width="266" height="57" rx="5" fill="#f9e5e2"/><text x="57" y="279" font-size="18">Physical prefix: 253</text>
+<path d="M314 271 H386" stroke="#44505d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="400" y="243" width="269" height="57" rx="5" fill="#f9e5e2"/><text x="421" y="279" font-size="18">Census receives grid only</text>
+<path d="M681 271 H753" stroke="#44505d" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="770" y="267" font-size="18" fill="#a02e27">ValueError</text><text x="770" y="292" font-size="16">Direct sampling values required</text>
+<text x="36" y="357" font-size="18" font-weight="600">Complete receipt input</text>
+<rect x="36" y="373" width="266" height="57" rx="5" fill="#dcefe2"/><text x="57" y="409" font-size="18">Terminal state: 730</text>
+<path d="M314 401 H386" stroke="#44505d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="400" y="373" width="269" height="57" rx="5" fill="#dcefe2"/><text x="421" y="409" font-size="18">Topology keeps the suffix</text>
+<path d="M681 401 H753" stroke="#44505d" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="770" y="397" font-size="18">Census pool: 132 + 477 = 609</text><text x="770" y="422" font-size="16">Grid and authored sampling rows</text>
+<text x="36" y="477" font-size="15" fill="#44505d">The wall rows remain in the topology input; the pool builder selects grid and sampling rows for the null census.</text>
+</g></svg>

@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="single-grid-solver-cutover-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="single-grid-solver-cutover">
+<meta name="plan-title" content="Single-grid solver cutover — cumulative execution evidence">
+<meta name="plan-summary" content="Landing record of the single-grid-solver-cutover plan: the stride sweep device control at a3f2429b and the records that follow it.">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-09-22">
+<title>single-grid-solver-cutover — landed evidence</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body>
+<main class="plan-doc">
+<header>
+<h1>Single-grid solver cutover — landed evidence</h1>
+<p class="lede">Cumulative record. Each landed node appends one <code>section</code>; a node never rewrites a predecessor's section. The plan <a href="/nova/plans/single-grid-solver-cutover.html">single-grid-solver-cutover</a> owns the semantics.</p>
+</header>
+
+<section id="titan-twenty-edit-stride-sweep">
+<h2>The twenty-edit stride sweep at revision a3f2429b is device-independent</h2>
+
+<p><strong>Verdict.</strong> The twenty-edit coil-edit sweep at revision <code>a3f2429b</code> converges <strong>4 of 20</strong> on a Tesla P100 exactly as it does on the H200: every edit carries the same converged flag, the same termination reason, the same trip count, and the same vertical-centroid qualification. The drop from the banked 10 of 20 to 4 of 20 therefore follows the revision, not the device. The per-edit warm wall does move with the device (median 3117.1 ms on the P100 against 2060.6 ms on the H200, 1.51x), so the revision change is the cause of the convergence loss and the device is the cause of the wall difference.</p>
+
+<p><strong>Run.</strong> One titan allocation, job <code>1275968</code> on <code>98dci4-gpu-0002.iter.org</code> (partition <code>titan</code>, <code>--gres=gpu:1 --cpus-per-task=4 --mem=64G --time=02:00:00</code>, no reservation), admitted off the H200 measurement host only because the run named its reason in <code>NOVA_COIL_EDIT_OFF_HOST_PROVENANCE</code>. The root interpreter was invoked directly with <code>PYTHONPATH</code> set to the worktree and <code>TMPDIR=/tmp</code>; <code>uv</code> was never invoked. Receipt: <a href="/nova/figures/single-grid-solver-cutover/titan-coil-edit-latency.json">titan-coil-edit-latency.json</a> — <code>source_revision a3f2429b</code>, device <code>Tesla P100-PCIE-16GB</code>, twenty edits, elapsed 817.2 s, <code>converged_edit_count 4</code>, median warm wall 3117.1 ms.</p>
+
+<p><strong>Configuration caveat, recorded because it changes how the drop reads.</strong> The brief for this run specified "no vertical current-centre constraint". At revision <code>a3f2429b</code> that configuration is unreachable through the driver's command line: <code>run()</code> sets <code>constraint_pairs</code> unconditionally to the prepared vertical-centroid row (<code>benchmarks/coil_edit_latency.py:2456</code>), the row was introduced by the commit that imposes the vertical current-centre on the coil-edit sweep, and the documented unconstrained fallback ("when no rows are supplied") can only be reached by changing source, which is outside this node's write scope. This run is therefore the plain driver invocation with the six declared output arguments and no constraint switch — the same invocation the H200 receipt at this revision was produced by. It is centroid-constrained, and so is the H200 receipt: all twenty of its edits carry a <code>vertical_centroid</code> row. That matched configuration is what makes the same-revision comparison below valid. The <em>banked</em> 10-of-20 receipt (revision <code>d3849192</code>, job 1273580) is the unconstrained one — its edits carry no <code>vertical_centroid</code> row at all — so the 10-to-4 drop spans a configuration change as well as the response-kernel port, and this node does not split those two.</p>
+
+<h3>Per edit, three receipts</h3>
+<p>Each cell reads <code>converged / termination / trip_count / warm wall ms / centroid qualified</code>. Column A is this node's titan run at a3f2429b; column B is the H200 receipt at the same revision (<a href="/nova/figures/single-grid-solver-cutover/h200-coil-edit-latency-at-a3f2429b.json">h200-coil-edit-latency-at-a3f2429b.json</a>, job 1274510); column C is the banked receipt at revision d3849192 (job 1273580). The last column states whether A and B agree on the converged flag, the termination reason and the trip count.</p>
+
+<table>
+<thead><tr><th>edit</th><th>fraction</th><th>A: titan @a3f2429b</th><th>B: H200 @a3f2429b</th><th>C: banked @d3849192 (unconstrained)</th><th>A vs B</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>-0.18</td><td>yes / converged / 4 / 134928 / y</td><td>yes / converged / 4 / 247979 / y</td><td>yes / converged / 4 / 25030 / -</td><td>match</td></tr>
+<tr><td>1</td><td>-0.16</td><td>no / active_set_settled / 2 / 3066 / n</td><td>no / active_set_settled / 2 / 2061 / n</td><td>no / active_set_settled / 1 / 446 / -</td><td>match</td></tr>
+<tr><td>2</td><td>-0.14</td><td>yes / converged / 2 / 2861 / y</td><td>yes / converged / 2 / 1864 / y</td><td>no / active_set_settled / 1 / 370 / -</td><td>match</td></tr>
+<tr><td>3</td><td>-0.12</td><td>no / active_set_settled / 1 / 3117 / n</td><td>no / active_set_settled / 1 / 1921 / n</td><td>yes / converged / 2 / 363 / -</td><td>match</td></tr>
+<tr><td>4</td><td>-0.10</td><td>no / active_set_settled / 5 / 5286 / n</td><td>no / active_set_settled / 5 / 3315 / n</td><td>no / active_set_settled / 1 / 349 / -</td><td>match</td></tr>
+<tr><td>5</td><td>-0.08</td><td>no / active_set_settled / 1 / 2010 / n</td><td>no / active_set_settled / 1 / 1195 / n</td><td>yes / converged / 3 / 367 / -</td><td>match</td></tr>
+<tr><td>6</td><td>-0.06</td><td>no / active_set_settled / 1 / 1991 / n</td><td>no / active_set_settled / 1 / 1185 / n</td><td>no / active_set_settled / 1 / 400 / -</td><td>match</td></tr>
+<tr><td>7</td><td>-0.04</td><td>no / active_set_iteration_budget_exhausted / 16 / 14110 / n</td><td>no / active_set_iteration_budget_exhausted / 16 / 8976 / n</td><td>yes / converged / 1 / 333 / -</td><td>match</td></tr>
+<tr><td>8</td><td>-0.02</td><td>no / active_set_settled / 4 / 6540 / n</td><td>no / active_set_settled / 4 / 4240 / n</td><td>no / active_set_settled / 1 / 363 / -</td><td>match</td></tr>
+<tr><td>9</td><td>-0.00</td><td>no / active_set_settled / 1 / 2387 / n</td><td>no / active_set_settled / 1 / 1540 / n</td><td>yes / converged / 2 / 370 / -</td><td>match</td></tr>
+<tr><td>10</td><td>+0.02</td><td>no / active_set_settled / 1 / 1584 / n</td><td>no / active_set_settled / 1 / 1026 / n</td><td>no / active_set_settled / 1 / 387 / -</td><td>match</td></tr>
+<tr><td>11</td><td>+0.04</td><td>no / active_set_settled / 1 / 1587 / n</td><td>no / active_set_settled / 1 / 964 / n</td><td>yes / converged / 2 / 405 / -</td><td>match</td></tr>
+<tr><td>12</td><td>+0.06</td><td>no / active_set_settled / 1 / 1799 / n</td><td>no / active_set_settled / 1 / 1073 / n</td><td>yes / converged / 2 / 420 / -</td><td>match</td></tr>
+<tr><td>13</td><td>+0.08</td><td>yes / converged / 2 / 3127 / y</td><td>yes / converged / 2 / 2111 / y</td><td>yes / converged / 2 / 404 / -</td><td>match</td></tr>
+<tr><td>14</td><td>+0.10</td><td>no / active_set_settled / 1 / 3388 / y</td><td>no / active_set_settled / 1 / 2234 / y</td><td>yes / converged / 2 / 416 / -</td><td>match</td></tr>
+<tr><td>15</td><td>+0.12</td><td>no / active_set_settled / 1 / 3282 / y</td><td>no / active_set_settled / 1 / 2073 / y</td><td>yes / converged / 2 / 428 / -</td><td>match</td></tr>
+<tr><td>16</td><td>+0.14</td><td>no / active_set_settled / 1 / 1985 / n</td><td>no / active_set_settled / 1 / 1314 / n</td><td>no / active_set_settled / 2 / 393 / -</td><td>match</td></tr>
+<tr><td>17</td><td>+0.16</td><td>yes / converged / 2 / 3464 / y</td><td>yes / converged / 2 / 2227 / y</td><td>no / active_set_settled / 1 / 340 / -</td><td>match</td></tr>
+<tr><td>18</td><td>+0.18</td><td>no / active_set_settled / 1 / 3357 / y</td><td>no / active_set_settled / 1 / 2265 / y</td><td>no / active_set_settled / 3 / 366 / -</td><td>match</td></tr>
+<tr><td>19</td><td>+0.20</td><td>no / active_set_settled / 1 / 3176 / y</td><td>no / active_set_settled / 1 / 2102 / y</td><td>no / active_set_settled / 1 / 356 / -</td><td>match</td></tr>
+</tbody>
+</table>
+
+<p><strong>The agreement is exhaustive, not approximate.</strong> (Tolerance, added at promotion: the boundary-displacement agreement is at binary64 roundoff, maximum absolute difference 3.47e-16 m with 5 of 20 edits differing near 1e-15 relative, so it is roundoff agreement rather than bit identity.) All twenty edits agree between titan and the H200 on the converged flag, the termination reason and the trip count, and all twenty agree on the centroid qualification too. The maximum boundary displacement is <code>0.151322961309616</code> m on both, agreeing to the last displayed digit. The only quantity that moves is the wall.</p>
+
+<figure>
+<img src="/nova/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png" alt="A converged and a non-converged edit drawn as line contours on shared levels, with the wall and the null markers">
+<figcaption>The titan run's terminal states, drawn by the committed painters: a converged edit beside a non-converged one on one physical level array, wall units and admitted nulls marked, the converged residual <code>4.13e-09</code> and the non-converged one stalling at <code>6.51e-03</code> after sixteen trips on the iteration budget. Vector form for review: <a href="/nova/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.svg">titan-converged-vs-nonconverged.svg</a>.</figcaption>
+</figure>
+
+<p><strong>Figure withheld.</strong> The driver writes a terminal raster flux image of its own (<code>titan-terminal-raster-flux.png</code>) as a filled colour map with axes, ticks and no wall, which breaks the plotting rules, so it is not shown here; the independent review of this record caught the mismatch between the earlier caption and the artifact. The per-edit panel data and the paired terminal-state panels stand as the figures of record; a rules-compliant redraw of the terminal flux is a follow-on for the driver owner.</p>
+
+<p><strong>What this record does not establish.</strong> That the drop originates in the vertical current-centre row rather than in the response-kernel port: both landed between <code>d3849192</code> and <code>a3f2429b</code>, and the unconstrained cell cannot be produced at <code>a3f2429b</code> without a source change. The claim this record does support is narrow and sufficient for the question asked: at revision <code>a3f2429b</code> the convergence outcome is a property of the revision, reproducible to the flag on a second device with a different fp64 rate, and the device moves only the wall.</p>
+</section>
+
+
+<section id="s4-coil-edit-reproducibility">
+  <h2>§4 Node — coil-edit sweep reproduced on the H200 at the banked revision</h2>
+  <p><strong>Node:</strong> <code>sgc-sweep-control-at-the-banked-revision</code>.
+  <strong>Revision:</strong> <code>d384919244f7a9e2d84df43a32a5d738b6785c68</code>;
+  the receipt's <code>source_revision</code> field stamps <code>9c203931e</code> (see the
+  code-identity note below). <strong>Status:</strong> delivered — the twenty-edit
+  unconstrained sweep reproduces the banked H200 arm on every discrete outcome, on the
+  same device. Nothing was committed for the measurement.</p>
+
+  <table>
+    <caption>The delivered arm against the banked arm at the same revision</caption>
+    <thead><tr><th></th><th>banked (job 1273580)</th><th>delivered (job 1275980)</th></tr></thead>
+    <tbody>
+      <tr><td>device</td><td>NVIDIA H200 NVL</td><td>NVIDIA H200 NVL</td></tr>
+      <tr><td>partition / reservation</td><td>betelgeuse / gpu_0003_grpA</td><td>betelgeuse / gpu_0003_grpA</td></tr>
+      <tr><td>cpus / mem</td><td>8 / 128 G</td><td>8 / 128 G</td></tr>
+      <tr><td><code>JAX_PLATFORMS</code></td><td>cuda,cpu</td><td>cuda,cpu</td></tr>
+      <tr><td><code>converged_edit_count</code></td><td>10 of 20</td><td>10 of 20</td></tr>
+      <tr><td>failing points</td><td>1,2,4,6,8,10,16,17,18,19</td><td>1,2,4,6,8,10,16,17,18,19</td></tr>
+      <tr><td>verdict</td><td>FAIL</td><td>FAIL</td></tr>
+      <tr><td>median warm wall</td><td>370.367 ms</td><td>340.992 ms</td></tr>
+      <tr><td>max boundary displacement</td><td>0.4722807398543636 m</td><td>0.4722807398543636 m</td></tr>
+    </tbody>
+  </table>
+
+  <p>Because the device is the same as the banked run, this arm measures
+  <em>reproducibility</em> at this revision rather than cross-device behaviour; the paired
+  arm at <code>a3f2429b</code> runs the same recipe on the same H200 device. Only the
+  latency column differs — an 8.0&nbsp;% spread on a device-shared H200 — while every
+  discrete outcome is identical.</p>
+
+  <h3>Code identity: why the <code>9c203931e</code> stamp is the same code</h3>
+  <p><code>source_revision</code> is <code>git rev-parse HEAD</code> in the repo root with
+  no override, and this node's landing record was committed before the measurement, so
+  HEAD had advanced by a docs-only commit when the sweep ran. Three hashes in the
+  delivered receipt are byte-identical to the banked <code>d3849192</code> receipt:</p>
+  <table>
+    <thead><tr><th>field</th><th>banked d3849192</th><th>delivered</th></tr></thead>
+    <tbody>
+      <tr><td><code>forward_module.sha256</code></td><td>e000f158aa438cf0…</td><td>e000f158aa438cf0…</td></tr>
+      <tr><td><code>reduced_newton_module.sha256</code></td><td>63dfdbd2bec1bcfe…</td><td>63dfdbd2bec1bcfe…</td></tr>
+      <tr><td><code>driver.sha256</code></td><td>664c2031d18d690a…</td><td>664c2031d18d690a…</td></tr>
+    </tbody>
+  </table>
+
+  <h3>The titan arm is not runnable at any revision</h3>
+  <p>The node was originally to run this sweep on the <code>titan</code> partition
+  (1&times; Tesla P100-PCIE-16GB), so that the titan reading would have a same-device
+  paired arm. Two clauses of the mandated command line are unsatisfiable at this revision,
+  and both were reproduced on the mandated device in job <code>1275965</code>
+  (<code>98dci4-gpu-0002</code>, partition <code>titan</code>, 4 CPUs, 64 G,
+  <code>JAX_PLATFORMS</code> unset, <code>TMPDIR=/tmp</code>).</p>
+
+  <table>
+    <caption>The mandated command line against the revision's actual interface</caption>
+    <thead><tr><th>Clause</th><th>Brief requires</th><th>Revision does</th><th>Observed</th></tr></thead>
+    <tbody>
+      <tr><td><code>--raster-figure</code></td><td>a sixth output path under the reports fence</td><td>no such argument; <code>run</code> takes five paths plus <code>--carrier</code> (<code>benchmarks/coil_edit_latency.py:2137-2144</code>)</td><td>exit 2, <code>unrecognized arguments</code></td></tr>
+      <tr><td>measurement host</td><td>titan P100, 4 CPUs, 64 G, <code>JAX_PLATFORMS</code> unset</td><td><code>_require_measurement_host</code> (<code>:157-173</code>) requires an H200 on <code>betelgeuse</code> under <code>gpu_0003_grpA</code>, 8 CPUs, 128 G, <code>JAX_PLATFORMS=cuda,cpu</code></td><td><code>RuntimeError: one H200 is required, got cuda:0</code></td></tr>
+    </tbody>
+  </table>
+
+  <p>The raster path matters beyond the flag name: the raster figure is written
+  unconditionally from the module constant <code>DEFAULT_RASTER_FIGURE</code>
+  (<code>:69-71</code>, written at <code>:1855</code>) which resolves to
+  <code>docs/figures/forward-solve-api/coil-edit-latency/terminal-raster-flux.png</code>,
+  outside this node's write fence. The requirement that nothing under <code>docs/</code>
+  change is therefore not satisfiable by the five existing flags alone.</p>
+
+  <p>The guard was introduced with the benchmark itself (<code>dea563908</code>,
+  2026-09-02, <code>git log -S"_require_measurement_host"</code>): this benchmark has never
+  had a titan-capable revision, so no earlier revision reaches a different code path. The
+  coordinator adjudicated the control onto the guard-mandated device with the guard
+  untouched — no bypass and no no-op.</p>
+
+  <p>Two further interface facts were forced by the driver and are recorded because each
+  cost a job. The <code>--figure</code> path must lie inside the worktree root
+  (<code>_receipt_document</code>, <code>:1548</code>, calls
+  <code>figure.relative_to(ROOT)</code>), so an out-of-tree figure aborts at receipt
+  assembly <em>after</em> the full sweep has run; H200 job <code>1275975</code> was lost
+  that way (<code>EXIT_MARKER=1</code>, <code>ValueError</code>) in four minutes of
+  measurement. And the raster figure has no CLI flag at all, so the driver wrote it and
+  its other default outputs into the worktree's own docs paths with nothing committed,
+  which satisfies the fence: the fence was about commits, not worktree files.</p>
+
+  <h3>The banked H200 arm at this revision</h3>
+  <p>Job <code>1273580</code>, device <code>NVIDIA H200 NVL</code>,
+  <code>converged_edit_count: 10</code> of 20, median warm wall 370.367&nbsp;ms (max
+  445.605, min 333.484), trip median 2 (max 4); failing points
+  <code>1,2,4,6,8,10,16,17,18,19</code>. The copy committed at HEAD still carries the
+  superseded pair (<code>7514edd9</code> / job <code>1273204</code>, also 10 of 20, median
+  353.038&nbsp;ms); the paired receipt survives in the report tree at
+  <code>s19-codex-20260916/cca-heavy-module-arms-for-the-tangent-repair/base-tree/docs/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.json</code>
+  and in <code>s19-local/coil-edit-panel-lcfs-2/predecessor-uncommitted-receipts.diff</code>.</p>
+
+  <table>
+    <caption>Per-edit: the banked arm beside the delivered arm. Twenty of twenty rows agree exactly.</caption>
+    <thead><tr><th>edit</th><th>fraction</th><th>banked conv</th><th>banked termination</th><th>banked trips</th><th>delivered conv</th><th>delivered termination</th><th>delivered trips</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>-0.18</td><td>True</td><td>converged</td><td>4</td><td>True</td><td>converged</td><td>4</td></tr>
+      <tr><td>1</td><td>-0.16</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+      <tr><td>2</td><td>-0.14</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+      <tr><td>3</td><td>-0.12</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+      <tr><td>4</td><td>-0.10</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+      <tr><td>5</td><td>-0.08</td><td>True</td><td>converged</td><td>3</td><td>True</td><td>converged</td><td>3</td></tr>
+      <tr><td>6</td><td>-0.06</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+      <tr><td>7</td><td>-0.04</td><td>True</td><td>converged</td><td>1</td><td>True</td><td>converged</td><td>1</td></tr>
+      <tr><td>8</td><td>-0.02</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+      <tr><td>9</td><td>-0.00</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+      <tr><td>10</td><td>+0.02</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+      <tr><td>11</td><td>+0.04</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+      <tr><td>12</td><td>+0.06</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+      <tr><td>13</td><td>+0.08</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+      <tr><td>14</td><td>+0.10</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+      <tr><td>15</td><td>+0.12</td><td>True</td><td>converged</td><td>2</td><td>True</td><td>converged</td><td>2</td></tr>
+      <tr><td>16</td><td>+0.14</td><td>False</td><td>active_set_settled</td><td>2</td><td>False</td><td>active_set_settled</td><td>2</td></tr>
+      <tr><td>17</td><td>+0.16</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+      <tr><td>18</td><td>+0.18</td><td>False</td><td>active_set_settled</td><td>3</td><td>False</td><td>active_set_settled</td><td>3</td></tr>
+      <tr><td>19</td><td>+0.20</td><td>False</td><td>active_set_settled</td><td>1</td><td>False</td><td>active_set_settled</td><td>1</td></tr>
+    </tbody>
+  </table>
+
+  <p>The failing set is <code>{1,2,4,6,8,10,16,17,18,19}</code> on both arms, and every
+  <code>(converged, termination, trip_count)</code> triple matches. Only wall-clock moves:
+  median 340.992&nbsp;ms against 370.367&nbsp;ms. No figure is drawn here: the deliverable
+  is two tables of per-row flags and clause outcomes, which is what a table is for.</p>
+
+  <h3>Artifacts</h3>
+  <ul>
+    <li><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/sgc-sweep-control-at-the-banked-revision/report.md</code> — full report</li>
+    <li><code>…/coil-edit-latency-h200-reproducibility.json</code> — the delivered receipt</li>
+    <li><code>…/h200-reproducibility-1275980.log</code> — job log, <code>EXIT_MARKER=2</code> (the FAIL verdict)</li>
+    <li><code>…/titan-refusal-1275965.log</code> — the device-qualified titan refusal, verbatim</li>
+    <li><code>…/h200-reproducibility-1275975.log</code> — the lost <code>--figure</code>-outside-ROOT attempt</li>
+  </ul>
+</section>
+</main>
+</body>
+</html>

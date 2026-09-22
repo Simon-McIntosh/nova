@@ -3092,6 +3092,132 @@ was created.</p>
 </ul>
 <p>Ready-to-append repair items, with commit/file/line anchors, are stored beside the review at <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-census-and-certificate-drivers/findings.json</code>. No file under <code>nova/</code> and no test file was edited by this review.</p>
 </section>
+<section class="audit-directory" id="figure-audit-cut-cell-current-attribution-section">
+<h2 id="figure-audit-cut-cell-current-attribution">Positional-stiffness residual figure pair — two measurements, not one picture</h2>
+<p><strong>Question asked.</strong> The repair followups on
+<code>cut-cell-current-attribution</code> reported that the 40-cell and 300-cell residual
+figures were pixel-identical and that <code>translated-40mm.png</code> printed neither its
+residual nor a convergence flag. The followups' own instruction was to find out
+<em>why</em> the pair looked identical — same receipt read twice, or identical receipts —
+and to say which.</p>
+<p><strong>Answer.</strong> Neither. Both figures are drawn from the one committed measurement
+receipt <code>docs/.../positional-stiffness/receipt.json</code>
+(sha256 <code>6e0b30e9b875ceb1ee4714d1aee8476a8ff50ba71d476f3a34828783dec223bb</code>), and each draws
+its own disjoint row selection out of it. They are not the same picture and never were; they
+are merely indistinguishable to a reader at the size they are printed, their arrays differing by
+under three percent at 40&nbsp;mm. The pixel-identity claim is refuted by measurement, not by
+argument: the decoded-pixel digests differ, and so do the file digests.</p>
+<table>
+  <thead><tr><th>figure</th><th>requested cells</th><th>realised cells</th><th>PNG sha256 (first 16)</th><th>pixel sha256 (first 16)</th></tr></thead>
+  <tbody>
+  <tr><td><code>weak-rotation-reactor-static-cells-110-residual.png</code></td><td>110</td><td>135</td><td><code>53b3208154062b69</code></td><td><code>26c8e8428281fc31</code></td></tr>
+  <tr><td><code>weak-rotation-reactor-static-cells-300-residual.png</code></td><td>300</td><td>342</td><td><code>46c3c9281231b6c7</code></td><td><code>54a5435489fd15f3</code></td></tr>
+  <tr><td><code>moderate-rotation-conventional-static-cells-300-residual.png</code></td><td>300</td><td>341</td><td><code>fc9640a50ff30ba9</code></td><td><code>c25d94d9e6c425a4</code></td></td></tr>
+  </tbody>
+</table>
+<p><strong>The comparison panel now states what it is.</strong> Each of the six panels of
+<code>translated-40mm.png</code> carries four title lines: the case and realised cell count, the
+displacement direction, the level array both fields are contoured on, and the residual is
+printed against the analytic span with a convergence flag.</p>
+<p><strong>The level array is stated.</strong> The two fields on a panel share one physical level
+array rather than one each, which is what makes a mismatch on the panel readable. The
+110-cell panel states
+<code>levels Wb (shared): [-19.51, -13.22, -6.931, -0.64, 5.651, 11.94, 18.23, 24.53, 30.82, 37.11, 43.4, 49.69]</code>.</p>
+<img src="/nova/figures/cut-cell-current-attribution/positional-stiffness/figures/translated-40mm.png"
+     alt="Six poloidal comparison panels at 40 mm: analytic field in blue, translated field in ochre, shared line contours, both null sets and the wall drawn."
+     width="640">
+<p><strong>Convergence reads no on all six panels, and that is the honest reading.</strong> The
+criterion is that the production map, started from the drawn 40&nbsp;mm state, returns the magnetic
+axis inside the input displacement within four trips. At 40&nbsp;mm it does not: the axis projects
+0.0738&nbsp;m (weak, outboard), 0.1391&nbsp;m (weak, vertical), 0.0715&nbsp;m (300-cell, outboard),
+0.1370&nbsp;m (300-cell, vertical), 0.0681&nbsp;m (moderate, outboard) and 0.1142&nbsp;m (moderate,
+vertical), every one above the 0.040&nbsp;m input displacement. The flag is computed, not looked up,
+and at this amplitude it carries no discriminating power between the cases.</p>
+<p><strong>Both null sets are drawn and counted on every panel.</strong> The render receipt records
+the glyph count drawn per null set per panel. This fixture reads limited, so both sets draw their
+magnetic axis and no saddle: <code>x_points_drawn</code> is 0 for the analytic set and 0 for the
+translated set on all six panels, while <code>axis_drawn</code> is 1 for each. The saddle part of
+the vocabulary is therefore unexercised at this directory; the axis count is what a reader can
+hold this record to.</p>
+<p><strong>Instrument.</strong> Drawing is payload-driven: the driver rebuilds every named figure
+from the committed receipts with no operator, no production map and no four-trip iteration, so the
+whole render path runs on the login node in seconds
+(<code>--render-only</code>, and <code>--write-render-inputs</code> for the translated input). A
+render receipt <code>render-receipt.json</code> in the figure directory records, per figure, its
+title lines and its file and pixel digests, and per poloidal panel the glyph count drawn for each
+null set.</p>
+<p><strong>The guard.</strong> <code>tests/test_fixture_positional_stiffness_render.py</code>
+reads the receipt and the PNGs directly, with only the standard library and Pillow, so it does not
+rest on the code path that wrote them. Five checks pass against the shipped receipt
+(<code>render/render-test.log</code>). The declared negative control writes the alleged defect into
+the receipt — one figure's pixel digest copied onto the figure it is compared against — and the
+check reddens on it with the message the guard exists to emit
+(<code>render/render-test-negative-control.log</code>).</p>
+<p><strong>What remains.</strong> The pair are distinct measurements, but at the size they are
+printed they are still visually alike, so a reader cannot tell them apart by eye; only the digests
+and the row counts separate them. At 40&nbsp;mm the iteration does not return inside its input
+displacement, so the convergence flag reads <code>no</code> everywhere at that amplitude, and the
+saddle vocabulary is unexercised because this fixture is limited in both topologies. Verifying the
+merged result belongs to a separately dispatched test node.</p>
+<p>Commit <code>c88ef0b91</code> on this worktree's branch.</p>
+
+  <h4 id="limiter-read-contact-shadow-label-repair">Repair &mdash; <code>limiter-read/single-null-contact-shadow.png</code> (30)</h4>
+  <p><strong>Repaired 2026-09-22</strong> by node <code>fsa-repair-contact-shadow-figure</code> under
+  followup <code>f-cca-repair-contact-shadow-unlabelled</code>, as a painter-only repair: both
+  limiter-read figures are rebuilt from the committed receipt by the driver's render entry point
+  with no solve entered. The audit's finding was that the panel carried no text of any kind and
+  placed the <code>draw_nulls</code> axis triangle in the divertor leg.</p>
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/limiter-read/single-null-contact-shadow.png" alt="Regenerated single-null contact-shadow poloidal panel: unfilled flux line contours on shared Wb levels, the wall at its 481 source nodes, a solid triangle at the analytic magnetic axis, a filled cross at the admitted X-point, a diamond at the selected wall contact and hollow squares over 18 exempted private-wall nodes, beneath a wrapped title reading the fixture, cell count, residual and convergence field from the receipt and beside a legend naming every drawn family." />
+    <figcaption>The repaired panel. Every drawn family has a legend entry and the selected wall contact
+    is a diamond, distinct from the axis triangle and the saddle cross.</figcaption>
+  </figure>
+  <p><strong>The defect reproduced before the repair.</strong> <code>git show
+  HEAD:docs/figures/cut-cell-current-attribution/limiter-read/single-null-contact-shadow.png</code>
+  is 972&times;1116 and carries no legend column and no title, and
+  <code>render-receipt.json</code> was <strong>absent at HEAD</strong>, so no receipt described the
+  committed artifact at all. The regenerated panel is 1404&times;1116.</p>
+  <p><strong>What the regenerated figures report.</strong> <code>render-receipt.json</code> in the
+  figure directory lists, per figure, every title line drawn and, per poloidal panel, the glyph
+  count of every null set. For this panel: <code>analytic_magnetic_axis</code> 1 drawn,
+  <code>analytic_admitted_x_points</code> 1 drawn, <code>wall_contact_glyphs</code> 1,
+  <code>excluded_*</code> 18 exempted private-wall nodes, <code>wall_drawn</code> true at
+  <code>wall_node_count</code> 481 (the source row's own wall array length).</p>
+  <p><strong>Provenance of the two title fields the source receipt does not carry per row.</strong>
+  The audit's reported residual and convergence flag have no per-row field: the source receipt enters
+  no nonlinear solve (<code>nonlinear_solve_entered</code> false) because the field is analytic
+  and only the carrier wall sampling varies, so the title's <code>residual</code> is the selected
+  contact's <code>production_contact.level_error_in_span</code> against the exact wall extremum
+  (9.852875804959903e-05) and <code>converged</code> reads <code>n/a</code>. The nominal cell scale
+  and the 1074 realised cells are both stated in the title's second line.</p>
+  <p><strong>The check that could have failed.</strong> <code>tests/test_limiter_read_render.py</code>
+  asserts each of those conditions against the render receipt, selected through
+  <code>NOVA_LIMITER_READ_RENDER_RECEIPT</code> so a mutated receipt can be audited. Under that
+  control &mdash; the wall-contact marker reset to the axis triangle <code>^</code>, its legend entry
+  deleted and the title truncated to <code>diverted-single-null &middot; cells=1074</code> &mdash; the
+  run fails on exactly those three conditions and the verbatim mutation is line 1 of the recorded
+  log.</p>
+
+</section>
+<section class="solver-audit" id="solver-clip-and-quadrature">
+<h2>Solver audit — clip and quadrature</h2>
+<p>Reviewer run <code>r-20260921T061551405436-fsa-audit-solver-clip-and-quadrature</code> independently re-read every ledger promotion since 2026-09-16 touching <code>separatrix_clip.py</code>, <code>clip_quadrature.py</code>, or <code>stencil_mesh.py</code>. The audit head was <code>0322e911a52588e116bb76a2243ff0dc728cc655</code>. Fourteen touching commits joined to eight promotion rows. The complete row-level record, ledger done-whens, diffs, and ready-to-append repairs are retained under the reviewer fence in <code>review.md</code> and <code>findings.json</code>.</p>
+<p>Portable promoted test targets were re-run in one <code>all_debug</code> allocation with <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>, and the shared root interpreter run directly; <code>uv</code was not invoked on the node. Nineteen fresh pytest processes yielded thirteen passes and six failures. The ten failed tests all identify the same later candidate, <code>d90a522fe</code> at <code>forward_operator.py:3091</code>, where an unconditional <code>topology.x_point</code> read rejects analytic fixtures that intentionally lack that attribute. The older historical scripts also hard-code removed worktrees, and their <code>test_exact_clip_memory.py</code> arm has recorded one-hour timeouts; that incomplete evidence is never treated as a pass.</p>
+<table><thead><tr><th>promotion</th><th>touching commit(s)</th><th>ledger done-when result</th><th>merged-head gate</th><th>verdict</th></tr></thead><tbody>
+<tr><td><code>r-20260916T070630305673-ecq-polygon-exact-density-moments</code></td><td><code>e916b3f9 f221d583 58c5951e 93162c25</code></td><td>Required all modules and under-200 evaluations; ledger says failed, one module timed out before an after arm, and the receipt reports 8,192–8,448 live evaluations.</td><td>Three quadrature and one moments failure, all later <code>d90a522fe</code> compatibility failures.</td><td><strong>defective</strong></td></tr>
+<tr><td><code>r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter</code></td><td><code>935589ac</code></td><td>Required every importing module; the memory module did not complete inside one allocation.</td><td>Six portable modules pass; forward-moment fails only at later <code>d90a522fe</code>.</td><td><strong>defective</strong></td></tr>
+<tr><td><code>r-20260916T204834010483-ecq-sampled-arc-gauss-route</code></td><td><code>1ad4bea9</code></td><td>Required the lowest accurate order and an expected under-500 evaluation count.</td><td>Both named module targets fail only at later <code>d90a522fe</code>.</td><td><strong>defective</strong>: order three is inexact for shifted moments.</td></tr>
+<tr><td><code>r-20260917T094325762879-ecq-shifted-path-order-and-budget-terms</code></td><td><code>e25803d8</code></td><td>Correctly repaired shifted paths to order four.</td><td>Seven passes and one later compatibility failure.</td><td><strong>defective</strong>: actual bound is 621, above the carried under-500 ceiling.</td></tr>
+<tr><td><code>r-20260917T100810663195-ecq-capacity-sizing</code></td><td><code>f7fefbd7</code></td><td>Required a retained overflow refusal with test.</td><td>25 separatrix tests pass on later code.</td><td><strong>defective</strong>: this commit silently converted overflow to <code>included=0</code>.</td></tr>
+<tr><td><code>r-20260918T080952872560-ecq-capacity-refusal-must-report</code></td><td><code>57af2955</code></td><td>Required a counted refusal that a solve can surface.</td><td>25 separatrix tests pass; the fixture directly calls the guard.</td><td><strong>defective</strong>: no production caller invokes <code>assert_no_refusal()</code>.</td></tr>
+<tr><td><code>r-20260918T202207266011-cca-xpoint-cell-treatment</code></td><td><code>0e18d6df 6ef26316</code></td><td>CPU oracle half required four saddle wedges and three row resolutions; GPU half explicitly deferred by unavailable QoS.</td><td>17 x-point/oracle tests pass.</td><td><strong>sound</strong></td></tr>
+<tr><td><code>r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle</code></td><td><code>d90a522fe</code></td><td>Required typed-saddle propagation, CPU oracle, and a red negative control.</td><td>Focused typed-saddle pin: 14 passed; three prior-gate targets regress through its unconditional <code>x_point</code> access.</td><td><strong>defective</strong></td></tr>
+</tbody></table>
+<h3>Negative control</h3>
+<p>The only ledger-declared control belongs to <code>d90a522fe</code>. Its red log begins with the declared deletion of <code>saddle_vertex=topology.x_point,</code> and fails exactly with <code>the clip is called with no saddle vertex</code>; the declaration, mutation, and failure reason match. It does not test a topology with no <code>x_point</code>, which is why the compatibility regression escaped.</p>
+<h3>Findings and count</h3>
+<p><strong>8 promotions reviewed; 7 defective; 1 sound; 0 unverifiable.</strong> Defect classes: unmet historical gate, insufficient Gauss order, evaluation-ceiling breach, silent capacity overflow, an unwired refusal guard, a cross-gate topology compatibility regression, and a negative-control coverage gap. The repair payloads name the responsible commit, file, line, defect, repair, and owning plan invocation.</p>
+</section>
   </main>
 </body>
 </html>

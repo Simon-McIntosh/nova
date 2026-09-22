@@ -13,6 +13,7 @@ saddle join that merged the lobe into a leg.
 
 from __future__ import annotations
 
+import argparse
 from collections import defaultdict
 import json
 from pathlib import Path
@@ -94,13 +95,15 @@ def failing_terms(branches) -> list[str]:
     return terms
 
 
-def main() -> None:
+def main(states_path: Path = STATES, output_path: Path = OUTPUT) -> None:
     jax.config.update("jax_enable_x64", True)
-    states = np.load(STATES, allow_pickle=False)
+    states = np.load(states_path, allow_pickle=False)
     radius = jnp.asarray(states["radius"])
     height = jnp.asarray(states["height"])
     rows = []
-    for index in range(20):
+    # The archive states its own extent: a sweep that stopped early is reported
+    # over the states it persisted rather than refused for the ones it did not.
+    for index in range(len(np.asarray(states["edit_index"]))):
         psi = jnp.asarray(states[f"psi_{index}"])
         axis = jnp.asarray(states[f"axis_{index}"])
         xpoint = jnp.asarray(states[f"xpoints_{index}"]).reshape(-1, 2)
@@ -124,7 +127,8 @@ def main() -> None:
                 "terms_that_fire": failing_terms(branches),
             }
         )
-    OUTPUT.write_text(json.dumps(rows, indent=2))
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(rows, indent=2))
     failing = [row for row in rows if not row["well_formed"]]
     print(f"failing {len(failing)} of {len(rows)}")
     for row in rows:
@@ -141,4 +145,18 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--states",
+        type=Path,
+        default=STATES,
+        help="panel archive to read; defaults to the case's own fixture",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=OUTPUT,
+        help="record to write; defaults to the case's own branch-terms record",
+    )
+    arguments = parser.parse_args()
+    main(arguments.states, arguments.output)

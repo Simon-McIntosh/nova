@@ -1,0 +1,1146 @@
+{
+  "edit_index": 10,
+  "read": "_FixedDesignNull2D.read_census reached through Topology.read_qualification",
+  "rows": [
+    {
+      "admitted_axis": [
+        0.8902036949540285,
+        -0.14620236912972034
+      ],
+      "admitted_axis_flux": 0.344794119431718,
+      "admitted_boundary_flux": -0.08443630770707714,
+      "admitted_distance_to_reference_m": 2.5325528300420053,
+      "admitted_distance_to_reference_pitch": 41.77406727078391,
+      "admitted_x_point": [
+        0.6106436207176105,
+        -1.3019059994238247
+      ],
+      "admitted_x_point_flux": -0.08443630770707714,
+      "axis_admitted": true,
+      "cell_pitch_m": 0.060625000041909516,
+      "census_same_root_count": 7,
+      "contained_saddle_count": 2,
+      "field": "psi_10",
+      "grid": "stride_33x33",
+      "grid_shape": [
+        33,
+        33
+      ],
+      "nearest_finite_saddle_to_reference_m": 0.18063213868066394,
+      "polarity": 1,
+      "polish_receipt": {
+        "boundary_comparison_spline_authored": {
+          "shape": [],
+          "values": true
+        },
+        "boundary_interpolation_uncertainty": {
+          "shape": [],
+          "values": 8.400357127098801e-05
+        },
+        "census_position_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.8902036949540285,
+              -0.14620236912972034
+            ],
+            [
+              0.6106436207176105,
+              -1.3019059994238247
+            ]
+          ]
+        },
+        "complete_map": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "converged": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "gradient": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              -7.487530890665804e-18,
+              1.5575167701841803e-17
+            ],
+            [
+              -1.942418140624123e-16,
+              7.23060735259663e-16
+            ]
+          ]
+        },
+        "gradient_norm": {
+          "shape": [
+            2
+          ],
+          "values": [
+            1.728146312611206e-17,
+            7.486966736966988e-16
+          ]
+        },
+        "hessian_determinant": {
+          "shape": [
+            2
+          ],
+          "values": [
+            3.67937470546786,
+            -2.7911748930001927
+          ]
+        },
+        "hessian_type": {
+          "shape": [
+            2
+          ],
+          "values": [
+            1,
+            -1
+          ]
+        },
+        "in_domain": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "local_value_evidence": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.34488752754687857,
+            -0.08435230413580615
+          ]
+        },
+        "multiplicity": {
+          "shape": [
+            2
+          ],
+          "values": [
+            8,
+            5
+          ]
+        },
+        "position_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.8902036949540285,
+              -0.14620236912972034
+            ],
+            [
+              0.6106436207176105,
+              -1.3019059994238247
+            ]
+          ]
+        },
+        "representative_origin_index": {
+          "shape": [
+            2
+          ],
+          "values": [
+            443,
+            270
+          ]
+        },
+        "representative_origin_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.8481249992037192,
+              -0.25
+            ],
+            [
+              0.5449999989941716,
+              -1.25
+            ]
+          ]
+        },
+        "requested_displacement": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.009334641694258839,
+            0.007892290024246984
+          ]
+        },
+        "root_uncertainty": {
+          "shape": [
+            2
+          ],
+          "values": [
+            2.527046413812264e-13,
+            2.527046413812264e-13
+          ]
+        },
+        "selected_position_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.8902036949540285,
+              -0.14620236912972034
+            ],
+            [
+              0.6106436207176105,
+              -1.3019059994238247
+            ]
+          ]
+        },
+        "selected_value": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.344794119431718,
+            -0.08443630770707714
+          ]
+        },
+        "spline_authored": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "spline_value": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.344794119431718,
+            -0.08443630770707714
+          ]
+        },
+        "value": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.344794119431718,
+            -0.08443630770707714
+          ]
+        },
+        "value_replaced": {
+          "shape": [
+            2
+          ],
+          "values": [
+            false,
+            false
+          ]
+        }
+      },
+      "pre_adoption_stored_axis": [
+        0.890203720609401,
+        -0.14620234953102915
+      ],
+      "pre_adoption_stored_xpoint": [
+        0.6165308530890653,
+        -1.263730504411434
+      ],
+      "raw_finite_saddle_count": 7,
+      "realised_cells": 1089,
+      "reference_axis": [
+        0.9033613058027905,
+        0.022469963650074854
+      ],
+      "reference_x_point": [
+        0.5849707936630444,
+        1.2305167028328101
+      ],
+      "requested_class": 1,
+      "state_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame/docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
+      "stored_achieved_class": "diverted",
+      "stored_converged": false,
+      "stored_terminal_residual": 1.5055356487639855e-08
+    },
+    {
+      "admitted_axis": [
+        0.9032201972942618,
+        0.02881205762309062
+      ],
+      "admitted_axis_flux": 0.3531297198254073,
+      "admitted_boundary_flux": -0.1229979211409491,
+      "admitted_distance_to_reference_m": 0.006855835455297894,
+      "admitted_distance_to_reference_pitch": 0.22617189115244593,
+      "admitted_x_point": [
+        0.5894412598098165,
+        1.2183038041635006
+      ],
+      "admitted_x_point_flux": -0.1229979211409491,
+      "axis_admitted": true,
+      "cell_pitch_m": 0.030312500020954758,
+      "census_same_root_count": 8,
+      "contained_saddle_count": 2,
+      "field": "psi_10",
+      "grid": "full_axes_65x65",
+      "grid_shape": [
+        65,
+        65
+      ],
+      "nearest_finite_saddle_to_reference_m": 0.006855835455297894,
+      "polarity": 1,
+      "polish_receipt": {
+        "boundary_comparison_spline_authored": {
+          "shape": [],
+          "values": true
+        },
+        "boundary_interpolation_uncertainty": {
+          "shape": [],
+          "values": 4.261608586263177e-05
+        },
+        "census_position_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.9032201972942618,
+              0.02881205762309062
+            ],
+            [
+              0.5894412598098165,
+              1.2183038041635006
+            ]
+          ]
+        },
+        "complete_map": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "converged": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "gradient": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              -3.219074489278036e-17,
+              -3.0357660829594124e-18
+            ],
+            [
+              2.7160941003283432e-17,
+              1.0993810029003015e-16
+            ]
+          ]
+        },
+        "gradient_norm": {
+          "shape": [
+            2
+          ],
+          "values": [
+            3.2333572837880315e-17,
+            1.1324355439301864e-16
+          ]
+        },
+        "hessian_determinant": {
+          "shape": [
+            2
+          ],
+          "values": [
+            4.321400888010724,
+            -1.9848335406307893
+          ]
+        },
+        "hessian_type": {
+          "shape": [
+            2
+          ],
+          "values": [
+            1,
+            -1
+          ]
+        },
+        "in_domain": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "local_value_evidence": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.35315777037615215,
+            -0.12304053722681173
+          ]
+        },
+        "multiplicity": {
+          "shape": [
+            2
+          ],
+          "values": [
+            5,
+            6
+          ]
+        },
+        "position_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.9032201972942618,
+              0.02881205762309062
+            ],
+            [
+              0.5894412598098165,
+              1.2183038041635006
+            ]
+          ]
+        },
+        "representative_origin_index": {
+          "shape": [
+            2
+          ],
+          "values": [
+            1787,
+            1092
+          ]
+        },
+        "representative_origin_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.878437499224674,
+              0.0
+            ],
+            [
+              0.5449999989941716,
+              1.25
+            ]
+          ]
+        },
+        "requested_displacement": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.0018057521364244387,
+            0.0028358630781091924
+          ]
+        },
+        "root_uncertainty": {
+          "shape": [
+            2
+          ],
+          "values": [
+            2.527046413812264e-13,
+            2.527046413812264e-13
+          ]
+        },
+        "selected_position_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.9032201972942618,
+              0.02881205762309062
+            ],
+            [
+              0.5894412598098165,
+              1.2183038041635006
+            ]
+          ]
+        },
+        "selected_value": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.3531297198254073,
+            -0.1229979211409491
+          ]
+        },
+        "spline_authored": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "spline_value": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.3531297198254073,
+            -0.1229979211409491
+          ]
+        },
+        "value": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.3531297198254073,
+            -0.1229979211409491
+          ]
+        },
+        "value_replaced": {
+          "shape": [
+            2
+          ],
+          "values": [
+            false,
+            false
+          ]
+        }
+      },
+      "pre_adoption_stored_axis": [
+        0.9004701915447499,
+        0.026935936053880317
+      ],
+      "pre_adoption_stored_xpoint": [
+        0.5894412598093506,
+        1.218303804163443
+      ],
+      "raw_finite_saddle_count": 8,
+      "realised_cells": 4225,
+      "reference_axis": [
+        0.9050062223972816,
+        0.026535548792173725
+      ],
+      "reference_x_point": [
+        0.5909675355634608,
+        1.224987587681386
+      ],
+      "requested_class": 1,
+      "state_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame/docs/figures/mast-centroid-capability/sweep-full-axis/panel-states.npz",
+      "stored_achieved_class": "diverted",
+      "stored_converged": true,
+      "stored_terminal_residual": 1.785788854467814e-09
+    },
+    {
+      "admitted_axis": [
+        0.9058612403715232,
+        0.02262441421449488
+      ],
+      "admitted_axis_flux": 0.35386124054217,
+      "admitted_boundary_flux": -0.12376307730656479,
+      "admitted_distance_to_reference_m": 0.015157833294256217,
+      "admitted_distance_to_reference_pitch": 0.25002611602107616,
+      "admitted_x_point": [
+        0.590174263583608,
+        1.2162799963681024
+      ],
+      "admitted_x_point_flux": -0.12376307730656479,
+      "axis_admitted": true,
+      "cell_pitch_m": 0.060625000041909516,
+      "census_same_root_count": 7,
+      "contained_saddle_count": 2,
+      "field": "reference_psi",
+      "grid": "reference_33x33",
+      "grid_shape": [
+        33,
+        33
+      ],
+      "nearest_finite_saddle_to_reference_m": 0.015157833294256217,
+      "polarity": 1,
+      "polish_receipt": {
+        "boundary_comparison_spline_authored": {
+          "shape": [],
+          "values": true
+        },
+        "boundary_interpolation_uncertainty": {
+          "shape": [],
+          "values": 0.0001838572530871302
+        },
+        "census_position_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.9058612403715232,
+              0.02262441421449488
+            ],
+            [
+              0.590174263583608,
+              1.2162799963681024
+            ]
+          ]
+        },
+        "complete_map": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "converged": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "gradient": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              1.2777547882471645e-16,
+              3.9248502412176514e-18
+            ],
+            [
+              -1.1318141901731142e-16,
+              4.8196825117472233e-17
+            ]
+          ]
+        },
+        "gradient_norm": {
+          "shape": [
+            2
+          ],
+          "values": [
+            1.2783574397758065e-16,
+            1.2301612724426185e-16
+          ]
+        },
+        "hessian_determinant": {
+          "shape": [
+            2
+          ],
+          "values": [
+            4.2831089758311585,
+            -1.993724600250038
+          ]
+        },
+        "hessian_type": {
+          "shape": [
+            2
+          ],
+          "values": [
+            1,
+            -1
+          ]
+        },
+        "in_domain": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "local_value_evidence": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.3539534975021947,
+            -0.12357922005347766
+          ]
+        },
+        "multiplicity": {
+          "shape": [
+            2
+          ],
+          "values": [
+            7,
+            6
+          ]
+        },
+        "position_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.9058612403715232,
+              0.02262441421449488
+            ],
+            [
+              0.590174263583608,
+              1.2162799963681024
+            ]
+          ]
+        },
+        "representative_origin_index": {
+          "shape": [
+            2
+          ],
+          "values": [
+            445,
+            289
+          ]
+        },
+        "representative_origin_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.8481249992037192,
+              0.0
+            ],
+            [
+              0.5449999989941716,
+              1.125
+            ]
+          ]
+        },
+        "requested_displacement": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.004902752834006511,
+            0.008179399127861935
+          ]
+        },
+        "root_uncertainty": {
+          "shape": [
+            2
+          ],
+          "values": [
+            2.527046413812264e-13,
+            2.527046413812264e-13
+          ]
+        },
+        "selected_position_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.9058612403715232,
+              0.02262441421449488
+            ],
+            [
+              0.590174263583608,
+              1.2162799963681024
+            ]
+          ]
+        },
+        "selected_value": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.35386124054217,
+            -0.12376307730656479
+          ]
+        },
+        "spline_authored": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "spline_value": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.35386124054217,
+            -0.12376307730656479
+          ]
+        },
+        "value": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.35386124054217,
+            -0.12376307730656479
+          ]
+        },
+        "value_replaced": {
+          "shape": [
+            2
+          ],
+          "values": [
+            false,
+            false
+          ]
+        }
+      },
+      "pre_adoption_stored_axis": [
+        0.9018209568983583,
+        0.03202205620261388
+      ],
+      "pre_adoption_stored_xpoint": [
+        0.5924415057237606,
+        1.2227066855117352
+      ],
+      "raw_finite_saddle_count": 7,
+      "realised_cells": 1089,
+      "reference_axis": [
+        0.9033613058027905,
+        0.022469963650074854
+      ],
+      "reference_x_point": [
+        0.5849707936630444,
+        1.2305167028328101
+      ],
+      "requested_class": 1,
+      "state_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame/docs/figures/mast-centroid-capability/panel-states.npz",
+      "stored_achieved_class": "diverted",
+      "stored_converged": false,
+      "stored_terminal_residual": 0.0030015738894111892
+    },
+    {
+      "admitted_axis": [
+        0.9085921736980997,
+        0.02704827405516587
+      ],
+      "admitted_axis_flux": 0.35823558039338976,
+      "admitted_boundary_flux": -0.12122722308219451,
+      "admitted_distance_to_reference_m": 0.0036138340428973808,
+      "admitted_distance_to_reference_pitch": 0.11921926731213757,
+      "admitted_x_point": [
+        0.5927397541196655,
+        1.2218381372724023
+      ],
+      "admitted_x_point_flux": -0.12122722308219451,
+      "axis_admitted": true,
+      "cell_pitch_m": 0.030312500020954758,
+      "census_same_root_count": 7,
+      "contained_saddle_count": 2,
+      "field": "reference_psi",
+      "grid": "reference_65x65",
+      "grid_shape": [
+        65,
+        65
+      ],
+      "nearest_finite_saddle_to_reference_m": 0.0036138340428973808,
+      "polarity": 1,
+      "polish_receipt": {
+        "boundary_comparison_spline_authored": {
+          "shape": [],
+          "values": true
+        },
+        "boundary_interpolation_uncertainty": {
+          "shape": [],
+          "values": 3.9664180852078124e-05
+        },
+        "census_position_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.9085921736980997,
+              0.02704827405516587
+            ],
+            [
+              0.5927397541196655,
+              1.2218381372724023
+            ]
+          ]
+        },
+        "complete_map": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "converged": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "gradient": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              -3.9344243757842666e-17,
+              1.3010426069826053e-18
+            ],
+            [
+              -2.123694975565371e-17,
+              4.9873299934333204e-18
+            ]
+          ]
+        },
+        "gradient_norm": {
+          "shape": [
+            2
+          ],
+          "values": [
+            3.9365749437064267e-17,
+            2.181470823521506e-17
+          ]
+        },
+        "hessian_determinant": {
+          "shape": [
+            2
+          ],
+          "values": [
+            4.302147782448273,
+            -2.001779184156491
+          ]
+        },
+        "hessian_type": {
+          "shape": [
+            2
+          ],
+          "values": [
+            1,
+            -1
+          ]
+        },
+        "in_domain": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "local_value_evidence": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.3582581759701608,
+            -0.12118755890134243
+          ]
+        },
+        "multiplicity": {
+          "shape": [
+            2
+          ],
+          "values": [
+            6,
+            5
+          ]
+        },
+        "position_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.9085921736980997,
+              0.02704827405516587
+            ],
+            [
+              0.5927397541196655,
+              1.2218381372724023
+            ]
+          ]
+        },
+        "representative_origin_index": {
+          "shape": [
+            2
+          ],
+          "values": [
+            1787,
+            1156
+          ]
+        },
+        "representative_origin_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.878437499224674,
+              0.0
+            ],
+            [
+              0.5753124990151264,
+              1.1875
+            ]
+          ]
+        },
+        "requested_displacement": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.0020009408159817805,
+            0.0013604736453125018
+          ]
+        },
+        "root_uncertainty": {
+          "shape": [
+            2
+          ],
+          "values": [
+            2.527046413812264e-13,
+            2.527046413812264e-13
+          ]
+        },
+        "selected_position_rz": {
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            [
+              0.9085921736980997,
+              0.02704827405516587
+            ],
+            [
+              0.5927397541196655,
+              1.2218381372724023
+            ]
+          ]
+        },
+        "selected_value": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.35823558039338976,
+            -0.12122722308219451
+          ]
+        },
+        "spline_authored": {
+          "shape": [
+            2
+          ],
+          "values": [
+            true,
+            true
+          ]
+        },
+        "spline_value": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.35823558039338976,
+            -0.12122722308219451
+          ]
+        },
+        "value": {
+          "shape": [
+            2
+          ],
+          "values": [
+            0.35823558039338976,
+            -0.12122722308219451
+          ]
+        },
+        "value_replaced": {
+          "shape": [
+            2
+          ],
+          "values": [
+            false,
+            false
+          ]
+        }
+      },
+      "pre_adoption_stored_axis": [
+        0.9004701915447499,
+        0.026935936053880317
+      ],
+      "pre_adoption_stored_xpoint": [
+        0.5894412598093506,
+        1.218303804163443
+      ],
+      "raw_finite_saddle_count": 7,
+      "realised_cells": 4225,
+      "reference_axis": [
+        0.9050062223972816,
+        0.026535548792173725
+      ],
+      "reference_x_point": [
+        0.5909675355634608,
+        1.224987587681386
+      ],
+      "requested_class": 1,
+      "state_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame/docs/figures/mast-centroid-capability/sweep-full-axis/panel-states.npz",
+      "stored_achieved_class": "diverted",
+      "stored_converged": true,
+      "stored_terminal_residual": 1.785788854467814e-09
+    }
+  ],
+  "schema": "nova.two-grid-frame",
+  "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame",
+  "verdict": "Corroborates the single-ring mechanism rather than a grid effect: one stored reference flux map read at 33x33 and at 65x65 admits the saddle nearest the reference X-point on both lattices, at 0.25 and 0.12 of a cell pitch, so under the adopted own-node census the resolution does not decide which saddle is admitted; the stored pair this frame's own figure draws is therefore a solver pair, not a resolution pair: the 65x65 terminal is reproduced to its own pre-adoption x-point exactly while the 33x33 terminal lands 0.64 of a cell pitch away in the same lower basin, at flux -0.0844 against -0.1230.",
+  "version": 1
+}

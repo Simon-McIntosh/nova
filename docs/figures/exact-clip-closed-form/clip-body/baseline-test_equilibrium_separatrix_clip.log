@@ -1,0 +1,62 @@
+revision=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f base=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/measure_clip_body.py', '--suite', 'baseline', 'test_equilibrium_separatrix_clip.py']
+18:04:29 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+........................F                                                [100%]
+=================================== FAILURES ===================================
+________ test_spline_clip_refuses_a_polygon_above_the_derived_capacity _________
+
+    def test_spline_clip_refuses_a_polygon_above_the_derived_capacity():
+        """A two-arc layout is refused, counted on the result (not silently dropped)."""
+        configure_dtypes()
+        cell = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+        mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.5, 0.5]]))
+        capacity = traced_polygon_vertex_capacity(int(mesh.support_capacity))
+    
+        def saddle_level(points):
+            radial, vertical = points[..., 0], points[..., 1]
+            return (radial - 0.5) * (vertical - 0.5)
+    
+        signed = saddle_level(jnp.asarray(mesh.node_coordinates))
+        support = mesh.traced_clip(signed, curve_evaluator=saddle_level)
+    
+        live = int(np.sum(np.asarray(signed) > 0.0))
+        assert live >= 2, "the fixture must leave the level set on two runs"
+        assert int(support.refused_cells()) == 1, "the refusal must be counted"
+        assert int(np.asarray(support.vertex_capacity)) == capacity
+        with pytest.raises(TracedCapacityRefusalError):
+>           support.assert_no_refusal()
+
+tests/test_equilibrium_separatrix_clip.py:719: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = TracedClippedSupports(support_vertices=Array([[[0., 0.],
+        [0., 0.],
+        [0., 0.],
+        [0., 0.],
+       ...ex=Array([[0., 0.]], dtype=float64), vertex_capacity=Array(136, dtype=int32), refused_cell_count=Array(1, dtype=int32))
+
+    def assert_no_refusal(self) -> None:
+        """Fail closed when any cell exceeded the derived vertex capacity.
+    
+        A refused cell is packed as an empty inclusion, which is
+        indistinguishable from a cell the clip placed outside the plasma and
+        would otherwise be dropped from the support in silence. A caller that
+        must not lose a cell calls this and gets the count in the message.
+        """
+        refused = self.refused_cells()
+        if refused:
+>           raise TracedCapacityRefusalError(
+                f"{refused} clipped cell(s) exceeded the derived traced-polygon "
+                f"vertex capacity {int(np.asarray(self.vertex_capacity))}"
+            )
+E           clip_body_reference.TracedCapacityRefusalError: 1 clipped cell(s) exceeded the derived traced-polygon vertex capacity 136
+
+nova/equilibrium/separatrix_clip.py:259: TracedCapacityRefusalError
+=============================== warnings summary ===============================
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; zarr
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_equilibrium_separatrix_clip.py::test_spline_clip_refuses_a_polygon_above_the_derived_capacity
+1 failed, 24 passed, 1 warning in 61.45s (0:01:01)

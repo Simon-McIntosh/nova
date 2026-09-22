@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Coil-edit non-convergence forensics</title>
+<title>Coil-edit non-convergence under the vertical current-centre row</title>
 <style>
   body { font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
          margin: 2.4rem auto; color: #1c2127; background: #fbfbfc; }
@@ -25,25 +25,49 @@
 </head>
 <body>
 <main>
-<h1>Coil-edit non-convergence forensics</h1>
-<p class="lede">Why ten of twenty warm-started coil edits stop short of the tolerance, per edit, from the per-edit traces of a single H200 re-run of the sweep.</p>
+<h1>Coil-edit non-convergence under the vertical current-centre row</h1>
+<p class="lede">Why sixteen of twenty warm-started coil edits stop short of the tolerance when the vertical
+current-centre row is imposed, per edit, from the per-trip traces of a single titan job that ran the
+constrained sweep and its unconstrained control arm.</p>
 <h2 id="measured">What was measured</h2>
-<p>The twenty-edit sweep of <code>benchmarks/coil_edit_latency.py</code> was re-run once on one reserved H200
-(<code>98dci4-gpu-... "NVIDIA H200 NVL"</code>, partition <code>betelgeuse</code>, reservation <code>gpu_0003_grpA</code>, no <code>uv</code> on the node,
-the root interpreter with <code>PYTHONPATH</code> at the worktree, persistent compilation cache reused).
-Each edit takes the frozen MAST 22086 slice-43 mixed seed, multiplies the P4-upper (circuit 8) current by
+<p>One titan allocation (job <code>1275764</code>) at revision <code>15b3aa2f8</code> ran the twenty-edit
+sweep of <code>benchmarks/coil_edit_latency.py</code> twice. The first pass imposed the vertical
+current-centre row through the machine interface the constrained route uses; the second was the same driver
+with <code>--without-vertical-centroid</code>, which keeps the row's pair out of the compiled solve and
+persists no centroid row, so both arms run identical code and differ only in whether the row is imposed.
+Host <code>98dci4-gpu-0002</code>, partition <code>titan</code> (a P100 rung, off the shared reservation), no
+<code>uv</code> on the node, the root interpreter run directly with <code>PYTHONPATH</code> at the worktree,
+<code>TMPDIR=/tmp</code> in the submit environment and in the payload, persistent compilation cache reused.
+The figure and every artifact beside this page are the constrained arm's own outputs, copied byte-identical
+from that job's scratch directory.</p>
+<p>Each edit takes the frozen MAST 22086 slice-43 mixed seed, multiplies the P4-upper (circuit 8) current by
 <code>1 + f</code> for <code>f</code> stepping 2&#37; from &minus;18&#37; to +20&#37;, and solves the reduced Newton route warm-started
 from the preceding edit's terminal state. The solve settings are the sweep's: tolerance <code>1e-8</code>,
 <code>newton_steps=12</code>, <code>active_set_steps=16</code>.</p>
-<p>Ten edits converged and ten did not. Every non-converged edit reports the same termination word,
-<code>active_set_settled</code>, so the word alone carries no diagnostic. What separates them is in the
-per-trip trace: how many Newton steps each trip accepted, how many it rejected, whether the trip's
-closing active-set read moved the mask, and the seed's own residual on the edited operator before the
-first trip. The seed probe is a zero-step solve (<code>newton_steps=0, active_set_steps=1</code>), so it
-records the residual the warm seed carries on the edited operator.</p>
-<h2 id="table">The twenty edits</h2>
+<p>Sixteen edits did not converge and four did. Most non-converged edits report the same termination word,
+<code>active_set_settled</code>, so the word alone carries no diagnostic; edit 7 is the one exception and
+reports its budget exhausted after sixteen trips. What separates the rest is in the per-trip trace: how many
+Newton steps each trip accepted, how many it rejected, whether the trip's closing active-set read moved the
+mask, and the seed's own residual on the edited operator before the first trip. The seed probe is a
+zero-step solve (<code>newton_steps=0, active_set_steps=1</code>), and it is measured without the row so that
+the seed residual stays the same quantity every earlier sweep recorded.</p>
+<p><strong>The row moves the solved set, and the control arm says so.</strong> The unconstrained arm
+reproduces the banked readings exactly &mdash; 10 of 20 converged, 12 drawn closed, 14 axis-enclosing cycles
+&mdash; so the numbers below are the row's own effect and not a change on <code>main</code>. Convergence
+differs between the arms on ten states and the drawn-closed set on nine.</p>
+<table>
+<thead>
+<tr><th>arm</th><th>converged</th><th>drawn closed</th><th>axis-enclosing cycles</th></tr>
+</thead>
+<tbody>
+<tr><td>constrained (this record)</td><td>4 &mdash; 0, 2, 13, 17</td><td>11</td><td>19</td></tr>
+<tr><td>unconstrained (control)</td><td>10 &mdash; 0, 3, 5, 7, 9, 11, 12, 13, 14, 15</td><td>12</td><td>14</td></tr>
+</tbody>
+</table>
+<h2 id="table">The twenty edits under the row</h2>
 <p>Rows marked in red are the non-converged ones. <em>Residual</em> is the terminal active-set residual;
-<em>seed</em> is the seed's residual on the edited operator before the first trip; <em>steps / trip</em>
+<em>seed</em> is the seed's residual on the edited operator before the first trip, measured without the row;
+<em>steps / trip</em>
 and <em>rejected / trip</em> are the Newton steps accepted and the line-search rejections in each trip;
 <em>mask &Delta;</em> is the size of the mask change the trip's closing read produced. A trip whose
 mask &Delta; is 0 promotes nothing, which is what ends the loop.</p>
@@ -52,83 +76,77 @@ mask &Delta; is 0 promotes nothing, which is what ends the loop.</p>
 <tr><th>edit</th><th>fraction</th><th>residual</th><th>seed</th><th>conv.</th><th>termination</th><th>trips</th><th>steps / trip</th><th>rejected / trip</th><th>mask &Delta;</th><th>TX disp. (m)</th></tr>
 </thead>
 <tbody>
-<tr><td>0</td><td>-18%</td><td>2.7291e-09</td><td>5.309e-02</td><td>yes</td><td>converged</td><td>4</td><td>12,10,0,0</td><td>0,0,0,0</td><td>18,34,6,0</td><td>0.4394</td></tr>
-<tr class="fail"><td>1</td><td>-16%</td><td>2.3738e-06</td><td>8.171e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.4372</td></tr>
-<tr class="fail"><td>2</td><td>-14%</td><td>2.4079e-05</td><td>7.561e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.4347</td></tr>
-<tr><td>3</td><td>-12%</td><td>1.2711e-09</td><td>6.931e-03</td><td>yes</td><td>converged</td><td>2</td><td>12,7</td><td>0,0</td><td>20,0</td><td>0.4322</td></tr>
-<tr class="fail"><td>4</td><td>-10%</td><td>1.8825e-03</td><td>6.455e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.4325</td></tr>
-<tr><td>5</td><td>-8%</td><td>3.7661e-15</td><td>7.806e-04</td><td>yes</td><td>converged</td><td>3</td><td>6,0,1</td><td>0,0,0</td><td>20,20,0</td><td>0.4285</td></tr>
-<tr class="fail"><td>6</td><td>-6%</td><td>4.4224e-03</td><td>5.386e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.4291</td></tr>
-<tr><td>7</td><td>-4%</td><td>5.0334e-09</td><td>7.437e-03</td><td>yes</td><td>converged</td><td>1</td><td>6</td><td>0</td><td>0</td><td>0.4282</td></tr>
-<tr class="fail"><td>8</td><td>-2%</td><td>1.8590e-07</td><td>4.158e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.427</td></tr>
-<tr><td>9</td><td>+0%</td><td>2.8901e-10</td><td>3.529e-03</td><td>yes</td><td>converged</td><td>2</td><td>12,1</td><td>0,0</td><td>1,0</td><td>0.4247</td></tr>
-<tr class="fail"><td>10</td><td>+2%</td><td>1.5055e-08</td><td>2.869e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.4222</td></tr>
-<tr><td>11</td><td>+4%</td><td>2.1406e-09</td><td>2.209e-03</td><td>yes</td><td>converged</td><td>2</td><td>12,6</td><td>0,0</td><td>1,0</td><td>0.4164</td></tr>
-<tr><td>12</td><td>+6%</td><td>4.2239e-09</td><td>1.573e-03</td><td>yes</td><td>converged</td><td>2</td><td>6,0</td><td>0,0</td><td>4,0</td><td>0.4118</td></tr>
-<tr><td>13</td><td>+8%</td><td>4.1520e-10</td><td>1.490e-03</td><td>yes</td><td>converged</td><td>2</td><td>12,3</td><td>0,0</td><td>2,0</td><td>0.412</td></tr>
-<tr><td>14</td><td>+10%</td><td>1.3122e-11</td><td>1.580e-03</td><td>yes</td><td>converged</td><td>2</td><td>12,1</td><td>0,0</td><td>1,0</td><td>0.3957</td></tr>
-<tr><td>15</td><td>+12%</td><td>6.1555e-10</td><td>2.570e-02</td><td>yes</td><td>converged</td><td>2</td><td>12,2</td><td>0,0</td><td>24,0</td><td>0.3639</td></tr>
-<tr class="fail"><td>16</td><td>+14%</td><td>8.3653e-04</td><td>1.740e-03</td><td>no</td><td>active_set_settled</td><td>2</td><td>7,1</td><td>1,1</td><td>32,0</td><td>0.3043</td></tr>
-<tr class="fail"><td>17</td><td>+16%</td><td>2.1106e-03</td><td>2.111e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0.2995</td></tr>
-<tr class="fail"><td>18</td><td>+18%</td><td>1.8489e-03</td><td>4.870e-03</td><td>no</td><td>active_set_settled</td><td>3</td><td>0,7,1</td><td>1,1,1</td><td>26,22,0</td><td>0.3857</td></tr>
-<tr class="fail"><td>19</td><td>+20%</td><td>2.9220e-03</td><td>2.922e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0.3786</td></tr>
+<tr><td>0</td><td>-18%</td><td>1.6195e-10</td><td>5.309e-02</td><td>yes</td><td>converged</td><td>4</td><td>12,3,1,0</td><td>0,0,0,0</td><td>19,19,4,0</td><td>0.1026</td></tr>
+<tr class="fail"><td>1</td><td>-16%</td><td>4.9431e-03</td><td>2.242e-02</td><td>no</td><td>active_set_settled</td><td>2</td><td>4,2</td><td>1,1</td><td>32,0</td><td>0.1513</td></tr>
+<tr><td>2</td><td>-14%</td><td>4.1293e-09</td><td>1.357e-02</td><td>yes</td><td>converged</td><td>2</td><td>9,0</td><td>0,0</td><td>29,0</td><td>0.0899</td></tr>
+<tr class="fail"><td>3</td><td>-12%</td><td>1.3236e-03</td><td>1.212e-02</td><td>no</td><td>active_set_settled</td><td>1</td><td>6</td><td>1</td><td>0</td><td>0.0797</td></tr>
+<tr class="fail"><td>4</td><td>-10%</td><td>5.6651e-03</td><td>1.160e-02</td><td>no</td><td>active_set_settled</td><td>5</td><td>3,4,1,0,2</td><td>1,1,1,1,1</td><td>51,49,49,29,0</td><td>0.1102</td></tr>
+<tr class="fail"><td>5</td><td>-8%</td><td>5.9457e-03</td><td>8.803e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>3</td><td>1</td><td>0</td><td>0.1058</td></tr>
+<tr class="fail"><td>6</td><td>-6%</td><td>6.2257e-03</td><td>7.064e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>3</td><td>1</td><td>0</td><td>0.0960</td></tr>
+<tr class="fail"><td>7</td><td>-4%</td><td>6.5142e-03</td><td>5.845e-03</td><td>no</td><td>active_set_iteration_budget_exhausted</td><td>16</td><td>6,1,3,1,3,1,0,2,1,3,1,0,2,1,3,1</td><td>1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1</td><td>27,29,29,29,29,29,1,28,29,29,29,1,28,29,29,29</td><td>0.1056</td></tr>
+<tr class="fail"><td>8</td><td>-2%</td><td>9.5093e-05</td><td>6.009e-03</td><td>no</td><td>active_set_settled</td><td>4</td><td>9,1,7,2</td><td>1,1,1,1</td><td>29,29,29,0</td><td>0.0228</td></tr>
+<tr class="fail"><td>9</td><td>+0%</td><td>2.6445e-03</td><td>2.645e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>5</td><td>1</td><td>0</td><td>0.0607</td></tr>
+<tr class="fail"><td>10</td><td>+2%</td><td>3.0016e-03</td><td>2.585e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0.0607</td></tr>
+<tr class="fail"><td>11</td><td>+4%</td><td>3.9217e-03</td><td>4.180e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0.0606</td></tr>
+<tr class="fail"><td>12</td><td>+6%</td><td>5.2669e-03</td><td>5.794e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>2</td><td>1</td><td>0</td><td>0.0759</td></tr>
+<tr><td>13</td><td>+8%</td><td>2.5744e-09</td><td>7.430e-03</td><td>yes</td><td>converged</td><td>2</td><td>11,0</td><td>0,0</td><td>4,0</td><td>0.0861</td></tr>
+<tr class="fail"><td>14</td><td>+10%</td><td>6.0262e-07</td><td>6.916e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.0848</td></tr>
+<tr class="fail"><td>15</td><td>+12%</td><td>6.4413e-08</td><td>8.124e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.0896</td></tr>
+<tr class="fail"><td>16</td><td>+14%</td><td>3.1488e-03</td><td>9.125e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>4</td><td>1</td><td>0</td><td>0.0936</td></tr>
+<tr><td>17</td><td>+16%</td><td>1.2131e-12</td><td>9.421e-03</td><td>yes</td><td>converged</td><td>2</td><td>12,1</td><td>0,0</td><td>1,0</td><td>0.1212</td></tr>
+<tr class="fail"><td>18</td><td>+18%</td><td>1.4628e-08</td><td>1.078e-02</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.1248</td></tr>
+<tr class="fail"><td>19</td><td>+20%</td><td>4.2667e-07</td><td>3.882e-02</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.1298</td></tr>
 </tbody>
 </table>
-<h2 id="groups">Grouping the non-converged half</h2>
-<p>All ten non-converged edits terminate with the same word, so the table groups them by the mechanism
-their traces support instead. The mechanism is decided by two facts only: whether any Newton step was
-accepted at all, and whether the closing active-set read ever moved the mask.</p>
+<h2 id="groups">Grouping the non-converged sixteen</h2>
+<p>Almost all of the sixteen non-converged edits terminate with the same word, so the table groups them by
+the mechanism their traces support instead. The mechanism is decided by two facts only: whether any
+Newton step was accepted at all, and whether the closing active-set read ever moved the mask.</p>
 
-<h3>Stall &mdash; one trip, full Newton budget spent, mask already stable &mdash; edits 1, 2, 4, 6, 8, 10</h3>
-<p>Each of these edits takes exactly one trip, and that trip consumes the whole <code>newton_steps=12</code>
-budget in accepted steps with no rejection, while its closing mask read reports a mask difference of 0.
-The loop ends there: a trip that promotes nothing and does not reach the tolerance exits the trip loop.</p>
-<p>The cost is that these seeds receive one trip's budget and no more. Twelve Newton steps move the
-residual a long way &mdash; edit 1 from 8.171e-03 to 2.374e-06, six orders &mdash; but not to 1e-8, so a solve
-that is still descending fast is reported as settled. The residuals of the group run from 1.506e-08
-(edit 10) to 4.422e-03 (edit 6), against seeds of 2.869e-03 to 8.171e-03. Every member's terminal
-residual is below its seed's, so none is a failure to descend; all are a stop while descending.</p>
+<h3>Stall &mdash; the closing read never moves the mask &mdash; edits 3, 5, 6, 9, 10, 11, 12, 14, 15, 16, 18, 19</h3>
+<p>Every member takes exactly one trip, and that trip's closing mask read reports a difference of 0, so the
+loop ends there: a trip that promotes nothing and does not reach the tolerance exits the trip loop. How
+much Newton work that one trip does varies widely &mdash; edits 14, 15, 18 and 19 spend the whole
+<code>newton_steps=12</code> budget in accepted steps with no rejection, while edits 10 and 11 accept one
+step and reject one. Terminal residuals run from 1.463e-08 Wb (edit 18, the closest of the sixteen) to
+6.226e-03 Wb (edit 6), against seeds of 2.585e-03 to 3.882e-02 Wb.</p>
+<p>Most members' terminal residual is below their seed's, so most are a stop while descending rather than a
+failure to descend. But not all: edit 10 ends <em>above</em> its seed, 2.585e-03 to 3.002e-03 Wb, so the
+group is not uniformly a descent cut short and the claim that it is does not hold under the row.</p>
 <p>The mask-stable seed is a consequence of the warm start: from edit 1 onward the seed is the previous
-edit's terminal state, whose active set is already stationary on the new operator. The one edit that is
-not warm-started from a predecessor (edit 0, seeded from the base frame at the shot current) is the
-contrast that makes the group coherent, and its trace is not a mask that moves on every trip: it takes
-four trips with twelve, ten, zero and zero accepted steps, on a mask difference of
-<code>18, 34, 6, 0</code> and a residual trace of
-<code>5.007e-02, 4.141e-02, 5.028e-10, 2.729e-09</code>. It converges &mdash; the last two entries sit
-below the 1e-8 tolerance &mdash; but the mask moves on its first three trips only, and its fourth
-closing read promotes nothing, which is the same read that stops the six stalled edits.</p>
+edit's terminal state, whose active set is already stationary on the new operator. The one edit not
+warm-started from a predecessor (edit 0, seeded from the base frame at the shot current) shows mask motion
+in every trip (<code>19, 19, 4, 0</code>) and converges, which is the contrast that makes the group
+coherent.</p>
 
-<h3>Refused first step &mdash; no Newton step accepted &mdash; edits 17, 19</h3>
-<p>These two take one trip, accept zero Newton steps, reject one, see a mask difference of 0, and return
-the seed unchanged: the terminal residual is bit-for-bit the seed probe's residual
-(<code>2.11060409400877</code> for edit 17, <code>2.92200350800961</code> for edit 19). The line search
-refused the first step, so nothing moved.</p>
-<p>This is the case the termination word misnames. On the host route the solver separates a refused-step
-exit from a settled active set: an exhausted line search with no accepted step and a mask difference of
-0 is reported as <code>SUFFICIENT_DECREASE_REFUSED</code>. The compiled trip loop has no branch for that
-case and its <code>settled = difference == 0</code> test answers <code>ACTIVE_SET_SETTLED</code> for both.
-The trace, not the word, is what distinguishes them.</p>
+<h3>Refused first step &mdash; no Newton step accepted &mdash; none under the row</h3>
+<p>The unconstrained arm produced two edits whose line search refused the first step, leaving the terminal
+residual bit-for-bit equal to the seed probe's own. Under the row the group is <strong>empty</strong>: no
+edit accepts zero Newton steps, and no edit's terminal residual equals its seed's exactly. The trace
+distinction that arm needed &mdash; on the host route an exhausted line search with no accepted step and a
+mask difference of 0 is reported as <code>SUFFICIENT_DECREASE_REFUSED</code>, where the compiled trip
+loop has no branch for it and its <code>settled = difference == 0</code> test answers
+<code>ACTIVE_SET_SETTLED</code> for both &mdash; remains the right thing to look for; it simply has no
+member here.</p>
 
-<h3>Partial walk &mdash; several trips, mask still moving, cut short &mdash; edits 16, 18</h3>
-<p>These are the two whose closing active-set read does move the mask. Edit 16 takes two trips with mask
-differences <code>32</code> then <code>0</code>, one rejection per trip, and descends
-1.278e-03 &rarr; 8.365e-04. Edit 18 takes three trips with mask differences <code>26, 22, 0</code>,
-one rejection per trip, and descends 4.870e-03 &rarr; 2.311e-03 &rarr; 1.849e-03. Both end on a trip whose
-mask difference is 0 while the residual is still above tolerance: a genuine active-set iteration that
-was working and was cut short, not a stalled or refused one.</p>
-<p>The three groups are persisted in <code>coil-edit-nonconvergence.json</code> as
-<code>summary.groups</code> with their member edit ids (<code>stall</code> 1, 2, 4, 6, 8, 10,
-<code>refused_first_step</code> 17, 19, <code>partial_walk</code> 16, 18), beside
-<code>summary.termination_groups.active_set_settled</code> holding all ten, so this table can be
-checked against the record it was read from rather than against the termination word alone.</p>
+<h3>Partial walk &mdash; several trips, mask still moving, cut short &mdash; edits 1, 4, 7, 8</h3>
+<p>These are the four whose closing active-set read does move the mask. Edit 1 takes two trips, mask
+differences <code>32</code> then <code>0</code>, and descends 2.242e-02 &rarr; 4.943e-03. Edit 4 takes five
+trips, mask differences <code>51, 49, 49, 29, 0</code>, and descends 1.160e-02 &rarr; 5.665e-03. Edit 8
+takes four trips, <code>29, 29, 29, 0</code>, and descends 6.009e-03 &rarr; 9.509e-05, the lowest residual
+of the sixteen. Edit 7 is the outlier of the whole sweep: sixteen trips, a mask difference that moves by
+27 or 29 on almost every one, and it ends with its active-set iteration budget exhausted rather than on a
+mask-stable trip &mdash; and <em>above</em> its seed, 5.845e-03 to 6.514e-03 Wb. A walk that was working
+and was cut short is the reading for the first three; edit 7 is a walk still moving when its budget ran
+out.</p>
 <table>
 <thead>
 <tr><th>group</th><th>edits</th><th>trips</th><th>steps / trip</th><th>rejected / trip</th><th>mask &Delta;</th><th>terminal residual</th><th>seed residual</th></tr>
 </thead>
 <tbody>
-<tr><td>stall</td><td>1, 2, 4, 6, 8, 10</td><td>1</td><td>12 (all)</td><td>0 (all)</td><td>0 (all)</td><td>1.506e-08 &ndash; 4.422e-03</td><td>2.869e-03 &ndash; 8.171e-03</td></tr>
-<tr><td>refused</td><td>17, 19</td><td>1</td><td>0</td><td>1</td><td>0</td><td>= seed, bitwise</td><td>2.111e-03, 2.922e-03</td></tr>
-<tr><td>walk</td><td>16, 18</td><td>2, 3</td><td>7/1, 0/7/1</td><td>1 per trip</td><td>32/0, 26/22/0</td><td>8.365e-04, 1.849e-03</td><td>1.740e-03, 4.870e-03</td></tr>
+<tr><td>stall</td><td>3, 5, 6, 9, 10, 11, 12, 14, 15, 16, 18, 19</td><td>1 (all)</td><td>1 to 12</td><td>0 or 1</td><td>0 (all)</td><td>1.463e-08 &ndash; 6.226e-03</td><td>2.585e-03 &ndash; 3.882e-02</td></tr>
+<tr><td>refused</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>walk</td><td>1, 4, 7, 8</td><td>2, 5, 16, 4</td><td>4/2, 3/4/1/0/2, 6/1/&hellip;/3/1, 9/1/7/2</td><td>1 per trip</td><td>32/0, 51/49/49/29/0, 27/&hellip;/29, 29/29/29/0</td><td>9.509e-05 &ndash; 6.514e-03</td><td>5.845e-03 &ndash; 2.242e-02</td></tr>
 </tbody>
 </table>
 <h2 id="caveats">What the traces rule out, and what they cannot say</h2>
@@ -146,27 +164,33 @@ checked against the record it was read from rather than against the termination 
   <code>settled = difference == 0</code>, which folds a refused-first-step exit
   (<code>SUFFICIENT_DECREASE_REFUSED</code> on the host route) and a mask-stable stop into one
   <code>active_set_settled</code> label. Any reading of the convergence rate from the termination word
-  alone is reading the label, not the cause.</li>
+  alone is reading the label, not the cause. Under the row exactly one edit carries a different word
+  &mdash; edit 7, the sixteen-trip walk, which exits on
+  <code>active_set_iteration_budget_exhausted</code>, and the other fifteen non-converged edits all read
+  <code>active_set_settled</code>.</li>
   <li><strong>No solver code was changed.</strong> The forensics ride the existing result fields; the
   sweep, the route, and the tolerance are as the sweep ran them.</li>
 </ul>
 <h2 id="panel">A converged edit beside a non-converged one</h2>
 <figure>
 <img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets">
-<figcaption>Left: edit 7 (&minus;4&#37;), converged, terminal residual 5.033e-09 Wb, one trip. Right: edit 6
-(&minus;6&#37;), non-converged, terminal residual 4.422e-03 Wb, one trip. Reference contours are drawn in
-grey, the solved contours in orange on the same fourteen levels (spanning the whole 1.58 Wb range of the
-reference), so a mismatch under about 1/14 of the range is inside the gap between drawn lines. The
-reference is the <strong>upper-null</strong> equilibrium: its admitted saddle sits at +1.231 m against an
-axis at +0.022 m, 1.208 m above the axis, while every one of the twenty solved states admits a
-<strong>lower</strong> null below its own axis. Both panels
-draw the reference nulls in blue and the solved nulls in orange, each set as a filled axis triangle plus a
-filled X at its admitted saddle, over the MAST first wall; neither set carries a second qualified null, so
-no hollow marker is drawn on either panel (the painter returns
-<code>other_x_points_drawn: 0</code> for both sets in the receipt below). The reference set's boundary
-arrives unassembled, so its crossings are drawn as separate unconnected marks rather than as a closed
-contour, while the solved set is drawn as a solid lobe with dashed legs. The pair is the two
-largest-residual points of their respective sets, chosen by the driver's panel selector.</figcaption>
+<figcaption>Left: edit 2 (&minus;14&#37;), converged, terminal residual 4.129e-09 Wb, two trips. Right: edit 7
+(&minus;4&#37;), non-converged, terminal residual 6.514e-03 Wb, sixteen trips, ended on
+<code>active_set_iteration_budget_exhausted</code>. The file name states the residual comparison, and the
+closedness runs the other way: the converged edit 2 traces a cycle that admits no closed candidate at all
+(<code>closed_candidate_count</code> 0, <code>cycle_component_count</code> 1), so its boundary is drawn
+unassembled, while the non-converged edit 7 assembles a well-formed closed boundary of 73 segments with
+2 open branches &mdash; against the reference's 75 and 2. Reference contours are drawn in grey, the solved
+contours in orange on the same fourteen levels (&minus;0.1224 to +0.3416 Wb, a 0.0357 Wb step), so a
+mismatch under about 1/13 of the level span sits inside the gap between drawn lines; the levels span
+0.464 Wb against a reference field ranging over 1.59 Wb. The reference is an
+<strong>upper-null</strong> equilibrium: its admitted saddle sits at +1.231 m against an axis at +0.022 m,
+1.208 m above it. Nineteen of the twenty solved states also admit an upper null above their own axis
+&mdash; edit 2 by 1.212 m, edit 7 by 1.172 m &mdash; and only edit 0 admits a lower one, so neither drawn
+panel closes through a null its reference does not. Both panels
+draw the reference nulls in blue (dashed separatrix, hollow markers) and the solved nulls in orange (solid
+separatrix, filled axis triangle, filled X) over the MAST first wall. The pair is the two largest-residual
+points of their respective sets, chosen by the driver's panel selector.</figcaption>
 </figure>
 <h2 id="artifacts">Where this rides</h2>
 <ul>
@@ -175,24 +199,21 @@ largest-residual points of their respective sets, chosen by the driver's panel s
   probe, boundary displacement, and the persistent-cache counters for each of the twenty edits.</li>
   <li><code>panel-states.npz</code> &mdash; the per-edit poloidal flux states, the reference state, the
   shared contour levels, the nulls and the wall units the panel is drawn from.</li>
-  <li><code>converged-vs-nonconverged.png</code> &mdash; the panel above.</li>
-  <li><code>converged-vs-nonconverged.json</code> &mdash; the panel's own receipt: the shared contour
-  levels, the branch terms and drawing style of each set, the caption text, and the drawn and dropped
-  null tally <code>poloidal.draw_nulls</code> returns for each set (one admitted saddle drawn, none
-  dropped outside the wall, no other qualified nulls).</li>
+  <li><code>converged-vs-nonconverged.png</code> and its <code>.svg</code> companion &mdash; the panel
+  above, redrawn from the refreshed fixture.</li>
   <li><code>coil-edit-latency.json</code> &mdash; the sweep receipt in the sibling
-  <code>coil-edit-latency</code> directory, this record's forensic companion: the same run
-  (<code>source_revision d38491924</code>, H200 job 1273580), with the latency statement and the two
-  gates that failed.</li>
-  <li><code>coil-edit-latency-2026-09-17.json</code> &mdash; the earlier receipt of this same
-  twenty-edit sweep (H200 job 1273204, median <strong>353.0 ms</strong> warm), preserved under a dated
-  name beside the current one because an earlier version of the plan text quoted its median.</li>
+  <code>coil-edit-latency</code> directory, this record's forensic companion, with the latency
+  statement and the three gates that failed: <code>all_edits_converged</code>,
+  <code>median_warm_wall_meets_tens_of_milliseconds_target</code>, and
+  <code>first_edit_compiles_program</code>.</li>
+  <li><code>tests/test_coil_edit_persistence_guard.py</code> &mdash; the read-back guard, re-persisted on
+  the refreshed fixture: it must read every state back as its own field, and it must still fire on the
+  retained pre-repair archive.</li>
 </ul>
-<p class="lede">Rendered from a single H200 job on the frozen MAST 22086 slice-43 arm. This record's own
-sweep receipt reports 10 of 20 converged at a <strong>370.4 ms</strong> median warm wall
-(<code>coil-edit-latency/coil-edit-latency.json</code>, job 1273580); the earlier receipt of the same
-sweep reports 353.0 ms (<code>coil-edit-latency/coil-edit-latency-2026-09-17.json</code>, job 1273204).
-This record explains the ten.</p>
+<p class="lede">Rendered from one titan job on the frozen MAST 22086 slice-43 arm, run with the vertical
+current-centre row imposed and with an unconstrained control arm in the same allocation. The sweep receipt
+reports 4 of 20 converged at a 3060 ms median warm wall on the P100 rung; the control arm at the same
+revision reports 10 of 20, so this record explains a set the row moved rather than a set HEAD moved.</p>
 </main>
 </body>
 </html>

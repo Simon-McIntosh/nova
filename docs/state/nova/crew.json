@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T12:15:05",
+  "updated": "2026-09-22T12:20:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -8295,10 +8295,15 @@
         "id": "session-337d1d569f61f639eedc",
         "harness": "clive",
         "role": "review",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-22"
+        "session_id": "c4446ec8-6d1c-44f2-9555-fc84461a35b6",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "c4446ec8-6d1c-44f2-9555-fc84461a35b6"
+        },
+        "created": "2026-09-22",
+        "session_owners": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "s19-codex-20260916"
+        }
       },
       {
         "id": "shadow-haiku-1",
@@ -242893,6 +242898,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3095
+    "_version": 3096
   }
 }

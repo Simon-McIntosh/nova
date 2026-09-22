@@ -25,7 +25,14 @@ def _binomial_coefficients(order, extended_precision):
                 jsp.special.gamma(term + 1) * jsp.special.gamma(order - term + 1)
             )
 
-        return tuple(np.asarray(coefficients(terms)).tolist())
+        @jax.jit
+        def table():
+            def element(carry, term):
+                return carry, coefficients(term)
+
+            return jax.lax.scan(element, None, terms)[1]
+
+        return tuple(np.asarray(table()).tolist())
 
 
 @jax.named_scope("bernstein_basis")

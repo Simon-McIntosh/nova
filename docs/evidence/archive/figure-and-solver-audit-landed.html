@@ -3847,6 +3847,50 @@ because these discrete guards and receipt identities are clearer as selectable t
 <h3>Scope and artifacts</h3>
 <p>The sampler worktree's documentation tip <code>47324a70c</code> and the loop worktree's documentation tip <code>42ac98272</code> were noted but not judged. The scored repair commits are respectively <code>c1af3a06d</code> and <code>3d6e20d68</code>. The durable review, valid findings JSON, and six replay logs are under <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-verify-two-prescribed-local-repairs</code>; the scratch trees were reconstructed from the named immutable revisions and removed after the logs landed. No figure was created because the evidence is a truth table of process exits, exception identity, and source-form resolution; the HTML table is the clearer representation.</p>
 </section>
+<section class="audit-directory" id="memory-scaling-figure-regeneration">
+<h2 id="memory-scaling-figure-from-its-receipt">Memory-scaling figure regenerated from its receipt</h2>
+<p><strong>What changed.</strong> <code>docs/figures/cut-cell-current-attribution/exact-clip-memory/base-memory-scaling.svg</code>
+was hand-authored: a single <code>&lt;path&gt;</code> whose three vertices and three labels were typed
+in by hand. It is now rendered by <code>benchmarks/exact_clip_memory_scaling.py render</code>, which
+plots each rung from the committed memory receipt <code>base-memory.json</code> and writes a PNG
+companion. The same entry point rebuilds the production-route solve panel
+<code>solve-panels-final-receipted/weak-rotation-reactor-static-production-route-cells-1000.png</code>
+from its persisted part receipt. No solve is executed, so the render runs on the login node.</p>
+<p><strong>The figure now agrees with the receipt, and says so.</strong> The receipt's temporary byte
+counts 27 343 556 456, 55 627 400 744 and 75 597 085 864 B become 25.46567139774561, 51.807054080069065
+and 70.40527264028788 GiB, printed as 25.47, 51.81 and 70.41 &mdash; the three labels the hand-drawn
+file carried. The render receipt records, per point, the receipt byte count beside the plotted
+coordinate and the printed label, so the two can be compared without re-deriving either:</p>
+<table>
+<thead><tr><th>realised cells</th><th>requested cells</th><th>receipt temporary bytes</th><th>receipt GiB</th><th>plotted y (GiB)</th><th>printed label</th><th>above 20 GiB gate</th></tr></thead>
+<tbody>
+<tr><td>135</td><td>110</td><td><code>27343556456</code></td><td>25.46567139774561</td><td>25.46567139774561</td><td>25.47</td><td>yes</td></tr>
+<tr><td>342</td><td>300</td><td><code>55627400744</code></td><td>51.807054080069065</td><td>51.807054080069065</td><td>51.81</td><td>yes</td></tr>
+<tr><td>555</td><td>500</td><td><code>75597085864</code></td><td>70.40527264028788</td><td>70.40527264028788</td><td>70.41</td><td>yes</td></tr>
+</tbody>
+</table>
+<img src="/nova/figures/cut-cell-current-attribution/exact-clip-memory/base-memory-scaling.svg"
+     alt="XLA temporary memory of the three exact-clip rungs against realised atomic cell count, with the 20 GiB gate drawn and each point labelled from its receipt byte count."
+     width="640">
+<p><strong>The panel prints the state it drew.</strong> Its title carries the case, the realised cell
+count 1072, the terminal fixed-point residual <code>1.452e-13</code> and <code>converged=yes</code>;
+both topologies are <code>limited</code>, so the admitted-x-point null sets draw zero glyphs and the
+tally says so rather than being omitted.</p>
+<p><strong>Gate.</strong> <code>uv run --no-sync pytest -p no:cacheprovider -q tests/test_exact_clip_memory_render.py</code>
+at revision <code>8c894a3ce</code>: <code>7 passed</code>, exit 0. The checks re-derive every coordinate
+from the source receipt and require the plotted point and its printed label to agree. A test that
+merely read the render receipt and echoed it would pass a figure decoupled from its receipt; this one
+does not.</p>
+<p><strong>Declared negative control.</strong> First line of its log, verbatim:
+&ldquo;perturb one receipt value in a copy and observe the point-equals-receipt check fail&rdquo;. One
+source-receipt byte count raised by 1 GiB in a copy: <code>1 failed, 6 passed</code>, exit 1, the
+failure being exactly <code>test_every_plotted_point_equals_its_source_receipt_value</code> with
+<code>assert 51.807054080069065 == 52.807054080069065 &plusmn; 5.5e-05</code>. Without the perturbation
+the same seven checks pass, so the failure is caused by the perturbation.</p>
+<p><strong>Scope.</strong> Ledger: <a href="/nova/evidence/archive/figure-and-solver-audit-landed.html#figure-audit-cut-cell-current-attribution">the positional-stiffness figure pair record</a>,
+whose figures live in the same directory and whose conventions this work follows. Merged-head
+verification of the node is separately owned; this record covers the node's own change only.</p>
+</section>
   </main>
 </body>
 </html>

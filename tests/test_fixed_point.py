@@ -1216,5 +1216,64 @@ def test_krylov_solve_composes_requests_without_entering_the_operator_body():
     np.testing.assert_allclose(jax.jit(solve)(rhs), [1.0, 2.0], atol=1e-14, rtol=0)
 
 
+@pytest.mark.slow
+def test_real_operator_request_calls_inline_unless_they_share_a_scan():
+    """Count actual full-flux output roots after optimizing a real operator."""
+    import re
+    from benchmarks.solve_program_size_gate import _certificate_operands
+    from nova.equilibrium.fixed_point import (
+        OperatorRequestKind,
+        operator_request,
+        operator_request_body,
+    )
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
+    profile, seed, topology, target, request = _certificate_operands(
+        "weak-rotation-reactor-static", -300
+    )
+    operator = profile.operator
+    external = operator.external(request.current, request.prescribed_current)
+    state = jnp.asarray(seed, dtype=jnp.float64)
+    shadow = operator.residual_shadow_mask(state, topology)
+    body = operator_request_body(operator.traced_flux_map_with_shadow(topology, target))
+
+    @jax.jit
+    def one(value, shadow, external, operator):
+        return body(
+            operator_request(OperatorRequestKind.RESIDUAL, value, shadow),
+            external,
+            operator,
+            target,
+        ).mapped
+
+    def nested(value, shadow, external, operator):
+        first = one(value, shadow, external, operator)
+        second = one(first, shadow, external, operator)
+        return one(second, shadow, external, operator)
+
+    def streamed(value, shadow, external, operator):
+        def serve(carry, _):
+            return one(carry, shadow, external, operator), None
+
+        return jax.lax.scan(serve, value, None, length=3)[0]
+
+    counts = {}
+    results = {}
+    for label, function in (("one", one), ("nested", nested), ("streamed", streamed)):
+        compiled = jax.jit(function).lower(state, shadow, external, operator).compile()
+        counts[label] = sum(
+            bool(re.search(rf" = f64\[{state.size}\].* select\(", line))
+            and "/jit(evaluate)/" in line
+            for line in compiled.as_text().splitlines()
+        )
+        results[label] = compiled(state, shadow, external, operator)
+    print(f"real_operator_optimized_bodies={counts}")
+    assert counts["one"] == 1, "known-present real operator boundary was not seen"
+    assert counts["nested"] == 3
+    assert counts["streamed"] == 1
+    np.testing.assert_array_equal(results["nested"], results["streamed"])
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-22">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-impl" content="0.0">
 </head>
 <body>
@@ -239,8 +239,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260922T131958475620-review-of-fsa-repair-terminal-flux-panel" data-who="reckon-ship" data-when="2026-09-22T13:27:36.576Z">
     <div class="r-comment-body"><p>review role: scored fsa-repair-terminal-flux-panel 89 of 100</p></div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260922T115635336563-fsa-repair-positional-stiffness-figures" data-who="reckon-ship" data-when="2026-09-22T11:56:35Z">
     <div class="r-comment-body"><p>positional-stiffness figure repair landed on commit c88ef0b91; evidence anchor <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figure-audit-cut-cell-current-attribution</code>. The followups' pixel-identity claim is refuted by measurement: the 110- and 300-cell residual figures both draw from the one committed measurement receipt (sha256 6e0b30e9…23bb) and each draws its own disjoint row selection (135 against 342 realised cells), so they are neither the same receipt read twice nor identical receipts, and both the file and the decoded-pixel digests differ (<code>53b32081…</code>/<code>26c8e842…</code> against <code>46c3c928…</code>/<code>54a54354…</code>). The pair are merely indistinguishable at print size, their arrays differing by under three percent at 40 mm. <code>translated-40mm.png</code> now prints residual= against the analytic span and converged= on all six panels, and states the shared level array it contours both fields on; convergence reads no everywhere at 40 mm because the axis projects 0.0681 to 0.1391 m against a 0.040 m input displacement, so the flag is computed and carries no discriminating power at that amplitude. Drawing is payload-driven and solve-free (login-node, seconds), a render receipt records per figure the title lines and digests and per poloidal panel the glyph count drawn per null set, and five checks pass in <code>tests/test_fixture_positional_stiffness_render.py</code> with a declared negative control that reddens on a duplicated pixel digest.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260922T123943037762-fsa-check-which-unmerged-record-tips-are-already-on-main" data-who="reckon-ship" data-when="2026-09-22T14:22:48.120Z">
+    <div class="r-comment-body"><p>report-only: of 19 audit record tips, 17 with commits beyond main add ids none of which main carries (none-present 17, partly 0, all-present 0), so every one is a merge-tip case; review 96/100</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

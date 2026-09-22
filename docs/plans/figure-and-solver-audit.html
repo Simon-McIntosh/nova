@@ -27,6 +27,7 @@
 <meta name="plan-impl" content="0.0">
 <meta name="plan-version" content="14">
 <meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="9">
 </head>
 <body>
   <main class="plan-doc">
@@ -263,6 +264,8 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-fsa-20260921-null-vocabulary-was-not-expressible" data-who="" data-when="">
     <div class="r-comment-body">Painter defect found 2026-09-21 by the adjacent nova session while rendering the matched-edit panel under the plotting rules and fixed on main at 2b12b210a (nova/media/ink.py and draw_nulls): InkStyle.xpoint_marker was the line marker x and axis_marker the dot, both faceless, so markerfacecolor none was silently inert, hollow drew identically to filled, and the axis drew as a dot where the rule says a solid triangle. The draw_nulls vocabulary the rules require (solid triangle for the axis, filled cross for the admitted saddle, hollow markers for other qualified nulls) was declared and not expressible. Consequence for this audit: every figure re-rendered under the rules before that commit carries indistinguishable null sets, so the repair followups on the owning plans that re-render flux panels are not closed by a re-render made before 2b12b210a; a pass over the re-rendered panels for null glyphs is owed once the repair queue clears. No test pinned the marker literals (tests/test_solovev_certificate_render.py reads the style rather than hard-coding it), so the change is visible in figures only.</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260921T061551405436-fsa-audit-solver-clip-and-quadrature" data-who="reckon-ship" data-when="2026-09-21T06:38:00+00:00">
+    <div class="r-comment-body"><p>Clip/quadrature audit complete: 8 ledger promotions reviewed, 7 defective and 1 sound. The current-head CPU allocation ran 19 fresh targets (13 pass, 6 fail); all 10 test failures trace to <code>d90a522fe</code> reading a missing <code>topology.x_point</code>. The evidence anchor records the row verdicts, valid typed-saddle negative control, unwired capacity refusal, and repair payloads.</p></div>
 </div>
 </section>
   </main>

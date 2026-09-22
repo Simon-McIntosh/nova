@@ -1520,6 +1520,65 @@ benchmarks/solovev_certificate.py:2514: RuntimeError
   <code>negative-control-final.log</code> and <code>atlas-caption-final.log</code> in this
   node's durable run directory.</p>
 </section>
+<section id="the-reachability-grid-passes-the-carrier-identity">
+  <h2>The reachability-grid driver passes the carrier identity to its MAST state request (2026-09-22)</h2>
+
+  <p><strong>Defect.</strong> <code>_mast_states</code> takes <code>carrier_identity</code> as a
+  required keyword-only argument, so a caller that omits it raises before any solve. The atlas repair
+  brought <code>generate_topology_visuals.py</code> inside its fence and left
+  <code>docs/figures/primary-xpoint-evidence/reachability_grid_final.py</code> outside it, where the
+  call at line 208 still read
+  <code>reachability._mast_states(profile, jnp.asarray(passive_case["state"]), target_current)</code>
+  — three positional arguments and no identity. Alongside that site,
+  <code>efit_topology_corroboration.py</code>, <code>bank_drift_paired_probe.py</code> and
+  <code>jacobian_null_direction.py</code> already forwarded the identity, so this driver was the
+  remaining one that could not be exercised end to end.</p>
+
+  <p><strong>Reproduction, at base revision <code>3ecafdf5a</code>.</strong> Binding the recorded
+  three-argument call against the request signature fails, which is the fault the full-set regeneration
+  reached at <code>generate_topology_visuals.py:279</code>:</p>
+
+  <pre><code>signature: (profile, seed: 'jax.Array', target_current: 'float', *, carrier_identity: 'str')
+REPRO TypeError: missing a required keyword-only argument: 'carrier_identity'</code></pre>
+
+  <p><strong>Repair.</strong> One argument, plus the binding that already held the value. The driver
+  loads the persisted response carrier through <code>_persisted_response_cache</code> and discarded its
+  second return as <code>_carrier</code>; the repair names it <code>carrier</code> and passes
+  <code>carrier["carrier"]["semantic_response_identity"]</code>, which is exactly the expression the
+  atlas generator forwards. Nothing else in the file changed
+  (<code>reachability_grid_final.py</code>, 1 insertion site plus the binding rename).</p>
+
+  <p><strong>Gate.</strong> Login node, one fresh process, <code>JAX_PLATFORMS=cpu</code> implied by the
+  default lane, the shared root environment reused with <code>PYTHONPATH</code> and
+  <code>--no-sync</code>. The test is new
+  (<code>tests/test_reachability_grid_driver.py</code>) and solves nothing: it patches the driver's
+  reconstruction, land-lookup and selection collaborators, runs the MAST panel path
+  (<code>_mast_panels</code>) on a synthesised passive case whose carrier identity is a recorded
+  sentinel, and records the state request instead of performing it. Two cases: the recorded call must
+  carry a <code>carrier_identity</code> equal to the case carrier identity (and the request path must
+  have executed at all, so the pin cannot pass vacuously), and a rotated carrier identity must be
+  forwarded from the carrier evidence rather than from anything constant in the driver.</p>
+
+  <table>
+  <thead><tr><th>arm</th><th>command</th><th>exit</th><th>result</th></tr></thead>
+  <tbody>
+  <tr><td>head</td><td><code>pytest -q tests/test_reachability_grid_driver.py</code></td><td>0</td><td>2 passed in 9.84s</td></tr>
+  <tr><td>negative control</td><td>same, call reverted to three positional arguments</td><td>1</td><td>2 failed in 11.99s</td></tr>
+  </tbody>
+  </table>
+
+  <p><strong>Negative control.</strong> The declared mutation reverts the call to
+  <code>reachability._mast_states(profile, jnp.asarray(passive_case["state"]), target_current)</code>,
+  and the log's first line repeats that mutation verbatim. Both cases redden, so the pin is shown to
+  fire rather than merely to pass; the mutated file is then restored and verified byte-identical to the
+  committed revision. Gate logs live in this node's durable run directory
+  (<code>gate.log</code>, <code>negative-control.log</code>). Implementation at commit
+  <code>0f56a51a5</code>.</p>
+
+  <p><strong>Scope.</strong> The gate measures this node's change only. Verifying the merged atlas-tree
+  result end to end belongs to a separately dispatched test node; the unchanged sites named above are
+  not this node's to alter.</p>
+</section>
 </main>
 </body>
 </html>

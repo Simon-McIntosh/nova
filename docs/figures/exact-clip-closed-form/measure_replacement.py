@@ -142,6 +142,11 @@ def executable(arm):
     result["completed"] = True
     result["below_byte_ceiling"] = len(serialized) < 100_000_000
     persist(f"{arm}-program.json", result)
+    if arm == "negative":
+        code = suite("candidate")
+        print(f"restored_gauss_test_exit={code}", flush=True)
+        if code == 0:
+            raise RuntimeError("restoring edge quadrature did not fire a guard")
 
 
 def child(arguments, name):
@@ -313,7 +318,7 @@ def row(case, cells):
     if refused_count:
         try:
             support.assert_no_refusal()
-        except ValueError as error:
+        except RuntimeError as error:
             refusal_message = str(error)
         assert refusal_message, "capacity refusal must be observable"
     result = {

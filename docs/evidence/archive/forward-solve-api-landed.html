@@ -873,6 +873,44 @@ row recorded (<code>imposed: true</code>, reference 0.031679780923040135 m, tole
 two-arm state-for-state table is preserved beside the run under
 <code>titan-evidence/two-arm-1275764/two-arm-table.txt</code>.</p>
 </section>
+<section id="coil-edit-fixture-driver-port">
+<h2>The regenerated fixture and both control paths share the current driver (2026-09-22)</h2>
+<p>Merge commit <code>ca714ffda29232c10c2d3b783baa0458aa924023</code> has the current driver
+<code>1153d9e89ff6e4cb84ea6921d3b92eaa8819e277</code> and the promoted five-commit fixture tip
+<code>269bcbaac136f0c68aec26d43d37191887d5a04e</code> as its two parents. The regenerated fixture,
+receipts, census and panel come from the promoted side. The eleven driver conflict hunks retain both
+contracts: the current driver still selects its frame through <code>grid_points</code> and carries the
+general off-host provenance marker, while the promoted side supplies the
+<code>--without-vertical-centroid</code> control, conditional constraint tuple, durable per-edit writes,
+strict titan provenance checks and the archive-count launcher gate.</p>
+<table>
+<thead><tr><th>Fresh process</th><th>Revision</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Persistence guard, base driver</td><td><code>1153d9e89</code></td><td>3 passed in 38.82 s</td></tr>
+<tr><td>Persistence guard, merged driver</td><td><code>ca714ffda</code></td><td>4 passed in 44.04 s</td></tr>
+<tr><td>Flux-surface connectivity</td><td><code>ca714ffda</code></td><td>43 passed in 66.74 s</td></tr>
+<tr><td>Parser and control-path probe</td><td><code>ca714ffda</code></td><td><code>grid_points=33</code>, centroid row off, zero constraint pairs</td></tr>
+</tbody>
+</table>
+<p>Those processes ran sequentially in one <code>all_debug</code> allocation with CPU x64 selected.
+The same allocation re-read all twenty fixture states: 11 of 20 draw a closed candidate and 19 of 20
+carry a cycle. Every discrete census field equals the committed record. Recomputed saddle levels differ
+only by at most <code>1.3877787807814457e-16 Wb</code>, within eight binary64 epsilons, so the corrected
+receipt reports <code>CENSUS_AGREES=1</code>. The first comparator required byte-identical JSON and
+returned a false negative solely on that sub-ulp level spelling; its log is retained rather than
+silently replaced.</p>
+<p>The declared negative control restored the unconditional tuple from the current side of the conflict.
+With <code>--without-vertical-centroid</code>, the probe then observed
+<code>constraint_pairs=(None,)</code> and failed. Restoring the conditional branch returns the control arm
+to an empty tuple. This demonstrates that the command-line control changes the compiled solve rather than
+only changing receipt prose.</p>
+<figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Constrained coil-edit terminal flux contours for a converged and a non-converged edit, with both null sets and the vessel wall"><figcaption>The promoted constrained fixture and panel now ride the current driver. The plotted state remains the branch artifact; only generated SVG trailing whitespace was normalised so the merge satisfies <code>git diff --check</code>.</figcaption></figure>
+<p>Gate logs:
+<code>combined-all-debug.log</code>, <code>census-agreement.log</code> and
+<code>negative-unconditional-constraint-pairs.log</code> under run
+<code>r-20260922T165225717709-fsa-port-the-regenerated-fixture-onto-the-current-driver</code>.
+No test failure was added against the base driver.</p>
+</section>
 </main>
 </body>
 </html>

@@ -287,7 +287,7 @@ def test_limited_solve_receipt_governs_label_and_boundary_without_an_atlas(tmp_p
             "efit_axis": np.asarray(((1.0, 0.0),)),
             "efit_x": np.asarray(((1.0, 1.0),)),
             "efit_lcfs": boundary,
-            "class": class_label,
+            "class": "diverted",
             "solve_topology_class": class_label,
             "terminal_residual": 0.0,
         }

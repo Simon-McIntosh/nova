@@ -1,0 +1,54 @@
+revision=8d047a923131e281be5e245d9a404d67b6ce2f0d source_checkpoint=067ea754ce138a8b93a704f42877ab501957c9ad tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/measure_reference.py', '--suite', 'baseline', 'test_flux_surface_extraction.py']
+16:07:06 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+...........F                                                             [100%]
+=================================== FAILURES ===================================
+_____________ test_bicubic_derivatives_lower_to_static_polynomials _____________
+
+    def test_bicubic_derivatives_lower_to_static_polynomials():
+        """A linear field retains its derivatives without traced binomial work."""
+        configure_dtypes()
+        coefficient = 2 * jnp.arange(4)[:, None] / 3 + jnp.arange(4)[None, :] / 3
+        radial = jnp.asarray([0.0, 0.23, 0.74, 1.0])
+        vertical = jnp.asarray([1.0, 0.66, 0.38, 0.0])
+        function = jax.jit(_bicubic_derivatives)
+        values = function(coefficient, radial, vertical)
+        expected = (
+            radial + 2 * vertical,
+            jnp.ones(4),
+            2 * jnp.ones(4),
+            jnp.zeros(4),
+            jnp.zeros(4),
+            jnp.zeros(4),
+        )
+        for actual, reference in zip(values, expected, strict=True):
+            np.testing.assert_allclose(actual, reference, atol=4e-15, rtol=4e-15)
+        text = function.lower(coefficient, radial, vertical).compile().as_text()
+>       assert "Bernstein.binom" not in text, (
+            "traced binomial evaluation remains in optimized HLO"
+        )
+E       AssertionError: traced binomial evaluation remains in optimized HLO
+E       assert 'Bernstein.binom' not in 'HloModule j...sion)\n}\n\n'
+E         
+E         'Bernstein.binom' is contained here:
+E           atrix"
+E           2 "Bernstein.binom"
+E           3 "Bernstein.basis"
+E           4 "Bernstein.coefficent_matrix.<locals>.basis"
+E           5 "<module>"...
+E         
+E         ...Full output truncated (3011 lines hidden), use '-vv' to show
+
+tests/test_flux_surface_extraction.py:776: AssertionError
+=============================== warnings summary ===============================
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; zarr
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+tests/test_flux_surface_extraction.py::test_even_edge_root_pair_is_resolved_on_iter_inner_surface
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jaxopt/__init__.py:59: DeprecationWarning: JAXopt is no longer maintained. See https://docs.jax.dev/en/latest/ for alternatives.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_flux_surface_extraction.py::test_bicubic_derivatives_lower_to_static_polynomials
+1 failed, 11 passed, 2 warnings in 750.61s (0:12:30)

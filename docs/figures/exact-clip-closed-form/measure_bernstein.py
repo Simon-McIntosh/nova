@@ -89,13 +89,12 @@ def configure():
 
 
 def suite(arm, filename):
+    """Run the current test harness against the selected source implementation."""
     configure()
     import pytest
 
     if arm == "baseline":
         original_evaluator()
-        path = "tests/" + filename
-        baseline_module(path, Path(filename).stem)
     return pytest.main([str(ROOT / "tests" / filename), "-q", "-p", "no:cacheprovider"])
 
 

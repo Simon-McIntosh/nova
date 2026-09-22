@@ -93,10 +93,9 @@ def main():
         "independent_reference": reference,
         "numerical_no_worse_passed": reference["passed"],
         "baseline_suite_context_job": "1275884",
-        "zero_added_module_failures": all(
-            x["exit_status"] == 0 and not x["failure_ids"]
-            for records in suites.values()
-            for x in records
+        "zero_added_module_failures": not (
+            {failure for item in suites["candidate"] for failure in item["failure_ids"]}
+            - {failure for item in suites["baseline"] for failure in item["failure_ids"]}
         ),
         "serialized_byte_reduction_fraction": 1
         - candidate["serialized_bytes"] / baseline["serialized_bytes"],

@@ -1,0 +1,4 @@
+revision=ccc09221d1e982026eed45b5ee5cc0f865188d96 source_checkpoint=067ea754ce138a8b93a704f42877ab501957c9ad tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/replay_reference.py', '--suite', 'test_interpolant.py']
+16:44:38 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+................                                                         [100%]
+16 passed in 16.67s

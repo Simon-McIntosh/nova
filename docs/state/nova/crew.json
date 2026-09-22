@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T16:17:57",
+  "updated": "2026-09-22T16:22:02",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -247212,6 +247212,291 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T121125384414-nia-attribute-the-coil-null-invariance-failures",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-attribute-the-coil-null-invariance-failures",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1743,
+                "cached_input_tokens": 504672,
+                "input_tokens": 506417,
+                "output_tokens": 1590,
+                "reasoning_output_tokens": 403,
+                "total_tokens": 508007,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "576a27e3-ea0d-439c-9e63-3058761859c6",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "a report at the write path records: the two failing assertions with their observed and expected values at main (fresh CPU process, log recorded); a bisection over the named landing commits on the null read (git log of nova/biot/null.py, nova/equilibrium/topology.py and forward_operator.py between the pin date and main) run read-only in a scratch checkout under one all_debug allocation, giving the first commit at which each case fails with its sha and subject; a verdict per case from exactly: production-invariance-broken (external coil nulls now change the plasma selection or partition, with the cells or nulls that moved named) or pin-stale (the expectation encodes a value the named landing legitimately changed, with the mechanism named); no production file is modified and the test file is modified only if the verdict is pin-stale, in which case the repinned expectation cites the sha in its assertion message, the file passes in a fresh process with the log recorded, and the declared negative control (evaluate the repinned case against the pre-landing production read from the scratch checkout) is observed to fail and its log recorded",
+          "estimated_hours": null,
+          "goal": "attribute the two failing cases test_external_coil_nulls_leave_plasma_selection_and_partition_invariant[coarse] and [fine] in tests/test_hex_flood_coil_nulls.py to the landing between 2026-09-15 and 2026-09-21 that moved the null read (containment anchor, wall-array traced indexing, or the typed census saddle into the clip) and state whether the invariance is broken in production or the pin is stale",
+          "id": "nia-attribute-the-coil-null-invariance-failures",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-22T12:11:28Z",
+            "read_at": "2026-09-22T12:11:29Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 47.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T121125384414-nia-attribute-the-coil-null-invariance-failures/manifest.md",
+          "negative_control": "on a pin-stale verdict, run the repinned test against the pre-landing production read in the scratch checkout and observe it fail; on a production-invariance-broken verdict, none: no check is written",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/nia-attribute-the-coil-null-invariance-failures",
+            "tests/test_hex_flood_coil_nulls.py",
+            "docs/plans/null-identification-authority.html",
+            "docs/evidence/archive/null-identification-authority-landed.html",
+            "docs/figures/null-identification-authority"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "s19f-sol-inv-2",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-22T12:11:52Z",
+        "completed_at": "2026-09-22T13:23:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4317,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4317,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "071dbeb386e7fb6ad585ea0eb84a8774a4bf1032",
+        "commits": [
+          "654e63e37b1c8ccae56099cf1062850a6eca784b",
+          "bf8adad966ab9d974c2eb610740d480f6713b5b1"
+        ],
+        "changed_lines": {
+          "added": 91,
+          "removed": 5,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -vv tests/test_hex_flood_coil_nulls.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T121125384414-nia-attribute-the-coil-null-invariance-failures/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T121125384414-nia-attribute-the-coil-null-invariance-failures/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c907-9711-7c71-9af4-bd48f07621d2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 27992320,
+            "cached_input_tokens_cumulative": 27992320,
+            "input_tokens": 28235589,
+            "input_tokens_cumulative": 28235589,
+            "output_tokens": 54541,
+            "output_tokens_cumulative": 54541,
+            "reasoning_output_tokens": 15459,
+            "reasoning_output_tokens_cumulative": 15459
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-22T13:23:49Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 53.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-22T13:23:49Z"
+            }
+          ],
+          "notional_cost_usd": 114.0332,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1987,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1961,
+              "log_fresh": false,
+              "manifest_commits": [
+                "a6b2517327b8ece718de95cee4f06140a0d075ef",
+                "4fcadf664"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "3925746a34a9ece0250a835e7c305f24b7a445417a9cd63498032a12397cf041",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T110524996762-cca-certificate-row-receipt-hygiene/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan cpu-compile-abort --section '\u00a72' --role review --spec-level exact --node review-of-cca-certificate-row-receipt-hygiene --goal 'attach an independent review to run r-20260922T110524996762-cca-certificate-row-receipt-hygiene' --done-when 'the review for r-20260922T110524996762-cca-certificate-row-receipt-hygiene stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T110524996762-cca-certificate-row-receipt-hygiene.json --time-budget 45m --session s19-codex-20260916 --allow-unreconciled-runs --local",
+              "node": "cca-certificate-row-receipt-hygiene",
+              "phase": "starting",
+              "plan": "cpu-compile-abort",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260922T110524996762-cca-certificate-row-receipt-hygiene",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 2008,
+              "terminal_at": "2026-09-22T11:38:04Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-certificate-row-receipt-hygiene"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "goal_fidelity": 19,
+            "evidence": 19,
+            "scope_discipline": 20,
+            "durability": 16,
+            "fit": 18
+          },
+          "absent": [],
+          "total": 92
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 27992320,
+          "cumulative_input_tokens": 28235589,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 70000,
+          "generation_seconds": 2305.826,
+          "machine_seconds": 2010.348,
+          "tokens_per_second": 30.36
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-attribute-the-coil-null-invariance-failures",
+          "session_id": "01a0c907-9711-7c71-9af4-bd48f07621d2",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T13:23:49Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.9995,
+        "impl_move": {
+          "plan": "null-identification-authority",
+          "at_dispatch": 0.9995,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:investigate"
+        },
+        "negative_control": {
+          "verdict": "waived",
+          "test_paths": [
+            "tests/test_hex_flood_coil_nulls.py"
+          ],
+          "declaration": "on a pin-stale verdict, run the repinned test against the pre-landing production read in the scratch checkout and observe it fail; on a production-invariance-broken verdict, none: no check is written",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/nia-attribute-the-coil-null-invariance-failures/repinned-negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/nia-attribute-the-coil-null-invariance-failures/repinned-negative-control.log",
+          "reason": "the repinned test was run against the pre-landing production read in the scratch checkout and observed to fail, as declared; the log names the checkout revision rather than repeating the declaration verbatim"
+        },
+        "tool_steps": 117.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -247678,6 +247963,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3143
+    "_version": 3144
   }
 }

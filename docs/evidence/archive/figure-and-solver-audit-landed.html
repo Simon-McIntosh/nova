@@ -3092,6 +3092,75 @@ was created.</p>
 </ul>
 <p>Ready-to-append repair items, with commit/file/line anchors, are stored beside the review at <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-audit-solver-census-and-certificate-drivers/findings.json</code>. No file under <code>nova/</code> and no test file was edited by this review.</p>
 </section>
+<section class="audit-directory" id="figure-audit-cut-cell-current-attribution-section">
+<h2 id="figure-audit-cut-cell-current-attribution">Positional-stiffness residual figure pair — two measurements, not one picture</h2>
+<p><strong>Question asked.</strong> The repair followups on
+<code>cut-cell-current-attribution</code> reported that the 40-cell and 300-cell residual
+figures were pixel-identical and that <code>translated-40mm.png</code> printed neither its
+residual nor a convergence flag. The followups' own instruction was to find out
+<em>why</em> the pair looked identical — same receipt read twice, or identical receipts —
+and to say which.</p>
+<p><strong>Answer.</strong> Neither. Both figures are drawn from the one committed measurement
+receipt <code>docs/.../positional-stiffness/receipt.json</code>
+(sha256 <code>6e0b30e9b875ceb1ee4714d1aee8476a8ff50ba71d476f3a34828783dec223bb</code>), and each draws
+its own disjoint row selection out of it. They are not the same picture and never were; they
+are merely indistinguishable to a reader at the size they are printed, their arrays differing by
+under three percent at 40&nbsp;mm. The pixel-identity claim is refuted by measurement, not by
+argument: the decoded-pixel digests differ, and so do the file digests.</p>
+<table>
+  <thead><tr><th>figure</th><th>requested cells</th><th>realised cells</th><th>PNG sha256 (first 16)</th><th>pixel sha256 (first 16)</th></tr></thead>
+  <tbody>
+  <tr><td><code>weak-rotation-reactor-static-cells-110-residual.png</code></td><td>110</td><td>135</td><td><code>53b3208154062b69</code></td><td><code>26c8e8428281fc31</code></td></tr>
+  <tr><td><code>weak-rotation-reactor-static-cells-300-residual.png</code></td><td>300</td><td>342</td><td><code>46c3c9281231b6c7</code></td><td><code>54a5435489fd15f3</code></td></tr>
+  <tr><td><code>moderate-rotation-conventional-static-cells-300-residual.png</code></td><td>300</td><td>341</td><td><code>fc9640a50ff30ba9</code></td><td><code>c25d94d9e6c425a4</code></td></td></tr>
+  </tbody>
+</table>
+<p><strong>The comparison panel now states what it is.</strong> Each of the six panels of
+<code>translated-40mm.png</code> carries four title lines: the case and realised cell count, the
+displacement direction, the level array both fields are contoured on, and the residual is
+printed against the analytic span with a convergence flag.</p>
+<p><strong>The level array is stated.</strong> The two fields on a panel share one physical level
+array rather than one each, which is what makes a mismatch on the panel readable. The
+110-cell panel states
+<code>levels Wb (shared): [-19.51, -13.22, -6.931, -0.64, 5.651, 11.94, 18.23, 24.53, 30.82, 37.11, 43.4, 49.69]</code>.</p>
+<img src="/nova/figures/cut-cell-current-attribution/positional-stiffness/figures/translated-40mm.png"
+     alt="Six poloidal comparison panels at 40 mm: analytic field in blue, translated field in ochre, shared line contours, both null sets and the wall drawn."
+     width="640">
+<p><strong>Convergence reads no on all six panels, and that is the honest reading.</strong> The
+criterion is that the production map, started from the drawn 40&nbsp;mm state, returns the magnetic
+axis inside the input displacement within four trips. At 40&nbsp;mm it does not: the axis projects
+0.0738&nbsp;m (weak, outboard), 0.1391&nbsp;m (weak, vertical), 0.0715&nbsp;m (300-cell, outboard),
+0.1370&nbsp;m (300-cell, vertical), 0.0681&nbsp;m (moderate, outboard) and 0.1142&nbsp;m (moderate,
+vertical), every one above the 0.040&nbsp;m input displacement. The flag is computed, not looked up,
+and at this amplitude it carries no discriminating power between the cases.</p>
+<p><strong>Both null sets are drawn and counted on every panel.</strong> The render receipt records
+the glyph count drawn per null set per panel. This fixture reads limited, so both sets draw their
+magnetic axis and no saddle: <code>x_points_drawn</code> is 0 for the analytic set and 0 for the
+translated set on all six panels, while <code>axis_drawn</code> is 1 for each. The saddle part of
+the vocabulary is therefore unexercised at this directory; the axis count is what a reader can
+hold this record to.</p>
+<p><strong>Instrument.</strong> Drawing is payload-driven: the driver rebuilds every named figure
+from the committed receipts with no operator, no production map and no four-trip iteration, so the
+whole render path runs on the login node in seconds
+(<code>--render-only</code>, and <code>--write-render-inputs</code> for the translated input). A
+render receipt <code>render-receipt.json</code> in the figure directory records, per figure, its
+title lines and its file and pixel digests, and per poloidal panel the glyph count drawn for each
+null set.</p>
+<p><strong>The guard.</strong> <code>tests/test_fixture_positional_stiffness_render.py</code>
+reads the receipt and the PNGs directly, with only the standard library and Pillow, so it does not
+rest on the code path that wrote them. Five checks pass against the shipped receipt
+(<code>render/render-test.log</code>). The declared negative control writes the alleged defect into
+the receipt — one figure's pixel digest copied onto the figure it is compared against — and the
+check reddens on it with the message the guard exists to emit
+(<code>render/render-test-negative-control.log</code>).</p>
+<p><strong>What remains.</strong> The pair are distinct measurements, but at the size they are
+printed they are still visually alike, so a reader cannot tell them apart by eye; only the digests
+and the row counts separate them. At 40&nbsp;mm the iteration does not return inside its input
+displacement, so the convergence flag reads <code>no</code> everywhere at that amplitude, and the
+saddle vocabulary is unexercised because this fixture is limited in both topologies. Verifying the
+merged result belongs to a separately dispatched test node.</p>
+<p>Commit <code>c88ef0b91</code> on this worktree's branch.</p>
+</section>
   </main>
 </body>
 </html>

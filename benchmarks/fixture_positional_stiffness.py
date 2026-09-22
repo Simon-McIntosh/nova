@@ -27,6 +27,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from PIL import Image
 
 from benchmarks import oracle_start_newton_probe as oracle_probe
 from benchmarks import solovev_certificate as certificate
@@ -68,6 +69,22 @@ POSINGS = {
 REQUESTED_CLASS = int(TopologyClass.LIMITED)
 LOW_STATE_DISPLACEMENT_M = 0.036
 LOW_STATE_RESIDUAL_FRACTION = 8.6e-2
+RENDER_INPUT_DIRNAME = "render"
+RENDER_RECEIPT_NAME = "render-receipt.json"
+TRANSLATED_DISPLACEMENT_M = 0.040
+POSING_INKS = {"analytic_clipped": "#3366cc", "whole_cell": "#cc7722"}
+POSING_LABELS = {
+    "analytic_clipped": "analytic-clipped exterior",
+    "whole_cell": "whole-cell exterior",
+}
+# The flag is read off the production iteration this measurement already ran: the
+# state drawn at 40 mm is the iteration's start, so "converged" is whether that
+# iteration settles back inside the input displacement, not whether a residual
+# taken from a state this panel does not draw passed a tolerance.
+CONVERGED_CRITERION = (
+    "the production map started from the drawn 40 mm state returns the magnetic "
+    "axis inside the input displacement within four trips"
+)
 
 
 def _strict(value: Any) -> Any:
@@ -116,6 +133,36 @@ def _revision() -> str:
     return subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
     ).strip()
+
+
+def _pixel_digest(path: Path) -> str:
+    """Digest the decoded pixels, so two files that differ only in metadata match,
+    and two files that differ on the canvas do not."""
+
+    with Image.open(path) as image:
+        pixels = np.asarray(image.convert("RGBA"), dtype=np.uint8)
+    return hashlib.sha256(np.ascontiguousarray(pixels).tobytes()).hexdigest()
+
+
+def _figure_titles(figure) -> list[str]:
+    lines = []
+    if figure._suptitle is not None and figure._suptitle.get_text():
+        lines.extend(figure._suptitle.get_text().splitlines())
+    for index, axis in enumerate(figure.axes):
+        for line in axis.get_title().splitlines():
+            if line:
+                lines.append(line)
+    return [line for line in lines if line.strip()]
+
+
+def _null_glyph_panels(figure, counts_by_axis: dict[int, dict[str, dict[str, int]]]):
+    panels = []
+    for index, axis in enumerate(figure.axes):
+        counts = counts_by_axis.get(index)
+        if counts is None:
+            continue
+        panels.append({"panel": index, "null_glyphs": counts})
+    return panels
 
 
 def _lane() -> dict[str, Any]:
@@ -412,45 +459,32 @@ def _fit(rows: list[dict[str, Any]], measure: str) -> dict[str, Any]:
     }
 
 
-def _draw_residual_figure(
-    path: Path, context: dict[str, Any], measurements: list[dict[str, Any]]
-) -> dict[str, Any]:
+def _draw_residual_figure(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
+    """Draw one residual figure from its own per-figure receipt."""
+
     figure, axes = plt.subplots(1, 2, figsize=(10.5, 4.6), constrained_layout=True)
-    colors = {"analytic_clipped": "#3366cc", "whole_cell": "#cc7722"}
-    labels = {
-        "analytic_clipped": "analytic-clipped exterior",
-        "whole_cell": "whole-cell exterior",
-    }
     for axis, direction_name in zip(axes, DIRECTIONS, strict=True):
         for posing in POSINGS:
-            selected = [
-                row
-                for row in measurements
-                if row["direction"] == direction_name and row["posing"] == posing
-            ]
-            displacement_mm = [1.0e3 * row["displacement_m"] for row in selected]
-            rms = [
-                row["one_map"]["residual"]["rms_fraction_of_span"] for row in selected
-            ]
-            sup = [
-                row["one_map"]["residual"]["sup_fraction_of_span"] for row in selected
-            ]
+            series = payload["series"][direction_name][posing]
+            displacement_mm = series["displacement_mm"]
+            rms = series["rms_fraction_of_span"]
+            sup = series["sup_fraction_of_span"]
             axis.plot(
                 displacement_mm,
                 rms,
                 marker="o",
-                color=colors[posing],
-                label=f"{labels[posing]} rms",
+                color=POSING_INKS[posing],
+                label=f"{POSING_LABELS[posing]} rms",
             )
             axis.plot(
                 displacement_mm,
                 sup,
                 marker="s",
                 linestyle="--",
-                color=colors[posing],
-                label=f"{labels[posing]} sup",
+                color=POSING_INKS[posing],
+                label=f"{POSING_LABELS[posing]} sup",
             )
-            axis.axhline(rms[0], color=colors[posing], alpha=0.28, linewidth=0.8)
+            axis.axhline(rms[0], color=POSING_INKS[posing], alpha=0.28, linewidth=0.8)
         axis.axvline(
             1.0e3 * LOW_STATE_DISPLACEMENT_M,
             color="#7a3e9d",
@@ -471,78 +505,365 @@ def _draw_residual_figure(
         axis.grid(axis="y", alpha=0.18)
         axis.legend(fontsize=6)
     figure.suptitle(
-        f"{context['case_name']} · {abs(context['requested_cells'])} requested cells"
+        f"{payload['case']} · {abs(payload['requested_cells'])} requested cells "
+        f"({payload['realised_cells']} realised)"
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
+    titles = _figure_titles(figure)
     plt.close(figure)
     return {
         "filesystem_path": str(path.relative_to(ROOT)),
         "project_absolute_src": f"/nova/{path.relative_to(ROOT / 'docs')}",
         "sha256": _file_digest(path),
+        "pixel_sha256": _pixel_digest(path),
+        "titles": titles,
+        "poloidal_panels": [],
     }
 
 
-def _draw_translated_panel(
-    path: Path, contexts: list[dict[str, Any]]
-) -> dict[str, Any]:
+def _null_glyph_counts(
+    tally: dict[str, int], magnetic_axis: Any, contain: Any
+) -> dict[str, int]:
+    """The axis marker is not tallied by ``draw_nulls``, so count it here.
+
+    ``draw_nulls`` reports what it drew for every set except the magnetic axis,
+    and the panel receipt has to name a count for each set; the predicate below
+    is the one that function applies before it plots the axis.
+    """
+
+    counted = dict(tally)
+    axis_drawn = 0
+    if magnetic_axis is not None:
+        point = np.asarray(magnetic_axis, dtype=float).reshape(-1)[:2]
+        if np.all(np.isfinite(point)):
+            inside = poloidal.inside_wall_units(point[None, :], contain)
+            axis_drawn = int(bool(np.asarray(inside)[0]))
+    counted["axis_drawn"] = axis_drawn
+    return counted
+
+
+def _draw_translated_panel(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
+    """Draw the forty-millimetre translated comparison from its own receipt."""
+
+    rows = payload["rows"]
     figure, axes = plt.subplots(
-        len(contexts), 2, figsize=(8.4, 10.6), constrained_layout=True
+        len(rows), 2, figsize=(8.4, 10.6), constrained_layout=True
     )
-    for row_index, context in enumerate(contexts):
-        wall = np.asarray(context["machine"].wall_node, dtype=np.float64)
+    panel_nulls: dict[int, dict[str, dict[str, int]]] = {}
+    for row_index, row in enumerate(rows):
+        wall = np.asarray(row["wall_units_rz_m"], dtype=np.float64)
+        coordinates = np.asarray(row["coordinates_rz_m"], dtype=np.float64)
         radial, height, analytic_field = certificate._raster_field(
-            context["coordinates"], context["analytic"], wall
+            coordinates, np.asarray(row["analytic_flux_wb"], dtype=np.float64), wall
         )
-        levels = poloidal.contour_levels(analytic_field, count=12)
-        for column, (direction_name, direction) in enumerate(DIRECTIONS.items()):
-            translated = _translated_state(context, 0.040 * direction)
+        level_array = row["levels_wb"]
+        for column, direction_name in enumerate(DIRECTIONS):
+            direction = row["directions"][direction_name]
             _, _, translated_field = certificate._raster_field(
-                context["coordinates"], translated, wall
-            )
-            translated_topology = oracle_probe._topology(
-                context["operator"], translated
+                coordinates,
+                np.asarray(direction["state_flux_wb"], dtype=np.float64),
+                wall,
             )
             axis = axes[row_index, column]
             poloidal.draw_flux_contours(
-                axis, radial, height, analytic_field, levels, color="#3366cc"
+                axis, radial, height, analytic_field, level_array, color="#3366cc"
             )
             poloidal.draw_flux_contours(
-                axis, radial, height, translated_field, levels, color="#cc7722"
+                axis, radial, height, translated_field, level_array, color="#cc7722"
             )
             poloidal.draw_wall(axis, units=(wall,))
-            poloidal.draw_nulls(
+            analytic_set = poloidal.draw_nulls(
                 axis,
-                magnetic_axis=context["analytic_topology"]["axis_rz_m"],
-                x_points=context["analytic_topology"]["x_point_rz_m"],
+                magnetic_axis=row["analytic_topology"]["axis_rz_m"],
+                x_points=row["analytic_topology"]["x_point_rz_m"],
                 style=DEFAULT_INK.variant(
                     axis_marker="^", axis_color="#3366cc", xpoint_color="#3366cc"
                 ),
                 contain=(wall,),
             )
-            poloidal.draw_nulls(
+            translated_set = poloidal.draw_nulls(
                 axis,
-                magnetic_axis=translated_topology["axis_rz_m"],
-                x_points=translated_topology["x_point_rz_m"],
+                magnetic_axis=direction["topology"]["axis_rz_m"],
+                x_points=direction["topology"]["x_point_rz_m"],
                 style=DEFAULT_INK.variant(
                     axis_marker="^", axis_color="#cc7722", xpoint_color="#cc7722"
                 ),
                 contain=(wall,),
             )
+            panel_nulls.setdefault(row_index * 2 + column, {})
+            panel_nulls[row_index * 2 + column]["analytic"] = _null_glyph_counts(
+                analytic_set, row["analytic_topology"]["axis_rz_m"], (wall,)
+            )
+            panel_nulls[row_index * 2 + column]["translated"] = _null_glyph_counts(
+                translated_set, direction["topology"]["axis_rz_m"], (wall,)
+            )
             poloidal_axes(axis)
             axis.set_title(
-                f"{context['case_name']} · {abs(context['requested_cells'])} cells\n"
-                f"40 mm {direction_name}: analytic blue / translated ochre",
-                fontsize=7,
+                f"{row['case']} · {abs(row['requested_cells'])} requested cells "
+                f"({row['realised_cells']} realised)\n"
+                f"40 mm {direction_name}: analytic blue / translated ochre\n"
+                f"levels Wb (shared): {_levels_text(level_array)}\n"
+                f"residual={direction['residual_fraction_of_span']:.3e} of span · "
+                f"converged={'yes' if direction['converged'] else 'no'}",
+                fontsize=6,
             )
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
+    titles = _figure_titles(figure)
     plt.close(figure)
     return {
         "filesystem_path": str(path.relative_to(ROOT)),
         "project_absolute_src": f"/nova/{path.relative_to(ROOT / 'docs')}",
         "sha256": _file_digest(path),
+        "pixel_sha256": _pixel_digest(path),
+        "titles": titles,
+        "poloidal_panels": _null_glyph_panels(figure, panel_nulls),
     }
+
+
+def _levels_text(levels: Any) -> str:
+    return "[" + ", ".join(f"{float(level):.4g}" for level in np.asarray(levels)) + "]"
+
+
+def _residual_slug(case_name: str, requested_cells: int) -> str:
+    return f"{case_name}-cells-{abs(requested_cells)}"
+
+
+def _residual_payload(
+    rows: list[dict[str, Any]],
+    case_name: str,
+    requested_cells: int,
+    source_receipt: Path,
+) -> dict[str, Any]:
+    """The per-figure input for one residual figure: its own rows, nothing else."""
+
+    case_rows = [
+        row
+        for row in rows
+        if row["case"] == case_name and row["requested_cells"] == requested_cells
+    ]
+    series: dict[str, Any] = {}
+    for direction_name in DIRECTIONS:
+        series[direction_name] = {}
+        for posing in POSINGS:
+            ordered = sorted(
+                (
+                    row
+                    for row in case_rows
+                    if row["direction"] == direction_name and row["posing"] == posing
+                ),
+                key=lambda row: row["displacement_m"],
+            )
+            series[direction_name][posing] = {
+                "displacement_mm": [1e3 * row["displacement_m"] for row in ordered],
+                "rms_fraction_of_span": [
+                    row["one_map"]["residual"]["rms_fraction_of_span"]
+                    for row in ordered
+                ],
+                "sup_fraction_of_span": [
+                    row["one_map"]["residual"]["sup_fraction_of_span"]
+                    for row in ordered
+                ],
+            }
+    return {
+        "slug": _residual_slug(case_name, requested_cells),
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "realised_cells": case_rows[0]["realised_cells"],
+        "source_receipt": str(source_receipt.relative_to(ROOT)),
+        "series": series,
+    }
+
+
+def _residual_payloads(
+    receipt: dict[str, Any], source_receipt: Path
+) -> list[dict[str, Any]]:
+    return [
+        _residual_payload(receipt["rows"], case_name, requested_cells, source_receipt)
+        for case_name, requested_cells in ROWS
+    ]
+
+
+def _render_geometry(case_name, requested_cells):
+    """The machine and analytic state on its nodes, no operator built."""
+
+    carrier_case, _source_case, exact = certificate._case(case_name)
+    machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = np.asarray(
+        certificate._exact_state(case_name, exact, coordinates), dtype=np.float64
+    )
+    return machine, coordinates, analytic, exact
+
+
+def _persisted_topology(output_root, slug, direction_name, posing, displacement_m):
+    """Read a topology the committed measurement already recorded."""
+
+    part = (
+        output_root
+        / "parts"
+        / (
+            f"{slug}-{direction_name}-{posing}-"
+            f"{int(round(1e3 * displacement_m)):03d}mm.json"
+        )
+    )
+    return json.loads(part.read_text(encoding="utf-8"))["input"]["topology"]
+
+
+def _translated_payload(output_root, rows, source_receipt):
+    """The per-figure input for the translated panel: the states it draws.
+
+    The states are stored on the machine coordinates and rasterised at
+    render time, so the input carries a few hundred samples per field
+    rather than the three-hundred-odd thousand a stored raster needs.
+    Both topologies are the ones the committed measurement already read
+    for these same states, so nothing is evaluated here.
+    """
+
+    entries = []
+    for case_name, requested_cells in ROWS:
+        machine, coordinates, analytic, exact = _render_geometry(
+            case_name, requested_cells
+        )
+        slug = _residual_slug(case_name, requested_cells)
+        wall = np.asarray(machine.wall_node, dtype=np.float64)
+        _, _, analytic_raster = certificate._raster_field(coordinates, analytic, wall)
+        measured = {
+            row["direction"]: row
+            for row in rows
+            if row["case"] == case_name
+            and row["requested_cells"] == requested_cells
+            and row["posing"] == "analytic_clipped"
+            and abs(row["displacement_m"] - TRANSLATED_DISPLACEMENT_M) < 1e-12
+        }
+        directions = {}
+        for direction_name, direction in DIRECTIONS.items():
+            shifted = coordinates - (TRANSLATED_DISPLACEMENT_M * direction[None, :])
+            state = np.asarray(
+                certificate._exact_state(case_name, exact, shifted),
+                dtype=np.float64,
+            )
+            row = measured[direction_name]
+            settled = abs(
+                row["iteration"]["after_four_trips"]["axis"][
+                    "projected_on_input_direction_m"
+                ]
+            )
+            directions[direction_name] = {
+                "state_flux_wb": state,
+                "topology": _persisted_topology(
+                    output_root,
+                    slug,
+                    direction_name,
+                    "analytic_clipped",
+                    TRANSLATED_DISPLACEMENT_M,
+                ),
+                "residual_fraction_of_span": row["one_map"]["residual"][
+                    "rms_fraction_of_span"
+                ],
+                "converged": bool(settled < TRANSLATED_DISPLACEMENT_M),
+            }
+        entries.append(
+            {
+                "case": case_name,
+                "requested_cells": requested_cells,
+                "realised_cells": len(machine.node),
+                "coordinates_rz_m": coordinates,
+                "wall_units_rz_m": wall,
+                "analytic_flux_wb": analytic,
+                "analytic_topology": _persisted_topology(
+                    output_root, slug, "outboard", "analytic_clipped", 0.0
+                ),
+                "levels_wb": poloidal.contour_levels(analytic_raster, count=12),
+                "directions": directions,
+            }
+        )
+    return {
+        "source_receipt": str(source_receipt.relative_to(ROOT)),
+        "converged_criterion": CONVERGED_CRITERION,
+        "displacement_m": TRANSLATED_DISPLACEMENT_M,
+        "rows": entries,
+    }
+
+
+def _render_from_inputs(output_root: Path, render_input: Path) -> dict[str, Any]:
+    """Draw every named figure from the committed receipts, with no solve.
+
+    The residual payloads are read back out of the committed measurement
+    receipt, one disjoint row selection per figure, and the translated payload
+    out of the render input this measurement routes through.
+    """
+
+    receipt_path = output_root / "receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    translated_payload = json.loads(render_input.read_text(encoding="utf-8"))
+    digest = _file_digest(receipt_path)
+    relative_receipt = str(receipt_path.relative_to(ROOT))
+    figures = []
+    for payload in _residual_payloads(receipt, receipt_path):
+        drawn = _draw_residual_figure(
+            output_root / "figures" / f"{payload['slug']}-residual.png", payload
+        )
+        drawn.update(
+            {
+                "figure": f"{payload['slug']}-residual.png",
+                "case": payload["case"],
+                "requested_cells": payload["requested_cells"],
+                "realised_cells": payload["realised_cells"],
+                "source_receipt": relative_receipt,
+                "source_receipt_sha256": digest,
+            }
+        )
+        figures.append(drawn)
+    translated = _draw_translated_panel(
+        output_root / "figures" / "translated-40mm.png", translated_payload
+    )
+    translated.update(
+        {
+            "figure": "translated-40mm.png",
+            "case": None,
+            "source_receipt": relative_receipt,
+            "source_receipt_sha256": digest,
+        }
+    )
+    render_receipt = {
+        "$id": "nova.fixture-positional-stiffness-render-receipt",
+        "revision": _revision(),
+        "source_receipt": relative_receipt,
+        "source_receipt_sha256": digest,
+        "render_input": str(render_input.relative_to(ROOT)),
+        "residual_figures": figures,
+        "translated_figure": translated,
+    }
+    _write_json(output_root / RENDER_RECEIPT_NAME, render_receipt)
+    return render_receipt
+
+
+def render_only(output_root: Path, render_input: Path) -> dict[str, Any]:
+    """Rebuild the named figures from the committed receipts alone."""
+
+    return _render_from_inputs(output_root, render_input)
+
+
+def write_render_inputs(output_root: Path) -> Path:
+    """Persist the translated render input from one fixture build, with no solve.
+
+    This builds the machine and the analytic state and reads the two translated
+    topologies; it never runs the production map or the four-trip iteration.
+    """
+
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("the render input requires extended precision")
+    receipt_path = output_root / "receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    path = output_root / RENDER_INPUT_DIRNAME / "translated-40mm.json"
+    _write_json(path, _translated_payload(output_root, receipt["rows"], receipt_path))
+    print("POSITIONAL_STIFFNESS_RENDER_INPUT written", flush=True)
+    return path
 
 
 def _verdict(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -731,23 +1052,7 @@ def run(output_root: Path, report_path: Path) -> dict[str, Any]:
                     )
                     receipt["rows"].append(measured)
                     _write_json(receipt_path, receipt)
-        figure = _draw_residual_figure(
-            output_root / "figures" / f"{row_slug}-residual.png",
-            context,
-            [
-                row
-                for row in receipt["rows"]
-                if row["case"] == case_name
-                and row["requested_cells"] == requested_cells
-            ],
-        )
-        figure.update({"case": case_name, "requested_cells": requested_cells})
-        receipt.setdefault("residual_figures", []).append(figure)
-        _write_json(receipt_path, receipt)
     receipt["groups"] = rows_by_group(receipt["rows"])
-    receipt["translated_figure"] = _draw_translated_panel(
-        output_root / "figures" / "translated-40mm.png", contexts
-    )
     receipt["verdict"] = _verdict(receipt["rows"])
     verdict = receipt["verdict"]
     if verdict["fixture_holds_position"]:
@@ -770,7 +1075,18 @@ def run(output_root: Path, report_path: Path) -> dict[str, Any]:
     receipt["completed"] = True
     receipt["elapsed_seconds"] = perf_counter() - started
     _write_json(receipt_path, receipt)
-    report = _report(receipt)
+    render_input = output_root / RENDER_INPUT_DIRNAME / "translated-40mm.json"
+    _write_json(
+        render_input, _translated_payload(output_root, receipt["rows"], receipt_path)
+    )
+    rendered = _render_from_inputs(output_root, render_input)
+    report = _report(
+        {
+            **receipt,
+            "residual_figures": rendered["residual_figures"],
+            "translated_figure": rendered["translated_figure"],
+        }
+    )
     _write_text(output_root / "report.md", report)
     _write_text(report_path, report)
     print(
@@ -784,8 +1100,26 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--report-path", type=Path, default=DEFAULT_REPORT_PATH)
+    parser.add_argument(
+        "--render-only",
+        action="store_true",
+        help="rebuild the named figures from the committed receipts, with no solve",
+    )
+    parser.add_argument(
+        "--write-render-inputs",
+        action="store_true",
+        help="persist the translated render input from one fixture build, no solve",
+    )
     arguments = parser.parse_args()
-    receipt = run(arguments.output_root.resolve(), arguments.report_path.resolve())
+    output_root = arguments.output_root.resolve()
+    render_input = output_root / RENDER_INPUT_DIRNAME / "translated-40mm.json"
+    if arguments.write_render_inputs:
+        write_render_inputs(output_root)
+        return 0
+    if arguments.render_only:
+        render_only(output_root, render_input)
+        return 0
+    receipt = run(output_root, arguments.report_path.resolve())
     return 0 if receipt["completed"] else 1
 
 

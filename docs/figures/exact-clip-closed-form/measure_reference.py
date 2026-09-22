@@ -211,6 +211,11 @@ def main():
         prior.row(*args.row)
         return 0
     if args.reference:
+        deadline = time.monotonic() + 600
+        while (OUTPUT / "row-repair-pending").exists():
+            if time.monotonic() > deadline:
+                raise TimeoutError("single-null measurement repair is pending")
+            time.sleep(1)
         from reference_clip import measure
 
         measure(OUTPUT)

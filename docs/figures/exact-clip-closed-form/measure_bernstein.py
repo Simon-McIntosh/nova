@@ -174,6 +174,38 @@ def program(arm):
     persist(f"{arm}-program.json", result)
 
 
+def _edge_crossing_mask(vertices, counts, live, atomic, atomic_count):
+    """Locate shared-edge intersections in sampled and short polygons."""
+    import numpy as np
+
+    crossing_mask = np.zeros(vertices.shape[:2], dtype=bool)
+    for cell in np.flatnonzero(live):
+        point = vertices[cell, : counts[cell]]
+        start = atomic[cell, : atomic_count[cell]]
+        edge = np.roll(start, -1, axis=0) - start
+        length = np.sqrt(np.sum(edge**2, axis=1))
+        tolerance = 128 * np.finfo(float).eps * max(1.0, np.max(np.abs(start)))
+        delta = point[:, None] - start[None]
+        distance = np.abs(
+            delta[..., 0] * edge[None, :, 1] - delta[..., 1] * edge[None, :, 0]
+        ) / np.maximum(length, np.finfo(float).tiny)
+        projection = np.sum(delta * edge[None], axis=-1) / np.maximum(
+            length**2, np.finfo(float).tiny
+        )
+        on_edge = np.any(
+            (distance <= tolerance)
+            & (projection >= -tolerance)
+            & (projection <= 1 + tolerance),
+            axis=1,
+        )
+        original = np.min(np.sqrt(np.sum(delta**2, axis=-1)), axis=1) <= tolerance
+        crossing_mask[cell, : counts[cell]] = on_edge & ~original
+        if counts[cell] >= 129:
+            # The sampler's first arc endpoints remain roots even at mesh corners.
+            crossing_mask[cell, [0, 128]] = True
+    return crossing_mask
+
+
 def row(case, cells):
     with (OUTPUT / f"{case}-{cells}.lock").open("w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
@@ -221,10 +253,25 @@ def _row(case, cells):
         vertices = np.asarray(support.support_vertices)
         live = np.asarray(support.included) & np.asarray(support.boundary)
         counts = np.asarray(support.vertex_count)
-        assert np.any(live) and np.all(counts[live] >= 129)
+        assert np.any(live)
+        print(
+            "LIVE_VERTEX_COUNTS",
+            np.unique(counts[live], return_counts=True),
+            flush=True,
+        )
+        mesh = operator.moment_geometry.atomic_mesh
+        atomic = np.asarray(mesh.node_coordinates)[np.asarray(mesh.cell_nodes)]
+        atomic_count = np.asarray(mesh.cell_vertex_count)
+        crossing_mask = _edge_crossing_mask(
+            vertices, counts, live, atomic, atomic_count
+        )
+        crossings = np.where(crossing_mask[..., None], vertices, 0.0)
+        assert np.any(crossing_mask) and np.linalg.norm(crossings) > 0
+        print("COLLECTED_SHARED_EDGE_CROSSINGS", int(crossing_mask.sum()), flush=True)
         return {
             "vertices": vertices,
-            "crossings": vertices[live][:, (0, 128)],
+            "crossings": crossings,
+            "crossing_mask": crossing_mask,
             "current": np.asarray(moments[0]),
             "radial_moment": np.asarray(moments[1]),
             "vertical_moment": np.asarray(moments[2]),

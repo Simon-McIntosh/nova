@@ -6,7 +6,8 @@ import re
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[3]
-OUTPUT = Path(__file__).resolve().parent / "bernstein-reference"
+OUTPUT = Path(__file__).resolve().parent / "bernstein-reference-audit"
+BASELINE_TEST_OUTPUT = Path(__file__).resolve().parent / "bernstein-reference"
 SOURCE = "067ea754ce138a8b93a704f42877ab501957c9ad"
 BASE = "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2"
 CASES = (
@@ -33,7 +34,8 @@ def main():
     for arm in ("baseline", "candidate"):
         suites[arm] = []
         for test in TESTS:
-            log = OUTPUT / f"{arm}-{test}.log"
+            test_output = BASELINE_TEST_OUTPUT if arm == "baseline" else OUTPUT
+            log = test_output / f"{arm}-{test}.log"
             text = log.read_text()
             passed = re.findall(r"(\d+) passed", text)
             assert passed, f"passing-test positive control absent: {log}"
@@ -41,7 +43,9 @@ def main():
                 {
                     "module": test + ".py",
                     "passed": int(passed[-1]),
-                    "exit_status": int((OUTPUT / f"{arm}-{test}.exit").read_text()),
+                    "exit_status": int(
+                        (test_output / f"{arm}-{test}.exit").read_text()
+                    ),
                     "failure_ids": re.findall(r"^FAILED ([^\n]+)", text, re.MULTILINE),
                     "log": str(log),
                 }
@@ -88,6 +92,7 @@ def main():
         "analytic_rows": rows,
         "independent_reference": reference,
         "numerical_no_worse_passed": reference["passed"],
+        "baseline_suite_context_job": "1275884",
         "zero_added_module_failures": all(
             x["exit_status"] == 0 and not x["failure_ids"]
             for records in suites.values()

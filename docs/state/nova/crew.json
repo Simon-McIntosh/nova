@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T19:16:39",
+  "updated": "2026-09-22T19:18:05",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -254935,6 +254935,237 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T153151004032-pta-adopted-read-cost-and-two-grid-frame",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a75",
+        "node": "pta-adopted-read-cost-and-two-grid-frame",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2041,
+                "cached_input_tokens": 728567,
+                "input_tokens": 730610,
+                "output_tokens": 202,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 730812,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "a receipt docs/figures/plasma-cell-topology-authority/adopted-read-cost.json records, on ONE titan allocation (sbatch --partition=titan --gres=gpu:1 --cpus-per-task=4 --mem=64G --time=02:00:00, JAX_PLATFORMS unset, XLA_PYTHON_CLIENT_PREALLOCATE=false, no compilation-cache root, TMPDIR=/tmp in submit environment and payload, the root interpreter run directly with PYTHONPATH set to the worktree, uv never invoked), the per-state warm wall of the production topology read at 550, 1074 and 2616 realised cells measured with the same instrument the twin-loop diagnosis used (benchmarks/dual_stencil_census.py production read timing, the run-gpu.sh recipe under ~/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-ring-read-misses-and-the-twin-loop/), beside the pre-adoption titan reference from that diagnosis timing-gpu-receipt.json (0.25745, 0.25523, 0.24349 ms per state, job 1275658, revision da3def20), warm compile excluded, device named on every wall, and states plainly whether each post-adoption wall is within 1.10 times its reference; a second receipt docs/figures/plasma-cell-topology-authority/two-grid-frame.json replays the stored terminal states of MAST 22086/43 coil-edit index 10 at 33x33 and 65x65 from docs/figures/mast-centroid-capability/sweep-full-axis/panel-states.npz through the adopted production topology read on all_debug, and states per grid which saddle is admitted (position, flux) against the reference X-point, in one sentence corroborating or falsifying the single-ring mechanism; a figure docs/figures/plasma-cell-topology-authority/two-grid-frame.png plus .svg draws one panel per grid under the plotting rules (unfilled line contours on shared levels, both null sets in the shared vocabulary via nova.media painters, the wall, axis off) with the admitted saddle per grid in the caption; the manifest is written before each wait with wait_probe as a JSON argument vector printing IN_QUEUE or LEFT_QUEUE and wait_terminal LEFT_QUEUE; the landing record appended to the section 5 comment and the evidence anchor cites both receipts and logs",
+          "estimated_hours": 1.0,
+          "goal": "price the adopted production read against its pre-adoption reference on the same device and instrument, and replay the two-grid MAST frame under the adopted read",
+          "id": "pta-adopted-read-cost-and-two-grid-frame",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-22T15:32:01Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T153151004032-pta-adopted-read-cost-and-two-grid-frame/manifest.md",
+          "negative_control": "none: a measurement node that changes no source; its correctness is the two receipts, the paired reference on the same device and the figure it produces",
+          "plan": "plasma-cell-topology-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/figures/plasma-cell-topology-authority",
+            "docs/plans/plasma-cell-topology-authority.html",
+            "docs/evidence/archive/plasma-cell-topology-authority-landed.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s18-pta-measure-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-22T15:33:23Z",
+        "completed_at": "2026-09-22T16:35:25.314Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3701,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3722,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "4112f5f853566ee7f013967330368affbb063f30",
+        "commits": [
+          "c10b933b4591fdf0f00f75c389852726e9f2a3cb",
+          "c5cb010eee6286460efdd64c5a874629e83c4848"
+        ],
+        "changed_lines": {
+          "added": 7326,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "titan job 1275970 (P100, warm compile excluded): /home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame/adopted_read_cost.py pricing the adopted production read against the pre-adoption reference at 550/1074/2616 cells with a positive control re-timing the reference call (0.996/0.918/0.994); all_debug jobs 1275991 and 1276012: two-grid frame replay through Topology.read_qualification and figure render",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T153151004032-pta-adopted-read-cost-and-two-grid-frame/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T153151004032-pta-adopted-read-cost-and-two-grid-frame/manifest.md",
+        "scope_changed": false,
+        "session_id": "6f90fd3a-3f96-4359-a8c8-a7ef309ad61e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 19402302,
+            "input_tokens_cumulative": 19402302,
+            "output_tokens": 119154,
+            "output_tokens_cumulative": 119154,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-22T16:35:25.314Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 8,
+            "evidence": 16,
+            "fit": 18,
+            "goal_fidelity": 18,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 80
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 19732435,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3713.855,
+          "generated_tokens": 141139,
+          "generation_seconds": 2712.288,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.6,
+          "machine_seconds": 1001.567,
+          "peak_input_tokens": 165899,
+          "tokens_per_second": 52.04,
+          "wall_tokens_per_second": 38.0
+        },
+        "follow_on_paths": [
+          "3.152x",
+          "/",
+          "6.079x",
+          "15.126x",
+          "15.1x"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame",
+          "session_id": "6f90fd3a-3f96-4359-a8c8-a7ef309ad61e",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T16:35:25.314Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.97,
+        "impl_move": {
+          "plan": "plasma-cell-topology-authority",
+          "at_dispatch": 0.97,
+          "at_complete": 0.99,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 184.0,
+        "orientation_input_tokens": 3319980.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -255401,6 +255632,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3182
+    "_version": 3183
   }
 }

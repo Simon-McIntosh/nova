@@ -19,12 +19,15 @@ import jax.numpy as jnp
 import matplotlib
 
 matplotlib.use("Agg")
+from matplotlib.lines import Line2D
 from matplotlib.path import Path as PlotPath
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import quad
 from scipy.optimize import brentq
 
+from benchmarks import limiter_read_resolution_audit as limiter_audit
+from benchmarks import solovev_certificate as certificate
 from benchmarks import topology_read_resolution_ladder as topology_ladder
 from nova.equilibrium.clip_quadrature import saddle_wedge_current_moments
 from nova.equilibrium.separatrix_clip import AtomicCellMesh
@@ -48,6 +51,50 @@ COLOURS = {
     "core": "#0f766e",
     "private": "#7c3aed",
     "sol": "#dc2626",
+}
+RENDER_RECEIPT_NAME = "render-receipt.json"
+RENDER_CELL_COUNTS = (110, 300, 500, 1000, 2500)
+
+# The two null sets a reader has to tell apart on every panel. Both use the
+# draw_nulls vocabulary -- an up triangle for the magnetic axis and a cross for
+# the saddle -- and they are separated by fill rather than by shape, because a
+# second shape is what put an ochre down triangle over a blue up triangle on
+# the coincident axis: two triangles pointing opposite ways read as one
+# hourglass and neither glyph is the vocabulary's axis glyph. The solved set
+# is solid and the analytic reference hollow, so a coincident pair reads as a
+# filled glyph inside an outline of the other colour.
+SOLVED_AXIS_MARKER = "^"
+SOLVED_NULL_INK = DEFAULT_INK.variant(
+    axis_color=COLOURS["read"],
+    axis_markersize=DEFAULT_INK.axis_markersize,
+    xpoint_marker="X",
+    xpoint_color=COLOURS["read"],
+    xpoint_markersize=DEFAULT_INK.xpoint_markersize,
+)
+# The reference set is drawn hollow, so it reaches the panel through
+# ``other_x_points``, whose marker literal comes from this style's x-point slot
+# rather than from the axis/x-point arguments.
+ANALYTIC_AXIS_INK = DEFAULT_INK.variant(
+    xpoint_marker="^",
+    xpoint_color=COLOURS["analytic"],
+    xpoint_markersize=DEFAULT_INK.axis_markersize,
+    xpoint_markeredgewidth=1.4,
+)
+ANALYTIC_SADDLE_INK = DEFAULT_INK.variant(
+    xpoint_marker="X",
+    xpoint_color=COLOURS["analytic"],
+    xpoint_markersize=DEFAULT_INK.xpoint_markersize,
+    xpoint_markeredgewidth=1.4,
+)
+
+# The marker literals draw_nulls can emit, mapped to the set and the null each
+# one stands for. Anything outside this table is a glyph the vocabulary does
+# not admit on a panel of this kind, and it is recorded rather than ignored.
+NULL_GLYPH_VOCABULARY = {
+    ("^", False): "solved_axis",
+    ("X", False): "solved_saddle",
+    ("^", True): "analytic_axis",
+    ("X", True): "analytic_saddle",
 }
 
 
@@ -108,6 +155,28 @@ def _allocation() -> dict[str, Any]:
         "jax_default_backend": jax.default_backend(),
         "jax_enable_x64": bool(jax.config.jax_enable_x64),
         "tmpdir": os.environ.get("TMPDIR"),
+    }
+
+
+def _render_allocation() -> dict[str, Any]:
+    """Describe the environment a render-only run rebuilds panels in.
+
+    A render is not a solve, so it qualifies no measurement and needs no
+    allocation. It does require the CPU backend, because the wedge geometry is
+    still traced by a JAX program and a device backend compiles a different one.
+    """
+    if os.environ.get("JAX_PLATFORMS") != "cpu" or jax.default_backend() != "cpu":
+        raise RuntimeError("a render-only run must select the JAX CPU backend")
+    job_id = os.environ.get("SLURM_JOB_ID")
+    return {
+        "job_id": int(job_id) if job_id else None,
+        "partition": os.environ.get("SLURM_JOB_PARTITION"),
+        "node": os.environ.get("SLURMD_NODENAME", socket.gethostname()),
+        "jax_platforms": ["cpu"],
+        "jax_default_backend": jax.default_backend(),
+        "jax_enable_x64": bool(jax.config.jax_enable_x64),
+        "tmpdir": os.environ.get("TMPDIR"),
+        "solve_free": True,
     }
 
 
@@ -593,99 +662,13 @@ def _observed_nulls(operator: Any, analytic: np.ndarray) -> dict[str, Any]:
     }
 
 
-def _render_panel(
-    output: Path,
-    requested_cells: int,
-    machine: Any,
-    exact: Any,
-    polygon: np.ndarray,
-    wedges: Any,
-    observed: dict[str, Any],
-) -> str:
-    wall = np.asarray(machine.wall_node, dtype=np.float64)
-    radial = np.linspace(float(np.min(wall[:, 0])), float(np.max(wall[:, 0])), 241)
-    vertical = np.linspace(float(np.min(wall[:, 1])), float(np.max(wall[:, 1])), 241)
-    radial_grid, vertical_grid = np.meshgrid(radial, vertical)
-    points = np.column_stack((radial_grid.ravel(), vertical_grid.ravel()))
-    flux = np.asarray(exact.flux(points), dtype=np.float64).reshape(radial_grid.shape)
-    levels = poloidal.contour_levels(flux, count=16)
-    figure, axis = plt.subplots(figsize=(6.2, 6.6), constrained_layout=True)
-    poloidal.draw_flux_contours(
-        axis, radial, vertical, flux, levels, color=COLOURS["analytic"]
-    )
-    poloidal.draw_wall(axis, units=(wall,), linewidth=0.75)
-    analytic_style = DEFAULT_INK.variant(
-        axis_marker="^",
-        axis_color=COLOURS["analytic"],
-        xpoint_color=COLOURS["analytic"],
-    )
-    poloidal.draw_nulls(
-        axis,
-        magnetic_axis=np.asarray(exact.magnetic_axis),
-        x_points=np.asarray(exact.x_point)[None, :],
-        style=analytic_style,
-        contain=(wall,),
-    )
-    observed_style = DEFAULT_INK.variant(
-        axis_marker="v",
-        axis_color=COLOURS["read"],
-        xpoint_color=COLOURS["read"],
-    )
-    observed_x = (
-        np.asarray(observed["saddle_rz_m"])[None, :]
-        if observed["saddle_admitted"]
-        else np.empty((0, 2))
-    )
-    poloidal.draw_nulls(
-        axis,
-        magnetic_axis=np.asarray(observed["axis_rz_m"]),
-        x_points=observed_x,
-        style=observed_style,
-        contain=(wall,),
-    )
-    cell_loop = np.vstack((polygon, polygon[0]))
-    axis.plot(cell_loop[:, 0], cell_loop[:, 1], color=COLOURS["cell"], linewidth=2.0)
-    for slot, colour in enumerate(
-        (COLOURS["core"], COLOURS["private"], COLOURS["sol"], COLOURS["sol"])
-    ):
-        wedge = _support_vertices(wedges, slot)
-        wedge_loop = np.vstack((wedge, wedge[0]))
-        axis.plot(wedge_loop[:, 0], wedge_loop[:, 1], color=colour, linewidth=1.1)
-    poloidal_axes(axis)
-    axis.set_title(
-        f"{requested_cells} requested / {len(machine.node)} realised cells\n"
-        "analytic nulls blue; production read ochre; X-point cell outlined",
-        fontsize=9,
-    )
-    name = f"single-null-wedges-cells-{requested_cells}.svg"
-    destination = output / name
-    figure.savefig(destination)
-    plt.close(figure)
-    return f"/nova/figures/cut-cell-current-attribution/xpoint-cell/{name}"
+def _resolve_xpoint_cell(machine: Any, exact: Any) -> dict[str, Any]:
+    """Select the analytic saddle's cell and trace its four wedges.
 
-
-def _measure_row(
-    requested_cells: int,
-    output: Path,
-    allocation: dict[str, Any],
-    *,
-    diagnose_only: bool = False,
-) -> dict[str, Any]:
-    started = perf_counter()
-    part_path = _part_path(output, requested_cells)
-    progress = {
-        "schema": "nova.xpoint-cell-wedge-oracle-part",
-        "version": 1,
-        "source_revision": _source_revision(),
-        "allocation": allocation,
-        "requested_cells": requested_cells,
-        "reference": requested_cells == REFERENCE_CELLS,
-        "completed": False,
-        "stage": "machine-load",
-    }
-    _write_json(part_path, progress)
-    machine, operator, analytic = topology_ladder._machine_and_field(requested_cells)
-    exact = topology_ladder.ANALYTIC
+    Shared by the measurement row and the render-only entry point, so a panel
+    rebuilt from a persisted part is built from the same cell, in the same
+    orientation frame, as the row that measured it.
+    """
     x_point = np.asarray(exact.x_point, dtype=np.float64)
     axis = np.asarray(exact.magnetic_axis, dtype=np.float64)
     boundary_flux = float(exact.flux(x_point[None, :])[0])
@@ -723,27 +706,262 @@ def _measure_row(
                 edge_root_positive_after=jnp.asarray(root_positive_after),
             )
         )(signed_flux)
-        candidate_row = candidate | {
-            "selected": candidate_cell == cell,
-            "centroid_rz_m": candidate_centre,
-            "characteristic_pitch_m": math.sqrt(
-                float(np.asarray(machine.area)[candidate_cell])
-            ),
-            "edge_root_count": int(sum(row["root_count"] for row in edge_rows)),
-            "edge_roots": edge_rows,
-            "wedge_shape": _wedge_shape_diagnostics(candidate_wedges, x_point),
-        }
-        candidate_diagnostics.append(candidate_row)
+        candidate_diagnostics.append(
+            candidate
+            | {
+                "selected": candidate_cell == cell,
+                "centroid_rz_m": candidate_centre,
+                "characteristic_pitch_m": math.sqrt(
+                    float(np.asarray(machine.area)[candidate_cell])
+                ),
+                "edge_root_count": int(sum(row["root_count"] for row in edge_rows)),
+                "edge_roots": edge_rows,
+                "wedge_shape": _wedge_shape_diagnostics(candidate_wedges, x_point),
+            }
+        )
         if candidate_cell == cell:
-            selected_geometry = (
-                candidate_polygon,
-                candidate_centre,
-                candidate_wedges,
-                candidate_row,
-            )
+            selected_geometry = (candidate_polygon, candidate_centre, candidate_wedges)
     if selected_geometry is None:
         raise RuntimeError("the selected X-point cell has no diagnostic row")
-    polygon, centre, wedges, selected_diagnostic = selected_geometry
+    polygon, centre, wedges = selected_geometry
+    return {
+        "cell": cell,
+        "polygon": polygon,
+        "centre": centre,
+        "wedges": wedges,
+        "candidate_rows": candidate_diagnostics,
+        "x_point": x_point,
+        "axis": axis,
+        "boundary_flux": boundary_flux,
+        "polarity": polarity,
+    }
+
+
+def _marker_glyphs(axes: Any) -> dict[str, Any]:
+    """Classify every marker glyph ``axes`` drew against the null vocabulary.
+
+    A glyph is classified from the artist -- its marker literal and whether it
+    has a face -- so the count is read off what was drawn rather than off an
+    assumption about which call ran. A literal outside the vocabulary is
+    recorded under ``unexpected_markers``, which is what makes an inverted
+    axis triangle a failure of the check rather than a silent style choice.
+    """
+    glyphs = {name: 0 for name in NULL_GLYPH_VOCABULARY.values()}
+    unexpected: list[str] = []
+    for line in axes.lines:
+        marker = line.get_marker()
+        if marker is None:
+            continue
+        literal = str(marker)
+        if literal.lower() in ("none", ""):
+            continue
+        drawn = int(
+            np.count_nonzero(
+                np.isfinite(np.asarray(line.get_xdata(), dtype=np.float64))
+            )
+        )
+        if drawn == 0:
+            continue
+        face = line.get_markerfacecolor()
+        hollow = isinstance(face, str) and face.lower() == "none"
+        key = (literal, hollow)
+        if key in NULL_GLYPH_VOCABULARY:
+            glyphs[NULL_GLYPH_VOCABULARY[key]] += drawn
+        else:
+            unexpected.append(literal)
+    return {"glyphs": glyphs, "unexpected_markers": sorted(set(unexpected))}
+
+
+def _legend_handles() -> list[Any]:
+    """Build the four legend entries that name the two null sets."""
+    return [
+        Line2D(
+            [],
+            [],
+            marker=SOLVED_AXIS_MARKER,
+            color=COLOURS["read"],
+            markerfacecolor=COLOURS["read"],
+            linestyle="none",
+            markersize=DEFAULT_INK.axis_markersize,
+            label="solved axis",
+        ),
+        Line2D(
+            [],
+            [],
+            marker=SOLVED_NULL_INK.xpoint_marker,
+            color=COLOURS["read"],
+            markerfacecolor=COLOURS["read"],
+            linestyle="none",
+            markersize=DEFAULT_INK.xpoint_markersize,
+            label="solved saddle",
+        ),
+        Line2D(
+            [],
+            [],
+            marker=ANALYTIC_AXIS_INK.xpoint_marker,
+            color=COLOURS["analytic"],
+            markerfacecolor="none",
+            linestyle="none",
+            markersize=DEFAULT_INK.axis_markersize,
+            label="analytic axis (hollow)",
+        ),
+        Line2D(
+            [],
+            [],
+            marker=ANALYTIC_SADDLE_INK.xpoint_marker,
+            color=COLOURS["analytic"],
+            markerfacecolor="none",
+            linestyle="none",
+            markersize=DEFAULT_INK.xpoint_markersize,
+            label="analytic saddle (hollow)",
+        ),
+    ]
+
+
+def _draw_panel(
+    output: Path,
+    requested_cells: int,
+    machine: Any,
+    exact: Any,
+    polygon: np.ndarray,
+    wedges: Any,
+    observed: dict[str, Any],
+    *,
+    write: bool = True,
+) -> dict[str, Any]:
+    """Draw one X-point-cell panel and record every null glyph it drew.
+
+    The production read is drawn solid and the analytic reference hollow, both
+    in the ``draw_nulls`` vocabulary: an up triangle for the magnetic axis and
+    a cross for the saddle. Separating the sets by fill rather than by shape is
+    what removes the hourglass a reader saw where the two axes coincide, and it
+    keeps every glyph a shape the vocabulary already defines. The reference
+    glyphs reach the panel through ``other_x_points``, which is the only route
+    that draws hollow.
+    """
+    wall = np.asarray(machine.wall_node, dtype=np.float64)
+    radial = np.linspace(float(np.min(wall[:, 0])), float(np.max(wall[:, 0])), 241)
+    vertical = np.linspace(float(np.min(wall[:, 1])), float(np.max(wall[:, 1])), 241)
+    radial_grid, vertical_grid = np.meshgrid(radial, vertical)
+    points = np.column_stack((radial_grid.ravel(), vertical_grid.ravel()))
+    flux = np.asarray(exact.flux(points), dtype=np.float64).reshape(radial_grid.shape)
+    levels = poloidal.contour_levels(flux, count=16)
+    figure, axis = plt.subplots(figsize=(6.2, 6.6), constrained_layout=True)
+    poloidal.draw_flux_contours(
+        axis, radial, vertical, flux, levels, color=COLOURS["analytic"]
+    )
+    poloidal.draw_wall(axis, units=(wall,), linewidth=0.75)
+    observed_x = (
+        np.asarray(observed["saddle_rz_m"], dtype=np.float64)[None, :]
+        if observed["saddle_admitted"]
+        else None
+    )
+    solved = poloidal.draw_nulls(
+        axis,
+        magnetic_axis=np.asarray(observed["axis_rz_m"], dtype=np.float64),
+        x_points=observed_x,
+        style=SOLVED_NULL_INK.variant(axis_marker=SOLVED_AXIS_MARKER),
+        contain=(wall,),
+    )
+    reference_axis = poloidal.draw_nulls(
+        axis,
+        magnetic_axis=None,
+        x_points=None,
+        other_x_points=np.asarray(exact.magnetic_axis, dtype=np.float64)[None, :],
+        style=ANALYTIC_AXIS_INK,
+    )
+    reference_saddle = poloidal.draw_nulls(
+        axis,
+        magnetic_axis=None,
+        x_points=None,
+        other_x_points=np.asarray(exact.x_point, dtype=np.float64)[None, :],
+        style=ANALYTIC_SADDLE_INK,
+    )
+    cell_loop = np.vstack((polygon, polygon[0]))
+    axis.plot(cell_loop[:, 0], cell_loop[:, 1], color=COLOURS["cell"], linewidth=2.0)
+    for slot, colour in enumerate(
+        (COLOURS["core"], COLOURS["private"], COLOURS["sol"], COLOURS["sol"])
+    ):
+        wedge = _support_vertices(wedges, slot)
+        wedge_loop = np.vstack((wedge, wedge[0]))
+        axis.plot(wedge_loop[:, 0], wedge_loop[:, 1], color=colour, linewidth=1.1)
+    poloidal_axes(axis)
+    handles = _legend_handles()
+    axis.legend(
+        handles=handles,
+        loc="lower right",
+        fontsize=6.5,
+        framealpha=0.9,
+        labelspacing=0.3,
+        handletextpad=0.4,
+        borderpad=0.4,
+    )
+    title_lines = [
+        f"{requested_cells} requested / {len(machine.node)} realised cells",
+        "analytic nulls hollow blue; solved solid ochre; X-point cell outlined",
+    ]
+    axis.set_title("\n".join(title_lines), fontsize=9)
+    name = f"single-null-wedges-cells-{requested_cells}"
+    record = {
+        "requested_cells": requested_cells,
+        "realised_cells": int(len(machine.node)),
+        "title_lines": title_lines,
+        "legend_labels": [handle.get_label() for handle in handles],
+        "wall_node_count": int(wall.shape[0]),
+        "wall_drawn": bool(wall.shape[0] > 0),
+        "figure_svg_path": str((output / f"{name}.svg").resolve()),
+        "figure_svg_src": (
+            f"/nova/figures/cut-cell-current-attribution/xpoint-cell/{name}.svg"
+        ),
+        "figure_png_path": str((output / f"{name}.png").resolve()),
+        "vs_draw_nulls_tallies": {
+            "solved": solved,
+            "reference_axis": reference_axis,
+            "reference_saddle": reference_saddle,
+        },
+    }
+    record |= _marker_glyphs(axis)
+    if write:
+        output.mkdir(parents=True, exist_ok=True)
+        figure.savefig(output / f"{name}.svg")
+        figure.savefig(output / f"{name}.png")
+    plt.close(figure)
+    return record
+
+
+def _measure_row(
+    requested_cells: int,
+    output: Path,
+    allocation: dict[str, Any],
+    *,
+    diagnose_only: bool = False,
+) -> dict[str, Any]:
+    started = perf_counter()
+    part_path = _part_path(output, requested_cells)
+    progress = {
+        "schema": "nova.xpoint-cell-wedge-oracle-part",
+        "version": 1,
+        "source_revision": _source_revision(),
+        "allocation": allocation,
+        "requested_cells": requested_cells,
+        "reference": requested_cells == REFERENCE_CELLS,
+        "completed": False,
+        "stage": "machine-load",
+    }
+    _write_json(part_path, progress)
+    machine, operator, analytic = topology_ladder._machine_and_field(requested_cells)
+    exact = topology_ladder.ANALYTIC
+    resolved = _resolve_xpoint_cell(machine, exact)
+    x_point = resolved["x_point"]
+    axis = resolved["axis"]
+    boundary_flux = resolved["boundary_flux"]
+    polarity = resolved["polarity"]
+    cell = resolved["cell"]
+    polygon = resolved["polygon"]
+    centre = resolved["centre"]
+    wedges = resolved["wedges"]
+    candidate_diagnostics = resolved["candidate_rows"]
+    selected_diagnostic = next(row for row in candidate_diagnostics if row["selected"])
     saddle_case = (
         "edge-coincident-degenerate-wedge"
         if any(row["saddle_on_edge"] for row in selected_diagnostic["edge_roots"])
@@ -896,9 +1114,10 @@ def _measure_row(
     if abs(area_closure) > 2.0e-12:
         raise AssertionError(f"wedge area closure is {area_closure:.3e} m2")
     observed = _observed_nulls(operator, analytic)
-    figure_src = _render_panel(
+    panel = _draw_panel(
         output, requested_cells, machine, exact, polygon, wedges, observed
     )
+    figure_src = panel["figure_svg_src"]
     row = {
         "schema": "nova.xpoint-cell-wedge-oracle-part",
         "version": 1,
@@ -939,6 +1158,7 @@ def _measure_row(
         "private_flux_current_a": float(actual[1, 0]),
         "common_sol_current_a": [float(actual[2, 0]), float(actual[3, 0])],
         "observed_nulls": observed,
+        "render_panel": panel,
         "figure_src": figure_src,
         "wall_seconds": perf_counter() - started,
         "oracle_completed": True,
@@ -947,6 +1167,139 @@ def _measure_row(
     }
     _write_json(part_path, row)
     return row
+
+
+def _render_carrier(requested_cells: int) -> tuple[Any, Any]:
+    """Load the single-null carrier and its closed-form flux, with no solve.
+
+    The panel is a picture of a read that was already measured, so the render
+    path needs the machine and the analytic reference and nothing else. Building
+    the forward operator here would run a qualification for a figure that does
+    not consume it.
+    """
+    carrier_case, _source_case, exact = certificate._case(topology_ladder.CASE_NAME)
+    machine = limiter_audit._machine(
+        topology_ladder.CASE_NAME,
+        carrier_case,
+        exact,
+        -requested_cells,
+        topology_ladder.WALL_NODE_COUNT,
+    )
+    return machine, exact
+
+
+def _render_row(
+    requested_cells: int,
+    output: Path,
+    allocation: dict[str, Any],
+) -> dict[str, Any]:
+    """Redraw one panel from its persisted part receipt, without solving."""
+    started = perf_counter()
+    part_path = _part_path(output, requested_cells)
+    if not part_path.exists():
+        raise FileNotFoundError(
+            f"no persisted part receipt at {part_path}; the panel cannot be "
+            "rebuilt from a read that was never measured"
+        )
+    part = json.loads(part_path.read_text(encoding="utf-8"))
+    if not part.get("oracle_completed"):
+        raise ValueError(
+            f"part receipt {part_path} has no completed measurement to render"
+        )
+    machine, exact = _render_carrier(requested_cells)
+    if int(len(machine.node)) != int(part["realised_cells"]):
+        raise ValueError(
+            f"carrier realised {len(machine.node)} cells against "
+            f"{part['realised_cells']} in the persisted part receipt"
+        )
+    resolved = _resolve_xpoint_cell(machine, exact)
+    if int(resolved["cell"]) != int(part["xpoint_cell"]):
+        raise ValueError(
+            f"carrier selected X-point cell {resolved['cell']} against "
+            f"{part['xpoint_cell']} in the persisted part receipt"
+        )
+    panel = _draw_panel(
+        output,
+        requested_cells,
+        machine,
+        exact,
+        resolved["polygon"],
+        resolved["wedges"],
+        part["observed_nulls"],
+    )
+    return panel | {
+        "reference": requested_cells == REFERENCE_CELLS,
+        "machine_cache": machine.cache,
+        "xpoint_cell": int(resolved["cell"]),
+        "saddle_case": part["saddle_case"],
+        "saddle_admitted": bool(part["observed_nulls"]["saddle_admitted"]),
+        "axis_admitted": bool(part["observed_nulls"]["axis_admitted"]),
+        "wall_seconds": perf_counter() - started,
+        "allocation": allocation,
+    }
+
+
+def render_only(
+    output: Path,
+    requested_cells: tuple[int, ...] = RENDER_CELL_COUNTS,
+) -> dict[str, Any]:
+    """Rebuild every panel and write the render receipt that audits them."""
+    output.mkdir(parents=True, exist_ok=True)
+    receipt = {
+        "schema": "nova.xpoint-cell-wedge-render",
+        "version": 1,
+        "source_revision": _source_revision(),
+        "allocation": _render_allocation(),
+        "requested_cells": list(requested_cells),
+        "null_glyph_vocabulary": {
+            f"{marker}|{'hollow' if hollow else 'solid'}": name
+            for (marker, hollow), name in NULL_GLYPH_VOCABULARY.items()
+        },
+        "panels": [],
+        "completed": False,
+    }
+    receipt_path = output / RENDER_RECEIPT_NAME
+    _write_json(receipt_path, receipt)
+    panels = []
+    for cells in requested_cells:
+        panel = _render_row(cells, output, receipt["allocation"])
+        panels.append(panel)
+        receipt["panels"] = panels
+        _write_json(receipt_path, receipt)
+        print(
+            "XPOINT_WEDGE_PANEL "
+            f"cells={cells} glyphs={panel['glyphs']} "
+            f"unexpected={panel['unexpected_markers']}",
+            flush=True,
+        )
+    receipt.update(
+        {
+            "panels_rendered": [panel["requested_cells"] for panel in panels],
+            "all_reference_axes_drawn": all(
+                panel["glyphs"]["analytic_axis"] >= 1 for panel in panels
+            ),
+            "all_reference_saddles_drawn": all(
+                panel["glyphs"]["analytic_saddle"] >= 1 for panel in panels
+            ),
+            "no_unexpected_markers": all(
+                not panel["unexpected_markers"] for panel in panels
+            ),
+            "all_walls_drawn": all(panel["wall_drawn"] for panel in panels),
+            "wall_node_count": topology_ladder.WALL_NODE_COUNT,
+            "completed": True,
+        }
+    )
+    _write_json(receipt_path, receipt)
+    print(
+        "XPOINT_WEDGE_RENDER "
+        f"panels={receipt['panels_rendered']} "
+        f"reference_axes={receipt['all_reference_axes_drawn']} "
+        f"reference_saddles={receipt['all_reference_saddles_drawn']} "
+        f"no_unexpected={receipt['no_unexpected_markers']} "
+        f"walls={receipt['all_walls_drawn']}",
+        flush=True,
+    )
+    return receipt
 
 
 def run(
@@ -1076,10 +1429,24 @@ def run(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--cells", type=int, nargs="+", default=REQUESTED_CELLS)
+    parser.add_argument("--cells", type=int, nargs="+", default=None)
     parser.add_argument("--diagnose-only", action="store_true")
+    parser.add_argument("--render-only", action="store_true")
     args = parser.parse_args()
-    run(args.output, tuple(args.cells), diagnose_only=args.diagnose_only)
+    if args.render_only and args.diagnose_only:
+        parser.error("--render-only and --diagnose-only are mutually exclusive")
+    if args.render_only:
+        # A render covers every published panel, because the panel set is what
+        # is under repair; a measurement covers only the cells it is told.
+        render_only(
+            args.output, tuple(args.cells) if args.cells else RENDER_CELL_COUNTS
+        )
+    else:
+        run(
+            args.output,
+            tuple(args.cells) if args.cells else REQUESTED_CELLS,
+            diagnose_only=args.diagnose_only,
+        )
     return 0
 
 

@@ -2999,6 +2999,61 @@ round-off floor 1e-12: [4.72e-20]</code>, <code>1 failed, 3 passed</code>, log
 (render 2.1 s, import 13.1 s). No SVG companion existed for these four before this repair and none
 was created.</p>
 </section>
+<section class="audit-directory" id="fsa-repair-the-wedge-null-markers">
+<h2 id="fsa-repair-the-wedge-null-markers">Repair — docs/figures/cut-cell-current-attribution/xpoint-cell</h2>
+<p>Reviewer anchor: <code>#figure-audit-cut-cell-current-attribution</code>, followup
+<code>f-cca-repair-minor-rendering-defects</code> on <code>cut-cell-current-attribution</code>, defect
+(2): the five <code>xpoint-cell/single-null-wedges-*</code> panels drew the coincident null sets as an
+ochre down triangle over a blue up triangle, and a downward triangle is not the
+<code>draw_nulls</code> axis glyph.</p>
+<p><strong>The reproduction, before the repair.</strong> The painter at the node's base revision
+<code>1cfd3fd4c2e2</code> was re-run over the production read persisted in
+<code>xpoint-cell/parts/single-null-wedges-cells-110.json</code> and its marker artists inventoried:
+<code>marker='^' face='#2563eb' points=1</code> (analytic axis), <code>marker='X' face='#2563eb'
+points=1</code> (analytic saddle), <code>marker='v' face='#d97706' points=1</code> (production-read
+axis). So the recorded defect is exact and it is two faults in one panel — the read's axis is an ochre
+down triangle, and both analytic glyphs are drawn solid so a coincident pair is one glyph on top of
+another. Log <code>xpoint-cell/render-defect-reproduction.log</code>.</p>
+<p><strong>What the repair is.</strong> A render-only entry point in
+<em>benchmarks/xpoint_cell_wedge_oracle.py</em> (<code>--render-only</code>) rebuilds every published
+panel from its committed <code>parts/*.json</code> receipt — carrier and closed-form flux only, no
+forward operator, no solve — and writes <code>xpoint-cell/render-receipt.json</code>. The production
+read is now drawn solid ochre and the analytic reference hollow blue, both in the
+<code>draw_nulls</code> vocabulary (up triangle for the magnetic axis, cross for the saddle), so a
+coincident pair reads as the solid glyph inside the outline of the other colour instead of as an
+hourglass. The reference glyphs reach the panel through <code>other_x_points</code>, the only route
+that draws hollow; the panel carries a legend naming both sets. Glyph literals are classified from the
+artist — marker plus whether it has a face — against a declared vocabulary, and a literal outside it is
+recorded rather than ignored.</p>
+<p><strong>Receipt.</strong> <code>xpoint-cell/render-receipt.json</code> (<code>schema
+nova.xpoint-cell-wedge-render</code>, five panels). Glyph counts, as rendered:
+<code>110</code> → 1 solved axis / 0 solved saddle / 1 analytic axis / 1 analytic saddle;
+<code>300</code> → 1 / 0 / 1 / 1; <code>500</code> → 1 / 1 / 1 / 1; <code>1000</code> → 1 / 1 / 1 / 1;
+<code>2500</code> → 1 / 1 / 1 / 1. No panel records an unexpected marker. The panels at 110 and 300
+admit no solved saddle — their part receipts carry <code>saddle_admitted: false</code>, and the
+receipt states which set each count belongs to rather than leaving a missing glyph unremarked. Every
+panel reports <code>wall_drawn</code> with <code>wall_node_count</code> 121, the two title lines, and
+the four legend labels.</p>
+<p><strong>Gate.</strong> <code>python -m pytest -p no:cacheprovider -s --no-header -q
+tests/test_xpoint_cell_wedge_render.py</code> at base revision <code>1cfd3fd4c2e2</code>: 4 passed, 1
+skipped in 10.09 s, log <code>xpoint-cell/render-gate.log</code>. The check reads the committed
+receipt, requires both null sets and no unexpected marker literal on every panel, requires the wall,
+the two title lines and a legend naming both sets, and requires each written SVG to carry the repaired
+title and every legend label — so a panel that was never regenerated cannot pass.</p>
+<p><strong>Negative control.</strong> Declared mutation <code>inverted-axis-marker</code> — draw the
+solved axis with the inverted triangle again. Applied by setting
+<code>NOVA_XPOINT_WEDGE_MUTATION=inverted-axis-marker</code>, the check reddens with
+<code>the vocabulary check admitted a marker outside the draw_nulls vocabulary: ['v']</code>,
+<code>1 failed, 4 passed</code>, log <code>xpoint-cell/render-negative-control.log</code>. The
+reference arm was already ruled out: the same check passes with the mutation absent, over the same
+panels, in the gate log above.</p>
+<p><strong>Figures regenerated</strong> under the plotting rules: the five
+<code>xpoint-cell/single-null-wedges-cells-*.svg</code> plus a raster companion
+<code>.png</code> each, on the login node only, from the persisted receipts alone. These panels draw
+line contours on shared levels, mark both null sets and show the wall; they carry no axes, no gridlines
+and no filled scalar map, so they already obeyed the plotting rules and the repair changed only the
+null vocabulary.</p>
+</section>
 <section id="figure-audit-cut-cell-current-attribution-terminal-flux-repair">
   <h3>repair &mdash; the empty terminal-flux panel of <code>zero-residual/panels/zero-residual-map.png</code></h3>
   <p>Scored 48, misrepresenting physics: the <code>moderate-rotation-conventional-static</code> panel

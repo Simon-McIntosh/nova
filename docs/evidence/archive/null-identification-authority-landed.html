@@ -1520,6 +1520,42 @@ benchmarks/solovev_certificate.py:2514: RuntimeError
   <code>negative-control-final.log</code> and <code>atlas-caption-final.log</code> in this
   node's durable run directory.</p>
 </section>
+<section id="the-convergence-atlas-panels-carry-the-null-vocabulary">
+  <h2 id="the-convergence-atlas-panels-carry-the-null-vocabulary-h">The convergence atlas panels carry the shared null vocabulary</h2>
+  <p>The panels under <code>docs/figures/null-identification-authority/convergence-atlas</code>
+  were drawn while the atlas carried a purpose-built null painter. That painter could show the
+  out-of-vessel candidates <code>draw_nulls</code> drops — which is what the atlas is for — but it
+  spelled its own markers and filled every cross alike, so the cross the solve actually admitted
+  was indistinguishable from a reference null by style. The committed painter fix
+  <code>2b12b210a</code> made the vocabulary expressible; the panels had not been redrawn with it.</p>
+  <p>The renderer now calls the committed <code>nova.media.poloidal.draw_nulls</code> and
+  <code>draw_wall</code>. The magnetic axis is a solid triangle, the admitted saddle a filled cross
+  under the wall containment polygon, and every other qualified null hollow and deliberately
+  unfiltered through <code>other_x_points</code>, so both saddles of a diverted frame stay visible
+  and are distinguished by fill rather than by absence. The marker idiom is read from the shared
+  <code>InkStyle</code> rather than written as literal marker strings, each panel carries a marker key
+  saying which is which, and the receipt records the style it drew with under <code>null_style</code>.</p>
+  <figure>
+    <img src="/nova/figures/null-identification-authority/convergence-atlas/22086-43-mixed.png"
+         alt="MAST 22086/43 mixed, redrawn with the shared null vocabulary">
+    <figcaption>MAST 22086/43 mixed, the one converged bank arm, redrawn: solid-triangle magnetic
+    axis, filled cross at the admitted saddle, hollow crosses for the other qualified nulls, grey
+    crosses for the EFIT references, wall and flux contours in the committed style.</figcaption>
+  </figure>
+  <p>Every panel in the directory was redrawn from the banked states and receipts already on
+  <code>main</code>: the twelve MAST rows and the five DIII-D frames, no new solve, in one
+  <code>all_debug</code> allocation with the root interpreter run directly and <code>uv</code> never
+  invoked on the node. The regenerated <code>convergence-atlas.json</code> keeps its class census:
+  twelve diverted MAST rows, five DIII-D frames and the two <code>BoundaryGenerationFailure</code>
+  markers for <code>21983/35 pure</code> and <code>21986/46 pure</code> with their captions intact.</p>
+  <p>The painter pin is a test rather than a description. A case runs a panel and inspects the
+  artists the figure actually carries: the triangle marker and its axis colour, exactly one filled
+  cross at the admitted saddle coordinates, at least one hollow cross, and that the nulls went
+  through the shared painter with the shared style. A declared mutation that routes the painter
+  through a local style variant, so the axis is a dot and the saddle a faceless lowercase x,
+  reddens it. The gate ran in a fresh process against the base revision: nine passing cases at
+  <code>3ecafdf5a</code>, ten at the change with nothing newly failing.</p>
+</section>
 </main>
 </body>
 </html>

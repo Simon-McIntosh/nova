@@ -1,0 +1,179 @@
+{
+  "source_sha256": {
+    "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+    "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+  },
+  "helper_sha256": "6854f39e70c75b175ea50ee410e1a92369f40931475064508cf91ee6fe630ab5",
+  "job": "1275884",
+  "completed": true,
+  "controls": {
+    "longdouble_mantissa_bits": 63,
+    "double_mantissa_bits": 52,
+    "triangle_moment_max_absolute_error": 1.3552527156068805e-20,
+    "linear_root_absolute_error": 2.710505431213761e-20
+  },
+  "production": {
+    "reference": "production-patch-reference",
+    "job": "1275884",
+    "cells": [
+      2,
+      3,
+      4,
+      11,
+      13,
+      14,
+      28,
+      35,
+      36,
+      38,
+      50,
+      52,
+      54,
+      68,
+      71,
+      72,
+      75,
+      76,
+      78,
+      80
+    ],
+    "cell_count": 20,
+    "degree": 6,
+    "coefficient_sha256": "dcbe49088cba1c7ca0d3b6c45bda877235435974437a4069b5704a8a12014f4e",
+    "maximum_reference_arc_residual": 6.098637220230962e-19,
+    "rows": [
+      {
+        "quantity": "crossing_radial",
+        "baseline_relative_l2": 8.832356089017144e-17,
+        "candidate_relative_l2": 8.785564932568336e-17,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "crossing_vertical",
+        "baseline_relative_l2": 1.0510251960210237e-16,
+        "candidate_relative_l2": 1.0940563613436549e-16,
+        "candidate_no_worse": false
+      },
+      {
+        "quantity": "area",
+        "baseline_relative_l2": 8.331312667529884e-16,
+        "candidate_relative_l2": 5.951622953321747e-16,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "first_radial",
+        "baseline_relative_l2": 1.4005519486248154e-15,
+        "candidate_relative_l2": 1.0893380334557013e-15,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "first_vertical",
+        "baseline_relative_l2": 1.3587740667995202e-15,
+        "candidate_relative_l2": 9.61260930514993e-16,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "second_radial",
+        "baseline_relative_l2": 1.0578486624672207e-15,
+        "candidate_relative_l2": 7.635760811373999e-16,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "second_mixed",
+        "baseline_relative_l2": 1.706861237683882e-15,
+        "candidate_relative_l2": 1.3959456957432818e-15,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "second_vertical",
+        "baseline_relative_l2": 7.20256003080878e-16,
+        "candidate_relative_l2": 5.542891007798154e-16,
+        "candidate_no_worse": true
+      }
+    ],
+    "passed": false
+  },
+  "bicubic": {
+    "reference": "bicubic-reference",
+    "job": "1275884",
+    "cells": [
+      2,
+      3,
+      4,
+      11,
+      13,
+      14,
+      28,
+      35,
+      36,
+      38,
+      50,
+      52,
+      54,
+      68,
+      71,
+      72,
+      75,
+      76,
+      78,
+      80
+    ],
+    "cell_count": 20,
+    "degree": 3,
+    "coefficient_sha256": "2d24ef4e8d75861599190b30ab110cd5e2763f3a138ce3c26f9d8f32f180eebd",
+    "maximum_reference_arc_residual": 4.56974275043695e-19,
+    "rows": [
+      {
+        "quantity": "crossing_radial",
+        "baseline_relative_l2": 7.892566719565864e-17,
+        "candidate_relative_l2": 7.431664367251332e-17,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "crossing_vertical",
+        "baseline_relative_l2": 9.039258878539527e-17,
+        "candidate_relative_l2": 9.039258878539527e-17,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "area",
+        "baseline_relative_l2": 1.802803732856338e-16,
+        "candidate_relative_l2": 1.5420704461755142e-16,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "first_radial",
+        "baseline_relative_l2": 4.860114872224125e-16,
+        "candidate_relative_l2": 4.1454253666511356e-16,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "first_vertical",
+        "baseline_relative_l2": 7.422125695748435e-16,
+        "candidate_relative_l2": 7.667582528611367e-16,
+        "candidate_no_worse": false
+      },
+      {
+        "quantity": "second_radial",
+        "baseline_relative_l2": 2.1762477264234579e-16,
+        "candidate_relative_l2": 2.809507456583407e-16,
+        "candidate_no_worse": false
+      },
+      {
+        "quantity": "second_mixed",
+        "baseline_relative_l2": 1.6892796714145189e-15,
+        "candidate_relative_l2": 1.251927321809721e-15,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "second_vertical",
+        "baseline_relative_l2": 3.447034715280758e-16,
+        "candidate_relative_l2": 3.562830538266562e-16,
+        "candidate_no_worse": false
+      }
+    ],
+    "passed": false
+  },
+  "passed": false,
+  "runtime_mutation": "Replace host gamma-derived coefficients with exact integer binomial coefficients; keep the fixed-width term loop."
+}

@@ -1,0 +1,81 @@
+{
+  "reference": "production-patch-reference",
+  "job": "1275884",
+  "cells": [
+    2,
+    3,
+    4,
+    11,
+    13,
+    14,
+    28,
+    35,
+    36,
+    38,
+    50,
+    52,
+    54,
+    68,
+    71,
+    72,
+    75,
+    76,
+    78,
+    80
+  ],
+  "cell_count": 20,
+  "degree": 6,
+  "coefficient_sha256": "dcbe49088cba1c7ca0d3b6c45bda877235435974437a4069b5704a8a12014f4e",
+  "maximum_reference_arc_residual": 6.098637220230962e-19,
+  "rows": [
+    {
+      "quantity": "crossing_radial",
+      "baseline_relative_l2": 8.832356089017144e-17,
+      "candidate_relative_l2": 8.785564932568336e-17,
+      "candidate_no_worse": true
+    },
+    {
+      "quantity": "crossing_vertical",
+      "baseline_relative_l2": 1.0510251960210237e-16,
+      "candidate_relative_l2": 1.0940563613436549e-16,
+      "candidate_no_worse": false
+    },
+    {
+      "quantity": "area",
+      "baseline_relative_l2": 8.331312667529884e-16,
+      "candidate_relative_l2": 5.951622953321747e-16,
+      "candidate_no_worse": true
+    },
+    {
+      "quantity": "first_radial",
+      "baseline_relative_l2": 1.4005519486248154e-15,
+      "candidate_relative_l2": 1.0893380334557013e-15,
+      "candidate_no_worse": true
+    },
+    {
+      "quantity": "first_vertical",
+      "baseline_relative_l2": 1.3587740667995202e-15,
+      "candidate_relative_l2": 9.61260930514993e-16,
+      "candidate_no_worse": true
+    },
+    {
+      "quantity": "second_radial",
+      "baseline_relative_l2": 1.0578486624672207e-15,
+      "candidate_relative_l2": 7.635760811373999e-16,
+      "candidate_no_worse": true
+    },
+    {
+      "quantity": "second_mixed",
+      "baseline_relative_l2": 1.706861237683882e-15,
+      "candidate_relative_l2": 1.3959456957432818e-15,
+      "candidate_no_worse": true
+    },
+    {
+      "quantity": "second_vertical",
+      "baseline_relative_l2": 7.20256003080878e-16,
+      "candidate_relative_l2": 5.542891007798154e-16,
+      "candidate_no_worse": true
+    }
+  ],
+  "passed": false
+}

@@ -626,11 +626,12 @@ def draw(data, receipt, output):
             contain=(wall,),
         )
     poloidal_axes(ax)
+    converged = chosen["actual"]["relative_sup"] <= data["locked_residual_bound"]
     ax.set_title(
         f"{name.replace('_', ' ')} · fraction {chosen['fraction']:g}\n"
         f"{'accepted' if accepted else 'best rejected'} · "
         f"residual {chosen['actual']['relative_sup']:.7g}\n"
-        f"converged: {chosen['actual']['relative_sup'] <= data['locked_residual_bound']}",
+        f"converged: {converged}",
         fontsize=10,
     )
     for ext in ("png", "svg"):

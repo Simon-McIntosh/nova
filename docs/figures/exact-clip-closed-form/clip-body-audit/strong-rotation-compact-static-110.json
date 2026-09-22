@@ -1,0 +1,249 @@
+{
+  "case": "strong-rotation-compact-static",
+  "cells": 110,
+  "job": "1275982",
+  "revision": "72916e649ecf615ca654e8b24062971acb3d66dc",
+  "base": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+  "comparisons": {
+    "support_vertices": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 74.34143337227371,
+      "max_absolute": 0.0
+    },
+    "vertex_count": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 876.6059548052363,
+      "max_absolute": 0.0
+    },
+    "centroids": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 10.498031225910209,
+      "max_absolute": 0.0
+    },
+    "included": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 11.0,
+      "max_absolute": 0.0
+    },
+    "boundary": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 6.6332495807108,
+      "max_absolute": 0.0
+    },
+    "area": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.026496121520198465,
+      "max_absolute": 0.0
+    },
+    "full_area": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.028232084559921825,
+      "max_absolute": 0.0
+    },
+    "first_area_moment": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 5.724613542513486e-05,
+      "max_absolute": 0.0
+    },
+    "second_area_moment": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 8.236846395174903e-06,
+      "max_absolute": 0.0
+    },
+    "contour_area": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.2571191817294599,
+      "max_absolute": 0.0
+    },
+    "patch_area_sum": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.2704274040142444,
+      "max_absolute": 0.0
+    },
+    "branch_support_vertices": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 74.34143337227371,
+      "max_absolute": 0.0
+    },
+    "branch_vertex_count": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 876.6059548052363,
+      "max_absolute": 0.0
+    },
+    "branch_area": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.026496121520198465,
+      "max_absolute": 0.0
+    },
+    "branch_first_area_moment": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 5.724613542513485e-05,
+      "max_absolute": 0.0
+    },
+    "branch_second_area_moment": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 8.236846395174903e-06,
+      "max_absolute": 0.0
+    },
+    "saddle": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.0,
+      "max_absolute": 0.0
+    },
+    "saddle_vertex": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.0,
+      "max_absolute": 0.0
+    },
+    "vertex_capacity": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 158.0,
+      "max_absolute": 0.0
+    },
+    "refused_cell_count": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.0,
+      "max_absolute": 0.0
+    },
+    "current": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 24673.391763434396,
+      "max_absolute": 0.0
+    },
+    "radial": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 40.598409464069604,
+      "max_absolute": 0.0
+    },
+    "vertical": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 28.213124658053314,
+      "max_absolute": 0.0
+    },
+    "crossing_mask": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 15.716233645501712,
+      "max_absolute": 0.0
+    },
+    "crossings": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 16.34333749088647,
+      "max_absolute": 0.0
+    },
+    "wedge_support_vertices": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.0,
+      "max_absolute": 0.0
+    },
+    "wedge_vertex_count": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.0,
+      "max_absolute": 0.0
+    },
+    "wedge_centroids": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 10.498031225910209,
+      "max_absolute": 0.0
+    },
+    "wedge_area": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.0,
+      "max_absolute": 0.0
+    },
+    "wedge_full_area": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.0,
+      "max_absolute": 0.0
+    },
+    "wedge_first_area_moment": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.0,
+      "max_absolute": 0.0
+    },
+    "wedge_second_area_moment": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.0,
+      "max_absolute": 0.0
+    },
+    "wedge_saddle": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.0,
+      "max_absolute": 0.0
+    },
+    "wedge_saddle_vertex": {
+      "array_equal": true,
+      "dtype_equal": true,
+      "relative_l2": 0.0,
+      "baseline_norm": 0.0,
+      "max_absolute": 0.0
+    }
+  },
+  "wedge_reference_policy": "admitted-saddle-only",
+  "passed": true
+}

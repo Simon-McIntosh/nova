@@ -380,6 +380,78 @@
 <p><strong>The independent-reference no-worse gate remains failed.</strong> The replay reproduces all sixteen errors in the reference table above exactly: crossings are bit-identical between routes, twelve quantities are no worse, and the production area, first radial and second radial moments plus the bicubic first vertical moment remain worse at roundoff scale. The exact-coefficient and explicit-runtime coefficient controls did not remove all failures, so neither was applied. Source 067ea754c is retained. Repair of the shared root/moment arithmetic requires a scoped follow-on; the current node does not own separatrix_clip.py or forward_operator.py.</p>
 <p><a href="/nova/figures/exact-clip-closed-form/bernstein-reference-audit/summary.json">Complete audit summary</a>, <a href="/nova/figures/exact-clip-closed-form/bernstein-reference-audit/reference-summary.json">replayed reference</a>, <a href="/nova/figures/exact-clip-closed-form/bernstein-reference-audit/candidate-program.json">final executable and ownership</a>, <a href="/nova/figures/exact-clip-closed-form/bernstein-reference-audit/short-polygon-control.json">short-polygon positive control</a>, and <a href="/nova/figures/exact-clip-closed-form/bernstein-reference-audit/scheduler-receipt.txt">completed scheduler receipt</a>. The summary process exits nonzero for the retained numerical inequalities; all allocation branches complete with exit zero. No section or driving followup is closed.</p></div>
     </section>
+<section id="mapped-cell-clip">
+<h2>Mapped cell clip and shared saddle arcs</h2>
+<p>The clip now maps one fixed-capacity cell implementation with <code>jax.vmap</code>. The existing gap scan remains; branch packing is mapped, root-slot selection broadcasts, and both saddle branches and four-wedge expansion share nested scans over regions and half-arcs. The evaluator binds one local fallback row while sharing the global spline. Root iteration counts, sampled-arc counts, capacities, and moment formulas retain their values. Source commits <code>337eb81ee82e139b9f94598554bf49ea27faaafe</code> and <code>23a8522b6b0ab27216c46db7d150e2b96433f347</code> carry the implementation and the host-array indexing repair. Commit <code>0c685775797acfc1648cbf375033391f62456603</code> then pins the mesh refusal reduction to int32 after an independent dtype check found promotion to int64. The original value-only comparison missed it; the final eight-row gate checks dtype equality as well as numerical agreement. No production source changed after that repair.</p>
+<p><strong>The executable ceiling remains unmet.</strong> One <code>all_debug</code> allocation, <code>1275982</code>, measured the exact-mode weak 110/135 certificate before, after, and with the declared mutation <code>restore the unrolled per-cell body</code>. The reduction is 5.48 percent; the candidate remains 70,127,989 bytes above the 100,000,000-byte target. The local base is <code>abeccb9e4c29a94594ec3e2238f5cf5df8a7448f</code>, whose measured executable is larger than the earlier 174,134,951-byte receipt; that earlier number is not substituted for this node’s baseline.</p>
+<table><thead><tr><th>Arm</th><th>Serialized bytes</th><th>Compile wall / s</th><th>Optimized instructions</th><th>Mapped cell marker</th></tr></thead><tbody>
+<tr><td>baseline</td><td>179,997,008</td><td>291.261120</td><td>572,827</td><td>False</td></tr>
+<tr><td>candidate</td><td>170,127,989</td><td>293.982915</td><td>530,152</td><td>True</td></tr>
+<tr><td>negative</td><td>179,996,928</td><td>295.034074</td><td>572,827</td><td>False</td></tr>
+</tbody></table>
+<p>The restored control returns toward baseline and has exactly the same optimized instruction counts; its exact byte difference is stated by the executable table. The candidate’s <code>_clip_cell</code> marker is present, and <code>Bernstein.binom</code> remains absent. The test negative control refuses with <code>unrolled arc polish bodies</code> (five traces against two) and <code>unrolled saddle half-arc bodies</code> (eight against one). The positive arms reach the supplied tracer and verify nonzero polygon areas, including four unit-area saddle wedges. The capacity-overflow fixture still raises its counted refusal.</p>
+<table><thead><tr><th>Arm</th><th>Top-five optimized HLO operations</th></tr></thead><tbody>
+<tr><td>baseline</td><td>parameter: 120,270, broadcast: 74,743, bitcast: 63,112, constant: 53,609, compare: 33,524</td></tr>
+<tr><td>candidate</td><td>parameter: 109,611, broadcast: 67,681, bitcast: 63,531, constant: 49,262, compare: 31,753</td></tr>
+<tr><td>negative</td><td>parameter: 120,270, broadcast: 74,743, bitcast: 63,112, constant: 53,609, compare: 33,524</td></tr>
+</tbody></table>
+<h3>Remaining instruction ownership</h3>
+<table><thead><tr><th>Source file</th><th>Baseline</th><th>Candidate</th></tr></thead><tbody>
+<tr><td>nova/equilibrium/forward_operator.py</td><td>102,858</td><td>93,078</td></tr>
+<tr><td>nova/equilibrium/separatrix_clip.py</td><td>86,101</td><td>83,127</td></tr>
+<tr><td>nova/equilibrium/clip_quadrature.py</td><td>77,296</td><td>77,216</td></tr>
+<tr><td>nova/equilibrium/topology.py</td><td>41,582</td><td>40,842</td></tr>
+<tr><td>nova/equilibrium/fixed_point.py</td><td>26,293</td><td>23,609</td></tr>
+<tr><td>nova/equilibrium/connectivity_boundary.py</td><td>16,913</td><td>16,913</td></tr>
+<tr><td>nova/linalg/interpolant.py</td><td>21,315</td><td>13,077</td></tr>
+<tr><td>nova/linalg/split_spline.py</td><td>9,655</td><td>6,863</td></tr>
+<tr><td>nova/equilibrium/flux_surface_connectivity.py</td><td>6,744</td><td>6,758</td></tr>
+<tr><td>nova/equilibrium/parallel_components.py</td><td>6,232</td><td>6,239</td></tr>
+<tr><td>nova/equilibrium/stencil_mesh.py</td><td>6,028</td><td>6,017</td></tr>
+<tr><td>nova/geometry/select.py</td><td>5,955</td><td>5,955</td></tr>
+<tr><td>nova/equilibrium/rotation.py</td><td>4,593</td><td>4,593</td></tr>
+<tr><td>nova/linalg/tensor_spline.py</td><td>6,767</td><td>4,350</td></tr>
+<tr><td>nova/biot/null.py</td><td>3,285</td><td>2,734</td></tr>
+<tr><td>nova/equilibrium/convention.py</td><td>1,391</td><td>1,391</td></tr>
+<tr><td>nova/equilibrium/domain.py</td><td>916</td><td>916</td></tr>
+<tr><td>nova/biot/target.py</td><td>510</td><td>510</td></tr>
+<tr><td>nova/equilibrium/source.py</td><td>183</td><td>183</td></tr>
+</tbody></table>
+<p>Ownership is the innermost Nova source frame and is disjoint across files; 135,781 instructions have no attributable Nova frame. Counts reconcile to 530,152. They attribute instructions, not serialized bytes or memory. The largest remaining functions are <code>nova/equilibrium/separatrix_clip.py:_clip_cell</code> (43,860), <code>nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments</code> (22,054), <code>nova/equilibrium/fixed_point.py:_active_set_newton_krylov</code> (15,556), <code>nova/equilibrium/forward_operator.py:_cell_banked_current_moments</code> (14,525), <code>nova/equilibrium/forward_operator.py:_FixedDesignNull2D.read_census</code> (13,427), <code>nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census</code> (13,332). Further reduction must address this measured residual program; removing the branch loops alone does not establish the executable ceiling.</p>
+<figure><img src="/nova/figures/exact-clip-closed-form/clip-body-audit/clip-execution.svg" alt="One cell map with a gap scan and a shared nested saddle-half scan, followed by mesh-level reductions"><figcaption>The mapped cell body preserves the geometry calculation while sharing the traced loop bodies. The whole certificate retains substantial operator and moment work.</figcaption></figure>
+<h3>Eight analytic row comparisons</h3><p>Each comparison uses baseline and candidate source in fresh row processes on the same allocation, with the same analytic inputs. Entries are relative L2 errors; zero means equal array values; dtype equality is checked separately. Geometric first and second moments are compared as their full tensor arrays, and the wedge column is the maximum across wedge vertices, area, first moments and second moments. Every other returned support field, count and refusal is also checked in the JSON receipt. Acceptance is 1e-14 relative.</p>
+<table><thead><tr><th>Row</th><th>Crossings</th><th>Vertices</th><th>Current</th><th>Radial current moment</th><th>Vertical current moment</th><th>Area</th><th>First area moment</th><th>Second area moment</th><th>Wedges</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>weak-rotation-reactor-static / 110</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>pass</td></tr>
+<tr><td>weak-rotation-reactor-static / 300</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>pass</td></tr>
+<tr><td>moderate-rotation-conventional-static / 110</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>pass</td></tr>
+<tr><td>moderate-rotation-conventional-static / 300</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>pass</td></tr>
+<tr><td>strong-rotation-compact-static / 110</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>pass</td></tr>
+<tr><td>strong-rotation-compact-static / 300</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>pass</td></tr>
+<tr><td>diverted-single-null / 110</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>1.848731e-17</td><td>3.866278e-18</td><td>1.793538e-16</td><td>pass</td></tr>
+<tr><td>diverted-single-null / 300</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>0 (array-equal)</td><td>2.202429e-15</td><td>pass</td></tr>
+</tbody></table>
+<p><strong>The wedge collector was corrected before accepting the table.</strong> A finite placeholder for an absent saddle admitted spurious four-root polygons on a limited row. Those unqualified controls remain under <code>unqualified-wedge-control/</code>. The corrected collector combines participation with the declared saddle’s finiteness; the affected rows were remeasured in the same allocation. Their receipts explicitly state <code>admitted-saddle-only</code>. Production source was unchanged by this instrument repair.</p>
+<table><thead><tr><th>Row</th><th>Admitted four-root cells observed by wedge collector</th></tr></thead><tbody>
+<tr><td>weak-rotation-reactor-static / 110</td><td>0</td></tr>
+<tr><td>weak-rotation-reactor-static / 300</td><td>0</td></tr>
+<tr><td>moderate-rotation-conventional-static / 110</td><td>0</td></tr>
+<tr><td>moderate-rotation-conventional-static / 300</td><td>0</td></tr>
+<tr><td>strong-rotation-compact-static / 110</td><td>0</td></tr>
+<tr><td>strong-rotation-compact-static / 300</td><td>0</td></tr>
+<tr><td>diverted-single-null / 110</td><td>1</td></tr>
+<tr><td>diverted-single-null / 300</td><td>2</td></tr>
+</tbody></table>
+<figure><img src="/nova/figures/exact-clip-closed-form/clip-body-audit/polygon-identity.svg" alt="Baseline and candidate polygons on shared physical coordinates, with the single-null saddle wedges"><figcaption>Both implementations are drawn on the same coordinates. Solid lines are baseline; dashed lines are the mapped body. This is a geometry comparison on analytic fields, not a terminal forward-solve state.</figcaption></figure>
+<h3>Fresh-process module suites</h3>
+<table><thead><tr><th>Module</th><th>Baseline passed</th><th>Candidate passed</th><th>Added failures</th></tr></thead><tbody>
+<tr><td>test_equilibrium_separatrix_clip.py</td><td>25</td><td>27</td><td>0</td></tr>
+<tr><td>test_exact_clip_moments.py</td><td>12</td><td>13</td><td>0</td></tr>
+<tr><td>test_null_generator_admission.py</td><td>20</td><td>20</td><td>0</td></tr>
+<tr><td>test_flux_surface_extraction.py</td><td>12</td><td>12</td><td>0</td></tr>
+</tbody></table>
+<p>The initial baseline loader gave the capacity-refusal exception a distinct Python class identity, so the expected refusal was not caught. That instrument failure is retained; preserving the public exception class and rerunning that module produced 25 passes. The composite baseline receipt includes this corrected run and the other three original module logs. The candidate adds three tests: two shared-body trace guards and one regression for NumPy-backed local geometry selected by a traced cell index.</p>
+<p>Receipts: <a href="/nova/figures/exact-clip-closed-form/clip-body-audit/summary.json">complete summary</a>, <a href="/nova/figures/exact-clip-closed-form/clip-body-audit/baseline-suite-receipt.log">baseline suite</a>, <a href="/nova/figures/exact-clip-closed-form/clip-body-audit/candidate-suite-receipt.log">candidate suite</a>, <a href="/nova/figures/exact-clip-closed-form/clip-body-audit/negative-program.log">restored-body executable log</a>, <a href="/nova/figures/exact-clip-closed-form/clip-body-audit/negative-guard.log">guard refusal log</a>, <a href="/nova/figures/exact-clip-closed-form/clip-body-audit/scheduler-receipt.txt">allocation receipt</a>. All full optimized HLOs and raw row arrays are retained beside these receipts. No driving followup or section status is closed by this worker.</p>
+<p>The dtype repair changes only the module wholly replaced by the negative mutation. The final replay verifies that every other executed package file is identical to the measured control, and reuses that same-allocation measurement with its original revision and compile wall; <a href="/nova/figures/exact-clip-closed-form/clip-body-audit/negative-source-identity.json">effective-source identity proof</a>. The dtype-specific negative control fails with <code>dtype('int64') == dtype('int32')</code>. The original allocation launcher retains exit 1 from its initial baseline-loader failure, while the corrected baseline and final-source module gates pass. The final-source replay records its own branch exits separately.</p></section>
   </main>
 </body>
 </html>

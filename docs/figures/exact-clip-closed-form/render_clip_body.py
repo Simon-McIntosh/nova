@@ -29,7 +29,13 @@ def render():
                 *closed.T, color=color, linestyle=style, linewidth=1.5, label=label
             )
         axes[0].set_title(f"Weak 110, clipped cell {cell}", fontsize=11)
-        axes[0].legend(frameon=False, loc="lower center", bbox_to_anchor=(0.5, -0.12))
+        figure.legend(
+            *axes[0].get_legend_handles_labels(),
+            frameon=False,
+            loc="lower left",
+            bbox_to_anchor=(0.02, 0.02),
+            ncol=2,
+        )
     with np.load(OUTPUT / "diverted-single-null-110.npz") as arrays:
         live = np.flatnonzero(arrays["after_wedge_saddle"])
         if len(live):

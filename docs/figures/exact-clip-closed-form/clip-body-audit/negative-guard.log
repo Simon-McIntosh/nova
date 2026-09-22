@@ -1,0 +1,84 @@
+restore the unrolled per-cell body
+revision=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['docs/figures/exact-clip-closed-form/measure_clip_body.py', '--guard', 'negative']
+18:09:44 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________________ test_clip_traces_one_polish_body_per_arc_kind _________________
+
+    def test_clip_traces_one_polish_body_per_arc_kind():
+        """Cell and branch counts must not replicate the root-polish program."""
+        import jax
+    
+        configure_dtypes()
+        square = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+        mesh = AtomicCellMesh.from_cells([square, square + [2.0, 0.0]])
+    
+        def level(points):
+            return 0.75 - points[..., 1]
+    
+        calls = []
+    
+        def tracer(start, end, evaluator, inside):
+            calls.append(start.shape)
+            return _traced_level_arc(start, end, evaluator, inside)
+    
+        def clip(flux):
+            return mesh.traced_clip(flux, curve_evaluator=level, arc_tracer=tracer)
+    
+        signed = level(jnp.asarray(mesh.node_coordinates))
+        jax.make_jaxpr(clip)(signed)
+        assert calls, "positive control: the supplied arc tracer must be reached"
+>       assert len(calls) == 2, f"unrolled arc polish bodies: {calls}"
+E       AssertionError: unrolled arc polish bodies: [(2, 2), (2, 2), (2, 2), (2, 2), (2, 2)]
+E       assert 5 == 2
+E        +  where 5 = len([(2, 2), (2, 2), (2, 2), (2, 2), (2, 2)])
+
+tests/test_equilibrium_separatrix_clip.py:749: AssertionError
+______________ test_saddle_wedges_share_one_half_arc_polish_body _______________
+
+    def test_saddle_wedges_share_one_half_arc_polish_body():
+        """All four saddle regions return through the same fixed-budget tracer."""
+        import jax
+    
+        configure_dtypes()
+        square = np.asarray([[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]])
+        mesh = AtomicCellMesh.from_cells([square])
+    
+        def level(points):
+            return points[..., 0] * points[..., 1]
+    
+        calls = []
+    
+        def tracer(start, end, evaluator, inside):
+            calls.append(start.shape)
+            return _traced_level_arc(start, end, evaluator, inside)
+    
+        def wedges(flux):
+            return mesh.traced_saddle_wedges(
+                flux,
+                saddle_vertex=jnp.asarray([0.0, 0.0]),
+                core_reference=jnp.asarray([0.5, 0.5]),
+                curve_evaluator=level,
+                arc_tracer=tracer,
+            )
+    
+        signed = level(jnp.asarray(mesh.node_coordinates))
+        jax.make_jaxpr(wedges)(signed)
+        assert calls, "positive control: saddle halves must be traced"
+>       assert len(calls) == 1, f"unrolled saddle half-arc bodies: {calls}"
+E       AssertionError: unrolled saddle half-arc bodies: [(1, 2), (1, 2), (1, 2), (1, 2), (1, 2), (1, 2), (1, 2), (1, 2)]
+E       assert 8 == 1
+E        +  where 8 = len([(1, 2), (1, 2), (1, 2), (1, 2), (1, 2), (1, 2), ...])
+
+tests/test_equilibrium_separatrix_clip.py:784: AssertionError
+=============================== warnings summary ===============================
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; zarr
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_equilibrium_separatrix_clip.py::test_clip_traces_one_polish_body_per_arc_kind
+FAILED tests/test_equilibrium_separatrix_clip.py::test_saddle_wedges_share_one_half_arc_polish_body
+2 failed, 25 deselected, 1 warning in 3.88s
+srun: error: 98dci4-clu-4073: task 0: Exited with exit code 1

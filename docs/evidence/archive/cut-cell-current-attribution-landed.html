@@ -2499,6 +2499,122 @@ restored the veto and produced the required two focused failures, exit 1.</p>
 The exact decision relationship is a table; an additional figure would add no spatial or sequential information.</p>
 </section>
 
+<section id="ring-read-twin-loop">
+  <h2 id="ring-read-twin-loop-h">Why the ring read misses, and the measured twin-loop alternative</h2>
+
+  <p><strong>Landed 2026-09-22 without a production or test-source change.</strong> On the analytic
+  single-null flux at nine rungs from 132 to 2616 realised cells, the production
+  ring-quadratic read again admits seven saddles and misses 132 and 340. The cell-centred
+  own-node quadratic census admits 9 of 9; the vertex-centred dual census admits 8 of 9;
+  their union admits 9 of 9. Newton polish of every union seed on the global tensor spline
+  preserves 9-of-9 admission in three or four steps. The polished error spans 0.01395 to
+  0.04202 cell pitch, although polish is not uniformly more accurate than the best seed.</p>
+
+  <p><strong>The proposed same-side mechanism explains 340 but not 132.</strong> At 340 cells the
+  analytic X-point is 0.07088 pitch from the nearest cell boundary and the six containing-cell
+  sides carry analytic separatrix root counts <code>[1, 0, 2, 1, 0, 0]</code>: two roots do
+  share one side. At 132 cells the null is still closer, 0.03521 pitch, but the roots are
+  <code>[1, 0, 0, 1, 1, 1]</code>, one each on four sides. In both cases the containing ring and
+  every recorded neighbour ring have only two cyclic sign changes, so the production raw
+  saddle population is zero. The cell candidates lie 0.06359 and 0.03137 pitch from the
+  analytic saddle; their mode-ratio distances are 0.58095 and 0.48394 pitch, both pass the
+  inside-or-near-source-cell and wall-containment checks, and the private-shadow filter does
+  not apply to saddles. The four-change raw gate therefore explains both misses before mode,
+  containment, wall or shadow filtering; a same-side double branch is the geometry behind
+  only the 340-cell instance.</p>
+
+  <table><thead><tr><th>Cells</th><th>Boundary distance</th><th>Production error</th>
+  <th>Cell error</th><th>Vertex error</th><th>Union seed</th><th>Polished / steps</th></tr></thead><tbody>
+  <tr><td>132</td><td>0.03521</td><td>miss</td><td>0.06359</td><td>miss</td><td>0.06359</td><td>0.01989 / 4</td></tr>
+  <tr><td>233</td><td>0.04641</td><td>0.08963</td><td>0.04914</td><td>0.01212</td><td>0.01212</td><td>0.01395 / 4</td></tr>
+  <tr><td>340</td><td>0.07088</td><td>miss</td><td>0.03137</td><td>0.006641</td><td>0.006641</td><td>0.01782 / 3</td></tr>
+  <tr><td>382</td><td>0.14956</td><td>0.05972</td><td>0.03384</td><td>0.006556</td><td>0.006556</td><td>0.01554 / 3</td></tr>
+  <tr><td>449</td><td>0.07027</td><td>0.01997</td><td>0.03118</td><td>0.006144</td><td>0.006144</td><td>0.03931 / 3</td></tr>
+  <tr><td>550</td><td>0.30368</td><td>0.01688</td><td>0.01021</td><td>0.01366</td><td>0.01021</td><td>0.02457 / 3</td></tr>
+  <tr><td>814</td><td>0.21990</td><td>0.01174</td><td>0.01189</td><td>0.01142</td><td>0.01142</td><td>0.04202 / 3</td></tr>
+  <tr><td>1074</td><td>0.01599</td><td>0.03019</td><td>0.02704</td><td>0.003446</td><td>0.003446</td><td>0.01797 / 3</td></tr>
+  <tr><td>2616</td><td>0.04134</td><td>0.01270</td><td>0.01578</td><td>0.002197</td><td>0.002197</td><td>0.01933 / 3</td></tr>
+  </tbody></table>
+
+  <p>Errors and distances in the census table are in local cell pitch. The analytic-flux
+  nonuniformity positive control is true. Global-spline RMS fit residuals are
+  5.90e-6 to 1.76e-5 of flux span, so neither the absent production candidates nor the
+  polished positions are empty- or uniform-field artefacts. The union's stage populations
+  below are shown as total / false relative to the one analytic saddle. Typing, containment
+  and representative selection remove every false candidate.</p>
+
+  <table><thead><tr><th>Cells</th><th>Raw</th><th>Typed</th><th>Contained</th><th>Representative</th></tr></thead><tbody>
+  <tr><td>132</td><td>84 / 83</td><td>3 / 0</td><td>3 / 0</td><td>1 / 0</td></tr>
+  <tr><td>233</td><td>206 / 205</td><td>5 / 0</td><td>5 / 0</td><td>1 / 0</td></tr>
+  <tr><td>340</td><td>313 / 311</td><td>5 / 0</td><td>5 / 0</td><td>1 / 0</td></tr>
+  <tr><td>382</td><td>357 / 354</td><td>5 / 0</td><td>5 / 0</td><td>1 / 0</td></tr>
+  <tr><td>449</td><td>472 / 471</td><td>5 / 0</td><td>5 / 0</td><td>1 / 0</td></tr>
+  <tr><td>550</td><td>566 / 561</td><td>6 / 0</td><td>6 / 0</td><td>1 / 0</td></tr>
+  <tr><td>814</td><td>889 / 886</td><td>4 / 0</td><td>4 / 0</td><td>1 / 0</td></tr>
+  <tr><td>1074</td><td>1191 / 1189</td><td>5 / 0</td><td>5 / 0</td><td>1 / 0</td></tr>
+  <tr><td>2616</td><td>3200 / 3199</td><td>4 / 0</td><td>4 / 0</td><td>1 / 0</td></tr>
+  </tbody></table>
+
+  <figure><img src="/nova/figures/cut-cell-current-attribution/twin-loop/position-error-by-boundary-distance.png"
+  alt="Position error in cell pitch against analytic-null distance to the nearest cell boundary for the production read, cell census, vertex census, union seed and polished union over all nine rungs.">
+  <figcaption>Position error against null-to-boundary distance. Missing production and vertex
+  points are left absent rather than imputed; every polished union point is retained.
+  <a href="/nova/figures/cut-cell-current-attribution/twin-loop/position-error-by-boundary-distance.svg">SVG</a>.</figcaption></figure>
+
+  <figure><img src="/nova/figures/cut-cell-current-attribution/twin-loop/analytic-flux-cells-340.png"
+  alt="The 340-cell analytic flux as unfilled line contours inside the wall, with the analytic axis and saddle plus the cell, vertex and polished saddle candidates; axes are hidden.">
+  <figcaption>The 340-cell miss on analytic line contours with the physical wall and axis off.
+  The analytic saddle is charcoal, the cell candidate blue, the vertex candidate violet and
+  the globally polished union candidate rose, each drawn through the null-marker vocabulary;
+  the analytic magnetic axis is the triangle. Production has no saddle marker because it
+  admits none on this rung. <a href="/nova/figures/cut-cell-current-attribution/twin-loop/analytic-flux-cells-340.svg">SVG</a>.</figcaption></figure>
+
+  <p><strong>Titan cost, warm compilation excluded.</strong> One job, <code>1275658</code>, ran
+  on titan with one P100, four CPUs and 64 GiB, <code>XLA_PYTHON_CLIENT_PREALLOCATE=false</code>,
+  <code>JAX_PLATFORMS</code> unset, no cache root and <code>TMPDIR=/tmp</code> in submit and
+  payload. The root interpreter ran directly and <code>uv</code> was not invoked on the node.
+  It completed 0:0 in 38m38s. Every wall in the next table is a titan per-state wall.</p>
+
+  <table><thead><tr><th>Cells</th><th>Cell ms</th><th>Vertex ms</th><th>Twin + polish ms</th>
+  <th>Production ms</th><th>Twin / production</th><th>Cell / production</th></tr></thead><tbody>
+  <tr><td>550</td><td>0.009517</td><td>0.009094</td><td>0.42594</td><td>0.25745</td><td>1.654x</td><td>0.0370x</td></tr>
+  <tr><td>1074</td><td>0.01287</td><td>0.01287</td><td>0.49434</td><td>0.25523</td><td>1.937x</td><td>0.0504x</td></tr>
+  <tr><td>2616</td><td>0.02038</td><td>0.02276</td><td>1.01441</td><td>0.24349</td><td>4.166x</td><td>0.0837x</td></tr>
+  </tbody></table>
+
+  <p>The program-scope lowered inventory finds zero while loops in the cell census, vertex
+  census and production read. The combined twin-plus-polish program has 17 while loops whose
+  known trip counts are fixed solver/control counts from four through eight; no realised-cell,
+  interior-vertex or combined-population count appears. The explicit
+  <code>cell_or_vertex_trip_count_present</code> control is false for every kernel and rung,
+  proving the vmapped programs do not contain an unrolled per-cell or per-vertex loop.</p>
+
+  <p><strong>CPU witness.</strong> One all_debug job, <code>1275659</code>, ran with eight CPUs,
+  64 GiB and <code>JAX_PLATFORMS=cpu</code>. It completed 0:0 in 1m39s. At 550, 1074 and 2616
+  cells the warm twin-plus-polish walls are 7.3344, 14.3451 and 35.3890 ms against production
+  walls 0.10600, 0.17159 and 0.20114 ms, ratios 69.19x, 83.60x and 175.94x. These are explicitly
+  CPU witness walls, not GPU timings.</p>
+
+  <p><strong>Recommendation for the generator implementation.</strong> Use the cell-centred
+  own-node quadratic-root census: it alone admits 9 of 9, while the vertex-centred dual misses
+  132 and adds no admission on this sample. Pre-filter finite roots by a nonsingular indefinite
+  Hessian, the existing inside-or-near-source-cell criterion and wall containment, then apply
+  global-spline Newton polish only to the few typed and contained representatives. Keep the
+  four-change count as a diagnostic rather than the admission gate, and keep the vertex loop as
+  a diagnostic or fallback rather than the hot-path generator. The proposed cell generator costs
+  0.0370x to 0.0837x the production read on titan; the complete twin census plus polish is the
+  conservative upper bound at 1.654x to 4.166x.</p>
+
+  <p>The durable receipts are <code>accuracy-receipt.json</code>,
+  <code>timing-gpu-receipt.json</code> and <code>timing-cpu-receipt.json</code> under the run's
+  report directory. Both timing logs begin with the revision, worktree and exact command. The
+  titan log header records executable revision <code>da3def20e95b7aa5b2b3c8d18715820c18009698</code>;
+  its receipt's late revision field records the figure-only commit
+  <code>236bb74c6afa6f2f1242c551b5abec8e5f6bcc00</code>, made while its final compile ran; no
+  executable or instrument changed between them. This record does not close the section or
+  resolve its driving followup.</p>
+</section>
+
 </main>
 </body>
 </html>

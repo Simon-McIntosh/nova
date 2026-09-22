@@ -5169,7 +5169,95 @@
     "accepted_predictor_count": 11,
     "selected_qualification": 1,
     "selected_achieved_reduction": 1.0315247745414499e-12,
-    "selected_consistent": false
+    "selected_consistent": false,
+    "best_actual_qualified": {
+      "predictor": 39,
+      "origin_fraction": 0.31247711181640625,
+      "fraction": 1.0,
+      "actual": {
+        "merit": 0.01308573620755603,
+        "relative_sup": 0.013409234984016891,
+        "numerator_wb": 1.0536108194464815,
+        "denominator_wb": 80.51597577200894
+      },
+      "predicted": {
+        "merit": 0.24956358431999887,
+        "relative_sup": 0.23266095794019337,
+        "numerator_wb": 25.895327401108567,
+        "denominator_wb": 103.76244383437249
+      },
+      "branch_predicted": {
+        "merit": 1.6034467396975445e-15,
+        "relative_sup": 2.073471818565451e-15,
+        "numerator_wb": 1.2758495277925757e-13,
+        "denominator_wb": 79.56918656576252
+      },
+      "branch_predicted_incumbent": 0.1074659492487706,
+      "rules": {
+        "sufficient_merit": true,
+        "strict_residual_decrease": true,
+        "model_trust": false,
+        "accepted_if_considered": false,
+        "refusing_rules": [
+          "model trust"
+        ],
+        "actual_decrease": 0.026863285175851265,
+        "predicted_decrease": -0.2096145629365916,
+        "actual_over_predicted_decrease": -0.1281556243016255,
+        "fallback_same_direction_refused": true,
+        "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+      },
+      "branch_model_trust": true,
+      "branch_model_accepted": true,
+      "branch_consistent": false,
+      "qualification": 1,
+      "achieved_reduction": 6.928780557166333e-15
+    },
+    "best_rebuilt_model_accepted": {
+      "predictor": 39,
+      "origin_fraction": 0.31247711181640625,
+      "fraction": 1.0,
+      "actual": {
+        "merit": 0.01308573620755603,
+        "relative_sup": 0.013409234984016891,
+        "numerator_wb": 1.0536108194464815,
+        "denominator_wb": 80.51597577200894
+      },
+      "predicted": {
+        "merit": 0.24956358431999887,
+        "relative_sup": 0.23266095794019337,
+        "numerator_wb": 25.895327401108567,
+        "denominator_wb": 103.76244383437249
+      },
+      "branch_predicted": {
+        "merit": 1.6034467396975445e-15,
+        "relative_sup": 2.073471818565451e-15,
+        "numerator_wb": 1.2758495277925757e-13,
+        "denominator_wb": 79.56918656576252
+      },
+      "branch_predicted_incumbent": 0.1074659492487706,
+      "rules": {
+        "sufficient_merit": true,
+        "strict_residual_decrease": true,
+        "model_trust": false,
+        "accepted_if_considered": false,
+        "refusing_rules": [
+          "model trust"
+        ],
+        "actual_decrease": 0.026863285175851265,
+        "predicted_decrease": -0.2096145629365916,
+        "actual_over_predicted_decrease": -0.1281556243016255,
+        "fallback_same_direction_refused": true,
+        "fallback_note": "Continuation uses these same inequalities; production continuation uses the map defect, measured separately."
+      },
+      "branch_model_trust": true,
+      "branch_model_accepted": true,
+      "branch_consistent": false,
+      "qualification": 1,
+      "achieved_reduction": 6.928780557166333e-15
+    },
+    "qualified_incumbent_model_accepted_count": 16,
+    "qualified_rebuilt_model_accepted_count": 26
   },
   "best_by_generator": {
     "branch_frozen": {

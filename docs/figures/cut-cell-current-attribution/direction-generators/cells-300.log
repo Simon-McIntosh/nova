@@ -1,0 +1,23 @@
+revision=2502e08b50f955f45e826ed933522efec6b98bd8 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed command=/home/ITER/mcintos/Code/nova/.venv/bin/python -u docs/figures/cut-cell-current-attribution/direction-generators/measure.py --cells 300 --output /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed
+BASE cells=342 merit=0.0546254885059 residual=0.0518511705161
+REPRODUCED both controls: every Newton fraction nondecreasing; full analytic sufficient decrease passes but model trust refuses
+BRANCH_FROZEN measured with confined polygons fixed
+CLIP_GEOMETRY_CONTINUATION measured after Newton-endpoint support update
+BRANCH_CENSUS coarse=316 fine=316 samples=3732
+PREDICTORS 1/316 best=(True, 0.054700989246172)
+PREDICTORS 26/316 best=(True, 0.047820265053571426)
+PREDICTORS 51/316 best=(True, 0.03583917720600003)
+PREDICTORS 76/316 best=(True, 0.03583917720600003)
+PREDICTORS 101/316 best=(True, 0.03583917720600003)
+PREDICTORS 126/316 best=(True, 0.026088877376311992)
+PREDICTORS 151/316 best=(False, 0.05455340965223293)
+PREDICTORS 176/316 best=(False, 0.05455340965223293)
+PREDICTORS 201/316 best=(False, 0.05455340965223293)
+PREDICTORS 226/316 best=(False, 0.05455340965223293)
+PREDICTORS 251/316 best=(False, 0.05383203949990553)
+PREDICTORS 276/316 best=(False, 0.051191537400350554)
+PREDICTORS 301/316 best=(False, 0.051191537400350554)
+MULTI_BRANCH all encountered predictors scored
+COMPLETED numerical measurement
+COMPLETED figures
+ROW_EXIT cells=300 status=124

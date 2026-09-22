@@ -1,0 +1,7 @@
+revision=68c743bdf4cda067a6422c19f4c3da0f4f5c56c8 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed command=["/home/ITER/mcintos/Code/nova/.venv/bin/python", "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed/verify.py"]
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed/verify.py", line 41, in <module>
+    assert selector['ladder_accepted'] == (any(selector['merits'][i] <= inc['merit']*(1-1e-4*f) and selector['residuals'][i] < inc['relative_sup'] for i,f in enumerate(selector['factors'])) and selector['ladder_trusted'])
+                                                                                                                                                                                                  ~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'ladder_trusted'
+CHECK_EXIT=1

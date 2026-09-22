@@ -1,0 +1,4 @@
+revision=68c743bdf4cda067a6422c19f4c3da0f4f5c56c8 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed command=["/home/ITER/mcintos/Code/reckon/.venv/bin/python", "-m", "reckon.doccheck", "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed/docs/evidence/archive/cut-cell-current-attribution-landed.html"]
+/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed/docs/evidence/archive/cut-cell-current-attribution-landed.html: warn (0 error, 1 warn, 0 info)
+  ! [md-list-or-heading] leading markdown marker (- / # ) in <p> — use <ul>/<li> or <h3>
+CHECK_EXIT=0

@@ -274,6 +274,23 @@ tests/test_compile_abort_probe.py</code>, exit <code>0</code>, <code>2 passed</c
 node. This measures the node's own change; the merged result belongs to a separately dispatched
 test node.</p>
 
+<p><strong>The guard is covered without the repair</strong> (commit <code>7f0207965</code>,
+2026-09-22). A re-dispatch of this followup confirmed before editing that the defect no longer
+reproduces: at base <code>edcba74f0</code>, with <code>benchmarks/compile_abort_probe.py</code>
+byte-identical to its committed state, the wrapper around <code>/bin/sh -c "exit 7"</code> recorded
+<code>exit_code: 7</code> in its summary and exited <strong>7</strong>. Because the behaviour was
+already correct, the node added coverage rather than re-implementing the repair:
+<code>tests/test_compile_abort_probe_exit.py</code> pins the contract in both directions plus an
+arbitrary non-zero status (<code>exit 3</code>) so a wrapper that special-cased one well-known code
+would still be caught. The declared negative control — restore the unconditional
+<code>return 0</code> at the end of the probe main — reddens
+<code>test_failed_child_fails_the_wrapper</code> at <code>assert 0 == 7</code> and
+<code>test_the_wrapper_carries_an_arbitrary_child_status</code> at <code>assert 0 == 3</code> while
+the zero-exit case passes (<code>2 failed, 1 passed</code>, exit <code>1</code>), and was reverted.
+Gate on the repaired tree: <code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p
+no:cacheprovider -q tests/test_compile_abort_probe_exit.py</code>, exit <code>0</code>,
+<code>3 passed</code> at <code>7f0207965</code>.</p>
+
 
 <h2 id="one-row-per-process">One certificate row per child process</h2>
 

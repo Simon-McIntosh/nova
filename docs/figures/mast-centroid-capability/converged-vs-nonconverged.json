@@ -1,0 +1,112 @@
+{
+  "caption": "terminal poloidal flux on shared levels between the axis and boundary flux (0.3416 to -0.1224 Wb) | every solved state imposes the vertical current-centre row at 0.031680 m (the reference's own centre, tolerance 1e-06 m) | reference is the unedited equilibrium, an upper-null state whose admitted saddle sits above its axis, while every solved state admits a lower null (blue, admitted saddle above its axis) | reference set blue: lobe solid, legs dashed, admitted saddle (0.585, +1.231) m, as drawn 1 admitted filled, no other qualified nulls | solved set orange: lobe solid, legs dashed, admitted saddle (0.602, +1.173) m, as drawn 1 admitted filled, no other qualified nulls | wall drawn",
+  "converged": {
+    "achieved_class": "diverted",
+    "branches": {
+      "axis_enclosing_component_count": 1,
+      "boundary_flux": -0.11463467986940132,
+      "closed_candidate_count": 0,
+      "closed_segment_count": 0,
+      "cycle_component_count": 1,
+      "open_branch_count": 0,
+      "source": "archive",
+      "well_formed": false
+    },
+    "branches_drawn": {
+      "closed_drawn": 0,
+      "open_drawn": 0,
+      "unassembled": 1
+    },
+    "converged": true,
+    "edit_index": 2,
+    "fraction": -0.14000000000000004,
+    "nulls_drawn": {
+      "other_x_points_drawn": 0,
+      "strike_points_drawn": 0,
+      "x_points_drawn": 1,
+      "x_points_dropped_outside_wall": 0
+    },
+    "residual": 4.129311600998776e-09,
+    "termination": "converged",
+    "trips": 2
+  },
+  "figure": "/home/ITER/mcintos/Code/nova/docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+  "figure_vector": "/home/ITER/mcintos/Code/nova/docs/figures/mast-centroid-capability/converged-vs-nonconverged.svg",
+  "level_band": {
+    "axis_flux": 0.34157609764778996,
+    "boundary_flux": -0.1223672818037445
+  },
+  "levels": [
+    -0.1223672818037445,
+    -0.08667932953824184,
+    -0.0509913772727392,
+    -0.01530342500723654,
+    0.020384527258266102,
+    0.056072479523768745,
+    0.09176043178927142,
+    0.12744838405477404,
+    0.1631363363202767,
+    0.19882428858577933,
+    0.23451224085128197,
+    0.2702001931167846,
+    0.3058881453822873,
+    0.34157609764778996
+  ],
+  "non_converged": {
+    "achieved_class": "diverted",
+    "branches": {
+      "axis_enclosing_component_count": 1,
+      "boundary_flux": -0.11995318947579442,
+      "closed_candidate_count": 1,
+      "closed_segment_count": 73,
+      "cycle_component_count": 1,
+      "open_branch_count": 2,
+      "source": "archive",
+      "well_formed": true
+    },
+    "branches_drawn": {
+      "closed_drawn": 1,
+      "open_drawn": 2,
+      "unassembled": 0
+    },
+    "converged": false,
+    "edit_index": 7,
+    "fraction": -0.04000000000000009,
+    "nulls_drawn": {
+      "other_x_points_drawn": 0,
+      "strike_points_drawn": 0,
+      "x_points_drawn": 1,
+      "x_points_dropped_outside_wall": 0
+    },
+    "residual": 0.006514172427897018,
+    "termination": "active_set_iteration_budget_exhausted",
+    "trips": 16
+  },
+  "receipt": "/home/ITER/mcintos/Code/nova/docs/figures/mast-centroid-capability/converged-vs-nonconverged.json",
+  "reference_branches": {
+    "axis_enclosing_component_count": 1,
+    "boundary_flux": -0.1223672818037445,
+    "closed_candidate_count": 1,
+    "closed_segment_count": 75,
+    "cycle_component_count": 1,
+    "open_branch_count": 2,
+    "source": "archive",
+    "well_formed": true
+  },
+  "reference_branches_drawn": {
+    "closed_drawn": 1,
+    "open_drawn": 2,
+    "unassembled": 0
+  },
+  "reference_nulls_drawn": {
+    "other_x_points_drawn": 0,
+    "strike_points_drawn": 0,
+    "x_points_drawn": 1,
+    "x_points_dropped_outside_wall": 0
+  },
+  "vertical_centroid": {
+    "reference_m": 0.031679780923040135,
+    "target_m": 0.031679780923040135,
+    "tolerance_m": 1e-06
+  }
+}

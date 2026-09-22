@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T13:14:28",
+  "updated": "2026-09-22T13:14:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4405,6 +4405,15 @@
         "id": "s18-pta-harness-c",
         "harness": "clive",
         "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-22"
+      },
+      {
+        "id": "s18-pta-review-s",
+        "harness": "codex",
+        "role": "review",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -244160,6 +244169,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3107
+    "_version": 3108
   }
 }

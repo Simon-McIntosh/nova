@@ -2,14 +2,33 @@
 
 import abc
 from dataclasses import dataclass, field
-from functools import cached_property
+from functools import cache, cached_property
+from math import comb
 import jax
 import jax.numpy as jnp
-import jax.scipy as jsp
 import numpy as np
 
 from nova.graphics.plot import Plot1D
 from nova.jax.tree_util import Pytree
+
+
+@cache
+def _binomial_coefficients(order):
+    """Build integer-order coefficients on the host, before device lowering."""
+    return tuple(float(comb(order, term)) for term in range(order + 1))
+
+
+@jax.named_scope("bernstein_basis")
+def bernstein_basis(coordinate, order):
+    """Evaluate a static-order basis with integer powers and host constants."""
+    coordinate = jnp.asarray(coordinate)
+    return jnp.stack(
+        [
+            coefficient * coordinate**term * (1 - coordinate) ** (order - term)
+            for term, coefficient in enumerate(_binomial_coefficients(order))
+        ],
+        axis=-1,
+    )
 
 
 @dataclass
@@ -107,9 +126,15 @@ class Bernstein(Pytree):
 
     @jax.jit
     def binom(self, term):
-        """Return Binomial cooefcient (order term)."""
-        return jsp.special.gamma(self.order + 1) / (
-            jsp.special.gamma(term + 1) * jsp.special.gamma(self.order - term + 1)
+        """Look up integer-order binomial coefficients without special functions."""
+        term = jnp.asarray(term)
+        if not jnp.issubdtype(term.dtype, jnp.integer):
+            raise TypeError("binomial terms must be integers")
+        coefficients = jnp.asarray(_binomial_coefficients(self.order))
+        return jnp.where(
+            (term >= 0) & (term <= self.order),
+            coefficients[jnp.clip(term, 0, self.order)],
+            0,
         )
 
     @jax.jit
@@ -124,11 +149,7 @@ class Bernstein(Pytree):
     @jax.jit
     def coefficent_matrix(self, coordinate: jnp.ndarray):
         """Return coefficent matrix."""
-
-        def basis(_, term):
-            return _, self.basis(coordinate, term)
-
-        return jax.lax.scan(basis, None, jnp.arange(self.order + 1))[1].T
+        return bernstein_basis(coordinate, self.order)
 
     def tree_flatten(self):
         """Return flattened pytree."""

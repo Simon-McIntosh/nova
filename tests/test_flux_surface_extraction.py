@@ -752,3 +752,27 @@ def test_real_equilibrium_reference_gates(filename, cocos):
     else:
         assert bool(record["valid"]), diagnostic
     assert not failures, failures
+
+
+def test_bicubic_derivatives_lower_to_static_polynomials():
+    """A linear field retains its derivatives without traced binomial work."""
+    configure_dtypes()
+    coefficient = 2 * jnp.arange(4)[:, None] / 3 + jnp.arange(4)[None, :] / 3
+    radial = jnp.asarray([0.0, 0.23, 0.74, 1.0])
+    vertical = jnp.asarray([1.0, 0.66, 0.38, 0.0])
+    function = jax.jit(_bicubic_derivatives)
+    values = function(coefficient, radial, vertical)
+    expected = (
+        radial + 2 * vertical,
+        jnp.ones(4),
+        2 * jnp.ones(4),
+        jnp.zeros(4),
+        jnp.zeros(4),
+        jnp.zeros(4),
+    )
+    for actual, reference in zip(values, expected, strict=True):
+        np.testing.assert_allclose(actual, reference, atol=4e-15, rtol=4e-15)
+    text = function.lower(coefficient, radial, vertical).compile().as_text()
+    assert "bernstein_basis" in text
+    assert "Bernstein.binom" not in text
+    assert "lgamma" not in text

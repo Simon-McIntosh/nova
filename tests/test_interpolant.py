@@ -110,5 +110,47 @@ def test_linear_plot():
         assert len(linear.plot().lines) == 2
 
 
+@pytest.mark.skipif(not JAX_AVAILABLE, reason="JAX is not installed")
+@pytest.mark.parametrize("order", [0, 1, 3, 7])
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+def test_static_bernstein_reproduces_constants_and_linear_fields(order, dtype):
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    x = jnp.asarray([0.0, 0.13, 0.5, 0.91, 1.0], dtype=dtype)
+    matrix = Bernstein(order=order).coefficent_matrix(x)
+    assert matrix.dtype == x.dtype
+    tolerance = 8 * np.finfo(dtype).eps
+    np.testing.assert_allclose(matrix.sum(axis=-1), 1.0, atol=tolerance)
+    if order:
+        np.testing.assert_allclose(
+            matrix @ jnp.arange(order + 1) / order, x, atol=tolerance
+        )
+        slope = jax.grad(
+            lambda t: jnp.dot(
+                Bernstein(order=order).coefficent_matrix(t),
+                jnp.arange(order + 1) / order,
+            )
+        )(jnp.asarray(0.37, dtype=dtype))
+        np.testing.assert_allclose(slope, 1.0, atol=tolerance)
+    np.testing.assert_array_equal(matrix[0], np.eye(order + 1)[0])
+    np.testing.assert_array_equal(matrix[-1], np.eye(order + 1)[-1])
+
+
+@pytest.mark.skipif(not JAX_AVAILABLE, reason="JAX is not installed")
+def test_binomial_lookup_lowers_without_special_functions():
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    terms = jnp.arange(-1, 6)
+    function = jax.jit(lambda term: Bernstein(order=4).binom(term))
+    np.testing.assert_array_equal(function(terms), [0, 1, 4, 6, 4, 1, 0])
+    text = function.lower(terms).compile().as_text()
+    assert "constant" in text
+    assert "lgamma" not in text and "gamma" not in text
+    with pytest.raises(TypeError, match="terms must be integers"):
+        function(jnp.asarray([1.5]))
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

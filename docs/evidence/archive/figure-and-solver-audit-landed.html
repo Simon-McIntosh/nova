@@ -3811,6 +3811,7 @@ because these discrete guards and receipt identities are clearer as selectable t
 </ol>
 
 <p><strong>Score:</strong> reproducibility and execution 24/25; receipts and controls 14/20; semantic fidelity 8/35; panel compliance 8/15; failure propagation and provenance 4/5; total <strong>58/100</strong>. Full review and findings JSON: <code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-verify-the-vertex-ring-census/</code>. No production or <code>nova/</code> source changed.</p>
+</section>
 <section id="wall-array-promotion-review">
 <h2>Wall-array traced-indexing repair — promotion review (2026-09-21)</h2>
 <p><strong>Verdict: reject, 98/100.</strong> Independent review of candidate <code>192a8ed20</code> against reference repair <code>74f00821c</code> found the prescribed three array-promotion sites and both trace pins, with no unexpected path. The three scoped files parse to identical Python ASTs between candidate and reference. Their only textual difference is one pre-existing three-line call wrap in <code>nova/equilibrium/topology.py</code>: the candidate preserved its base formatting while the reference commit reformatted the same expression; no guard, operand, branch, test, or executable token differs. The score reflects sound behavior, but the exact spec requires line-for-line identity and makes any deviation blocking, so AST equivalence cannot authorize promotion. Apply the reference line wrap and repeat the exact diff check, or have the coordinator explicitly relax that requirement.</p>

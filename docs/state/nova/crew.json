@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T16:44:11",
+  "updated": "2026-09-22T17:28:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -249787,6 +249787,251 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T112326856974-pta-parity-harness-twelve-rows",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "pta-parity-harness-twelve-rows",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 797,
+                "cached_input_tokens": 344718,
+                "input_tokens": 345547,
+                "output_tokens": 3199,
+                "reasoning_output_tokens": 699,
+                "total_tokens": 348746,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "docs/figures/hex-cell-single-grid/topology-parity.json records row_count 12, every row replayed or named unavailable with its exception class, marginal_unknown_row_count 0, pending_replayable_row_count 0, differing_cells empty on every non-marginal replayed row, every marginal-row difference carrying per-cell adjudication (index, centroid, both labels, psi_norm under the census-saddle and raster binding-level authorities) and the per-row wall-node census, status complete and passes true, the cache sha256 and operand base_revision named; the replay ran on one all_debug allocation (root interpreter run directly, JAX_PLATFORMS=cpu, TMPDIR=/tmp in submit environment and payload, per-row wall recorded) with the whole log cited; the figure has one poloidal panel per declared row under the plotting rules (unfilled line contours on stated levels with the census-saddle contour, both null sets, the wall, axis off) or a visible unavailability annotation; tests/test_topology_parity_harness.py gains a coverage regression and a difference regression (an injected one-cell label difference is counted and adjudicated, never absorbed) and passes in a fresh CPU process with the count printed and zero added failures against the base revision; the declared negative control is applied, the difference regression is observed to fail, and its log is recorded",
+          "estimated_hours": 1.0,
+          "goal": "run the topology parity harness across the twelve-row MAST bank on main, porting the held twelve-row adaptation by diff, so the section-4 receipt is complete on every row",
+          "id": "pta-parity-harness-twelve-rows",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-22T11:23:29Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T112326856974-pta-parity-harness-twelve-rows/manifest.md",
+          "negative_control": "mutate the harness so an injected one-cell label difference is dropped from differing_cells and observe the difference regression in tests/test_topology_parity_harness.py fail",
+          "plan": "plasma-cell-topology-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/topology_parity_harness.py",
+            "tests/test_topology_parity_harness.py",
+            "docs/figures/hex-cell-single-grid",
+            "docs/plans/plasma-cell-topology-authority.html",
+            "docs/evidence/archive/plasma-cell-topology-authority-landed.html",
+            "docs/figures/plasma-cell-topology-authority"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s18-pta-harness-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-22T11:23:47Z",
+        "completed_at": "2026-09-22T14:38:27.381Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 11665,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 11680,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "edc04e8c42c7575649bf9f11834083e2508cbd8d",
+        "commits": [
+          "36fe7ee0c7a6ce7c0bc43772cd164b9883d02dd1",
+          "5afa24efa7bcceeceae9d655480015b829e2d87a",
+          "6ca11bd6981fbde867772437fe118eb9479b24c3",
+          "ce0e1444d8faa71f9aee7d0da107850eaf6aa79f",
+          "a82046315060250d0ee7d71181bbe47e6e179d7c"
+        ],
+        "changed_lines": {
+          "added": 1872,
+          "removed": 212,
+          "files": 6
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sbatch /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-twelve-rows/run-lane.sbatch (one all_debug allocation, job 1275902): twelve-row replay through benchmarks/topology_parity_harness.py, receipt check, fail-closed probe, base and head suites of tests/test_topology_parity_harness.py, negative control; RECEIPT_CHECK_OK, 12 of 12 rows replayed with 0 differing cells, head suite 9 passed, base 3 passed, NEG_CONTROL_EXIT=1",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T112326856974-pta-parity-harness-twelve-rows/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T112326856974-pta-parity-harness-twelve-rows/manifest.md",
+        "scope_changed": false,
+        "session_id": "6ca5ac3e-1f4e-42c3-8665-ef87d97b4a49",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 5802054,
+            "input_tokens_cumulative": 5802054,
+            "output_tokens": 31390,
+            "output_tokens_cumulative": 31390,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-22T14:38:27.381Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 13,
+            "evidence": 15,
+            "fit": 16,
+            "goal_fidelity": 15,
+            "scope_discipline": 19
+          },
+          "absent": [
+            "a nonzero harness exit when a governed marginal_solver_basin flag is missing or null",
+            "the committed magnetic axis as part of the second null set in every replayed figure panel",
+            "a cited base-revision suite log and contract-shaped first lines for the gate and negative-control logs",
+            "one current section-4 landed summary without the superseded two-row pending verdict"
+          ],
+          "total": 78
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 38762122,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1488.153,
+          "generated_tokens": 246109,
+          "generation_seconds": 1055.688,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.3,
+          "machine_seconds": 432.465,
+          "peak_input_tokens": 164826,
+          "tokens_per_second": 233.13,
+          "wall_tokens_per_second": 165.38
+        },
+        "follow_on_paths": [
+          "docs/plans/plasma-cell-topology-authority.html",
+          "21986/46",
+          "21989/55"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-twelve-rows",
+          "session_id": "6ca5ac3e-1f4e-42c3-8665-ef87d97b4a49",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T14:38:27.381Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.9,
+        "impl_move": {
+          "plan": "plasma-cell-topology-authority",
+          "at_dispatch": 0.9,
+          "at_complete": 0.97,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "waived",
+          "test_paths": [
+            "tests/test_topology_parity_harness.py"
+          ],
+          "declaration": "mutate the harness so an injected one-cell label difference is dropped from differing_cells and observe the difference regression in tests/test_topology_parity_harness.py fail",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-twelve-rows/negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-twelve-rows/negative-control.log",
+          "reason": "the declared mutation was executed and observed: /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-twelve-rows/negative-control.log opens with 'mutation applied: differing_cell_records returns records[:0] instead of records, so a counted cell difference is absorbed', the difference regression failed (1 failed, 8 deselected), NEG_CONTROL_EXIT=1 and NEG_RESTORED_CLEAN=0; the wording differs from the dispatch declaration, the mutation does not"
+        },
+        "tool_steps": 175.0,
+        "orientation_input_tokens": 2712388.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -250253,6 +250498,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3155
+    "_version": 3156
   }
 }

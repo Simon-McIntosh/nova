@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="240">
+<meta name="plan-version" content="241">
 </head>
 <body>
 <main class="plan-doc">
@@ -836,6 +836,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260922T121125384414-nia-attribute-the-coil-null-invariance-failures" data-who="reckon-ship" data-when="2026-09-22T13:23:49Z">
     <div class="r-comment-body"><p>both coil-null invariance cases attributed pin-stale to merge 47b9f996 (parent 7bff1d5d passes), containment anchor, typed saddle and wall promotion exonerated; interior cells compare with zero differences and all changes sit in the boundary band; repinned with the sha, 2 passed, control red; merged 286a56a11</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260922T140219922619-review-of-nia-attribute-the-coil-null-invariance-failures" data-who="reckon-ship" data-when="2026-09-22T14:12:27.007Z">
+    <div class="r-comment-body"><p>review role: scored nia-attribute-the-coil-null-invariance-failures 92 of 100</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260903T191200000000" data-who="reckon-ship-s19-relaunch" data-when="2026-09-03T21:12:00+02:00">
     <div class="r-comment-body">LEAD READING OF THE OVERLAYS 2026-09-03 21:10 (docs/evidence/mast-bank-efit-overlays.html, panels 21986/46 pure, 21989/55 pure, 21989/55 mixed): the rows where the dark-blue Nova binding contour is much smaller than the EFIT LCFS are limiter identification errors, most likely limiter points selected from private regions topologically disconnected from the plasma O-point. This is MAST work, not only DIII-D. MECHANISM TO TEST FIRST: the binding wall point is a wall node lying in a private-flux region (behind a divertor plate or beyond an X-point) whose flux is the most confined of all wall nodes, so the height-band shadow test lets it bind and the closed region shrinks to the small ellipse the overlays show, with the axis still correctly placed. THE RULE THE LEAD IMPLIES: a limiter point is admissible only if it is topologically connected to the O-point's confined region, that is the wall node is reached by the axis-connected flood without crossing an X-point separatrix, and every wall node in the private-flux region of any admitted X-point is shadowed regardless of its flux value or height. Non-shadowed limiter identification is a connectivity test, not a height band. The running node nia-limiter-point-selection tests this mechanism against the three rows' competing binding-point fluxes; section 3's implementation then replaces the height-band predicate with the connectivity rule and re-solves the four rows, with the overlay panels regenerated so the Nova binding contour is judged against the EFIT LCFS on every row.</div>

@@ -1445,5 +1445,59 @@
   "raw_cross_process_ratios_exceeding_ten_percent": [
     550,
     1074
-  ]
+  ],
+  "cpu_gate": {
+    "baseline": {
+      "revision": "20088ff805bbf24c73fd143604bf48ad79f2be90",
+      "passed": 178,
+      "failed": 1,
+      "skipped": 5,
+      "wall_seconds": 668.8
+    },
+    "after": {
+      "revision": "450bab78a55b6178b145de2dcacaa3e479940743",
+      "passed": 180,
+      "failed": 1,
+      "skipped": 5,
+      "wall_seconds": 646.48
+    },
+    "added_failure_ids": [],
+    "failure_ids": [
+      "tests/test_split_polish_nulls.py::test_accepted_unmoved_polish_preserves_census_value_bits"
+    ],
+    "logs": {
+      "baseline": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pta-adopted-read-cost-reduction/baseline.log",
+      "after": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pta-adopted-read-cost-reduction/after.log"
+    }
+  },
+  "admission_regressions": {
+    "ladder_realised_cells": [
+      132,
+      340,
+      550
+    ],
+    "ladder_error_pitch": [
+      0.0635922608409,
+      0.0922881419414,
+      0.09173372795
+    ],
+    "bound_pitch": 0.1,
+    "rescaling_positions_max_error_m": [
+      8.32667268469e-17,
+      2.70616862252e-16
+    ],
+    "raster_compared_cells": 646,
+    "raster_differing_cells": 0,
+    "bank_rows": 12,
+    "bank_differing_cells": 0,
+    "wall_batch_control_cells": 21,
+    "vessel_only_inside_rejected": [
+      20,
+      1
+    ],
+    "material_hole_inside_rejected": [
+      18,
+      3
+    ]
+  }
 }

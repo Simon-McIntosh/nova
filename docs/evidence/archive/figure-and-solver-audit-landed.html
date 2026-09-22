@@ -3199,6 +3199,70 @@ merged result belongs to a separately dispatched test node.</p>
   run fails on exactly those three conditions and the verbatim mutation is line 1 of the recorded
   log.</p>
 
+  <h4 id="moment-order-cell-count-sign-repair">Repair &mdash; <code>moment-order</code> cell-count sign and panel state (one of the five defects of <code>f-cca-repair-minor-rendering-defects</code>)</h4>
+  <p><strong>Repaired 2026-09-22</strong> by node <code>fsa-repair-the-cell-count-sign</code> on commit
+  <code>e6a49e81d</code>, reviewer anchor
+  <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figure-audit-cut-cell-current-attribution</code>,
+  audit finding F8 (&ldquo;moment-order and gate-b print a leading minus on the cell count&rdquo;). Only the
+  <code>moment-order</code> half of that finding is in this node's scope; the <code>gate-b</code> half is
+  reported under <code>follow_ons</code> rather than touched here.</p>
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/moment-order/weak-rotation-reactor-static-110.svg" alt="Regenerated moment-order route-error panels: four scatter panels of absolute flux-image error over the grid flux span against distance to the nearest cut-cell centroid, titled exact (quadrature stability), order zero, order one and order two, beneath a suptitle reading the case and the cell count as a magnitude." />
+    <figcaption>The repaired figure. The suptitle prints the realised cell count as a magnitude
+    (<code>110 cells</code>) while <code>requested_cells</code> stays the signed field of record in the
+    figure's part file.</figcaption>
+  </figure>
+  <p><strong>The defect reproduced before the repair.</strong> The rendered SVGs carry glyph outlines,
+  not text nodes, so the reproduction is taken at the composer. At the base revision
+  <code>1cfd3fd4c</code> the suptitle was composed as</p>
+  <pre><code>figure.suptitle(
+    f"{row['case']}, {row['requested_cells']} cells &mdash; frozen atomic blocks",
+    fontsize=11,
+)</code></pre>
+  <p>and <code>row['requested_cells']</code> is signed on every one of the four rows
+  (<code>-110</code>, <code>-300</code>, <code>-110</code>, <code>-300</code>), so all four titles read
+  a leading minus. The sign is a data convention of the frozen row key, not a property of the picture:
+  the same driver already wrote the file names, the report tables and the report headings from
+  <code>abs(requested_cells)</code>, so only the title disagreed with the rest of the record.</p>
+  <p><strong>The repair.</strong> The title is composed from <code>abs(row['requested_cells'])</code>
+  and <code>requested_cells</code> remains the signed field in the part and receipt data. The draw
+  routine now returns the render record of what it drew &mdash; the same string it handed
+  <code>suptitle</code>, every panel title with the state that panel draws, and the null-set glyph
+  counts &mdash; and <code>main()</code> writes <code>render-receipt.json</code> beside the figures from
+  those records. The receipt is the only way these titles can be audited: the SVG cannot be read back
+  for text.</p>
+  <p><strong>What the receipt reports.</strong> Four figures, each with its suptitle and its four route
+  panel titles. Cell counts read <code>weak-rotation-reactor-static, 110 cells</code>,
+  <code>&hellip;, 300 cells</code>, <code>moderate-rotation-conventional-static, 110 cells</code>,
+  <code>&hellip;, 300 cells</code>; the signed field stays <code>-110</code>/<code>-300</code> in the
+  same record, and <code>displayed_cell_count</code> equals its magnitude on every row.</p>
+  <p><strong>Panel state, stated rather than assumed.</strong> Every panel in these figures draws an
+  analytic route error, so all sixteen are recorded with <code>state: analytic</code> and there is no
+  forward-state panel among them: the <code>residual=</code>/<code>converged=</code> condition is
+  therefore vacuous here, and the record says so instead of implying it was met by a panel that does not
+  exist. To keep that from being an empty guard, the check rejects any panel whose recorded state is not
+  <code>analytic</code> and whose title omits either field, and a synthetic forward-state panel is
+  asserted to fail it (and to pass once both fields are present). The null-set glyph counts are recorded
+  as an empty mapping per figure for the same reason: these panels draw no <code>draw_nulls</code>
+  vocabulary, and the key is present rather than absent so a missing record is distinguishable from a
+  zero one.</p>
+  <p><strong>The check that could have failed.</strong> <code>tests/test_coupling_moment_order_render.py</code>
+  asserts each condition against the receipt, selected through
+  <code>NOVA_MOMENT_ORDER_RENDER_RECEIPT</code> so a mutated receipt can be audited: 7 passed in 3.99 s.
+  Under the declared control &mdash; the signed <code>requested_cells</code> restored in the title of
+  every figure, the pre-render composer's exact output &mdash; the run exits 1 with four findings, the
+  first reading <code>signed cell count '-110' in 'weak-rotation-reactor-static, -110 cells &mdash;
+  frozen atomic blocks'</code>.</p>
+  <p><strong>Measurement caveat, disclosed.</strong> These figures are drawn from a measurement, and the
+  four rows were re-measured to re-render them: the driver refuses to draw without entering the
+  measurement, so there is no solve-free repaint path for this figure family. This run was made on the
+  <code>titan</code> P100 lane (the H200 reservation refuses every job at the time of writing), and the
+  committed numbers it produced differ from the previously committed
+  ones (a 2026-09-14 run at source revision <code>c2612255e2c3</code> on an unnamed GPU) by up to about
+  2.6e-3 relative on the order-two upper envelope; the adjudication is unchanged, order two still reaches
+  the comparison target on every row and order one still does not. These are titan numbers and are not
+  attributed to the H200.</p>
+
 </section>
 <section class="solver-audit" id="solver-clip-and-quadrature">
 <h2>Solver audit — clip and quadrature</h2>

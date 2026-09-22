@@ -1,0 +1,15 @@
+revision=f5af729a9de6a2287ebd2b528cea278d5bdb3157 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort host=98dci4-clu-3141.iter.org command=env JAX_ENABLE_COMPILATION_CACHE=true /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -vv --tb=short tests/test_reduced_newton.py
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 23:08:42 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 21 items
+
+tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback FAILED [  4%]
+tests/test_reduced_newton.py::test_reduced_coordinates_carry_the_whole_plasma_current PASSED [  9%]
+tests/test_reduced_newton.py::test_prescribed_currents_reuse_one_program PASSED [ 14%]
+tests/test_reduced_newton.py::test_reconstruction_reproduces_the_production_flux_map PASSED [ 19%]
+tests/test_reduced_newton.py::test_reduced_newton_reaches_the_production_fixed_point 

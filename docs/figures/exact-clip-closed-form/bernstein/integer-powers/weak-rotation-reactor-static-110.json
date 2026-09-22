@@ -1,0 +1,69 @@
+{
+  "source_sha256": {
+    "nova/linalg/interpolant.py": "c122821a0bf48626566ad1526e3a4b0a606d60927b200e2a9afb7cf787667e6d",
+    "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+  },
+  "case": "weak-rotation-reactor-static",
+  "requested_cells": 110,
+  "revision": "219c01732d177b14878f691e61c580d0fc258bbc",
+  "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+  "job": "1275837",
+  "comparisons": {
+    "vertices": {
+      "array_equal": false,
+      "relative_l2": 1.8867716723689067e-14,
+      "max_absolute": 3.4017233474514796e-13
+    },
+    "crossings": {
+      "array_equal": false,
+      "relative_l2": 2.1720742638979716e-14,
+      "max_absolute": 3.348432642269472e-13
+    },
+    "current": {
+      "array_equal": false,
+      "relative_l2": 1.5109402925760483e-13,
+      "max_absolute": 1.1883093975484371e-07
+    },
+    "radial_moment": {
+      "array_equal": false,
+      "relative_l2": 1.4269233073176016e-12,
+      "max_absolute": 1.7418187781004235e-08
+    },
+    "vertical_moment": {
+      "array_equal": false,
+      "relative_l2": 1.1129642392806007e-12,
+      "max_absolute": 9.876657713903114e-09
+    },
+    "area": {
+      "array_equal": false,
+      "relative_l2": 1.386976665989637e-13,
+      "max_absolute": 1.3355982986240633e-13
+    },
+    "first_area_moment": {
+      "array_equal": false,
+      "relative_l2": 1.0834278806865278e-12,
+      "max_absolute": 2.0173966663872278e-14
+    },
+    "second_area_moment": {
+      "array_equal": false,
+      "relative_l2": 1.6137624089609279e-13,
+      "max_absolute": 3.6121279578527066e-15
+    },
+    "counts": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    },
+    "live": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    },
+    "refused": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    }
+  },
+  "passed": false
+}

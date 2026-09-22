@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T17:31:49",
+  "updated": "2026-09-22T17:32:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4468,6 +4468,15 @@
       },
       {
         "id": "s18-sgc-control-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-22"
+      },
+      {
+        "id": "s18-sgc-control-c2",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -250516,6 +250525,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3158
+    "_version": 3159
   }
 }

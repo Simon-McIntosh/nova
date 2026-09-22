@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T19:55:54",
+  "updated": "2026-09-22T19:58:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4419,6 +4419,15 @@
         "session_owners": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "s18-fable-20260922"
         }
+      },
+      {
+        "id": "s18-pta-cost-a",
+        "harness": "codex-astra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-22"
       },
       {
         "id": "s18-pta-harness-c",
@@ -259167,6 +259176,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3192
+    "_version": 3193
   }
 }

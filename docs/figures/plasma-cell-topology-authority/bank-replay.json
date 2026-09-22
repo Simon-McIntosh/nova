@@ -1,0 +1,1164 @@
+{
+  "cache": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-null-generator-adoption/docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
+  "cache_sha256": "dacb1776d361dc80b282b038efd2b0a05937de818a9c1b1017554224fe808644",
+  "cache_source_identity": "sha256:23038d9c17076ab89be916f6aa65fea049e6e2241edba15e334c8b4dcf90e0a3",
+  "exact_non_marginal_pass_count": 4,
+  "exact_non_marginal_row_count": 4,
+  "marginal_rule": "only solver_qualification.marginal_solver_basin is authoritative; a missing flag is marginal-unknown and pending",
+  "marginal_unknown_row_count": 6,
+  "not_replayable_row_count": 0,
+  "passes": true,
+  "pending_replayable_row_count": 6,
+  "production_replay": "ForwardFluxOperator._fixed_design_read with MomentGeometry built from the row's committed cell polygons",
+  "qualification_metadata": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-null-generator-adoption/docs/figures/gs-absolute-accuracy/efit-reproduction.json",
+  "replayable_row_count": 12,
+  "row_count": 12,
+  "rows": [
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.3142914939111878,
+      "census_saddle_flux": -0.06887337726853762,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.06887337726853762,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.06887337726853764,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "marginal finding",
+      "frame": 35,
+      "identity": "21978/35 pure",
+      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": true,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.06887337726853764,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.113606002252634e-16,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 2,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 2
+        }
+      },
+      "shot": 21978,
+      "wall_node_census": {
+        "cell_authority_private_count": 10,
+        "differing_node_count": 4,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 9,
+            "nearest_cell_index": 295,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.8250000476837158
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 10,
+            "nearest_cell_index": 294,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 14
+      }
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.3147334469601199,
+      "census_saddle_flux": -0.06470777474906284,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.06470777474906284,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "pending marginal qualification",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.0647077747490628,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "pending marginal qualification",
+      "frame": 35,
+      "identity": "21978/35 mixed",
+      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": null,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.0647077747490628,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.2204762870444054e-15,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 2,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 2
+        }
+      },
+      "shot": 21978,
+      "wall_node_census": {
+        "cell_authority_private_count": 10,
+        "differing_node_count": 4,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 9,
+            "nearest_cell_index": 295,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.8250000476837158
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 10,
+            "nearest_cell_index": 294,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 14
+      }
+    },
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.3056555195860185,
+      "census_saddle_flux": -0.09532994589373621,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.09532994589373621,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.09532994589373615,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "frame": 35,
+      "identity": "21983/35 pure",
+      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.09532994589373615,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.3877787807814457e-17,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21983,
+      "wall_node_census": {
+        "cell_authority_private_count": 7,
+        "differing_node_count": 4,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 9,
+            "nearest_cell_index": 295,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.8250000476837158
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 10,
+            "nearest_cell_index": 294,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 11
+      }
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.305741267417503,
+      "census_saddle_flux": -0.09500072235468901,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.09500072235468901,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "pending marginal qualification",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.09500072235468905,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "pending marginal qualification",
+      "frame": 35,
+      "identity": "21983/35 mixed",
+      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": null,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.09500072235468905,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.3877787807814457e-17,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 2.220446049250313e-16,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21983,
+      "wall_node_census": {
+        "cell_authority_private_count": 8,
+        "differing_node_count": 4,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 9,
+            "nearest_cell_index": 295,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.8250000476837158
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 10,
+            "nearest_cell_index": 294,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 12
+      }
+    },
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.3369926551448841,
+      "census_saddle_flux": -0.2125381521108099,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.2125381521108099,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.21253815211080992,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "frame": 51,
+      "identity": "21985/51 pure",
+      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.21253815211080992,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.734723475976807e-17,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.1102230246251565e-16,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21985,
+      "wall_node_census": {
+        "cell_authority_private_count": 10,
+        "differing_node_count": 7,
+        "differing_nodes": [
+          {
+            "cell_authority_private": true,
+            "index": 11,
+            "nearest_cell_index": 426,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.7835000157356262,
+              1.7280815839767456
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 12,
+            "nearest_cell_index": 426,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.7835000157356262,
+              1.7155816555023193
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 13,
+            "nearest_cell_index": 325,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.5825902819633484,
+              1.5470000505447388
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 14,
+            "nearest_cell_index": 226,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.4165000021457672,
+              1.5470000505447388
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 15,
+            "nearest_cell_index": 161,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.2800000011920929,
+              1.683500051498413
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 7
+      }
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.33713240940252337,
+      "census_saddle_flux": -0.21126305742088536,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.21126305742088536,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "pending marginal qualification",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.21126305742088541,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "pending marginal qualification",
+      "frame": 51,
+      "identity": "21985/51 mixed",
+      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": null,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.21126305742088541,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 2.42861286636753e-17,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21985,
+      "wall_node_census": {
+        "cell_authority_private_count": 5,
+        "differing_node_count": 2,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 7
+      }
+    },
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.3491084947695402,
+      "census_saddle_flux": -0.18663029086836333,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.18663029086836333,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.18663029086836327,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "frame": 46,
+      "identity": "21986/46 pure",
+      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.18663029086836327,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 6.938893903907228e-18,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21986,
+      "wall_node_census": {
+        "cell_authority_private_count": 5,
+        "differing_node_count": 2,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 7
+      }
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.34802893837691723,
+      "census_saddle_flux": -0.1854883665533794,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.1854883665533794,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "pending marginal qualification",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.18548836655337939,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "pending marginal qualification",
+      "frame": 46,
+      "identity": "21986/46 mixed",
+      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": null,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.18548836655337939,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21986,
+      "wall_node_census": {
+        "cell_authority_private_count": 10,
+        "differing_node_count": 4,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 9,
+            "nearest_cell_index": 295,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.8250000476837158
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 10,
+            "nearest_cell_index": 294,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 14
+      }
+    },
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.3325560917624351,
+      "census_saddle_flux": -0.20290750834507937,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.20290750834507937,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.2029075083450793,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "exact non-marginal parity",
+      "frame": 55,
+      "identity": "21989/55 pure",
+      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": false,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.2029075083450793,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.1295700899707568e-16,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 8.881784197001252e-16,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21989,
+      "wall_node_census": {
+        "cell_authority_private_count": 10,
+        "differing_node_count": 7,
+        "differing_nodes": [
+          {
+            "cell_authority_private": true,
+            "index": 11,
+            "nearest_cell_index": 426,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.7835000157356262,
+              1.7280815839767456
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 12,
+            "nearest_cell_index": 426,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.7835000157356262,
+              1.7155816555023193
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 13,
+            "nearest_cell_index": 325,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.5825902819633484,
+              1.5470000505447388
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 14,
+            "nearest_cell_index": 226,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.4165000021457672,
+              1.5470000505447388
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": true,
+            "index": 15,
+            "nearest_cell_index": 161,
+            "nearest_cell_label": 3,
+            "position_m": [
+              0.2800000011920929,
+              1.683500051498413
+            ],
+            "retained_raster_private": false
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 7
+      }
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.3312218814919157,
+      "census_saddle_flux": -0.2022071592500646,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.2022071592500646,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "pending marginal qualification",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.2022071592500647,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "pending marginal qualification",
+      "frame": 55,
+      "identity": "21989/55 mixed",
+      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": null,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.2022071592500647,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 2.0816681711721685e-17,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.1102230246251565e-16,
+          "replayed_candidate_index": 4
+        }
+      },
+      "shot": 21989,
+      "wall_node_census": {
+        "cell_authority_private_count": 5,
+        "differing_node_count": 2,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 7
+      }
+    },
+    {
+      "arm": "pure",
+      "census_axis_flux": 0.34144123663734205,
+      "census_saddle_flux": -0.12440216027127886,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.12440216027127886,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "exact non-marginal parity",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.12440216027127889,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "marginal finding",
+      "frame": 43,
+      "identity": "22086/43 pure",
+      "marginal_flag_source": "solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": true,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.12440216027127889,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 4.002966042486721e-16,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 1,
+          "matches": true,
+          "position_residual_m": 0.0,
+          "replayed_candidate_index": 1
+        }
+      },
+      "shot": 22086,
+      "wall_node_census": {
+        "cell_authority_private_count": 5,
+        "differing_node_count": 2,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 7
+      }
+    },
+    {
+      "arm": "mixed",
+      "census_axis_flux": 0.3415760976477333,
+      "census_saddle_flux": -0.12236763818412656,
+      "classification": {
+        "adjudication": "committed, cell-authority, and retained raster classes agree",
+        "cell_boundary_flux": -0.12236763818412656,
+        "cell_class_margin": "+Infinity",
+        "cell_raster_matches": true,
+        "committed": "diverted",
+        "finding": false,
+        "gate": "pending marginal qualification",
+        "matches_committed": true,
+        "replayed_cell_authority": "diverted",
+        "retained_raster": "diverted",
+        "retained_raster_boundary_flux": -0.12236763818412653,
+        "retained_raster_class_margin": "+Infinity"
+      },
+      "compared_cell_count": 1089,
+      "differing_cell_count": 0,
+      "differing_cells": [],
+      "disposition": "pending marginal qualification",
+      "frame": 43,
+      "identity": "22086/43 mixed",
+      "marginal_flag_source": "missing solver_qualification.marginal_solver_basin",
+      "marginal_solver_basin": null,
+      "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
+      "raster_binding_flux": -0.12236763818412653,
+      "replayable": true,
+      "selected_primaries": {
+        "axis": {
+          "committed_candidate_index": 4,
+          "matches": true,
+          "position_residual_m": 1.6887762462497003e-15,
+          "replayed_candidate_index": 4
+        },
+        "x_point": {
+          "committed_candidate_index": 1,
+          "matches": true,
+          "position_residual_m": 1.1957467920563633e-15,
+          "replayed_candidate_index": 1
+        }
+      },
+      "shot": 22086,
+      "wall_node_census": {
+        "cell_authority_private_count": 10,
+        "differing_node_count": 4,
+        "differing_nodes": [
+          {
+            "cell_authority_private": false,
+            "index": 9,
+            "nearest_cell_index": 295,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.8250000476837158
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 10,
+            "nearest_cell_index": 294,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 25,
+            "nearest_cell_index": 266,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.7280815839767456
+            ],
+            "retained_raster_private": true
+          },
+          {
+            "cell_authority_private": false,
+            "index": 26,
+            "nearest_cell_index": 265,
+            "nearest_cell_label": 0,
+            "position_m": [
+              0.5649306774139404,
+              -1.8250000476837158
+            ],
+            "retained_raster_private": true
+          }
+        ],
+        "node_count": 37,
+        "retained_raster_private_count": 14
+      }
+    }
+  ],
+  "schema": "nova.topology-cell-parity",
+  "status": "pending",
+  "tested_revision": "08dd0dda16ac938205753234f06a53f4e194dca2",
+  "validation_errors": []
+}

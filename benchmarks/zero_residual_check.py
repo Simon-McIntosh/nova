@@ -19,12 +19,17 @@ the policy field and code line that set it.
 
 The weak and moderate 2500-cell rows are measured identically.  This is an
 evidence node: it rebuilds and re-applies, never re-solves.
+
+``--render-only`` rebuilds the panels from the arrays the measurement pass
+persisted under ``--output-root/parts/render``; it applies no map, touches no
+solver and runs anywhere in seconds.
 """
 
 from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
+from dataclasses import replace
 import hashlib
 import json
 import os
@@ -41,6 +46,7 @@ import numpy as np
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.jax.config import configure_dtypes
+from nova.media import ink
 from nova.media import poloidal
 from nova.media.ink import poloidal_axes
 
@@ -52,6 +58,20 @@ ROW_ORDER = (
 )
 CLIP_MODE = "chord"
 COORDINATE_REBUILD_TOLERANCE_M = 1.0e-6
+FIGURE_STEM = "zero-residual-map"
+FLUX_LEVEL_COUNT = 10
+RESIDUAL_LEVEL_COUNT = 8
+
+# The reference (analytic) null set is drawn beside the solved one in its own
+# style: a hollow triangle for the reference axis, so a reader can see the
+# position error of the solve against the fixture rather than one glyph alone.
+REFERENCE_NULL_INK = replace(
+    ink.DEFAULT_INK,
+    xpoint_marker="^",
+    xpoint_color="#0b7285",
+    xpoint_markersize=ink.DEFAULT_INK.axis_markersize,
+    xpoint_markeredgewidth=1.4,
+)
 
 
 def _source_revision() -> str:
@@ -384,29 +404,129 @@ def _measure_row(
         ],
     }
     figure_payload = {
+        "case": case_name,
         "coordinates": coordinates,
         "terminal": terminal,
         "physical_diff": physical_diff,
         "wall": np.asarray(machine.wall_node, dtype=np.float64),
         "boundary": boundary,
         "topology": topology,
+        "reference_topology": part["render_data"]["analytic_topology"],
+        "reference_receipt": str(_row_part_path(case_name).relative_to(ROOT)),
         "span_wb": span,
         "caption": caption,
     }
     return row, figure_payload
 
 
+def _bundle_dir(output_root: Path) -> Path:
+    return output_root / "parts" / "render"
+
+
+def _bundle_paths(output_root: Path, case_name: str) -> tuple[Path, Path]:
+    directory = _bundle_dir(output_root)
+    return directory / f"{case_name}.npz", directory / f"{case_name}-meta.json"
+
+
+def _write_bundle(
+    output_root: Path, case_name: str, payload: dict[str, Any]
+) -> dict[str, str]:
+    """Persist the arrays and labels a re-render needs, with no map application.
+
+    The measured payload is written beside the row record so a later render-only
+    run rebuilds the figure from this directory alone.
+    """
+    array_path, meta_path = _bundle_paths(output_root, case_name)
+    array_path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        array_path,
+        coordinates=np.asarray(payload["coordinates"], dtype=np.float64),
+        terminal=np.asarray(payload["terminal"], dtype=np.float64),
+        physical_diff=np.asarray(payload["physical_diff"], dtype=np.float64),
+        wall=np.asarray(payload["wall"], dtype=np.float64),
+        boundary=np.asarray(payload["boundary"], dtype=np.float64),
+    )
+    meta = {
+        key: payload[key]
+        for key in (
+            "case",
+            "topology",
+            "reference_topology",
+            "reference_receipt",
+            "span_wb",
+            "caption",
+        )
+    }
+    _write_json(meta_path, meta)
+    return {
+        "arrays": str(array_path.relative_to(ROOT)),
+        "meta": str(meta_path.relative_to(ROOT)),
+    }
+
+
+def _load_bundle(output_root: Path, case_name: str) -> dict[str, Any]:
+    array_path, meta_path = _bundle_paths(output_root, case_name)
+    if not array_path.exists() or not meta_path.exists():
+        raise FileNotFoundError(
+            f"render bundle missing for {case_name}: run the measurement pass first "
+            f"({array_path} / {meta_path})"
+        )
+    arrays = np.load(array_path)
+    payload: dict[str, Any] = {name: arrays[name] for name in arrays.files}
+    payload.update(json.loads(meta_path.read_text(encoding="utf-8")))
+    return payload
+
+
+def _null_points(topology: dict[str, Any]) -> tuple[Any, Any]:
+    """Return the finite ``(axis, x_points)`` of one null set, or ``None``."""
+    axis = topology.get("axis_rz_m")
+    x_points = topology.get("x_point_rz_m")
+    axis_array = None if axis is None else np.asarray(axis, dtype=float).reshape(-1)[:2]
+    if axis_array is not None and not np.all(np.isfinite(axis_array)):
+        axis_array = None
+    if x_points is None:
+        x_array = None
+    else:
+        candidate = np.atleast_2d(np.asarray(x_points, dtype=float))
+        finite = candidate[np.all(np.isfinite(candidate[:, :2]), axis=1)]
+        x_array = finite if finite.size else None
+    return axis_array, x_array
+
+
+def _resolve_levels(raster: np.ndarray, count: int) -> list[float]:
+    """Stated contour levels for one raster, never drawn empty.
+
+    The two rows differ in flux span by a factor of about thirty-six, so a
+    level array taken over their union carries levels inside neither: the
+    narrow row then draws no contour at all. Levels are stated per raster.
+    """
+    finite = np.asarray(raster, dtype=np.float64)
+    finite = finite[np.isfinite(finite)]
+    if finite.size == 0:
+        return []
+    levels = poloidal.contour_levels(finite, count=count)
+    return [float(level) for level in np.asarray(levels).reshape(-1)]
+
+
 def _render_panels(
     output_root: Path,
     payloads: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    """Render shared-level flux and relative-residual panels for each row.
+    """Render the terminal-flux and relative-residual panels for each row.
 
     One row of two panels per case: the persisted terminal flux as line
     contours (the state the map is re-applied to) and the unmasked relative
-    residual ``|map - state| / |span|`` on the same geometry.  Both panels
-    share one physical level array each across cases and always carry the
-    wall, the separatrix and the terminal nulls.
+    residual ``|map - state| / |span|`` on the same geometry.  The contour
+    levels are stated per panel, because the two rows differ in flux span by a
+    factor of about thirty-six and a level array taken over their union falls
+    inside neither of the narrower row's values, drawing it empty.
+
+    The terminal-flux panel carries its stated level array, the wall, the
+    boundary, the solved null set and the analytic reference null set in
+    distinct styles, and both panel titles carry the recorded residual and the
+    converged flag.  Every title line and the per-set glyph counts are written
+    to ``render-receipt.json`` beside the panels, so a reader can check the
+    figure's own claim about what it drew.
     """
     import matplotlib.pyplot as plt
 
@@ -430,14 +550,15 @@ def _render_panels(
         rel = residual / abs(payload["span_wb"])
         rel_rasters[name] = (radial, height, rel)
 
-    flux_levels = poloidal.contour_levels(
-        np.concatenate([f.ravel() for _r, _h, f in flux_rasters.values()]),
-        count=10,
-    )
-    residual_levels = poloidal.contour_levels(
-        np.concatenate([f.ravel() for _r, _h, f in rel_rasters.values()]),
-        count=8,
-    )
+    flux_levels = {
+        name: _resolve_levels(raster, FLUX_LEVEL_COUNT)
+        for name, (_r, _h, raster) in flux_rasters.items()
+    }
+    residual_levels = {
+        name: _resolve_levels(raster, RESIDUAL_LEVEL_COUNT)
+        for name, (_r, _h, raster) in rel_rasters.items()
+    }
+    panels: list[dict[str, Any]] = []
 
     for row, name in enumerate(names):
         payload = payloads[name]
@@ -445,27 +566,68 @@ def _render_panels(
         _, _, rel = rel_rasters[name]
         wall_units = (payload["wall"],)
         topology = payload["topology"]
+        reference = payload.get("reference_topology") or {}
+        caption = payload["caption"]
+        residual = float(caption["recorded_scalar"])
+        converged = bool(caption["converged"])
+        marker = f"residual={residual:.3e}  converged={converged}"
 
         flux_axis = axes[row, 0]
+        solved_axis, solved_x = _null_points(topology)
+        reference_axis, reference_x = _null_points(reference)
+        flux_level_array = flux_levels[name]
+        if flux_level_array:
+            flux_title = (
+                f"{name} terminal flux (persisted)  levels={len(flux_level_array)}"
+            )
+        else:
+            flux_title = (
+                f"{name} terminal flux: no persisted flux raster exists "
+                f"({payload.get('reference_receipt')})"
+            )
         poloidal.draw_flux_contours(
-            flux_axis, radial, height, flux, flux_levels, color="#5a6bd6"
+            flux_axis, radial, height, flux, flux_level_array, color="#5a6bd6"
         )
         poloidal.draw_wall(flux_axis, units=wall_units)
         poloidal.draw_boundary(
             flux_axis, payload["boundary"][:, 0], payload["boundary"][:, 1]
         )
-        poloidal.draw_nulls(
+        solved_tally = poloidal.draw_nulls(
             flux_axis,
-            magnetic_axis=topology["axis_rz_m"],
-            x_points=topology["x_point_rz_m"],
+            magnetic_axis=solved_axis,
+            x_points=solved_x,
             contain=wall_units,
         )
+        reference_tally = poloidal.draw_nulls(
+            flux_axis,
+            magnetic_axis=None,
+            x_points=None,
+            other_x_points=(
+                None if reference_x is None else np.asarray(reference_x, dtype=float)
+            ),
+            style=REFERENCE_NULL_INK,
+        )
+        reference_axis_tally = poloidal.draw_nulls(
+            flux_axis,
+            magnetic_axis=None,
+            x_points=None,
+            other_x_points=(
+                None
+                if reference_axis is None
+                else np.asarray(reference_axis, dtype=float)[None, :]
+            ),
+            style=REFERENCE_NULL_INK,
+        )
         poloidal_axes(flux_axis)
-        flux_axis.set_title(f"{name} terminal flux (persisted)", fontsize=9)
+        flux_axis.set_title(f"{flux_title}\n{marker}", fontsize=8)
 
         residual_axis = axes[row, 1]
+        residual_level_array = residual_levels[name]
+        residual_title = (
+            f"{name} |map-state|/|span|  levels={len(residual_level_array)}"
+        )
         poloidal.draw_flux_contours(
-            residual_axis, radial, height, rel, residual_levels, color="#7a3e9d"
+            residual_axis, radial, height, rel, residual_level_array, color="#7a3e9d"
         )
         poloidal.draw_wall(residual_axis, units=wall_units)
         poloidal.draw_boundary(
@@ -475,27 +637,56 @@ def _render_panels(
             color="#35b9c8",
         )
         poloidal_axes(residual_axis)
-        residual_axis.set_title(f"{name} |map-state|/|span|", fontsize=9)
+        residual_axis.set_title(f"{residual_title}\n{marker}", fontsize=8)
+
+        panels.append(
+            {
+                "case": name,
+                "kind": "terminal_flux",
+                "title": f"{flux_title}\n{marker}",
+                "persisted_raster_present": bool(flux_level_array),
+                "level_count": len(flux_level_array),
+                "levels_wb": flux_level_array,
+                "reference_receipt": payload.get("reference_receipt"),
+                "null_glyphs": {
+                    "solved_axis": int(solved_axis is not None),
+                    "solved_x_points": int(solved_tally["x_points_drawn"]),
+                    "solved_x_points_dropped_outside_wall": int(
+                        solved_tally["x_points_dropped_outside_wall"]
+                    ),
+                    "solved_other_x_points": int(solved_tally["other_x_points_drawn"]),
+                    "reference_axis": int(reference_axis_tally["other_x_points_drawn"]),
+                    "reference_x_points": int(reference_tally["other_x_points_drawn"]),
+                },
+            }
+        )
+        panels.append(
+            {
+                "case": name,
+                "kind": "relative_residual",
+                "title": f"{residual_title}\n{marker}",
+                "level_count": len(residual_level_array),
+                "levels_relative_span": residual_level_array,
+            }
+        )
 
     figure.suptitle(
         "cut-cell whole-cell map re-applied once at the persisted terminal state",
         fontsize=10,
     )
-    path = output_root / "panels" / "zero-residual-map.png"
+    path = output_root / "panels" / f"{FIGURE_STEM}.png"
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
     plt.close(figure)
     _write_json(
-        output_root / "panels" / "zero-residual-map-caption.json",
+        output_root / "panels" / f"{FIGURE_STEM}-caption.json",
         {
-            "flux_levels_wb": [float(level) for level in flux_levels],
-            "residual_levels_relative_span": [
-                float(level) for level in residual_levels
-            ],
+            "flux_levels_wb": flux_levels,
+            "residual_levels_relative_span": residual_levels,
             "series": {name: payload["caption"] for name, payload in payloads.items()},
         },
     )
-    return {
+    figure_record = {
         "png_relative": str(Path(os.path.abspath(path)).relative_to(ROOT)),
         "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         "src": (
@@ -503,6 +694,20 @@ def _render_panels(
             "zero-residual-map.png"
         ),
         "render_source": "zero_residual_check",
+    }
+    render_receipt = {
+        "schema": "nova.zero-residual-render-receipt",
+        "source_revision": _source_revision(),
+        "driver_sha256": _driver_sha256(),
+        "figures": {FIGURE_STEM: {"figure": figure_record, "panels": panels}},
+    }
+    _write_json(output_root / "render-receipt.json", render_receipt)
+    return {
+        "figure": figure_record,
+        "panels": panels,
+        "render_receipt": str(
+            (output_root / "render-receipt.json").relative_to(ROOT)
+        ),
     }
 
 
@@ -614,7 +819,8 @@ def _run(output_root: Path, rows: list[tuple[str, int]]) -> dict[str, Any]:
             output_root / "parts" / f"{case_name}-cells-{abs(requested_cells)}.json",
             measured[case_name],
         )
-    figure_record = _render_panels(output_root, figure_payloads)
+        _write_bundle(output_root, case_name, figure_payloads[case_name])
+    render_result = _render_panels(output_root, figure_payloads)
     verdict = (
         _verdict(measured[rows[0][0]], measured[rows[1][0]])
         if len(rows) == 2
@@ -628,7 +834,9 @@ def _run(output_root: Path, rows: list[tuple[str, int]]) -> dict[str, Any]:
             "driver_sha256": _driver_sha256(),
             "clip_mode": support_clip_mode(),
             "device": _device_record(),
-            "figure": figure_record,
+            "figure": render_result["figure"],
+            "panels": render_result["panels"],
+            "render_receipt": render_result["render_receipt"],
             "rows": measured,
             "verdict": verdict,
             "completed": True,
@@ -645,6 +853,41 @@ def _run(output_root: Path, rows: list[tuple[str, int]]) -> dict[str, Any]:
         )
     print("ZERO_RESIDUAL_EXIT=0", flush=True)
     return json.loads(receipt_path.read_text(encoding="utf-8"))
+
+
+def _run_render_only(
+    output_root: Path, rows: list[tuple[str, int]]
+) -> dict[str, Any]:
+    """Rebuild the panels from the persisted bundles, applying no map.
+
+    This is the render path: it reads the arrays the measurement pass wrote
+    and the labels beside them, and it touches no solver and no device beyond
+    matplotlib, so it can run anywhere and finishes in seconds.
+    """
+    payloads = {
+        case_name: _load_bundle(output_root, case_name) for case_name, _ in rows
+    }
+    render_result = _render_panels(output_root, payloads)
+    receipt_path = output_root / "receipt.json"
+    receipt: dict[str, Any] = {}
+    if receipt_path.exists():
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    receipt["figure"] = render_result["figure"]
+    receipt["panels"] = render_result["panels"]
+    receipt["render_receipt"] = render_result["render_receipt"]
+    receipt["render_only"] = {
+        "rows": [name for name, _cells in rows],
+        "source_revision": _source_revision(),
+    }
+    _write_json(receipt_path, receipt)
+    for panel in render_result["panels"]:
+        print(
+            f"ZERO_RESIDUAL_RENDER_PANEL kind={panel['kind']} case={panel['case']} "
+            f"levels={panel['level_count']}",
+            flush=True,
+        )
+    print("ZERO_RESIDUAL_RENDER_EXIT=0", flush=True)
+    return receipt
 
 
 def _parse_rows(arguments: argparse.Namespace) -> list[tuple[str, int]]:
@@ -671,9 +914,20 @@ def main() -> None:
         action="store_true",
         help="validate the row plan and clip mode without applying any map",
     )
+    parser.add_argument(
+        "--render-only",
+        action="store_true",
+        help=(
+            "rebuild the panels from the persisted render bundles in "
+            "--output-root, applying no map"
+        ),
+    )
     arguments = parser.parse_args()
 
     rows = _parse_rows(arguments)
+    if arguments.render_only:
+        _run_render_only(arguments.output_root, rows)
+        return
     if arguments.dry_run:
         configure_dtypes()
         print("ZERO_RESIDUAL_DRY_RUN rows=%d" % len(rows))

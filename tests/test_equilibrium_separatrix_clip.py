@@ -721,3 +721,67 @@ def test_spline_clip_refuses_a_polygon_above_the_derived_capacity():
     assert int(support.vertex_count[0]) == 0
     assert float(support.area[0]) == 0.0
     assert capacity > 0
+
+
+def test_clip_traces_one_polish_body_per_arc_kind():
+    """Cell and branch counts must not replicate the root-polish program."""
+    import jax
+
+    configure_dtypes()
+    square = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+    mesh = AtomicCellMesh.from_cells([square, square + [2.0, 0.0]])
+
+    def level(points):
+        return 0.75 - points[..., 1]
+
+    calls = []
+
+    def tracer(start, end, evaluator, inside):
+        calls.append(start.shape)
+        return _traced_level_arc(start, end, evaluator, inside)
+
+    def clip(flux):
+        return mesh.traced_clip(flux, curve_evaluator=level, arc_tracer=tracer)
+
+    signed = level(jnp.asarray(mesh.node_coordinates))
+    jax.make_jaxpr(clip)(signed)
+    assert calls, "positive control: the supplied arc tracer must be reached"
+    assert len(calls) == 2, f"unrolled arc polish bodies: {calls}"
+    result = jax.jit(clip)(signed)
+    np.testing.assert_allclose(result.area, [0.75, 0.75], rtol=1e-14)
+    result.assert_no_refusal()
+
+
+def test_saddle_wedges_share_one_half_arc_polish_body():
+    """All four saddle regions return through the same fixed-budget tracer."""
+    import jax
+
+    configure_dtypes()
+    square = np.asarray([[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]])
+    mesh = AtomicCellMesh.from_cells([square])
+
+    def level(points):
+        return points[..., 0] * points[..., 1]
+
+    calls = []
+
+    def tracer(start, end, evaluator, inside):
+        calls.append(start.shape)
+        return _traced_level_arc(start, end, evaluator, inside)
+
+    def wedges(flux):
+        return mesh.traced_saddle_wedges(
+            flux,
+            saddle_vertex=jnp.asarray([0.0, 0.0]),
+            core_reference=jnp.asarray([0.5, 0.5]),
+            curve_evaluator=level,
+            arc_tracer=tracer,
+        )
+
+    signed = level(jnp.asarray(mesh.node_coordinates))
+    jax.make_jaxpr(wedges)(signed)
+    assert calls, "positive control: saddle halves must be traced"
+    assert len(calls) == 1, f"unrolled saddle half-arc bodies: {calls}"
+    result = jax.jit(wedges)(signed)
+    assert np.asarray(result.saddle).all()
+    np.testing.assert_allclose(result.area, np.ones((1, 4)), rtol=1e-14)

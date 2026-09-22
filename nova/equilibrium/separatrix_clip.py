@@ -928,6 +928,100 @@ def _traced_clip(
     participating_cell=None,
     arc_tracer: Callable | None = None,
 ):
+    """Map one fixed-capacity clip body over independent atomic-cell inputs.
+
+    A level evaluator with cell-local data supplies ``for_cell(index)``; a
+    coordinate-only callable can be shared directly. Global contour and
+    refusal reductions are performed after the cell map.
+    """
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+
+    coordinates = jnp.asarray(node_coordinates)
+    nodes = jnp.asarray(cell_nodes)
+    count = jnp.asarray(cell_vertex_count)
+    centre = jnp.asarray(centroids)
+    flux = jnp.asarray(signed_flux)
+    cells, width = nodes.shape
+    if flux.shape != (coordinates.shape[0],):
+        raise ValueError("signed_flux must carry one value per atomic node")
+
+    def cell_array(value, shape, message):
+        if value is None:
+            return None
+        array = jnp.asarray(value)
+        if array.shape != shape:
+            raise ValueError(message)
+        return array
+
+    coefficient = cell_array(
+        curve_coefficient, (cells, 6), "curve_coefficient must have shape (cells, 6)"
+    )
+    origin = cell_array(
+        curve_centre, (cells, 2), "curve centres and scales must have shape (cells, 2)"
+    )
+    scale = cell_array(
+        curve_scale, (cells, 2), "curve centres and scales must have shape (cells, 2)"
+    )
+    participation = cell_array(
+        participating_cell, (cells,), "participating_cell must carry one flag per cell"
+    )
+    saddle = None if saddle_vertex is None else jnp.asarray(saddle_vertex)
+    if saddle is not None:
+        if saddle.shape == (2,):
+            saddle = jnp.broadcast_to(saddle, (cells, 2))
+        elif saddle.shape != (cells, 2):
+            raise ValueError("saddle_vertex must have shape (2,) or (cells, 2)")
+
+    def clip_one(index):
+        def row(value):
+            return None if value is None else value[index][None, ...]
+
+        evaluator = curve_evaluator
+        if evaluator is not None and hasattr(evaluator, "for_cell"):
+            evaluator = evaluator.for_cell(index)
+        result = _clip_cell(
+            coordinates[nodes[index]],
+            jnp.arange(width)[None, :],
+            count[index][None],
+            centre[index][None, :],
+            support_capacity,
+            flux[nodes[index]],
+            row(saddle),
+            row(coefficient),
+            row(origin),
+            row(scale),
+            evaluator,
+            row(participation),
+            arc_tracer,
+        )
+        return jax.tree.map(lambda value: value[0] if value.ndim else value, result)
+
+    result = jax.vmap(clip_one)(jnp.arange(cells))
+    return result._replace(
+        contour_area=jnp.abs(jnp.sum(result.contour_area)),
+        patch_area_sum=jnp.sum(result.area),
+        vertex_capacity=result.vertex_capacity[0],
+        refused_cell_count=jnp.sum(result.refused_cell_count),
+    )
+
+
+def _clip_cell(
+    node_coordinates,
+    cell_nodes,
+    cell_vertex_count,
+    centroids,
+    support_capacity,
+    signed_flux,
+    saddle_vertex=None,
+    curve_coefficient=None,
+    curve_centre=None,
+    curve_scale=None,
+    curve_evaluator=None,
+    participating_cell=None,
+    arc_tracer: Callable | None = None,
+):
     """Clip fixed atomic cells using only traced fixed-shape operations.
 
     ``arc_tracer`` is the level-root tracer used on each gap crossing, called as
@@ -1263,85 +1357,36 @@ def _traced_clip(
         compact_slot = jnp.arange(support_capacity)
 
     branch_number = jnp.cumsum(support_saddle, axis=1) - 1
-    branch_vertices = []
-    branch_counts = []
-    for branch in range(2):
+
+    def pack_branch(branch):
         branch_valid = compact_slot[None, :] < vertex_count[:, None]
         branch_valid = branch_valid & jnp.where(
             saddle[:, None], branch_number == branch, branch == 0
         )
-        vertices, counts = _pack_traced_vertices(
-            support, branch_valid, support_capacity
-        )
-        branch_vertices.append(vertices)
-        branch_counts.append(counts)
-    branch_support = jnp.stack(branch_vertices, axis=1)
-    branch_vertex_count = jnp.stack(branch_counts, axis=1)
+        return _pack_traced_vertices(support, branch_valid, support_capacity)
+
+    branch_support, branch_vertex_count = jax.vmap(pack_branch)(jnp.arange(2))
+    branch_support = jnp.moveaxis(branch_support, 0, 1)
+    branch_vertex_count = jnp.moveaxis(branch_vertex_count, 0, 1)
 
     if curve_evaluator is not None:
-        expanded_branches = []
-        expanded_branch_counts = []
-        branch_overflow = jnp.zeros(cell_count, dtype=bool)
-        half_arc_slot = jnp.arange(0, _SPLINE_BOUNDARY_SEGMENTS + 1, 2)
-        second_half_slot = half_arc_slot[1:-1]
-        middle_slot = jnp.arange(2, chord_capacity)
-
-        for branch in range(2):
-            branch_polygon = branch_support[:, branch]
-            branch_count = branch_vertex_count[:, branch]
-            last_slot = jnp.maximum(branch_count - 1, 0)
-            previous_slot = jnp.maximum(branch_count - 2, 0)
-            first_root = branch_polygon[:, 1]
-            last_root = jnp.take_along_axis(
-                branch_polygon, last_slot[:, None, None], axis=1
-            )[:, 0]
-            first_inside = branch_polygon[:, 2]
-            last_inside = jnp.take_along_axis(
-                branch_polygon, previous_slot[:, None, None], axis=1
-            )[:, 0]
-            first_half = tracer(
-                saddle_point,
-                first_root,
-                curve_evaluator,
-                first_inside,
-            )[:, half_arc_slot]
-            second_half = tracer(
-                last_root,
-                saddle_point,
-                curve_evaluator,
-                last_inside,
-            )[:, second_half_slot]
-            middle = branch_polygon[:, middle_slot]
-            expanded_candidate = jnp.concatenate(
-                (first_half, middle, second_half), axis=1
-            )
-            expanded_valid = jnp.concatenate(
-                (
-                    jnp.broadcast_to(
-                        saddle[:, None], (cell_count, first_half.shape[1])
-                    ),
-                    saddle[:, None] & (middle_slot[None, :] < branch_count[:, None]),
-                    jnp.broadcast_to(
-                        saddle[:, None], (cell_count, second_half.shape[1])
-                    ),
-                ),
-                axis=1,
-            )
-            expanded_count = jnp.sum(expanded_valid, axis=1)
-            branch_overflow = branch_overflow | (expanded_count > support_capacity)
-            expanded_support, expanded_count = _pack_traced_vertices(
-                expanded_candidate, expanded_valid, support_capacity
-            )
-            expanded_branches.append(
-                jnp.where(saddle[:, None, None], expanded_support, branch_polygon)
-            )
-            expanded_branch_counts.append(
-                jnp.where(saddle, expanded_count, branch_count)
-            )
-
-        branch_support = jnp.stack(expanded_branches, axis=1)
-        branch_vertex_count = jnp.stack(expanded_branch_counts, axis=1)
-        overflow = overflow | branch_overflow
+        expanded_support, expanded_count, branch_overflow = _trace_saddle_chains(
+            branch_support,
+            branch_vertex_count,
+            saddle_point,
+            saddle,
+            curve_evaluator,
+            tracer,
+            chord_capacity,
+            support_capacity,
+        )
+        branch_support = jnp.where(
+            saddle[:, None, None, None], expanded_support, branch_support
+        )
+        branch_vertex_count = jnp.where(
+            saddle[:, None], expanded_count, branch_vertex_count
+        )
+        overflow = overflow | jnp.any(branch_overflow, axis=1)
 
     full_area, _full_first, _full_second = _traced_polygon_moments(
         cell_start_point, count, centre
@@ -1396,7 +1441,7 @@ def _traced_clip(
         ),
         axis=1,
     )
-    contour_area = 0.5 * jnp.abs(jnp.sum(contour_cross))
+    contour_area = 0.5 * jnp.sum(contour_cross)
     patch_area_sum = jnp.sum(area)
     return TracedClippedSupports(
         support_vertices=support,
@@ -1777,14 +1822,9 @@ def _sampled_spline_edge_roots(
         supported = supported & participation
 
     rank = jnp.cumsum(sign_change, axis=2) - 1
-    bracket_index = []
-    bracket_valid = []
-    for root_slot in range(2):
-        selected = sign_change & (rank == root_slot)
-        bracket_index.append(jnp.argmax(selected, axis=2))
-        bracket_valid.append(jnp.any(selected, axis=2))
-    bracket_index = jnp.stack(bracket_index, axis=2)
-    bracket_valid = jnp.stack(bracket_valid, axis=2) & supported[:, None, None]
+    selected = sign_change[..., None] & (rank[..., None] == jnp.arange(2))
+    bracket_index = jnp.argmax(selected, axis=2)
+    bracket_valid = jnp.any(selected, axis=2) & supported[:, None, None]
     lower_parameter = parameter[bracket_index]
     upper_parameter = parameter[bracket_index + 1]
     lower_point = (
@@ -1811,6 +1851,65 @@ def _sampled_spline_edge_roots(
     return fraction, packed_count, bracket_valid & (upper_value > 0.0)
 
 
+def _trace_saddle_chains(
+    vertices,
+    counts,
+    saddle_point,
+    saddle,
+    evaluator,
+    tracer,
+    straight_capacity,
+    capacity,
+):
+    """Share one root-polish body across both halves and every saddle region."""
+    cell_count = vertices.shape[0]
+    half_arc_slot = jnp.arange(0, _SPLINE_BOUNDARY_SEGMENTS + 1, 2)
+    second_half_slot = half_arc_slot[1:-1]
+    middle_slot = jnp.arange(2, straight_capacity)
+
+    def expand(_carry, region):
+        polygon, count = region
+        last_slot = jnp.maximum(count - 1, 0)
+        previous_slot = jnp.maximum(count - 2, 0)
+        last_root = jnp.take_along_axis(polygon, last_slot[:, None, None], axis=1)[:, 0]
+        last_inside = jnp.take_along_axis(
+            polygon, previous_slot[:, None, None], axis=1
+        )[:, 0]
+
+        def trace_half(_carry, geometry):
+            start, end, inside = geometry
+            return None, tracer(start, end, evaluator, inside)
+
+        _, halves = jax.lax.scan(
+            trace_half,
+            None,
+            (
+                jnp.stack((saddle_point, last_root)),
+                jnp.stack((polygon[:, 1], saddle_point)),
+                jnp.stack((polygon[:, 2], last_inside)),
+            ),
+        )
+        first_half = halves[0][:, half_arc_slot]
+        second_half = halves[1][:, second_half_slot]
+        middle = polygon[:, middle_slot]
+        candidate = jnp.concatenate((first_half, middle, second_half), axis=1)
+        valid = jnp.concatenate(
+            (
+                jnp.broadcast_to(saddle[:, None], (cell_count, first_half.shape[1])),
+                saddle[:, None] & (middle_slot[None, :] < count[:, None]),
+                jnp.broadcast_to(saddle[:, None], (cell_count, second_half.shape[1])),
+            ),
+            axis=1,
+        )
+        expanded, expanded_count = _pack_traced_vertices(candidate, valid, capacity)
+        return None, (expanded, expanded_count, jnp.sum(valid, axis=1) > capacity)
+
+    _, result = jax.lax.scan(
+        expand, None, (jnp.moveaxis(vertices, 1, 0), jnp.moveaxis(counts, 1, 0))
+    )
+    return jax.tree.map(lambda value: jnp.moveaxis(value, 0, 1), result)
+
+
 def _expand_spline_saddle_wedges(
     wedges,
     curve_evaluator,
@@ -1822,57 +1921,17 @@ def _expand_spline_saddle_wedges(
     count = jnp.asarray(wedges.vertex_count)
     cell_count = vertices.shape[0]
     capacity = traced_polygon_vertex_capacity(straight_capacity)
-    half_arc_slot = jnp.arange(0, _SPLINE_BOUNDARY_SEGMENTS + 1, 2)
-    second_half_slot = half_arc_slot[1:-1]
-    middle_slot = jnp.arange(2, straight_capacity)
-    expanded_vertices = []
-    expanded_counts = []
     tracer = _traced_level_arc if arc_tracer is None else arc_tracer
-
-    for wedge in range(4):
-        polygon = vertices[:, wedge]
-        polygon_count = count[:, wedge]
-        last_slot = jnp.maximum(polygon_count - 1, 0)
-        previous_slot = jnp.maximum(polygon_count - 2, 0)
-        first_root = polygon[:, 1]
-        last_root = jnp.take_along_axis(polygon, last_slot[:, None, None], axis=1)[:, 0]
-        first_inside = polygon[:, 2]
-        last_inside = jnp.take_along_axis(
-            polygon, previous_slot[:, None, None], axis=1
-        )[:, 0]
-        first_half = tracer(
-            wedges.saddle_vertex,
-            first_root,
-            curve_evaluator,
-            first_inside,
-        )[:, half_arc_slot]
-        second_half = tracer(
-            last_root,
-            wedges.saddle_vertex,
-            curve_evaluator,
-            last_inside,
-        )[:, second_half_slot]
-        middle = polygon[:, middle_slot]
-        candidate = jnp.concatenate((first_half, middle, second_half), axis=1)
-        valid = jnp.concatenate(
-            (
-                jnp.broadcast_to(
-                    wedges.saddle[:, None], (cell_count, first_half.shape[1])
-                ),
-                wedges.saddle[:, None]
-                & (middle_slot[None, :] < polygon_count[:, None]),
-                jnp.broadcast_to(
-                    wedges.saddle[:, None], (cell_count, second_half.shape[1])
-                ),
-            ),
-            axis=1,
-        )
-        expanded, expanded_count = _pack_traced_vertices(candidate, valid, capacity)
-        expanded_vertices.append(expanded)
-        expanded_counts.append(expanded_count)
-
-    vertices = jnp.stack(expanded_vertices, axis=1)
-    count = jnp.stack(expanded_counts, axis=1)
+    vertices, count, _overflow = _trace_saddle_chains(
+        vertices,
+        count,
+        wedges.saddle_vertex,
+        wedges.saddle,
+        curve_evaluator,
+        tracer,
+        straight_capacity,
+        capacity,
+    )
     flat_vertices = vertices.reshape(4 * cell_count, capacity, 2)
     flat_count = count.reshape(4 * cell_count)
     flat_centre = jnp.broadcast_to(

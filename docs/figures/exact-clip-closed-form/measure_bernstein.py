@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+import fcntl
 import hashlib
 import json
 import os
@@ -174,6 +175,12 @@ def program(arm):
 
 
 def row(case, cells):
+    with (OUTPUT / f"{case}-{cells}.lock").open("w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        return _row(case, cells)
+
+
+def _row(case, cells):
     fingerprint = {
         path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
         for path in (

@@ -23,12 +23,12 @@
   <title>Exact-clip moment quadrature | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-21">
+<meta name="plan-modified" content="2026-09-22">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 </head>
 <body>
   <main class="plan-doc">
@@ -268,6 +268,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260919T143550451855-ecq-capacity-record-repairs" data-who="reckon-ship" data-when="2026-09-19T14:57:47.894Z">
     <div class="r-comment-body"><p>All three capacity record defects corrected against measurement; the refused cell is identified and shown to realise two traced level runs against a one-arc bound, which is now a decision.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-ecq-20260922-the-order-lever-for-the-hot-path" data-who="" data-when="">
+    <div class="r-comment-body">Lead decision 2026-09-22 (decision production-clip-is-moment-preserving-and-coupling-frozen on cut-cell-current-attribution): the moment-preserving, Biot-interaction-frozen cell clips go into the hot path, and any memory or trace cost is solved independently by vmapping the clip kernels or lowering the clip and moment order. This plan owns that lever. Its closed-form polygon moments at the coupling's order and the realised-support capacity (3840 swept to 158 derived at 110 cells, f7fefbd7) are what make the clipped mode compilable; the open swept-product followup and section 4 are therefore on the S19 critical path behind the exact-mode program census (f-cca-measure-the-exact-mode-executable-at-head): if the clipped-mode certificate executable at HEAD sits over 100,000,000 bytes at 300 cells, the next node lands here (one vmapped per-cell clip kernel body, moment order no higher than the frozen coupling consumes) before any production mode change touches forward_operator.py. Its files (nova/equilibrium/clip_quadrature.py, moment.py) do not contend with the mode change or with route-integrity section 3.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T050738546364-review-of-ecq-sampled-arc-gauss-route" data-who="s19c-review-ecq-c" data-when="2026-09-17T06:47:16.162Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T204834010483-ecq-sampled-arc-gauss-route stored at the fence path, total 82, findings recorded on the reviewed run's completion</p></div>

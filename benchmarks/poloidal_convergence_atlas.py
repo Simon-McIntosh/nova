@@ -19,19 +19,29 @@ Nothing here solves or reads an image: the flux maps, walls and stationary
 points are the committed operands of docs/figures/topology-visual-corroboration,
 and the only writes are PNGs and a machine-readable receipt.
 
-The painter set is nova.media.poloidal (draw_wall, draw_flux_contours,
-draw_boundary, contour_levels) together with one purpose-built null painter.
-nova.media.poloidal.draw_nulls is NOT reused for the X-points because it drops
-out-of-vessel candidates as a matter of design (its containment filter exists
-to remove markers that mislead), and showing the out-of-vessel population is
-precisely the content the atlas is for. The null painter here therefore keeps
-every finite candidate and draws the outside-wall subset with a distinct
-marker and a per-panel tally. The wall shadow is the production
-wall_height_shadow_mask hysteretic rule run on the committed axis, admitted
-saddle and finite X candidates; the connectivity-private term is passed as an
-empty mask because the committed operands do not persist the per-wall-node
-private flux classification, so the drawn shadow is the saddle-height band
-only. Both deviations are stated in the evidence document.
+The painter set is the committed nova.media.poloidal painters: draw_wall,
+draw_flux_contours, draw_boundary, contour_levels and draw_nulls. The null
+vocabulary is draw_nulls' own -- the magnetic axis as a solid triangle, the
+admitted saddle as a filled cross, and every other qualified null hollow --
+taken from the shared InkStyle rather than spelled as literal marker strings,
+so a panel cannot drift from the style the rest of the figure set is drawn in.
+
+Showing the out-of-vessel population is precisely the content the atlas is
+for, and draw_nulls carries it: the admitted saddle is passed as ``x_points``
+with the wall as its containment polygon (a null outside the vessel is finite
+and would otherwise draw a plausible cross in the centre column), while every
+remaining qualified null -- inside the wall or above it -- is passed as
+``other_x_points``, which is drawn hollow and deliberately NOT
+containment-filtered, so both saddles of a diverted frame are visible and
+distinguished by fill rather than by absence. The receipt keeps the
+out-of-vessel member count beside draw_nulls' own tallies.
+
+The wall shadow is the production wall_height_shadow_mask hysteretic rule run
+on the committed axis, admitted saddle and finite X candidates; the
+connectivity-private term is passed as an empty mask because the committed
+operands do not persist the per-wall-node private flux classification, so the
+drawn shadow is the saddle-height band only. That deviation is stated in the
+evidence document.
 
 Run on a debug partition with a per-job TMPDIR so the compilation cache cannot
 collide (the render itself is matplotlib-only; the shadow rule is one eager
@@ -270,72 +280,56 @@ def _nearest_cell(
     return np.asarray(nearest, dtype=int)
 
 
-class NullPainter:
-    """Draw the axis and the qualified X-points with the out-of-vessel split.
+def _split_qualified_nulls(
+    qualified_x: np.ndarray, admitted_x: np.ndarray
+) -> tuple[np.ndarray | None, np.ndarray | None]:
+    """Split the qualified set into the admitted saddle and every other null.
 
-    ``draw_nulls`` in nova.media.poloidal drops every candidate outside the
-    containment polygon, which is the opposite of what the atlas has to show,
-    so this painter keeps the qualified set and draws the wall-exterior
-    members with a distinct hollow square while the in-vessel members are
-    hollow circles; the admitted saddle is drawn filled on top by the caller.
+    ``draw_nulls`` draws ``x_points`` as a filled cross and ``other_x_points``
+    hollow, so the split is exactly which nulls the read admitted. The admitted
+    saddle is compared against the qualified rows at a tolerance far below the
+    detector spacing, because the committed store persists the two separately
+    and they agree only to the polish's own resolution.
     """
+    array = np.atleast_2d(np.asarray(qualified_x, dtype=float))
+    if array.size == 0:
+        return None, None
+    array = array[np.all(np.isfinite(array[:, :2]), axis=1)]
+    if array.size == 0:
+        return None, None
+    admitted = np.asarray(admitted_x, dtype=float).reshape(-1)[:2]
+    if not np.all(np.isfinite(admitted)):
+        return None, array
+    near = np.linalg.norm(array[:, :2] - admitted[None, :], axis=1) <= 1e-9
+    if not np.any(near):
+        return admitted[None, :], array
+    return array[near], array[~near]
 
-    def __init__(self, axes, style=DEFAULT_INK) -> None:
-        self.axes = axes
-        self.style = style
 
-    def draw(self, magnetic_axis, x_points, wall) -> dict[str, int]:
-        tally = {
-            "qualified_x_count": 0,
-            "qualified_x_outside_wall": 0,
-        }
-        if magnetic_axis is not None:
-            point = np.asarray(magnetic_axis, dtype=float).reshape(-1)[:2]
-            if np.all(np.isfinite(point)):
-                self.axes.plot(
-                    point[0],
-                    point[1],
-                    marker=self.style.axis_marker,
-                    markersize=self.style.axis_markersize,
-                    color=self.style.axis_color,
-                    linestyle="none",
-                    zorder=self.style.zorder_markers,
-                )
-        if x_points is None:
-            return tally
-        array = np.atleast_2d(np.asarray(x_points, dtype=float))
-        array = array[np.all(np.isfinite(array[:, :2]), axis=1)]
-        if array.size == 0:
-            return tally
-        tally["qualified_x_count"] = int(array.shape[0])
-        wall2 = np.asarray(wall, dtype=float).reshape(-1, 2)
-        inside = inside_polygon(array[:, 0], array[:, 1], wall2[:, 0], wall2[:, 1])
-        tally["qualified_x_outside_wall"] = int(np.sum(~np.asarray(inside, dtype=bool)))
-        # Outside-wall qualified X-points: hollow squares in the outboard accent.
-        self.axes.plot(
-            array[~inside, 0],
-            array[~inside, 1],
-            marker="s",
-            markersize=self.style.xpoint_markersize,
-            markerfacecolor="none",
-            markeredgecolor="#b35806",
-            markeredgewidth=self.style.xpoint_markeredgewidth,
-            linestyle="none",
-            zorder=self.style.zorder_markers,
-        )
-        # Inside-wall qualified X-points: hollow circles.
-        self.axes.plot(
-            array[inside, 0],
-            array[inside, 1],
-            marker=self.style.xpoint_marker,
-            markersize=self.style.xpoint_markersize,
-            markerfacecolor="none",
-            markeredgecolor=self.style.xpoint_color,
-            markeredgewidth=self.style.xpoint_markeredgewidth,
-            linestyle="none",
-            zorder=self.style.zorder_markers,
-        )
-        return tally
+def _draw_nulls(axes, axis: np.ndarray, qualified_x: np.ndarray, admitted_x, wall):
+    """Draw the axis and qualified nulls through the committed draw_nulls.
+
+    Returns draw_nulls' own tally extended with the atlas' counts: the
+    qualified population and its out-of-vessel members. The style is passed
+    explicitly rather than spelled as literal markers so the panel vocabulary
+    is the figure set's.
+    """
+    admitted_set, other = _split_qualified_nulls(qualified_x, admitted_x)
+    tally = poloidal.draw_nulls(
+        axes,
+        magnetic_axis=axis,
+        x_points=admitted_set,
+        other_x_points=other,
+        contain=np.asarray(wall, dtype=float).reshape(-1, 2),
+        style=DEFAULT_INK,
+    )
+    array = np.atleast_2d(np.asarray(qualified_x, dtype=float))
+    array = array[np.all(np.isfinite(array[:, :2]), axis=1)]
+    wall2 = np.asarray(wall, dtype=float).reshape(-1, 2)
+    inside = inside_polygon(array[:, 0], array[:, 1], wall2[:, 0], wall2[:, 1])
+    tally["qualified_x_count"] = int(array.shape[0])
+    tally["qualified_x_outside_wall"] = int(np.sum(~np.asarray(inside, dtype=bool)))
+    return tally
 
 
 def _draw_shadowed_wall(
@@ -462,21 +456,7 @@ def _panel(
             bbox={"facecolor": "#fff1f1", "edgecolor": "#b00020"},
             zorder=10,
         )
-    painter = NullPainter(axes)
-    tally = painter.draw(axis, qualified_x, wall)
-    # The admitted saddle is drawn on top of the qualified population.
-    if np.all(np.isfinite(admitted_x)):
-        axes.plot(
-            admitted_x[0],
-            admitted_x[1],
-            marker="X",
-            markersize=DEFAULT_INK.xpoint_markersize + 2,
-            markerfacecolor=DEFAULT_INK.xpoint_color,
-            markeredgecolor="white",
-            markeredgewidth=0.8,
-            linestyle="none",
-            zorder=DEFAULT_INK.zorder_markers + 1,
-        )
+    tally = _draw_nulls(axes, axis, qualified_x, admitted_x, wall)
     if np.all(np.isfinite(efit_axis)):
         axes.plot(
             efit_axis[0],
@@ -500,6 +480,21 @@ def _panel(
     axes.set_xlim(float(np.min(wall[:, 0])) - 0.06, float(np.max(wall[:, 0])) + 0.06)
     axes.set_ylim(float(np.min(wall[:, 1])) - 0.06, float(np.max(wall[:, 1])) + 0.06)
     axes.set_axis_off()
+    axes.text(
+        0.02,
+        0.02,
+        (
+            f"{DEFAULT_INK.axis_marker} magnetic axis   "
+            f"{DEFAULT_INK.xpoint_marker} admitted saddle   "
+            f"{DEFAULT_INK.xpoint_marker} (hollow) other qualified   "
+            "+ EFIT reference"
+        ),
+        transform=axes.transAxes,
+        ha="left",
+        va="bottom",
+        fontsize=6,
+        color="#444444",
+    )
 
     identity = record["identity"]
     slug = identity.replace("/", "-").replace(" ", "-").replace(":", "-")
@@ -541,6 +536,12 @@ def _panel(
         "efit_axis": [float(v) for v in efit_axis],
         "efit_x_count": int(np.sum(np.all(np.isfinite(efit_x[:, :2]), axis=1))),
         **_host_tally(tally),
+        "null_style": {
+            "axis_marker": DEFAULT_INK.axis_marker,
+            "admitted_x_marker": DEFAULT_INK.xpoint_marker,
+            "admitted_x_fill": "filled",
+            "other_x_fill": "hollow",
+        },
         "shadow_band_wall_nodes": int(np.sum(band)),
         "shadow_band_drawn_segments": band_segments,
         "shadow_private_wall_nodes": int(np.sum(shadow)),

@@ -1,0 +1,46 @@
+{
+  "revision": "07e16f911d520cdd091ec7e685a506c9615dd6a4",
+  "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+  "arm": "negative",
+  "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-closed-form-polygon-moments-replace-the-gauss-antiderivative",
+  "job": "1275743",
+  "node": "98dci4-clu-3141",
+  "requested_cells": 110,
+  "realised_cells": 135,
+  "mode": "exact",
+  "evaluations_per_cut_cell": 621,
+  "completed": true,
+  "lower_seconds": 41.52330326847732,
+  "lowered_antiderivative_present": true,
+  "lowered_closed_form_present": false,
+  "compile_seconds": 433.70258370414376,
+  "serialized_bytes": 234137743,
+  "serialized_sha256": "ea5d79c7b57573e68998662c7f70eded6b2b6d6f67d6cdfb2c1c8b41f2eabf71",
+  "top_five_hlo_ops": [
+    [
+      "parameter",
+      124212
+    ],
+    [
+      "broadcast",
+      89497
+    ],
+    [
+      "bitcast",
+      74875
+    ],
+    [
+      "constant",
+      74478
+    ],
+    [
+      "add",
+      55569
+    ]
+  ],
+  "hlo_instructions": 741991,
+  "hlo_antiderivative_occurrences": 1,
+  "hlo_closed_form_occurrences": 0,
+  "hlo_bernstein_binom_occurrences": 1,
+  "below_byte_ceiling": false
+}

@@ -568,6 +568,7 @@ class _NewtonIterationState(NamedTuple):
     promotion_descent_activations: jax.Array
     promotion_descent_scales: jax.Array
     inner_trace: _InnerIterationTrace
+    model_rebuild_required: jax.Array
 
 
 class _NewtonGlobalizationState(NamedTuple):
@@ -582,6 +583,7 @@ class _NewtonGlobalizationState(NamedTuple):
     previous_model_error_fraction: jax.Array
     recovery_radius: jax.Array
     model_rebuild_damping: jax.Array
+    model_rebuild_required: jax.Array
 
 
 class _ActiveSetIterationState(NamedTuple):
@@ -646,6 +648,15 @@ class _BacktrackingScores(NamedTuple):
     ladder_selected: jax.Array
     ladder_accepted: jax.Array
     ladder_distrusted: jax.Array
+    selected_model_unreliable: jax.Array
+
+
+class _BacktrackingSelection(NamedTuple):
+    """Decision returned by the common measured-candidate selector."""
+
+    selected: jax.Array
+    accepted: jax.Array
+    model_distrusted: jax.Array
     selected_model_unreliable: jax.Array
 
 
@@ -941,6 +952,64 @@ def _measured_decrease_accepts_pessimistic_model(
     )
 
 
+def _select_backtracking_candidate(
+    factors: jax.Array,
+    merits: jax.Array,
+    residuals: jax.Array,
+    incumbent_merit: jax.Array,
+    incumbent_residual: jax.Array,
+    acceptance_reference: jax.Array,
+    predicted_merits: jax.Array,
+    predicted_current_merit: jax.Array,
+    model_trust_selection: jax.Array | bool,
+    own_mask_acceptance: jax.Array | bool,
+) -> _BacktrackingSelection:
+    """Select one ladder candidate under the production decrease authorities."""
+    required = acceptance_reference * (1.0 - _SUFFICIENT_DECREASE_SLOPE * factors)
+    sufficient = jnp.isfinite(merits) & jnp.isfinite(residuals) & (merits <= required)
+    sufficient &= ~jnp.asarray(own_mask_acceptance) | (residuals < incumbent_residual)
+    selected = jnp.argmax(sufficient)
+    selected_trusted = _model_decrease_is_trusted(
+        predicted_merits[selected],
+        merits[selected],
+        incumbent_merit,
+        predicted_current_merit,
+    )
+    selected_model_unreliable = jnp.asarray(
+        own_mask_acceptance
+    ) & _measured_decrease_accepts_pessimistic_model(
+        predicted_merits[selected],
+        merits[selected],
+        incumbent_merit,
+        predicted_current_merit,
+        residuals[selected],
+        incumbent_residual,
+        factors[selected],
+    )
+    accepted = jnp.any(sufficient) & (
+        ~jnp.asarray(model_trust_selection)
+        | selected_trusted
+        | selected_model_unreliable
+    )
+    ladder_mispredicted = (predicted_merits < predicted_current_merit) & ~jax.vmap(
+        lambda predicted, actual: _model_decrease_is_trusted(
+            predicted,
+            actual,
+            incumbent_merit,
+            predicted_current_merit,
+        )
+    )(predicted_merits, merits)
+    model_distrusted = jnp.asarray(model_trust_selection) & (
+        jnp.any(ladder_mispredicted) | selected_model_unreliable
+    )
+    return _BacktrackingSelection(
+        selected=selected,
+        accepted=accepted,
+        model_distrusted=model_distrusted,
+        selected_model_unreliable=selected_model_unreliable,
+    )
+
+
 def _nonlinear_model_error_fraction(
     predicted_merit: jax.Array,
     actual_merit: jax.Array,
@@ -1044,39 +1113,18 @@ def _backtracking_scores(
         ),
         candidates,
     )
-    required = acceptance_reference * (1.0 - _SUFFICIENT_DECREASE_SLOPE * factors)
-    sufficient = jnp.isfinite(merits) & jnp.isfinite(residuals) & (merits <= required)
-    sufficient &= ~jnp.asarray(own_mask_acceptance) | (residuals < incumbent_residual)
-    ladder_selected = jnp.argmax(sufficient)
     predicted_current_merit = _smooth_relative_sup_merit(model_map_fn(state), state)
-    ladder_trusted = _model_decrease_is_trusted(
-        predicted_merits[ladder_selected],
-        merits[ladder_selected],
+    selection = _select_backtracking_candidate(
+        factors,
+        merits,
+        residuals,
         incumbent_merit,
-        predicted_current_merit,
-    )
-    selected_model_unreliable = _measured_decrease_accepts_pessimistic_model(
-        predicted_merits[ladder_selected],
-        merits[ladder_selected],
-        incumbent_merit,
-        predicted_current_merit,
-        residuals[ladder_selected],
         incumbent_residual,
-        factors[ladder_selected],
-    )
-    ladder_accepted = jnp.any(sufficient) & (
-        ~jnp.asarray(model_trust_selection) | ladder_trusted | selected_model_unreliable
-    )
-    ladder_mispredicted = (predicted_merits < predicted_current_merit) & ~jax.vmap(
-        lambda predicted, actual: _model_decrease_is_trusted(
-            predicted,
-            actual,
-            incumbent_merit,
-            predicted_current_merit,
-        )
-    )(predicted_merits, merits)
-    ladder_distrusted = jnp.asarray(model_trust_selection) & (
-        jnp.any(ladder_mispredicted) | selected_model_unreliable
+        acceptance_reference,
+        predicted_merits,
+        predicted_current_merit,
+        model_trust_selection,
+        own_mask_acceptance,
     )
     return _BacktrackingScores(
         factors=factors,
@@ -1088,10 +1136,10 @@ def _backtracking_scores(
         acceptance_reference=acceptance_reference,
         predicted_merits=predicted_merits,
         predicted_current_merit=predicted_current_merit,
-        ladder_selected=ladder_selected,
-        ladder_accepted=ladder_accepted,
-        ladder_distrusted=ladder_distrusted,
-        selected_model_unreliable=selected_model_unreliable,
+        ladder_selected=selection.selected,
+        ladder_accepted=selection.accepted,
+        ladder_distrusted=selection.model_distrusted,
+        selected_model_unreliable=selection.selected_model_unreliable,
     )
 
 
@@ -1162,7 +1210,9 @@ def _backtracked_promotion(
                 RecoveryOutcome.NOT_APPLICABLE, dtype=jnp.int32
             ),
             applied_factor=factors[ladder_selected],
-            model_distrusted=scores.selected_model_unreliable,
+            model_distrusted=(
+                jnp.asarray(model_trust_selection) & scores.selected_model_unreliable
+            ),
             model_error_fraction=model_error_fraction,
         )
 
@@ -1192,7 +1242,7 @@ def _backtracked_promotion(
                 incumbent_merit,
                 _smooth_relative_sup_merit(model_map_fn(state), state),
             )
-            measured_pessimistic_decrease = (
+            measured_pessimistic_decrease = jnp.asarray(own_mask_acceptance) & (
                 _measured_decrease_accepts_pessimistic_model(
                     predicted_merit,
                     candidate_merit,
@@ -1662,6 +1712,7 @@ def _complete_newton_promotion(
         candidate_model_error_fraction,
         measured.previous_model_error_fraction,
     )
+    next_model_rebuild_required = promotion.accepted & promotion.model_distrusted
     recent_merits, merit_observations = _record_merit(
         measured.recent_merits,
         measured.merit_observations,
@@ -1782,6 +1833,7 @@ def _complete_newton_promotion(
         descent_activations,
         descent_scales,
         inner_trace,
+        next_model_rebuild_required,
     )
 
 
@@ -2841,6 +2893,7 @@ def _newton_krylov_inner(
             model_rebuild_damping=jnp.asarray(
                 _MODEL_REBUILD_DAMPING_INITIAL, dtype=initial.dtype
             ),
+            model_rebuild_required=jnp.asarray(False),
         )
     best_state = jnp.where(
         resume_globalization, globalization_state.best_state, best_state
@@ -3056,7 +3109,7 @@ def _newton_krylov_inner(
                             own_mask_acceptance=own_mask_acceptance,
                         ),
                     )
-                    promotion = _backtracked_promotion(
+                    measured_promotion = _backtracked_promotion(
                         frozen_map,
                         local_model,
                         state,
@@ -3070,7 +3123,31 @@ def _newton_krylov_inner(
                         own_mask_acceptance=own_mask_acceptance,
                         scores=scores,
                     )
-                    rebuild_activated = (
+                    rebuild_only = _BacktrackedPromotion(
+                        state=state,
+                        residual=nonlinear_residual,
+                        accepted=jnp.asarray(False),
+                        backtrack_count=jnp.asarray(factors.size, dtype=jnp.int32),
+                        recovery_activated=jnp.asarray(False),
+                        recovery_radius=current.recovery_radius,
+                        recovery_radius_before=jnp.asarray(jnp.nan, dtype=state.dtype),
+                        recovery_outcome=jnp.asarray(
+                            RecoveryOutcome.NOT_APPLICABLE, dtype=jnp.int32
+                        ),
+                        applied_factor=jnp.asarray(0.0, dtype=state.dtype),
+                        model_distrusted=jnp.asarray(False),
+                        model_error_fraction=jnp.asarray(jnp.nan, dtype=state.dtype),
+                    )
+                    promotion = jax.tree.map(
+                        lambda measured_value, rebuild_value: jnp.where(
+                            current.model_rebuild_required,
+                            rebuild_value,
+                            measured_value,
+                        ),
+                        measured_promotion,
+                        rebuild_only,
+                    )
+                    rebuild_activated = current.model_rebuild_required | (
                         promotion.recovery_activated
                         & ~promotion.accepted
                         & (
@@ -3285,6 +3362,7 @@ def _newton_krylov_inner(
                     ),
                     measured.promotion_descent_scales,
                     inner_trace,
+                    measured.model_rebuild_required,
                 )
 
             return jax.lax.cond(
@@ -3344,6 +3422,11 @@ def _newton_krylov_inner(
             jnp.full(newton_steps, -1, dtype=jnp.int32),
             jnp.full(newton_steps, jnp.nan, dtype=initial.dtype),
             _empty_inner_trace(newton_steps, initial.dtype),
+            jnp.where(
+                resume_globalization,
+                globalization_state.model_rebuild_required,
+                jnp.asarray(False),
+            ),
         ),
     )
     result = FixedPointResult(
@@ -3394,6 +3477,7 @@ def _newton_krylov_inner(
         previous_model_error_fraction=loop.previous_model_error_fraction,
         recovery_radius=loop.recovery_radius,
         model_rebuild_damping=loop.model_rebuild_damping,
+        model_rebuild_required=loop.model_rebuild_required,
     )
     if return_globalization_state:
         return result, continued_globalization

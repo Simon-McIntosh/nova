@@ -10,93 +10,118 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
-from nova.equilibrium.fixed_point import (  # noqa: E402
-    _measured_decrease_accepts_pessimistic_model,
-    _model_decrease_is_trusted,
-)
+import jax.numpy as jnp  # noqa: E402
+
+from nova.equilibrium.fixed_point import _select_backtracking_candidate  # noqa: E402
 
 
-def _actual_checks(incumbent, candidate, fraction):
-    required = incumbent["merit"] * (1.0 - 1.0e-4 * fraction)
-    return (
-        candidate["actual"]["merit"] <= required
-        and candidate["actual"]["relative_sup"] < incumbent["relative_sup"]
-    )
-
-
-def _pessimistic_admission(incumbent, candidate):
-    return bool(
-        _measured_decrease_accepts_pessimistic_model(
-            candidate["predicted"]["merit"],
-            candidate["actual"]["merit"],
-            incumbent["merit"],
-            incumbent["merit"],
-            candidate["actual"]["relative_sup"],
-            incumbent["relative_sup"],
-            candidate["fraction"],
-        )
+def _production_selection(
+    factors,
+    merits,
+    residuals,
+    incumbent_merit,
+    incumbent_residual,
+    acceptance_reference,
+    predicted_merits,
+    predicted_current_merit,
+):
+    return _select_backtracking_candidate(
+        jnp.asarray(factors),
+        jnp.asarray(merits),
+        jnp.asarray(residuals),
+        jnp.asarray(incumbent_merit),
+        jnp.asarray(incumbent_residual),
+        jnp.asarray(acceptance_reference),
+        jnp.asarray(predicted_merits),
+        jnp.asarray(predicted_current_merit),
+        True,
+        True,
     )
 
 
 def _historical_checks(coarse):
     scores = coarse["historical_reproduction"]["scores"]
     analytic = scores["toward_analytic"]
-    selected = analytic["ladder_selected"]
-    full_candidate = {
-        "fraction": analytic["factors"][selected],
-        "actual": {
-            "merit": analytic["merits"][selected],
-            "relative_sup": analytic["residuals"][selected],
-        },
-        "predicted": {"merit": analytic["predicted_merits"][selected]},
-    }
-    incumbent = {
-        "merit": analytic["incumbent_merit"],
-        "relative_sup": analytic["incumbent_residual"],
-    }
-    assert _actual_checks(incumbent, full_candidate, full_candidate["fraction"])
-    assert _pessimistic_admission(incumbent, full_candidate)
+    analytic_selection = _production_selection(
+        analytic["factors"],
+        analytic["merits"],
+        analytic["residuals"],
+        analytic["incumbent_merit"],
+        analytic["incumbent_residual"],
+        analytic["acceptance_reference"],
+        analytic["predicted_merits"],
+        analytic["predicted_current_merit"],
+    )
+    assert int(analytic_selection.selected) == 0
+    assert bool(analytic_selection.accepted)
+    assert bool(analytic_selection.selected_model_unreliable)
 
     half = scores["map_defect"]
-    selected = half["ladder_selected"]
+    half_selection = _production_selection(
+        half["factors"],
+        half["merits"],
+        half["residuals"],
+        half["incumbent_merit"],
+        half["incumbent_residual"],
+        half["acceptance_reference"],
+        half["predicted_merits"],
+        half["predicted_current_merit"],
+    )
+    selected = int(half_selection.selected)
     assert half["factors"][selected] == 0.5
-    assert half["merits"][selected] <= half["incumbent_merit"] * (
-        1.0 - 1.0e-4 * half["factors"][selected]
-    )
-    assert half["residuals"][selected] < half["incumbent_residual"]
-    assert bool(
-        _model_decrease_is_trusted(
-            half["predicted_merits"][selected],
-            half["merits"][selected],
-            half["incumbent_merit"],
-            half["predicted_current_merit"],
-        )
-    )
+    assert bool(half_selection.accepted)
+    assert not bool(half_selection.selected_model_unreliable)
     return {
         "full_analytic": {
-            "actual_merit": full_candidate["actual"]["merit"],
-            "predicted_merit": full_candidate["predicted"]["merit"],
+            "actual_merit": analytic["merits"][0],
+            "predicted_merit": analytic["predicted_merits"][0],
             "accepted": True,
             "model_unreliable": True,
+            "selected_index": int(analytic_selection.selected),
         },
         "half_defect": {
             "actual_merit": half["merits"][selected],
             "predicted_merit": half["predicted_merits"][selected],
             "accepted": True,
             "model_unreliable": False,
+            "selected_index": selected,
         },
     }
 
 
 def _authoritative_checks(receipt):
     incumbent = receipt["incumbent"]
-    analytic = receipt["directions"]["analytic"]["ladder"][0]
-    assert _actual_checks(incumbent, analytic, analytic["fraction"])
-    assert _pessimistic_admission(incumbent, analytic)
+    analytic_ladder = receipt["directions"]["analytic"]["ladder"]
+    analytic_selection = _production_selection(
+        [item["fraction"] for item in analytic_ladder],
+        [item["actual"]["merit"] for item in analytic_ladder],
+        [item["actual"]["relative_sup"] for item in analytic_ladder],
+        incumbent["merit"],
+        incumbent["relative_sup"],
+        incumbent["merit"],
+        [item["predicted"]["merit"] for item in analytic_ladder],
+        incumbent["merit"],
+    )
+    analytic = analytic_ladder[int(analytic_selection.selected)]
+    assert int(analytic_selection.selected) == 0
+    assert bool(analytic_selection.accepted)
+    assert bool(analytic_selection.selected_model_unreliable)
 
     newton = receipt["directions"]["newton"]["ladder"]
-    assert all(not _actual_checks(incumbent, item, item["fraction"]) for item in newton)
-    assert all(not _pessimistic_admission(incumbent, item) for item in newton)
+    newton_verdicts = []
+    for item in newton:
+        selection = _production_selection(
+            [item["fraction"]],
+            [item["actual"]["merit"]],
+            [item["actual"]["relative_sup"]],
+            incumbent["merit"],
+            incumbent["relative_sup"],
+            incumbent["merit"],
+            [item["predicted"]["merit"]],
+            incumbent["merit"],
+        )
+        assert not bool(selection.accepted)
+        newton_verdicts.append({"fraction": item["fraction"], "accepted": False})
     return {
         "cells": receipt["realised_cells"],
         "analytic": {
@@ -105,8 +130,10 @@ def _authoritative_checks(receipt):
             "residual": analytic["actual"]["relative_sup"],
             "accepted": True,
             "model_unreliable": True,
+            "selected_index": int(analytic_selection.selected),
         },
         "newton_candidates_refused": len(newton),
+        "newton_production_selector_verdicts": newton_verdicts,
     }
 
 
@@ -127,6 +154,9 @@ def main():
         "production_direction_note": (
             "Only measured analytic witnesses use pessimistic-model admission; "
             "all sampled Newton candidates worsen actual merit and remain refused."
+        ),
+        "selector_kernel": (
+            "nova.equilibrium.fixed_point._select_backtracking_candidate"
         ),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)

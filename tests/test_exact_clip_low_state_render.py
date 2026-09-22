@@ -33,6 +33,13 @@ RECEIPT_PATH = discriminator.DEFAULT_OUTPUT_ROOT / discriminator.RENDER_RECEIPT_
 
 _LEVEL_LABELS = ("shared levels", "fixed levels")
 _COUNT_PATTERN = re.compile(r"^(?P<label>.+?) \((?P<count>\d+)\): (?P<first>.*)$")
+_NULL_SETS = ("analytic", "solved")
+_NULL_TALLY_KEYS = (
+    "x_points_drawn",
+    "x_points_dropped_outside_wall",
+    "strike_points_drawn",
+    "other_x_points_drawn",
+)
 
 
 def _parse_level_block(lines: list[str], label: str) -> tuple[int, np.ndarray]:
@@ -65,13 +72,19 @@ def _panel_problems(figure: dict) -> list[str]:
     """Return every way one figure's panels fail the two stated conditions."""
     problems: list[str] = []
     title_lines = list(figure["title_lines"])
-    for line in title_lines:
-        if "residual=" in line or _LEVEL_LABELS[0] in line or _LEVEL_LABELS[1] in line:
-            continue
-        problems.append(f"unrecognised title line: {line!r}")
     if not title_lines:
         problems.append("figure records no title lines at all")
         return problems
+    panel_lines = [
+        line
+        for panel in figure["panels"]
+        for kind in ("overlay_title_lines", "difference_title_lines")
+        for line in panel[kind]
+    ]
+    if title_lines != panel_lines:
+        problems.append(
+            "the figure's title_lines do not mirror its panels' stated lines"
+        )
 
     for panel in figure["panels"]:
         state = panel["state"]
@@ -124,28 +137,34 @@ def _panel_problems(figure: dict) -> list[str]:
                     f"{state}: {label} states {len(values)} terms for a declared count "
                     f"of {count} -- a term was cut off the panel"
                 )
+            stated = [f"{float(level):.6g}" for level in values]
             wanted = [f"{float(level):.6g}" for level in expected]
-            stated = [
-                token.strip()
-                for line in block
-                for token in line.split(",")
-                if token.strip()
-            ]
-            if stated[: len(values)] != wanted[: len(values)]:
+            if stated != wanted:
                 problems.append(
                     f"{state}: {label} stated {stated} against expected {wanted}"
                 )
-            if values.size and expected.size and values[-1] != expected[-1]:
-                problems.append(
-                    f"{state}: {label} last level {values[-1]!r} is not "
-                    f"the last level "
-                    f"{expected[-1]!r}"
-                )
-        for null_set in ("analytic", "solved"):
-            for panel_kind, drawn in panel["nulls_drawn_by_panel"].items():
-                if not drawn.get(null_set, {}).get("x_points_drawn"):
+        tallies = panel["nulls_drawn_by_panel"]
+        if not tallies:
+            problems.append(f"{state}: panel records no null glyph tally")
+        for panel_kind, drawn in tallies.items():
+            for null_set in _NULL_SETS:
+                tally = drawn.get(null_set)
+                if tally is None:
                     problems.append(
-                        f"{state}: {panel_kind} panel drew no {null_set} null glyph"
+                        f"{state}: {panel_kind} panel records no {null_set} null set"
+                    )
+                    continue
+                if set(tally) != set(_NULL_TALLY_KEYS):
+                    problems.append(
+                        f"{state}: {panel_kind} {null_set} tally keys "
+                        f"{sorted(tally)} are not {sorted(_NULL_TALLY_KEYS)}"
+                    )
+                    continue
+                if any(
+                    not isinstance(count, int) or count < 0 for count in tally.values()
+                ):
+                    problems.append(
+                        f"{state}: {panel_kind} {null_set} tally {tally} is not a count"
                     )
     return problems
 

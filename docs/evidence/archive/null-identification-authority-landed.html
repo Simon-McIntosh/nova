@@ -1709,6 +1709,40 @@ REPRO TypeError: missing a required keyword-only argument: 'carrier_identity'</c
   <code>~/.config/reckon/crew/reports/nova/s19-codex-20260916/nia-attribute-the-coil-null-invariance-failures/</code>.
   No figure is added: commit order and per-case numeric comparisons are naturally tables.</p>
 </section>
+<section id="the-limiter-read-coupling-feeds-the-complete-census">
+  <h2 id="the-limiter-read-coupling-feeds-the-complete-census-h">The limiter-read wall-coupling diagnostic feeds the complete census</h2>
+  <p>The recorded consumer migration for <code>benchmarks/limiter_read_resolution_audit.py</code>
+  is applied verbatim inside <code>_saddle_wall_coupling</code>, as two hunks and no more:
+  the operand becomes <code>jnp.asarray(analytic)</code> in place of its
+  <code>[: operator.physical_node_number]</code> prefix, and the census pool becomes
+  <code>operator.null_flux_pool(physical)</code> in place of
+  <code>operator._fixed_design_topology.split_flux_map(physical)</code>. The routed pool keeps the
+  direct authored sampling values beside the centroid values, so the existing
+  <code>read_census(grid_flux)</code> call receives the complete state.</p>
+  <p>On the 110-cell diverted single-null analytic hex carrier the operator reports
+  <code>node_number=730</code> (<code>grid_node_number=132</code>, <code>direct_sample_count=477</code>,
+  <code>physical_node_number=253</code>), and the diagnostic runs without raising and records
+  <code>axis_admitted=true</code>, <code>contained_x_candidate_count=3</code> and
+  <code>deduplication_retained_count=3</code>, with the selected X-point at
+  (1.49302256, -1.01883191) m, 9.631e-3 m from the analytic saddle.</p>
+  <figure>
+    <img src="/nova/figures/null-identification-authority/limiter-read-carrier-partition.png"
+         alt="Stacked bar of the carrier's 730 nodes split into 132 grid, 477 direct samples and 121 wall, with the pre-migration 253-node prefix slice marked and the census refusal named">
+    <figcaption>The carrier partition behind the migrated diagnostic. The pre-migration slice kept only
+    the grid and wall nodes (253 of 730) and would have read a null census with no authored sampling
+    values in it; the migrated operand is the whole carrier.</figcaption>
+  </figure>
+  <p>The declared negative control restores the pre-migration prefix slice and drives the migrated
+  consumer with it: the 253-node operand against a carrier whose topology grid carries direct samples
+  is refused with <code>ValueError: own-node null census requires the direct sampling flux values</code>,
+  so the guard is observed to fire rather than assumed to.</p>
+  <p>Gate in one <code>all_debug</code> allocation, root interpreter run directly with <code>uv</code>
+  never invoked on the node: probe exit 0, <strong>7 passed in 2.27 s, exit 0</strong> for
+  <code>tests/test_limiter_read_render.py</code> in a fresh process, negative-control exit 0 carrying
+  the declared refusal. Log: <code>logs/gate.log</code> under this run's directory. The focused render
+  check reads a committed render receipt and imports nothing from the changed function, so it cannot
+  move with this change; no full suite is claimed.</p>
+</section>
 </main>
 </body>
 </html>

@@ -1091,5 +1091,30 @@ def test_runtime_precision_selects_fixed_point_state_dtype():
     assert single.trace.dtype == jnp.float32
 
 
+def test_nested_jit_calls_inline_each_operator_request():
+    """A shared lowered callee is not a shared executable operator body."""
+    import re
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
+    operator = jax.jit(jnp.sin)
+
+    def requests(state):
+        return operator(operator(operator(state)))
+
+    initial = jnp.arange(4, dtype=jnp.float64)
+    lowered = jax.jit(requests).lower(initial)
+    compiled = lowered.compile()
+    lowered_bodies = lowered.as_text().count("stablehlo.sine")
+    optimized_bodies = len(re.findall(r" = f64\[4\].* sine\(", compiled.as_text()))
+    print(
+        f"nested_jit_lowered_bodies={lowered_bodies} "
+        f"nested_jit_optimized_bodies={optimized_bodies}"
+    )
+    assert lowered_bodies == 1
+    assert optimized_bodies == 3
+    np.testing.assert_array_equal(compiled(initial), jnp.sin(jnp.sin(jnp.sin(initial))))
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

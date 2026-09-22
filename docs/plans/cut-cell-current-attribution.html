@@ -319,6 +319,27 @@ controls, and inspected PNG/SVG. See the
 <a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#current-candidacy-attribution">quantitative attribution and poloidal comparison</a>.
 No production or test files, section status, or driving followup were changed.</p>
 
+<h3 id="s6-exact-mode-executable-census">Exact-mode executable census: the 300-cell gate fails before compilation</h3>
+<p><strong>2026-09-22 worker outcome; section, gate and driving followup remain open.</strong>
+At HEAD <code>7a1ae659b</code>, the exact 110-requested/135-realised CPU executable is
+<code>234,130,996</code> serialized bytes after a <code>395.489 s</code> compile, already
+<code>134,130,996</code> bytes over the route-integrity ceiling; its execution then
+times out at the 59-minute allocation limit with a retained <code>8.93 GiB</code> process
+RSS high-water mark and no terminal digest. The nominal 300-requested/342-realised and
+1000-requested/1072-realised exact rows both refuse before lowering because the exact
+clip seed does not bracket unit amplitude (<code>a(0)=nan</code>,
+<code>a(1)=0.89683512</code>), so no honest bytes, compile wall, peak allocation or
+terminal digest exists for either row. Titan supplies the device arm and the complete
+chord controls, not a substitute CPU gate. At the recorded <code>d730c294…</code>
+342-cell stalled state, exact mode has 49 cut, 103 inside and 190 outside cells; all
+49 clipped areas move across the ±<code>1e-6</code> analytic-direction endpoints while
+zero confined/open masks flip, with both positive controls passing. The executable
+census points first to lower clip and moment order through closed-form polygon moments,
+then to a single vmapped per-cell clip body. See the
+<a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#exact-mode-executable-census">full CPU/titan receipt, failure record, program attribution and figures</a>.
+Figure commit <code>f2379a5f1</code> carries the inspected PNG/SVG pairs. Nothing under
+<code>nova/</code> changed, and this worker does not resolve its own followup.</p>
+
 <h2 id="s7">§7 — Wire the typed census saddle into the production spline-chain clip and re-solve the diverted certificate rows</h2>
 <p>The wedge split landed on the oracle (core-side current within 1e-13 relative of the analytic wedge integral at 110, 300 and 500 cells) but the production spline route discards it because the operator passes no saddle vertex, and the oracle compares the carrier against its own emitted polygons. Pass the typed census saddle as the clip's saddle vertex, consume the four region-owned moment profiles in the plasma partition and the null read, and make the oracle independent of the carrier by integrating the analytic current over the region bounded by the separatrix branches and the cell edges. Gate: the independent oracle at 110, 300 and 500 cells on all_debug, then one H200 job re-solving the four diverted certificate rows with the four limited rows as the bit-identical negative control.</p>
 

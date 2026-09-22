@@ -2613,6 +2613,115 @@ The exact decision relationship is a table; an additional figure would add no sp
   <code>236bb74c6afa6f2f1242c551b5abec8e5f6bcc00</code>, made while its final compile ran; no
   executable or instrument changed between them. This record does not close the section or
   resolve its driving followup.</p>
+<section id="exact-mode-executable-census">
+<h2>Exact-mode executable census: route-integrity gate fails at HEAD</h2>
+<p><strong>Measured 2026-09-22 at revision <code>7a1ae659b047d3c36cf9d41551b4130ca0ff398c</code>; no production change.</strong>
+The route-integrity verdict is <strong>FAIL</strong>. The nominal 300-requested-cell row
+realises 342 cells and refuses in exact-mode seed construction before lowering, so there
+is no 300-row executable that can be asserted below 100,000,000 bytes. The smaller exact
+110-requested/135-realised CPU executable is already <code>234,130,996</code> bytes,
+<code>134,130,996</code> over the ceiling. Its execution times out; that partial row is
+retained rather than promoted into a terminal result. The 1000-requested/1072-realised
+exact row independently reproduces the same pre-lowering refusal:</p>
+<p><code>ValueError: exact clip seed boundary level does not bracket unit amplitude:
+a(0)=nan, a(1)=0.89683512</code></p>
+<p>Building those seeds under chord mode would measure a different path and is not used as
+a substitute. The missing entries below are unavailable measurements, never zeros.</p>
+
+<h3>CPU witness — all_debug job 1275633</h3>
+<table><thead><tr><th>Mode</th><th>Requested / realised cells</th><th>Serialized bytes</th><th>Compile wall</th><th>Peak host RSS</th><th>Peak mappings</th><th>Terminal</th></tr></thead><tbody>
+<tr><td>exact</td><td>110 / 135</td><td>234,130,996</td><td>395.488862 s</td><td>9,363,880 KiB (8.93 GiB)</td><td>49,232 / 65,530</td><td>execution timed out; no digest</td></tr>
+<tr><td>exact</td><td>300 / 342</td><td>not reached</td><td>not reached</td><td>not reached</td><td>not reached</td><td>preceding row consumed allocation</td></tr>
+<tr><td>exact</td><td>1000 / 1072</td><td>not reached</td><td>not reached</td><td>not reached</td><td>not reached</td><td>preceding row consumed allocation</td></tr>
+<tr><td>chord</td><td>all three rungs</td><td>not reached</td><td>not reached</td><td>not reached</td><td>not reached</td><td>preceding row consumed allocation</td></tr>
+</tbody></table>
+<p>Job 1275633 requests eight CPUs, 128 GiB and 00:59:00 and ends
+<code>TIMEOUT</code> at 00:59:13. The compile and serialization finish; the row remains in
+phase <code>execute</code>. The compiled static temporary-buffer estimate is
+405,291,632 bytes. <code>compile_abort_probe</code> retains 7,003 half-second samples
+through 3,551.739 s. The final sample is live with 33,514 mappings and 9,363,880 KiB
+high-water RSS; peak mappings are 49,232 at 643.322 s. No terminal digest, residual or
+convergence flag is inferred from the timeout.</p>
+<figure><img src="/nova/figures/cut-cell-current-attribution/exact-mode-executable-census/cpu-bytes-and-compile-wall.png" alt="CPU serialized executable bytes and compile wall on shared cell-count axes. The exact 110-cell executable is 234.1 MB after 395.5 seconds, over the 100 MB line; later CPU rows were not reached and appear as crosses at the lower margin."><figcaption>CPU witness. The red square is a completed compile, not a completed solve. Lower-margin crosses are unavailable rows, not zero measurements. <a href="/nova/figures/cut-cell-current-attribution/exact-mode-executable-census/cpu-bytes-and-compile-wall.svg">SVG</a>.</figcaption></figure>
+
+<h3>Titan device arm — job 1275634</h3>
+<table><thead><tr><th>Mode</th><th>Requested / realised cells</th><th>Serialized bytes</th><th>Compile wall</th><th>Execute wall</th><th>Peak device bytes</th><th>Peak mappings</th><th>Outcome</th></tr></thead><tbody>
+<tr><td>exact</td><td>110 / 135</td><td>48,079,034</td><td>631.973051 s</td><td>435.136704 s</td><td>277,725,696</td><td>2,644 / 65,530</td><td>complete, nonconverged</td></tr>
+<tr><td>exact</td><td>300 / 342</td><td>unavailable</td><td>unavailable</td><td>unavailable</td><td>unavailable</td><td>2,550 / 65,530</td><td>seed refusal before lowering</td></tr>
+<tr><td>exact</td><td>1000 / 1072</td><td>unavailable</td><td>unavailable</td><td>unavailable</td><td>unavailable</td><td>2,577 / 65,530</td><td>seed refusal before lowering</td></tr>
+<tr><td>chord</td><td>110 / 135</td><td>23,624,115</td><td>268.642631 s</td><td>241.614598 s</td><td>143,507,968</td><td>2,561 / 65,530</td><td>complete, nonconverged</td></tr>
+<tr><td>chord</td><td>300 / 342</td><td>33,630,682</td><td>268.251831 s</td><td>693.819490 s</td><td>314,667,520</td><td>2,572 / 65,530</td><td>complete, nonconverged</td></tr>
+<tr><td>chord</td><td>1000 / 1072</td><td>121,360,499</td><td>267.228864 s</td><td>1,537.560145 s</td><td>1,238,357,504</td><td>2,590 / 65,530</td><td>complete, nonconverged</td></tr>
+</tbody></table>
+<p>Job 1275634 requests one P100, four CPUs and 64 GiB and completes in 01:30:40.
+Every wall in this table is a titan wall, not an H200 result. The exact 110 terminal is
+<code>c0dce01981336f26c28bb0029d666eec1a0e89546778256e2ec0e4d213c31773</code>,
+residual 0.0750044640364, four trips. Its chord counterpart is
+<code>8c9fcba1c5f2de787fae438238a16c2b2a87d62825fef09a08ffe2a7fcfe3234</code>.
+At 300 requested cells exact has no terminal; the recorded stalled chord comparator is
+<code>d730c294b7aa7c1a7a9d9fdcf92a301f856ff066d3d7a50bb05cbf216b2b790b</code>
+and the HEAD titan chord terminal is
+<code>d088afea24fdcec53f6a760909e5b3a722cde4476dbc78270f7ecabfc2e890f4</code>.
+At 1000, exact again has none and the HEAD chord terminal is
+<code>f2292849102c1a6453a26b516d5b5fd3590d5f8bfba2b28d09858959b2263cfb</code>.
+All completed rows are nonconverged; identities are not acceptance claims.</p>
+<figure><img src="/nova/figures/cut-cell-current-attribution/exact-mode-executable-census/titan-bytes-and-compile-wall.png" alt="Titan serialized executable bytes and compile wall on the same axes as the CPU witness. Chord is measured at 110, 300 and 1000 cells; exact is measured only at 110 because 300 and 1000 refuse before lowering."><figcaption>Titan device arm. Exact 300 and 1000 crosses denote the seed refusal, not zero bytes or zero compile wall. <a href="/nova/figures/cut-cell-current-attribution/exact-mode-executable-census/titan-bytes-and-compile-wall.svg">SVG</a>.</figcaption></figure>
+
+<h3>Program census and reduction choice</h3>
+<p>The exact 110 HLO carries 22,718 computations and 133,161,787 direct
+computation-protobuf bytes, against chord's 11,663 computations and 57,198,205 bytes.
+The GPU executable format does not embed the HLO module verbatim, so these are HLO
+computation bytes rather than a partition of GPU executable bytes. The largest exact
+source totals are <code>Bernstein.binom</code> 27,521,787 bytes,
+<code>_monomial_antiderivative</code> 11,987,303,
+<code>_traced_clip</code> 6,004,528, <code>Bernstein.basis</code> 5,380,953,
+<code>_sampled_arc_polynomial_moments</code> 4,183,836,
+<code>Bernstein.coefficent_matrix</code> 3,682,243,
+<code>_cell_banked_current_moments</code> 3,104,537 and
+<code>clipped_support_current_moments</code> 2,237,309. Chord carries only 5,805,033
+bytes in <code>_monomial_antiderivative</code>, 2,602,449 in <code>_traced_clip</code>
+and 2,080,521 in <code>_sampled_arc_polynomial_moments</code>.</p>
+<p>The largest named exact computations are <code>region_215.9730</code> at 2,715,161
+bytes, <code>region_217.9728.clone.clone.clone</code> at 955,241,
+<code>region_3026.8169.clone.clone.clone</code> at 757,826 led by
+<code>_traced_clip</code>, <code>region_218.8540.clone.clone.clone</code> at 571,843,
+and <code>region_2528.5644.clone.clone.clone.clone.clone</code> at 549,180. The
+concentration in exact polygon and moment algebra points first to lower clip and moment
+order through closed-form polygon moments. The near-doubling of computation count and
+repeated clip frames leave one vmapped per-cell clip body as the second reduction to
+measure. With no 300 exact HLO, this record does not invent a quantitative choice at the
+gate rung.</p>
+
+<h3>The clipped path is live at the stalled state</h3>
+<p>The input is the recorded 342-cell chord terminal
+<code>d730c294b7aa7c1a7a9d9fdcf92a301f856ff066d3d7a50bb05cbf216b2b790b</code>.
+Exact mode classifies 49 cells cut, 103 wholly inside and 190 wholly outside. Across
+plus/minus <code>1e-6</code> times the analytic direction, confined, open and included
+masks each flip zero cells, but all 49 cut-cell areas move; the largest endpoint area
+difference is <code>4.5399971337900524e-7 m²</code>. Positive controls detect one seeded
+confined-mask flip and all 49 known cut cells. Exact therefore supplies a continuously
+moving path exactly where chord mode held whole-cell classifications fixed.</p>
+
+<h3>Instrument refusal, retry boundary and artifacts</h3>
+<p>The first class-census attempt fails before reading the supplied terminal state because
+the fixture builder inherits exact mode and enters the exact cold-seed constructor. Its
+log preserves the same <code>a(0)=nan</code> refusal. Only then is the instrument repaired:
+the retry builds the unchanged machine and operator under the production chord default,
+loads and digest-checks the recorded terminal state, and switches to exact immediately
+before <code>_support_partition</code>. It does not retry or disguise the exact executable
+failure and it passes both positive controls. The exact 300 and 1000 executable rows are
+never retried.</p>
+<p>Both allocations set <code>TMPDIR=/tmp</code> in submit and payload; CPU pins
+<code>JAX_PLATFORMS=cpu</code>; titan leaves it unset and clears the cache-root variable.
+The root interpreter runs directly and uv never runs on a compute node. Every row is a
+separate <code>benchmarks.compile_abort_probe</code> child. Complete raw receipts, HLO,
+protobufs, executables, state arrays, logs and mapping trajectories live under
+<code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-measure-the-exact-mode-executable-at-head</code>.
+The full synthesis is <code>report.md</code> there. Figure commit
+<code>f2379a5f14911b6778423d1286967130b7eaec2f</code> publishes the inspected PNG/SVG
+pairs; the documentation landing commit is recorded in the worker manifest after it
+exists. Nothing under <code>nova/</code> changes. The section, gate and driving followup
+remain open for coordinator adjudication.</p>
 </section>
 
 </main>

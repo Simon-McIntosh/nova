@@ -44,6 +44,7 @@ from nova.jax.config import (
 )
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
+from nova.media.sources.frame import inside_wall_units
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,6 +55,11 @@ DEFAULT_OUTPUT = (
 DEFAULT_FIGURE = (
     ROOT / "docs/figures/constraint-augmented-newton-krylov/edge-constraint/"
     "edge-contours.png"
+)
+DEFAULT_RENDER_RECEIPT = (
+    ROOT
+    / "docs/figures/constraint-augmented-newton-krylov/edge-constraint/"
+    "edge-contours-render.json"
 )
 DEFAULT_REPORT = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/"
@@ -652,6 +658,115 @@ def _free_reference(
     return result
 
 
+def _exponent(value: float) -> str:
+    """Render a position error in exponent form.
+
+    The three terminal errors span five orders of magnitude and the last is
+    machine zero, so a fixed-decimal format prints all three as "+0.000" and
+    discards the receipt's own spread.
+    """
+    return f"{value:.3g}"
+
+
+def _null_set(topology) -> dict[str, Any]:
+    """Return one state's axis and qualified x-points as plain lists."""
+    axis = np.asarray(topology.axis, dtype=float).reshape(-1)[:2]
+    points = np.atleast_2d(np.asarray(topology.x_point, dtype=float))
+    points = points[np.all(np.isfinite(points[:, :2]), axis=1)]
+    return {
+        "magnetic_axis_rz_m": axis.tolist(),
+        "x_point_rz_m": points[:, :2].tolist(),
+    }
+
+
+def _draw_null_set(axis, null_set, wall, style) -> dict[str, int]:
+    """Draw both halves of one null set.
+
+    The admitted saddle is filled and shown when it lies inside the wall; every
+    remaining qualified null is hollow and unfiltered, so a diverted frame's
+    second null above the vessel is drawn rather than dropped.
+    """
+    points = np.atleast_2d(np.asarray(null_set["x_point_rz_m"], dtype=float))
+    if points.size and points.shape[1]:
+        inside = np.asarray(inside_wall_units(points[:, :2], wall), dtype=bool)
+        admitted, remaining = points[inside], points[~inside]
+    else:
+        admitted, remaining = np.empty((0, 2)), np.empty((0, 2))
+    return poloidal.draw_nulls(
+        axis,
+        magnetic_axis=np.asarray(null_set["magnetic_axis_rz_m"], dtype=float),
+        x_points=admitted if admitted.size else None,
+        other_x_points=remaining if remaining.size else None,
+        style=style,
+        contain=None,
+    )
+
+
+def _marker_keys() -> list[tuple[str, dict[str, Any]]]:
+    """Every marker the panels draw, so the legend names each marker."""
+    reference, solved = "#3366cc", "#cc7722"
+    return [
+        ("reference (free) flux", {"color": reference}),
+        ("terminal (solved) flux", {"color": solved}),
+        (
+            "reference magnetic axis",
+            {"marker": "^", "color": reference, "linestyle": "none"},
+        ),
+        (
+            "reference x-point",
+            {
+                "marker": "X",
+                "color": reference,
+                "linestyle": "none",
+                "markerfacecolor": reference,
+            },
+        ),
+        (
+            "solved magnetic axis",
+            {"marker": "^", "color": solved, "linestyle": "none"},
+        ),
+        (
+            "solved x-point",
+            {
+                "marker": "X",
+                "color": solved,
+                "linestyle": "none",
+                "markerfacecolor": solved,
+            },
+        ),
+        (
+            "qualified null outside the wall",
+            {
+                "marker": "X",
+                "color": "black",
+                "linestyle": "none",
+                "markerfacecolor": "none",
+                "markeredgewidth": 1.2,
+            },
+        ),
+        (
+            "commanded edge point",
+            {
+                "marker": "o",
+                "color": "black",
+                "linestyle": "none",
+                "markerfacecolor": "none",
+            },
+        ),
+        ("achieved edge point", {"marker": "x", "color": "black", "linestyle": "none"}),
+    ]
+
+
+def _panel_title(command: dict[str, Any]) -> str:
+    """The panel's own reading, with the receipt's error in exponent form."""
+    trips = int(command["trip_count"])
+    return (
+        f"{command['commanded_displacement_mm']:.0f} mm command\n"
+        f"error {_exponent(command['terminal_position_error_mm'])} mm; "
+        f"{trips} trip{'' if trips == 1 else 's'}"
+    )
+
+
 def _render(
     profile,
     free_state,
@@ -661,8 +776,13 @@ def _render(
     chord_height_m: float,
     requested_class,
     output: Path,
-) -> None:
-    """Draw free and terminal flux on shared levels with both null sets."""
+    render_receipt: Path,
+) -> dict[str, Any]:
+    """Draw free and terminal flux on shared levels with both null sets.
+
+    Returns the primitives the drawing needs, so the receipt can carry them and
+    a later render re-runs without a solve.
+    """
     lattice = profile.lattice
     radius = np.asarray(lattice.radius, dtype=float)
     height = np.asarray(lattice.height, dtype=float)
@@ -675,9 +795,58 @@ def _render(
         count=12,
     )
     wall = np.asarray(profile.operator.wall.coordinate, dtype=float)
-    _masks, free_topology = profile.operator.read(
+    _reference_masks, free_topology = profile.operator.read(
         jnp.asarray(free_state), requested_class
     )
+    reference_nulls = _null_set(free_topology)
+    solved_nulls = [
+        _null_set(profile.operator.read(jnp.asarray(state), requested_class)[1])
+        for state in terminal_states
+    ]
+    render_inputs = {
+        "radius": radius.tolist(),
+        "height": height.tolist(),
+        "wall": wall.tolist(),
+        "levels_wb": np.asarray(levels, dtype=float).tolist(),
+        "free_grid": free_grid.tolist(),
+        "terminal_grids": [grid.tolist() for grid in terminal_grids],
+        "reference_null_set": reference_nulls,
+        "solved_null_sets": solved_nulls,
+        "chord_height_m": float(chord_height_m),
+    }
+    draw_panels(
+        radius=radius,
+        height=height,
+        wall=wall,
+        free_grid=free_grid,
+        terminal_grids=terminal_grids,
+        levels=levels,
+        reference_nulls=reference_nulls,
+        solved_nulls=solved_nulls,
+        commands=commands,
+        chord_height_m=chord_height_m,
+        output=output,
+        render_receipt=render_receipt,
+    )
+    return render_inputs
+
+
+def draw_panels(
+    *,
+    radius,
+    height,
+    wall,
+    free_grid,
+    terminal_grids,
+    levels,
+    reference_nulls,
+    solved_nulls,
+    commands,
+    chord_height_m: float,
+    output: Path,
+    render_receipt: Path,
+) -> dict[str, Any]:
+    """Draw the panels and record what each panel drew."""
     figure, axes = plt.subplots(1, len(commands), figsize=(4.6 * len(commands), 5.0))
     axes = np.atleast_1d(axes)
     free_style = DEFAULT_INK.variant(
@@ -686,31 +855,17 @@ def _render(
     solved_style = DEFAULT_INK.variant(
         axis_marker="^", axis_color="#cc7722", xpoint_color="#cc7722"
     )
-    for axis, grid, command, state in zip(
-        axes, terminal_grids, commands, terminal_states, strict=True
+    panels: list[dict[str, Any]] = []
+    for axis, grid, command, solved_null in zip(
+        axes, terminal_grids, commands, solved_nulls, strict=True
     ):
         poloidal.draw_flux_contours(
             axis, radius, height, free_grid, levels, color="#3366cc"
         )
         poloidal.draw_flux_contours(axis, radius, height, grid, levels, color="#cc7722")
         poloidal.draw_wall(axis, units=(wall,))
-        poloidal.draw_nulls(
-            axis,
-            magnetic_axis=np.asarray(free_topology.axis, dtype=float),
-            x_points=np.asarray(free_topology.x_point, dtype=float)[None, :],
-            style=free_style,
-            contain=(wall,),
-        )
-        _terminal_masks, terminal_topology = profile.operator.read(
-            jnp.asarray(state), requested_class
-        )
-        poloidal.draw_nulls(
-            axis,
-            magnetic_axis=np.asarray(terminal_topology.axis, dtype=float),
-            x_points=np.asarray(terminal_topology.x_point, dtype=float)[None, :],
-            style=solved_style,
-            contain=(wall,),
-        )
+        reference_tally = _draw_null_set(axis, reference_nulls, wall, free_style)
+        solved_tally = _draw_null_set(axis, solved_null, wall, solved_style)
         target = np.asarray(command["target_point_rz_m"], dtype=float)
         achieved = np.asarray(
             [command["terminal_edge_radius_m"], chord_height_m], dtype=float
@@ -725,20 +880,71 @@ def _render(
         )
         axis.plot(achieved[0], achieved[1], marker="x", color="black", markersize=5)
         poloidal_axes(axis)
-        axis.set_title(
-            f"{command['commanded_displacement_mm']:.0f} mm command\n"
-            f"error {command['terminal_position_error_mm']:+.3f} mm; "
-            f"{command['trip_count']} trips",
-            fontsize=9,
+        title = _panel_title(command)
+        axis.set_title(title, fontsize=9)
+        panels.append(
+            {
+                "commanded_displacement_mm": command["commanded_displacement_mm"],
+                "title": title,
+                "axis_off": not bool(axis.axison),
+                "terminal_position_error_mm": command["terminal_position_error_mm"],
+                "reference_null_set": reference_nulls,
+                "solved_null_set": solved_null,
+                "reference_null_tally": reference_tally,
+                "solved_null_tally": solved_tally,
+                "target_point_rz_m": target.tolist(),
+                "achieved_point_rz_m": achieved.tolist(),
+            }
         )
+    keys = _marker_keys()
+    figure.legend(
+        handles=[plt.Line2D([], [], markersize=6, **style) for _label, style in keys],
+        labels=[label for label, _style in keys],
+        loc="lower center",
+        ncol=3,
+        fontsize=7,
+        frameon=False,
+    )
     figure.suptitle(
         "MAST 22086/43 edge constraint: free blue, terminal ochre; shared Wb levels",
         y=0.98,
     )
-    figure.subplots_adjust(left=0.02, right=0.99, bottom=0.03, top=0.87, wspace=0.08)
+    figure.subplots_adjust(left=0.02, right=0.99, bottom=0.11, top=0.87, wspace=0.03)
     output.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(output, dpi=180)
+    figure.savefig(output.with_suffix(".svg"))
     plt.close(figure)
+    record = {
+        "figure": str(output),
+        "levels_wb": np.asarray(levels, dtype=float).tolist(),
+        "marker_keys": [label for label, _style in keys],
+        "panels": panels,
+    }
+    _write(record, render_receipt)
+    return record
+
+
+def render_from_receipt(
+    payload: dict[str, Any], *, output: Path, render_receipt: Path
+) -> dict[str, Any]:
+    """Re-draw the figure from a committed receipt, with no solve."""
+    inputs = payload["render_inputs"]
+    return draw_panels(
+        radius=np.asarray(inputs["radius"], dtype=float),
+        height=np.asarray(inputs["height"], dtype=float),
+        wall=np.asarray(inputs["wall"], dtype=float),
+        free_grid=np.asarray(inputs["free_grid"], dtype=float),
+        terminal_grids=[
+            np.asarray(grid, dtype=float) for grid in inputs["terminal_grids"]
+        ],
+        levels=np.asarray(inputs["levels_wb"], dtype=float),
+        reference_nulls=inputs["reference_null_set"],
+        solved_nulls=inputs["solved_null_sets"],
+        commands=payload["commands"],
+        chord_height_m=float(inputs["chord_height_m"]),
+        output=output,
+        render_receipt=render_receipt,
+    )
 
 
 def _write_report(
@@ -796,7 +1002,9 @@ def _write_report(
     report.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def measure(*, output: Path, figure: Path, report: Path) -> dict[str, Any]:
+def measure(
+    *, output: Path, figure: Path, report: Path, render_receipt: Path
+) -> dict[str, Any]:
     """Run the complete three-command receipt on one reserved accelerator."""
     configure_dtypes()
     if not bool(jax.config.jax_enable_x64):
@@ -1002,7 +1210,7 @@ def measure(*, output: Path, figure: Path, report: Path) -> dict[str, Any]:
         )
         persist_command(row)
         terminal_states.append(terminal.state)
-        _render(
+        payload["render_inputs"] = _render(
             profile,
             free.state,
             terminal_states,
@@ -1010,7 +1218,9 @@ def measure(*, output: Path, figure: Path, report: Path) -> dict[str, Any]:
             chord_height_m=chord_height,
             requested_class=requested,
             output=figure,
+            render_receipt=render_receipt,
         )
+        _write(payload, output)
     payload["verdict"] = {
         "status": (
             "pass"
@@ -1051,11 +1261,37 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
+    parser.add_argument("--render-receipt", type=Path, default=DEFAULT_RENDER_RECEIPT)
+    parser.add_argument(
+        "--render-only",
+        action="store_true",
+        help="re-draw the figure from the committed receipt, with no solve",
+    )
     arguments = parser.parse_args()
+    if arguments.render_only:
+        payload = json.loads(arguments.output.read_text(encoding="utf-8"))
+        record = render_from_receipt(
+            payload,
+            output=arguments.figure.resolve(),
+            render_receipt=arguments.render_receipt.resolve(),
+        )
+        print(
+            json.dumps(
+                {
+                    "render_only": True,
+                    "figure": record["figure"],
+                    "panels": [panel["title"] for panel in record["panels"]],
+                },
+                indent=2,
+            ),
+            flush=True,
+        )
+        return
     payload = measure(
         output=arguments.output.resolve(),
         figure=arguments.figure.resolve(),
         report=arguments.report.resolve(),
+        render_receipt=arguments.render_receipt.resolve(),
     )
     print(json.dumps(payload["verdict"], indent=2), flush=True)
     if payload["verdict"]["status"] != "pass":

@@ -24,7 +24,7 @@ def test_production_read_admits_analytic_saddle(requested, realised):
     masks, topology = operator.read(jnp.asarray(state, dtype=jnp.float64))
     error = float(np.linalg.norm(np.asarray(topology.x_point) - reference) / pitch)
     grid = operator._fixed_design_topology.grid
-    pool = operator._null_flux_pool(jnp.asarray(state, dtype=jnp.float64))
+    pool = operator.null_flux_pool(jnp.asarray(state, dtype=jnp.float64))
     table = grid.candidate_table_status(pool)
     crossing = np.asarray(table["ring_crossing_count"])
     print(
@@ -115,3 +115,68 @@ def test_raster_label_parity_over_both_analytic_fields():
     print(f"raster_oracle_compared={compared} differing={differing}")
     assert compared == 646
     assert differing == 0
+
+
+def test_compatibility_census_reports_prepolish_work_slot_exhaustion():
+    """Three disjoint saddle roots exceed a two-slot polish work table."""
+    from nova.biot.null import Null2D
+    from nova.equilibrium.forward_operator import _FixedDesignNull2D
+
+    configure_dtypes()
+    angles = np.arange(6) * np.pi / 3.0
+    patch = np.vstack((np.zeros(2), np.column_stack((np.cos(angles), np.sin(angles)))))
+    centres = np.asarray(((0.0, 0.0), (4.0, 0.2), (8.0, -0.1)))
+    coordinates = (patch[None, :, :] + centres[:, None, :]).reshape((-1, 2))
+    stencil = np.arange(len(coordinates)).reshape((-1, 7))
+    values = jnp.asarray(np.tile(patch[:, 0] ** 2 - patch[:, 1] ** 2, len(centres)))
+    locator = Null2D.from_coordinates(coordinates, stencil, maxsize=1)
+    fixed = _FixedDesignNull2D.from_locator(locator)
+    assert not fixed.structured
+    table = fixed.candidate_table_status(values)
+    control = _FixedDesignNull2D.from_locator(
+        locator.with_capacity(3)
+    ).candidate_table_status(values)
+    print(
+        f"compatibility_work_slots roots={int(table['typed_count'][1])} "
+        f"exhausted={bool(table['census_slots_exhausted'])} "
+        f"control_exhausted={bool(control['census_slots_exhausted'])}",
+        flush=True,
+    )
+    assert int(table["typed_count"][1]) == 3
+    assert int(table["candidate_count"][1]) == 3
+    assert int(table["retained_count"][1]) == 1
+    assert bool(table["overflow"][1])
+    assert bool(table["census_slots_exhausted"])
+    assert not bool(control["census_slots_exhausted"])
+
+
+def test_banked_consumer_uses_public_complete_flux_pool(monkeypatch):
+    from benchmarks.diiid_forward_gs_match import candidate_flux_margins
+
+    configure_dtypes()
+    _machine, operator, state, _exact = census_benchmark._machine_and_field(
+        certificate.DIVERTED_CASE_NAME, 110
+    )
+    state = jnp.asarray(state, dtype=jnp.float64)
+    calls = []
+    builder = operator.null_flux_pool
+
+    def record_pool(argument):
+        calls.append(np.asarray(argument))
+        return builder(argument)
+
+    monkeypatch.setattr(operator, "null_flux_pool", record_pool)
+    expected = operator._fixed_design_topology.grid.candidate_table_status(
+        builder(state)
+    )
+    receipt = candidate_flux_margins(operator, state, polarity=operator.polarity)
+    assert len(calls) == 1
+    np.testing.assert_array_equal(calls[0], state)
+    assert receipt["o_candidate_count"] == int(expected["candidate_count"][0])
+    assert receipt["x_candidate_count"] == int(expected["candidate_count"][1])
+    assert receipt["x_candidate_count"] > 0
+    print(f"banked_consumer complete_pool=True counts={receipt}", flush=True)
+    with pytest.raises(ValueError, match="direct sampling flux values"):
+        candidate_flux_margins(
+            operator, state[: operator.physical_node_number], polarity=operator.polarity
+        )

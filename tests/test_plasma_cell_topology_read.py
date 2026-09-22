@@ -283,8 +283,13 @@ def test_raster_fixture_labels_are_bitwise_equal_to_independent_oracle():
         )
         representative_mask = np.asarray(stationary["representative_mask"])
         crossing_count = np.asarray(stationary["ring_crossing_count"])
-        assert np.all(crossing_count[representative_mask[0]] == 0)
-        assert np.all(crossing_count[representative_mask[1]] == 4)
+        census = operator._fixed_design_topology.grid.candidate_table_status(
+            operator.null_flux_pool(physical)
+        )
+        quadratic_admitted = np.asarray(census["quadratic_admitted_mask"])
+        assert quadratic_admitted.shape == representative_mask.shape
+        assert np.all(~representative_mask | quadratic_admitted)
+        np.testing.assert_array_equal(crossing_count, census["ring_crossing_count"])
         np.testing.assert_array_equal(state.axis, stationary["axis"][:2])
         np.testing.assert_array_equal(state.x_point, stationary["x_point"][:2])
         np.testing.assert_array_equal(state.boundary, stationary["boundary"][:2])

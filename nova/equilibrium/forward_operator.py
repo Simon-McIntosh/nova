@@ -1017,7 +1017,8 @@ class _FixedDesignNull2D:
     def _local_fit_census(self, psi):
         """Fit finite typed roots inside or near their own source cells."""
         sampled = jnp.asarray(psi, dtype=self.fit_dtype)[self.fit_locator.stencil]
-        coefficient = jnp.einsum("...ij,...j->...i", self.fit_weight, sampled)
+        # Keep the sample reduction identical for scalar and vmapped fields.
+        coefficient = jnp.sum(self.fit_weight * sampled[:, None, :], axis=-1)
         determinant = (
             4.0 * coefficient[..., 0] * coefficient[..., 1] - coefficient[..., 4] ** 2
         )
@@ -1505,7 +1506,8 @@ class _FixedDesignNull2D:
                 valid, jnp.take_along_axis(multiplicity, index, axis=1), 0
             ),
             "spline_authored": jnp.asarray(False),
-            "census_slots_exhausted": jnp.asarray(False),
+            "census_slots_exhausted": jnp.sum(jnp.any(masks, axis=0), dtype=jnp.int32)
+            > min(masks.shape[1], 2 * self.locator.maxsize),
         }
 
     @jax.jit
@@ -2874,7 +2876,7 @@ class ForwardFluxOperator:
         distance2 = jnp.where(jnp.isfinite(vmap_o[:, 0]), distance2, jnp.inf)
         return vmap_o[jnp.argmin(distance2), :2]
 
-    def _null_flux_pool(self, state):
+    def null_flux_pool(self, state):
         """Keep direct authored sampling values beside the centroid values."""
         state = jnp.asarray(state)
         grid_flux = state[: self.grid.node_number]
@@ -2885,6 +2887,8 @@ class ForwardFluxOperator:
                 )
             return jnp.concatenate((grid_flux, state[self.physical_node_number :]))
         return grid_flux
+
+    _null_flux_pool = null_flux_pool
 
     def _fixed_design_read(
         self, physical, requested_class=None, private_wall_node_mask=None

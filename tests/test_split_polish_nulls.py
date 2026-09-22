@@ -372,12 +372,22 @@ def test_mast_unmoved_saddle_keeps_census_flux_and_reports_fit_misrepresentation
     seed_position = jnp.asarray(slot["seed_position_rz_m"])
     census_value = jnp.asarray(slot["seed_value_wb"])
     published_fit_value = float(slot["polished_value_wb"])
-    # Replay bank 52cad98a follows corroboration bank ed9bb793.
+    # The refreshed bank keeps the upper saddle and publishes its typed-census position.
     np.testing.assert_allclose(
-        bank_saddle, [0.5917516875565209, 1.219749197600917], atol=5.0e-9
+        bank_saddle,
+        [0.5892573682268838, 1.216816481138625],
+        atol=5.0e-9,
+        err_msg=(
+            "68cfe15c retained the same upper saddle while regenerating its "
+            "spline-authored typed-census position"
+        ),
     )
     assert np.linalg.norm(np.asarray(seed_position) - bank_saddle) == pytest.approx(
-        3.059905079630436e-3, abs=1.0e-12
+        6.518424646460277e-3,
+        abs=1.0e-12,
+    ), (
+        "68cfe15c retained the same upper saddle while regenerating its "
+        "spline-authored typed-census position"
     )
 
     radial = jnp.asarray(np.unique(operand_coordinate[:, 0]))

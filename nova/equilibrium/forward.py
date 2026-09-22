@@ -2677,10 +2677,10 @@ class ForwardProfile:
         reader = getattr(self.operator, "_fixed_design_topology", None)
         if topology is None or reader is None:
             return None
-        physical = jnp.asarray(equilibrium.flux)[: self.operator.physical_node_number]
+        terminal_flux = jnp.asarray(equilibrium.flux)
         _seed, material = self.operator.connectivity_axis_seed(topology.axis)
         qualification = reader.read_qualification(
-            physical,
+            terminal_flux,
             self.operator.polarity,
             material,
         )

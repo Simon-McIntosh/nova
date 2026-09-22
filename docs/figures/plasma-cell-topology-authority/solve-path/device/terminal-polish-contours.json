@@ -1,0 +1,114 @@
+[
+  {
+    "case": "diverted-single-null",
+    "realised_cells": 132,
+    "residual": 0.15210159579534352,
+    "converged": false,
+    "finite_landmarks": 2,
+    "levels": [
+      -0.009325765280982199,
+      -0.008160640267045507,
+      -0.006995515253108814,
+      -0.005830390239172122,
+      -0.004665265225235429,
+      -0.003500140211298736,
+      -0.0023350151973620444,
+      -0.0011698901834253511,
+      -4.765169488657808e-06,
+      0.0011603598444480338,
+      0.002325484858384727,
+      0.0034906098723214204,
+      0.004655734886258112
+    ],
+    "panels": [
+      {
+        "name": "Analytic input",
+        "contour_segments": 17,
+        "analytic_nulls": {
+          "x_points_drawn": 1,
+          "x_points_dropped_outside_wall": 0,
+          "strike_points_drawn": 0,
+          "other_x_points_drawn": 2
+        },
+        "terminal_nulls": {
+          "x_points_drawn": 1,
+          "x_points_dropped_outside_wall": 0,
+          "strike_points_drawn": 0,
+          "other_x_points_drawn": 0
+        }
+      },
+      {
+        "name": "Terminal solve",
+        "contour_segments": 20,
+        "analytic_nulls": {
+          "x_points_drawn": 1,
+          "x_points_dropped_outside_wall": 0,
+          "strike_points_drawn": 0,
+          "other_x_points_drawn": 2
+        },
+        "terminal_nulls": {
+          "x_points_drawn": 1,
+          "x_points_dropped_outside_wall": 0,
+          "strike_points_drawn": 0,
+          "other_x_points_drawn": 0
+        }
+      }
+    ]
+  },
+  {
+    "case": "weak-rotation-reactor-static",
+    "realised_cells": 135,
+    "residual": 0.04707896271873737,
+    "converged": false,
+    "finite_landmarks": 1,
+    "levels": [
+      -14.670425012545055,
+      -9.718943170748961,
+      -4.767461328952868,
+      0.18402051284322596,
+      5.135502354639321,
+      10.086984196435413,
+      15.038466038231505,
+      19.9899478800276,
+      24.941429721823695,
+      29.89291156361979,
+      34.84439340541588,
+      39.795875247211974,
+      44.74735708900806
+    ],
+    "panels": [
+      {
+        "name": "Analytic input",
+        "contour_segments": 19,
+        "analytic_nulls": {
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0,
+          "strike_points_drawn": 0,
+          "other_x_points_drawn": 0
+        },
+        "terminal_nulls": {
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0,
+          "strike_points_drawn": 0,
+          "other_x_points_drawn": 0
+        }
+      },
+      {
+        "name": "Terminal solve",
+        "contour_segments": 19,
+        "analytic_nulls": {
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0,
+          "strike_points_drawn": 0,
+          "other_x_points_drawn": 0
+        },
+        "terminal_nulls": {
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0,
+          "strike_points_drawn": 0,
+          "other_x_points_drawn": 0
+        }
+      }
+    ]
+  }
+]

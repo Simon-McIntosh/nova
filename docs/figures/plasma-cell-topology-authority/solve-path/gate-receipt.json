@@ -1,0 +1,276 @@
+{
+  "base_revision": "397f6b3fcf3f0d0cefc707526659c8cc3e54b7db",
+  "source_revision": "aec49acdc72034d73c893f4d2700bd2c7f00fd1a",
+  "baseline": {
+    "revision": "397f6b3fcf3f0d0cefc707526659c8cc3e54b7db",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/baseline.py",
+    "exit_status": 1,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/baseline.log",
+    "completed": true,
+    "failure_count": 3,
+    "failure_ids": [
+      "tests/test_plasma_cell_topology_read.py::test_raster_fixture_labels_are_bitwise_equal_to_independent_oracle",
+      "tests/test_split_polish_nulls.py::test_accepted_unmoved_polish_preserves_census_value_bits",
+      "tests/test_split_polish_nulls.py::test_mast_unmoved_saddle_keeps_census_flux_and_reports_fit_misrepresentation"
+    ]
+  },
+  "after": {
+    "revision": "bb076f460113ef46fce157844a8f47356ecce9a4",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -p no:randomly -vv -s tests/test_stencil_nulls.py tests/test_stencil_nulls_dual_sweep.py tests/test_analytic_single_null.py tests/test_banked_null_reads.py tests/test_fieldnull.py tests/test_jax_null.py tests/test_plasma_cell_topology_read.py tests/test_plasma_cell_flood_families.py tests/test_hex_flood_coil_nulls.py tests/test_hex_flood_geometries.py tests/test_hex_flood_sn_secondary.py tests/test_hex_flood_snowflake.py tests/test_split_polish_nulls.py tests/test_topology_parity_harness.py tests/test_null_generator_admission.py tests/test_forward_census.py tests/test_forward_secondary_null.py tests/test_solve_path_census_inputs.py",
+    "exit_status": 1,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/lane-split-cpu.log",
+    "completed": true,
+    "passed": 176,
+    "skipped": 5,
+    "failure_count": 3,
+    "failure_ids": [
+      "tests/test_plasma_cell_topology_read.py::test_raster_fixture_labels_are_bitwise_equal_to_independent_oracle",
+      "tests/test_split_polish_nulls.py::test_accepted_unmoved_polish_preserves_census_value_bits",
+      "tests/test_split_polish_nulls.py::test_mast_unmoved_saddle_keeps_census_flux_and_reports_fit_misrepresentation"
+    ],
+    "added_failure_ids": [],
+    "wall_seconds": 552.18,
+    "job_id": "1276042",
+    "lane": "all_debug CPU",
+    "selected_files": 18,
+    "collected": 184
+  },
+  "negative_control": {
+    "revision": "bb076f460113ef46fce157844a8f47356ecce9a4",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/lane-split-negative.py",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/lane-split-negative.log",
+    "mutation": "restore the physical-prefix slice at forward.py _terminal_polish_receipt and observe the exact-mode 110-cell solve regression fail",
+    "exercise_point": "CPU terminal seam under the coordinator lane-split decision",
+    "exit_status": 1,
+    "completed": true,
+    "expected_failure_observed": true,
+    "failure_count": 2,
+    "failure_ids": [
+      "tests/test_solve_path_census_inputs.py::test_terminal_polish_receipt_keeps_direct_samples[single-null]",
+      "tests/test_solve_path_census_inputs.py::test_terminal_polish_receipt_keeps_direct_samples[discriminator-row]"
+    ],
+    "wall_seconds": 10.33
+  },
+  "runtime_reproduction": {
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/direct-reproduce.log",
+    "exit_status": 1,
+    "full_values": 730,
+    "physical_values": 253,
+    "retained": [
+      1,
+      3
+    ],
+    "refusal": "ValueError: own-node null census requires the direct sampling flux values",
+    "scope": "Production terminal-reader method on the populated analytic input; this is not an end-to-end solve."
+  },
+  "full_solve_reproductions": [
+    {
+      "job_id": "1276020",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/reproduce.log",
+      "scheduler_state": "TIMEOUT",
+      "allocation_minutes": 20,
+      "terminal_receipt_observed": false
+    },
+    {
+      "job_id": "1276022",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/reproduce-single.log",
+      "scheduler_state": "TIMEOUT",
+      "allocation_minutes": 20,
+      "terminal_receipt_observed": false
+    }
+  ],
+  "source_audit": [
+    {
+      "path": "nova/equilibrium/reduced_newton.py",
+      "function": "_constraint_qualification",
+      "slice_line": 2329,
+      "call_line": 2330,
+      "target": "_fixed_design_read"
+    }
+  ],
+  "direct_positive_control": {
+    "revision": "2248637d341f91cb06672d010f928b12a1ad3005",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/direct-positive.py",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/direct-positive.log",
+    "exit_status": 0,
+    "completed": true,
+    "rows": [
+      {
+        "case": "diverted-single-null",
+        "full_values": 730,
+        "finite_landmarks": 2,
+        "position": [
+          [
+            1.786910492413462,
+            0.04615148216432859
+          ],
+          [
+            1.4930225591761932,
+            -1.0188319093078109
+          ]
+        ],
+        "value": [
+          0.005713819178329535,
+          1.361644435324942e-05
+        ]
+      },
+      {
+        "case": "weak-rotation-reactor-static",
+        "full_values": 772,
+        "finite_landmarks": 1,
+        "position": [
+          [
+            6.194958772632181,
+            0.0001349978582949144
+          ],
+          [
+            null,
+            null
+          ]
+        ],
+        "value": [
+          49.941870789390364,
+          null
+        ]
+      }
+    ],
+    "scope": "Production terminal-reader method on the analytic inputs, with entry instrument observed; not an end-to-end solve."
+  },
+  "outcome": "complete-under-authorized-lane-split",
+  "scheduler_receipts_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/scheduler-receipts.log",
+  "follow_ons": [
+    "The separately owned reduced_newton.py:2329 full-state caller patch and source-scanner allowlist removal; the read boundary itself is covered and passing.",
+    "The separately owned limiter-read benchmark migration.",
+    "The three enabled baseline failure expectations remain with their owners.",
+    "Coordinator integration and merged-head verification; no post-merge driver fallback was needed to obtain this device evidence."
+  ],
+  "lane_split": {
+    "decision": "CPU seams and source scan are the completion gate; full exact-mode solves are GPU-only evidence with a coordinator post-merge driver fallback after one device attempt.",
+    "source_revision": "bb076f460113ef46fce157844a8f47356ecce9a4",
+    "cpu_gate": {
+      "revision": "bb076f460113ef46fce157844a8f47356ecce9a4",
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -p no:randomly -vv -s tests/test_stencil_nulls.py tests/test_stencil_nulls_dual_sweep.py tests/test_analytic_single_null.py tests/test_banked_null_reads.py tests/test_fieldnull.py tests/test_jax_null.py tests/test_plasma_cell_topology_read.py tests/test_plasma_cell_flood_families.py tests/test_hex_flood_coil_nulls.py tests/test_hex_flood_geometries.py tests/test_hex_flood_sn_secondary.py tests/test_hex_flood_snowflake.py tests/test_split_polish_nulls.py tests/test_topology_parity_harness.py tests/test_null_generator_admission.py tests/test_forward_census.py tests/test_forward_secondary_null.py tests/test_solve_path_census_inputs.py",
+      "exit_status": 1,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/lane-split-cpu.log",
+      "completed": true,
+      "passed": 176,
+      "skipped": 5,
+      "failure_count": 3,
+      "failure_ids": [
+        "tests/test_plasma_cell_topology_read.py::test_raster_fixture_labels_are_bitwise_equal_to_independent_oracle",
+        "tests/test_split_polish_nulls.py::test_accepted_unmoved_polish_preserves_census_value_bits",
+        "tests/test_split_polish_nulls.py::test_mast_unmoved_saddle_keeps_census_flux_and_reports_fit_misrepresentation"
+      ],
+      "added_failure_ids": [],
+      "wall_seconds": 552.18,
+      "job_id": "1276042",
+      "lane": "all_debug CPU",
+      "selected_files": 18,
+      "collected": 184
+    },
+    "negative_control": {
+      "revision": "bb076f460113ef46fce157844a8f47356ecce9a4",
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/lane-split-negative.py",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/lane-split-negative.log",
+      "mutation": "restore the physical-prefix slice at forward.py _terminal_polish_receipt and observe the exact-mode 110-cell solve regression fail",
+      "exercise_point": "CPU terminal seam under the coordinator lane-split decision",
+      "exit_status": 1,
+      "completed": true,
+      "expected_failure_observed": true,
+      "failure_count": 2,
+      "failure_ids": [
+        "tests/test_solve_path_census_inputs.py::test_terminal_polish_receipt_keeps_direct_samples[single-null]",
+        "tests/test_solve_path_census_inputs.py::test_terminal_polish_receipt_keeps_direct_samples[discriminator-row]"
+      ],
+      "wall_seconds": 10.33
+    },
+    "device_evidence": {
+      "job_id": "1276041",
+      "lane": "H200",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA",
+      "completed": true,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/device-evidence.log",
+      "submission_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/device-betelgeuse-submit.log",
+      "allocation": "1 GPU, 8 CPUs, 128G, 45 minutes",
+      "backend_control": "gpu [CudaDevice(id=0)], NVIDIA H200 NVL, x64 True",
+      "titan_fallback_needed": false,
+      "revision": "bb076f460113ef46fce157844a8f47356ecce9a4",
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -p no:randomly -vv -s tests/test_solve_path_census_inputs.py -k exact_mode_solve",
+      "exit_status": 0,
+      "passed": 2,
+      "deselected": 6,
+      "failure_count": 0,
+      "failure_ids": [],
+      "wall_seconds": 908.93,
+      "scheduler_elapsed": "00:15:47",
+      "rows": [
+        {
+          "case": "diverted-single-null",
+          "realised_cells": 132,
+          "finite_landmarks": 2,
+          "residual": 0.152101595795,
+          "converged": false,
+          "backend": "gpu",
+          "state_artifact": "docs/figures/plasma-cell-topology-authority/solve-path/device/diverted-single-null.npz"
+        },
+        {
+          "case": "weak-rotation-reactor-static",
+          "realised_cells": 135,
+          "finite_landmarks": 1,
+          "residual": 0.0470789627187,
+          "converged": false,
+          "backend": "gpu",
+          "state_artifact": "docs/figures/plasma-cell-topology-authority/solve-path/device/weak-rotation-reactor-static.npz"
+        }
+      ],
+      "render_exit_status": 0,
+      "post_merge_driver_fallback_required": false,
+      "qualification": "Both public solves finish and return finite polish telemetry; neither terminal state is converged. These are receipt-path checks, not convergence certificates.",
+      "figure_render_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/device-render.log",
+      "figure_render_exit_status": 0,
+      "figure_method": "Piecewise-linear contours through the stored flux samples; shared physical levels per row; larger blue analytic-read nulls and smaller red terminal-read nulls; duplicate selected candidate markers excluded at roundoff."
+    },
+    "scheduler_receipts_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/lane-split-scheduler.log"
+  },
+  "prior_cpu_full_solve_attempt": {
+    "revision": "aec49acdc72034d73c893f4d2700bd2c7f00fd1a",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -p no:randomly -vv -s tests/test_stencil_nulls.py tests/test_stencil_nulls_dual_sweep.py tests/test_analytic_single_null.py tests/test_banked_null_reads.py tests/test_fieldnull.py tests/test_jax_null.py tests/test_plasma_cell_topology_read.py tests/test_plasma_cell_flood_families.py tests/test_hex_flood_coil_nulls.py tests/test_hex_flood_geometries.py tests/test_hex_flood_sn_secondary.py tests/test_hex_flood_snowflake.py tests/test_split_polish_nulls.py tests/test_topology_parity_harness.py tests/test_null_generator_admission.py tests/test_forward_census.py tests/test_forward_secondary_null.py tests/test_solve_path_census_inputs.py",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/candidate.log",
+    "completed": false,
+    "job_id": "1276029",
+    "completed_subset": {
+      "passed": 172,
+      "failed": 3,
+      "skipped": 3,
+      "added_failure_ids": []
+    },
+    "exit_status": null,
+    "scheduler_state": "CANCELLED",
+    "scheduler_batch_exit_status": "0:15",
+    "elapsed": "00:20:57",
+    "failure_ids": [
+      "tests/test_plasma_cell_topology_read.py::test_raster_fixture_labels_are_bitwise_equal_to_independent_oracle",
+      "tests/test_split_polish_nulls.py::test_accepted_unmoved_polish_preserves_census_value_bits",
+      "tests/test_split_polish_nulls.py::test_mast_unmoved_saddle_keeps_census_flux_and_reports_fit_misrepresentation"
+    ],
+    "blocking_diagnostic": "LLVM compilation error: Cannot allocate memory",
+    "blocking_log_line": 238,
+    "terminal_receipt_observed": false,
+    "reason": "Stopped after the out-of-scope LLVM compilation failure; the remaining solve cases did not complete."
+  },
+  "prior_full_solve_negative_control": {
+    "mutation": "restore the physical-prefix slice at forward.py _terminal_polish_receipt and observe the exact-mode 110-cell solve regression fail",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/negative.log",
+    "completed": false,
+    "job_id": "1276030",
+    "exit_status": null,
+    "scheduler_state": "CANCELLED",
+    "scheduler_batch_exit_status": "0:15",
+    "elapsed": "00:20:57",
+    "terminal_receipt_observed": false,
+    "expected_failure_observed": false,
+    "reason": "Stopped with the failed acceptance lane; applied mutation is recorded, but the solve never reached the terminal receipt."
+  },
+  "figure": "docs/figures/plasma-cell-topology-authority/solve-path/device/terminal-polish-contours.png"
+}

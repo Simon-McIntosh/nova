@@ -62,6 +62,12 @@ __all__ = [
     "FixedPointResult",
     "FixedPointTerminationReason",
     "InnerIterationDecision",
+    "OperatorRequest",
+    "OperatorRequestKind",
+    "OperatorResponse",
+    "operator_request",
+    "operator_request_body",
+    "run_operator_requests",
     "KinkAwareResult",
     "KrylovActionQualification",
     "ManifoldAdvanceQualification",
@@ -862,6 +868,128 @@ def _projected_krylov_condition(
         jnp.zeros_like(direction),
     )
     return (*measurement, direction)
+
+
+class OperatorRequestKind(IntEnum):
+    """Read authority and interpretation for one live operator application."""
+
+    RESIDUAL = 0
+    MERIT = 1
+    ACCEPTANCE = 2
+    RECOVERY = 3
+    RECONCILIATION = 4
+    JVP = 5
+
+
+class OperatorRequest(NamedTuple):
+    """Fixed-shape operands; no topology value is borrowed from another state."""
+
+    kind: jax.Array
+    state: jax.Array
+    vector: jax.Array
+    shadow: jax.Array
+    use_incumbent: jax.Array
+
+
+class OperatorResponse(NamedTuple):
+    """One live read and the measurements derived from exactly that read."""
+
+    mapped: jax.Array
+    tangent: jax.Array
+    shadow: jax.Array
+    residual: jax.Array
+    merit: jax.Array
+
+
+def operator_request(
+    kind: OperatorRequestKind,
+    state: jax.Array,
+    shadow: jax.Array,
+    *,
+    vector: jax.Array | None = None,
+    use_incumbent: jax.Array | bool = True,
+) -> OperatorRequest:
+    """Construct uniformly shaped operands for a residual or tangent request."""
+    return OperatorRequest(
+        jnp.asarray(kind, dtype=jnp.int32),
+        state,
+        jnp.zeros_like(state) if vector is None else vector,
+        jnp.asarray(shadow, dtype=bool),
+        jnp.asarray(use_incumbent, dtype=bool),
+    )
+
+
+def operator_request_body(
+    shadowed_map_fn: Callable[..., jax.Array],
+    promoted_shadow_fn: Callable[..., jax.Array] | None = None,
+) -> Callable[..., OperatorResponse]:
+    """Build the shared primal/tangent body without enclosing a Krylov solve.
+
+    The switch chooses a read authority before applying the live map. It never
+    selects between copies of the map. Both members of the JVP are evaluated
+    at the request's state; the residual mask is fixed for its local tangent,
+    exactly as it is in the frozen-mask Newton model. Geometry and profile
+    arrays are explicit trailing arguments, not captured by this factory.
+    """
+
+    def evaluate(request, *arguments):
+        def incumbent(_):
+            return jnp.asarray(False)
+
+        def selected(value):
+            return ~value.use_incumbent
+
+        def reconciliation(_):
+            return jnp.asarray(True)
+
+        read_induced = jax.lax.switch(
+            request.kind,
+            (incumbent, incumbent, selected, selected, reconciliation, incumbent),
+            request,
+        )
+        if promoted_shadow_fn is None:
+            shadow = request.shadow
+        else:
+            shadow = jax.lax.cond(
+                read_induced,
+                lambda: jnp.ravel(
+                    promoted_shadow_fn(request.state, request.shadow, *arguments)
+                ),
+                lambda: request.shadow,
+            )
+
+        def live_map(state):
+            return shadowed_map_fn(state, shadow, *arguments)
+
+        mapped, tangent = jax.jvp(live_map, (request.state,), (request.vector,))
+        return OperatorResponse(
+            mapped,
+            tangent,
+            shadow,
+            _relative_residual(mapped, request.state),
+            _smooth_relative_sup_merit(mapped, request.state),
+        )
+
+    return jax.jit(evaluate)
+
+
+def run_operator_requests(
+    body: Callable[..., OperatorResponse],
+    requests: OperatorRequest,
+    *arguments: Any,
+) -> OperatorResponse:
+    """Serve a fixed-capacity request stream through one traced scan body.
+
+    Request kinds may differ at runtime while payload leaf shapes stay fixed.
+    The caller owns linear solves and continuation decisions; neither is
+    interpreted or traced again by this machine.
+    """
+
+    def serve(carry, request):
+        return carry, body(request, *arguments)
+
+    _, responses = jax.lax.scan(serve, None, requests)
+    return responses
 
 
 def _relative_residual(mapped: jax.Array, state: jax.Array) -> jax.Array:

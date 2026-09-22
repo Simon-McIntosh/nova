@@ -1116,5 +1116,105 @@ def test_nested_jit_calls_inline_each_operator_request():
     np.testing.assert_array_equal(compiled(initial), jnp.sin(jnp.sin(jnp.sin(initial))))
 
 
+def test_operator_request_stream_preserves_live_reads_and_local_tangents():
+    """Every request owns its field and only the selected mask is held fixed."""
+    from nova.equilibrium.fixed_point import (
+        OperatorRequest,
+        OperatorRequestKind,
+        operator_request_body,
+        run_operator_requests,
+    )
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
+
+    def mapped(state, shadow, slope):
+        return jnp.where(shadow, state, slope * state**2 + 1.0)
+
+    def promoted(state, previous, slope):
+        del previous, slope
+        return state > 0.0
+
+    states = jnp.asarray(
+        [
+            [-0.5, 0.25],
+            [-0.25, 0.5],
+            [0.5, -0.5],
+            [-0.5, 0.5],
+            [0.25, -0.25],
+            [0.5, -0.25],
+        ],
+        dtype=jnp.float64,
+    )
+    vectors = jnp.ones_like(states)
+    shadows = jnp.zeros_like(states, dtype=bool)
+    incumbent = jnp.asarray([True, True, False, True, False, True])
+    requests = OperatorRequest(
+        jnp.arange(len(OperatorRequestKind), dtype=jnp.int32),
+        states,
+        vectors,
+        shadows,
+        incumbent,
+    )
+    body = operator_request_body(mapped, promoted)
+    observed = jax.jit(lambda payload: run_operator_requests(body, payload, 0.25))(
+        requests
+    )
+    expected_shadow = (
+        shadows.at[OperatorRequestKind.ACCEPTANCE]
+        .set(states[OperatorRequestKind.ACCEPTANCE] > 0.0)
+        .at[OperatorRequestKind.RECONCILIATION]
+        .set(states[OperatorRequestKind.RECONCILIATION] > 0.0)
+    )
+    np.testing.assert_array_equal(observed.shadow, expected_shadow)
+    np.testing.assert_array_equal(
+        observed.mapped, jnp.where(expected_shadow, states, 0.25 * states**2 + 1.0)
+    )
+    np.testing.assert_array_equal(
+        observed.tangent, jnp.where(expected_shadow, vectors, 0.5 * states * vectors)
+    )
+    assert not np.array_equal(observed.mapped[0], observed.mapped[1])
+
+
+def test_krylov_solve_composes_requests_without_entering_the_operator_body():
+    """The request body has no linear solve; its caller owns Krylov control."""
+    from jax.extend import core
+    from nova.equilibrium.fixed_point import (
+        OperatorRequestKind,
+        operator_request,
+        operator_request_body,
+    )
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
+    body = operator_request_body(lambda state, _shadow: 0.25 * state)
+    request = operator_request(
+        OperatorRequestKind.JVP,
+        jnp.ones(2, dtype=jnp.float64),
+        jnp.zeros(2, dtype=bool),
+        vector=jnp.ones(2, dtype=jnp.float64),
+    )
+
+    def primitives(jaxpr):
+        found = set()
+        for equation in jaxpr.eqns:
+            found.add(equation.primitive.name)
+            for nested in core.jaxprs_in_params(equation.params):
+                found.update(primitives(nested))
+        return found
+
+    assert "custom_linear_solve" not in primitives(jax.make_jaxpr(body)(request))
+
+    def solve(rhs):
+        def action(vector):
+            return vector - body(request._replace(vector=vector)).tangent
+
+        return jax.scipy.sparse.linalg.gmres(action, rhs, restart=2, maxiter=2)[0]
+
+    rhs = jnp.asarray([0.75, 1.5], dtype=jnp.float64)
+    assert "custom_linear_solve" in primitives(jax.make_jaxpr(solve)(rhs))
+    np.testing.assert_allclose(jax.jit(solve)(rhs), [1.0, 2.0], atol=1e-14, rtol=0)
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

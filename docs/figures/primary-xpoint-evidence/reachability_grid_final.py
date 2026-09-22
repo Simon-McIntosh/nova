@@ -187,7 +187,7 @@ def _mast_panels(corroboration, reachability) -> list[dict[str, Any]]:
     achieved = _achieved_classes()
     referee = _efit_rows()
     selected = select_slices_by_shot(DECOMPOSITION_BANK)
-    response_cache, _carrier = _persisted_response_cache(
+    response_cache, carrier = _persisted_response_cache(
         response_carrier.DEFAULT_CARRIER, response_carrier.DEFAULT_RECEIPT
     )
     panels: list[dict[str, Any]] = []
@@ -206,7 +206,10 @@ def _mast_panels(corroboration, reachability) -> list[dict[str, Any]]:
             raise RuntimeError("MAST reconstruction entered a direct response builder")
         target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
         states = reachability._mast_states(
-            profile, jnp.asarray(passive_case["state"]), target_current
+            profile,
+            jnp.asarray(passive_case["state"]),
+            target_current,
+            carrier_identity=carrier["carrier"]["semantic_response_identity"],
         )
         for arm, state in states.items():
             key = (identity, arm)

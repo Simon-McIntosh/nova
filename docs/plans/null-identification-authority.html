@@ -283,6 +283,29 @@ login-node gate (seconds, no solve, no allocation):
 1 passed in 10.61 s, exit 0. The declared negative control — the one-argument revert above — reddens
 at 1 failed. Commit <code>c9d6f449</code>.</p>
 
+<h3>The external-coil isolation failures were stale raw-grid pins (2026-09-22)</h3>
+<p><strong>Both coarse and fine cases are pin-stale; production invariance remains intact.</strong>
+At current head the coarse production axis was (1.0064725449802572, 0.18466978826118072) m
+against the stale raw-grid expectation (1.0096852636396698, 0.18645279538409726) m; the fine
+pair was (0.9972431622386931, 0.17740956978431402) m against
+(0.9986607891769985, 0.17424244407984985) m. A read-only CPU bisection found both cases
+passing at <code>7bff1d5d</code> and first failing on main at <code>47b9f996</code>,
+<em>Merge the null-identification integration candidate</em>, on 2026-09-05. That landing made
+structured production reads publish the typed census position and value authored by the common
+tensor spline; the test continued to compare that published axis with <code>topology.grid()</code>'s
+raw local-fit candidate. The containment-aware limiter anchor, typed saddle clip handoff and traced
+wall-array promotion are exonerated: each one's first parent already failed both cases.</p>
+<p><strong>The partition instrument is now non-vacuous.</strong> Its former raster rings were in the
+transposed internal grid order while the returned labels are in the fixture's flat coordinate order,
+so the supposed stable interior contained zero cells. Using <code>hex_stencil(shape)</code> compares
+65 of 327 coarse cells and 136 of 478 fine cells outside the one-link boundary band, with zero label
+differences; all 17 coarse and 25 fine changed cells lie inside that declared band, and no stable
+plasma-core cell becomes private flux. Commit <code>654e63e37</code> pins the spline-authored axis,
+cites <code>47b9f996</code> in the assertion message, and requires nonempty comparison and stable-core
+sets. The fresh current process passes 2 of 2; the identical repinned test against pre-landing
+production fails 2 of 2. Record:
+<a href="/nova/evidence/archive/null-identification-authority-landed#the-external-coil-isolation-pin-follows-the-production-census">the external-coil isolation attribution</a>.</p>
+
 <h2 id="s2"><span class="badge badge-shipped">✓ landed 2026-09-04</span> §2 — Connected, contained stationary points on the read the solve uses</h2>
 <p class="landed-summary">The solve's own read path is containment-aware for the single closed ring: X candidates are masked by first-wall containment before the flux ranking (<code>nova/equilibrium/topology.py</code> lines 352–368, commit <code>54e8911b</code>), O admission uses one shared seed mask and requires a material-connected component rather than accepting a private well (lines 754–812), the fixed-shape candidate census keeps overflow visible instead of truncating (<code>nova/equilibrium/forward_operator.py</code> lines 404–412, 620–652), private wall anchors are masked (<code>20f3a40c</code>), and the out-of-vessel saddle regression is pinned (<code>tests/test_stationary_point_admission.py</code>). The generalisation from one ring to the occupiable region of a multi-unit wall is owned by <code>multi-unit-limiter-wall</code> §3. Record: <a href="/nova/evidence/archive/null-identification-authority-landed">landed evidence</a>.</p>
 

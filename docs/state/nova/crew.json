@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T18:14:11",
+  "updated": "2026-09-22T18:14:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -250643,6 +250643,189 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T154639741321-review-of-pta-parity-harness-merged-head",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a74",
+        "node": "review-of-pta-parity-harness-merged-head",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 561,
+                "cached_input_tokens": 705749,
+                "input_tokens": 706342,
+                "output_tokens": 220,
+                "reasoning_output_tokens": 114,
+                "total_tokens": 706562,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "576a27e3-ea0d-439c-9e63-3058761859c6",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "the review for r-20260922T153047030797-pta-parity-harness-merged-head stores a parsed record scoring all 5 dimensions in the range 0..20",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260922T153047030797-pta-parity-harness-merged-head",
+          "id": "review-of-pta-parity-harness-merged-head",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-22T15:46:53Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T154639741321-review-of-pta-parity-harness-merged-head/manifest.md",
+          "negative_control": "",
+          "plan": "plasma-cell-topology-authority",
+          "requested_backend": null,
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T153047030797-pta-parity-harness-merged-head.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "session-71ebec9b1921ac205409",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-22T15:48:49Z",
+        "completed_at": "2026-09-22T16:06:34.274Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1046,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1065,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ab597d6d80c002fdef9b9781976a1754e976eea1",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T154639741321-review-of-pta-parity-harness-merged-head/manifest.md",
+        "scope_changed": false,
+        "session_id": "82136814-ff1a-46ff-afd3-4f595b6de358",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no rate-limit event in the stream yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-22T16:06:34.274Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "follow_on_paths": [
+          "lane.sh",
+          "before/after",
+          "docs/evidence/archive/plasma-cell-topology-authority-landed.html"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/review-of-pta-parity-harness-merged-head",
+          "session_id": "82136814-ff1a-46ff-afd3-4f595b6de358",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T16:06:34.274Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.97,
+        "impl_move": {
+          "plan": "plasma-cell-topology-authority",
+          "at_dispatch": 0.97,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 98.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -251109,6 +251292,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3165
+    "_version": 3166
   }
 }

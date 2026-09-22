@@ -24,7 +24,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-version" content="95">
+<meta name="plan-version" content="96">
 <meta name="plan-impl" content="1.0">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,wall-height-shadow-safety,diiid-residual-stall-mechanism">
 <meta name="plan-section-declarations" content="{&quot;currency&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;}">
@@ -463,6 +463,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260922T175926155312-pta-adopted-read-cost-reduction" data-who="reckon-ship" data-when="2026-09-22T18:36:19Z">
     <div class="r-comment-body"><p>the adopted read measures 0.122, 0.145 and 0.187 times the like-for-like pre-adoption read at 550, 1074 and 2616 cells on one titan job with the ladder, rescaling, raster parity and twelve-row bank replay held and zero added CPU failure IDs; the declared whole-wall control stayed in bound and is recorded as a finding, the substituted deduplication control leaves it at 17.18; merged at 2b228af7a, review 91</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260922T183656218710-review-of-pta-adopted-read-cost-reduction" data-who="reckon-ship" data-when="2026-09-22T19:34:13.761Z">
+    <div class="r-comment-body"><p>review of the read-cost reduction stored, 91 of 100, two findings already carried in the receipt (declared control in bound; ten percent reference-arm spread)</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260922-s6-attribution-hint" data-who="reckon-ship s18-fable-20260922" data-when="2026-09-22T14:05:00+00:00">
     <div class="r-comment-body">Input from the S19 attribution of the two coil-null contracts (node nia-attribute-the-coil-null-invariance-failures, 2026-09-22): verdict pin-stale for both; the first main commit at which they fail is 47b9f996 (Merge the null-identification integration candidate) and its parent 7bff1d5d passes; the containment anchor fe0689ce, the typed census saddle d90a522f and the wall-array promotion 192a8ed2 are exonerated because their parents already fail. Mechanism there: the axis moved (coarse 1.00969,0.18645 to 1.00647,0.18467; fine 0.99866,0.17424 to 0.99724,0.17741) with zero interior-cell differences and every change inside the allowed boundary band. The two contracts this plan owns most likely went stale at the same merge, so 47b9f996 against 7bff1d5d is the first pair to check for the oracle coordinate and the MAST saddle before reading any other landing. The adoption merged at 5ae1e66e0 after this measurement; both tests still fail identically at that head (same four failure IDs at the adopted base and head), so the adoption is exonerated too.</div>

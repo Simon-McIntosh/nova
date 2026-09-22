@@ -53,6 +53,45 @@ def main():
     OUTPUT.mkdir(exist_ok=True)
     cpus = sorted(os.sched_getaffinity(0))
     if args.program:
+        if args.program == "negative":
+            import subprocess
+
+            measured = json.loads((HELD / "negative-program.json").read_text())
+            changed = subprocess.check_output(
+                [
+                    "git",
+                    "diff",
+                    "--name-only",
+                    measured["revision"],
+                    "HEAD",
+                    "--",
+                    "nova",
+                ],
+                cwd=gates.ROOT,
+                text=True,
+            ).splitlines()
+            assert set(changed) <= {"nova/equilibrium/separatrix_clip.py"}, changed
+            # The mutation replaces this entire module from the pinned base.
+            # Every other executed package file is identical to the measured control.
+            proof = dict(
+                measured_revision=measured["revision"],
+                candidate_revision=prior.revision(),
+                changed_package_paths=changed,
+                replaced_module_revision=gates.BASE,
+                effective_control_source_unchanged=True,
+            )
+            measured["unchanged_control_reuse"] = proof
+            shutil.copy2(
+                HELD / "negative-optimized-hlo.txt.gz",
+                OUTPUT / "negative-optimized-hlo.txt.gz",
+            )
+            shutil.copy2(
+                HELD / "negative-program.log", OUTPUT / "negative-measured.log"
+            )
+            prior.persist("negative-program.json", measured)
+            prior.persist("negative-source-identity.json", proof)
+            print("REUSED_UNCHANGED_CONTROL", flush=True)
+            return 0
         census.SOURCE = prior.revision()
         census.program(args.program)
         path = OUTPUT / (args.program + "-program.json")

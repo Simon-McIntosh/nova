@@ -3160,6 +3160,44 @@ displacement, so the convergence flag reads <code>no</code> everywhere at that a
 saddle vocabulary is unexercised because this fixture is limited in both topologies. Verifying the
 merged result belongs to a separately dispatched test node.</p>
 <p>Commit <code>c88ef0b91</code> on this worktree's branch.</p>
+
+  <h4 id="limiter-read-contact-shadow-label-repair">Repair &mdash; <code>limiter-read/single-null-contact-shadow.png</code> (30)</h4>
+  <p><strong>Repaired 2026-09-22</strong> by node <code>fsa-repair-contact-shadow-figure</code> under
+  followup <code>f-cca-repair-contact-shadow-unlabelled</code>, as a painter-only repair: both
+  limiter-read figures are rebuilt from the committed receipt by the driver's render entry point
+  with no solve entered. The audit's finding was that the panel carried no text of any kind and
+  placed the <code>draw_nulls</code> axis triangle in the divertor leg.</p>
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/limiter-read/single-null-contact-shadow.png" alt="Regenerated single-null contact-shadow poloidal panel: unfilled flux line contours on shared Wb levels, the wall at its 481 source nodes, a solid triangle at the analytic magnetic axis, a filled cross at the admitted X-point, a diamond at the selected wall contact and hollow squares over 18 exempted private-wall nodes, beneath a wrapped title reading the fixture, cell count, residual and convergence field from the receipt and beside a legend naming every drawn family." />
+    <figcaption>The repaired panel. Every drawn family has a legend entry and the selected wall contact
+    is a diamond, distinct from the axis triangle and the saddle cross.</figcaption>
+  </figure>
+  <p><strong>The defect reproduced before the repair.</strong> <code>git show
+  HEAD:docs/figures/cut-cell-current-attribution/limiter-read/single-null-contact-shadow.png</code>
+  is 972&times;1116 and carries no legend column and no title, and
+  <code>render-receipt.json</code> was <strong>absent at HEAD</strong>, so no receipt described the
+  committed artifact at all. The regenerated panel is 1404&times;1116.</p>
+  <p><strong>What the regenerated figures report.</strong> <code>render-receipt.json</code> in the
+  figure directory lists, per figure, every title line drawn and, per poloidal panel, the glyph
+  count of every null set. For this panel: <code>analytic_magnetic_axis</code> 1 drawn,
+  <code>analytic_admitted_x_points</code> 1 drawn, <code>wall_contact_glyphs</code> 1,
+  <code>excluded_*</code> 18 exempted private-wall nodes, <code>wall_drawn</code> true at
+  <code>wall_node_count</code> 481 (the source row's own wall array length).</p>
+  <p><strong>Provenance of the two title fields the source receipt does not carry per row.</strong>
+  The audit's reported residual and convergence flag have no per-row field: the source receipt enters
+  no nonlinear solve (<code>nonlinear_solve_entered</code> false) because the field is analytic
+  and only the carrier wall sampling varies, so the title's <code>residual</code> is the selected
+  contact's <code>production_contact.level_error_in_span</code> against the exact wall extremum
+  (9.852875804959903e-05) and <code>converged</code> reads <code>n/a</code>. The nominal cell scale
+  and the 1074 realised cells are both stated in the title's second line.</p>
+  <p><strong>The check that could have failed.</strong> <code>tests/test_limiter_read_render.py</code>
+  asserts each of those conditions against the render receipt, selected through
+  <code>NOVA_LIMITER_READ_RENDER_RECEIPT</code> so a mutated receipt can be audited. Under that
+  control &mdash; the wall-contact marker reset to the axis triangle <code>^</code>, its legend entry
+  deleted and the title truncated to <code>diverted-single-null &middot; cells=1074</code> &mdash; the
+  run fails on exactly those three conditions and the verbatim mutation is line 1 of the recorded
+  log.</p>
+
 </section>
   </main>
 </body>

@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 import hashlib
-import json
 import os
 from pathlib import Path
 import subprocess
@@ -165,6 +164,7 @@ def main():
     parser.add_argument("--suites", action="store_true")
     parser.add_argument("--row", nargs=2)
     parser.add_argument("--reference", action="store_true")
+    parser.add_argument("--rows", action="store_true")
     args = parser.parse_args()
     OUTPUT.mkdir(parents=True, exist_ok=True)
     for path in (
@@ -183,6 +183,16 @@ def main():
     if args.suite:
         return prior.suite(*args.suite)
     cpus = sorted(os.sched_getaffinity(0))
+    if args.rows:
+        for case in (
+            "weak-rotation-reactor-static",
+            "moderate-rotation-conventional-static",
+            "strong-rotation-compact-static",
+            "diverted-single-null",
+        ):
+            for cells in (110, 300):
+                child(["--row", case, str(cells)], f"{case}-{cells}-measurement", cpus)
+        return 0
     if args.suites:
         return max(
             child(["--suite", arm, name], f"{arm}-{Path(name).stem}", cpus)
@@ -190,12 +200,15 @@ def main():
             for name in TESTS
         )
     if args.row:
+        original_persist = prior.persist
+
+        def publish(name, value):
+            value["previous_route_equivalence_1e14"] = value.pop("passed")
+            value["previous_route_equivalence_is_acceptance_gate"] = False
+            original_persist(name, value)
+
+        prior.persist = publish
         prior.row(*args.row)
-        path = OUTPUT / ("-".join(args.row) + ".json")
-        value = json.loads(path.read_text())
-        value["previous_route_equivalence_1e14"] = value.pop("passed")
-        value["previous_route_equivalence_is_acceptance_gate"] = False
-        path.write_text(json.dumps(value, indent=2) + "\n")
         return 0
     if args.reference:
         from reference_clip import measure

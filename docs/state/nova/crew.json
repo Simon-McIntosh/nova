@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T15:01:37",
+  "updated": "2026-09-22T15:02:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6470,10 +6470,15 @@
         "id": "s19f-local-2",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-22"
+        "session_id": "8c966423-c9e2-4f93-b043-a1c0831d0ae1",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "8c966423-c9e2-4f93-b043-a1c0831d0ae1"
+        },
+        "created": "2026-09-22",
+        "session_owners": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19f-local-3",
@@ -245324,6 +245329,204 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T123445789415-review-of-pta-null-generator-adoption",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a75",
+        "node": "review-of-pta-null-generator-adoption",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4101,
+                "cached_input_tokens": 468692,
+                "input_tokens": 472825,
+                "output_tokens": 2345,
+                "reasoning_output_tokens": 683,
+                "total_tokens": 475170,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "the review for r-20260922T112528428825-pta-null-generator-adoption stores a parsed record scoring all 5 dimensions in the range 0..20, reading the six commits 68112f59..e46e5378 in worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-null-generator-adoption against section 5 of the plan: the admission rule (finite nonsingular Hessian, inside-or-near source cell at a quarter pitch, wall containment) on both carriers, the crossing count demoted to diagnostic, the polish on representatives only with positions-only value authority preserved, DomainMasks order and capacity semantics preserved, the census input contract change (full state with sampling suffix) and its consumer repairs, the exhaustion flag propagation, and whether the ladder regression, the 0/646 raster parity, the twelve-row 0/13068 replay and the negative control are evidence or self-agreement",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260922T112528428825-pta-null-generator-adoption",
+          "id": "review-of-pta-null-generator-adoption",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-22T12:34:48Z",
+            "read_at": "2026-09-22T12:34:49Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 49.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T123445789415-review-of-pta-null-generator-adoption/manifest.md",
+          "negative_control": "",
+          "plan": "plasma-cell-topology-authority",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T112528428825-pta-null-generator-adoption.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s18-pta-review-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-22T12:35:09Z",
+        "completed_at": "2026-09-22T12:52:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1022,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1022,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "f704bd2d5a783f76c31c23295c4d648ab39d3943",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T123445789415-review-of-pta-null-generator-adoption/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c91c-e8e0-7b51-9494-33c13303ad93",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6565632,
+            "cached_input_tokens_cumulative": 6565632,
+            "input_tokens": 6760232,
+            "input_tokens_cumulative": 6760232,
+            "output_tokens": 26019,
+            "output_tokens_cumulative": 26019,
+            "reasoning_output_tokens": 9308,
+            "reasoning_output_tokens_cumulative": 9308
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-22T12:52:11Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 51.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-22T12:52:11Z"
+            }
+          ],
+          "notional_cost_usd": 27.5613,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 6565632,
+          "cumulative_input_tokens": 6760232,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 35327,
+          "generation_seconds": 937.022,
+          "machine_seconds": 83.57,
+          "tokens_per_second": 37.7
+        },
+        "follow_on_paths": [
+          "nova/equilibrium/forward.py::_secondary_x_point"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/review-of-pta-null-generator-adoption",
+          "session_id": "01a0c91c-e8e0-7b51-9494-33c13303ad93",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T12:52:11Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.9,
+        "impl_move": {
+          "plan": "plasma-cell-topology-authority",
+          "at_dispatch": 0.9,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 78.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -245790,6 +245993,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3125
+    "_version": 3127
   }
 }

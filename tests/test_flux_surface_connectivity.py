@@ -838,24 +838,49 @@ PANEL_STATES = (
 )
 
 # The persisted states carry the terms their own solved field produces, read at
-# that field's admitted saddle.  State 0 holds a saddle cell, so its lobe meets
-# two divertor legs; state 13 carries no saddle cell at all and its lobe is the
-# whole closed boundary.
+# that field's admitted saddle.  Eleven of the twenty close: each draws exactly
+# one closed candidate, well formed, whose segment count is pinned below.  The
+# closing states span 71 to 77 closed segments and all but one carry two open
+# branches, so a change to the tracker or to the saddle bracket moves one of
+# these counts.  State 19 is the exception on both counts: its lobe meets no
+# open branch at all, and its candidate survives a 1e-3 Wb displacement of the
+# level, so its own control displacement is 2e-3 Wb.  That is a statement about
+# how sharply its level is pinned, not a weaker assertion.
 #
-# States 9 to 12 are the ones whose saddle cell holds a pair of level crossings
-# inside one sub-interval of a fixed five-sample edge subdivision.  Both
-# endpoints of that sub-interval sit on the same side of the boundary level, so
-# the subdivision reports no crossing there, the cell's crossing count reads 2
-# instead of 4, the tie between its two sectors never fires, and the lobe the
-# saddle pinches is left open.  They are pinned here at the terms the
-# stationary-point bracket produces, which is the state that closes them.
+# The other nine states are pinned by what they do produce instead.  The
+# contour traces a cycle that encloses the axis but admits no closed candidate
+# at all: no closed slot validates and the branch slots stay empty, so the
+# cycle is drawn as the lobe and the panel names it open.  That is one
+# mechanism, and it is the one eight of the nine share.  State 3 is the second:
+# no cycle is admitted either, so the state records no closed and no open
+# candidate.  Two mechanisms, told apart by the cycle count, and a reader who
+# sees a panel marked open needs to know which one it was.
 PERSISTED_STATE_TERMS = {
-    0: {"closed_segment_count": 67, "open_branch_count": 2},
-    9: {"closed_segment_count": 67, "open_branch_count": 2},
-    10: {"closed_segment_count": 67, "open_branch_count": 2},
-    11: {"closed_segment_count": 69, "open_branch_count": 2},
-    12: {"closed_segment_count": 69, "open_branch_count": 2},
-    13: {"closed_segment_count": 66, "open_branch_count": 0},
+    5: {"closes": True, "closed_segment_count": 75, "open_branch_count": 2},
+    6: {"closes": True, "closed_segment_count": 75, "open_branch_count": 2},
+    7: {"closes": True, "closed_segment_count": 73, "open_branch_count": 2},
+    13: {"closes": True, "closed_segment_count": 71, "open_branch_count": 2},
+    14: {"closes": True, "closed_segment_count": 71, "open_branch_count": 2},
+    15: {"closes": True, "closed_segment_count": 71, "open_branch_count": 2},
+    16: {"closes": True, "closed_segment_count": 71, "open_branch_count": 2},
+    17: {"closes": True, "closed_segment_count": 73, "open_branch_count": 2},
+    18: {"closes": True, "closed_segment_count": 73, "open_branch_count": 2},
+    4: {"closes": True, "closed_segment_count": 77, "open_branch_count": 2},
+    19: {
+        "closes": True,
+        "closed_segment_count": 72,
+        "open_branch_count": 0,
+        "control_displacement": 2.0e-3,
+    },
+    0: {"closes": False, "cycle_component_count": 1},
+    1: {"closes": False, "cycle_component_count": 1},
+    2: {"closes": False, "cycle_component_count": 1},
+    3: {"closes": False, "cycle_component_count": 0},
+    8: {"closes": False, "cycle_component_count": 1},
+    9: {"closes": False, "cycle_component_count": 1},
+    10: {"closes": False, "cycle_component_count": 1},
+    11: {"closes": False, "cycle_component_count": 1},
+    12: {"closes": False, "cycle_component_count": 1},
 }
 
 
@@ -879,14 +904,36 @@ def test_persisted_state_closes_the_axis_enclosing_lobe(index):
 
     The level is read from the field's admitted saddle rather than reconstructed
     by refitting the same field elsewhere, and the difference is the whole
-    result: the displaced-level control below assembles no cycle on either
-    state, while the saddle level gives exactly one axis-enclosing cycle.
+    result: the displaced-level control below assembles no cycle on every
+    closing state, while the saddle level gives exactly one axis-enclosing
+    cycle.  State 19 carries its own wider control displacement, because its
+    candidate survives the 1e-3 Wb default and the control has to move the
+    level further before it stops validating.
+
+    The open states are pinned by the mechanism that leaves them open instead.
+    Each draws no closed candidate, and what tells them apart is whether the
+    contour traced a cycle at all: eight trace a cycle that admits nothing and
+    one admits no cycle either.  Both arms are asserted, because a state that
+    silently changed mechanism would otherwise still read as open, which is
+    what it already said.
     """
     psi, radial, vertical, axis, xpoint = _persisted_state(index)
     level = branches.boundary_flux_at_admitted_saddle(
         psi, radial, vertical, axis, xpoint
     )
     result = branches.assemble_separatrix_branches(psi, radial, vertical, level, axis)
+    expected = PERSISTED_STATE_TERMS[index]
+
+    if not expected["closes"]:
+        assert int(np.asarray(result["closed_candidate_count"])) == 0
+        assert not bool(np.asarray(result["well_formed"]))
+        assert (
+            int(np.asarray(result["cycle_component_count"]))
+            == expected["cycle_component_count"]
+        )
+        assert int(np.asarray(result["closed_segment_count"])) == 0
+        assert int(np.asarray(result["open_branch_count"])) == 0
+        return
 
     assert bool(np.asarray(result["well_formed"]))
     assert int(np.asarray(result["closed_candidate_count"])) == 1
@@ -896,7 +943,6 @@ def test_persisted_state_closes_the_axis_enclosing_lobe(index):
     closed_valid = np.asarray(result["closed_valid"])
     assert closed_valid.any()
     assert np.count_nonzero(np.asarray(result["closed_controls_rz"])[closed_valid]) > 0
-    expected = PERSISTED_STATE_TERMS[index]
     assert (
         int(np.asarray(result["closed_segment_count"]))
         == expected["closed_segment_count"]
@@ -904,7 +950,11 @@ def test_persisted_state_closes_the_axis_enclosing_lobe(index):
     assert int(np.asarray(result["open_branch_count"])) == expected["open_branch_count"]
 
     displaced = branches.assemble_separatrix_branches(
-        psi, radial, vertical, level - _f64(1.0e-3), axis
+        psi,
+        radial,
+        vertical,
+        level - _f64(expected.get("control_displacement", 1.0e-3)),
+        axis,
     )
     assert int(np.asarray(displaced["closed_candidate_count"])) == 0
     assert not bool(np.asarray(displaced["well_formed"]))

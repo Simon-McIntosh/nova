@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-22">
-<meta name="plan-impl" content="0.8">
-<meta name="plan-version" content="13">
+<meta name="plan-impl" content="0.85">
+<meta name="plan-version" content="14">
 </head>
 <body>
   <main class="plan-doc">
@@ -138,15 +138,21 @@
     <div class="r-fu-body"><p>The interim half of the lead's ruling. One program load costs about seventeen thousand mappings against a cap of 65,530, so three loads fit and the certificate asks for four; the run that completed did so only because it released a program before its fourth load. Giving each row its own process makes that release unconditional. It changes no solver code and it unblocks the two unmeasured certificate rows, the coil-edit regeneration and the centroid positive arm while the program-size work on the route-integrity plan does the real repair.</p><p>The certificate driver already persists each row's receipt as it lands, so the per-process shape costs nothing in recoverability. The regeneration sweep and the centroid arm need the same treatment and are named here so they are not forgotten when the certificate is done.</p></div>
     <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort §2</pre>
     </article>
-<article class="r-fu" data-id="f-fsa-audit-probe-exit-status" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="solver census-and-certificate-drivers review (codex luna)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship cpu-compile-abort" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-audit-probe-exit-status" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="solver census-and-certificate-drivers review (codex luna)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship cpu-compile-abort" data-resolved-at="2026-09-22T21:24:52+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Propagate compile-abort child failure in the sampler exit status</h4>
     <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Commit 17bd21d5, benchmarks/compile_abort_probe.py:149-167, writes the child's exit_code but unconditionally returns 0. Reproduction in /tmp/fsa-driver-reproductions.log and current all_debug receipt current-abort-summary.json: `/bin/sh -c exit 7` records child exit 7 while the wrapper prints WRAPPER_EXIT=0. Repair: return the recorded child status, or expose an explicit measurement-success status and make every caller gate on the receipt rather than the wrapper's zero. recommends_skill=/reckon-ship cpu-compile-abort §2.</p></div>
     <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort</pre>
+    <p class="r-fu-outcome">Already repaired on main at c1af3a06d (2026-09-21): benchmarks/compile_abort_probe.py returns the child status, and tests/test_compile_abort_probe.py pins both directions. Re-confirmed by cpu-probe-returns-the-child-exit-status (merged 98707eebc, review 92), which adds an arbitrary-status case. That node's new test file duplicates two existing tests; folding it is followup f-cca-fold-duplicate-probe-exit-tests.</p>
     </article>
 <article class="r-fu" data-id="f-fsa-audit-certificate-receipt-provenance" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="solver census-and-certificate-drivers review (codex luna)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship cpu-compile-abort" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Make per-row certificate receipts relocatable and status-faithful</h4>
     <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Unpromoted run r-20260920T180231259880-cca-one-certificate-row-per-process, commit 2710b2ea1, benchmarks/solve_program_size_gate.py:1737 and :2165, writes candidate_state_array_path as an absolute worktree path and calls the probe wrapper result exit_code even though the child status is only probe_exit_code; the run manifest names both follow-ons. Repair receipt paths relative to the receipt/state directory and distinguish wrapper exit from child exit in the schema and gate. recommends_skill=/reckon-ship cpu-compile-abort §2.</p></div>
     <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort</pre>
+    </article>
+<article class="r-fu" data-id="f-cca-fold-duplicate-probe-exit-tests" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-22" data-recommends-skill="/reckon-ship cpu-compile-abort §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Fold the exit-3 case into test_compile_abort_probe.py and delete the duplicate test module</h4>
+    <div class="r-fu-body">tests/test_compile_abort_probe_exit.py repeats _sample_a_child, test_failed_child_fails_the_wrapper and test_successful_child_leaves_the_wrapper_at_zero verbatim from tests/test_compile_abort_probe.py. Move only test_the_wrapper_carries_an_arbitrary_child_status into the existing module and delete the new file.</div>
+    <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort §2</pre>
     </article>
 </section>
 

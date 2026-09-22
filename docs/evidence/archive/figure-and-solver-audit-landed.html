@@ -2750,6 +2750,63 @@ ROW2_EXIT=139</pre>
 <p><strong>Excluded from promotion counts:</strong> <code>r-20260920T180231259880-cca-one-certificate-row-per-process</code> is explicitly described in the census review as local and unpromoted; its useful measurement and defective receipt are not counted as a promotion.</p>
 
 </section>
+
+<section class="audit-repair" id="measured-candidate-acceptance-verification">
+<h2>Measured-candidate acceptance verification — reject 68/100</h2>
+<p><strong>Independent review of source commit <code>0e7f35e882e917904dabf4c02e475ae25ad002a6</code>.</strong>
+Documentation commit <code>6e9d1e055222f45e3fcca32335b9d03f22ace3e9</code> was noted and not judged.
+The promotion verdict is <strong>reject</strong>: the exact measured-candidate rule works for the
+recorded witnesses but its production exception is broader than the authorised own-mask rule.</p>
+
+<h3>Quantitative replay</h3>
+<table>
+<thead><tr><th>measure</th><th>independent result</th><th>verdict</th></tr></thead>
+<tbody>
+<tr><th scope="row">allocation</th><td><code>all_debug</code> job <code>1275522</code>, one allocation, 5:45, exit <code>0:0</code>, root interpreter, CPU backend</td><td>sound</td></tr>
+<tr><th scope="row">fresh-process tests</th><td>6 + 41 + 28 + 69 + 16 = <strong>160 passed, 0 failed</strong></td><td>sound</td></tr>
+<tr><th scope="row">recorded stalled states</th><td>three analytic witnesses accepted; historical half-defect accepted; <strong>14 of 14</strong> worsening Newton candidates refused</td><td>values reproduced</td></tr>
+<tr><th scope="row">negative control</th><td>declared model-trust restoration failed both eager and JIT cases because state 1.0 remained selected instead of state 2.0</td><td>red for claimed reason</td></tr>
+<tr><th scope="row">production terminal</th><td>342 realised cells, residual <code>2.7049292596435537e-15</code>, converged, two active-set trips, digest <code>69f8805e240e6472209b0a27ce73132bf35c5ab0e239e68c7558472242adcdff</code></td><td>reproduced</td></tr>
+</tbody>
+</table>
+<p>The prior continuous-support digest is
+<code>3e9fa335cd74115222d6cfeddf529174d5485f7d38731f3a883b274ae3ea1106</code>.
+The source commit changes production behaviour only in <code>nova/equilibrium/fixed_point.py</code>;
+the digest move is therefore explained by the newly admitted candidate rather than a changed
+terminal evaluator.</p>
+
+<h3>Promotion-blocking finding</h3>
+<p>At <code>fixed_point.py:1058-1068</code> and <code>:1195-1222</code>, the
+pessimistic-model predicate enters the model-trust disjunction without requiring
+<code>own_mask_acceptance</code>. The independent probe first established its positive control:
+with own-mask authority enabled, the finite candidate was accepted at factor 1.0 and marked
+unreliable. The same candidate was then accepted unchanged with own-mask authority disabled.
+That second admission weakens a refusal path outside the exact rule. Repair both the Newton
+ladder and continuation path by conditioning the exception on own-mask authority and pin the
+disabled case as an eager and JIT refusal.</p>
+
+<h3>Additional findings</h3>
+<ul>
+<li>The recorded-state replay imports and calls
+<code>_measured_decrease_accepts_pessimistic_model</code> directly; it does not drive
+<code>_backtracking_scores</code> or <code>_backtracked_promotion</code>. It proves the scalar
+predicate on the original receipts, not the recorded candidates' passage through production
+selector wiring.</li>
+<li>The accepted candidate carries <code>model_distrusted=true</code>, but the rebuild predicate
+requires <code>recovery_activated &amp; ~accepted</code>, so the flag cannot cause that accepted
+candidate's rebuild. A normal next Newton iteration relinearizes at the promoted state, but no
+committed two-iteration case proves the claimed next-trip consequence.</li>
+<li>Independent negative boundaries were sound: a nonfinite actual candidate was refused, and a
+positive but insufficiently trusted prediction was refused. No budget, tolerance, backtracking
+factor or current pin changed.</li>
+</ul>
+
+<p>Review bundle:
+<code>/home/ITER/mcintos/.config/reckon/crew/reviews/nova/s19-codex-20260916/fsa-verify-the-measured-candidate-acceptance</code>,
+including <code>review.md</code>, <code>findings.json</code>, per-process logs, selector and terminal
+receipts, the independent boundary probe and the negative-control log. No figure is included
+because these discrete guards and receipt identities are clearer as selectable text and a table.</p>
+</section>
   </main>
 </body>
 </html>

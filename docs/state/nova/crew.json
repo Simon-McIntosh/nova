@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T18:19:45",
+  "updated": "2026-09-22T18:20:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -251162,6 +251162,204 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T155237762794-review-of-pta-attribute-stale-contracts",
+        "plan": "plasma-cell-topology-authority",
+        "section": "\u00a76",
+        "node": "review-of-pta-attribute-stale-contracts",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3399,
+                "cached_input_tokens": 749978,
+                "input_tokens": 753379,
+                "output_tokens": 89,
+                "reasoning_output_tokens": 52,
+                "total_tokens": 753468,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "the review for r-20260922T140423155727-pta-attribute-stale-contracts stores a parsed record scoring all 5 dimensions in the range 0..20, reading commits 4a3837c0, a9fe994a and 3a9a99ba in worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-attribute-stale-contracts against section 6 of the plan: whether each verdict (raster oracle coordinate first failing at 9f0692fb, MAST saddle at 68cfe15c) is supported by the historical pair logs under the reports fence, whether pin-stale is the right verdict rather than read-defect for each (the 4.83e-15 m coordinate move must be explained as a reordered operation with a tolerance derived from the operands, never a widened slack; the 0.00293 m saddle move must state whether the selected candidate changed or the same candidate moved), whether the re-pinned assertions name the commit and mechanism, whether the 17-file after lane (167 passed, 0 failed, job 1275947) and the cited baseline are a valid delta, and whether the negative control was executed and observed to fail",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260922T140423155727-pta-attribute-stale-contracts",
+          "id": "review-of-pta-attribute-stale-contracts",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-22T15:52:47Z",
+            "read_at": "2026-09-22T15:52:51Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 57.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T155237762794-review-of-pta-attribute-stale-contracts/manifest.md",
+          "negative_control": "",
+          "plan": "plasma-cell-topology-authority",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a76",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T140423155727-pta-attribute-stale-contracts.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s18-pta-review-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-22T15:54:26Z",
+        "completed_at": "2026-09-22T16:07:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 783,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 783,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d6bd2d25b523fdc8b01b97a27bd3d42dbc473f86",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T155237762794-review-of-pta-attribute-stale-contracts/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c91c-e8e0-7b51-9494-33c13303ad93",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6552064,
+            "cached_input_tokens_cumulative": 13117696,
+            "input_tokens": 7093431,
+            "input_tokens_cumulative": 13853663,
+            "output_tokens": 19642,
+            "output_tokens_cumulative": 45661,
+            "reasoning_output_tokens": 5587,
+            "reasoning_output_tokens_cumulative": 14895
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-22T16:07:29Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 58.0,
+              "resets_at": 1790575133,
+              "observed_at": "2026-09-22T16:07:29Z"
+            }
+          ],
+          "notional_cost_usd": 62.9795,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 13117696,
+          "cumulative_input_tokens": 13853663,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 60556,
+          "generation_seconds": 12582.277,
+          "machine_seconds": 156.099,
+          "tokens_per_second": 4.81
+        },
+        "follow_on_paths": [
+          "plan/evidence"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/review-of-pta-attribute-stale-contracts",
+          "session_id": "01a0c91c-e8e0-7b51-9494-33c13303ad93",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T16:07:29Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.98,
+        "impl_move": {
+          "plan": "plasma-cell-topology-authority",
+          "at_dispatch": 0.98,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 54.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -251628,6 +251826,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3167
+    "_version": 3168
   }
 }

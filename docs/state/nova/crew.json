@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T23:06:10",
+  "updated": "2026-09-22T23:06:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4394,6 +4394,15 @@
       },
       {
         "id": "s18-pcrf-a1",
+        "harness": "codex-astra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-22"
+      },
+      {
+        "id": "s18-pcrf-a2",
         "harness": "codex-astra",
         "role": "implement",
         "session_id": null,
@@ -265891,6 +265900,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3234
+    "_version": 3235
   }
 }

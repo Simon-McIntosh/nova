@@ -1,0 +1,29 @@
+{
+  "wall_node_count": 61,
+  "wall_unit_count": 1,
+  "axis_drawn": true,
+  "admitted_null_class": "wall_contact",
+  "x_points_drawn": 0,
+  "strike_points_drawn": 1,
+  "other_x_points_drawn": 0,
+  "x_points_dropped_outside_wall": 0,
+  "title": {
+    "lines": [
+      "Mapped-source current ledger: common-SOL cells",
+      "red outlines: carrying common-SOL cells with per-cell A",
+      "red LCFS marker and admitted boundary nulls over grey solved contours",
+      "common-SOL total 1072.71 A split 844.49 A in the 16 fitted-cut cells + 228.22 A in the 15 fully open cells"
+    ],
+    "line_widths_px": [
+      701.81,
+      779.14,
+      1029.31,
+      1488.0
+    ],
+    "canvas_width_px": 1728.0,
+    "text": "Mapped-source current ledger: common-SOL cells\nred outlines: carrying common-SOL cells with per-cell A\nred LCFS marker and admitted boundary nulls over grey solved contours\ncommon-SOL total 1072.71 A split 844.49 A in the 16 fitted-cut cells + 228.22 A in the 15 fully open cells"
+  },
+  "png": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-sol-ledger-panel-draws-wall-and-nulls/docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-current.png",
+  "svg": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-sol-ledger-panel-draws-wall-and-nulls/docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-current.svg",
+  "receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-sol-ledger-panel-draws-wall-and-nulls/docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json"
+}

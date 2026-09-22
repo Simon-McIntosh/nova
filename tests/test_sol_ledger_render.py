@@ -23,9 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-RECEIPT = (
-    ROOT / "docs" / "figures" / "forward-solve-api" / "sol-ledger-census"
-)
+RECEIPT = ROOT / "docs" / "figures" / "forward-solve-api" / "sol-ledger-census"
 
 #: Set by the negative-control run so the gate meets a panel without the wall.
 DROP = os.environ.get("SOL_LEDGER_DROP_WALL") == "1"

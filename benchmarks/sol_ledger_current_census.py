@@ -218,9 +218,7 @@ def _measure():
             else "selectable",
         },
         "fixed_point_residual": float(equilibrium.fixed_point.residual),
-        "converged_boolean": bool(
-            float(equilibrium.fixed_point.residual) < 1.0e-6
-        ),
+        "converged_boolean": bool(float(equilibrium.fixed_point.residual) < 1.0e-6),
         "topology_branch": {
             "axis": list(map(float, np.asarray(equilibrium.topology.axis))),
             "x_point": list(map(float, np.asarray(equilibrium.topology.x_point))),
@@ -242,7 +240,9 @@ def _admitted_nulls(equilibrium):
     """Return the admitted axis, saddle set and wall-contact points.
 
     A limited boundary admits no magnetic saddle: its boundary nulls are the
-    strike points where the closed surface meets the wall.  A diverted
+    contact points where the closed surface meets the wall, read from the
+    labelled strike points and, when those are empty, from the terminal
+    topology's wall point.  A diverted
     boundary admits the saddle as its boundary, so the qualified set beyond
     the admitted one is drawn hollow rather than left as absence.
     """
@@ -251,6 +251,8 @@ def _admitted_nulls(equilibrium):
     axis = _finite_points(topology.axis)
     x_points = _finite_points(topology.x_point)
     strike = _finite_points(labelled.strike_points)
+    if not strike:
+        strike = _finite_points(topology.wall_point)
     other = _finite_points(labelled.secondary_x_point)
     if x_points:
         null_class = "saddle"
@@ -396,8 +398,12 @@ def _draw_panel(render, output):
     figure, axes = plt.subplots(1, 1, figsize=(9.6, 7.6), dpi=180)
     plot_axes = poloidal_axes(axes)
     plot_axes.tricontour(
-        node[:, 0], node[:, 1], grid_flux, levels=levels,
-        colors="#999999", linewidths=0.35,
+        node[:, 0],
+        node[:, 1],
+        grid_flux,
+        levels=levels,
+        colors="#999999",
+        linewidths=0.35,
     )
     if not DROP_WALL:
         poloidal.draw_wall(plot_axes, units=(wall,))
@@ -411,9 +417,17 @@ def _draw_panel(render, output):
             plot_axes.plot(loop[:, 0], loop[:, 1], color="#cc0000", linewidth=1.1)
         centre = np.asarray(cell["centroid"], dtype=float)
         current = float(cell["current_a"])
-        label = f"{current:.3g} A" if abs(current) < 1000 else f"{current / 1000:.2f} kA"
+        label = (
+            f"{current:.3g} A" if abs(current) < 1000 else f"{current / 1000:.2f} kA"
+        )
         plot_axes.text(
-            centre[0], centre[1], label, fontsize=6, ha="center", va="center", color="#cc0000"
+            centre[0],
+            centre[1],
+            label,
+            fontsize=6,
+            ha="center",
+            va="center",
+            color="#cc0000",
         )
     solved_style = DEFAULT_INK.variant(axis_marker="^")
     tally = poloidal.draw_nulls(
@@ -465,6 +479,7 @@ def render_from_receipt(receipt_path=RECEIPT, output=FIGURE, metrics_path=None):
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(metrics, indent=2) + "\n")
     return metrics
+
 
 def _verdict(sol_split):
     """Return the one-sentence attribution statement.

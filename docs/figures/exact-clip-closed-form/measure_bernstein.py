@@ -272,6 +272,54 @@ def child(arguments, name, cpus, *, wait=True):
     return code
 
 
+def summarize():
+    programs = {
+        arm: json.loads((OUTPUT / f"{arm}-program.json").read_text())
+        for arm in ("baseline", "candidate", "negative")
+    }
+    rows = [
+        json.loads(path.read_text())
+        for path in sorted(OUTPUT.glob("*-*.json"))
+        if path.stem.endswith(("-110", "-300"))
+    ]
+    suites = {
+        arm: {
+            name: int((OUTPUT / f"{arm}-{Path(name).stem}.exit").read_text())
+            for name in TESTS
+        }
+        for arm in ("baseline", "candidate")
+    }
+    baseline, candidate, negative = (
+        programs[arm] for arm in ("baseline", "candidate", "negative")
+    )
+    gates = {
+        "programs_completed": all(p["completed"] for p in programs.values()),
+        "below_byte_ceiling": candidate["serialized_bytes"] < 100_000_000,
+        "baseline_marker_present": baseline["bernstein_binom_present"],
+        "candidate_marker_absent": not candidate["bernstein_binom_present"],
+        "candidate_static_basis_present": candidate["static_basis_present"],
+        "negative_marker_returns": negative["bernstein_binom_present"],
+        "negative_bytes_rise": negative["serialized_bytes"]
+        > candidate["serialized_bytes"],
+        "eight_rows_within_tolerance": len(rows) == 8
+        and all(r["passed"] for r in rows),
+        "both_suites_pass": all(
+            code == 0 for suite in suites.values() for code in suite.values()
+        ),
+    }
+    result = {
+        "programs": programs,
+        "rows": rows,
+        "suite_exit_status": suites,
+        "gates": gates,
+        "passed": all(gates.values()),
+        "serialized_byte_reduction_fraction": 1
+        - candidate["serialized_bytes"] / baseline["serialized_bytes"],
+    }
+    persist("summary.json", result)
+    return 0 if result["passed"] else 1
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--program", choices=("baseline", "candidate", "negative"))
@@ -279,8 +327,11 @@ def main():
     parser.add_argument("--suite-set", choices=("baseline", "candidate"))
     parser.add_argument("--row", nargs=2)
     parser.add_argument("--negative-tests", action="store_true")
+    parser.add_argument("--summarize", action="store_true")
     args = parser.parse_args()
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    if args.summarize:
+        return summarize()
     if args.negative_tests:
         print(MUTATION, flush=True)
         configure()

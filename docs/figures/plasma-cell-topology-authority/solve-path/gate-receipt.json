@@ -145,5 +145,42 @@
     "The separately owned reduced_newton.py:2329 full-state patch and scanner allowlist removal.",
     "The separately owned limiter-read benchmark migration.",
     "The three enabled baseline failure expectations remain with their owners."
-  ]
+  ],
+  "lane_split": {
+    "decision": "CPU seams and source scan are the completion gate; full exact-mode solves are GPU-only evidence with a coordinator post-merge driver fallback after one device attempt.",
+    "source_revision": "bb076f460113ef46fce157844a8f47356ecce9a4",
+    "cpu_gate": {
+      "job_id": "1276042",
+      "completed": false,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/lane-split-cpu.log"
+    },
+    "negative_control": {
+      "revision": "bb076f460113ef46fce157844a8f47356ecce9a4",
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/lane-split-negative.py",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/lane-split-negative.log",
+      "mutation": "restore the physical-prefix slice at forward.py _terminal_polish_receipt and observe the exact-mode 110-cell solve regression fail",
+      "exercise_point": "CPU terminal seam under the coordinator lane-split decision",
+      "exit_status": 1,
+      "completed": true,
+      "expected_failure_observed": true,
+      "failure_count": 2,
+      "failure_ids": [
+        "tests/test_solve_path_census_inputs.py::test_terminal_polish_receipt_keeps_direct_samples[single-null]",
+        "tests/test_solve_path_census_inputs.py::test_terminal_polish_receipt_keeps_direct_samples[discriminator-row]"
+      ],
+      "wall_seconds": 10.33
+    },
+    "device_evidence": {
+      "job_id": "1276041",
+      "lane": "H200",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA",
+      "completed": false,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/device-evidence.log",
+      "submission_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/device-betelgeuse-submit.log",
+      "allocation": "1 GPU, 8 CPUs, 128G, 45 minutes",
+      "backend_control": "gpu [CudaDevice(id=0)], NVIDIA H200 NVL, x64 True",
+      "titan_fallback_needed": false
+    }
+  }
 }

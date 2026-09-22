@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T13:56:09",
+  "updated": "2026-09-22T14:08:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6423,10 +6423,15 @@
         "id": "s19f-astra-1",
         "harness": "codex-astra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-22"
+        "session_id": "01a0c8b3-79e4-7b81-b58c-797e1e2dd1be",
+        "session_model": "gpt-6-astra",
+        "sessions": {
+          "{\"alias\":\"astra6\",\"backend\":\"codex-astra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-6-astra\",\"sandbox\":\"worktree-full\"}": "01a0c8b3-79e4-7b81-b58c-797e1e2dd1be"
+        },
+        "created": "2026-09-22",
+        "session_owners": {
+          "{\"alias\":\"astra6\",\"backend\":\"codex-astra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-6-astra\",\"sandbox\":\"worktree-full\"}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19f-astra-2",
@@ -245153,6 +245158,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3115
+    "_version": 3116
   }
 }

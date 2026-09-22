@@ -239,6 +239,10 @@ def _carrier_statistics(
     entering_promoted = ~promoted_j
     physical_diff = np.abs(physical - terminal)
 
+    def sup_where(mask: np.ndarray) -> float | None:
+        selected = physical_diff[mask]
+        return None if selected.size == 0 else float(np.max(selected))
+
     return (
         {
             "shadow_census_cold": {
@@ -267,12 +271,10 @@ def _carrier_statistics(
             },
             "physical_unmasked": {
                 "sup_all": float(np.max(physical_diff)),
-                "sup_entering_cold": float(np.max(physical_diff[entering_cold])),
-                "sup_shadowed_cold": float(np.max(physical_diff[cold_j])),
-                "sup_entering_promoted": float(
-                    np.max(physical_diff[entering_promoted])
-                ),
-                "sup_shadowed_promoted": float(np.max(physical_diff[promoted_j])),
+                "sup_entering_cold": sup_where(entering_cold),
+                "sup_shadowed_cold": sup_where(cold_j),
+                "sup_entering_promoted": sup_where(entering_promoted),
+                "sup_shadowed_promoted": sup_where(promoted_j),
                 "argmax_index": int(np.argmax(physical_diff)),
             },
             "profile_owned": {

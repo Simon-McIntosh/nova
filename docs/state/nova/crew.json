@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T13:39:44",
+  "updated": "2026-09-22T13:40:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6421,6 +6421,15 @@
       },
       {
         "id": "s19f-astra-1",
+        "harness": "codex-astra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-22"
+      },
+      {
+        "id": "s19f-astra-2",
         "harness": "codex-astra",
         "role": "implement",
         "session_id": null,
@@ -244929,6 +244938,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3111
+    "_version": 3112
   }
 }

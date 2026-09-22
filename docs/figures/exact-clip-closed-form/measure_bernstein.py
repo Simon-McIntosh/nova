@@ -174,6 +174,23 @@ def program(arm):
 
 
 def row(case, cells):
+    fingerprint = {
+        path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+        for path in (
+            "nova/linalg/interpolant.py",
+            "nova/equilibrium/flux_surface_extraction.py",
+        )
+    }
+    receipt = OUTPUT / f"{case}-{cells}.json"
+    arrays = OUTPUT / f"{case}-{cells}.npz"
+    if receipt.exists() and arrays.exists():
+        previous = json.loads(receipt.read_text())
+        if (
+            previous.get("source_sha256") == fingerprint
+            and previous.get("job") == os.environ["SLURM_JOB_ID"]
+        ):
+            print("REUSE_COMPLETED_ROW", str(receipt), flush=True)
+            return
     configure()
     import jax
     import numpy as np
@@ -217,6 +234,7 @@ def row(case, cells):
     jax.clear_caches()
     after = snapshot()
     result = {
+        "source_sha256": fingerprint,
         "case": case,
         "requested_cells": int(cells),
         "revision": revision(),
@@ -328,8 +346,20 @@ def main():
     parser.add_argument("--row", nargs=2)
     parser.add_argument("--negative-tests", action="store_true")
     parser.add_argument("--summarize", action="store_true")
+    parser.add_argument("--rows", action="store_true")
     args = parser.parse_args()
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    if args.rows:
+        cpus = sorted(os.sched_getaffinity(0))
+        for case in (
+            "weak-rotation-reactor-static",
+            "moderate-rotation-conventional-static",
+            "strong-rotation-compact-static",
+            "diverted-single-null",
+        ):
+            for cells in (110, 300):
+                child(["--row", case, str(cells)], f"{case}-{cells}-measurement", cpus)
+        return 0
     if args.summarize:
         return summarize()
     if args.negative_tests:

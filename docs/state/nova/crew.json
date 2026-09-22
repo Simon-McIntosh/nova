@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T23:03:01",
+  "updated": "2026-09-22T23:04:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7945,6 +7945,15 @@
       {
         "id": "s19n-imp-8",
         "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-22"
+      },
+      {
+        "id": "s19n-opus-1",
+        "harness": "claude-opus",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -265864,6 +265873,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3231
+    "_version": 3232
   }
 }

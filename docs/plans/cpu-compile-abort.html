@@ -343,6 +343,64 @@
       below stays open for it. Evidence: <a href="/nova/evidence/archive/cpu-compile-abort-landed">the
       mapping-count record</a>, carrying the four child series and their peaks as a figure.</p>
     </section>
+<section id="certificate-row-receipt-hygiene">
+      <h2><span class="sec">§</span> The per-row receipt now states what it measured</h2>
+      <p class="worker-landing"><strong>Landed 2026-09-22, commit <code>a6b251732</code>.</strong>
+      The receipt a certificate row's child process leaves behind named the wrapper for the child. The
+      row entry carried the probe wrapper's exit status under <code>exit_code</code> while the status
+      of the process that actually solved the row sat beside it under <code>probe_exit_code</code>, so
+      a row that died inside the child read as one that completed — and a reader taking the status
+      from <code>lane.log</code> did not get the value the receipt held. <code>exit_code</code> now
+      holds the child status and the wrapper's status is its own field,
+      <code>probe_wrapper_exit</code>, printed beside it. The two are separate because they answer
+      different questions: a wrapper killed before it wrote its summary leaves a status that is not
+      the child's.</p>
+      <p class="worker-landing"><strong>The one-load flag held the two-load comparison.</strong>
+      <code>within_one_program_load</code> tested the sampled peak against twice the
+      <strong>16789-17620</strong> a single load costs — the looser bound reported under the tighter
+      name, which is why the section above reads <code>no</code> for three rows against a bound that
+      was never one load. It now compares against one program load and the two-load ceiling keeps its
+      own field, <code>within_two_program_loads</code>. Both are printed per row, so the measurement
+      that separated a child holding one program from one holding two is visible rather than
+      inferred. The stored peaks are unchanged; only what they were compared against moved.</p>
+      <p class="worker-landing"><strong>A receipt now travels.</strong> The state array path was
+      written absolute to the worktree that minted it, so a committed receipt named a tree that would
+      not exist when it was next read. It is written relative to the states directory, and the reader
+      resolves it beside the receipt first and inside the receipt's own recorded
+      <code>state_directory</code> second, so both forms in use resolve and a receipt can serve as the
+      next baseline from a different checkout.</p>
+      <p class="worker-landing"><strong>The committed receipt was annotated, not rewritten.</strong>
+      <code>.../process-per-row/certificate.json</code> was measured at revision
+      <code>2710b2ea1</code> under the superseded semantics, and it records that: the revision, and
+      which two of its fields read against the names they now carry. Re-minting it would have
+      destroyed the evidence this whole section rests on — the four peaks and their exit codes are the
+      measurement — so the record keeps the values it measured and gains a
+      <code>field_semantics_note</code> a reader cannot miss. A receipt minted after this landing
+      reports <code>exit_code</code> as the child status, <code>probe_wrapper_exit</code> as the
+      wrapper's, and both load bounds separately.</p>
+      <p class="worker-landing"><strong>The command builder had no test that ran it.</strong>
+      <code>certificate_row_command</code> is covered now by a case that parses the argv it builds
+      through the driver's own argument parser and asserts the row it names, and there is a case per
+      renamed or re-semanticised field: the exit field in both directions, the no-probe case, the
+      one-load boundary including the two-load ceiling and the <strong>40,756</strong> peak the
+      earlier run recorded, and the relative state path round-tripping back through
+      <code>load_certificate_baseline</code>. Row counts: <strong>23 passed</strong> at this revision
+      against <strong>17 passed</strong> at the base, zero added failures. The declared negative
+      control — restore the two-load comparison under the one-load name — reddens
+      <code>test_one_load_flag_compares_against_one_program_load</code> at
+      <code>1 failed in 5.29s</code>, EXIT=1, and was reverted.</p>
+      <p class="worker-landing">This node repairs the receipt's own vocabulary. It does not re-run the
+      certificate: no row was re-measured, so the four peaks and terminal states above stand as
+      measured, and the followup that drove this landing — make per-row receipts relocatable and
+      status-faithful — stays open for the coordinator to resolve against this record. Evidence:
+      <a href="/nova/evidence/archive/cpu-compile-abort-landed#certificate-row-receipt-hygiene">the
+      receipt-hygiene anchor</a>.</p>
+      <p class="worker-landing"><strong>What remains open.</strong> The gate here measures only this
+      node's change against a base revision; verifying the merged result belongs to a separately
+      dispatched test node. Nothing in the solver changed, so the certificate identity comparator
+      still reports the failing <code>diverted-single-null</code> row this plan already records, and
+      that failure is not this node's to triage.</p>
+    </section>
 </main>
 </body>
 </html>

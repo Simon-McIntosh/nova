@@ -373,6 +373,72 @@ reported here rather than triaged, because it lies outside this node's declared 
   <li>Figure: <code>/nova/figures/millisecond-converged-solve/program-size/process-per-row/one-load-per-row.png</code>
   (<code>.svg</code> beside it), rendered from the four probe series.</li>
 </ul>
+<h2 id="certificate-row-receipt-hygiene">The per-row receipt now states what it measured</h2>
+
+<p><strong>Landed 2026-09-22, commit <code>a6b251732</code>.</strong> The one-row-per-process receipt
+above was read as announcing things it did not measure. Four field identities were repaired in
+<code>benchmarks/solve_program_size_gate.py</code>, and the committed receipt was left as measured
+with a note rather than re-minted.</p>
+
+<table>
+  <tr><th>field</th><th>what it held before</th><th>what it holds now</th></tr>
+  <tr><td><code>exit_code</code></td>
+      <td>the probe wrapper's status; the child that solved the row sat elsewhere under
+      <code>probe_exit_code</code></td>
+      <td>the child's status; the wrapper's status is its own field,
+      <code>probe_wrapper_exit</code>, printed beside it</td></tr>
+  <tr><td>one-load flag</td>
+      <td><code>within_one_program_load</code> tested the peak against twice the
+      <strong>16789-17620</strong> a single load costs — the two-load comparison under the one-load
+      name</td>
+      <td><code>within_one_program_load</code> tests against one program load; the two-load ceiling
+      keeps its own field <code>within_two_program_loads</code>; both printed per row</td></tr>
+  <tr><td><code>candidate_state_array_path</code></td>
+      <td>absolute to the worktree that minted it, naming a tree a later reader would not
+      have</td>
+      <td>the array's name within the states directory, resolved beside the receipt first and
+      inside the receipt's recorded <code>state_directory</code> second</td></tr>
+</table>
+
+<p>The defect is visible in the committed receipt itself, which is why it was annotated rather than
+rewritten. Every one of its four <code>exit_code</code> values is <strong>0</strong> while the
+child that solved the row recorded <strong>1</strong> under <code>probe_exit_code</code>: on this
+run the wrapper completed even where its child did not, so a reader of <code>lane.log</code> and a
+reader of the receipt disagreed about whether the rows finished.
+<code>candidate_state_array_path</code> begins
+<code>/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/&#8230;</code>, naming the
+worktree <code>cca-one-certificate-row-per-process</code>. And
+<code>within_one_program_load</code> reads <strong>true</strong> for
+<code>weak-rotation-reactor-static</code> at a peak of <strong>24,750</strong> and
+<strong>false</strong> for <code>moderate-rotation-conventional-static</code> at
+<strong>40,756</strong> — but so does a genuine one-load test, which is exactly what made the
+looser bound hard to notice. Three rows show <strong>NO</strong> in the table above under a bound
+that was never one load.</p>
+
+<p><strong>The committed receipt keeps its values.</strong> Rather than re-running the certificate,
+<code>docs/figures/millisecond-converged-solve/program-size/process-per-row/certificate.json</code>
+gains a <code>field_semantics_note</code> naming the revision it was measured at
+(<code>2710b2ea1</code>) and the two fields that read against the names they now carry. The four
+peaks and their terminal states are the evidence the section above rests on; re-minting them to
+match a renamed field would have destroyed the measurement in order to describe the instrument.</p>
+
+<p><strong>The command builder now has a test that runs it.</strong>
+<code>certificate_row_command</code> is covered by a case that parses the argv it builds through the
+driver's own argument parser and asserts the row it names, and there is a case per renamed or
+re-semanticised field: the exit field in both directions, the no-probe case where the wrapper's
+status is the child's, the one-load boundary including the two-load ceiling and the
+<strong>40,756</strong> peak recorded above, and the relative state path round-tripping back
+through <code>load_certificate_baseline</code>. Row counts: <strong>23 passed</strong> at
+<code>a6b251732</code> against <code>17 passed</code> at the base, zero added failures. The
+declared negative control — put the two-load comparison back under the one-load name — reddens
+<code>test_one_load_flag_compares_against_one_program_load</code> at
+<code>1 failed in 5.29s</code>, EXIT=1, and was reverted.</p>
+
+<p><strong>No row was re-measured and no solver code changed.</strong> This landing repairs the
+receipt's vocabulary and adds coverage; the certificate identity comparison, including the failing
+<code>diverted-single-null</code> row this record already reports, is untouched. The followup that
+drove the work — make per-row receipts relocatable and status-faithful — remains open for the
+coordinator to resolve against this anchor.</p>
 </main>
 </body>
 </html>

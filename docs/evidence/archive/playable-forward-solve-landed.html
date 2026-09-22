@@ -1959,8 +1959,7 @@ standalone kernel wall only. Receipts: <code>~/.config/reckon/crew/reports/nova/
   rather than by the version suffix <code>after2</code>; the receipt moved with it, and the submission harness moved to <code>run_topology_batch_probe.sh</code> because its stem's trailing digit
   would otherwise have been the last served name in the directory ending in a digit. PNG and SVG are written for each arm.</p>
   <p><strong>Gate and negative control.</strong> <code>tests/test_topology_batch_render.py</code> reads <code>render-receipt.json</code> only: 8 passed on the login node with no device. The
-  negative control re-renders from a receipt whose titles carry the row-index list again, and three checks fail against the five that pass — the title omits its arm, omits its revision, and holds a
-  comma-separated integer run. The render receipt records the source receipt, arm, revision, title and per-panel ordinate of each figure, so a rendered panel can be audited against its measurement
+  negative control re-renders from a receipt whose titles carry the row-index list again and whose middle panel is returned to a linear ordinate, and five checks fail against the three that pass: the middle wall panel is no longer on a log axis, the title names neither arm nor revision, the title holds a comma-separated integer run, the title no longer agrees with its source receipt, and the files the receipt names are not beside the mutated receipt. The render receipt records the source receipt, arm, revision, title and per-panel ordinate of each figure, so a rendered panel can be audited against its measurement
   without re-running the kernels.</p>
 </section>
 </main>

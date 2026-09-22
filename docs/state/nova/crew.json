@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T14:10:13",
+  "updated": "2026-09-22T14:21:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6527,10 +6527,15 @@
         "id": "s19f-sol-inv",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-22"
+        "session_id": "01a0c8af-092d-7611-a938-37730fdc1911",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"read-only\"}": "01a0c8af-092d-7611-a938-37730fdc1911"
+        },
+        "created": "2026-09-22",
+        "session_owners": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"read-only\"}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19f-sol-inv-2",
@@ -244701,6 +244706,320 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T103443825819-cca-triage-the-worktrees-holding-unmerged-commits",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a75",
+        "node": "cca-triage-the-worktrees-holding-unmerged-commits",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 862,
+                "cached_input_tokens": 329176,
+                "input_tokens": 330070,
+                "output_tokens": 2986,
+                "reasoning_output_tokens": 556,
+                "total_tokens": 333056,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "576a27e3-ea0d-439c-9e63-3058761859c6",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the report at the write path records the inventory command (git worktree list --porcelain, then git rev-list --count main..HEAD per tree) with its printed output, and carries one row per tree whose count is nonzero (43 rows at the 2026-09-22 12:15 inventory, the report states its own count); each row names the crew ledger run id with its recorded status and gate verdict, the nonzero commit count, per commit the git patch-id verdict present-on-main or absent (command and output recorded), the dirty-file count from git status --porcelain excluding the .venv symlink, and one recommendation from exactly keep-for-resume, merge-tip, remove; the report closes with the three recommendation counts summing to the row count and lists the merge-tip rows in the order to merge them; git status of the main checkout and of every tree is unchanged before and after, shown by recording both",
+          "estimated_hours": null,
+          "goal": "classify every nova session worktree under /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2 whose HEAD carries commits not reachable from main into keep-for-resume, merge-tip or remove, with the evidence for each",
+          "id": "cca-triage-the-worktrees-holding-unmerged-commits",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-22T10:34:45Z",
+            "read_at": "2026-09-22T10:34:46Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 41.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T103443825819-cca-triage-the-worktrees-holding-unmerged-commits/manifest.md",
+          "negative_control": "",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-triage-the-worktrees-holding-unmerged-commits"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "s19f-sol-inv",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-22T10:35:08Z",
+        "completed_at": "2026-09-22T12:17:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 6169,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 6169,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "775720c77c5443e990a74b52ea464b73ce87b6aa",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T103443825819-cca-triage-the-worktrees-holding-unmerged-commits/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c8af-092d-7611-a938-37730fdc1911",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 33786240,
+            "cached_input_tokens_cumulative": 33786240,
+            "input_tokens": 34189715,
+            "input_tokens_cumulative": 34189715,
+            "output_tokens": 54694,
+            "output_tokens_cumulative": 54694,
+            "reasoning_output_tokens": 17769,
+            "reasoning_output_tokens_cumulative": 17769
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-22T12:17:57Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 48.0,
+              "resets_at": 1790575133,
+              "observed_at": "2026-09-22T12:17:57Z"
+            }
+          ],
+          "notional_cost_usd": 137.8527,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 43,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 141455,
+              "log_fresh": false,
+              "manifest_commits": [
+                "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
+                "0028295f5ba1e4c4d0c3ba0e1c98f0b0fbb4c9d1"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "28b0fa1a9d3559290e36bf25bbedc4839c9ef1861513ab5235f34a953247d5fe",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T180231259880-cca-one-certificate-row-per-process/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan cpu-compile-abort --section '\u00a72' --role review --spec-level exact --node review-of-cca-one-certificate-row-per-process --goal 'attach an independent review to run r-20260920T180231259880-cca-one-certificate-row-per-process' --done-when 'the review for r-20260920T180231259880-cca-one-certificate-row-per-process stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260920T180231259880-cca-one-certificate-row-per-process.json --time-budget 55m --session s19-codex-20260916 --allow-unreconciled-runs --local",
+              "node": "cca-one-certificate-row-per-process",
+              "phase": "complete",
+              "plan": "cpu-compile-abort",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T180231259880-cca-one-certificate-row-per-process",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 141460,
+              "terminal_at": "2026-09-20T19:17:11Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 625,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: Second allocation ran out - job 1274360 aborted at edit 16 on JIT mapping exhaustion with REGEN_DRIVER_EXIT=134 and EXIT_MARKER=134 after 15 of 20 edits; so edits 16 through 20 never ran and the states for edits 14 and 15 were never flushed; seven of the twenty states the done-when needs are absent. The census cannot pass on what landed and CENSUS_AGREES=0; both because 14 states are fewer than the 20 the figures are defined over (drawn_closed 5 of 14 against the required 12 of 20; axis_enclosing_cycle 13 of 14 against 14 of 20) and because the comparison basis itself is unestablished. The comparison basis needs a plan-level answer this worker cannot give - the provenance of the sweep-persistence record and the definition of its level field - and the per-state disagreement is already present at the unedited index 0; so it is not attributable to the constraint; the edit schedule or the level definition. The fixture was therefore not committed and the repository still carries the superseded panel. No resume seam exists in the driver and the archived rows cannot seed one; so completing this node requires the driver capability named in follow_ons before any further allocation is spent.",
+              "elapsed_seconds": 3925,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 106843,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1af882c9ce897d771f68e7158b9f321274358a94",
+                "570ac4bf5782de8353205d4600496e32b41d00a8"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0791ab9295230c76f0e7ba866041563829b22d42afa1542f10d83f009f569795",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint/manifest.md; resolve the blocker before resuming the run",
+              "node": "fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+              "phase": "complete",
+              "plan": "forward-solve-api",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+                "session_id": "63238c6f-d618-43a9-b3b8-e682e544fc9e",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 106935,
+              "terminal_at": "2026-09-21T04:52:36Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 33786240,
+          "cumulative_input_tokens": 34189715,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 72463,
+          "generation_seconds": 3200.729,
+          "machine_seconds": 2967.026,
+          "tokens_per_second": 22.64
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-triage-the-worktrees-holding-unmerged-commits",
+          "session_id": "01a0c8af-092d-7611-a938-37730fdc1911",
+          "session_source": "pointer",
+          "retained_at": "2026-09-22T12:17:57Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.85,
+        "impl_move": {
+          "plan": "cut-cell-current-attribution",
+          "at_dispatch": 0.85,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:investigate"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 66.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -245167,6 +245486,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3117
+    "_version": 3119
   }
 }

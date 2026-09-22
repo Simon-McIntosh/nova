@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-22">
-<meta name="plan-version" content="166">
+<meta name="plan-version" content="167">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
 <meta name="plan-impl" content="0.85">
@@ -384,6 +384,17 @@ No production or test files, section status, or driving followup were changed.</
       <button class="r-opt" data-value="branch-aware-newton-on-the-piecewise-chord-map">Route B: keep chord mode and build a multi-branch predictor with model rebuilding plus the measured-candidate acceptance rule</button>
       </p>
     <p class="r-dec-rat">Lead 2026-09-22: the proper moment-preserving, Biot-interaction-frozen cell clips belong in the hot path; this is non-negotiable. A memory or trace issue is resolved independently, with proper vmaps or a reduction in the order of the clips and the moment support, never by falling back to whole-cell booking. The evidence supports it: the coupling stays frozen (decision coupling-geometry-frozen), the clipped current enters as moments, the tangent on the clipped path is measured correct, and every measurement of the chord mode shows a piecewise-constant map no Newton can close. Route B is retained only as a fallback record.</p>
+    </div>
+<div class="r-dec" data-key="vertex-ring-candidate-generator" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which candidate generator feeds the saddle and axis read from the cell vertex ring</p>
+    <p class="r-dec-ctx">The ring stays the cell vertex ring (decision census-ring-is-the-cell-vertex-ring). Measured 2026-09-21/22 on the analytic flux over nine single-null rungs (132 to 2616 realised cells) and six static rows, reproduced independently at 132 and 2616 cells: the four-cyclic-sign-change count over the six vertex values minus the centroid seeds no saddle on any rung, because a centroid generically off the stationary point cuts one hyperbola branch pair and returns two changes; the own-node quadratic root scan (fit the quadratic to centroid plus six vertices in every cell, keep finite indefinite roots inside the cell or within a quarter pitch, classify by Hessian, dedupe within half a pitch, wall containment and private shadow) admits the analytic saddle 9 of 9 at 0.016 to 0.092 pitch and the axis 15 of 15 at 0.001 to 0.010 pitch with zero false candidates before and after the filters; the production ring-quadratic read admits the saddle 7 of 9, missing at 132 and 340 realised cells, the rungs the certificate needs, at 0.012 to 0.090 pitch where admitted. CPU cost of the scan is 2.3 to 3.3 times the production read (11.1, 35.2, 107 ms per state at 550, 1074, 2616 cells against 4.81, 11.3, 32.3); device cost owed to titan.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="own-node-root-scan-with-hessian-prefilter">A: the own-node quadratic root scan becomes the production candidate generator, with the Hessian classification run first as a pre-filter so only indefinite cells are polished for a saddle and only definite cells for the axis, the four-change count kept as a diagnostic control, polish and admission against the global spline read; acceptance: 9 of 9 saddle admission on the ladder, no false candidate on the fifteen analytic rows and the twelve MAST bank rows, position error no worse than the ring-quadratic read where both admit, cost within 1.5 times the production read after the pre-filter on CPU and measured on titan</button>
+      <button class="r-opt" data-value="own-node-root-scan-as-fallback-only">B: keep the ring-quadratic read as the primary generator and run the own-node scan only when the primary admits no saddle on a row whose class is diverted; cheapest in the common case, adds a conditional to the lowered read, and leaves the primary&#x27;s misses unexplained</button>
+      <button class="r-opt" data-value="diagnose-the-ring-quadratic-misses-first">C: a prescribed local node first explains why the production ring-quadratic read misses at 132 and 340 cells (mode ratio threshold, the m1 to m2 closed form, or the wall and shadow filters) and whether a threshold repair restores 9 of 9; decide A or B on that record</button>
+      <button class="r-opt" data-value="keep-the-ring-quadratic-read">D: keep the production read as it is and accept the misses; ruled out by the acceptance rule, which requires the admitted X-point inside one pitch at 110 and 300 requested cells</button>
+      </p>
+    <p class="r-dec-rat"></p>
     </div>
 </section>
 

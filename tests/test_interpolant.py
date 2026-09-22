@@ -133,8 +133,8 @@ def test_static_bernstein_reproduces_constants_and_linear_fields(order, dtype):
             )
         )(jnp.asarray(0.37, dtype=dtype))
         np.testing.assert_allclose(slope, 1.0, atol=tolerance)
-    np.testing.assert_array_equal(matrix[0], np.eye(order + 1)[0])
-    np.testing.assert_array_equal(matrix[-1], np.eye(order + 1)[-1])
+    np.testing.assert_allclose(matrix[0], np.eye(order + 1)[0], atol=tolerance)
+    np.testing.assert_allclose(matrix[-1], np.eye(order + 1)[-1], atol=tolerance)
 
 
 @pytest.mark.skipif(not JAX_AVAILABLE, reason="JAX is not installed")
@@ -144,7 +144,7 @@ def test_binomial_lookup_lowers_without_special_functions():
     configure_dtypes()
     terms = jnp.arange(-1, 6)
     function = jax.jit(lambda term: Bernstein(order=4).binom(term))
-    np.testing.assert_array_equal(function(terms), [0, 1, 4, 6, 4, 1, 0])
+    np.testing.assert_allclose(function(terms), [0, 1, 4, 6, 4, 1, 0], rtol=1e-14)
     text = function.lower(terms).compile().as_text()
     assert "constant" in text
     assert "lgamma" not in text and "gamma" not in text

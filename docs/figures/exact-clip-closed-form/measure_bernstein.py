@@ -190,6 +190,7 @@ def _row(case, cells):
     }
     receipt = OUTPUT / f"{case}-{cells}.json"
     arrays = OUTPUT / f"{case}-{cells}.npz"
+    previous = None
     if receipt.exists() and arrays.exists():
         previous = json.loads(receipt.read_text())
         if (
@@ -235,10 +236,26 @@ def _row(case, cells):
             "refused": np.asarray(support.refused_cell_count),
         }
 
-    restore = original_evaluator()
-    before = snapshot()
-    restore()
-    jax.clear_caches()
+    if previous is not None and previous.get("base_revision") == BASE:
+        import shutil
+
+        archive = OUTPUT / "integer-powers"
+        archive.mkdir(exist_ok=True)
+        for path in (receipt, arrays, OUTPUT / f"{case}-{cells}-measurement.log"):
+            if path.exists() and not (archive / path.name).exists():
+                shutil.copy2(path, archive / path.name)
+        with np.load(arrays) as saved:
+            before = {
+                key.removeprefix("before_"): saved[key]
+                for key in saved.files
+                if key.startswith("before_")
+            }
+        print("REUSE_BASELINE_ARRAYS", str(arrays), flush=True)
+    else:
+        restore = original_evaluator()
+        before = snapshot()
+        restore()
+        jax.clear_caches()
     after = snapshot()
     result = {
         "source_sha256": fingerprint,

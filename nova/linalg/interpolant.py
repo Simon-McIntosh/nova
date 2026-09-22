@@ -3,9 +3,9 @@
 import abc
 from dataclasses import dataclass, field
 from functools import cache, cached_property
-from math import comb
 import jax
 import jax.numpy as jnp
+import jax.scipy as jsp
 import numpy as np
 
 from nova.graphics.plot import Plot1D
@@ -13,22 +13,38 @@ from nova.jax.tree_util import Pytree
 
 
 @cache
-def _binomial_coefficients(order):
-    """Build integer-order coefficients on the host, before device lowering."""
-    return tuple(float(comb(order, term)) for term in range(order + 1))
+def _binomial_coefficients(order, extended_precision):
+    """Freeze the device evaluator's integer-order coefficients on the host."""
+    with jax.ensure_compile_time_eval():
+        dtype = jnp.int64 if extended_precision else jnp.int32
+        terms = jnp.arange(order + 1, dtype=dtype)
+
+        @jax.jit
+        def coefficients(term):
+            return jsp.special.gamma(order + 1) / (
+                jsp.special.gamma(term + 1) * jsp.special.gamma(order - term + 1)
+            )
+
+        return tuple(np.asarray(coefficients(terms)).tolist())
 
 
 @jax.named_scope("bernstein_basis")
 def bernstein_basis(coordinate, order):
-    """Evaluate a static-order basis with integer powers and host constants."""
+    """Evaluate the basis with host constants and a fixed-width term loop."""
     coordinate = jnp.asarray(coordinate)
-    return jnp.stack(
-        [
-            coefficient * coordinate**term * (1 - coordinate) ** (order - term)
-            for term, coefficient in enumerate(_binomial_coefficients(order))
-        ],
-        axis=-1,
+    coefficients = jnp.asarray(
+        _binomial_coefficients(order, jax.config.jax_enable_x64),
+        dtype=jnp.result_type(coordinate, 0.0),
     )
+
+    def term_basis(carry, term):
+        value = (
+            coefficients[term] * coordinate**term * (1 - coordinate) ** (order - term)
+        )
+        return carry, value
+
+    values = jax.lax.scan(term_basis, None, jnp.arange(order + 1))[1]
+    return jnp.moveaxis(values, 0, -1)
 
 
 @dataclass
@@ -130,7 +146,9 @@ class Bernstein(Pytree):
         term = jnp.asarray(term)
         if not jnp.issubdtype(term.dtype, jnp.integer):
             raise TypeError("binomial terms must be integers")
-        coefficients = jnp.asarray(_binomial_coefficients(self.order))
+        coefficients = jnp.asarray(
+            _binomial_coefficients(self.order, jax.config.jax_enable_x64)
+        )
         return jnp.where(
             (term >= 0) & (term <= self.order),
             coefficients[jnp.clip(term, 0, self.order)],

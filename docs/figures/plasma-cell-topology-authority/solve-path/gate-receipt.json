@@ -70,5 +70,53 @@
       "call_line": 2330,
       "target": "_fixed_design_read"
     }
-  ]
+  ],
+  "direct_positive_control": {
+    "revision": "2248637d341f91cb06672d010f928b12a1ad3005",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/direct-positive.py",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T162949223287-pta-full-state-solve-path-callers/direct-positive.log",
+    "exit_status": 0,
+    "completed": true,
+    "rows": [
+      {
+        "case": "diverted-single-null",
+        "full_values": 730,
+        "finite_landmarks": 2,
+        "position": [
+          [
+            1.786910492413462,
+            0.04615148216432859
+          ],
+          [
+            1.4930225591761932,
+            -1.0188319093078109
+          ]
+        ],
+        "value": [
+          0.005713819178329535,
+          1.361644435324942e-05
+        ]
+      },
+      {
+        "case": "weak-rotation-reactor-static",
+        "full_values": 772,
+        "finite_landmarks": 1,
+        "position": [
+          [
+            6.194958772632181,
+            0.0001349978582949144
+          ],
+          [
+            null,
+            null
+          ]
+        ],
+        "value": [
+          49.941870789390364,
+          null
+        ]
+      }
+    ],
+    "scope": "Production terminal-reader method on the analytic inputs, with entry instrument observed; not an end-to-end solve."
+  }
 }

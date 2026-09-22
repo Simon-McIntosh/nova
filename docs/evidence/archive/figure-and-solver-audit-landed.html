@@ -2998,6 +2998,80 @@ round-off floor 1e-12: [4.72e-20]</code>, <code>1 failed, 3 passed</code>, log
 (render 2.1 s, import 13.1 s). No SVG companion existed for these four before this repair and none
 was created.</p>
 </section>
+<section id="figure-audit-cut-cell-current-attribution-terminal-flux-repair">
+  <h3>repair &mdash; the empty terminal-flux panel of <code>zero-residual/panels/zero-residual-map.png</code></h3>
+  <p>Scored 48, misrepresenting physics: the <code>moderate-rotation-conventional-static</code> panel
+  titled <em>terminal flux (persisted)</em> drew no field at all &mdash; only the boundary ring and a
+  faceless axis dot &mdash; so the figure invited the reading that no persisted flux raster existed for
+  that row. Reviewer anchor:
+  <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figure-audit-cut-cell-current-attribution</code>.</p>
+  <h4>What the persisted raster turned out to be</h4>
+  <p>The raster was present and finite for both rows. The measured span is
+  <code>-1.3328</code> Wb for <code>moderate-rotation-conventional-static</code> and
+  <code>-47.5943</code> Wb for <code>weak-rotation-reactor-static</code>, a factor of about 36 apart.
+  The driver resolved one level array over the concatenation of both rasters, so all ten levels landed
+  in the weak row's range; the narrow row contains none of them, and
+  <code>draw_flux_contours</code> drew an empty level set. The defect is a level-array scope defect,
+  not an absent or flat raster.</p>
+  <h4>The repair</h4>
+  <ul>
+    <li>Levels are resolved per raster, so each panel states its own
+      <code>levels=</code> count and is drawn on those levels for the nulls of its own row and the
+      contours of its own raster.</li>
+    <li>Each terminal-flux panel records the finite range of the raster it drew on
+      (<code>raster_min_wb</code>, <code>raster_max_wb</code>) and the number of its stated levels that
+      strictly cross that range (<code>levels_inside_raster</code>). The moderate panel now states 10 levels, 8 of
+      which lie inside <code>[-0.3738, 1.1582]</code> Wb; the weak panel states 10 levels, 8 inside
+      <code>[-12.5714, 41.6496]</code> Wb.</li>
+    <li>Both null sets are drawn and counted. The solved terminal topology is drawn solid through the
+      <code>draw_nulls</code> vocabulary and the analytic reference topology is drawn hollow in a
+      distinct colour, so a solved null on a non-converged state no longer reads as the answer on its
+      own. Both rows are <code>limited</code> with <code>x_candidate_count = 0</code>, so each set is a
+      single magnetic axis: the receipt records <code>solved_axis = 1 and reference_axis = 1</code> per
+      panel.</li>
+    <li>Every panel title carries <code>residual=</code> and <code>converged=</code> on its own line.</li>
+    <li><code>render-receipt.json</code> beside the panels, so the arithmetic above is checkable without
+      opening the PNG.</li>
+    <li>A <code>--render-only</code> entry point rebuilds the panels from persisted render bundles
+      without applying the map: 20.8 s wall on the login node, no solve, no device.</li>
+  </ul>
+  <h4>The gate, its negative control, and what it does not cover</h4>
+  <p><code>tests/test_zero_residual_render.py</code> asserts against the receipt that every panel title
+  carries <code>residual=</code> and <code>converged=</code>, that each terminal-flux panel states as many
+  levels as it lists, that the stated levels cross its own recorded raster range, and that both null sets
+  contributed a glyph. Declared negative control: the moderate panel's level array is replaced with the
+  union-derived array (the historical defect). Applied to the check, the check goes red with
+  <code>stated levels do not match the counted levels inside the raster (0 vs 8)</code>.</p>
+  <p>Two findings this repair does not close, both for the reviewer rather than the repair node.
+  <strong>First</strong>, the shadow census is now empty for both rows:
+  <code>entering_cold</code> equals the whole state (9123 of 9123 carriers for
+  <code>moderate-rotation-conventional-static</code>, 9009 of 9009 for
+  <code>weak-rotation-reactor-static</code>), where the reviewed revision recorded 73 and 54 excluded
+  carriers. The measurement driver had no branch for an empty shadow census and aborted on
+  <code>np.max</code> of an empty selection, overwriting its own acceptance receipt with an incomplete
+  stub; the fix folds the empty selection to null. The shift is in the operator's shadow mask or its
+  clip, not in the operator's carrier set.
+  <strong>Second</strong>, the unmasked supremum moved with it, from <code>1.1236</code> to
+  <code>1.1000</code> Wb for the moderate row and from <code>44.11</code> to <code>42.25</code> Wb for
+  the weak row, so the residual story in the repaired figure is not the story the audit scored. With no
+  shadowed carrier the relative-residual raster is concentrated in a thin shell at the boundary, so the
+  right-hand panels of the repaired figure carry ink only there: their eight levels do
+  cross their own raster and the panel is not the empty-array defect the left panel was, but a reader
+  comparing the two figures would see the residual panel lose its interior structure. The
+  gate below is the node's own change and reads the receipt; verifying the merged result belongs to a
+  separately dispatched test node.</p>
+  <table>
+    <tr><th>gate</th><th>command</th><th>exit</th></tr>
+    <tr><td>render check</td>
+      <td><code>python -m pytest tests/test_zero_residual_render.py</code></td><td>0 (1 passed,
+      5.6 s)</td></tr>
+    <tr><td>negative control</td>
+      <td><code>python tests/test_zero_residual_render.py</code> with the union array substituted for
+      the moderate panel's levels</td><td>1 (assertion red)</td></tr>
+    <tr><td>render-only rebuild</td>
+      <td><code>python -m benchmarks.zero_residual_check --render-only</code></td><td>0 (20.8 s)</td></tr>
+  </table>
+</section>
   </main>
 </body>
 </html>

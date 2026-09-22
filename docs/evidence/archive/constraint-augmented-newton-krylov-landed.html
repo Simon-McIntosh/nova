@@ -325,11 +325,36 @@
       <img src="/nova/figures/constraint-augmented-newton-krylov/edge-constraint/edge-contours.png"
            alt="Three MAST poloidal panels comparing the free and terminal flux contours for 5, 10 and 20 millimetre outboard-edge commands">
       <figcaption>MAST 22086/43 at 5, 10 and 20 mm outward commands. Free-state contours are blue and terminal constrained contours ochre on
-      one shared physical level array; every panel includes the unit-faithful wall, both magnetic-axis and X-point sets, and the terminal error
-      and trip count. The hollow target and achieved marker overlap at this scale because each error is below 3&times;10<sup>&minus;9</sup> mm.</figcaption>
+      one shared physical level array; every panel includes the unit-faithful wall, both magnetic-axis and X-point sets, and a title naming the
+      terminal error in exponent form and the trip count. Every marker drawn on a panel is keyed in the figure legend. The hollow target and
+      achieved marker overlap at this scale because each error is below 4&times;10<sup>&minus;9</sup> mm; the drawn values come from the titan P100
+      rebuild and the last digits of the earlier H200 run differ; the error's magnitude is the last digits, not the exponent.</figcaption>
     </figure>
     <p><strong>Decision:</strong> the constrained reduced route recovers the named outboard-midplane edge displacement on this converged MAST
     equilibrium for all three commands. This node's scientific evidence gate passes; merged-head verification remains a separately owned gate.</p>
+  </section>
+  <section id="edge-contours-render">
+    <h2>The edge-contours figure is redrawn from its committed receipt: exponent titles, keyed markers, both null sets</h2>
+    <p><strong>Node:</strong> <code>cna-edge-contours-print-exponent-errors</code>, commits <code>cec822195</code> (driver and gate) and
+    <code>04b6ede92</code> (regenerated PNG, SVG, receipt and render receipt). The figure above was regenerated against the same committed
+    measurement: each panel title now prints its command's <code>terminal_position_error_mm</code> in exponent form
+    (<code>2.94e-09</code>, <code>1.79e-10</code>, <code>1.73e-14</code> mm on the H200 receipt the table above records), every drawn marker is
+    keyed in a figure-level legend, and each panel records and draws both the reference and the figure's flux-map null sets.</p>
+    <p><strong>The render path is solve-free.</strong> The receipt previously carried no flux grids and no null sets, so the figure could not be
+    redrawn without re-solving. <code>measure</code> now persists its <code>render_inputs</code> — radius, height, wall, the reference and terminal
+    flux grids on one shared level array, and both null sets — into <code>receipt.json</code>, and <code>benchmarks/edge_constraint_demonstration.py
+    --render-only</code> calls <code>render_from_receipt</code> to redraw, the figure, <code>edge-contours-render.json</code> and the SVG from the
+    committed receipt alone in seconds on the login node with no solve.</p>
+    <p><strong>Machine-precision error text is device-dependent.</strong> The rebuild this record's figure came from ran on a titan P100 (job
+    1276127) after the H200 reservation refused admission, so the drawn titles carry the titan run's values and <code>receipt.json</code> names
+    its own figure source; the table above still records the earlier H200 machine-precision readings, which differ in the last digits. The gate
+    <code>tests/test_edge_constraint_render.py</code> therefore derives its expected titles from the committed receipt and asserts exponent form
+    with an independent pattern rather than pinned literals: <strong>4 passed</strong> in 11.7 s, exit 0. The negative control mutated
+    <code>_exponent</code> back to a fixed three-decimal format and re-rendered — the panel title then read <code>error +0.000 mm</code> and the
+    exponent assertion failed exactly, with the other three tests passing; the source and render receipt were restored.</p>
+    <p><strong>Left open:</strong> the audit also deducts for the commanded displacement being invisible at panel scale and requested an
+    outboard-midplane inset, which is a measurement change and not part of this exponent/keying/null-set repair. This node leaves its driving
+    followup open for the coordinator to resolve.</p>
   </section>
   <section id="shafranov-profile-amplitude-blocker">
     <h2>Shafranov profile-amplitude row: source tangent absent</h2>

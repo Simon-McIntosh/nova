@@ -1,0 +1,4 @@
+LOW_STATE_AMPLITUDE_PROBE_SETUP_FAILED
+LOW_STATE_AMPLITUDE_PROBE_SUMMARY {"amplitude_calls": 0, "error_message": "the discriminator requires one H200, got cpu:0", "first_stage": null, "last_amplitude_call": null, "outcome": "setup-failed", "stages": 0}
+LOW_STATE_AMPLITUDE_PROBE_DONE
+PROBE_EXIT=1

@@ -1,0 +1,4 @@
+LOW_STATE_AMPLITUDE_PROBE_RAISED
+LOW_STATE_AMPLITUDE_PROBE_SUMMARY {"amplitude_calls": 1, "error_message": "source amplitude nan is outside (1e-06, 1000000.0)", "first_stage": {"all_nonfinite": true, "first_index": [0, 0], "float": true, "inf": 0, "label": "clipped_support_current_moments()", "nan": 1026, "nonfinite": 1026, "producer": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/source_info_util.py:712", "shape": [3, 342], "size": 1026}, "last_amplitude_call": {"label": "nova/equilibrium/forward_operator.py:3590", "phase": "reference-seed-arm", "target_current": {"finite": true, "is_inf": false, "is_nan": false, "shape": [], "value": 16314773.311828371}, "unscaled_current": {"finite": false, "is_inf": false, "is_nan": true, "shape": [], "value": NaN}}, "outcome": "raised", "stages": 1}
+LOW_STATE_AMPLITUDE_PROBE_DONE
+PROBE_EXIT=0

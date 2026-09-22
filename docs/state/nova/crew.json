@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T14:21:35",
+  "updated": "2026-09-22T14:22:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6518,10 +6518,15 @@
         "id": "s19f-sol-impl",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-22"
+        "session_id": "01a0c8fa-d8d4-7780-9ab5-ff4b083cd855",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a0c8fa-d8d4-7780-9ab5-ff4b083cd855"
+        },
+        "created": "2026-09-22",
+        "session_owners": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19f-sol-inv",
@@ -245486,6 +245491,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3119
+    "_version": 3120
   }
 }

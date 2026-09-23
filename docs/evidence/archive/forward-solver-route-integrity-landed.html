@@ -1573,6 +1573,88 @@ The fence therefore does not restore bit identity on the real operator, and the
 certificate terminal state is expected to move by the same order. Whether to
 re-base the certificate digest on the stream is a lead decision.</p>
 </section>
+
+  <section id="recovery-ladder-executions">
+    <h2>Recovery-ladder executions per certificate solve</h2>
+    <p>Commits <code>513568ec29053607c6f206458cc09bb6f6a6dc42</code>,
+    <code>8538baf7dbf5b92af3fe5aa87bd6948403cdbd49</code> and
+    <code>9632ad11e013c0a1f2d853f4c281db080ad4f76f</code> land
+    <code>benchmarks/recovery_ladder_census.py</code> and its receipt under
+    <code>docs/figures/forward-solver-route-integrity/recovery-ladders/</code>.
+    The driver wraps the rebuild and descent rungs of the Newton recovery ladder
+    so each runtime execution emits an ordered debug callback, and wraps the trip
+    entry point so every execution is attributed to the fixed-point trip that
+    produced it.</p>
+    <p>The certificate row the reduced-Newton test exercises,
+    <code>diverted-single-null</code> at requested cells <code>-300</code>, ran as
+    one <code>all_debug</code> job with <code>JAX_PLATFORMS=cpu</code>. Over its six
+    trips the rebuild rung ran 22 times and the descent rung 12 times; the
+    committed operator census attributes 40237 of 302553 optimised instructions
+    to the rebuild rung (13.30 percent) and 17352 to the descent rung (5.74
+    percent).</p>
+    <table>
+      <thead><tr><th>Path</th><th>Executions</th><th>Instructions</th><th>Share</th></tr></thead>
+      <tbody>
+        <tr><td><code>_rebuilt_model_promotion</code> rebuilt-model rung</td><td>22</td><td>40237</td><td>13.30%</td></tr>
+        <tr><td>steepest-descent rung</td><td>12</td><td>17352</td><td>5.74%</td></tr>
+      </tbody>
+    </table>
+    <p>The instrumented solve and the uninstrumented test run both terminate at
+    fixed-point residual <code>0.27948523220464483</code>, so the counter does not
+    perturb what it counts. The test instead asserts
+    <code>2.248351582217136</code> and fails at this revision with the census
+    absent from the process, so that expected constant is stale and its repair
+    sits outside this node's write scope.</p>
+  </section>
+  <section id="recovery-ladder-family-census">
+    <h2>The ladder across the four certificate rows</h2>
+    <p>Commits <code>64175a093ad15cbaccc3d377c78c84a5e4726569</code> and
+    <code>db634db22995b3ee92a8f2e31dbed0eef1de32b8</code> complete the census over
+    every certificate row the reduced-Newton tests exercise, at requested cells
+    <code>-300</code>. The driver stores each row's receipt as it lands and
+    rebuilds the merged report from the stored receipts, so a job that ends
+    before its row finishes still leaves the rows that landed; it also takes the
+    panel root from inside the landing record's own figures tree, because the
+    rendered panel is receipted as a URL relative to <code>docs/</code>.</p>
+    <table>
+      <thead><tr><th>Row</th><th>Trips</th><th>Rebuilt-model rung</th><th>Steepest-descent rung</th><th>Terminal residual</th><th>Converged</th></tr></thead>
+      <tbody>
+        <tr><td>weak-rotation-reactor-static</td><td>16</td><td>155</td><td>135</td><td>0.0553</td><td>no</td></tr>
+        <tr><td>moderate-rotation-conventional-static</td><td>11</td><td>84</td><td>73</td><td>0.0498</td><td>no</td></tr>
+        <tr><td>strong-rotation-compact-static</td><td>8</td><td>48</td><td>39</td><td>0.0251</td><td>no</td></tr>
+        <tr><td>diverted-single-null</td><td>6</td><td>22</td><td>12</td><td>0.2795</td><td>see below</td></tr>
+      </tbody>
+    </table>
+    <p>Every row terminates <code>active_set_settled</code> with a residual between
+    <code>0.0251</code> and <code>0.2795</code>, against the terminal bound
+    <code>1e-12</code>, so no measured row converges and the rare-fallback branch
+    is not exercised by any certificate row at this revision. On every row each
+    rung fires in essentially every trip: the rebuilt-model rung fires in all
+    trips of all four rows, and the steepest-descent rung in fifteen of sixteen
+    trips on the weak-rotation row and in all trips of the other three. The
+    driver's family verdict reads, verbatim: <em>every counted ladder rung fires
+    in at least half the trips on the measured rows, none of which converged, so
+    the ladders are a hot path rather than a rare fallback</em>. The two rungs together carry 57589 of
+    302553 optimised instructions, 19.03 percent of the solve program.</p>
+    <p>Two routes were measured and they disagree on the diverting row, which is
+    the reason the live counter exists. The persisted certificate parts record
+    the diverting row converging at <code>5.63e-15</code> over two trips with
+    neither rung activated, while a fresh solve at the fence base revision runs
+    six trips, activates both rungs in every trip, and stops at
+    <code>0.27948523220464483</code>. The persisted parts therefore describe the
+    revision that wrote them, not the fence base, and the committed reader of
+    those parts, <code>benchmarks/recovery_ladder_telemetry.py</code>, reports each
+    static row activating both rungs on ten promotions with sixty backtracking
+    trials for the same revision its parts came from. Only the live counter
+    speaks for the base revision; the diverting row's earlier receipt predates the
+    convergence field; the record's own control run, in which the test fails
+    against the same expected constant with the census absent from the process,
+    establishes that the row does not converge there.</p>
+    <p>The four rows cannot share one window: their production solves take 2148 to
+    2624 seconds each, so one <code>all_debug</code> job holds one row inside its
+    59-minute limit and the census runs as one job per row, each recording its row
+    as it lands.</p>
+  </section>
 </main>
 </body>
 </html>

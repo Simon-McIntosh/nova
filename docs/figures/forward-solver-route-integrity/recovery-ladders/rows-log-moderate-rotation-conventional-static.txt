@@ -1,0 +1,114 @@
+ROW-BEGIN case=moderate-rotation-conventional-static cells=-300 slurm_job=1276622 host=98dci4-clu-3141.iter.org 2026-09-23T13:12:13+02:00
+SOLOVEV_COMPILATION_CACHE directory=/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe version=runtime-ea5c55820be3d80549fe
+SOLOVEV_STAGE_BEGIN case=moderate-rotation-conventional-static requested_cells=-300 stage=case_and_machine
+SOLOVEV_STAGE_END case=moderate-rotation-conventional-static requested_cells=-300 stage=case_and_machine elapsed_seconds=0.146803
+SOLOVEV_STAGE_BEGIN case=moderate-rotation-conventional-static requested_cells=-300 stage=operator_and_seed
+SOLOVEV_STAGE_END case=moderate-rotation-conventional-static requested_cells=-300 stage=operator_and_seed elapsed_seconds=26.768200
+SOLOVEV_STAGE_BEGIN case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=30.005
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=60.005
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=90.005
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=120.006
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=150.006
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=180.006
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=210.006
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=240.008
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=270.009
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=300.010
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=330.011
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=360.012
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=390.012
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=420.012
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=450.013
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=480.014
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=510.014
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=540.016
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=570.017
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=600.017
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=630.018
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=660.018
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=690.020
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=720.021
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=750.021
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=780.021
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=810.021
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=840.022
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=870.023
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=900.025
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=930.026
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=960.026
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=990.026
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1020.027
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1050.027
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1080.028
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1110.029
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1140.029
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1170.030
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1200.031
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1230.031
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1260.031
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1290.032
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1320.033
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1350.035
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1380.035
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1410.036
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1440.037
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1470.038
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1500.038
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1530.040
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1560.040
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1590.042
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1620.042
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1650.043
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1680.045
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1710.046
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1740.047
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1770.048
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1800.050
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1830.052
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1860.054
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1890.056
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1920.057
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1950.058
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=1980.059
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2010.061
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2040.061
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2070.061
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2100.063
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2130.063
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2160.064
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2190.065
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2220.065
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2250.067
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2280.069
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2310.071
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2340.073
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2370.073
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2400.073
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2430.074
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2460.074
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2490.074
+SOLOVEV_STAGE_HEARTBEAT case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2520.074
+SOLOVEV_STAGE_END case=moderate-rotation-conventional-static requested_cells=-300 stage=production_solve elapsed_seconds=2528.125970
+SOLOVEV_STAGE_BEGIN case=moderate-rotation-conventional-static requested_cells=-300 stage=accuracy_scoring
+SOLOVEV_STAGE_END case=moderate-rotation-conventional-static requested_cells=-300 stage=accuracy_scoring elapsed_seconds=0.651848
+SOLOVEV_STAGE_BEGIN case=moderate-rotation-conventional-static requested_cells=-300 stage=figure_render
+SOLOVEV_STAGE_END case=moderate-rotation-conventional-static requested_cells=-300 stage=figure_render elapsed_seconds=0.619455
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-recovery-ladder-execution-and-size-census/benchmarks/recovery_ladder_census.py", line 381, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-recovery-ladder-execution-and-size-census/benchmarks/recovery_ladder_census.py", line 366, in main
+    payload = run(rows, Path(args.output), scratch)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-recovery-ladder-execution-and-size-census/benchmarks/recovery_ladder_census.py", line 184, in run
+    _merged(output, rows)
+    ~~~~~~~^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-recovery-ladder-execution-and-size-census/benchmarks/recovery_ladder_census.py", line 228, in _merged
+    "verdict": _verdict(receipts),
+               ~~~~~~~~^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-recovery-ladder-execution-and-size-census/benchmarks/recovery_ladder_census.py", line 240, in _verdict
+    converged = [row for row in rows if row["converged"]]
+                                        ~~~^^^^^^^^^^^^^
+KeyError: 'converged'
+ROW-EXIT case=moderate-rotation-conventional-static exit=1
+ROW-END case=moderate-rotation-conventional-static 2026-09-23T13:55:07+02:00

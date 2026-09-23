@@ -23,9 +23,9 @@
   <title>Figure And Solver Audit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-22">
-<meta name="plan-impl" content="0.94">
-<meta name="plan-version" content="21">
+<meta name="plan-modified" content="2026-09-23">
+<meta name="plan-impl" content="0.95">
+<meta name="plan-version" content="22">
 </head>
 <body>
   <main class="plan-doc">
@@ -235,6 +235,16 @@
     <div class="r-fu-body"><p>From the solver wall-read review (codex sol): <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-wall-read</code>; severity high, commit <code>8fdc71ef5f358399ec434827821192d34e402802</code>, docs/state/nova/crew.json:201511.</p><p><strong>Defect.</strong> The promotion row says gate passed while gate_check.exit_status is 1 and the named log ends with 3 failed, 30 passed. The row also stores only a prose test summary rather than an executable command, so the promised verbatim rerun cannot be reconstructed from the ledger alone.</p><p><strong>Repair.</strong> Correct the promotion record to preserve the failing gate, store the executable argv, and require gate status to agree with exit status before promotion. Preserve the three failure IDs rather than classifying them away as follow-ons.</p><p>Commit <code>8fdc71ef5f358399ec434827821192d34e402802</code> is joined to <code>docs/state/nova/crew.json:201511</code>, where <code>gate</code> is <code>passed</code> while <code>gate_check.exit_status</code> is 1 and the named log ends with three failures. Repair the promotion record and the write path so the executable argv, exit status, and failure IDs are stored, and a nonzero gate can never be promoted or rendered green.</p></div>
     <pre class="r-fu-prompt">/reckon-ship figure-and-solver-audit</pre>
     </article>
+<article class="r-fu" data-id="f-fsa-gate-b-cell-count-sign" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Print the gate-b figures&#x27; cell count as a magnitude, as the moment-order titles now do</h4>
+    <div class="r-fu-body">The fsa-repair-the-cell-count-sign follow-on: the two gate-b figures print the same leading minus on the cell count and need the same title repair in their own driver.</div>
+    <pre class="r-fu-prompt">/reckon-ship figure-and-solver-audit</pre>
+    </article>
+<article class="r-fu" data-id="f-fsa-production-route-receipt-revision" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Stamp every production-route receipt with the source revision it was solved at</h4>
+    <div class="r-fu-body">S18 (nova-37) had to date an exact-mode receipt with git log on the file, because production-route receipts carry no source revision field. Add a source_revision field (git rev-parse HEAD of the tree that ran) to the production-route receipt writers, with a test asserting that it is present.</div>
+    <pre class="r-fu-prompt">/reckon-ship figure-and-solver-audit</pre>
+    </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -375,6 +385,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260922T194617097714-review-of-fsa-locate-the-renderers-of-the-dark-cut-cell-figure-families" data-who="reckon-ship" data-when="2026-09-22T19:50:42.476Z">
     <div class="r-comment-body"><p>review stored</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260923T0130-cell-count-landed" data-who="reckon-ship" data-when="2026-09-23T01:30:00Z">
+    <div class="r-comment-body">fsa-repair-the-cell-count-sign merged at dd32c8332 (review 98): the moment-order titles print the cell count as a magnitude, the report numbers re-derive from the committed receipt, and the negative-control log carries the declared mutation verbatim. The gate-b figures that print the same leading minus are f-fsa-gate-b-cell-count-sign.</div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

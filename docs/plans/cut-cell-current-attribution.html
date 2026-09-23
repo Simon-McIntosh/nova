@@ -25,11 +25,11 @@
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
-<meta name="plan-modified" content="2026-09-22">
-<meta name="plan-version" content="182">
+<meta name="plan-modified" content="2026-09-23">
+<meta name="plan-version" content="183">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
-<meta name="plan-impl" content="0.89">
+<meta name="plan-impl" content="0.9">
 </head>
 <body>
 <main class="plan-doc">
@@ -933,6 +933,16 @@ report traces the partition from the whole state instead.</p>
     <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §6</pre>
     <p class="r-fu-outcome">Decided by the lead 2026-09-22: option (a). Proceed to route-A step 3, the mode change in forward_operator.py with candidacy from the clip geometry. The exact-mode executable size (170,127,989 bytes at 110 requested / 135 realised cells after the clip ladder) is recorded as a known cost. The bounded gate g-cca-exact-mode-executable-admits-the-hot-path is retired as failed negative evidence and replaced by g-cca-exact-mode-executable-measured, which measures the 135- and 342-cell executables rather than bounding them. Step 3 continues on f-cca-rung-a-is-the-critical-path.</p>
     </article>
+<article class="r-fu" data-id="f-cca-exact-bank-capacity-overflow" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship cut-cell-current-attribution §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Size the exact-mode moment bank&#x27;s callback capacity to the mesh so a two-cell level crossing cannot overflow to nan</h4>
+    <div class="r-fu-body">From cca-exact-support-deficit-per-cell-attribution (merged 6ddbe0d4c, review 95). At the terminal state of the weak 135-cell row, the whole-cell branch of forward_operator._cell_banked_current_moments integrates the exact current with cut_cell_capacity=1. clip_quadrature._flux_selected_current_moments re-derives a quadratic level boundary and calls back at that inherited capacity; two cut cells overflow the bin, and clipped_support_current_moments returns nan for every cell. The same fail-closed nan stops the low-state discriminator at 342 cells (fsa-low-state-amplitude-nan-attribution). Coordinator choice: repair in clip_quadrature.py by resizing the callback capacity to the mesh cell count, as the chord route already does, which leaves forward_operator.py untouched. Gate: the census at the terminal state is finite with zero overflowing bank signatures; analytic rows with no overflow are bit-identical; the negative control (restore the inherited capacity) turns the terminal exact total back to nan.</div>
+    <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §6</pre>
+    </article>
+<article class="r-fu" data-id="f-cca-empty-exact-polygon-attribution" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship cut-cell-current-attribution §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Attribute why eight cells with analytic current trace no exact polygon at either state</h4>
+    <div class="r-fu-body">From the same attribution: cells 2, 35, 75, 89, 114, 126, 128 and 134 carry zero exact area at both the seed and the terminal state. At the terminal state, cells 2, 75, 89, 114, 126 and 134 have 2/15 to 3/13 vertices inside the boundary level, yet no polygon is traced. This is a geometry outcome independent of the bank overflow. Report only: name the clip step that discards the polygon for each cell.</div>
+    <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §6</pre>
+    </article>
 </section>
 
 <section data-reckon="questions" id="questions" class="r-questions">
@@ -1436,6 +1446,9 @@ report traces the partition from the whole state instead.</p>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260922T2215-lead-gate-decision" data-who="reckon-ship" data-when="2026-09-22T22:15:00+02:00">
     <div class="r-comment-body">Lead decision 2026-09-22 (S19 coordinator nova-cc): the bounded executable gate is retired as failed negative evidence (234,130,996 bytes at base, then 170,127,989 after the clip ladder, against 100,000,000). Its replacement g-cca-exact-mode-executable-measured records the size at 135 and 342 realised cells with no bound. Step 3 of route A is dispatchable. First piece dispatched: cca-exact-support-deficit-per-cell-attribution (local lane, report only). It names the cause of the 5.05 percent exact-mode current deficit that step 3's unit-amplitude gate must close.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260923T0130-deficit-attribution-landed" data-who="reckon-ship" data-when="2026-09-23T01:30:00Z">
+    <div class="r-comment-body">cca-exact-support-deficit-per-cell-attribution merged at 6ddbe0d4c (review 95). The exact deficit has two independent causes: a terminal-state moment bank overflow at inherited capacity 1 that fails closed to nan (f-cca-exact-bank-capacity-overflow), and eight cells that trace no polygon at either state (f-cca-empty-exact-polygon-attribution). Step 3 stays held on both, and on S18's revision attribution of the exact-mode fixed-point regression.</div>
 </div>
 </section>
 

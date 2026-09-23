@@ -23,9 +23,9 @@
   <title>The CPU Lane Aborts In Compilation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-22">
-<meta name="plan-impl" content="0.85">
-<meta name="plan-version" content="16">
+<meta name="plan-modified" content="2026-09-23">
+<meta name="plan-impl" content="0.87">
+<meta name="plan-version" content="17">
 </head>
 <body>
   <main class="plan-doc">
@@ -149,10 +149,11 @@
     <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Unpromoted run r-20260920T180231259880-cca-one-certificate-row-per-process, commit 2710b2ea1, benchmarks/solve_program_size_gate.py:1737 and :2165, writes candidate_state_array_path as an absolute worktree path and calls the probe wrapper result exit_code even though the child status is only probe_exit_code; the run manifest names both follow-ons. Repair receipt paths relative to the receipt/state directory and distinguish wrapper exit from child exit in the schema and gate. recommends_skill=/reckon-ship cpu-compile-abort §2.</p></div>
     <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort</pre>
     </article>
-<article class="r-fu" data-id="f-cca-fold-duplicate-probe-exit-tests" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-22" data-recommends-skill="/reckon-ship cpu-compile-abort §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cca-fold-duplicate-probe-exit-tests" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-22" data-recommends-skill="/reckon-ship cpu-compile-abort §2" data-resolved-at="2026-09-23T01:16:07+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Fold the exit-3 case into test_compile_abort_probe.py and delete the duplicate test module</h4>
     <div class="r-fu-body">tests/test_compile_abort_probe_exit.py repeats _sample_a_child, test_failed_child_fails_the_wrapper and test_successful_child_leaves_the_wrapper_at_zero verbatim from tests/test_compile_abort_probe.py. Move only test_the_wrapper_carries_an_arbitrary_child_status into the existing module and delete the new file.</div>
     <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort §2</pre>
+    <p class="r-fu-outcome">Landed at b2c31c324 (cpu-fold-duplicate-probe-exit-tests, review 99): the exit-3 case lives in tests/test_compile_abort_probe.py and the duplicate module is deleted.</p>
     </article>
 </section>
 

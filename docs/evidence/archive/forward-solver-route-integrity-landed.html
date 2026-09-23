@@ -1492,7 +1492,15 @@ plain identity of the residual dtype. <code>toy_self_identity.py</code> recorded
 every field of the 16 toy cases before the rewrite. After it, the stream
 reproduces 144 of 144 fields bitwise (<code>toy-self-compare.log</code>). The same
 comparison with the GMRES tolerance raised to 1e-3 reports 128 of 144 and exits 1
-(<code>toy-self-compare-perturbed.log</code>), so the check can fail.</p>
+(<code>toy-self-compare-perturbed.log</code>), so the check can fail. At the
+rewritten revision <code>8d02dd0f</code>, fresh <code>all_debug</code> processes
+reproduce the earlier results. The 300-cell stream census still measures 284,792
+instructions (job 1276568, compile 159 s, <code>census-stream-300-rerun.log</code>).
+<code>tests/test_fixed_point.py</code> passes 45 of 45 (job 1276569, EXIT=0, 148 s).
+<code>tests/test_reduced_newton.py</code> gives 18 passed and 4 failed, with no
+abort (job 1276570, EXIT=1, 1,289 s). The failing tests are the same four ids,
+and the diverted rung reads 0.279485232201572 again, bitwise unchanged by the
+rewrite.</p>
 <p id="single-site-krylov-test"><code>tests/test_single_site_krylov.py</code>
 traces the step with its operator under a named scope. It counts that
 operator's contraction through every nested jaxpr and requires exactly one site;

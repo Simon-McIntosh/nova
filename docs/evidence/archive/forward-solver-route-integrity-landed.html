@@ -1139,6 +1139,44 @@ files; <code>measure.py</code>, <code>census.py</code>, <code>regions.py</code> 
 commands, exits, commits and assigned paths. No plan metadata, driving followup, peer-owned
 file or benchmark source is changed.</p>
 </section>
+<section id="reduced-newton-abort">
+<h2>Reduced-Newton exit 134 is memory-map exhaustion in the CPU JIT linker</h2>
+<p><strong>A compile-memory abort, not a numerical abort or an assertion.</strong> At main HEAD
+<code>f5af729a9de6a2287ebd2b528cea278d5bdb3157</code> one all_debug process running the whole of
+<code>tests/test_reduced_newton.py</code> aborts with <code>Fatal Python error: Aborted</code> and
+<code>EXIT=134</code>. The native frames, symbolised against jaxlib 0.11.0, are
+<code>llvm::report_fatal_error</code> ← <code>RuntimeDyldImpl::emitSection</code> ←
+<code>RuntimeDyldELF::loadObject</code> ← <code>jitLinkForORC</code>. That is LLVM's "Unable to allocate
+section memory". It fires when the process's <code>/proc/&lt;pid&gt;/maps</code> count reaches
+<code>vm.max_map_count</code> = 65,530, which RSS does not bound.</p>
+<figure><img src="/nova/figures/forward-solver-route-integrity/reduced-newton-abort/map-count-bisect.png" alt="Memory-map count against time for the bisect arms">
+<figcaption>Map count per fresh process, sampled every 5 s. The whole file holds at 62,914 and aborts.
+Tests 10 to 20 reach 62,797 and survive. With the JAX caches cleared after every test, the count
+between tests stays near 3,000.</figcaption></figure>
+<table>
+<caption>Fresh processes at f5af729a9; all_debug jobs 1276136 and 1276172.</caption>
+<thead><tr><th>Arm</th><th>Outcome</th><th>Peak maps</th><th>Peak RSS</th></tr></thead>
+<tbody>
+<tr><td>Whole file, persistent cache on</td><td>SIGABRT in test 20, EXIT=134</td><td>62,814</td><td>8.63 GiB</td></tr>
+<tr><td>Whole file, persistent cache off</td><td>SIGABRT in test 20 (fresh compile-and-load), EXIT=134</td><td>65,078</td><td>8.27 GiB</td></tr>
+<tr><td>Whole file, repeat</td><td>test 20 passed; SIGABRT in test 21, EXIT=134</td><td>62,915</td><td>11.49 GiB</td></tr>
+<tr><td>Whole file, caches cleared per test</td><td>4 failed, 17 passed, no abort</td><td>35,010</td><td>6.57 GiB</td></tr>
+<tr><td>Tests 2 to 20</td><td>3 failed, 16 passed, no abort</td><td>56,081</td><td>8.78 GiB</td></tr>
+<tr><td>Tests 10 to 20</td><td>2 failed, 9 passed, no abort</td><td>62,797</td><td>5.51 GiB</td></tr>
+<tr><td>Tests 18 to 20</td><td>2 failed, 1 passed, no abort</td><td>35,042</td><td>5.13 GiB</td></tr>
+<tr><td>Test 20 alone</td><td>1 passed</td><td>27,015</td><td>4.12 GiB</td></tr>
+<tr><td>Threshold-one test alone</td><td>1 passed</td><td>28,987</td><td>2.73 GiB</td></tr>
+</tbody></table>
+<p>The smallest ordered subset observed to abort is tests 1 to 20. Dropping test 1, which leaves
+23,690 maps held when it finishes, is enough to survive. Middle-test deletions that keep test 1
+were not run. The threshold-one test no longer aborts: it passes in-suite and alone, and the abort
+site shifts between tests 20 and 21 because the margin is a few hundred maps. Clearing the caches adds
+no failure: tests 1, 5, 18 and 19 fail with or without it, and tests 18 and 19 also fail in the
+18-to-20 arm. The pytest logs, 5 s memory samples, per-test timelines, job payloads and the
+<a href="/nova/figures/forward-solver-route-integrity/reduced-newton-abort/report.md">abort report</a> are under
+<code>docs/figures/forward-solver-route-integrity/reduced-newton-abort/</code>. No file under
+<code>nova/</code> or <code>tests/</code> is changed, and no plan metadata or driving followup is changed.</p>
+</section>
 </main>
 </body>
 </html>

@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.58">
 </head>
@@ -289,6 +289,21 @@
     <div class="r-fu-body">The abort attribution's cache-cleared arm ran every test at f5af729a9. Four fail independently of the abort: test 1 test_diverted_normalised_certificate_rung_retains_finite_fallback (assert 2.340823366528062 == 2.248351582217136), test 5 (assert False), and tests 18 and 19 (AssertionError: assert False). Attribute and repair each, one node per test.</div>
     <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
     </article>
+<article class="r-fu" data-id="f-fsri-single-site-krylov" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Single-site Krylov: every GMRES and promotion loop applies the operator at one site served from a scan</h4>
+    <div class="r-fu-body">The transpose-kind slice (r-20260923T042057247197, program 302,553 to 339,490) showed that the shared request body inlines once per GMRES call site, so sharing pays only once each Krylov loop applies its operator at a single site. Restructure _qualified_krylov_step, _rebuilt_model_promotion (damped normal-equation GMRES and linear transpose) and _steepest_descent_promotion so that the operator (residual, JVP and transpose requests) is applied at exactly one call site per program, served from a lax.scan request stream. Gate: optimised instructions at 300 and 1000 cells below 302,553 and 304,913 (the design state), with the per-caller attribution in callers.json; terminal arrays bit-identical on the operator-boundary check; tests/test_fixed_point.py and tests/test_reduced_newton.py in fresh all_debug processes with no failure beyond the four recorded at 52bfefc0. Proceed site by site, one commit and one census per site.</div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-recovery-ladders-as-separate-programs" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Measure, then compile the rarely-taken recovery ladders as separate programs</h4>
+    <div class="r-fu-body">The unshared stream at 52bfefc0 is dominated by recovery paths taken only after a refused Newton step: _rebuilt_model_promotion (40,237 instructions) and _steepest_descent_promotion (17,352). Step 1 (report only): over the certificate rows, count how often each recovery path executes per solve, and attribute its instruction share. Step 2 (after the single-site Krylov redesign lands): compile each recovery ladder as its own program, entered only when a step is refused, so that the always-compiled program shrinks; gate on instruction count, bit-identical terminal arrays, and zero added test failures.</div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-operator-geometry-as-operands" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pass the certificate route&#x27;s operator geometry as traced operands, not closure constants</h4>
+    <div class="r-fu-body">The whole-cell and certificate solves close the mesh, coupling blocks and stencils into the trace as constants (compile-cost census: about 55 MiB captured at 300 cells), so every geometry value change recompiles and the executable carries the literals. The batched-operator-boundary plan already made member data traced arguments on the batched route; passing the mesh as arguments measured 337 s compile against 535 s for the closure at 300 cells. Apply the same boundary to the certificate route, gated on bit-identical terminal states and a one-program-for-two-geometries check.</div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §2</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-fsri-nk-attempt-fence" data-who="coordinator" data-when="2026-09-19T13:55:00Z">
@@ -332,6 +347,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260922T103934949557-fsri-one-traced-operator-state-machine" data-who="reckon-ship" data-when="2026-09-23T03:55:06.841Z">
     <div class="r-comment-body"><p>section-3 ceilings refuse after four attempts (302553 &gt; 203078, 304913 &gt; 204531); design state carries explicit request streams and the per-test cache-clear fixture with zero added failures; gap attributed: 99475 instructions, largest unshared caller _rebuilt_model_promotion 40237, needs a transpose request kind; continued as a new node based on 52bfefc0</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260923T0745-lead-program-size-directive" data-who="reckon-ship" data-when="2026-09-23T07:45:00+02:00">
+    <div class="r-comment-body">Lead directive 2026-09-23 ("we need to fix this"), after the transpose-kind slice measured 339,490 instructions against 302,553 because the operator body inlines once per GMRES call site. Three lines of work start now, all based on the design state at 52bfefc0: (1) single-site Krylov redesign on the claude-opus 5.5 lane, owning fixed_point.py and reduced_newton.py; (2) splitting the rarely-taken recovery ladders into separately compiled programs, starting with a measurement node and implemented after (1) lands, because both edit fixed_point.py; (3) section 4's pre-warm pin, so the lanes stop paying cold compiles for programs they request. The certificate route's operator geometry is also still closed into the trace as constants (about 55 MiB captured at 300 cells; mesh as arguments measured 337 s compile against 535 s for the closure); moving it to operands is f-fsri-operator-geometry-as-operands.</div>
 </div>
 </section>
 </main>

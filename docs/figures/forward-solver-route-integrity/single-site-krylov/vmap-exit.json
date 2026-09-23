@@ -1,0 +1,103 @@
+{
+  "revision": "63a32bb4a041682c1d4fe4e41cd7528fefdb8d91",
+  "unbatched_optimised_instructions_300": 261735,
+  "compile_seconds_300": 159.2763520926237,
+  "census_job": "1276890",
+  "slice_one_instructions_300": 284792,
+  "qualified_step_live_map_sites_300": {
+    "sites": 1,
+    "instructions": 2028,
+    "rows": [
+      {
+        "instructions": 2028,
+        "kinds": {
+          "jvp": 2028
+        }
+      }
+    ]
+  },
+  "slice_one_vmapped_width16_cpu": {
+    "stream_seconds": 1.24,
+    "base_seconds": 0.086
+  },
+  "vmapped_width16": {
+    "exit_h200": {
+      "backend": "gpu",
+      "arm": "exit",
+      "median_seconds": 0.014345587231218815,
+      "base_median_seconds": 0.008181021548807621,
+      "ratio_over_base": 1.7535202841886752,
+      "member_applications_first_four": [
+        83,
+        83,
+        83,
+        83
+      ]
+    },
+    "exit_cpu": {
+      "backend": "cpu",
+      "arm": "exit",
+      "median_seconds": 0.20471756719052792,
+      "base_median_seconds": 0.12961766123771667,
+      "ratio_over_base": 1.579395625840519,
+      "member_applications_first_four": [
+        83,
+        83,
+        83,
+        83
+      ]
+    },
+    "restored_scan_h200": {
+      "backend": "gpu",
+      "arm": "scan",
+      "median_seconds": 0.016563035547733307,
+      "base_median_seconds": 0.008309101685881615,
+      "ratio_over_base": 1.9933605549534121,
+      "member_applications_first_four": [
+        83,
+        83,
+        83,
+        83
+      ]
+    },
+    "restored_scan_cpu": {
+      "backend": "cpu",
+      "arm": "scan",
+      "median_seconds": 2.015282243490219,
+      "base_median_seconds": 0.12153363041579723,
+      "ratio_over_base": 16.58209531465019,
+      "member_applications_first_four": [
+        83,
+        83,
+        83,
+        83
+      ]
+    },
+    "consumer_gated_h200": {
+      "backend": "gpu",
+      "arm": "exit",
+      "median_seconds": 0.019561885856091976,
+      "base_median_seconds": 0.008640829473733902,
+      "ratio_over_base": 2.26388981700837,
+      "member_applications_first_four": [
+        83,
+        83,
+        83,
+        83
+      ]
+    },
+    "consumer_gated_cpu": {
+      "backend": "cpu",
+      "arm": "exit",
+      "median_seconds": 0.13886350207030773,
+      "base_median_seconds": 0.080116743221879,
+      "ratio_over_base": 1.73326443994026,
+      "member_applications_first_four": [
+        83,
+        83,
+        83,
+        83
+      ]
+    }
+  }
+}

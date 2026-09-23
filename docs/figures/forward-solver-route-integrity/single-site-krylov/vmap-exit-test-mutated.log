@@ -1,0 +1,49 @@
+restore the fixed-capacity cond-gated scan so every slot runs under vmap
+revision=63a32bb4a041682c1d4fe4e41cd7528fefdb8d91 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit command=.venv/bin/python mutated_vmap_test.py (login node, CPU, seconds)
+MUTATION_APPLIED restore the fixed-capacity cond-gated scan so every slot runs under vmap
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 18:55:21 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 3 items
+
+tests/test_single_site_krylov.py::test_the_qualified_step_applies_its_operator_at_one_site PASSED [ 33%]
+tests/test_single_site_krylov.py::test_the_single_site_step_still_solves_a_full_dimension_system PASSED [ 66%]
+tests/test_single_site_krylov.py::test_the_vmapped_stream_stops_when_every_member_is_done FAILED [100%]
+
+=================================== FAILURES ===================================
+___________ test_the_vmapped_stream_stops_when_every_member_is_done ____________
+
+    def test_the_vmapped_stream_stops_when_every_member_is_done():
+        iterations = 3
+        capacity = 1 + iterations + 1 + iterations * (iterations + 1) + 1
+        step, applications, rhs = _counted_member_step(iterations)
+        # an identity member resolves in its first restart, a weakly coupled one
+        # needs two; neither reaches the stream's worst-case slot count
+        scales = jnp.asarray([0.0, 0.02])
+        rhs = jnp.asarray(rhs)
+        single = []
+        for scale, member_rhs in zip(scales, rhs, strict=True):
+            applications.clear()
+            jax.jit(step)(scale, member_rhs).block_until_ready()
+            single.append(len(applications))
+        assert single[0] < single[1] < capacity
+        applications.clear()
+        batched = jax.jit(jax.vmap(step))(scales, rhs).block_until_ready()
+>       assert len(applications) == len(scales) * max(single)
+E       assert 36 == (2 * 14)
+E        +  where 36 = len([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+E        +  and   2 = len(Array([0.  , 0.02], dtype=float64))
+E        +  and   14 = max([8, 14])
+
+tests/test_single_site_krylov.py:119: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_single_site_krylov.py::test_the_vmapped_stream_stops_when_every_member_is_done - assert 36 == (2 * 14)
+ +  where 36 = len([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+ +  and   2 = len(Array([0.  , 0.02], dtype=float64))
+ +  and   14 = max([8, 14])
+========================= 1 failed, 2 passed in 18.29s =========================
+EXIT=1

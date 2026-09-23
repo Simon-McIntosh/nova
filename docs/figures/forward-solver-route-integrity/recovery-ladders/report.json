@@ -1,0 +1,75 @@
+{
+  "base_sha": "513568ec29053607c6f206458cc09bb6f6a6dc42",
+  "fixed_point_digest": "0972c5afdeee28897d922dceb6f91abe47ddeb0e01516499eaf24fa1be7292be",
+  "instruction_census": {
+    "by_owner": {
+      "_rebuilt_model_promotion": 40237,
+      "_steepest_descent_promotion": 17352
+    },
+    "instructions": {
+      "_rebuilt_model_promotion": 40237,
+      "_steepest_descent_promotion": 17352
+    },
+    "optimized_instructions": 302553,
+    "share": {
+      "_rebuilt_model_promotion": 0.13299157502982947,
+      "_steepest_descent_promotion": 0.057351935032870276
+    }
+  },
+  "rows": [
+    {
+      "case": "diverted-single-null",
+      "executions": {
+        "_rebuilt_model_promotion": 22,
+        "_steepest_descent_promotion": 12
+      },
+      "executions_per_trip": {
+        "_rebuilt_model_promotion": 3.6666666666666665,
+        "_steepest_descent_promotion": 2.0
+      },
+      "fired_in_trips": {
+        "_rebuilt_model_promotion": [
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          2,
+          2,
+          3,
+          4,
+          5,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6
+        ],
+        "_steepest_descent_promotion": [
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          2,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      "requested_cells": -300,
+      "terminal_fixed_point_residual": 0.27948523220464483,
+      "trips": 6
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+SOLOVEV_COMPILATION_CACHE directory=/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe version=runtime-ea5c55820be3d80549fe
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=case_and_machine
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=case_and_machine elapsed_seconds=1.287689
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=operator_and_seed
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=operator_and_seed elapsed_seconds=30.000
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=operator_and_seed elapsed_seconds=32.854405
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=production_solve
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=30.000
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=60.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=90.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=120.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=150.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=180.002
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=210.002
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=240.002
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=270.002
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=300.002
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=330.002
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=360.003
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=390.003
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=420.003
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=450.003
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=480.003
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=489.836375
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=accuracy_scoring
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=accuracy_scoring elapsed_seconds=1.039985
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=figure_render
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=figure_render elapsed_seconds=0.816945
+ROW diverted-single-null trips=6
+  _rebuilt_model_promotion executions=22
+  _steepest_descent_promotion executions=12
+CENSUS-OK rows=1

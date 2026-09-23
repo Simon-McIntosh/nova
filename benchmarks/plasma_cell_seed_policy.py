@@ -10,6 +10,18 @@ state digest, the converged flag, the trip count, the per-trip residual
 history, the terminal residual, the terminal and reference saddle with
 their distance in metres, and the count of non-finite clipped-support
 current moments at the terminal state.
+
+Each case's row also carries the flux range of every seed against the
+analytic seed's own range, because seed amplitude is what separates the
+policies: the route's saddle-anchored seed is several times the analytic
+seed's flux extent, so the two are different initial states rather than
+two spellings of one.
+
+--complete-receipt splices a receipt that already carries a case: it
+measures the declared one-trip control, records the seed flux ranges, and
+measures only the cases the receipt lacks, leaving a case's arms as the
+documented comparison state.  A crash in a later part of a measurement
+therefore does not require the earlier arms to be measured again.
 """
 
 from __future__ import annotations
@@ -47,6 +59,10 @@ from scripts.oracle_rebaseline import measure as recovery
 CASES = ("diverted-single-null", "weak-rotation-reactor-static")
 REQUESTED_CELLS = -110
 SEED_POLICIES = ("analytic", "current_centroid_disc")
+# The route's own seed is not one of the two policies under comparison; it
+# is measured in the forced one-trip control and labelled so every arm row
+# carries a seed policy.
+PRODUCTION_SEED_POLICY = "production_route_seed"
 NEGATIVE_CONTROL = (
     "run the analytic-seed arm of the diverted case with the active-set "
     "budget forced to one trip and observe the receipt read converged "
@@ -90,6 +106,78 @@ def _point(value):
 
 def _write_json(path, value):
     path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+
+
+def _jsonable(value):
+    """Reduce a route receipt to JSON-safe containers and scalars."""
+    if isinstance(value, dict):
+        return {str(key): _jsonable(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_jsonable(item) for item in value]
+    if isinstance(value, np.ndarray):
+        return _jsonable(value.tolist())
+    if isinstance(value, np.generic):
+        return value.item()
+    return value
+
+
+def _flux_range(state):
+    """Flux extent of a seed state over its finite samples."""
+    values = np.asarray(state, dtype=np.float64).reshape(-1)
+    finite = values[np.isfinite(values)]
+    if finite.size == 0:
+        return {
+            "min_wb": None,
+            "max_wb": None,
+            "amplitude_wb": None,
+            "abs_max_wb": None,
+            "nonfinite_count": int(values.size),
+            "sample_count": int(values.size),
+        }
+    return {
+        "min_wb": float(finite.min()),
+        "max_wb": float(finite.max()),
+        "amplitude_wb": float(finite.max() - finite.min()),
+        "abs_max_wb": float(np.abs(finite).max()),
+        "nonfinite_count": int(values.size - finite.size),
+        "sample_count": int(values.size),
+    }
+
+
+def _seed_flux_ranges(seeds):
+    """Flux range per seed beside the analytic seed's own range.
+
+    Amplitude is the discriminating quantity: the route's saddle-anchored
+    seed carries several times the analytic seed's flux extent, so the two
+    are different initial states rather than two spellings of one.
+    """
+    ranges = []
+    analytic_amplitude = None
+    for policy, state in seeds:
+        entry = {"seed_policy": policy, "seed_state_digest": _digest(state)}
+        entry.update(_flux_range(state))
+        if policy == "analytic":
+            analytic_amplitude = entry["amplitude_wb"]
+        ranges.append(entry)
+    for entry in ranges:
+        amplitude = entry["amplitude_wb"]
+        entry["analytic_amplitude_wb"] = analytic_amplitude
+        if amplitude is None or not analytic_amplitude:
+            entry["amplitude_ratio_to_analytic"] = None
+        else:
+            entry["amplitude_ratio_to_analytic"] = float(amplitude / analytic_amplitude)
+    return ranges
+
+
+def _production_seed_receipt(state, route_receipt):
+    """Label the route's own seed so its arm row carries a seed policy."""
+    state = np.asarray(state, dtype=np.float64)
+    return {
+        "seed_policy": PRODUCTION_SEED_POLICY,
+        "seed_state_digest": _digest(state),
+        "seed_construction": "production_route",
+        "route_seed_receipt": _jsonable(route_receipt),
+    }
 
 
 def _nulls(operator, state):
@@ -225,6 +313,92 @@ def require_converged(row):
             )
 
 
+def _policy_seeds(built, profile):
+    """Build the two seed policies under comparison for one case."""
+    analytic_seed, analytic_receipt = _analytic_seed(built["analytic"])
+    disc_seed, disc_receipt = _disc_seed(
+        profile, built["target_current"], built["centroid"]
+    )
+    return {
+        "analytic": (analytic_seed, analytic_receipt),
+        "current_centroid_disc": (disc_seed, disc_receipt),
+    }
+
+
+def _production_seed_state(profile, built):
+    seed, branch, route_receipt = certificate._production_seed(
+        profile,
+        built["case_name"],
+        float(built["target_current"]),
+        built["centroid"],
+        built["current_receipt"],
+    )
+    return np.asarray(seed, dtype=np.float64), branch, route_receipt
+
+
+def _run_control(profile, built, row, reference, pitch, carrier, seeds, negative_log):
+    """Run the declared one-trip control and record the seed flux ranges.
+
+    The control is the analytic-seed arm with the active-set budget forced to
+    one trip, alongside the route's own seed under the same budget so the
+    declared residual is measured against the arm it came from.  Each seed's
+    flux range is recorded beside the arms against the analytic range.
+    """
+    operator = built["operator"]
+    production_state, _branch, route_receipt = _production_seed_state(profile, built)
+    row["seed_flux_ranges"] = _seed_flux_ranges(
+        [
+            ("analytic", np.asarray(built["analytic"], dtype=np.float64)),
+            (
+                "current_centroid_disc",
+                np.asarray(seeds["current_centroid_disc"][0], dtype=np.float64),
+            ),
+            (PRODUCTION_SEED_POLICY, production_state),
+        ]
+    )
+    control_arms = [
+        (
+            "analytic_seed",
+            seeds["analytic"][0],
+            seeds["analytic"][1],
+            [
+                (EXPECTED_ONE_TRIP_RESIDUAL, DECLARED_CONTROL_SOURCE),
+                (COMMITTED_ONE_TRIP_RESIDUAL, COMMITTED_CONTROL_SOURCE),
+            ],
+        )
+    ]
+    control_arms.append(
+        (
+            PRODUCTION_SEED_POLICY,
+            jnp.asarray(production_state, dtype=jnp.float64),
+            _production_seed_receipt(production_state, route_receipt),
+            [(PRODUCTION_TRIP_ONE_RESIDUAL, PRODUCTION_CONTROL_SOURCE)],
+        )
+    )
+    records = []
+    for label, seed, seed_receipt, expectations in control_arms:
+        request = certificate._certificate_solve_request(
+            profile, seed, float(built["target_current"]), carrier_identity=carrier
+        )
+        one_request = replace(
+            request, policy=replace(request.policy, active_set_steps=1)
+        )
+        mutation, _state = _arm(
+            profile, one_request, operator, reference, pitch, seed_receipt
+        )
+        records.extend(
+            _one_trip_control(mutation, row, negative_log, label, expectations)
+        )
+    return records
+
+
+def _recorded_range(row, policy):
+    for entry in row.get("seed_flux_ranges", []):
+        if entry["seed_policy"] == policy:
+            return entry
+    return None
+
+
 def _draw_nulls(axis, nulls, wall_units, style):
     admitted = nulls["x_point_rz_m"]
     others = np.asarray(nulls["qualified_saddles_rz_m"]).reshape(-1, 2)
@@ -308,6 +482,13 @@ def render(receipt, output):
                     f"residual={arm['terminal_residual']:.6g}; "
                     f"converged={arm['converged']}; trips={arm['trip_count']}"
                 )
+                extent = _recorded_range(row, arm["seed_policy"])
+                if extent is not None and extent["amplitude_wb"] is not None:
+                    caption += f"\nseed amplitude={extent['amplitude_wb']:.3g} Wb"
+                    if extent["amplitude_ratio_to_analytic"] is not None:
+                        caption += (
+                            f" ({extent['amplitude_ratio_to_analytic']:.2f}x analytic)"
+                        )
             axis.set_title(caption, fontsize=10)
             row["panels"].append(
                 {
@@ -368,6 +549,30 @@ def _construction(case_name):
     }
 
 
+def _refresh_verdict(receipt):
+    """One field answering the seed-policy question at the cases measured.
+
+    The answer is carried as that verdict's own name when every case agrees
+    and as a case-keyed mapping when they do not, so a reader never has to
+    average two answers into one word.
+    """
+    verdicts = {
+        row["case"]: row["seed_policy_verdict"]
+        for row in receipt["cases"]
+        if "seed_policy_verdict" in row
+    }
+    if not verdicts:
+        receipt.pop("seed_policy_verdict", None)
+        return
+    distinct = set(verdicts.values())
+    receipt["seed_policy_verdict"] = distinct.pop() if len(distinct) == 1 else verdicts
+
+
+def _write_receipt(output, receipt):
+    _refresh_verdict(receipt)
+    _write_json(output / (FIGURE_STEM + ".json"), receipt)
+
+
 def _run_case(built, receipt, output, negative_log):
     case_name = built["case_name"]
     operator = built["operator"]
@@ -396,14 +601,7 @@ def _run_case(built, receipt, output, negative_log):
         ],
     }
     receipt["cases"].append(row)
-    analytic_seed, analytic_receipt = _analytic_seed(built["analytic"])
-    disc_seed, disc_receipt = _disc_seed(
-        profile, built["target_current"], built["centroid"]
-    )
-    seeds = {
-        "analytic": (analytic_seed, analytic_receipt),
-        "current_centroid_disc": (disc_seed, disc_receipt),
-    }
+    seeds = _policy_seeds(built, profile)
     carrier = f"solovev:{case_name}:{REQUESTED_CELLS}"
     states = {}
     for policy in SEED_POLICIES:
@@ -414,7 +612,7 @@ def _run_case(built, receipt, output, negative_log):
         arm, state = _arm(profile, request, operator, reference, pitch, seed_receipt)
         row["arms"].append(arm)
         states["analytic_seed" if policy == "analytic" else "disc_seed"] = state
-        _write_json(output / (FIGURE_STEM + ".json"), receipt)
+        _write_receipt(output, receipt)
     analytic_arm, disc_arm = row["arms"][0], row["arms"][1]
     if disc_arm["converged"] and not analytic_arm["converged"]:
         verdict = "disc_converges_where_analytic_does_not"
@@ -434,49 +632,87 @@ def _run_case(built, receipt, output, negative_log):
         **states,
     )
     if case_name == CASES[0]:
-        control_arms = [
-            (
-                "analytic_seed",
-                seeds["analytic"][0],
-                seeds["analytic"][1],
-                [
-                    (EXPECTED_ONE_TRIP_RESIDUAL, DECLARED_CONTROL_SOURCE),
-                    (COMMITTED_ONE_TRIP_RESIDUAL, COMMITTED_CONTROL_SOURCE),
-                ],
-            )
-        ]
-        prod_seed, _branch, prod_receipt = certificate._production_seed(
-            profile,
-            case_name,
-            float(built["target_current"]),
-            built["centroid"],
-            built["current_receipt"],
-        )
-        control_arms.append(
-            (
-                "production_route_seed",
-                prod_seed,
-                prod_receipt,
-                [(PRODUCTION_TRIP_ONE_RESIDUAL, PRODUCTION_CONTROL_SOURCE)],
+        receipt["negative_control"].extend(
+            _run_control(
+                profile, built, row, reference, pitch, carrier, seeds, negative_log
             )
         )
-        for label, seed, seed_receipt, expectations in control_arms:
-            request = certificate._certificate_solve_request(
-                profile,
-                seed,
-                float(built["target_current"]),
-                carrier_identity=carrier,
+    _write_receipt(output, receipt)
+
+
+def _assert_seed_digests(row, seeds):
+    """Require the freshly built seeds to reproduce the recorded arms."""
+    for arm in row["arms"]:
+        policy = arm["seed_policy"]
+        if policy not in seeds:
+            continue
+        recorded = arm["seed_receipt"]["seed_state_digest"]
+        rebuilt = seeds[policy][1]["seed_state_digest"]
+        assert recorded == rebuilt, (
+            f"{row['case']} rebuilt a different {policy} seed than the arm recorded"
+        )
+
+
+def complete_receipt(output, negative_log):
+    """Measure the control and any case the receipt does not already carry.
+
+    The receipt is spliced rather than rewritten: a case it already carries
+    was measured by the revision it records, so only its control arms and
+    seed flux ranges are added, and the rebuilt policy seeds are checked
+    against the digests those arms recorded.
+    """
+    output.mkdir(parents=True, exist_ok=True)
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    assert jax.default_backend() == "gpu", "measurement requires the GPU lane"
+    receipt_path = output / (FIGURE_STEM + ".json")
+    receipt = json.loads(receipt_path.read_text())
+    receipt["completion_revision"] = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], text=True
+    ).strip()
+    receipt["completion_job_id"] = os.environ.get("SLURM_JOB_ID")
+    receipt["completion_slurm_partition"] = os.environ.get("SLURM_JOB_PARTITION")
+    receipt.setdefault("negative_control", [])
+    # The control is re-measured here, so drop any records a previous
+    # attempt wrote for the case it belongs to rather than duplicate them.
+    receipt["negative_control"] = [
+        record for record in receipt["negative_control"] if record["case"] != CASES[0]
+    ]
+    negative_log.write_text(NEGATIVE_CONTROL + "\n")
+    previous = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        for case_name in CASES:
+            print("BUILD case=" + case_name, flush=True)
+            built = _construction(case_name)
+            carrier = f"solovev:{case_name}:{REQUESTED_CELLS}"
+            existing = next(
+                (row for row in receipt["cases"] if row["case"] == case_name), None
             )
-            one_request = replace(
-                request, policy=replace(request.policy, active_set_steps=1)
-            )
-            mutation, _state = _arm(
-                profile, one_request, operator, reference, pitch, seed_receipt
-            )
+            if existing is None:
+                _run_case(built, receipt, output, negative_log)
+                continue
+            seeds = _policy_seeds(built, built["profile"])
+            _assert_seed_digests(existing, seeds)
             receipt["negative_control"].extend(
-                _one_trip_control(mutation, row, negative_log, label, expectations)
+                _run_control(
+                    built["profile"],
+                    built,
+                    existing,
+                    existing["reference_nulls"],
+                    float(existing["characteristic_pitch_m"]),
+                    carrier,
+                    seeds,
+                    negative_log,
+                )
             )
-    _write_json(output / (FIGURE_STEM + ".json"), receipt)
+            _write_receipt(output, receipt)
+        render(receipt, output)
+        receipt["figure_src"] = FIGURE_URL + "/" + FIGURE_STEM + ".png"
+        _write_receipt(output, receipt)
+    finally:
+        set_support_clip_mode(previous)
+    print("MEASUREMENT_COMPLETE", flush=True)
 
 
 def _one_trip_control(mutation, row, negative_log, arm_label, expectations):
@@ -556,7 +792,7 @@ def measure(output, negative_log):
             _run_case(built, receipt, output, negative_log)
         render(receipt, output)
         receipt["figure_src"] = FIGURE_URL + "/" + FIGURE_STEM + ".png"
-        _write_json(output / (FIGURE_STEM + ".json"), receipt)
+        _write_receipt(output, receipt)
     finally:
         set_support_clip_mode(previous)
     print("MEASUREMENT_COMPLETE", flush=True)
@@ -567,14 +803,22 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--negative-control-log", type=Path, required=True)
     parser.add_argument("--render-only", action="store_true")
+    parser.add_argument(
+        "--complete-receipt",
+        action="store_true",
+        help="add the control and any case the existing receipt lacks",
+    )
     arguments = parser.parse_args()
     if not arguments.negative_control_log.parent.is_dir():
         parser.error("negative control log directory is absent")
+    if arguments.complete_receipt:
+        complete_receipt(arguments.output, arguments.negative_control_log)
+        return
     if arguments.render_only:
         receipt_path = arguments.output / (FIGURE_STEM + ".json")
         receipt = json.loads(receipt_path.read_text())
         render(receipt, arguments.output)
-        _write_json(receipt_path, receipt)
+        _write_receipt(arguments.output, receipt)
         return
     if arguments.negative_control_log is None:
         parser.error("--negative-control-log is required for measurement")

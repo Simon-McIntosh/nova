@@ -258,16 +258,22 @@
     </figure>
     <p>The ceiling needs at least 99,475 instructions removed. That is 73% of the
     direct map instructions, and it includes linear transposes, which the request
-    body has no kind for. The unshared stream is the direct <code>jax.linearize</code>
-    sites (<code>newton_body</code>, <code>attempt_step</code>,
-    <code>acceptance_map</code>, the <code>newton_krylov</code> telemetry
-    tangent), the <code>jax.linear_transpose</code> in
-    <code>_rebuilt_model_promotion</code>, and the direct primal line-search reads.
-    Together they are 29 sites; 18 of them hold more than 1,000 instructions
-    each, 136,508 in all. The per-request control raises the shared-body
+    body has no kind for. Stack-frame attribution names the unshared stream: 29 sites,
+    18 of them above 1,000 instructions each, 136,508 in all. The largest parts
+    are the damped normal-equation GMRES and model check of
+    <code>_rebuilt_model_promotion</code> (20,209 + 10,015 + 10,013), the
+    gradient of <code>_steepest_descent_promotion</code> (17,352), and the Newton
+    GMRES of <code>_qualified_krylov_step</code> (7,916 + 2,626). Smaller parts
+    are the Arnoldi columns of <code>_projected_krylov_condition</code>,
+    <code>_record_merit</code> and <code>_backtracking_scores</code>. JAX's
+    batched GMRES applies its operator in more than one place, so every GMRES
+    site inlines its action repeatedly. The per-request control raises the shared-body
     share from 30,554 to 126,712, so the census does resolve body duplication. The
     <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#operator-sharing-census">detailed record</a>
-    carries the site table and the test disposition. This entry changes neither
+    carries the site table and the test disposition. In one fresh
+    <code>all_debug</code> process at <code>f803b640</code>,
+    <code>tests/test_fixed_point.py</code> passes 45 of 45 (EXIT=0, 201 s),
+    including the nested-call regression. This entry changes neither
     section state nor its followup.</p>
 
     <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>

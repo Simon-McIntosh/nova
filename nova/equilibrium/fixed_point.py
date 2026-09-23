@@ -2154,22 +2154,23 @@ def _single_site_krylov(
 ) -> tuple[
     jax.Array, tuple[jax.Array, jax.Array, jax.Array], jax.Array, jax.Array, jax.Array
 ]:
-    """Serve every operator application of one qualified step from one scan.
+    """Serve every operator application of one qualified step from one loop.
 
     The stream reproduces, slot for slot, the finite-action probe, the
     projected-condition Arnoldi columns, the batched restarted GMRES of
     ``jax.scipy.sparse.linalg.gmres`` (``restart = maxiter = gmres_iterations``,
     zero initial guess, identity preconditioner) and the achieved-residual
     check. Each slot applies ``linear_action`` at the single call site in the
-    scan body; a phase switch routes the result to its consumer, so the
+    loop body; a phase switch routes the result to its consumer, so the
     lowered program carries one inlined operator body however many
-    applications the solve needs. Slots after the machine reaches ``DONE``
-    apply nothing.
+    applications the solve needs. The loop exits when the machine reaches
+    ``DONE``, and under ``vmap`` when every member has, so no slot applies
+    the operator after the last member finishes; a finished member's carry is
+    held by the loop's batched select while the others run on.
     """
     size = residual_vector.size
     restart = min(gmres_iterations, size)
     maxiter = gmres_iterations
-    capacity = 1 + gmres_iterations + 1 + maxiter * (restart + 1) + 1
     dtype = residual_vector.dtype
     eps = jnp.finfo(dtype).eps
     atol = jnp.maximum(_GMRES_RELATIVE_TOLERANCE * _gmres_norm(residual_vector), 0.0)
@@ -2283,9 +2284,6 @@ def _single_site_krylov(
             achieved_action=action,
         )
 
-    def done_slot(stream, _action):
-        return stream
-
     consumers = (
         probe_slot,
         condition_slot,
@@ -2293,7 +2291,6 @@ def _single_site_krylov(
         arnoldi_slot,
         restart_residual_slot,
         achieved_slot,
-        done_slot,
     )
     requests = (
         lambda stream: probe,
@@ -2302,24 +2299,21 @@ def _single_site_krylov(
         lambda stream: stream.basis[..., stream.arnoldi_index],
         lambda stream: stream.candidate,
         lambda stream: stream.solution,
-        lambda stream: zeros,
     )
 
-    def serve(stream, _):
+    def pending(stream):
+        return stream.phase != _KrylovPhase.DONE
+
+    def serve(stream):
         vector = jax.lax.switch(stream.phase, requests, stream)
         # The barrier keeps the operator's arithmetic out of its consumers'
         # fusions, so each application rounds as a standalone evaluation.
         action = jax.lax.optimization_barrier(
-            jax.lax.cond(
-                stream.phase == _KrylovPhase.DONE,
-                jnp.zeros_like,
-                linear_action,
-                jax.lax.optimization_barrier(vector),
-            )
+            linear_action(jax.lax.optimization_barrier(vector))
         )
-        return jax.lax.switch(stream.phase, consumers, stream, action), None
+        return jax.lax.switch(stream.phase, consumers, stream, action)
 
-    stream, _ = jax.lax.scan(serve, initial, None, length=capacity)
+    stream = jax.lax.while_loop(pending, serve, initial)
     info = jnp.where(jnp.isnan(_gmres_norm(stream.solution)), -1, 0)
     return (
         stream.probe_action,

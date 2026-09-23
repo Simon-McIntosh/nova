@@ -2,10 +2,12 @@
 
 Every operator application of the step (the finite-action probe, the
 condition Arnoldi columns, the restarted GMRES and the achieved-residual
-check) is served from one slot of a scan, so the traced program carries the
+check) is served from one slot of a loop, so the traced program carries the
 operator once however many applications the solve needs. The operator is
 traced under a named scope and its contraction is counted through every
-nested jaxpr.
+nested jaxpr. The loop exits when the stream is done, and under ``vmap`` when
+every member is, so a batch applies the operator no more often than its
+slowest member needs.
 """
 
 import jax
@@ -73,3 +75,54 @@ def test_the_single_site_step_still_solves_a_full_dimension_system():
         np.asarray(matrix @ result.unconditioned_step), np.asarray(rhs), atol=1e-10
     )
     assert float(result.achieved_reduction) < 1e-10
+
+
+def _counted_member_step(iterations=3, size=6):
+    """A vmappable step whose operator reports each application to the host."""
+    rng = np.random.default_rng(3)
+    coupling = jnp.asarray(rng.standard_normal((size, size)))
+    applications = []
+
+    def step(scale, rhs):
+        def operator(vector):
+            jax.debug.callback(lambda _: applications.append(1), vector)
+            return vector + scale * (coupling @ vector)
+
+        return fixed_point._qualified_krylov_step(
+            operator,
+            rhs,
+            jnp.asarray(0.1),
+            gmres_iterations=iterations,
+            condition_ratio_limit=10.0,
+            preceding_condition_baseline=jnp.asarray(2.0),
+        ).step
+
+    return step, applications, rng.standard_normal((2, size))
+
+
+def test_the_vmapped_stream_stops_when_every_member_is_done():
+    iterations = 3
+    capacity = 1 + iterations + 1 + iterations * (iterations + 1) + 1
+    step, applications, rhs = _counted_member_step(iterations)
+    # an identity member resolves in its first restart, a weakly coupled one
+    # needs two; neither reaches the stream's worst-case slot count
+    scales = jnp.asarray([0.0, 0.02])
+    rhs = jnp.asarray(rhs)
+    single = []
+    for scale, member_rhs in zip(scales, rhs, strict=True):
+        applications.clear()
+        jax.jit(step)(scale, member_rhs).block_until_ready()
+        single.append(len(applications))
+    assert single[0] < single[1] < capacity
+    applications.clear()
+    batched = jax.jit(jax.vmap(step))(scales, rhs).block_until_ready()
+    assert len(applications) == len(scales) * max(single)
+    # a finished member's carry is held while the other runs on; batched and
+    # unbatched arithmetic round differently, so the match is to rounding
+    for index, scale in enumerate(scales):
+        np.testing.assert_allclose(
+            np.asarray(batched[index]),
+            np.asarray(jax.jit(step)(scale, rhs[index])),
+            rtol=1e-12,
+            atol=1e-15,
+        )

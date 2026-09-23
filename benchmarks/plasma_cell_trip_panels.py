@@ -93,7 +93,7 @@ def measure_arm(args):
     import nova
     from benchmarks import plasma_cell_terminal_state as driver
     from benchmarks.plasma_cell_fixed_point_attribution import build_construction
-    from nova.equilibrium import reduced_newton
+    from nova.equilibrium import fixed_point
     from nova.jax.config import (
         configure_persistent_compilation_cache,
         default_persistent_compilation_cache_root,
@@ -133,42 +133,43 @@ def measure_arm(args):
         provenance=built["provenance"],
         realised_cells=len(built["machine"].node),
     )
+    assert request.policy.route == "newton_krylov", request.policy.route
+    write_json(path, row)
+    print(f"SOLVE route={request.policy.route}", flush=True)
     captures = []
-    original = reduced_newton._drive_trips
+    original = fixed_point._ActiveSetIterationState
 
-    def observe_drive(kernels, state, reduced, shadow, **kwargs):
-        copied = dict(kernels)
-        boundary = (
-            kernels["boundary"] if kwargs["fused"] else kwargs["dispatched_boundary"]
+    def capture(state, residual, iterations):
+        count = int(iterations)
+        if count == 0:
+            return
+        assert count == len(captures) + 1
+        captures.append((np.asarray(state).copy(), float(residual)))
+        np.savez(
+            args.output / f"{args.revision[:9]}-{args.clip}-boundary-{count}.npz",
+            state=captures[-1][0],
+            residual=captures[-1][1],
         )
+        print(f"CAPTURE trip={count} residual={float(residual):.14g}", flush=True)
 
-        def observe_boundary(*operands):
-            result = boundary(*operands)
-            jax.block_until_ready(result)
-            captures.append((np.asarray(result[0]).copy(), float(result[3])))
-            np.savez(
-                args.output
-                / f"{args.revision[:9]}-{args.clip}-boundary-{len(captures)}.npz",
-                state=captures[-1][0],
-                residual=captures[-1][1],
-            )
-            print(
-                f"CAPTURE trip={len(captures)} residual={captures[-1][1]:.14g}",
-                flush=True,
-            )
-            return result
+    def observe_carry(*values, **keywords):
+        result = original(*values, **keywords)
+        jax.debug.callback(
+            capture,
+            result.state,
+            result.live_residual,
+            result.iterations,
+            ordered=True,
+        )
+        return result
 
-        if kwargs["fused"]:
-            copied["boundary"] = observe_boundary
-        else:
-            kwargs["dispatched_boundary"] = observe_boundary
-        return original(copied, state, reduced, shadow, **kwargs)
-
-    reduced_newton._drive_trips = observe_drive
+    fixed_point._ActiveSetIterationState = observe_carry
     try:
         solved = built["profile"].solve(request)
+        jax.block_until_ready(solved.equilibrium.flux)
+        jax.effects_barrier()
     finally:
-        reduced_newton._drive_trips = original
+        fixed_point._ActiveSetIterationState = original
     history = solved.equilibrium.fixed_point
     assert len(captures) == int(history.active_set_iterations) > 0
     np.testing.assert_array_equal(captures[-1][0], np.asarray(solved.equilibrium.flux))

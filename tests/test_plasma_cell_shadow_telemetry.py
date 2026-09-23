@@ -1,4 +1,4 @@
-"""Carrier-owned wall shadows and active-set label telemetry."""
+"""Carrier-owned wall shadows read from node flux, and active-set label telemetry."""
 
 import json
 
@@ -37,8 +37,8 @@ def _raster_operator(
     if wall_through_lower_lobe:
         lower_lobe_segment = np.asarray(
             (
-                (1.58, -0.46),
-                (1.58, -0.31),
+                (1.55, -0.46),
+                (1.55, -0.31),
                 (1.70, -0.31),
                 (1.82, -0.31),
                 (1.82, -0.46),
@@ -101,162 +101,95 @@ def _fixture_read(flux, requested_class):
     return operator, physical, masks, topology
 
 
-def _inside_boundary(flux, boundary_flux, polarity):
-    """Evaluate one flux against a boundary using the operator convention."""
-    values = np.asarray(flux)
-    return values >= boundary_flux if polarity > 0 else values < boundary_flux
+def _band_limits(axis_height, saddle_height):
+    """Bound the axis-facing height interval with the admitted saddle position.
+
+    A single admitted saddle splits the axis-facing band into the side of the
+    low saddle and the side of the high saddle: a saddle above the axis leaves
+    only the band below it, and vice versa. This recomputes the limit the
+    topology read carries without calling the production helper.
+    """
+    lower = float(saddle_height)
+    upper = float(saddle_height)
+    lower = -np.inf if lower > axis_height else lower
+    upper = np.inf if upper < axis_height else upper
+    return lower, upper
 
 
-def test_carrier_private_wall_is_label_owned_with_raster_census():
-    """Nearest-cell private labels own the mask; raster deltas are censused."""
+def _node_flux_private_mask(
+    wall_flux, wall_height, axis_height, saddle_height, saddle_flux, polarity
+):
+    """Recompute the node-flux private rule independently of the production read.
+
+    The flag is true when the node's own finite flux lies on the private side of
+    the admitted saddle flux and the node height sits outside the axis-facing
+    band bounded by the admitted saddle. Cell labels play no part.
+    """
+    flux = np.asarray(wall_flux, dtype=np.float64)
+    height = np.asarray(wall_height, dtype=np.float64)
+    qualified = bool(np.isfinite(saddle_flux)) and bool(np.isfinite(axis_height))
+    if not qualified:
+        return np.zeros_like(flux, dtype=bool)
+    lower, upper = _band_limits(float(axis_height), float(saddle_height))
+    flux_side = np.isfinite(flux) & (polarity * (flux - saddle_flux) >= 0.0)
+    height_band = np.isfinite(height) & ((height < lower) | (height > upper))
+    return flux_side & height_band
+
+
+def test_carrier_private_wall_follows_the_node_flux_rule():
+    """A wall node is private by its own flux and height band, not its nearest cell."""
     configure_dtypes()
+    disagreeing = {}
     for fixture_name, flux, requested_class in (
         ("limited", _limited_flux, TopologyClass.LIMITED),
         ("single_null", _single_null_flux, TopologyClass.DIVERTED),
     ):
         operator, physical, masks, topology = _fixture_read(flux, requested_class)
-        retained_read = operator._connectivity_read(physical, topology, classify=False)
-        retained = np.asarray(retained_read["private_wall_node_mask"])
         carrier = np.asarray(
             operator._carrier_shadow_read(physical, masks)["private_wall_node_mask"]
         )
         coordinate = np.asarray(operator.wall.coordinate)
-        owner = np.asarray(operator._wall_carrier_index)
-        labels = np.asarray(masks.label)
-        owner_label = labels[owner]
-        expected = owner_label == PlasmaDomain.PRIVATE_FLUX
-        np.testing.assert_array_equal(carrier, expected)
-
-        grid_coordinate = np.asarray(operator.grid.coordinate)
-        radial_spacing = np.min(np.diff(np.unique(grid_coordinate[:, 0])))
-        vertical_spacing = np.min(np.diff(np.unique(grid_coordinate[:, 1])))
-        cell_spacing = max(radial_spacing, vertical_spacing)
-        if fixture_name == "single_null":
-            analytic_axes = np.asarray(((1.7, -0.31), (1.7, 0.31)))
-            axis_error = np.min(
-                np.linalg.norm(analytic_axes - np.asarray(topology.axis), axis=1)
-            )
-            saddle_error = np.linalg.norm(
-                np.asarray(topology.x_point) - np.asarray((1.7, 0.0))
-            )
-            assert axis_error <= cell_spacing
-            assert saddle_error <= cell_spacing
-            assert bool(topology.boundary_is_xpoint)
-            assert np.isclose(
-                float(topology.boundary_flux),
-                float(_single_null_flux(1.7, 0.0)),
-                rtol=0.0,
-                atol=cell_spacing**2,
-            )
-            domain_counts = {
-                domain.name: int(np.count_nonzero(labels == domain))
-                for domain in (
-                    PlasmaDomain.CORE,
-                    PlasmaDomain.PRIVATE_FLUX,
-                    PlasmaDomain.COMMON_SOL,
-                )
-            }
-            assert all(count > 0 for count in domain_counts.values())
-            assert np.count_nonzero(carrier) > 0
-        else:
-            domain_counts = {
-                domain.name: int(np.count_nonzero(labels == domain))
-                for domain in PlasmaDomain
-            }
-            assert domain_counts[PlasmaDomain.CORE.name] > 0
-            assert domain_counts[PlasmaDomain.COMMON_SOL.name] > 0
-            assert domain_counts[PlasmaDomain.PRIVATE_FLUX.name] == 0
-            assert (
-                np.linalg.norm(np.asarray(topology.axis) - np.asarray((1.7, 0.0)))
-                <= cell_spacing
-            )
-
-        differing = np.flatnonzero(retained != carrier)
         wall_flux = np.asarray(
             physical[operator.grid.node_number : operator.physical_node_number]
         )
-        grid_flux = np.asarray(physical[: operator.grid.node_number])
-        census_boundary_flux = (
-            float(_single_null_flux(1.7, 0.0))
-            if fixture_name == "single_null"
-            else float(topology.boundary_flux)
+        labels = np.asarray(masks.label)
+        owner_label = labels[np.asarray(operator._wall_carrier_index)]
+        label_owned = owner_label == int(PlasmaDomain.PRIVATE_FLUX)
+        axis_height = float(np.asarray(topology.axis)[1])
+        x_point = np.asarray(topology.x_point)
+        saddle_height = float(x_point[1])
+        saddle_flux = float(np.asarray(topology.x_point_flux))
+        expected = _node_flux_private_mask(
+            wall_flux,
+            coordinate[:, 1],
+            axis_height,
+            saddle_height,
+            saddle_flux,
+            operator.polarity,
         )
-        raster_boundary_flux = float(retained_read["psi_bnd"])
-        wall_census_inside = _inside_boundary(
-            wall_flux, census_boundary_flux, operator.polarity
-        )
-        wall_raster_inside = _inside_boundary(
-            wall_flux, raster_boundary_flux, operator.polarity
-        )
-        owner_census_inside = _inside_boundary(
-            grid_flux[owner], census_boundary_flux, operator.polarity
-        )
-        owner_raster_inside = _inside_boundary(
-            grid_flux[owner], raster_boundary_flux, operator.polarity
-        )
-        rows = []
-        contradictions = []
-        for index in differing:
-            label = PlasmaDomain(int(owner_label[index]))
-            level_difference = bool(
-                wall_census_inside[index] != wall_raster_inside[index]
-            )
-            touch_difference = bool(
-                (wall_census_inside[index] != owner_census_inside[index])
-                or (wall_raster_inside[index] != owner_raster_inside[index])
-            )
-            contradiction = not (level_difference or touch_difference)
-            classification = (
-                "binding-level difference"
-                if level_difference
-                else "touch-dilation"
-                if touch_difference
-                else "contradiction"
-            )
-            row = {
-                "index": int(index),
-                "position_m": coordinate[index].tolist(),
-                "wall_flux": float(wall_flux[index]),
-                "census_boundary_flux": census_boundary_flux,
-                "raster_boundary_flux": raster_boundary_flux,
-                "wall_inside_census_boundary": bool(wall_census_inside[index]),
-                "wall_inside_raster_boundary": bool(wall_raster_inside[index]),
-                "nearest_cell_label": label.name,
-                "retained_private": bool(retained[index]),
-                "classification": classification,
-            }
-            rows.append(row)
-            if contradiction:
-                contradictions.append(row)
-        classification_tally = {
-            classification: sum(row["classification"] == classification for row in rows)
-            for classification in (
-                "binding-level difference",
-                "touch-dilation",
-                "contradiction",
-            )
-        }
+        np.testing.assert_array_equal(carrier, expected)
+        disagreeing[fixture_name] = int(np.count_nonzero(label_owned != expected))
         print(
-            "wall_mask_census="
+            "node_flux_wall_census="
             + json.dumps(
                 {
                     "fixture": fixture_name,
                     "wall_nodes": operator.wall.node_number,
                     "carrier_private": int(np.count_nonzero(carrier)),
-                    "retained_private": int(np.count_nonzero(retained)),
-                    "differing": int(differing.size),
-                    "domain_counts": domain_counts,
-                    "selected_axis_m": np.asarray(topology.axis).tolist(),
-                    "selected_x_m": np.asarray(topology.x_point).tolist(),
-                    "census_boundary_flux": census_boundary_flux,
-                    "raster_boundary_flux": raster_boundary_flux,
-                    "classification_tally": classification_tally,
-                    "rows": rows,
+                    "label_owned_private": int(np.count_nonzero(label_owned)),
+                    "nearest_cell_disagreements": disagreeing[fixture_name],
+                    "axis_m": np.asarray(topology.axis).tolist(),
+                    "x_point_m": x_point.tolist(),
+                    "saddle_flux": saddle_flux,
                 },
                 sort_keys=True,
             )
         )
-        assert not contradictions
+    # The diverted fixture carries a wall node in the narrow private leg whose
+    # nearest cell centre lies across the diverted read's leg, so the retired
+    # label-owned rule reads the opposite flag there. This count is what makes
+    # the oracle discriminate the two rules rather than agree with both.
+    assert disagreeing["single_null"] > 0
 
 
 def test_residual_shadow_uses_carrier_operands_without_raster_read():

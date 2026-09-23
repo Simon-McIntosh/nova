@@ -959,6 +959,54 @@ remove the draw_wall call applied and the wall assertion failing) and the census
 <code>uv</code> on the compute node. The gate <code>tests/test_sol_ledger_render.py</code> is the only file that
 imports the changed driver, so no other test is affected; no failure was added against the base
 revision <code>e1f1239559</code>.</p>
+<section id="optional-extra-imports">
+  <h2>Optional-extra imports at module level across nova (2026-09-23)</h2>
+  <p>A package that only an optional extra of <code>pyproject.toml</code> provides is
+  absent from a default install, so a module-level import of it makes the
+  importing module unimportable without that extra. <code>benchmarks/optional_extra_import_census.py</code>
+  reads <code>[project.dependencies]</code> and <code>[project.optional-dependencies]</code>
+  from <code>pyproject.toml</code>, resolves each requirement's distribution name to the
+  import names it provides (from the installed environment via
+  <code>importlib.metadata.packages_distributions</code>), parses every module under
+  <code>nova/</code> with <code>ast</code>, and lists every module-level import whose
+  top-level package is provided by at least one extra and by no core dependency.</p>
+  <p>An import is module-level when it is reachable from the module body without
+  passing through a function or class body. Imports whose enclosing <code>try</code>
+  catches <code>ImportError</code> or <code>ModuleNotFoundError</code> are excluded: that
+  guard is the intended way to keep an extra optional. A module-level import under
+  <code>if TYPE_CHECKING:</code> is a module-level statement, so it is listed, but in a
+  separate table, because it is never executed and cannot break an import.</p>
+  <p><strong>Measure.</strong> 205 findings: 197 executed at import time and 8
+  annotation-only. <code>jax</code> (the <code>jax</code>/<code>gpu</code> extras) dominates the
+  executed set; the rest are <code>pandas</code> (<code>interchange</code>),
+  <code>matplotlib</code>/<code>mpl_toolkits</code> (<code>matplotlib</code>),
+  <code>vedo</code>/<code>pyvista</code>/<code>meshio</code>/<code>trimesh</code>/<code>sklearn</code>
+  (<code>test</code>/<code>viz</code>/<code>mast</code>), <code>bokeh</code> (<code>bokeh</code>),
+  <code>bs4</code>/<code>mechanize</code> (<code>naka</code>),
+  <code>CoolProp</code>/<code>fitz</code>/<code>regex</code>/<code>ftputil</code>/<code>nlopt</code>
+  (<code>thermofluids</code>), <code>networkx</code> and <code>pytest</code> (<code>test</code>).
+  13 imports are excluded as guarded. Every core distribution resolved to its import
+  names from the installed environment, so no requirement fell back to a normalised
+  name; the self-reference <code>nova-stella[jax,transport]</code> in the <code>test</code>
+  extra is skipped rather than read as an extra-provided package.</p>
+  <p><strong>Positive control.</strong> <code>nova/geometry/section.py:8</code> <code>import vedo</code>
+  is a known un-guarded module-level import of the <code>test</code>/<code>viz</code> extras and is
+  listed; the script exits nonzero if the control is absent, so a clean report cannot
+  come from a broken scan. <strong>Negative control.</strong> A synthetic module carrying
+  <code>try: import vedo / except ImportError</code> reads as guarded (excluded); mutating the
+  same source's handler to <code>except ValueError</code> moves the same import to reported.
+  The control log's first line states that mutation.</p>
+  <p>Artifacts, all under <code>docs/figures/forward-solve-api/optional-extra-imports/</code>:
+  <a href="/nova/figures/forward-solve-api/optional-extra-imports/report.md">report.md</a>
+  (findings table, type-checking-only table, positive control, extra-only package list),
+  <code>report.json</code> (the same rows with <code>module</code>, <code>line</code>,
+  <code>package</code>, <code>extras</code>, <code>guarded</code> and
+  <code>annotation_only</code>), <code>census.log</code> (the run transcript) and
+  <code>negative-control.log</code>. No figure is published: the census is a module/line/
+  package table, which the representation rule keeps as a table rather than an image.
+  No file under <code>nova/</code> changes. Gate command:
+  <code>python benchmarks/optional_extra_import_census.py</code>, exit 0 with the positive
+  control found. Verifying the merged result belongs to a separately dispatched test node.</p>
 </section>
 <section id="section-imports-without-vedo">
 <h2>A section imports without the viz extra (2026-09-23)</h2>

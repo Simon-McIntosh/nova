@@ -111,7 +111,6 @@ def measure_pair(case_name, requested, output):
     from matplotlib.path import Path as PolygonPath
     from benchmarks import solovev_certificate as certificate
     from nova.equilibrium.forward_operator import set_support_clip_mode
-    from nova.equilibrium.topology import TopologyClass
     from scripts.analytic_oracle_fixtures import measure as fixture
 
     assert jax.default_backend() == "gpu", "physical gate requires a GPU"
@@ -130,11 +129,8 @@ def measure_pair(case_name, requested, output):
     target, _, current_receipt = certificate._closed_form_current_target(
         case_name, source, operator, physical
     )
-    requested_class = int(
-        TopologyClass.DIVERTED
-        if certificate._is_diverted_case(case_name)
-        else TopologyClass.LIMITED
-    )
+    # The certificate's explicit seed supplies no requested topology class.
+    requested_class = None
     analytic_coefficients = operator.coupling_current_moments(physical)
     analytic_plasma = np.asarray(operator.current_moment_image(analytic_coefficients))
     analytic_external = analytic - analytic_plasma

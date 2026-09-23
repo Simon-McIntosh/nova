@@ -1,0 +1,28 @@
+{
+  "revision": "2e38dc877",
+  "case": "weak-rotation-reactor-static",
+  "arm": "default_policy",
+  "status": "not-measured",
+  "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/__init__.py",
+  "exception": "Cancelled by coordinator during the solve; job 1276177 ended CANCELLED, batch exit 0:15.",
+  "harness_sha256": "a9c991e58045b02e8d16c0f99fd5e2e1a04217ddd9fcbaa102037122f046888f",
+  "full_revision": "2e38dc87702f4ebaa594da2f809daf960b176acc",
+  "realised_cells": 135,
+  "reference_nulls": {
+    "axis_rz_m": [
+      6.194958772632181,
+      0.00013499785829806932
+    ],
+    "x_point_rz_m": null,
+    "qualified_saddles_rz_m": [],
+    "retained_count": [
+      3,
+      0
+    ],
+    "axis_flux_wb": 49.94187078939037,
+    "boundary_flux_wb": 1.1345091532888318e-15
+  },
+  "diagnostic_census_input": "null_flux_pool",
+  "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/2e38dc877-weak-rotation-reactor-static.log",
+  "exit_status": 143
+}

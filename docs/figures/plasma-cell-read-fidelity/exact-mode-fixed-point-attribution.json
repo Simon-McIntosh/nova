@@ -141,127 +141,6 @@
     },
     {
       "revision": "b43714114",
-      "case": "diverted-single-null",
-      "arm": "forced_one_trip",
-      "status": "measured",
-      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/b43714114/nova/__init__.py",
-      "exception": null,
-      "harness_sha256": "a9c991e58045b02e8d16c0f99fd5e2e1a04217ddd9fcbaa102037122f046888f",
-      "full_revision": "b4371411497eee506f426bd2fe5785dc88a82095",
-      "realised_cells": 132,
-      "reference_nulls": {
-        "axis_rz_m": [
-          1.781975332623947,
-          0.04649427898753031
-        ],
-        "x_point_rz_m": null,
-        "qualified_saddles_rz_m": [],
-        "retained_count": [
-          1,
-          0
-        ],
-        "axis_flux_wb": 0.005726884222302376,
-        "boundary_flux_wb": 0.0010033077606710562
-      },
-      "diagnostic_census_input": "native_grid_flux",
-      "active_set_budget": 1,
-      "residual": 0.2586805230398537,
-      "converged": false,
-      "qualified": false,
-      "trip_count": 1,
-      "per_trip_residual_history": [
-        {
-          "trip": 1,
-          "residual": 0.2586805230398537
-        }
-      ],
-      "terminal_axis_rz_m": [
-        1.7686096156608269,
-        0.011414034774499052
-      ],
-      "terminal_x_point_rz_m": null,
-      "reference_axis_rz_m": [
-        1.781975332623947,
-        0.04649427898753031
-      ],
-      "reference_x_point_rz_m": null,
-      "x_point_distance_m": null,
-      "x_point_distance_status": "no_admitted_reference_saddle",
-      "certificate_position_bound_m": 0.15145387287104764,
-      "certificate_residual_bound": 1e-12,
-      "jax_platform": "gpu",
-      "nulls": {
-        "axis_rz_m": [
-          1.7686096156608269,
-          0.011414034774499052
-        ],
-        "x_point_rz_m": null,
-        "qualified_saddles_rz_m": [],
-        "retained_count": [
-          1,
-          0
-        ],
-        "axis_flux_wb": 0.009246574467088228,
-        "boundary_flux_wb": 0.0002450122265028761
-      },
-      "termination_reason": 8,
-      "resolved_defaults": {
-        "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
-        "policy": {
-          "route": "newton_krylov",
-          "newton_steps": 10,
-          "gmres_iterations": 30,
-          "warmup": 0,
-          "relaxation": 0.5,
-          "step_cap": 10.0,
-          "active_set_steps": 1,
-          "kernel_tolerance": 1e-12,
-          "qualification_tolerance": 1e-12,
-          "current_pin": true,
-          "settled_exit": true,
-          "own_mask_acceptance": true,
-          "continuation": true,
-          "best_iterate_retention": true,
-          "stagnation_stop": true,
-          "exact_kernels": true,
-          "cached_machine": true,
-          "compilation_cache": true
-        },
-        "deviations": {
-          "active_set_steps": 1,
-          "kernel_tolerance": 1e-12,
-          "qualification_tolerance": 1e-12
-        },
-        "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
-      },
-      "wall_seconds": 590.7422629659995,
-      "compilation_cache_hit": false,
-      "terminal_residual": 0.2586805230398537,
-      "wall_units": [
-        [
-          0,
-          121,
-          true,
-          "vessel"
-        ]
-      ],
-      "state_file": "b43714114-diverted-single-null-one-trip.npz",
-      "moment_diagnostic": {
-        "cut_cell_capacity": 132,
-        "selected_cut_cell_count": 44,
-        "cut_cell_capacity_overflow": false,
-        "capacity_receipt": "recomputed operator integrator predicate: cut_count > capacity",
-        "clipped_support_current_moments_finite": true,
-        "operator_current_moments_finite": true,
-        "moment_calls": 1
-      },
-      "convergence_refusal": "converged assertion refused: forced_one_trip residual=0.25868052304 converged=False trips=1",
-      "total_wall_seconds": 631.5110642788932,
-      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/b43714114-diverted-single-null-one-trip.log",
-      "exit_status": 0
-    },
-    {
-      "revision": "b43714114",
       "case": "weak-rotation-reactor-static",
       "arm": "default_policy",
       "status": "measured",
@@ -386,18 +265,440 @@
       "total_wall_seconds": 753.5582553856075,
       "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/b43714114-weak-rotation-reactor-static.log",
       "exit_status": 0
+    },
+    {
+      "revision": "08dd0dda1",
+      "case": "diverted-single-null",
+      "arm": "default_policy",
+      "status": "not-measured",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/__init__.py",
+      "exception": "Traceback (most recent call last):\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/benchmarks/plasma_cell_fixed_point_attribution.py\", line 190, in arm\n    measurement, terminal = driver._arm(\n                            ~~~~~~~~~~~^\n        profile,\n        ^^^^^^^^\n    ...<4 lines>...\n        row[\"arm\"],\n        ^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-terminal-state-is-one-trip/benchmarks/plasma_cell_terminal_state.py\", line 159, in _arm\n    receipt = profile.solve(request)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 2689, in solve\n    return self._solve_request(initial_flux)\n           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 2289, in _solve_request\n    return self._solve_imposed_request(request)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 2492, in _solve_imposed_request\n    equilibrium = active.solve(\n        initial_flux,\n    ...<11 lines>...\n        **policy.kernel_options(),\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 2741, in solve\n    equilibrium = self._solve_accelerated(\n        route,\n    ...<5 lines>...\n        **resolved_options,\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 1881, in _solve_accelerated\n    return self._receipt(\n           ~~~~~~~~~~~~~^\n        history.state,\n        ^^^^^^^^^^^^^^\n    ...<4 lines>...\n        prescribed_current,\n        ^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 1685, in _receipt\n    labelled_flux=self._labelled_flux(flux, masks, topology),\n                  ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 1502, in _labelled_flux\n    secondary_x_point=self._secondary_x_point(flux, topology),\n                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 1373, in _secondary_x_point\n    _o_candidates, x_candidates = self.operator._fixed_design_topology.grid(\n                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        grid_flux\n        ^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward_operator.py\", line 1565, in __call__\n    return self.read_census(psi)[0]\n           ~~~~~~~~~~~~~~~~^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward_operator.py\", line 1540, in read_census\n    census = self.candidate_census(psi)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward_operator.py\", line 1515, in candidate_census\n    raise ValueError(\n        \"own-node null census requires the direct sampling flux values\"\n    )\nValueError: own-node null census requires the direct sampling flux values\n--------------------\nFor simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.\n",
+      "harness_sha256": "a9c991e58045b02e8d16c0f99fd5e2e1a04217ddd9fcbaa102037122f046888f",
+      "full_revision": "08dd0dda16ac938205753234f06a53f4e194dca2",
+      "realised_cells": 132,
+      "reference_nulls": {
+        "axis_rz_m": [
+          1.7869104924134618,
+          0.046151482164328565
+        ],
+        "x_point_rz_m": [
+          1.4930225591761932,
+          -1.0188319093078109
+        ],
+        "qualified_saddles_rz_m": [
+          [
+            1.5107863810710611,
+            -1.0275005315610446
+          ],
+          [
+            1.4930225591761932,
+            -1.0188319093078109
+          ],
+          [
+            1.506509523756129,
+            -1.000151395931814
+          ]
+        ],
+        "retained_count": [
+          1,
+          3
+        ],
+        "axis_flux_wb": 0.005713819178329534,
+        "boundary_flux_wb": 1.36164443532494e-05
+      },
+      "diagnostic_census_input": "_null_flux_pool",
+      "total_wall_seconds": 853.9891068935394,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/08dd0dda1-diverted-single-null.log",
+      "exit_status": 1
+    },
+    {
+      "revision": "08dd0dda1",
+      "case": "weak-rotation-reactor-static",
+      "arm": "default_policy",
+      "status": "not-measured",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/__init__.py",
+      "exception": "Traceback (most recent call last):\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/benchmarks/plasma_cell_fixed_point_attribution.py\", line 190, in arm\n    measurement, terminal = driver._arm(\n                            ~~~~~~~~~~~^\n        profile,\n        ^^^^^^^^\n    ...<4 lines>...\n        row[\"arm\"],\n        ^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-terminal-state-is-one-trip/benchmarks/plasma_cell_terminal_state.py\", line 159, in _arm\n    receipt = profile.solve(request)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 2689, in solve\n    return self._solve_request(initial_flux)\n           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 2289, in _solve_request\n    return self._solve_imposed_request(request)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 2492, in _solve_imposed_request\n    equilibrium = active.solve(\n        initial_flux,\n    ...<11 lines>...\n        **policy.kernel_options(),\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 2741, in solve\n    equilibrium = self._solve_accelerated(\n        route,\n    ...<5 lines>...\n        **resolved_options,\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 1881, in _solve_accelerated\n    return self._receipt(\n           ~~~~~~~~~~~~~^\n        history.state,\n        ^^^^^^^^^^^^^^\n    ...<4 lines>...\n        prescribed_current,\n        ^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 1685, in _receipt\n    labelled_flux=self._labelled_flux(flux, masks, topology),\n                  ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 1502, in _labelled_flux\n    secondary_x_point=self._secondary_x_point(flux, topology),\n                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward.py\", line 1373, in _secondary_x_point\n    _o_candidates, x_candidates = self.operator._fixed_design_topology.grid(\n                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        grid_flux\n        ^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward_operator.py\", line 1565, in __call__\n    return self.read_census(psi)[0]\n           ~~~~~~~~~~~~~~~~^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward_operator.py\", line 1540, in read_census\n    census = self.candidate_census(psi)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/08dd0dda1/nova/equilibrium/forward_operator.py\", line 1515, in candidate_census\n    raise ValueError(\n        \"own-node null census requires the direct sampling flux values\"\n    )\nValueError: own-node null census requires the direct sampling flux values\n--------------------\nFor simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.\n",
+      "harness_sha256": "a9c991e58045b02e8d16c0f99fd5e2e1a04217ddd9fcbaa102037122f046888f",
+      "full_revision": "08dd0dda16ac938205753234f06a53f4e194dca2",
+      "realised_cells": 135,
+      "reference_nulls": {
+        "axis_rz_m": [
+          6.194958772632181,
+          0.00013499785829806932
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          3,
+          0
+        ],
+        "axis_flux_wb": 49.94187078939037,
+        "boundary_flux_wb": 1.1345091532888318e-15
+      },
+      "diagnostic_census_input": "_null_flux_pool",
+      "total_wall_seconds": 768.1738169044256,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/08dd0dda1-weak-rotation-reactor-static.log",
+      "exit_status": 1
+    },
+    {
+      "revision": "ee17f9570",
+      "case": "diverted-single-null",
+      "arm": "default_policy",
+      "status": "not-measured",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/__init__.py",
+      "exception": "Traceback (most recent call last):\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/benchmarks/plasma_cell_fixed_point_attribution.py\", line 190, in arm\n    measurement, terminal = driver._arm(\n                            ~~~~~~~~~~~^\n        profile,\n        ^^^^^^^^\n    ...<4 lines>...\n        row[\"arm\"],\n        ^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-terminal-state-is-one-trip/benchmarks/plasma_cell_terminal_state.py\", line 159, in _arm\n    receipt = profile.solve(request)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 2689, in solve\n    return self._solve_request(initial_flux)\n           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 2289, in _solve_request\n    return self._solve_imposed_request(request)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 2492, in _solve_imposed_request\n    equilibrium = active.solve(\n        initial_flux,\n    ...<11 lines>...\n        **policy.kernel_options(),\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 2741, in solve\n    equilibrium = self._solve_accelerated(\n        route,\n    ...<5 lines>...\n        **resolved_options,\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 1881, in _solve_accelerated\n    return self._receipt(\n           ~~~~~~~~~~~~~^\n        history.state,\n        ^^^^^^^^^^^^^^\n    ...<4 lines>...\n        prescribed_current,\n        ^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 1685, in _receipt\n    labelled_flux=self._labelled_flux(flux, masks, topology),\n                  ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 1502, in _labelled_flux\n    secondary_x_point=self._secondary_x_point(flux, topology),\n                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 1373, in _secondary_x_point\n    _o_candidates, x_candidates = self.operator._fixed_design_topology.grid(\n                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        grid_flux\n        ^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward_operator.py\", line 1567, in __call__\n    return self.read_census(psi)[0]\n           ~~~~~~~~~~~~~~~~^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward_operator.py\", line 1542, in read_census\n    census = self.candidate_census(psi)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward_operator.py\", line 1517, in candidate_census\n    raise ValueError(\n        \"own-node null census requires the direct sampling flux values\"\n    )\nValueError: own-node null census requires the direct sampling flux values\n--------------------\nFor simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.\n",
+      "harness_sha256": "a9c991e58045b02e8d16c0f99fd5e2e1a04217ddd9fcbaa102037122f046888f",
+      "full_revision": "ee17f9570d5cca3184729f5d260b2bd77c90db2b",
+      "realised_cells": 132,
+      "reference_nulls": {
+        "axis_rz_m": [
+          1.7869104924134618,
+          0.046151482164328565
+        ],
+        "x_point_rz_m": [
+          1.4930225591761932,
+          -1.0188319093078109
+        ],
+        "qualified_saddles_rz_m": [
+          [
+            1.5107863810710611,
+            -1.0275005315610446
+          ],
+          [
+            1.4930225591761932,
+            -1.0188319093078109
+          ],
+          [
+            1.506509523756129,
+            -1.000151395931814
+          ]
+        ],
+        "retained_count": [
+          1,
+          3
+        ],
+        "axis_flux_wb": 0.005713819178329534,
+        "boundary_flux_wb": 1.36164443532494e-05
+      },
+      "diagnostic_census_input": "null_flux_pool",
+      "total_wall_seconds": 841.4467937201262,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/ee17f9570-diverted-single-null.log",
+      "exit_status": 1
+    },
+    {
+      "revision": "ee17f9570",
+      "case": "weak-rotation-reactor-static",
+      "arm": "default_policy",
+      "status": "not-measured",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/__init__.py",
+      "exception": "Traceback (most recent call last):\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/benchmarks/plasma_cell_fixed_point_attribution.py\", line 190, in arm\n    measurement, terminal = driver._arm(\n                            ~~~~~~~~~~~^\n        profile,\n        ^^^^^^^^\n    ...<4 lines>...\n        row[\"arm\"],\n        ^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-terminal-state-is-one-trip/benchmarks/plasma_cell_terminal_state.py\", line 159, in _arm\n    receipt = profile.solve(request)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 2689, in solve\n    return self._solve_request(initial_flux)\n           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 2289, in _solve_request\n    return self._solve_imposed_request(request)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 2492, in _solve_imposed_request\n    equilibrium = active.solve(\n        initial_flux,\n    ...<11 lines>...\n        **policy.kernel_options(),\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 2741, in solve\n    equilibrium = self._solve_accelerated(\n        route,\n    ...<5 lines>...\n        **resolved_options,\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 1881, in _solve_accelerated\n    return self._receipt(\n           ~~~~~~~~~~~~~^\n        history.state,\n        ^^^^^^^^^^^^^^\n    ...<4 lines>...\n        prescribed_current,\n        ^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 1685, in _receipt\n    labelled_flux=self._labelled_flux(flux, masks, topology),\n                  ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 1502, in _labelled_flux\n    secondary_x_point=self._secondary_x_point(flux, topology),\n                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward.py\", line 1373, in _secondary_x_point\n    _o_candidates, x_candidates = self.operator._fixed_design_topology.grid(\n                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        grid_flux\n        ^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward_operator.py\", line 1567, in __call__\n    return self.read_census(psi)[0]\n           ~~~~~~~~~~~~~~~~^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward_operator.py\", line 1542, in read_census\n    census = self.candidate_census(psi)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/ee17f9570/nova/equilibrium/forward_operator.py\", line 1517, in candidate_census\n    raise ValueError(\n        \"own-node null census requires the direct sampling flux values\"\n    )\nValueError: own-node null census requires the direct sampling flux values\n--------------------\nFor simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.\n",
+      "harness_sha256": "a9c991e58045b02e8d16c0f99fd5e2e1a04217ddd9fcbaa102037122f046888f",
+      "full_revision": "ee17f9570d5cca3184729f5d260b2bd77c90db2b",
+      "realised_cells": 135,
+      "reference_nulls": {
+        "axis_rz_m": [
+          6.194958772632181,
+          0.00013499785829806932
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          3,
+          0
+        ],
+        "axis_flux_wb": 49.94187078939037,
+        "boundary_flux_wb": 1.1345091532888318e-15
+      },
+      "diagnostic_census_input": "null_flux_pool",
+      "total_wall_seconds": 727.3345304382965,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/ee17f9570-weak-rotation-reactor-static.log",
+      "exit_status": 1
+    },
+    {
+      "revision": "2e38dc877",
+      "case": "diverted-single-null",
+      "arm": "default_policy",
+      "status": "not-measured",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/__init__.py",
+      "exception": "Traceback (most recent call last):\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/benchmarks/plasma_cell_fixed_point_attribution.py\", line 190, in arm\n    measurement, terminal = driver._arm(\n                            ~~~~~~~~~~~^\n        profile,\n        ^^^^^^^^\n    ...<4 lines>...\n        row[\"arm\"],\n        ^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-terminal-state-is-one-trip/benchmarks/plasma_cell_terminal_state.py\", line 159, in _arm\n    receipt = profile.solve(request)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/equilibrium/forward.py\", line 2689, in solve\n    return self._solve_request(initial_flux)\n           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/equilibrium/forward.py\", line 2289, in _solve_request\n    return self._solve_imposed_request(request)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/equilibrium/forward.py\", line 2492, in _solve_imposed_request\n    equilibrium = active.solve(\n        initial_flux,\n    ...<11 lines>...\n        **policy.kernel_options(),\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/equilibrium/forward.py\", line 2741, in solve\n    equilibrium = self._solve_accelerated(\n        route,\n    ...<5 lines>...\n        **resolved_options,\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/equilibrium/forward.py\", line 1881, in _solve_accelerated\n    return self._receipt(\n           ~~~~~~~~~~~~~^\n        history.state,\n        ^^^^^^^^^^^^^^\n    ...<4 lines>...\n        prescribed_current,\n        ^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/equilibrium/forward.py\", line 1685, in _receipt\n    labelled_flux=self._labelled_flux(flux, masks, topology),\n                  ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/equilibrium/forward.py\", line 1502, in _labelled_flux\n    secondary_x_point=self._secondary_x_point(flux, topology),\n                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/equilibrium/forward.py\", line 1373, in _secondary_x_point\n    _o_candidates, x_candidates = self.operator._fixed_design_topology.grid(\n                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        grid_flux\n        ^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/equilibrium/forward_operator.py\", line 1571, in __call__\n    return self.read_census(psi)[0]\n           ~~~~~~~~~~~~~~~~^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/equilibrium/forward_operator.py\", line 1546, in read_census\n    census = self.candidate_census(psi)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/equilibrium/forward_operator.py\", line 1521, in candidate_census\n    raise ValueError(\n        \"own-node null census requires the direct sampling flux values\"\n    )\nValueError: own-node null census requires the direct sampling flux values\n--------------------\nFor simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.\n",
+      "harness_sha256": "a9c991e58045b02e8d16c0f99fd5e2e1a04217ddd9fcbaa102037122f046888f",
+      "full_revision": "2e38dc87702f4ebaa594da2f809daf960b176acc",
+      "realised_cells": 132,
+      "reference_nulls": {
+        "axis_rz_m": [
+          1.7869104924134618,
+          0.046151482164328565
+        ],
+        "x_point_rz_m": [
+          1.4930225591761932,
+          -1.0188319093078109
+        ],
+        "qualified_saddles_rz_m": [
+          [
+            1.5107863810710611,
+            -1.0275005315610446
+          ],
+          [
+            1.4930225591761932,
+            -1.0188319093078109
+          ],
+          [
+            1.506509523756129,
+            -1.000151395931814
+          ]
+        ],
+        "retained_count": [
+          1,
+          3
+        ],
+        "axis_flux_wb": 0.005713819178329534,
+        "boundary_flux_wb": 1.361644435324944e-05
+      },
+      "diagnostic_census_input": "null_flux_pool",
+      "total_wall_seconds": 812.2275209315121,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/2e38dc877-diverted-single-null.log",
+      "exit_status": 1
+    },
+    {
+      "revision": "2e38dc877",
+      "case": "weak-rotation-reactor-static",
+      "arm": "default_policy",
+      "status": "not-measured",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/2e38dc877/nova/__init__.py",
+      "exception": "Cancelled by coordinator during the solve; job 1276177 ended CANCELLED, batch exit 0:15.",
+      "harness_sha256": "a9c991e58045b02e8d16c0f99fd5e2e1a04217ddd9fcbaa102037122f046888f",
+      "full_revision": "2e38dc87702f4ebaa594da2f809daf960b176acc",
+      "realised_cells": 135,
+      "reference_nulls": {
+        "axis_rz_m": [
+          6.194958772632181,
+          0.00013499785829806932
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          3,
+          0
+        ],
+        "axis_flux_wb": 49.94187078939037,
+        "boundary_flux_wb": 1.1345091532888318e-15
+      },
+      "diagnostic_census_input": "null_flux_pool",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/2e38dc877-weak-rotation-reactor-static.log",
+      "exit_status": 143
+    },
+    {
+      "revision": "337eb81ee",
+      "case": "diverted-single-null",
+      "arm": "default_policy",
+      "status": "not-run",
+      "reason": "Revision ladder cancelled by coordinator after its converged-baseline premise was falsified; redirected to construction comparison."
+    },
+    {
+      "revision": "337eb81ee",
+      "case": "weak-rotation-reactor-static",
+      "arm": "default_policy",
+      "status": "not-run",
+      "reason": "Revision ladder cancelled by coordinator after its converged-baseline premise was falsified; redirected to construction comparison."
+    },
+    {
+      "revision": "23a8522b6",
+      "case": "diverted-single-null",
+      "arm": "default_policy",
+      "status": "not-run",
+      "reason": "Revision ladder cancelled by coordinator after its converged-baseline premise was falsified; redirected to construction comparison."
+    },
+    {
+      "revision": "23a8522b6",
+      "case": "weak-rotation-reactor-static",
+      "arm": "default_policy",
+      "status": "not-run",
+      "reason": "Revision ladder cancelled by coordinator after its converged-baseline premise was falsified; redirected to construction comparison."
+    },
+    {
+      "revision": "450bab78a",
+      "case": "diverted-single-null",
+      "arm": "default_policy",
+      "status": "not-run",
+      "reason": "Revision ladder cancelled by coordinator after its converged-baseline premise was falsified; redirected to construction comparison."
+    },
+    {
+      "revision": "450bab78a",
+      "case": "weak-rotation-reactor-static",
+      "arm": "default_policy",
+      "status": "not-run",
+      "reason": "Revision ladder cancelled by coordinator after its converged-baseline premise was falsified; redirected to construction comparison."
+    },
+    {
+      "revision": "a17431153",
+      "case": "diverted-single-null",
+      "arm": "default_policy",
+      "status": "not-run",
+      "reason": "Revision ladder cancelled by coordinator after its converged-baseline premise was falsified; redirected to construction comparison."
+    },
+    {
+      "revision": "a17431153",
+      "case": "weak-rotation-reactor-static",
+      "arm": "default_policy",
+      "status": "not-run",
+      "reason": "Revision ladder cancelled by coordinator after its converged-baseline premise was falsified; redirected to construction comparison."
+    },
+    {
+      "revision": "f5af729a9",
+      "case": "diverted-single-null",
+      "arm": "default_policy",
+      "status": "not-run",
+      "reason": "Revision ladder cancelled by coordinator after its converged-baseline premise was falsified; redirected to construction comparison."
+    },
+    {
+      "revision": "f5af729a9",
+      "case": "weak-rotation-reactor-static",
+      "arm": "default_policy",
+      "status": "not-run",
+      "reason": "Revision ladder cancelled by coordinator after its converged-baseline premise was falsified; redirected to construction comparison."
+    },
+    {
+      "revision": "b43714114",
+      "case": "diverted-single-null",
+      "arm": "forced_one_trip",
+      "status": "measured",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/b43714114/nova/__init__.py",
+      "exception": null,
+      "harness_sha256": "a9c991e58045b02e8d16c0f99fd5e2e1a04217ddd9fcbaa102037122f046888f",
+      "full_revision": "b4371411497eee506f426bd2fe5785dc88a82095",
+      "realised_cells": 132,
+      "reference_nulls": {
+        "axis_rz_m": [
+          1.781975332623947,
+          0.04649427898753031
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          1,
+          0
+        ],
+        "axis_flux_wb": 0.005726884222302376,
+        "boundary_flux_wb": 0.0010033077606710562
+      },
+      "diagnostic_census_input": "native_grid_flux",
+      "active_set_budget": 1,
+      "residual": 0.2586805230398537,
+      "converged": false,
+      "qualified": false,
+      "trip_count": 1,
+      "per_trip_residual_history": [
+        {
+          "trip": 1,
+          "residual": 0.2586805230398537
+        }
+      ],
+      "terminal_axis_rz_m": [
+        1.7686096156608269,
+        0.011414034774499052
+      ],
+      "terminal_x_point_rz_m": null,
+      "reference_axis_rz_m": [
+        1.781975332623947,
+        0.04649427898753031
+      ],
+      "reference_x_point_rz_m": null,
+      "x_point_distance_m": null,
+      "x_point_distance_status": "no_admitted_reference_saddle",
+      "certificate_position_bound_m": 0.15145387287104764,
+      "certificate_residual_bound": 1e-12,
+      "jax_platform": "gpu",
+      "nulls": {
+        "axis_rz_m": [
+          1.7686096156608269,
+          0.011414034774499052
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          1,
+          0
+        ],
+        "axis_flux_wb": 0.009246574467088228,
+        "boundary_flux_wb": 0.0002450122265028761
+      },
+      "termination_reason": 8,
+      "resolved_defaults": {
+        "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
+        "policy": {
+          "route": "newton_krylov",
+          "newton_steps": 10,
+          "gmres_iterations": 30,
+          "warmup": 0,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "active_set_steps": 1,
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12,
+          "current_pin": true,
+          "settled_exit": true,
+          "own_mask_acceptance": true,
+          "continuation": true,
+          "best_iterate_retention": true,
+          "stagnation_stop": true,
+          "exact_kernels": true,
+          "cached_machine": true,
+          "compilation_cache": true
+        },
+        "deviations": {
+          "active_set_steps": 1,
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12
+        },
+        "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+      },
+      "wall_seconds": 590.7422629659995,
+      "compilation_cache_hit": false,
+      "terminal_residual": 0.2586805230398537,
+      "wall_units": [
+        [
+          0,
+          121,
+          true,
+          "vessel"
+        ]
+      ],
+      "state_file": "b43714114-diverted-single-null-one-trip.npz",
+      "moment_diagnostic": {
+        "cut_cell_capacity": 132,
+        "selected_cut_cell_count": 44,
+        "cut_cell_capacity_overflow": false,
+        "capacity_receipt": "recomputed operator integrator predicate: cut_count > capacity",
+        "clipped_support_current_moments_finite": true,
+        "operator_current_moments_finite": true,
+        "moment_calls": 1
+      },
+      "convergence_refusal": "converged assertion refused: forced_one_trip residual=0.25868052304 converged=False trips=1",
+      "total_wall_seconds": 631.5110642788932,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/b43714114-diverted-single-null-one-trip.log",
+      "exit_status": 0
     }
   ],
   "attribution": {
     "diverted-single-null": {
-      "verdict": "incomplete_ladder",
+      "verdict": "nonconvergence_predates_ladder_window",
       "first_transition": null,
-      "complete": false
+      "complete": false,
+      "qualification": "Historical build failures and not-run arms are retained; no claim of an all-revision measurement."
     },
     "weak-rotation-reactor-static": {
-      "verdict": "incomplete_ladder",
+      "verdict": "nonconvergence_predates_ladder_window",
       "first_transition": null,
-      "complete": false
+      "complete": false,
+      "qualification": "Historical build failures and not-run arms are retained; no claim of an all-revision measurement."
     }
-  }
+  },
+  "status": "partial-ladder-cancelled",
+  "scheduler": {
+    "job_id": "1276177",
+    "state": "CANCELLED",
+    "elapsed": "01:54:09",
+    "batch_exit_status": "0:15"
+  },
+  "conclusion": "Nonconvergence is not introduced by a landing in this window: the analytic-hex construction is already unconverged at the first revision for both cases. The stored converged solovev certificate describes a different construction. This partial ladder does not claim outcomes for failed or unrun arms."
 }

@@ -323,6 +323,35 @@
     carries the counts, the control and the reduced-Newton run.
     This entry changes neither section state nor its followup.</p>
 
+    <h3 id="s3-single-site-krylov-vmap-exit">The Krylov request stream exits when every member is done</h3>
+    <p><code>_single_site_krylov</code> now serves its slots from a
+    <code>lax.while_loop</code> that exits at <code>DONE</code>, in place of the
+    83-slot scan with a cond around the operator. Under <code>vmap</code> the loop
+    runs until the last member finishes; unbatched, the slots and their order are unchanged. The
+    300-cell certificate program falls from 284,792 to <strong>261,735
+    instructions</strong>, with one qualified-step site (2,028).
+    <code>tests/test_single_site_krylov.py</code> counts applications through a host
+    callback: a width-2 batch whose members need 8 and 14 applies 28, and with the scan
+    restored it applies 36, so the test fails.</p>
+    <p><strong>The vmapped cost gate is not met.</strong> On one H200 job the width-16
+    dense step costs 0.01435 s against the per-site base's 0.00818 s (1.75&times;). The
+    restored scan costs 0.01656 s (1.99&times;), against slice 1's CPU reading of 1.240 s
+    and 0.086 s. On CPU, the exit loop is 1.58&times; and the restored scan 16.6&times;. In
+    that case every member needs all 83 applications, so the exit cannot shorten the loop.
+    The remaining excess comes from the while-loop batching rule: once the predicate is
+    per member, every slot selects the whole carry. A probe measures 74 ms with a batched
+    predicate against 41 ms with an unbatched one over 83 slots at width 16. Gating each
+    consumer behind an at-most-once loop made the H200 worse (2.26&times;) and was
+    withdrawn. Closing the gap needs the stream to keep an unbatched predicate under
+    <code>vmap</code>. The operator-boundary reading also fails its bound: the non-converged diverted rung's
+    terminal residual moves from 0.279485232201572 to 0.06325730373091486, although the
+    step is bitwise equal to the scan on 8 of 8 toy operators; the mechanism is not
+    yet named. <code>tests/test_fixed_point.py</code> passes 45 of 45 and
+    <code>tests/test_reduced_newton.py</code> shows the base's four failures. The
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#single-site-krylov-vmap-exit">detailed record</a>
+    carries the arms, the control and the tests. This entry changes neither section state
+    nor its followup.</p>
+
     <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>
     <p>Measured 2026-09-18: the pre-warm covers 3292 keys the lane never requests and none of the 1285 keys it
     does, so the lane's 1341 hits all came from that target's own earlier run on the same directory; a lane

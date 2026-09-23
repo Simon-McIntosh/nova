@@ -1574,6 +1574,75 @@ certificate terminal state is expected to move by the same order. Whether to
 re-base the certificate digest on the stream is a lead decision.</p>
 </section>
 
+<section id="single-site-krylov-vmap-exit">
+<h2>The Krylov request stream exits when every member is done</h2>
+<p>The solver change is in <code>nova/equilibrium/fixed_point.py</code>
+(<code>1f3d56a4f</code>, kept at <code>63a32bb4a</code>). <code>_single_site_krylov</code>
+now serves its slots from a <code>lax.while_loop</code> whose predicate is the
+machine not having reached <code>DONE</code>, in place of the 83-slot
+<code>lax.scan</code> with a <code>lax.cond</code> around the operator. Unbatched,
+the slots and their order are unchanged. Under <code>vmap</code>, the loop runs until
+the last member finishes, and the loop's select holds the carry of any member that
+has already finished. The <code>DONE</code> consumer, its zero request and the
+per-slot cond are gone, because the loop never serves a <code>DONE</code> slot.</p>
+<table><thead><tr><th>Width-16 vmapped step, dense 1529-square, 8 iterations</th><th>H200 (job 1276892)</th><th>CPU (job 1276891)</th></tr></thead><tbody>
+<tr><td>Slice-1 capacity scan (recorded, CPU job 1276452)</td><td>&mdash;</td><td>1.240 s against 0.086 s (14.3&times;)</td></tr>
+<tr><td>Restored scan, the negative control</td><td>0.01656 s against 0.00831 s (1.99&times;)</td><td>2.015 s against 0.1215 s (16.6&times;)</td></tr>
+<tr><td>Exit loop, at <code>63a32bb4a</code></td><td><strong>0.01435 s against 0.00818 s (1.75&times;)</strong></td><td>0.2047 s against 0.1296 s (1.58&times;)</td></tr>
+<tr><td>Exit loop with one at-most-once gate per consumer (<code>6179bf47a</code>, withdrawn)</td><td>0.01956 s against 0.00864 s (2.26&times;)</td><td>0.1389 s against 0.0801 s (1.73&times;)</td></tr>
+</tbody></table>
+<p>Each row pairs the arm with the per-site base, measured in the same
+process. <strong>The cost gate is not met</strong>: the exit loop costs 1.75 times
+the base on the H200. The loop cannot exit early in this case. Every member needs
+all 83 applications: the first four members count 83 each through a host
+callback, because GMRES(8) does not reach the 1e-5 tolerance within its 8
+restarts on this operator. So the whole gain comes from dropping the per-slot
+cond: a batched cond evaluated both branches and selected, and on CPU that cost
+more than the loop saves. The remaining excess, 59 ms on CPU, is the
+while-loop batching rule. Once the predicate is per member, every slot selects
+the whole carry, about 4.7 MB at width 16. <code>carry_select_probe.py</code>
+isolates this: an 83-slot loop carrying an
+<code>n &times; 24</code> array and applying the same matrix takes 41 ms with an
+unbatched predicate and 74 ms with a batched one (all_debug, CPU). The base's
+Arnoldi loop counts with an unbatched index, so it never pays that select. Gating
+each consumer and the least-squares projection behind an at-most-once loop did not
+help. It adds a loop predicate per consumer per slot, so the H200 got worse, and it
+was withdrawn at <code>63a32bb4a</code>.</p>
+<p id="single-site-krylov-vmap-exit-program">Unbatched program size (census job
+1276890, compile 159 s): the 300-cell weak certificate program measures
+<strong>261,735</strong> optimised instructions, 23,057 below slice 1's 284,792. The
+qualified step keeps one live-map site, now 2,028 instructions against 2,696.</p>
+<p id="single-site-krylov-vmap-exit-test"><code>tests/test_single_site_krylov.py</code>
+adds <code>test_the_vmapped_stream_stops_when_every_member_is_done</code>. It
+counts operator applications through a host callback. Unbatched, an identity
+member takes 8 and a weakly coupled member 14, both under the capacity of 18
+at three iterations. Vmapped together they take 28 (2 &times; 14), and each
+member's step matches its unbatched solve to 1e-12. With the scan restored
+(<code>mutated_vmap_test.py</code>), the test fails with <code>assert 36 == (2 * 14)</code>
+(<code>vmap-exit-test-mutated.log</code>). The site test still counts one
+operator site.</p>
+<p id="single-site-krylov-vmap-exit-tests">Tests (<code>vmap-exit-gate-job.sh</code>,
+job 1276890, one fresh <code>all_debug</code> process per file at
+<code>63a32bb4a</code>): <code>tests/test_single_site_krylov.py</code> 3 passed;
+<code>tests/test_fixed_point.py</code> 45 passed (EXIT=0, 151 s);
+<code>tests/test_reduced_newton.py</code> 18 passed and 4 failed (EXIT=1, 1,710 s),
+the same four ids as the slice-1 base, so no failure is added.</p>
+<p id="single-site-krylov-vmap-exit-real-operator"><strong>The operator-boundary
+reading fails the re-base bound.</strong> The first reduced-Newton failure prints the
+diverted certificate rung's terminal fixed-point residual. It read
+<code>0.279485232201572</code> under slice 1 and reads <code>0.06325730373091486</code>
+here, a difference of 0.216 against the 3.07e-12 bound. Unbatched, on toy operators, the exit
+loop matches the capacity scan bitwise on 8 of 8 cases (<code>exit_toy_identity.py</code>,
+<code>exit-toy-identity.log</code>), so the two differ only inside the real
+operator's program. The mechanism is not yet named. That rung is not converged
+(the test's recorded value is 2.248), so a rounding-level change can plausibly
+be amplified along its trajectory, but that has not been measured. The
+certificate rows' convergence and null positions were not re-measured.</p>
+<p>Receipts: <code>/nova/figures/forward-solver-route-integrity/single-site-krylov/vmap-exit.json</code>,
+<code>vmap-exit-cost-*.json</code>, <code>vmap-exit-negative-control-*.json</code>,
+<code>program-exit-300.json</code>, <code>callers-exit-300.json</code> and their logs.</p>
+</section>
+
   <section id="recovery-ladder-executions">
     <h2>Recovery-ladder executions per certificate solve</h2>
     <p>Commits <code>513568ec29053607c6f206458cc09bb6f6a6dc42</code>,

@@ -19,6 +19,8 @@ dispatched after it.
 
 from __future__ import annotations
 
+import gc
+
 import numpy as np
 import pytest
 from scipy.constants import mu_0
@@ -26,6 +28,7 @@ from scipy.constants import mu_0
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
+    import jax
     import jax.numpy as jnp
 
     from nova.biot.greens import hybrid_greens
@@ -76,6 +79,21 @@ BOUNDARY_FLUX_AGREEMENT = 1.0e-9
 TAIL_RESIDUAL_AGREEMENT = 1.0e-12
 PRODUCTION_NEWTON_STEPS = 12
 GMRES_ITERATIONS = 12
+
+
+@pytest.fixture(autouse=True)
+def _release_compiled_programs():
+    """Drop every compiled program after each test.
+
+    Each loaded CPU executable holds its code sections in their own memory
+    maps, and a whole-file process that keeps them all reaches the kernel's
+    map-count ceiling, where LLVM can no longer place the next section and
+    aborts the process. Clearing the executable caches between tests keeps the
+    map count bounded by the largest single test rather than by the file.
+    """
+    yield
+    jax.clear_caches()
+    gc.collect()
 
 
 def _terms():

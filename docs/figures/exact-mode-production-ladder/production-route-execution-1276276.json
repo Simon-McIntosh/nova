@@ -14,5 +14,10 @@
   ],
   "clip_mode": "exact",
   "reason": "oldest-first coverage of decisive controls before time limits",
-  "peer_job": "1276244"
+  "peer_job": "1276244",
+  "scheduler_state": "CANCELLED by 39486",
+  "elapsed": "00:01:22",
+  "worker_cancelled_job": false,
+  "terminal_arm_count": 0,
+  "disposition": "blocked: no further submission permitted; H200 job 1276244 remains active"
 }

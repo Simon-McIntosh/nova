@@ -679,7 +679,7 @@ def render(payload, output):
             boundary=ref["boundary_flux_wb"],
         )
     payload["shared_contour_levels_wb"] = levels.tolist()
-    panel_rows = (len(REVISIONS) + 2) // 3
+    panel_rows = (len(measured) + 2) // 3
     figure = plt.figure(figsize=(15, 4 * panel_rows + 2), constrained_layout=True)
     grid = figure.add_gridspec(
         panel_rows + 1, 3, height_ratios=[1] * panel_rows + [0.65]
@@ -691,21 +691,10 @@ def render(payload, output):
         xpoint_markersize=11,
     )
     terminal_style = DEFAULT_INK.variant(axis_markersize=4, xpoint_markersize=5)
-    for index, revision in enumerate(REVISIONS):
+    for index, row in enumerate(measured):
+        revision = row["revision"]
         axis = figure.add_subplot(grid[index // 3, index % 3])
         poloidal_axes(axis)
-        row = rows.get(revision)
-        if row is None or row["status"] != "measured":
-            axis.text(
-                0.5,
-                0.5,
-                "Not measured\n"
-                + ("pending" if row is None else "construction exception; see receipt"),
-                transform=axis.transAxes,
-                ha="center",
-            )
-            axis.set_title(revision)
-            continue
         with np.load(output / row["state_file"]) as data:
             units = tuple(
                 WallUnit(data["wall"][a:b, 0], data["wall"][a:b, 1], closed=c, kind=k)
@@ -890,6 +879,228 @@ def evidence_complete(payload):
     )
 
 
+def partial_rows(output):
+    """Account for every requested arm without inventing missing observations."""
+    rows = []
+    for revision in REVISIONS:
+        for case in CASES:
+            modes = ("exact", "chord") if revision == REVISIONS[-1] else ("exact",)
+            for mode in modes:
+                path = output / f"{revision}-{case}-{mode}.json"
+                if path.exists():
+                    row = json.loads(path.read_text())
+                    row["raw_status"] = row["status"]
+                    if (
+                        row["status"] == "measured"
+                        and row.get("support_health_status") == "measured"
+                    ):
+                        row["status"] = "measured"
+                    elif row.get("exception"):
+                        row["status"] = "not-built"
+                        row["failure_stage"] = (
+                            "terminal_receipt_qualification"
+                            if "_terminal_polish_receipt" in row["exception"]
+                            else "construction_or_solve_receipt"
+                        )
+                    else:
+                        row["status"] = "not-run"
+                        row["not_run_reason"] = (
+                            "started but interrupted before a terminal receipt; "
+                            "no exception was recorded"
+                        )
+                    row["source_receipt"] = path.name
+                else:
+                    row = {
+                        "revision": revision,
+                        "case": case,
+                        "clip_mode": mode,
+                        "status": "not-run",
+                        "slurm_job_id": None,
+                        "not_run_reason": (
+                            "arm was not reached before the allocation ended"
+                        ),
+                        "seed_policy": {
+                            "status": "not-built",
+                            "type": None,
+                            "construction_type": None,
+                            "state_sha256": None,
+                        },
+                    }
+                rows.append(row)
+    return rows
+
+
+def partial_receipt_complete(payload):
+    """Accept unmeasured arms only in a terminal, populated partial record."""
+    expected = {(r, c, "exact") for r in REVISIONS for c in CASES}
+    expected |= {(REVISIONS[-1], c, "chord") for c in CASES}
+    rows = payload["rows"]
+    identities = {(r["revision"], r["case"], r["clip_mode"]) for r in rows}
+    state = payload.get("gate_job_state", "")
+    if (
+        identities != expected
+        or len(rows) != len(expected)
+        or not payload.get("gate_job_id")
+        or not state.startswith(
+            (
+                "COMPLETED",
+                "TIMEOUT",
+                "CANCELLED",
+                "FAILED",
+                "OUT_OF_MEMORY",
+                "NODE_FAIL",
+                "PREEMPTED",
+            )
+        )
+    ):
+        return False
+    measured = [r for r in rows if r["status"] == "measured"]
+    if not measured:
+        return False
+    for row in rows:
+        if row["status"] == "measured":
+            if (
+                not row.get("slurm_job_id")
+                or row.get("support_health_status") != "measured"
+                or len(row.get("support_health", {}).get("per_trip", []))
+                != row.get("trip_count")
+                or not isinstance(row.get("converged"), bool)
+                or row.get("terminal_residual") is None
+                or len(row.get("seed_policy", {}).get("state_sha256", "")) != 64
+            ):
+                return False
+        elif row["status"] == "not-built":
+            if not row.get("exception"):
+                return False
+        elif row["status"] == "not-run":
+            if not row.get("not_run_reason"):
+                return False
+        else:
+            return False
+    return True
+
+
+def partial_conclusion(rows):
+    """Compare rounded values while retaining their full numerical precision."""
+    comparison = {}
+    for case in CASES:
+        selected = [
+            next(
+                (
+                    r
+                    for r in rows
+                    if r["revision"] == revision
+                    and r["case"] == case
+                    and r["clip_mode"] == "exact"
+                    and r["status"] == "measured"
+                ),
+                None,
+            )
+            for revision in REVISIONS[-3:]
+        ]
+        rounded = [
+            None if row is None else format(row["terminal_residual"], ".5g")
+            for row in selected
+        ]
+        comparison[case] = {
+            "revisions": list(REVISIONS[-3:]),
+            "residuals": [
+                None if r is None else r["terminal_residual"] for r in selected
+            ],
+            "five_significant_digits": rounded,
+            "identical_to_five_significant_digits": None not in rounded
+            and len(set(rounded)) == 1,
+        }
+    chords = [r for r in rows if r["clip_mode"] == "chord"]
+    older_missing = [
+        {"revision": r["revision"], "case": r["case"], "status": r["status"]}
+        for r in rows
+        if r["revision"] in REVISIONS[:-3] and r["status"] != "measured"
+    ]
+    return {
+        "newest_three": comparison,
+        "main_chord_unconverged": len(chords) == len(CASES)
+        and all(r["status"] == "measured" and not r["converged"] for r in chords),
+        "decisive_unmeasured_arms": older_missing,
+        "attribution": (
+            "not-attributed: decisive older arms are unavailable to this driver"
+            if older_missing
+            else "all older arms measured; see transition receipts"
+        ),
+        "adapter_scope": (
+            "per-revision construction and receipt adapters are outside this node"
+        ),
+    }
+
+
+def finalize_partial(args):
+    """Publish an honest partial ladder after its scientific allocation ends."""
+    if job_in_queue(args.gate_job):
+        raise RuntimeError(
+            "refusing partial finalization while the gate job is in queue"
+        )
+    args.logs.mkdir(parents=True, exist_ok=True)
+    command = [
+        "sacct",
+        "-j",
+        args.gate_job,
+        "--format=JobID,State,Elapsed,ExitCode",
+        "-P",
+    ]
+    accounting = subprocess.check_output(command, text=True)
+    (args.logs / "gate-scheduler.log").write_text(accounting)
+    records = [line.split("|") for line in accounting.splitlines()[1:]]
+    gate = next(row for row in records if row[0] == args.gate_job)
+    payload = assemble(args.output)
+    payload["full_ladder_gate_passed"] = payload["gate_passed"]
+    payload["rows"] = partial_rows(args.output)
+    payload.update(
+        gate_job_id=args.gate_job,
+        gate_job_state=gate[1],
+        gate_job_elapsed=gate[2],
+        gate_job_exit_code=gate[3],
+        coverage="partial",
+        acceptance="explicit partial-ladder closure",
+        status_semantics={
+            "measured": "terminal solve and support-health receipt available",
+            "not-built": (
+                "driver could not produce the complete certificate arm; "
+                "exception and failure stage retained"
+            ),
+            "not-run": (
+                "unattempted or interrupted before a terminal receipt; "
+                "no exception invented"
+            ),
+        },
+    )
+    payload["attribution"] = attribution(payload["rows"])
+    payload["conclusion"] = partial_conclusion(payload["rows"])
+    data_qualified = partial_receipt_complete(payload)
+    payload["gate_passed"] = False
+    payload["status"] = "rendering" if data_qualified else "incomplete"
+    write_json(args.output / f"{STEM}.json", payload)
+    if not data_qualified:
+        raise RuntimeError("partial receipt failed explicit coverage validation")
+    render(payload, args.output)
+    panels = [
+        row
+        for row in payload["rows"]
+        if row["case"] == CASES[0]
+        and row["clip_mode"] == "exact"
+        and row["status"] == "measured"
+    ]
+    assert panels and all(
+        row["panel"]["axis_off"] and all(row["panel"]["contour_segments"])
+        for row in panels
+    ), "measured contour panels are incomplete"
+    payload["figure_files"] = [f"{STEM}.png", f"{STEM}.svg"]
+    payload["gate_passed"] = True
+    payload["status"] = "complete"
+    write_json(args.output / f"{STEM}.json", payload)
+    print("PARTIAL_LADDER_COMPLETE " + json.dumps(payload["conclusion"]), flush=True)
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -909,16 +1120,27 @@ def main():
     subset.add_argument("--logs", type=Path, required=True)
     subset.add_argument("--revisions", nargs="+", choices=REVISIONS, required=True)
     subset.add_argument("--peer-job", required=True)
+    finalization = sub.add_parser("finalize-partial")
+    finalization.add_argument("--output", type=Path, required=True)
+    finalization.add_argument("--logs", type=Path, required=True)
+    finalization.add_argument("--gate-job", required=True)
     validation = sub.add_parser("validate")
     validation.add_argument("--output", type=Path, required=True)
+    validation.add_argument("--partial", action="store_true")
     args = parser.parse_args()
     if args.command == "validate":
         payload = json.loads(args.output.read_text())
-        passed = evidence_complete(payload)
+        passed = (
+            partial_receipt_complete(payload)
+            if args.partial
+            else evidence_complete(payload)
+        )
         print(
             "COMPLETE" if passed else "REFUSED: incomplete production ladder evidence"
         )
         return int(not passed)
+    if args.command == "finalize-partial":
+        return finalize_partial(args)
     if args.command == "segment":
         return segment(args)
     return arm(args) if args.command == "arm" else measure(args)

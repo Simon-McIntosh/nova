@@ -18,7 +18,7 @@
 <meta name="plan-modified" content="2026-09-23">
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-impl" content="0.8">
-<meta name="plan-version" content="40">
+<meta name="plan-version" content="41">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -153,6 +153,14 @@
 <li>It states which component carries the mismatch where it fails: the support, the plasma response or the exterior.</li>
 <li>The negative control runs: the same evaluation at the analytic state shifted vertically by one pitch must raise the mismatch by a recorded amount, showing the measure can see a displaced plasma.</li>
 </ul>
+<p><strong>Why the Solov'ev tests did not catch this (lead 2026-09-23 16:15).</strong></p>
+<ul>
+<li><code>tests/test_certificate_pin.py</code> reads the stored 09-19 receipt (job 1268058) and never solves. It asserts, as passing, <code>qualified_rows: 1</code> of 16, convergence <code>[False, False, False, False]</code> for three of the four cases, and, for the diverted case at −110 and −300 cells, that the topology read is unqualified and no X-point is admitted. <code>tests/test_certificate_baseline_revision.py</code> also works from stored JSON.</li>
+<li>The live forward-solve tests (<code>tests/test_equilibrium_forward_solve.py</code>) build their own closed-form Solov'ev flux on a small fixture, so they never exercise the production route's Green's-function map, fixture exterior, hex mesh or cut-cell support.</li>
+<li>The live tests on the production construction (<code>test_solve_path_census_inputs.py</code> and <code>test_exact_clip_seed_bracket.py</code>) assert neither convergence nor position, and are marked <code>slow</code>, so the default lane skips them.</li>
+<li>No test checks that the forward map reproduces the analytic state.</li>
+</ul>
+<p><strong>Node <code>pcrf-certificate-gate-is-a-live-test</code> (after the map-fidelity gate reads).</strong> An H200-lane test that solves the certificate production route at the rung the gate passes. It asserts, in order: map fidelity at the analytic state below the gate's bound; convergence under the certificate default policy; and the terminal X-point inside the position bound. <code>test_certificate_pin.py</code> is rewritten so an unqualified row fails rather than being pinned as expected, keeping the receipt's facts as data. The negative control: a map evaluated at a one-pitch vertically shifted analytic state must fail the first assertion.</p>
 <p><strong>Node <code>pcrf-vertical-constraint-on-the-certificate-route</code> (behind the map-fidelity gate; lead 2026-09-23 15:10).</strong></p>
 <p><strong>Why.</strong> The lead asked whether the stalls come from a missing vertical constraint. It is missing. <code>_certificate_solve_request</code> (<code>benchmarks/solovev_certificate.py</code>) passes no <code>constraint_pairs</code>, and did not at 9aebe5fae either, so the production route has never held the current centroid. The case is a coil-less fixture with a prescribed exterior boundary condition.</p>
 <p><strong>The mechanism exists on the constrainable routes</strong> (<code>newton_krylov</code>, which the certificate uses, and <code>reduced_newton</code>), like λ holds the net current:</p>

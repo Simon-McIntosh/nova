@@ -19,5 +19,9 @@
   "elapsed": "00:01:22",
   "worker_cancelled_job": false,
   "terminal_arm_count": 0,
-  "disposition": "blocked: no further submission permitted; H200 job 1276244 remains active"
+  "disposition": "authorized stop; H200 continues and final partial ladder is accepted",
+  "cancellation_authorized": true,
+  "cancellation_authority": "coordinator",
+  "coordinator_reported_local_time": "07:46",
+  "cancellation_reason": "decisive older revisions require construction adapters outside this node"
 }

@@ -322,6 +322,21 @@
       == 3</code> while the zero-exit case passes; that red was captured and the mutation reverted.
       Evidence: <a href="/nova/evidence/archive/cpu-compile-abort-landed#sampler-exit-status">the
       mapping-count record</a>.</p>
+<p class="worker-landing"><strong>Duplicate coverage folded 2026-09-22, commit
+      <code>ab32b8e63</code>.</strong> The coverage paragraph above added a second module repeating
+      <code>_sample_a_child</code> beside two of the three status cases verbatim, leaving two places
+      to keep in step. Only <code>test_the_wrapper_carries_an_arbitrary_child_status</code> was novel,
+      so it moves into <code>tests/test_compile_abort_probe.py</code>, which becomes the single home
+      of the contract, and <code>tests/test_compile_abort_probe_exit.py</code> is deleted.
+      <code>grep -rc 'def _sample_a_child' tests/</code> now returns exactly one definition. Gate:
+      <code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q
+      tests/test_compile_abort_probe.py</code>, exit <code>0</code>, <code>3 passed</code>. The
+      declared negative control — make the probe main return 0 unconditionally — reddens
+      <code>test_failed_child_fails_the_wrapper</code> at <code>assert 0 == 7</code> and the moved
+      <code>test_the_wrapper_carries_an_arbitrary_child_status</code> at <code>assert 0 == 3</code>
+      while the zero-exit case passes, and was reverted. Evidence:
+      <a href="/nova/evidence/archive/cpu-compile-abort-landed#sampler-exit-status">the mapping-count
+      record</a>.</p>
     </section>
   
 <section id="one-row-per-process">

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-24T01:47:06",
+  "updated": "2026-09-24T01:48:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6502,6 +6502,15 @@
       },
       {
         "id": "s19c-rv-chord",
+        "harness": "codex-astra",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-23"
+      },
+      {
+        "id": "s19c-rv-desync",
         "harness": "codex-astra",
         "role": "review",
         "session_id": null,
@@ -298124,6 +298133,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3332
+    "_version": 3333
   }
 }

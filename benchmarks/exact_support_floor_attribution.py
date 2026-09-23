@@ -687,6 +687,7 @@ def render(rows, output):
         )
     )
     levels = np.linspace(-maximum, maximum, 13)
+    levels = levels[np.abs(levels) > maximum * 1e-12]
     panels = []
     for row in selected:
         case_name = row["case"]
@@ -755,7 +756,8 @@ def render(rows, output):
             poloidal.draw_flux_contours(
                 axis, radius, height, field, levels, color="#a34828", linewidth=0.8
             )
-            axis.set_title(title + "\n% target current per cell")
+            peak = float(np.max(np.abs(quantity)) / target * 100)
+            axis.set_title(title + f"\n% target/cell; max magnitude {peak:.3g}")
         for axis in axes:
             poloidal.draw_wall(axis, units=units)
             _draw_nulls(axis, analytic_nulls, units, blue)
@@ -939,7 +941,13 @@ def main():
                 rows.append(measure(case, rung, args.output))
                 summarize(rows, args.output, controls, [])
     panels = render(rows, args.output)
-    report = summarize(rows, args.output, controls, panels)
+    if args.render_only:
+        report = json.loads((args.output / "report.json").read_text())
+        report["panels"] = panels
+        report["render_revision"] = revision
+        write_json(args.output / "report.json", report)
+    else:
+        report = summarize(rows, args.output, controls, panels)
     assert report["completed"]
     assert all(
         row["modes"]["chord"]["negative_control"][

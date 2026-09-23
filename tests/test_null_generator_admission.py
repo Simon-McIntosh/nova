@@ -8,6 +8,7 @@ import pytest
 from benchmarks import dual_stencil_census as census_benchmark
 from benchmarks import solovev_certificate as certificate
 from nova.jax.config import configure_dtypes
+from tests.test_solve_path_census_inputs import analytic_carrier as analytic_carrier
 
 
 @pytest.mark.parametrize("requested,realised", [(110, 132), (300, 340), (500, 550)])
@@ -364,4 +365,57 @@ def test_compact_wall_check_matches_all_origin_control_across_batches(material):
     print(
         f"wall_batch_parity material={material} checked={len(points)} "
         f"inside={int(jnp.sum(expected))} rejected={int(jnp.sum(~expected))}"
+    )
+
+
+@pytest.mark.parametrize("analytic_carrier", ["diverted-single-null"], indirect=True)
+def test_exact_analytic_saddle_has_one_representative(analytic_carrier):
+    """Neighbouring cell fits of one physical saddle share a representative."""
+    case = analytic_carrier
+    assert len(case.machine.node) == 132
+    state = jnp.asarray(case.analytic, dtype=jnp.float64)
+    table = case.operator._fixed_design_topology.grid.candidate_table_status(
+        case.operator.null_flux_pool(state)
+    )
+    valid = np.asarray(table["retained_valid"])[1]
+    saddles = np.asarray(table["retained_candidate"])[1, valid, :2]
+    reference = np.asarray(certificate.DIVERTED_REFERENCE.x_point)
+    distances = np.linalg.norm(saddles - reference, axis=1)
+    print(
+        f"analytic_saddle_cluster cells=132 qualified={len(saddles)} "
+        f"positions={saddles.tolist()} distances_m={distances.tolist()}",
+        flush=True,
+    )
+    assert len(saddles) == 1
+    assert distances[0] < 0.15
+    _masks, topology = case.operator.read(state)
+    assert np.linalg.norm(np.asarray(topology.x_point) - reference) < 0.15
+
+
+def test_saddles_one_source_pitch_apart_remain_distinct():
+    """Distinct quadratic saddles retain separate census slots at one pitch."""
+    from nova.biot.null import Null2D
+    from nova.equilibrium.forward_operator import _FixedDesignNull2D
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    angle = np.arange(6) * np.pi / 3.0
+    patch = np.vstack(
+        (np.zeros(2), 0.2 * np.column_stack((np.cos(angle), np.sin(angle))))
+    )
+    centres = np.asarray(((0.0, 0.0), (1.0, 0.0)))
+    coordinates = (patch[None, :, :] + centres[:, None, :]).reshape((-1, 2))
+    stencil = np.arange(len(coordinates)).reshape((-1, 7))
+    polygons = tuple(coordinate + patch[1:] for coordinate in coordinates)
+    locator = Null2D.from_coordinates(coordinates, stencil)
+    fixed = _FixedDesignNull2D.from_locator(
+        locator, cell_polygons=polygons, cell_area=np.ones(len(coordinates))
+    )
+    np.testing.assert_allclose(fixed.source_pitch, 1.0, rtol=0, atol=0)
+    assert np.linalg.norm(centres[1] - centres[0]) >= np.max(fixed.source_pitch)
+    values = jnp.asarray(np.tile(patch[:, 0] ** 2 - patch[:, 1] ** 2, 2))
+    table = fixed.candidate_table_status(values)
+    assert int(table["retained_count"][1]) == 2
+    np.testing.assert_allclose(
+        table["retained_candidate"][1, :2, :2], centres, atol=1e-12
     )

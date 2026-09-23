@@ -848,6 +848,11 @@ def _structured_grid_axes(coordinate) -> tuple[np.ndarray, np.ndarray]:
     return radius, height
 
 
+# Local quadratic roots carry an admitted positional error of one tenth of
+# their source-cell pitch.
+_NULL_MERGE_PITCH_FRACTION = 0.10
+
+
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class _FixedDesignNull2D:
@@ -1219,6 +1224,11 @@ class _FixedDesignNull2D:
             (representatives, multiplicity, representative_index),
         )
 
+    def _representative_merge_radius(self):
+        """Combine cell-fit discretisation error with the arithmetic radius."""
+        roundoff = 256.0 * jnp.finfo(self.fit_dtype).eps * self.source_pitch
+        return _NULL_MERGE_PITCH_FRACTION * self.source_pitch + roundoff
+
     def _seed_representatives(self, candidate, masks, uncertainty):
         """Deduplicate admitted roots in bounded work slots before polishing."""
         # Process the first pending origin and all of its duplicates together.
@@ -1280,7 +1290,7 @@ class _FixedDesignNull2D:
             (crossing_count == 0, crossing_count == 4), axis=0
         )
         local_candidate, quadratic_mask = self._local_fit_census(psi)
-        seed_uncertainty = 256.0 * jnp.finfo(self.fit_dtype).eps * self.source_pitch
+        seed_uncertainty = self._representative_merge_radius()
         ring_mask, _seed_multiplicity = self._seed_representatives(
             local_candidate, quadratic_mask, seed_uncertainty
         )
@@ -1341,8 +1351,9 @@ class _FixedDesignNull2D:
                 & compact_within_cell[None, :]
             )
             compact_typed_mask = compact_polished_mask & compact_type_agrees
-            compact_root_uncertainty = self._root_uncertainty(
-                compact_polish, compact_cell_width, domain_scale
+            compact_root_uncertainty = (
+                self._root_uncertainty(compact_polish, compact_cell_width, domain_scale)
+                + _NULL_MERGE_PITCH_FRACTION * self.source_pitch[compact_index]
             )
             deduplicated = [
                 self._deduplicate_type(
@@ -1540,7 +1551,7 @@ class _FixedDesignNull2D:
         crossing_count = self.locator.crossing_count(sampled)
         ring_masks = jnp.stack((crossing_count == 0, crossing_count == 4))
         candidate, masks = self._local_fit_census(psi)
-        uncertainty = 256.0 * jnp.finfo(self.fit_dtype).eps * self.source_pitch
+        uncertainty = self._representative_merge_radius()
         representative_mask, multiplicity = self._seed_representatives(
             candidate, masks, uncertainty
         )

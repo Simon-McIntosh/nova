@@ -1,0 +1,18 @@
+{
+  "job_id": "1276276",
+  "partition": "titan",
+  "revision_order": [
+    "9aebe5fae",
+    "b43714114",
+    "08dd0dda1",
+    "ee17f9570",
+    "2e38dc877"
+  ],
+  "cases": [
+    "diverted-single-null",
+    "weak-rotation-reactor-static"
+  ],
+  "clip_mode": "exact",
+  "reason": "oldest-first coverage of decisive controls before time limits",
+  "peer_job": "1276244"
+}

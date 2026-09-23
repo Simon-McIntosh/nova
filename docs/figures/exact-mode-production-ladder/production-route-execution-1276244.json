@@ -1,0 +1,24 @@
+{
+  "job_id": "1276244",
+  "partition": "betelgeuse",
+  "device_class": "H200",
+  "revision_order": [
+    "f5af729a9",
+    "a17431153",
+    "450bab78a",
+    "23a8522b6",
+    "337eb81ee",
+    "2e38dc877",
+    "ee17f9570",
+    "08dd0dda1",
+    "b43714114",
+    "9aebe5fae"
+  ],
+  "cases": [
+    "diverted-single-null",
+    "weak-rotation-reactor-static"
+  ],
+  "reason": "original newest-first job continues unchanged; about 1h50 remaining at decision time for six rungs at about 20 minutes each",
+  "time_limit": "03:00:00",
+  "supplement_authorized": "one titan job covers oldest five revisions to prevent time-limit loss of decisive controls"
+}

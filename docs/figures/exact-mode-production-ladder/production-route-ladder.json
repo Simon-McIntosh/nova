@@ -364,14 +364,2154 @@
           "other_x_points_drawn": 0
         }
       }
+    },
+    {
+      "revision": "f5af729a9",
+      "case": "weak-rotation-reactor-static",
+      "clip_mode": "exact",
+      "status": "measured",
+      "exception": null,
+      "slurm_job_id": "1276244",
+      "seed_policy": {
+        "status": "measured",
+        "type": "nova.equilibrium.solve_request.ExplicitSolveSeed",
+        "construction_type": "current_centroid_disc",
+        "factory": "profile.cold_seed_portfolio",
+        "state_sha256": "3447e5599fcd2452bc4191f487c1d7c363b73101e5d38de38e751d7676c6a133",
+        "state_dtype": "float64",
+        "state_shape": [
+          772
+        ],
+        "seed_radius_m": 1.564079053601776
+      },
+      "harness_sha256": "60536750f31a9ec55a478b122bdd65231cc3aa6e7b58bd347a4d07fe745547b3",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/f5af729a9/nova/__init__.py",
+      "full_revision": "f5af729a9de6a2287ebd2b528cea278d5bdb3157",
+      "devices": [
+        "cuda:0"
+      ],
+      "realised_cells": 135,
+      "carrier_identity": "solovev:weak-rotation-reactor-static:-110",
+      "reference_nulls": {
+        "axis_rz_m": [
+          6.194958772632181,
+          0.00013499785829806932
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          3,
+          0
+        ],
+        "axis_flux_wb": 49.94187078939037,
+        "boundary_flux_wb": 1.1345091532888318e-15
+      },
+      "seed_receipt": {
+        "factory": "profile.cold_seed_portfolio",
+        "requested_class": "limited",
+        "branch_index": 0,
+        "construction": "current_centroid_disc",
+        "plasma_current_a": 16314773.311828371,
+        "current_centroid_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "seed_radius_m": 1.564079053601776,
+        "supported_cell_count": 36,
+        "anchor_available": true,
+        "anchor_m": [
+          7.801395788445413,
+          -5.0309038843461575e-11
+        ],
+        "declared_axis_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "declared_boundary_m": [
+          7.801395788445413,
+          -5.0309038843461575e-11
+        ],
+        "stored_flux_samples_used": false,
+        "current_target_provenance": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "quadrature_nodes": 512,
+          "quadrature_current_a": 16314773.311828367,
+          "declared_current_a": 16314773.311828371,
+          "quadrature_relative_closure": 2.2833846522164315e-16,
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ]
+        },
+        "state_sha256_binary64": "3447e5599fcd2452bc4191f487c1d7c363b73101e5d38de38e751d7676c6a133"
+      },
+      "seed_amplitude": 1.0057784705338186,
+      "fixture_cache": {
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
+        "semantic_key": "0eb458e6edb500a7",
+        "hit": true,
+        "lock_wait_seconds": 7.931143045425415e-06,
+        "build_seconds": 0.0
+      },
+      "current_receipt": {
+        "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+        "quadrature_nodes": 512,
+        "quadrature_current_a": 16314773.311828367,
+        "declared_current_a": 16314773.311828371,
+        "quadrature_relative_closure": 2.2833846522164315e-16,
+        "current_centroid_m": [
+          6.063530173332898,
+          0.0
+        ]
+      },
+      "seed_sha256": "3447e5599fcd2452bc4191f487c1d7c363b73101e5d38de38e751d7676c6a133",
+      "active_set_budget": 16,
+      "observer": {
+        "method": "host callback copies selected state at native trip reconcile",
+        "native_function_sha256": "5f3d41010da058238abd4204cf02ac65e468dbde474871c2baec6fcaf417dea1",
+        "inserted_statement": "jax.debug.callback(_capture_trip, trip_active, index, selected_state, selected_residual, ordered=True)",
+        "solver_values_modified": false
+      },
+      "converged": false,
+      "qualified": false,
+      "trip_count": 4,
+      "terminal_residual": 0.07500827508769735,
+      "per_trip_residual_history": [
+        {
+          "trip": 1,
+          "residual": 0.0750704745509263
+        },
+        {
+          "trip": 2,
+          "residual": 0.07500829465725575
+        },
+        {
+          "trip": 3,
+          "residual": 0.07500827508769735
+        },
+        {
+          "trip": 4,
+          "residual": 0.07500827508769735
+        }
+      ],
+      "terminal_nulls": {
+        "axis_rz_m": [
+          6.172837423452742,
+          -0.0008660649939719878
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          2,
+          0
+        ],
+        "axis_flux_wb": 68.21866246061575,
+        "boundary_flux_wb": 9.522315524732125
+      },
+      "terminal_axis_rz_m": [
+        6.172837423452742,
+        -0.0008660649939719878
+      ],
+      "terminal_x_point_rz_m": null,
+      "reference_axis_rz_m": [
+        6.194958772632181,
+        0.00013499785829806932
+      ],
+      "reference_x_point_rz_m": null,
+      "x_point_distance_m": null,
+      "x_point_distance_status": "no_admitted_reference_saddle",
+      "resolved_defaults": {
+        "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
+        "policy": {
+          "route": "newton_krylov",
+          "newton_steps": 10,
+          "gmres_iterations": 30,
+          "warmup": 0,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "active_set_steps": 16,
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12,
+          "current_pin": true,
+          "settled_exit": true,
+          "own_mask_acceptance": true,
+          "continuation": true,
+          "best_iterate_retention": true,
+          "stagnation_stop": true,
+          "exact_kernels": true,
+          "cached_machine": true,
+          "compilation_cache": true
+        },
+        "deviations": {
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12
+        },
+        "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+      },
+      "termination_reason": 10,
+      "wall_units": [
+        [
+          0,
+          121,
+          true,
+          "vessel"
+        ]
+      ],
+      "state_file": "f5af729a9-weak-rotation-reactor-static-exact.npz",
+      "support_health": {
+        "counter_positive_control": {
+          "nonfinite_entries": 2,
+          "expected": 2
+        },
+        "integrator": "    def support_current_moments(\n        self,\n        profile,\n        centroid_flux,\n        sample_flux,\n        support,\n    ) -> CellCurrentMoments:\n        \"\"\"Evaluate every nonempty support through one moment callable.\"\"\"\n        if self.moment_geometry is None:\n            raise ValueError(\"moment geometry is required for current moments\")\n        field = flux_field_polynomial(\n            self._support_moment_stencils, centroid_flux, sample_flux\n        )\n        selected = field.active & (jnp.asarray(support.vertex_count) >= 3)\n        moment_integrator = (\n            clipped_support_current_moments\n            if _SUPPORT_CLIP_MODE == \"chord\"\n            else _cell_banked_current_moments\n        )\n        moments = moment_integrator(\n            support,\n            selected,\n            field,\n            profile,\n            cut_cell_capacity=self._cut_cell_bank_capacity,\n        )\n        return CellCurrentMoments(*moments)\n",
+        "capacity_receipt": "no public overflow receipt; recomputed native selected boundary count > cut-cell bank capacity",
+        "cut_cell_capacity": 135,
+        "per_trip": [
+          {
+            "trip": 1,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              38
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 2,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              38
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 3,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              38
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 4,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              38
+            ],
+            "cut_cell_capacity_overflow": false
+          }
+        ],
+        "max_nonfinite_clipped_moment_entries": 0
+      },
+      "support_health_status": "measured",
+      "wall_seconds": 662.107742764987,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-production-route-ladder/authorized-retry/f5af729a9-weak-rotation-reactor-static-exact.log",
+      "exit_status": 0
+    },
+    {
+      "revision": "f5af729a9",
+      "case": "diverted-single-null",
+      "clip_mode": "chord",
+      "status": "measured",
+      "exception": null,
+      "slurm_job_id": "1276244",
+      "seed_policy": {
+        "status": "measured",
+        "type": "nova.equilibrium.solve_request.ExplicitSolveSeed",
+        "construction_type": "axis_saddle_geometry",
+        "factory": "profile.cold_seed_portfolio",
+        "state_sha256": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883",
+        "state_dtype": "float64",
+        "state_shape": [
+          730
+        ],
+        "seed_radius_m": 0.649709176903539
+      },
+      "harness_sha256": "60536750f31a9ec55a478b122bdd65231cc3aa6e7b58bd347a4d07fe745547b3",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/f5af729a9/nova/__init__.py",
+      "full_revision": "f5af729a9de6a2287ebd2b528cea278d5bdb3157",
+      "devices": [
+        "cuda:0"
+      ],
+      "realised_cells": 132,
+      "carrier_identity": "solovev:diverted-single-null:-110",
+      "reference_nulls": {
+        "axis_rz_m": [
+          1.7869104924134618,
+          0.046151482164328565
+        ],
+        "x_point_rz_m": [
+          1.4930225591761932,
+          -1.0188319093078109
+        ],
+        "qualified_saddles_rz_m": [
+          [
+            1.5107863810710611,
+            -1.0275005315610446
+          ],
+          [
+            1.4930225591761932,
+            -1.0188319093078109
+          ],
+          [
+            1.506509523756129,
+            -1.000151395931814
+          ]
+        ],
+        "retained_count": [
+          1,
+          3
+        ],
+        "axis_flux_wb": 0.005713819178329534,
+        "boundary_flux_wb": 1.361644435324944e-05
+      },
+      "seed_receipt": {
+        "factory": "profile.cold_seed_portfolio",
+        "requested_class": "diverted",
+        "branch_index": 1,
+        "construction": "axis_saddle_geometry",
+        "plasma_current_a": 37319.34592471112,
+        "current_centroid_m": [
+          1.7120154725908823,
+          0.030254757713386198
+        ],
+        "seed_radius_m": 0.649709176903539,
+        "supported_cell_count": 58,
+        "anchor_available": true,
+        "anchor_m": [
+          1.5019897592858353,
+          -1.019292805308505
+        ],
+        "declared_axis_m": [
+          1.7870647018106887,
+          0.0467736265648528
+        ],
+        "declared_boundary_m": [
+          1.5025279999999999,
+          -1.01728
+        ],
+        "stored_flux_samples_used": false,
+        "current_target_provenance": {
+          "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+          "declared_current_a": 37319.34592471112,
+          "current_centroid_m": [
+            1.7120154725908823,
+            0.030254757713386198
+          ],
+          "closed_form_flux_samples_used_for_current_support_only": true
+        },
+        "state_sha256_binary64": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883"
+      },
+      "seed_amplitude": 1.0003717260626652,
+      "fixture_cache": {
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
+        "semantic_key": "833a17bde1b7b150",
+        "hit": true,
+        "lock_wait_seconds": 8.582137525081635e-06,
+        "build_seconds": 0.0
+      },
+      "current_receipt": {
+        "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+        "declared_current_a": 37319.34592471112,
+        "current_centroid_m": [
+          1.7120154725908823,
+          0.030254757713386198
+        ],
+        "closed_form_flux_samples_used_for_current_support_only": true
+      },
+      "seed_sha256": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883",
+      "active_set_budget": 16,
+      "observer": {
+        "method": "host callback copies selected state at native trip reconcile",
+        "native_function_sha256": "5f3d41010da058238abd4204cf02ac65e468dbde474871c2baec6fcaf417dea1",
+        "inserted_statement": "jax.debug.callback(_capture_trip, trip_active, index, selected_state, selected_residual, ordered=True)",
+        "solver_values_modified": false
+      },
+      "converged": false,
+      "qualified": false,
+      "trip_count": 2,
+      "terminal_residual": 0.49574731595435056,
+      "per_trip_residual_history": [
+        {
+          "trip": 1,
+          "residual": 0.49574731595435056
+        },
+        {
+          "trip": 2,
+          "residual": 0.49574731595435056
+        }
+      ],
+      "terminal_nulls": {
+        "axis_rz_m": [
+          1.9036784325758607,
+          0.11381986803530138
+        ],
+        "x_point_rz_m": [
+          1.9602071772100627,
+          0.06463834031247988
+        ],
+        "qualified_saddles_rz_m": [
+          [
+            1.8084474711561132,
+            -0.7923009025472612
+          ],
+          [
+            1.4620573585803454,
+            0.031145073293497444
+          ],
+          [
+            1.5039816920020437,
+            0.19656611690541856
+          ],
+          [
+            1.4376991945183744,
+            0.36747869664496996
+          ],
+          [
+            1.3275412563693196,
+            0.44793176593307216
+          ],
+          [
+            1.9602071772100627,
+            0.06463834031247988
+          ],
+          [
+            1.908555022599361,
+            0.07973711567660643
+          ]
+        ],
+        "retained_count": [
+          10,
+          7
+        ],
+        "axis_flux_wb": 0.11638459051737315,
+        "boundary_flux_wb": 0.10910238390397466
+      },
+      "terminal_axis_rz_m": [
+        1.9036784325758607,
+        0.11381986803530138
+      ],
+      "terminal_x_point_rz_m": [
+        1.9602071772100627,
+        0.06463834031247988
+      ],
+      "reference_axis_rz_m": [
+        1.7869104924134618,
+        0.046151482164328565
+      ],
+      "reference_x_point_rz_m": [
+        1.4930225591761932,
+        -1.0188319093078109
+      ],
+      "x_point_distance_m": 1.179902220160513,
+      "x_point_distance_status": "measured",
+      "resolved_defaults": {
+        "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
+        "policy": {
+          "route": "newton_krylov",
+          "newton_steps": 10,
+          "gmres_iterations": 30,
+          "warmup": 0,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "active_set_steps": 16,
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12,
+          "current_pin": true,
+          "settled_exit": true,
+          "own_mask_acceptance": true,
+          "continuation": true,
+          "best_iterate_retention": true,
+          "stagnation_stop": true,
+          "exact_kernels": true,
+          "cached_machine": true,
+          "compilation_cache": true
+        },
+        "deviations": {
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12
+        },
+        "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+      },
+      "termination_reason": 10,
+      "wall_units": [
+        [
+          0,
+          121,
+          true,
+          "vessel"
+        ]
+      ],
+      "state_file": "f5af729a9-diverted-single-null-chord.npz",
+      "support_health": {
+        "counter_positive_control": {
+          "nonfinite_entries": 2,
+          "expected": 2
+        },
+        "integrator": "    def support_current_moments(\n        self,\n        profile,\n        centroid_flux,\n        sample_flux,\n        support,\n    ) -> CellCurrentMoments:\n        \"\"\"Evaluate every nonempty support through one moment callable.\"\"\"\n        if self.moment_geometry is None:\n            raise ValueError(\"moment geometry is required for current moments\")\n        field = flux_field_polynomial(\n            self._support_moment_stencils, centroid_flux, sample_flux\n        )\n        selected = field.active & (jnp.asarray(support.vertex_count) >= 3)\n        moment_integrator = (\n            clipped_support_current_moments\n            if _SUPPORT_CLIP_MODE == \"chord\"\n            else _cell_banked_current_moments\n        )\n        moments = moment_integrator(\n            support,\n            selected,\n            field,\n            profile,\n            cut_cell_capacity=self._cut_cell_bank_capacity,\n        )\n        return CellCurrentMoments(*moments)\n",
+        "capacity_receipt": "no public overflow receipt; recomputed native selected boundary count > cut-cell bank capacity",
+        "cut_cell_capacity": 132,
+        "per_trip": [
+          {
+            "trip": 1,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 2,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          }
+        ],
+        "max_nonfinite_clipped_moment_entries": 0
+      },
+      "support_health_status": "measured",
+      "wall_seconds": 269.92857323773205,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-production-route-ladder/authorized-retry/f5af729a9-diverted-single-null-chord.log",
+      "exit_status": 0
+    },
+    {
+      "revision": "f5af729a9",
+      "case": "weak-rotation-reactor-static",
+      "clip_mode": "chord",
+      "status": "measured",
+      "exception": null,
+      "slurm_job_id": "1276244",
+      "seed_policy": {
+        "status": "measured",
+        "type": "nova.equilibrium.solve_request.ExplicitSolveSeed",
+        "construction_type": "current_centroid_disc",
+        "factory": "profile.cold_seed_portfolio",
+        "state_sha256": "145cce9cd1b809d64311141fc2b61417237a3f89c9a7808781f87df2136da12a",
+        "state_dtype": "float64",
+        "state_shape": [
+          772
+        ],
+        "seed_radius_m": 1.564079053601776
+      },
+      "harness_sha256": "60536750f31a9ec55a478b122bdd65231cc3aa6e7b58bd347a4d07fe745547b3",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/f5af729a9/nova/__init__.py",
+      "full_revision": "f5af729a9de6a2287ebd2b528cea278d5bdb3157",
+      "devices": [
+        "cuda:0"
+      ],
+      "realised_cells": 135,
+      "carrier_identity": "solovev:weak-rotation-reactor-static:-110",
+      "reference_nulls": {
+        "axis_rz_m": [
+          6.194958772632181,
+          0.00013499785829806932
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          3,
+          0
+        ],
+        "axis_flux_wb": 49.94187078939037,
+        "boundary_flux_wb": 1.1345091532888318e-15
+      },
+      "seed_receipt": {
+        "factory": "profile.cold_seed_portfolio",
+        "requested_class": "limited",
+        "branch_index": 0,
+        "construction": "current_centroid_disc",
+        "plasma_current_a": 16314773.311828371,
+        "current_centroid_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "seed_radius_m": 1.564079053601776,
+        "supported_cell_count": 36,
+        "anchor_available": true,
+        "anchor_m": [
+          7.801395788445413,
+          -5.030890007447734e-11
+        ],
+        "declared_axis_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "declared_boundary_m": [
+          7.801395788445413,
+          -5.030890007447734e-11
+        ],
+        "stored_flux_samples_used": false,
+        "current_target_provenance": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "quadrature_nodes": 512,
+          "quadrature_current_a": 16314773.311828367,
+          "declared_current_a": 16314773.311828371,
+          "quadrature_relative_closure": 2.2833846522164315e-16,
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ]
+        },
+        "state_sha256_binary64": "145cce9cd1b809d64311141fc2b61417237a3f89c9a7808781f87df2136da12a"
+      },
+      "seed_amplitude": 2.036588546796,
+      "fixture_cache": {
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
+        "semantic_key": "0eb458e6edb500a7",
+        "hit": true,
+        "lock_wait_seconds": 7.4338167905807495e-06,
+        "build_seconds": 0.0
+      },
+      "current_receipt": {
+        "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+        "quadrature_nodes": 512,
+        "quadrature_current_a": 16314773.311828367,
+        "declared_current_a": 16314773.311828371,
+        "quadrature_relative_closure": 2.2833846522164315e-16,
+        "current_centroid_m": [
+          6.063530173332898,
+          0.0
+        ]
+      },
+      "seed_sha256": "145cce9cd1b809d64311141fc2b61417237a3f89c9a7808781f87df2136da12a",
+      "active_set_budget": 16,
+      "observer": {
+        "method": "host callback copies selected state at native trip reconcile",
+        "native_function_sha256": "5f3d41010da058238abd4204cf02ac65e468dbde474871c2baec6fcaf417dea1",
+        "inserted_statement": "jax.debug.callback(_capture_trip, trip_active, index, selected_state, selected_residual, ordered=True)",
+        "solver_values_modified": false
+      },
+      "converged": false,
+      "qualified": false,
+      "trip_count": 14,
+      "terminal_residual": 0.05245103919634117,
+      "per_trip_residual_history": [
+        {
+          "trip": 1,
+          "residual": 0.05255408736543541
+        },
+        {
+          "trip": 2,
+          "residual": 0.05254447718241892
+        },
+        {
+          "trip": 3,
+          "residual": 0.05253485982581941
+        },
+        {
+          "trip": 4,
+          "residual": 0.0525252351060905
+        },
+        {
+          "trip": 5,
+          "residual": 0.052515602826120104
+        },
+        {
+          "trip": 6,
+          "residual": 0.05250596278084974
+        },
+        {
+          "trip": 7,
+          "residual": 0.052496314756865975
+        },
+        {
+          "trip": 8,
+          "residual": 0.0524866585319754
+        },
+        {
+          "trip": 9,
+          "residual": 0.05247699387474131
+        },
+        {
+          "trip": 10,
+          "residual": 0.052467320543998636
+        },
+        {
+          "trip": 11,
+          "residual": 0.05245763828833937
+        },
+        {
+          "trip": 12,
+          "residual": 0.052451436820622414
+        },
+        {
+          "trip": 13,
+          "residual": 0.05245103919634117
+        },
+        {
+          "trip": 14,
+          "residual": 0.05245103919634117
+        }
+      ],
+      "terminal_nulls": {
+        "axis_rz_m": [
+          6.404584745577163,
+          -1.215199678815416e-06
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          3,
+          0
+        ],
+        "axis_flux_wb": 94.83635284649293,
+        "boundary_flux_wb": 34.24232096497957
+      },
+      "terminal_axis_rz_m": [
+        6.404584745577163,
+        -1.215199678815416e-06
+      ],
+      "terminal_x_point_rz_m": null,
+      "reference_axis_rz_m": [
+        6.194958772632181,
+        0.00013499785829806932
+      ],
+      "reference_x_point_rz_m": null,
+      "x_point_distance_m": null,
+      "x_point_distance_status": "no_admitted_reference_saddle",
+      "resolved_defaults": {
+        "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
+        "policy": {
+          "route": "newton_krylov",
+          "newton_steps": 10,
+          "gmres_iterations": 30,
+          "warmup": 0,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "active_set_steps": 16,
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12,
+          "current_pin": true,
+          "settled_exit": true,
+          "own_mask_acceptance": true,
+          "continuation": true,
+          "best_iterate_retention": true,
+          "stagnation_stop": true,
+          "exact_kernels": true,
+          "cached_machine": true,
+          "compilation_cache": true
+        },
+        "deviations": {
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12
+        },
+        "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+      },
+      "termination_reason": 10,
+      "wall_units": [
+        [
+          0,
+          121,
+          true,
+          "vessel"
+        ]
+      ],
+      "state_file": "f5af729a9-weak-rotation-reactor-static-chord.npz",
+      "support_health": {
+        "counter_positive_control": {
+          "nonfinite_entries": 2,
+          "expected": 2
+        },
+        "integrator": "    def support_current_moments(\n        self,\n        profile,\n        centroid_flux,\n        sample_flux,\n        support,\n    ) -> CellCurrentMoments:\n        \"\"\"Evaluate every nonempty support through one moment callable.\"\"\"\n        if self.moment_geometry is None:\n            raise ValueError(\"moment geometry is required for current moments\")\n        field = flux_field_polynomial(\n            self._support_moment_stencils, centroid_flux, sample_flux\n        )\n        selected = field.active & (jnp.asarray(support.vertex_count) >= 3)\n        moment_integrator = (\n            clipped_support_current_moments\n            if _SUPPORT_CLIP_MODE == \"chord\"\n            else _cell_banked_current_moments\n        )\n        moments = moment_integrator(\n            support,\n            selected,\n            field,\n            profile,\n            cut_cell_capacity=self._cut_cell_bank_capacity,\n        )\n        return CellCurrentMoments(*moments)\n",
+        "capacity_receipt": "no public overflow receipt; recomputed native selected boundary count > cut-cell bank capacity",
+        "cut_cell_capacity": 135,
+        "per_trip": [
+          {
+            "trip": 1,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 2,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 3,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 4,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 5,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 6,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 7,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 8,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 9,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 10,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 11,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 12,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 13,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 14,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              0
+            ],
+            "cut_cell_capacity_overflow": false
+          }
+        ],
+        "max_nonfinite_clipped_moment_entries": 0
+      },
+      "support_health_status": "measured",
+      "wall_seconds": 530.1841608751565,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-production-route-ladder/authorized-retry/f5af729a9-weak-rotation-reactor-static-chord.log",
+      "exit_status": 0
+    },
+    {
+      "revision": "a17431153",
+      "case": "diverted-single-null",
+      "clip_mode": "exact",
+      "status": "measured",
+      "exception": null,
+      "slurm_job_id": "1276244",
+      "seed_policy": {
+        "status": "measured",
+        "type": "nova.equilibrium.solve_request.ExplicitSolveSeed",
+        "construction_type": "axis_saddle_geometry",
+        "factory": "profile.cold_seed_portfolio",
+        "state_sha256": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883",
+        "state_dtype": "float64",
+        "state_shape": [
+          730
+        ],
+        "seed_radius_m": 0.649709176903539
+      },
+      "harness_sha256": "60536750f31a9ec55a478b122bdd65231cc3aa6e7b58bd347a4d07fe745547b3",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/a17431153/nova/__init__.py",
+      "full_revision": "a174311537a5e5fe04678dc3fe7909f3d8487650",
+      "devices": [
+        "cuda:0"
+      ],
+      "realised_cells": 132,
+      "carrier_identity": "solovev:diverted-single-null:-110",
+      "reference_nulls": {
+        "axis_rz_m": [
+          1.7869104924134618,
+          0.046151482164328565
+        ],
+        "x_point_rz_m": [
+          1.4930225591761932,
+          -1.0188319093078109
+        ],
+        "qualified_saddles_rz_m": [
+          [
+            1.5107863810710611,
+            -1.0275005315610446
+          ],
+          [
+            1.4930225591761932,
+            -1.0188319093078109
+          ],
+          [
+            1.506509523756129,
+            -1.000151395931814
+          ]
+        ],
+        "retained_count": [
+          1,
+          3
+        ],
+        "axis_flux_wb": 0.005713819178329534,
+        "boundary_flux_wb": 1.361644435324944e-05
+      },
+      "seed_receipt": {
+        "factory": "profile.cold_seed_portfolio",
+        "requested_class": "diverted",
+        "branch_index": 1,
+        "construction": "axis_saddle_geometry",
+        "plasma_current_a": 37319.34592471112,
+        "current_centroid_m": [
+          1.7120154725908823,
+          0.030254757713386198
+        ],
+        "seed_radius_m": 0.649709176903539,
+        "supported_cell_count": 58,
+        "anchor_available": true,
+        "anchor_m": [
+          1.5019897592858353,
+          -1.019292805308505
+        ],
+        "declared_axis_m": [
+          1.7870647018106887,
+          0.0467736265648528
+        ],
+        "declared_boundary_m": [
+          1.5025279999999999,
+          -1.01728
+        ],
+        "stored_flux_samples_used": false,
+        "current_target_provenance": {
+          "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+          "declared_current_a": 37319.34592471112,
+          "current_centroid_m": [
+            1.7120154725908823,
+            0.030254757713386198
+          ],
+          "closed_form_flux_samples_used_for_current_support_only": true
+        },
+        "state_sha256_binary64": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883"
+      },
+      "seed_amplitude": 0.9818308983647959,
+      "fixture_cache": {
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
+        "semantic_key": "833a17bde1b7b150",
+        "hit": true,
+        "lock_wait_seconds": 8.244998753070831e-06,
+        "build_seconds": 0.0
+      },
+      "current_receipt": {
+        "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+        "declared_current_a": 37319.34592471112,
+        "current_centroid_m": [
+          1.7120154725908823,
+          0.030254757713386198
+        ],
+        "closed_form_flux_samples_used_for_current_support_only": true
+      },
+      "seed_sha256": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883",
+      "active_set_budget": 16,
+      "observer": {
+        "method": "host callback copies selected state at native trip reconcile",
+        "native_function_sha256": "5f3d41010da058238abd4204cf02ac65e468dbde474871c2baec6fcaf417dea1",
+        "inserted_statement": "jax.debug.callback(_capture_trip, trip_active, index, selected_state, selected_residual, ordered=True)",
+        "solver_values_modified": false
+      },
+      "converged": false,
+      "qualified": false,
+      "trip_count": 6,
+      "terminal_residual": 0.1749182905416013,
+      "per_trip_residual_history": [
+        {
+          "trip": 1,
+          "residual": 0.7165569108712918
+        },
+        {
+          "trip": 2,
+          "residual": 0.17528534517743444
+        },
+        {
+          "trip": 3,
+          "residual": 0.17491830378416728
+        },
+        {
+          "trip": 4,
+          "residual": 0.17491829201299655
+        },
+        {
+          "trip": 5,
+          "residual": 0.1749182905416013
+        },
+        {
+          "trip": 6,
+          "residual": 0.1749182905416013
+        }
+      ],
+      "terminal_nulls": {
+        "axis_rz_m": [
+          2.2515304188524508,
+          -0.14251644080298342
+        ],
+        "x_point_rz_m": [
+          1.9395422427726479,
+          0.23539768238244185
+        ],
+        "qualified_saddles_rz_m": [
+          [
+            1.9395422427726479,
+            0.23539768238244185
+          ]
+        ],
+        "retained_count": [
+          5,
+          1
+        ],
+        "axis_flux_wb": 0.21223013075912364,
+        "boundary_flux_wb": 0.16141000167656952
+      },
+      "terminal_axis_rz_m": [
+        2.2515304188524508,
+        -0.14251644080298342
+      ],
+      "terminal_x_point_rz_m": [
+        1.9395422427726479,
+        0.23539768238244185
+      ],
+      "reference_axis_rz_m": [
+        1.7869104924134618,
+        0.046151482164328565
+      ],
+      "reference_x_point_rz_m": [
+        1.4930225591761932,
+        -1.0188319093078109
+      ],
+      "x_point_distance_m": 1.3313420659284285,
+      "x_point_distance_status": "measured",
+      "resolved_defaults": {
+        "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
+        "policy": {
+          "route": "newton_krylov",
+          "newton_steps": 10,
+          "gmres_iterations": 30,
+          "warmup": 0,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "active_set_steps": 16,
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12,
+          "current_pin": true,
+          "settled_exit": true,
+          "own_mask_acceptance": true,
+          "continuation": true,
+          "best_iterate_retention": true,
+          "stagnation_stop": true,
+          "exact_kernels": true,
+          "cached_machine": true,
+          "compilation_cache": true
+        },
+        "deviations": {
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12
+        },
+        "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+      },
+      "termination_reason": 10,
+      "wall_units": [
+        [
+          0,
+          121,
+          true,
+          "vessel"
+        ]
+      ],
+      "state_file": "a17431153-diverted-single-null-exact.npz",
+      "support_health": {
+        "counter_positive_control": {
+          "nonfinite_entries": 2,
+          "expected": 2
+        },
+        "integrator": "    def support_current_moments(\n        self,\n        profile,\n        centroid_flux,\n        sample_flux,\n        support,\n    ) -> CellCurrentMoments:\n        \"\"\"Evaluate every nonempty support through one moment callable.\"\"\"\n        if self.moment_geometry is None:\n            raise ValueError(\"moment geometry is required for current moments\")\n        field = flux_field_polynomial(\n            self._support_moment_stencils, centroid_flux, sample_flux\n        )\n        selected = field.active & (jnp.asarray(support.vertex_count) >= 3)\n        moment_integrator = (\n            clipped_support_current_moments\n            if _SUPPORT_CLIP_MODE == \"chord\"\n            else _cell_banked_current_moments\n        )\n        moments = moment_integrator(\n            support,\n            selected,\n            field,\n            profile,\n            cut_cell_capacity=self._cut_cell_bank_capacity,\n        )\n        return CellCurrentMoments(*moments)\n",
+        "capacity_receipt": "no public overflow receipt; recomputed native selected boundary count > cut-cell bank capacity",
+        "cut_cell_capacity": 132,
+        "per_trip": [
+          {
+            "trip": 1,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              15
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 2,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              8
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 3,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              8
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 4,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              8
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 5,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              8
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 6,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              8
+            ],
+            "cut_cell_capacity_overflow": false
+          }
+        ],
+        "max_nonfinite_clipped_moment_entries": 0
+      },
+      "support_health_status": "measured",
+      "wall_seconds": 642.9371376261115,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-production-route-ladder/authorized-retry/a17431153-diverted-single-null-exact.log",
+      "exit_status": 0,
+      "panel": {
+        "caption": "a17431153 | converged=False\ntrips=6 | residual=0.174918\nnon-finite moment entries (max/trip)=0",
+        "axis_off": true,
+        "contour_segments": [
+          19,
+          15
+        ],
+        "reference_markers": {
+          "x_points_drawn": 1,
+          "x_points_dropped_outside_wall": 0,
+          "strike_points_drawn": 0,
+          "other_x_points_drawn": 2
+        },
+        "terminal_markers": {
+          "x_points_drawn": 1,
+          "x_points_dropped_outside_wall": 0,
+          "strike_points_drawn": 0,
+          "other_x_points_drawn": 0
+        }
+      }
+    },
+    {
+      "revision": "a17431153",
+      "case": "weak-rotation-reactor-static",
+      "clip_mode": "exact",
+      "status": "measured",
+      "exception": null,
+      "slurm_job_id": "1276244",
+      "seed_policy": {
+        "status": "measured",
+        "type": "nova.equilibrium.solve_request.ExplicitSolveSeed",
+        "construction_type": "current_centroid_disc",
+        "factory": "profile.cold_seed_portfolio",
+        "state_sha256": "36733af01b7facb6fe3398a20df929b5d96dce1ac83370319b5d1128de06e6d8",
+        "state_dtype": "float64",
+        "state_shape": [
+          772
+        ],
+        "seed_radius_m": 1.564079053601776
+      },
+      "harness_sha256": "60536750f31a9ec55a478b122bdd65231cc3aa6e7b58bd347a4d07fe745547b3",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/a17431153/nova/__init__.py",
+      "full_revision": "a174311537a5e5fe04678dc3fe7909f3d8487650",
+      "devices": [
+        "cuda:0"
+      ],
+      "realised_cells": 135,
+      "carrier_identity": "solovev:weak-rotation-reactor-static:-110",
+      "reference_nulls": {
+        "axis_rz_m": [
+          6.194958772632181,
+          0.00013499785829806932
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          3,
+          0
+        ],
+        "axis_flux_wb": 49.94187078939037,
+        "boundary_flux_wb": 1.1345091532888318e-15
+      },
+      "seed_receipt": {
+        "factory": "profile.cold_seed_portfolio",
+        "requested_class": "limited",
+        "branch_index": 0,
+        "construction": "current_centroid_disc",
+        "plasma_current_a": 16314773.311828371,
+        "current_centroid_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "seed_radius_m": 1.564079053601776,
+        "supported_cell_count": 36,
+        "anchor_available": true,
+        "anchor_m": [
+          7.801395788445413,
+          -5.030892782827948e-11
+        ],
+        "declared_axis_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "declared_boundary_m": [
+          7.801395788445413,
+          -5.030892782827948e-11
+        ],
+        "stored_flux_samples_used": false,
+        "current_target_provenance": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "quadrature_nodes": 512,
+          "quadrature_current_a": 16314773.311828367,
+          "declared_current_a": 16314773.311828371,
+          "quadrature_relative_closure": 2.2833846522164315e-16,
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ]
+        },
+        "state_sha256_binary64": "36733af01b7facb6fe3398a20df929b5d96dce1ac83370319b5d1128de06e6d8"
+      },
+      "seed_amplitude": 1.0057784705338764,
+      "fixture_cache": {
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
+        "semantic_key": "0eb458e6edb500a7",
+        "hit": true,
+        "lock_wait_seconds": 6.397254765033722e-06,
+        "build_seconds": 0.0
+      },
+      "current_receipt": {
+        "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+        "quadrature_nodes": 512,
+        "quadrature_current_a": 16314773.311828367,
+        "declared_current_a": 16314773.311828371,
+        "quadrature_relative_closure": 2.2833846522164315e-16,
+        "current_centroid_m": [
+          6.063530173332898,
+          0.0
+        ]
+      },
+      "seed_sha256": "36733af01b7facb6fe3398a20df929b5d96dce1ac83370319b5d1128de06e6d8",
+      "active_set_budget": 16,
+      "observer": {
+        "method": "host callback copies selected state at native trip reconcile",
+        "native_function_sha256": "5f3d41010da058238abd4204cf02ac65e468dbde474871c2baec6fcaf417dea1",
+        "inserted_statement": "jax.debug.callback(_capture_trip, trip_active, index, selected_state, selected_residual, ordered=True)",
+        "solver_values_modified": false
+      },
+      "converged": false,
+      "qualified": false,
+      "trip_count": 4,
+      "terminal_residual": 0.07500827508772143,
+      "per_trip_residual_history": [
+        {
+          "trip": 1,
+          "residual": 0.07507047455094697
+        },
+        {
+          "trip": 2,
+          "residual": 0.07500829465727699
+        },
+        {
+          "trip": 3,
+          "residual": 0.07500827508772143
+        },
+        {
+          "trip": 4,
+          "residual": 0.07500827508772143
+        }
+      ],
+      "terminal_nulls": {
+        "axis_rz_m": [
+          6.172837423452956,
+          -0.0008660649939196685
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          2,
+          0
+        ],
+        "axis_flux_wb": 68.21866246067732,
+        "boundary_flux_wb": 9.522315524800224
+      },
+      "terminal_axis_rz_m": [
+        6.172837423452956,
+        -0.0008660649939196685
+      ],
+      "terminal_x_point_rz_m": null,
+      "reference_axis_rz_m": [
+        6.194958772632181,
+        0.00013499785829806932
+      ],
+      "reference_x_point_rz_m": null,
+      "x_point_distance_m": null,
+      "x_point_distance_status": "no_admitted_reference_saddle",
+      "resolved_defaults": {
+        "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
+        "policy": {
+          "route": "newton_krylov",
+          "newton_steps": 10,
+          "gmres_iterations": 30,
+          "warmup": 0,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "active_set_steps": 16,
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12,
+          "current_pin": true,
+          "settled_exit": true,
+          "own_mask_acceptance": true,
+          "continuation": true,
+          "best_iterate_retention": true,
+          "stagnation_stop": true,
+          "exact_kernels": true,
+          "cached_machine": true,
+          "compilation_cache": true
+        },
+        "deviations": {
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12
+        },
+        "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+      },
+      "termination_reason": 10,
+      "wall_units": [
+        [
+          0,
+          121,
+          true,
+          "vessel"
+        ]
+      ],
+      "state_file": "a17431153-weak-rotation-reactor-static-exact.npz",
+      "support_health": {
+        "counter_positive_control": {
+          "nonfinite_entries": 2,
+          "expected": 2
+        },
+        "integrator": "    def support_current_moments(\n        self,\n        profile,\n        centroid_flux,\n        sample_flux,\n        support,\n    ) -> CellCurrentMoments:\n        \"\"\"Evaluate every nonempty support through one moment callable.\"\"\"\n        if self.moment_geometry is None:\n            raise ValueError(\"moment geometry is required for current moments\")\n        field = flux_field_polynomial(\n            self._support_moment_stencils, centroid_flux, sample_flux\n        )\n        selected = field.active & (jnp.asarray(support.vertex_count) >= 3)\n        moment_integrator = (\n            clipped_support_current_moments\n            if _SUPPORT_CLIP_MODE == \"chord\"\n            else _cell_banked_current_moments\n        )\n        moments = moment_integrator(\n            support,\n            selected,\n            field,\n            profile,\n            cut_cell_capacity=self._cut_cell_bank_capacity,\n        )\n        return CellCurrentMoments(*moments)\n",
+        "capacity_receipt": "no public overflow receipt; recomputed native selected boundary count > cut-cell bank capacity",
+        "cut_cell_capacity": 135,
+        "per_trip": [
+          {
+            "trip": 1,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              38
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 2,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              38
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 3,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              38
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 4,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              38
+            ],
+            "cut_cell_capacity_overflow": false
+          }
+        ],
+        "max_nonfinite_clipped_moment_entries": 0
+      },
+      "support_health_status": "measured",
+      "wall_seconds": 667.8224993860349,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-production-route-ladder/authorized-retry/a17431153-weak-rotation-reactor-static-exact.log",
+      "exit_status": 0
+    },
+    {
+      "revision": "450bab78a",
+      "case": "diverted-single-null",
+      "clip_mode": "exact",
+      "status": "measured",
+      "exception": null,
+      "slurm_job_id": "1276244",
+      "seed_policy": {
+        "status": "measured",
+        "type": "nova.equilibrium.solve_request.ExplicitSolveSeed",
+        "construction_type": "axis_saddle_geometry",
+        "factory": "profile.cold_seed_portfolio",
+        "state_sha256": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883",
+        "state_dtype": "float64",
+        "state_shape": [
+          730
+        ],
+        "seed_radius_m": 0.649709176903539
+      },
+      "harness_sha256": "60536750f31a9ec55a478b122bdd65231cc3aa6e7b58bd347a4d07fe745547b3",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/450bab78a/nova/__init__.py",
+      "full_revision": "450bab78a55b6178b145de2dcacaa3e479940743",
+      "devices": [
+        "cuda:0"
+      ],
+      "realised_cells": 132,
+      "carrier_identity": "solovev:diverted-single-null:-110",
+      "reference_nulls": {
+        "axis_rz_m": [
+          1.7869104924134618,
+          0.046151482164328565
+        ],
+        "x_point_rz_m": [
+          1.4930225591761932,
+          -1.0188319093078109
+        ],
+        "qualified_saddles_rz_m": [
+          [
+            1.5107863810710611,
+            -1.0275005315610446
+          ],
+          [
+            1.4930225591761932,
+            -1.0188319093078109
+          ],
+          [
+            1.506509523756129,
+            -1.000151395931814
+          ]
+        ],
+        "retained_count": [
+          1,
+          3
+        ],
+        "axis_flux_wb": 0.005713819178329534,
+        "boundary_flux_wb": 1.361644435324944e-05
+      },
+      "seed_receipt": {
+        "factory": "profile.cold_seed_portfolio",
+        "requested_class": "diverted",
+        "branch_index": 1,
+        "construction": "axis_saddle_geometry",
+        "plasma_current_a": 37319.34592471112,
+        "current_centroid_m": [
+          1.7120154725908823,
+          0.030254757713386198
+        ],
+        "seed_radius_m": 0.649709176903539,
+        "supported_cell_count": 58,
+        "anchor_available": true,
+        "anchor_m": [
+          1.5019897592858353,
+          -1.019292805308505
+        ],
+        "declared_axis_m": [
+          1.7870647018106887,
+          0.0467736265648528
+        ],
+        "declared_boundary_m": [
+          1.5025279999999999,
+          -1.01728
+        ],
+        "stored_flux_samples_used": false,
+        "current_target_provenance": {
+          "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+          "declared_current_a": 37319.34592471112,
+          "current_centroid_m": [
+            1.7120154725908823,
+            0.030254757713386198
+          ],
+          "closed_form_flux_samples_used_for_current_support_only": true
+        },
+        "state_sha256_binary64": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883"
+      },
+      "seed_amplitude": 0.9818308983647956,
+      "fixture_cache": {
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
+        "semantic_key": "833a17bde1b7b150",
+        "hit": true,
+        "lock_wait_seconds": 6.598420441150665e-06,
+        "build_seconds": 0.0
+      },
+      "current_receipt": {
+        "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+        "declared_current_a": 37319.34592471112,
+        "current_centroid_m": [
+          1.7120154725908823,
+          0.030254757713386198
+        ],
+        "closed_form_flux_samples_used_for_current_support_only": true
+      },
+      "seed_sha256": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883",
+      "active_set_budget": 16,
+      "observer": {
+        "method": "host callback copies selected state at native trip reconcile",
+        "native_function_sha256": "5f3d41010da058238abd4204cf02ac65e468dbde474871c2baec6fcaf417dea1",
+        "inserted_statement": "jax.debug.callback(_capture_trip, trip_active, index, selected_state, selected_residual, ordered=True)",
+        "solver_values_modified": false
+      },
+      "converged": false,
+      "qualified": false,
+      "trip_count": 6,
+      "terminal_residual": 0.1749177415122349,
+      "per_trip_residual_history": [
+        {
+          "trip": 1,
+          "residual": 0.7165569263710823
+        },
+        {
+          "trip": 2,
+          "residual": 0.17528520725487845
+        },
+        {
+          "trip": 3,
+          "residual": 0.17491785922362296
+        },
+        {
+          "trip": 4,
+          "residual": 0.1749177650545105
+        },
+        {
+          "trip": 5,
+          "residual": 0.1749177415122349
+        },
+        {
+          "trip": 6,
+          "residual": 0.1749177415122349
+        }
+      ],
+      "terminal_nulls": {
+        "axis_rz_m": [
+          2.2515305500080984,
+          -0.14251646102223411
+        ],
+        "x_point_rz_m": [
+          1.9395423493267328,
+          0.23539796933839524
+        ],
+        "qualified_saddles_rz_m": [
+          [
+            1.9395423493267328,
+            0.23539796933839524
+          ]
+        ],
+        "retained_count": [
+          5,
+          1
+        ],
+        "axis_flux_wb": 0.21223003929921241,
+        "boundary_flux_wb": 0.16140997221190345
+      },
+      "terminal_axis_rz_m": [
+        2.2515305500080984,
+        -0.14251646102223411
+      ],
+      "terminal_x_point_rz_m": [
+        1.9395423493267328,
+        0.23539796933839524
+      ],
+      "reference_axis_rz_m": [
+        1.7869104924134618,
+        0.046151482164328565
+      ],
+      "reference_x_point_rz_m": [
+        1.4930225591761932,
+        -1.0188319093078109
+      ],
+      "x_point_distance_m": 1.331342372000891,
+      "x_point_distance_status": "measured",
+      "resolved_defaults": {
+        "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
+        "policy": {
+          "route": "newton_krylov",
+          "newton_steps": 10,
+          "gmres_iterations": 30,
+          "warmup": 0,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "active_set_steps": 16,
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12,
+          "current_pin": true,
+          "settled_exit": true,
+          "own_mask_acceptance": true,
+          "continuation": true,
+          "best_iterate_retention": true,
+          "stagnation_stop": true,
+          "exact_kernels": true,
+          "cached_machine": true,
+          "compilation_cache": true
+        },
+        "deviations": {
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12
+        },
+        "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+      },
+      "termination_reason": 10,
+      "wall_units": [
+        [
+          0,
+          121,
+          true,
+          "vessel"
+        ]
+      ],
+      "state_file": "450bab78a-diverted-single-null-exact.npz",
+      "support_health": {
+        "counter_positive_control": {
+          "nonfinite_entries": 2,
+          "expected": 2
+        },
+        "integrator": "    def support_current_moments(\n        self,\n        profile,\n        centroid_flux,\n        sample_flux,\n        support,\n    ) -> CellCurrentMoments:\n        \"\"\"Evaluate every nonempty support through one moment callable.\"\"\"\n        if self.moment_geometry is None:\n            raise ValueError(\"moment geometry is required for current moments\")\n        field = flux_field_polynomial(\n            self._support_moment_stencils, centroid_flux, sample_flux\n        )\n        selected = field.active & (jnp.asarray(support.vertex_count) >= 3)\n        moment_integrator = (\n            clipped_support_current_moments\n            if _SUPPORT_CLIP_MODE == \"chord\"\n            else _cell_banked_current_moments\n        )\n        moments = moment_integrator(\n            support,\n            selected,\n            field,\n            profile,\n            cut_cell_capacity=self._cut_cell_bank_capacity,\n        )\n        return CellCurrentMoments(*moments)\n",
+        "capacity_receipt": "no public overflow receipt; recomputed native selected boundary count > cut-cell bank capacity",
+        "cut_cell_capacity": 132,
+        "per_trip": [
+          {
+            "trip": 1,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              15
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 2,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              8
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 3,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              8
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 4,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              8
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 5,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              8
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 6,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              8
+            ],
+            "cut_cell_capacity_overflow": false
+          }
+        ],
+        "max_nonfinite_clipped_moment_entries": 0
+      },
+      "support_health_status": "measured",
+      "wall_seconds": 437.2237605387345,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-production-route-ladder/authorized-retry/450bab78a-diverted-single-null-exact.log",
+      "exit_status": 0,
+      "panel": {
+        "caption": "450bab78a | converged=False\ntrips=6 | residual=0.174918\nnon-finite moment entries (max/trip)=0",
+        "axis_off": true,
+        "contour_segments": [
+          19,
+          15
+        ],
+        "reference_markers": {
+          "x_points_drawn": 1,
+          "x_points_dropped_outside_wall": 0,
+          "strike_points_drawn": 0,
+          "other_x_points_drawn": 2
+        },
+        "terminal_markers": {
+          "x_points_drawn": 1,
+          "x_points_dropped_outside_wall": 0,
+          "strike_points_drawn": 0,
+          "other_x_points_drawn": 0
+        }
+      }
+    },
+    {
+      "revision": "450bab78a",
+      "case": "weak-rotation-reactor-static",
+      "clip_mode": "exact",
+      "status": "measured",
+      "exception": null,
+      "slurm_job_id": "1276244",
+      "seed_policy": {
+        "status": "measured",
+        "type": "nova.equilibrium.solve_request.ExplicitSolveSeed",
+        "construction_type": "current_centroid_disc",
+        "factory": "profile.cold_seed_portfolio",
+        "state_sha256": "36733af01b7facb6fe3398a20df929b5d96dce1ac83370319b5d1128de06e6d8",
+        "state_dtype": "float64",
+        "state_shape": [
+          772
+        ],
+        "seed_radius_m": 1.564079053601776
+      },
+      "harness_sha256": "60536750f31a9ec55a478b122bdd65231cc3aa6e7b58bd347a4d07fe745547b3",
+      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/450bab78a/nova/__init__.py",
+      "full_revision": "450bab78a55b6178b145de2dcacaa3e479940743",
+      "devices": [
+        "cuda:0"
+      ],
+      "realised_cells": 135,
+      "carrier_identity": "solovev:weak-rotation-reactor-static:-110",
+      "reference_nulls": {
+        "axis_rz_m": [
+          6.194958772632181,
+          0.00013499785829806932
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          3,
+          0
+        ],
+        "axis_flux_wb": 49.94187078939037,
+        "boundary_flux_wb": 1.1345091532888318e-15
+      },
+      "seed_receipt": {
+        "factory": "profile.cold_seed_portfolio",
+        "requested_class": "limited",
+        "branch_index": 0,
+        "construction": "current_centroid_disc",
+        "plasma_current_a": 16314773.311828371,
+        "current_centroid_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "seed_radius_m": 1.564079053601776,
+        "supported_cell_count": 36,
+        "anchor_available": true,
+        "anchor_m": [
+          7.801395788445413,
+          -5.030892782827948e-11
+        ],
+        "declared_axis_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "declared_boundary_m": [
+          7.801395788445413,
+          -5.030892782827948e-11
+        ],
+        "stored_flux_samples_used": false,
+        "current_target_provenance": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "quadrature_nodes": 512,
+          "quadrature_current_a": 16314773.311828367,
+          "declared_current_a": 16314773.311828371,
+          "quadrature_relative_closure": 2.2833846522164315e-16,
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ]
+        },
+        "state_sha256_binary64": "36733af01b7facb6fe3398a20df929b5d96dce1ac83370319b5d1128de06e6d8"
+      },
+      "seed_amplitude": 1.0057784705338766,
+      "fixture_cache": {
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
+        "semantic_key": "0eb458e6edb500a7",
+        "hit": true,
+        "lock_wait_seconds": 6.51925802230835e-06,
+        "build_seconds": 0.0
+      },
+      "current_receipt": {
+        "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+        "quadrature_nodes": 512,
+        "quadrature_current_a": 16314773.311828367,
+        "declared_current_a": 16314773.311828371,
+        "quadrature_relative_closure": 2.2833846522164315e-16,
+        "current_centroid_m": [
+          6.063530173332898,
+          0.0
+        ]
+      },
+      "seed_sha256": "36733af01b7facb6fe3398a20df929b5d96dce1ac83370319b5d1128de06e6d8",
+      "active_set_budget": 16,
+      "observer": {
+        "method": "host callback copies selected state at native trip reconcile",
+        "native_function_sha256": "5f3d41010da058238abd4204cf02ac65e468dbde474871c2baec6fcaf417dea1",
+        "inserted_statement": "jax.debug.callback(_capture_trip, trip_active, index, selected_state, selected_residual, ordered=True)",
+        "solver_values_modified": false
+      },
+      "converged": false,
+      "qualified": false,
+      "trip_count": 4,
+      "terminal_residual": 0.07500827508743789,
+      "per_trip_residual_history": [
+        {
+          "trip": 1,
+          "residual": 0.07507047455066831
+        },
+        {
+          "trip": 2,
+          "residual": 0.0750082946569942
+        },
+        {
+          "trip": 3,
+          "residual": 0.07500827508743789
+        },
+        {
+          "trip": 4,
+          "residual": 0.07500827508743789
+        }
+      ],
+      "terminal_nulls": {
+        "axis_rz_m": [
+          6.172837423453162,
+          -0.0008660649939585818
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          2,
+          0
+        ],
+        "axis_flux_wb": 68.2186624607062,
+        "boundary_flux_wb": 9.522315524806189
+      },
+      "terminal_axis_rz_m": [
+        6.172837423453162,
+        -0.0008660649939585818
+      ],
+      "terminal_x_point_rz_m": null,
+      "reference_axis_rz_m": [
+        6.194958772632181,
+        0.00013499785829806932
+      ],
+      "reference_x_point_rz_m": null,
+      "x_point_distance_m": null,
+      "x_point_distance_status": "no_admitted_reference_saddle",
+      "resolved_defaults": {
+        "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
+        "policy": {
+          "route": "newton_krylov",
+          "newton_steps": 10,
+          "gmres_iterations": 30,
+          "warmup": 0,
+          "relaxation": 0.5,
+          "step_cap": 10.0,
+          "active_set_steps": 16,
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12,
+          "current_pin": true,
+          "settled_exit": true,
+          "own_mask_acceptance": true,
+          "continuation": true,
+          "best_iterate_retention": true,
+          "stagnation_stop": true,
+          "exact_kernels": true,
+          "cached_machine": true,
+          "compilation_cache": true
+        },
+        "deviations": {
+          "kernel_tolerance": 1e-12,
+          "qualification_tolerance": 1e-12
+        },
+        "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+      },
+      "termination_reason": 10,
+      "wall_units": [
+        [
+          0,
+          121,
+          true,
+          "vessel"
+        ]
+      ],
+      "state_file": "450bab78a-weak-rotation-reactor-static-exact.npz",
+      "support_health": {
+        "counter_positive_control": {
+          "nonfinite_entries": 2,
+          "expected": 2
+        },
+        "integrator": "    def support_current_moments(\n        self,\n        profile,\n        centroid_flux,\n        sample_flux,\n        support,\n    ) -> CellCurrentMoments:\n        \"\"\"Evaluate every nonempty support through one moment callable.\"\"\"\n        if self.moment_geometry is None:\n            raise ValueError(\"moment geometry is required for current moments\")\n        field = flux_field_polynomial(\n            self._support_moment_stencils, centroid_flux, sample_flux\n        )\n        selected = field.active & (jnp.asarray(support.vertex_count) >= 3)\n        moment_integrator = (\n            clipped_support_current_moments\n            if _SUPPORT_CLIP_MODE == \"chord\"\n            else _cell_banked_current_moments\n        )\n        moments = moment_integrator(\n            support,\n            selected,\n            field,\n            profile,\n            cut_cell_capacity=self._cut_cell_bank_capacity,\n        )\n        return CellCurrentMoments(*moments)\n",
+        "capacity_receipt": "no public overflow receipt; recomputed native selected boundary count > cut-cell bank capacity",
+        "cut_cell_capacity": 135,
+        "per_trip": [
+          {
+            "trip": 1,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              38
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 2,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              38
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 3,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              38
+            ],
+            "cut_cell_capacity_overflow": false
+          },
+          {
+            "trip": 4,
+            "nonfinite_clipped_moment_entries": 0,
+            "nonfinite_entries_per_profile": [
+              0
+            ],
+            "nonfinite_combined_moment_entries": 0,
+            "selected_cut_cells_per_profile": [
+              38
+            ],
+            "cut_cell_capacity_overflow": false
+          }
+        ],
+        "max_nonfinite_clipped_moment_entries": 0
+      },
+      "support_health_status": "measured",
+      "wall_seconds": 481.3510120026767,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-production-route-ladder/authorized-retry/450bab78a-weak-rotation-reactor-static-exact.log",
+      "exit_status": 0
     }
   ],
   "attribution": {
     "diverted-single-null": {
       "verdict": "all_measured_revisions_unconverged",
       "first_transition": null,
-      "attempted": 1,
-      "measured": 1,
+      "attempted": 3,
+      "measured": 3,
       "unmeasured_revisions": [
         "9aebe5fae",
         "b43714114",
@@ -379,16 +2519,14 @@
         "ee17f9570",
         "2e38dc877",
         "337eb81ee",
-        "23a8522b6",
-        "450bab78a",
-        "a17431153"
+        "23a8522b6"
       ]
     },
     "weak-rotation-reactor-static": {
-      "verdict": "no_adjacent_transition_attributed",
+      "verdict": "all_measured_revisions_unconverged",
       "first_transition": null,
-      "attempted": 0,
-      "measured": 0,
+      "attempted": 3,
+      "measured": 3,
       "unmeasured_revisions": [
         "9aebe5fae",
         "b43714114",
@@ -396,10 +2534,7 @@
         "ee17f9570",
         "2e38dc877",
         "337eb81ee",
-        "23a8522b6",
-        "450bab78a",
-        "a17431153",
-        "f5af729a9"
+        "23a8522b6"
       ]
     }
   },

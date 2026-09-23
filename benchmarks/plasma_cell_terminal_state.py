@@ -245,14 +245,81 @@ def _draw_nulls(axis, nulls, wall_units, style):
     )
 
 
-def render(receipt, output):
-    """Draw all measured fields on a shared physical contour array per case."""
+def _cluster_pixel_census(figure, axes, receipt):
+    """Count style-coloured pixels at the analytic saddle cluster on each panel.
+
+    The census is the instrument for the marker draw order: the reference
+    markers are large and the panel-state markers small, so whichever style is
+    drawn last is the one visible where the two coincide. Counting pixels of
+    each style inside a box around the analytic cluster shows the covering
+    directly rather than inferring it from the artist list.
+    """
+    import matplotlib.colors as mcolors
+
+    def rgb(value):
+        return np.asarray(mcolors.to_rgb(value)) * 255.0
+
+    reference_rgb = rgb("#3366cc")
+    panel_rgb = rgb(DEFAULT_INK.xpoint_color)
+    buffer = np.asarray(figure.canvas.buffer_rgba())[..., :3].astype(np.float64)
+    height = buffer.shape[0]
+    census = []
+    for row_index, row in enumerate(receipt["cases"]):
+        candidates = row["analytic_saddle_cluster"]["candidates"]
+        if not candidates:
+            census.append({"status": "no_admitted_reference_saddle"})
+            continue
+        positions = np.asarray([entry["position_rz_m"] for entry in candidates])
+        panels = []
+        for column in range(3):
+            axis = axes[row_index, column]
+            display = axis.transData.transform(positions)
+            low = display.min(axis=0) - 16.0
+            high = display.max(axis=0) + 16.0
+            x0, x1 = int(max(low[0], 0)), int(min(high[0], buffer.shape[1]))
+            y0, y1 = int(max(height - high[1], 0)), int(min(height - low[1], height))
+            block = buffer[y0:y1, x0:x1]
+            reference_count = int(
+                np.sum(np.all(np.abs(block - reference_rgb) <= 40.0, axis=-1))
+            )
+            panel_count = int(
+                np.sum(np.all(np.abs(block - panel_rgb) <= 40.0, axis=-1))
+            )
+            panels.append(
+                {
+                    "reference_pixels": reference_count,
+                    "panel_pixels": panel_count,
+                }
+            )
+        census.append(
+            {
+                "status": "measured",
+                "box_halfwidth_px": 16.0,
+                "panels": panels,
+            }
+        )
+    return census
+
+
+DRAW_ORDERS = ("reference-last", "panel-last")
+
+
+def render(receipt, output, draw_order="reference-last"):
+    """Draw all measured fields on a shared physical contour array per case.
+
+    ``draw_order`` names which null set is drawn last, and therefore which one
+    stays visible where the two coincide. ``panel-last`` is the original
+    ordering, kept reachable as the declared negative control: the small
+    panel-state markers are then drawn over the large reference markers, and the
+    analytic panel draws its own null set twice.
+    """
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
     figure, axes = plt.subplots(2, 3, figsize=(12, 10), constrained_layout=True)
+    figure.set_dpi(160)
     reference_style = DEFAULT_INK.variant(
         axis_color="#3366cc",
         xpoint_color="#3366cc",
@@ -295,9 +362,31 @@ def render(receipt, output):
                 )
                 assert segments > 0, "contour positive control is empty"
                 poloidal.draw_wall(axis, units=units)
-                current = reference if column == 0 else row["arms"][column - 1]["nulls"]
-                reference_tally = _draw_nulls(axis, reference, units, reference_style)
-                panel_tally = _draw_nulls(axis, current, units, panel_style)
+                if draw_order == "panel-last":
+                    # The original ordering: the panel-state markers are drawn
+                    # over the reference markers, and the
+                    # analytic panel draws its own null set a second time.
+                    current = (
+                        reference if column == 0 else row["arms"][column - 1]["nulls"]
+                    )
+                    reference_tally = _draw_nulls(
+                        axis, reference, units, reference_style
+                    )
+                    panel_tally = _draw_nulls(axis, current, units, panel_style)
+                elif column == 0:
+                    # The analytic state is both the reference and the panel
+                    # state, so it is drawn once, in the reference style.
+                    reference_tally = _draw_nulls(
+                        axis, reference, units, reference_style
+                    )
+                    panel_tally = reference_tally
+                else:
+                    panel_tally = _draw_nulls(
+                        axis, row["arms"][column - 1]["nulls"], units, panel_style
+                    )
+                    reference_tally = _draw_nulls(
+                        axis, reference, units, reference_style
+                    )
                 poloidal_axes(axis)
                 if column == 0:
                     caption = "Analytic input\nresidual=n/a; converged=n/a; trips=0"
@@ -336,9 +425,12 @@ def render(receipt, output):
         "Blue large markers: analytic-state read; "
         "red small markers: panel-state read.\n"
         "Filled triangle: axis; filled cross: admitted saddle; "
-        "hollow crosses: other qualified saddles.",
+        "hollow crosses: other qualified saddles. "
+        "Reference markers are drawn last and stay visible where the sets coincide.",
         fontsize=10,
     )
+    figure.canvas.draw()
+    receipt["marker_pixel_census"] = _cluster_pixel_census(figure, axes, receipt)
     figure.savefig(output / "terminal-state-trip-arms.png", dpi=160)
     figure.savefig(output / "terminal-state-trip-arms.svg")
     plt.close(figure)
@@ -501,11 +593,12 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--negative-control-log", type=Path)
     parser.add_argument("--render-only", action="store_true")
+    parser.add_argument("--draw-order", choices=DRAW_ORDERS, default="reference-last")
     arguments = parser.parse_args()
     if arguments.render_only:
         receipt_path = arguments.output / "terminal-state-trip-arms.json"
         receipt = json.loads(receipt_path.read_text())
-        render(receipt, arguments.output)
+        render(receipt, arguments.output, draw_order=arguments.draw_order)
         _write_json(receipt_path, receipt)
     else:
         if arguments.negative_control_log is None:

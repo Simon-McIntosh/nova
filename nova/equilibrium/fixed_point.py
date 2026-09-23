@@ -62,6 +62,12 @@ __all__ = [
     "FixedPointResult",
     "FixedPointTerminationReason",
     "InnerIterationDecision",
+    "OperatorRequest",
+    "OperatorRequestKind",
+    "OperatorResponse",
+    "operator_request",
+    "operator_request_body",
+    "run_operator_requests",
     "KinkAwareResult",
     "KrylovActionQualification",
     "ManifoldAdvanceQualification",
@@ -780,6 +786,24 @@ def _projected_krylov_condition(
     Krylov breakdown is retained as a shorter active projection without
     introducing data-dependent array shapes or control flow.
     """
+
+    def arnoldi_column(column, carry):
+        action = linear_action(carry[0][column])
+        return _arnoldi_column_update(column, carry, action)
+
+    carry = jax.lax.fori_loop(
+        0,
+        krylov_dimension,
+        arnoldi_column,
+        _arnoldi_condition_start(residual_vector, krylov_dimension),
+    )
+    return _arnoldi_condition(*carry, return_direction=return_direction)
+
+
+def _arnoldi_condition_start(
+    residual_vector: jax.Array, krylov_dimension: int
+) -> tuple[jax.Array, jax.Array, jax.Array]:
+    """Seed the fixed-shape Arnoldi basis from the normalised residual."""
     residual_norm = jnp.linalg.norm(residual_vector)
     fallback = jnp.ones_like(residual_vector) / jnp.sqrt(residual_vector.size)
     first_vector = jnp.where(
@@ -797,46 +821,53 @@ def _projected_krylov_condition(
     basis_valid = (
         jnp.zeros(krylov_dimension + 1, dtype=jnp.bool_).at[0].set(residual_norm > 0.0)
     )
-    basis_index = jnp.arange(krylov_dimension + 1)
-    breakdown_floor = 64.0 * jnp.finfo(residual_vector.dtype).eps
+    return basis, hessenberg, basis_valid
 
-    def arnoldi_column(column, carry):
-        basis, hessenberg, basis_valid = carry
-        column_valid = basis_valid[column]
-        action = linear_action(basis[column])
-        active_rows = (basis_index <= column) & basis_valid
 
-        coefficients = jnp.where(active_rows, basis @ action, 0.0)
-        action = action - coefficients @ basis
-        corrections = jnp.where(active_rows, basis @ action, 0.0)
-        action = action - corrections @ basis
-        coefficients = coefficients + corrections
+def _arnoldi_column_update(
+    column: jax.Array,
+    carry: tuple[jax.Array, jax.Array, jax.Array],
+    action: jax.Array,
+) -> tuple[jax.Array, jax.Array, jax.Array]:
+    """Orthogonalise one applied basis column twice and append its successor."""
+    basis, hessenberg, basis_valid = carry
+    basis_index = jnp.arange(basis.shape[0])
+    breakdown_floor = 64.0 * jnp.finfo(basis.dtype).eps
+    column_valid = basis_valid[column]
+    active_rows = (basis_index <= column) & basis_valid
 
-        next_norm = jnp.linalg.norm(action)
-        next_valid = (
-            column_valid & jnp.isfinite(next_norm) & (next_norm > breakdown_floor)
-        )
-        next_vector = jnp.where(
-            next_valid,
-            action / jnp.maximum(next_norm, 1.0e-300),
-            jnp.zeros_like(action),
-        )
-        hessenberg = hessenberg.at[:, column].set(
-            jnp.where(column_valid, coefficients, 0.0)
-        )
-        hessenberg = hessenberg.at[column + 1, column].set(
-            jnp.where(column_valid, next_norm, 0.0)
-        )
-        basis = basis.at[column + 1].set(next_vector)
-        basis_valid = basis_valid.at[column + 1].set(next_valid)
-        return basis, hessenberg, basis_valid
+    coefficients = jnp.where(active_rows, basis @ action, 0.0)
+    action = action - coefficients @ basis
+    corrections = jnp.where(active_rows, basis @ action, 0.0)
+    action = action - corrections @ basis
+    coefficients = coefficients + corrections
 
-    basis, hessenberg, basis_valid = jax.lax.fori_loop(
-        0,
-        krylov_dimension,
-        arnoldi_column,
-        (basis, hessenberg, basis_valid),
+    next_norm = jnp.linalg.norm(action)
+    next_valid = column_valid & jnp.isfinite(next_norm) & (next_norm > breakdown_floor)
+    next_vector = jnp.where(
+        next_valid,
+        action / jnp.maximum(next_norm, 1.0e-300),
+        jnp.zeros_like(action),
     )
+    hessenberg = hessenberg.at[:, column].set(
+        jnp.where(column_valid, coefficients, 0.0)
+    )
+    hessenberg = hessenberg.at[column + 1, column].set(
+        jnp.where(column_valid, next_norm, 0.0)
+    )
+    basis = basis.at[column + 1].set(next_vector)
+    basis_valid = basis_valid.at[column + 1].set(next_valid)
+    return basis, hessenberg, basis_valid
+
+
+def _arnoldi_condition(
+    basis: jax.Array,
+    hessenberg: jax.Array,
+    basis_valid: jax.Array,
+    *,
+    return_direction: bool = False,
+) -> tuple[jax.Array, jax.Array] | tuple[jax.Array, jax.Array, jax.Array]:
+    """Condition and spectral baseline of a completed Arnoldi projection."""
     singular_values = jnp.linalg.svd(hessenberg, compute_uv=False)
     active_columns = jnp.sum(basis_valid[:-1], dtype=jnp.int32)
     smallest_index = jnp.maximum(active_columns - 1, 0)
@@ -862,6 +893,142 @@ def _projected_krylov_condition(
         jnp.zeros_like(direction),
     )
     return (*measurement, direction)
+
+
+class OperatorRequestKind(IntEnum):
+    """Read authority and interpretation for one live operator application."""
+
+    RESIDUAL = 0
+    MERIT = 1
+    ACCEPTANCE = 2
+    RECOVERY = 3
+    RECONCILIATION = 4
+    JVP = 5
+
+
+class OperatorRequest(NamedTuple):
+    """Fixed-shape operands; no topology value is borrowed from another state."""
+
+    kind: jax.Array
+    state: jax.Array
+    vector: jax.Array
+    shadow: jax.Array
+    use_incumbent: jax.Array
+
+
+class OperatorResponse(NamedTuple):
+    """One live read and the measurements derived from exactly that read."""
+
+    mapped: jax.Array
+    tangent: jax.Array
+    shadow: jax.Array
+    residual: jax.Array
+    merit: jax.Array
+
+
+def operator_request(
+    kind: OperatorRequestKind,
+    state: jax.Array,
+    shadow: jax.Array,
+    *,
+    vector: jax.Array | None = None,
+    use_incumbent: jax.Array | bool = True,
+) -> OperatorRequest:
+    """Construct uniformly shaped operands for a residual or tangent request."""
+    return OperatorRequest(
+        jnp.asarray(kind, dtype=jnp.int32),
+        state,
+        jnp.zeros_like(state) if vector is None else vector,
+        jnp.asarray(shadow, dtype=bool),
+        jnp.asarray(use_incumbent, dtype=bool),
+    )
+
+
+def operator_request_body(
+    shadowed_map_fn: Callable[..., jax.Array],
+    promoted_shadow_fn: Callable[..., jax.Array] | None = None,
+) -> Callable[..., OperatorResponse]:
+    """Build the shared primal/tangent body without enclosing a Krylov solve.
+
+    The switch chooses a read authority before applying the live map. It never
+    selects between copies of the map. Both members of the JVP are evaluated
+    at the request's state; the residual mask is fixed for its local tangent,
+    exactly as it is in the frozen-mask Newton model. Geometry and profile
+    arrays are explicit trailing arguments, not captured by this factory.
+    """
+
+    def evaluate(request, *arguments):
+        def incumbent(_):
+            return jnp.asarray(False)
+
+        def selected(value):
+            return ~value.use_incumbent
+
+        def reconciliation(_):
+            return jnp.asarray(True)
+
+        read_induced = jax.lax.switch(
+            request.kind,
+            (incumbent, incumbent, selected, selected, reconciliation, incumbent),
+            request,
+        )
+        if promoted_shadow_fn is None:
+            shadow = request.shadow
+        else:
+            shadow = jax.lax.cond(
+                read_induced,
+                lambda: jnp.ravel(
+                    promoted_shadow_fn(request.state, request.shadow, *arguments)
+                ),
+                lambda: request.shadow,
+            )
+
+        def live_map(state):
+            return shadowed_map_fn(state, shadow, *arguments)
+
+        mapped, tangent = jax.jvp(live_map, (request.state,), (request.vector,))
+        return OperatorResponse(
+            mapped,
+            tangent,
+            shadow,
+            _relative_residual(mapped, request.state),
+            _smooth_relative_sup_merit(mapped, request.state),
+        )
+
+    return jax.jit(evaluate)
+
+
+def run_operator_requests(
+    body: Callable[..., OperatorResponse],
+    requests: OperatorRequest,
+    *arguments: Any,
+) -> OperatorResponse:
+    """Serve a fixed-capacity request stream through one traced scan body.
+
+    Request kinds may differ at runtime while payload leaf shapes stay fixed.
+    The caller owns linear solves and continuation decisions; neither is
+    interpreted or traced again by this machine.
+    """
+
+    def serve(carry, request):
+        return carry, body(request, *arguments)
+
+    _, responses = jax.lax.scan(serve, None, requests)
+    return responses
+
+
+def _operator_scores(map_fn, states, kind):
+    """Score a candidate family through the common live request body."""
+    body = operator_request_body(lambda state, _shadow: map_fn(state))
+    requests = OperatorRequest(
+        jnp.full(states.shape[0], int(kind), dtype=jnp.int32),
+        states,
+        jnp.zeros_like(states),
+        jnp.zeros_like(states, dtype=bool),
+        jnp.ones(states.shape[0], dtype=bool),
+    )
+    responses = run_operator_requests(body, requests)
+    return responses.merit, responses.residual
 
 
 def _relative_residual(mapped: jax.Array, state: jax.Array) -> jax.Array:
@@ -1092,15 +1259,10 @@ def _backtracking_scores(
     factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=state.dtype)
     candidates = state[None, :] + factors[:, None] * step[None, :]
 
-    def score(candidate):
-        mapped = acceptance_map_fn(candidate)
-        return (
-            _smooth_relative_sup_merit(mapped, candidate),
-            _relative_residual(mapped, candidate),
-        )
-
-    all_merits, all_residuals = jax.lax.map(
-        score, jnp.concatenate((candidates, state[None, :]), axis=0)
+    all_merits, all_residuals = _operator_scores(
+        acceptance_map_fn,
+        jnp.concatenate((candidates, state[None, :]), axis=0),
+        OperatorRequestKind.ACCEPTANCE,
     )
     merits, incumbent_merit = all_merits[:-1], all_merits[-1]
     residuals, incumbent_residual = all_residuals[:-1], all_residuals[-1]
@@ -1509,17 +1671,13 @@ def _steepest_descent_promotion(
     scales = jnp.asarray(_STEEPEST_DESCENT_SCALES, dtype=state.dtype)
     candidates = state[None, :] + scales[:, None] * direction[None, :]
 
-    def score(candidate):
-        mapped = acceptance_map_fn(candidate)
-        return (
-            _smooth_relative_sup_merit(mapped, candidate),
-            _relative_residual(mapped, candidate),
-        )
-
-    merits, residuals = jax.lax.map(score, candidates)
-    incumbent_mapped = acceptance_map_fn(state)
-    incumbent_merit = _smooth_relative_sup_merit(incumbent_mapped, state)
-    incumbent_residual = _relative_residual(incumbent_mapped, state)
+    all_merits, all_residuals = _operator_scores(
+        acceptance_map_fn,
+        jnp.concatenate((candidates, state[None, :]), axis=0),
+        OperatorRequestKind.RECOVERY,
+    )
+    merits, incumbent_merit = all_merits[:-1], all_merits[-1]
+    residuals, incumbent_residual = all_residuals[:-1], all_residuals[-1]
     acceptance_reference = jnp.where(
         own_mask_acceptance, incumbent_merit, reference_merit
     )
@@ -1871,6 +2029,307 @@ def _apply_krylov_conditioning(
     return unconditioned_step * damping, conditioning_applied
 
 
+class _KrylovPhase(IntEnum):
+    """Which consumer receives the one operator application of a stream slot."""
+
+    PROBE = 0
+    CONDITION = 1
+    GMRES_START = 2
+    ARNOLDI = 3
+    RESTART_RESIDUAL = 4
+    ACHIEVED = 5
+    DONE = 6
+
+
+class _KrylovStream(NamedTuple):
+    """Fixed-shape carry of the single-site Krylov request stream."""
+
+    phase: jax.Array
+    column: jax.Array
+    condition: tuple[jax.Array, jax.Array, jax.Array]
+    probe_action: jax.Array
+    solution: jax.Array
+    candidate: jax.Array
+    basis: jax.Array
+    hessenberg: jax.Array
+    arnoldi_index: jax.Array
+    breakdown: jax.Array
+    restarts: jax.Array
+    unit_residual: jax.Array
+    residual_norm: jax.Array
+    achieved_action: jax.Array
+
+
+def _gmres_dot(left: jax.Array, right: jax.Array) -> jax.Array:
+    """Highest-precision product, the contraction every GMRES reduction uses."""
+    return jnp.dot(left, right, precision=jax.lax.Precision.HIGHEST)
+
+
+def _gmres_norm(vector: jax.Array) -> jax.Array:
+    """Euclidean norm of a real vector as the root of its own inner product."""
+    return jnp.sqrt(jnp.vdot(vector, vector, precision=jax.lax.Precision.HIGHEST))
+
+
+def _gmres_safe_normalize(
+    vector: jax.Array, thresh: jax.Array | None = None
+) -> tuple[jax.Array, jax.Array]:
+    """Unit vector and norm, both zero when the norm is at or below ``thresh``.
+
+    The default threshold is the machine epsilon of the vector's dtype.
+    """
+    norm = _gmres_norm(vector)
+    if thresh is None:
+        thresh = jnp.finfo(norm.dtype).eps
+    use_norm = norm > jnp.asarray(thresh, dtype=vector.dtype)
+    unit = jnp.where(use_norm, vector / norm.astype(vector.dtype), 0.0)
+    return unit, jnp.where(use_norm, norm, 0.0)
+
+
+def _gmres_classical_gram_schmidt(
+    basis: jax.Array, vector: jax.Array, vector_norm: jax.Array
+) -> tuple[jax.Array, jax.Array]:
+    """Orthogonalise ``vector`` against the columns of ``basis``, twice at most.
+
+    The second pass runs only when the overlaps are not already small against
+    the vector's norm, the "twice is enough" criterion; the returned overlaps
+    accumulate both passes.
+    """
+    max_iterations = 2
+    overlaps = jnp.zeros(basis.shape[-1], dtype=basis.dtype)
+
+    def project(carry):
+        iteration, vector, overlaps, scaled_norm = carry
+        projection = jnp.einsum(
+            "...n,...->n", basis, vector, precision=jax.lax.Precision.HIGHEST
+        )
+        vector = vector - _gmres_dot(basis, projection)
+        overlaps = overlaps + projection
+
+        def measure_cond(state):
+            iteration, pending, _, _ = state
+            return jnp.logical_and(pending, iteration < (max_iterations - 1))
+
+        def measure(state):
+            iteration, _, vector, _ = state
+            _, measured = _gmres_safe_normalize(vector)
+            return iteration, False, vector, measured / jnp.sqrt(2.0)
+
+        _, _, vector, scaled_norm = jax.lax.while_loop(
+            measure_cond, measure, (iteration, True, vector, scaled_norm)
+        )
+        return iteration + 1, vector, overlaps, scaled_norm
+
+    def repeat(carry):
+        iteration, _, overlaps, scaled_norm = carry
+        _, overlap_norm = _gmres_safe_normalize(overlaps)
+        return jnp.logical_and(
+            iteration < (max_iterations - 1), overlap_norm < scaled_norm
+        )
+
+    carry = project((0, vector, overlaps, vector_norm / jnp.sqrt(2.0)))
+    _, vector, overlaps, _ = jax.lax.while_loop(repeat, project, carry)
+    return vector, overlaps
+
+
+def _gmres_lstsq(matrix: jax.Array, rhs: jax.Array) -> jax.Array:
+    """Least-squares coefficients through the positive normal equations."""
+    return jax.scipy.linalg.solve(
+        _gmres_dot(matrix.T, matrix), _gmres_dot(matrix.T, rhs), assume_a="pos"
+    )
+
+
+def _gmres_restart_start(unit_residual: jax.Array, restart: int):
+    """Seed one batched-GMRES restart: the unit residual and an identity model."""
+    basis = jnp.pad(unit_residual[..., None], ((0, 0), (0, restart)))
+    hessenberg = jnp.eye(restart, restart + 1, dtype=unit_residual.dtype)
+    return basis, hessenberg
+
+
+def _single_site_krylov(
+    linear_action: Callable[[jax.Array], jax.Array],
+    residual_vector: jax.Array,
+    probe: jax.Array,
+    *,
+    gmres_iterations: int,
+) -> tuple[
+    jax.Array, tuple[jax.Array, jax.Array, jax.Array], jax.Array, jax.Array, jax.Array
+]:
+    """Serve every operator application of one qualified step from one scan.
+
+    The stream reproduces, slot for slot, the finite-action probe, the
+    projected-condition Arnoldi columns, the batched restarted GMRES of
+    ``jax.scipy.sparse.linalg.gmres`` (``restart = maxiter = gmres_iterations``,
+    zero initial guess, identity preconditioner) and the achieved-residual
+    check. Each slot applies ``linear_action`` at the single call site in the
+    scan body; a phase switch routes the result to its consumer, so the
+    lowered program carries one inlined operator body however many
+    applications the solve needs. Slots after the machine reaches ``DONE``
+    apply nothing.
+    """
+    size = residual_vector.size
+    restart = min(gmres_iterations, size)
+    maxiter = gmres_iterations
+    capacity = 1 + gmres_iterations + 1 + maxiter * (restart + 1) + 1
+    dtype = residual_vector.dtype
+    eps = jnp.finfo(dtype).eps
+    atol = jnp.maximum(_GMRES_RELATIVE_TOLERANCE * _gmres_norm(residual_vector), 0.0)
+    zeros = jnp.zeros_like(residual_vector)
+    basis, hessenberg = _gmres_restart_start(zeros, restart)
+    initial = _KrylovStream(
+        phase=jnp.asarray(_KrylovPhase.PROBE, dtype=jnp.int32),
+        column=jnp.asarray(0, dtype=jnp.int32),
+        condition=_arnoldi_condition_start(residual_vector, gmres_iterations),
+        probe_action=zeros,
+        solution=zeros,
+        candidate=zeros,
+        basis=basis,
+        hessenberg=hessenberg,
+        arnoldi_index=jnp.asarray(0, dtype=jnp.int32),
+        breakdown=jnp.asarray(False),
+        restarts=jnp.asarray(0, dtype=jnp.int32),
+        unit_residual=zeros,
+        residual_norm=jnp.zeros((), dtype=residual_vector.dtype),
+        achieved_action=zeros,
+    )
+
+    def restarted(stream, residual):
+        unit_residual, residual_norm = _gmres_safe_normalize(residual)
+        basis, hessenberg = _gmres_restart_start(unit_residual, restart)
+        begin = (stream.restarts < maxiter) & (residual_norm > atol)
+        return stream._replace(
+            phase=jnp.where(begin, _KrylovPhase.ARNOLDI, _KrylovPhase.ACHIEVED).astype(
+                jnp.int32
+            ),
+            basis=basis,
+            hessenberg=hessenberg,
+            arnoldi_index=jnp.asarray(0, dtype=jnp.int32),
+            breakdown=jnp.asarray(False),
+            unit_residual=unit_residual,
+            residual_norm=residual_norm,
+        )
+
+    def probe_slot(stream, action):
+        return stream._replace(
+            phase=jnp.asarray(
+                _KrylovPhase.CONDITION
+                if gmres_iterations > 0
+                else _KrylovPhase.GMRES_START,
+                dtype=jnp.int32,
+            ),
+            probe_action=action,
+        )
+
+    def condition_slot(stream, action):
+        column = stream.column + 1
+        return stream._replace(
+            phase=jnp.where(
+                column < gmres_iterations,
+                _KrylovPhase.CONDITION,
+                _KrylovPhase.GMRES_START,
+            ).astype(jnp.int32),
+            column=column,
+            condition=_arnoldi_column_update(stream.column, stream.condition, action),
+        )
+
+    def gmres_start_slot(stream, action):
+        return restarted(stream, residual_vector - action)
+
+    def arnoldi_slot(stream, action):
+        index = stream.arnoldi_index
+        _, norm_before = _gmres_safe_normalize(action)
+        orthogonal, overlaps = _gmres_classical_gram_schmidt(
+            stream.basis, action, norm_before
+        )
+        unit_vector, norm_after = _gmres_safe_normalize(
+            orthogonal, thresh=eps * norm_before
+        )
+        basis = stream.basis.at[..., index + 1].set(unit_vector)
+        overlaps = overlaps.at[index + 1].set(norm_after.astype(dtype))
+        hessenberg = stream.hessenberg.at[index, :].set(overlaps)
+        breakdown = norm_after == 0.0
+        index = index + 1
+        proceed = (index < restart) & ~breakdown
+
+        def project(_):
+            beta = (
+                jnp.zeros_like(hessenberg, shape=(restart + 1,))
+                .at[0]
+                .set(stream.residual_norm.astype(dtype))
+            )
+            coefficients = _gmres_lstsq(hessenberg.T, beta)
+            return stream.solution + _gmres_dot(basis[..., :-1], coefficients)
+
+        candidate = jax.lax.cond(proceed, lambda _: stream.candidate, project, None)
+        return stream._replace(
+            phase=jnp.where(
+                proceed, _KrylovPhase.ARNOLDI, _KrylovPhase.RESTART_RESIDUAL
+            ).astype(jnp.int32),
+            candidate=candidate,
+            basis=basis,
+            hessenberg=hessenberg,
+            arnoldi_index=index,
+            breakdown=breakdown,
+        )
+
+    def restart_residual_slot(stream, action):
+        stream = stream._replace(
+            solution=stream.candidate, restarts=stream.restarts + 1
+        )
+        return restarted(stream, residual_vector - action)
+
+    def achieved_slot(stream, action):
+        return stream._replace(
+            phase=jnp.asarray(_KrylovPhase.DONE, dtype=jnp.int32),
+            achieved_action=action,
+        )
+
+    def done_slot(stream, _action):
+        return stream
+
+    consumers = (
+        probe_slot,
+        condition_slot,
+        gmres_start_slot,
+        arnoldi_slot,
+        restart_residual_slot,
+        achieved_slot,
+        done_slot,
+    )
+    requests = (
+        lambda stream: probe,
+        lambda stream: stream.condition[0][stream.column],
+        lambda stream: stream.solution,
+        lambda stream: stream.basis[..., stream.arnoldi_index],
+        lambda stream: stream.candidate,
+        lambda stream: stream.solution,
+        lambda stream: zeros,
+    )
+
+    def serve(stream, _):
+        vector = jax.lax.switch(stream.phase, requests, stream)
+        # The barrier keeps the operator's arithmetic out of its consumers'
+        # fusions, so each application rounds as a standalone evaluation.
+        action = jax.lax.optimization_barrier(
+            jax.lax.cond(
+                stream.phase == _KrylovPhase.DONE,
+                jnp.zeros_like,
+                linear_action,
+                jax.lax.optimization_barrier(vector),
+            )
+        )
+        return jax.lax.switch(stream.phase, consumers, stream, action), None
+
+    stream, _ = jax.lax.scan(serve, initial, None, length=capacity)
+    info = jnp.where(jnp.isnan(_gmres_norm(stream.solution)), -1, 0)
+    return (
+        stream.probe_action,
+        stream.condition,
+        stream.solution,
+        info,
+        stream.achieved_action,
+    )
+
+
 def _qualified_krylov_step(
     linear_action: Callable[[jax.Array], jax.Array],
     residual_vector: jax.Array,
@@ -1893,12 +2352,14 @@ def _qualified_krylov_step(
         residual_vector / probe_scale,
         jnp.ones_like(residual_vector) / jnp.sqrt(residual_vector.size),
     )
-    finite_linear_action = jnp.all(jnp.isfinite(linear_action(probe)))
-    projected_condition, spectral_baseline = _projected_krylov_condition(
+    probe_action, condition, step, info, achieved_action = _single_site_krylov(
         linear_action,
         residual_vector,
-        krylov_dimension=gmres_iterations,
+        probe,
+        gmres_iterations=gmres_iterations,
     )
+    finite_linear_action = jnp.all(jnp.isfinite(probe_action))
+    projected_condition, spectral_baseline = _arnoldi_condition(*condition)
     has_preceding_baseline = jnp.isfinite(preceding_condition_baseline) & (
         preceding_condition_baseline > 0.0
     )
@@ -1908,16 +2369,8 @@ def _qualified_krylov_step(
         spectral_baseline,
     )
 
-    step, info = jax.scipy.sparse.linalg.gmres(
-        linear_action,
-        residual_vector,
-        tol=_GMRES_RELATIVE_TOLERANCE,
-        maxiter=gmres_iterations,
-        restart=gmres_iterations,
-        solve_method="batched",
-    )
     unconditioned_step = step
-    achieved_linear_residual = residual_vector - linear_action(step)
+    achieved_linear_residual = residual_vector - achieved_action
     achieved_reduction = jnp.linalg.norm(achieved_linear_residual) / jnp.maximum(
         jnp.linalg.norm(residual_vector), jnp.finfo(residual_vector.dtype).tiny
     )
@@ -3622,6 +4075,8 @@ def _active_set_newton_krylov(
         matches = jnp.all(mask_history == mask[None, :], axis=1)
         return jnp.any(populated & matches)
 
+    live_body = operator_request_body(shadowed_map_fn, promoted_shadow_mask_fn)
+
     def reconcile(
         index,
         state,
@@ -3635,6 +4090,24 @@ def _active_set_newton_krylov(
         previous_live_residual,
     ):
         solved_state = inner_result.state
+        damped_state = state + _ACTIVE_SET_CYCLE_DAMPING * (solved_state - state)
+        if not freeze_topology:
+            candidates = jnp.stack((solved_state, damped_state, state))
+            requests = OperatorRequest(
+                jnp.asarray(
+                    [
+                        OperatorRequestKind.RECONCILIATION,
+                        OperatorRequestKind.RECONCILIATION,
+                        OperatorRequestKind.MERIT,
+                    ],
+                    dtype=jnp.int32,
+                ),
+                candidates,
+                jnp.zeros_like(candidates),
+                jnp.broadcast_to(mask, (3, mask.size)),
+                jnp.asarray([False, False, True]),
+            )
+            responses = run_operator_requests(live_body, requests)
         if freeze_topology:
             observed_partition = partition_read(solved_state, mask)
             observed_carried = usable_partition(observed_partition)
@@ -3653,9 +4126,9 @@ def _active_set_newton_krylov(
                 lambda: shadowed_map_fn(solved_state, observed_mask),
             )
         else:
-            observed_mask = jnp.ravel(promoted_shadow_mask_fn(solved_state, mask))
+            observed_mask = responses.shadow[0]
             observed_partition = observed_mask
-            observed_mapped = shadowed_map_fn(solved_state, observed_mask)
+            observed_mapped = responses.mapped[0]
         observed_difference = jnp.sum(observed_mask != mask, dtype=jnp.int32)
         observed_residual = _relative_residual(observed_mapped, solved_state)
         observed_finite = jnp.isfinite(observed_residual)
@@ -3670,7 +4143,6 @@ def _active_set_newton_krylov(
             & ~converged
         )
 
-        damped_state = state + _ACTIVE_SET_CYCLE_DAMPING * (solved_state - state)
         if freeze_topology:
             damped_mask = observed_mask
             damped_mapped = jax.lax.cond(
@@ -3679,8 +4151,8 @@ def _active_set_newton_krylov(
                 lambda: shadowed_map_fn(damped_state, damped_mask),
             )
         else:
-            damped_mask = jnp.ravel(promoted_shadow_mask_fn(damped_state, mask))
-            damped_mapped = shadowed_map_fn(damped_state, damped_mask)
+            damped_mask = responses.shadow[1]
+            damped_mapped = responses.mapped[1]
         damped_residual = _relative_residual(damped_mapped, damped_state)
         damped_finite = jnp.isfinite(damped_residual)
         damping_repeats = mask_seen(damped_mask, mask_history, history_count)
@@ -3699,7 +4171,7 @@ def _active_set_newton_krylov(
                 lambda: shadowed_map_fn(state, mask),
             )
             if freeze_topology
-            else shadowed_map_fn(state, mask)
+            else responses.mapped[2]
         )
         incoming_residual = _relative_residual(incoming_mapped, state)
         incoming_merit = _smooth_relative_sup_merit(incoming_mapped, state)
@@ -3710,7 +4182,7 @@ def _active_set_newton_krylov(
                 lambda: shadowed_map_fn(selected_state, selected_mask),
             )
             if freeze_topology
-            else shadowed_map_fn(selected_state, selected_mask)
+            else jnp.where(repeated, responses.mapped[1], responses.mapped[0])
         )
         selected_merit = _smooth_relative_sup_merit(selected_mapped, selected_state)
         retain_incoming = (

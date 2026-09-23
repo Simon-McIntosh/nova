@@ -1,0 +1,14 @@
+revision=7c74bf18b72f1b15d57f006f3eb6462cc6acba7b plus explicit request design; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine; command=python -m pytest -p no:cacheprovider tests/test_fixed_point.py -k operator_request_stream_or_krylov -vv
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 13:16:54 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 44 items / 42 deselected / 2 selected
+
+tests/test_fixed_point.py::test_operator_request_stream_preserves_live_reads_and_local_tangents PASSED [ 50%]
+tests/test_fixed_point.py::test_krylov_solve_composes_requests_without_entering_the_operator_body PASSED [100%]
+
+======================= 2 passed, 42 deselected in 5.62s =======================

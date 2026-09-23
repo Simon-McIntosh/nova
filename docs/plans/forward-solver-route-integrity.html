@@ -207,6 +207,121 @@
     <a href="/nova/figures/forward-solver-route-integrity/reduced-newton-abort/report.md">abort report</a> and the
     <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#reduced-newton-abort">cumulative landing record</a>.
     This entry does not close the section or resolve its driving followup.</p>
+    <h3 id="s3-request-machine-boundary">Request-machine boundary measured; implementation held</h3>
+    <p>Commit <code>d8d858ff09a39851885a738c2293544785df32be</code> adds an executable
+    counter control: three dependent nested-JIT calls have one lowered callee and
+    three optimized bodies. A request-machine prototype shares one body on the
+    scalar and control-flow probes, and restoring per-request evaluation raises
+    the count from one to three and fires its refusal. It is not installed in
+    either solver. The full Newton prototype exposes eight operator signatures,
+    255 continuation blocks and 880 registers; after its first unsupported
+    linear-solve boundary was handled, the next attempt timed out at 8:20.
+    The two-attempt fence stops this implementation attempt.</p>
+    <p>The unchanged solver sources measure <strong>342,055 and 344,858 optimized
+    instructions</strong> for the 300- and 1000-cell weak rows on one CPU allocation,
+    above the required 203,078 and 204,531. The baseline suite aborts with exit 134
+    inside <code>test_prescribed_currents_reuse_one_program</code>, after an earlier
+    unreported failure, and a certificate test overwrites two figures outside the
+    assigned scope. Those figures remain untouched and uncommitted for coordinator
+    adjudication. The <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#request-machine-boundary">cumulative record</a>
+    preserves the logs, prototype, negative control, and next design options.
+    No terminal section status or driving followup is changed.</p>
+
+    <h3 id="s3-explicit-live-requests">Explicit requests committed; whole-solve ceiling still refuses</h3>
+    <p>The adjudicated final attempt defines six request kinds and a fixed payload,
+    with one switch selecting the read authority before the common live map/JVP
+    body. Krylov remains outside that body. Commits <code>674ad986d155cf5c403d2cbb1201db7a6b15f2a7</code>,
+    <code>364f92c3663f16f817ca873c573db1d4aa0aef91</code>,
+    <code>f2d952c89c2183bcad54a311ed866fc67125da73</code>, and
+    <code>a359f8fed22b69798a5668c33a1dc9708f830405</code> retain the request contract,
+    fixed-point scoring/reconciliation streams, real-operator regression, and
+    reduced residual/JVP integration. The real 300-cell operator proves one
+    optimized boundary for one call, three for nested calls, and one for a scan,
+    with the two three-application results bit-identical.</p>
+    <p>The whole programs shrink from 342,055 / 344,858 to
+    <strong>302,553 / 304,913 instructions</strong>, but remain above 203,078 / 204,531.
+    This is a partial design state, not the single body for the entire solve.
+    The fixed-point file passes 44 tests against 42 at the base, with the added
+    real-operator case separately passing. Split baseline processes expose two
+    reduced-file failures and a later compile abort. The candidate reproduces
+    those outcomes and adds a ladder-scoring failure before aborting. That test
+    passes alone, leaving the suite-only failure unresolved; a completed all-file
+    delta is not claimed. The whole-program negative control raises
+    the 300-cell count to 532,366. The <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#explicit-live-requests">detailed record</a>
+    carries the exact refusals, negative control and final test disposition.
+    The generated PNG/SVG are deleted from the worktree as adjudicated and are
+    not committed. This entry changes neither section state nor its followup.</p>
+
+    <h3 id="s3-operator-sharing-census">Where the unshared instructions sit; ceilings still refuse</h3>
+    <p>The fourth attempt, on the committed design state, lands two things.
+    Commit <code>f803b640cfcfda7aa9e50ead083eb667cfd27e0f</code> adds an autouse
+    fixture to <code>tests/test_reduced_newton.py</code> that calls
+    <code>jax.clear_caches()</code> and <code>gc.collect()</code> after each test,
+    so a whole-file process no longer keeps every loaded executable until the
+    memory-map count reaches <code>vm.max_map_count</code>. Commit
+    <code>9a3dc3a7f5f7b009e8a3cd2473fa3c9205e15287</code> attributes every optimized
+    instruction of the certificate programs to the live-map site that emitted it.
+    The solver source digest (<code>e5fa1479&hellip;</code>) is unchanged from the
+    measured candidate, so the counts remain
+    <strong>302,553 / 304,913 against 203,078 / 204,531</strong>. Whole-solve
+    request scheduling was not implemented in this attempt.</p>
+    <figure>
+    <img src="/nova/figures/forward-solver-route-integrity/operator-sharing/instruction-budget-300.png" alt="Optimized instruction split of the 300-cell weak certificate program against its ceiling">
+    <figcaption>300-cell program: 134,881 instructions sit outside the live map,
+    30,554 in the six shared request bodies, and 137,118 in direct map calls
+    (37,161 primal, 63,481 tangent, 36,476 linear transpose). The ceiling falls
+    inside the direct primal band.</figcaption>
+    </figure>
+    <p>The ceiling needs at least 99,475 instructions removed. That is 73% of the
+    direct map instructions, and it includes linear transposes, which the request
+    body has no kind for. Stack-frame attribution names the unshared stream: 29 sites,
+    18 of them above 1,000 instructions each, 136,508 in all. The largest parts
+    are the damped normal-equation GMRES and model check of
+    <code>_rebuilt_model_promotion</code> (20,209 + 10,015 + 10,013), the
+    gradient of <code>_steepest_descent_promotion</code> (17,352), and the Newton
+    GMRES of <code>_qualified_krylov_step</code> (7,916 + 2,626). Smaller parts
+    are the Arnoldi columns of <code>_projected_krylov_condition</code>,
+    <code>_record_merit</code> and <code>_backtracking_scores</code>. JAX's
+    batched GMRES applies its operator in more than one place, so every GMRES
+    site inlines its action repeatedly. The per-request control raises the shared-body
+    share from 30,554 to 126,712, so the census does resolve body duplication. The
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#operator-sharing-census">detailed record</a>
+    carries the site table and the test disposition. In one fresh
+    <code>all_debug</code> process at <code>f803b640</code>,
+    <code>tests/test_fixed_point.py</code> passes 45 of 45 (EXIT=0, 201 s),
+    including the nested-call regression. <code>tests/test_reduced_newton.py</code>
+    completes without an abort for the first time: 18 passed and 4 failed. All
+    four failures are present at the base, so none is added. This entry changes neither
+    section state nor its followup.</p>
+
+    <h3 id="s3-single-site-krylov">One operator site for the qualified Krylov step</h3>
+    <p><code>_qualified_krylov_step</code> now applies its linear action at one call site
+    inside a fixed-capacity <code>lax.scan</code>. The site serves the finite-action
+    probe, the condition Arnoldi columns, the restarted batched GMRES and the
+    achieved-residual check (83 slots at eight iterations). An optimisation
+    barrier fences each application from its consumers. The GMRES is built from local
+    helpers on public jax APIs, in the operation order of the library's batched
+    GMRES. <code>tests/test_single_site_krylov.py</code> pins one operator site and
+    fails with 11 sites when the per-site body is rebound. In one <code>all_debug</code>
+    job the weak certificate program measures <strong>284,792 / 287,117
+    instructions</strong> at 300 / 1000 cells, below 302,553 / 304,913 but still above
+    203,078 / 204,531. The per-site control, the base body rebound in the same job,
+    measures 302,550 / 304,910. The qualified step's live-map sites fall from three
+    (13,165 instructions) to one (2,696).</p>
+    <p>Bitwise equality is shown on toy operators only. Against the base with the
+    same fence, the dense arm is equal on 8 of 8 cases and the elementwise arm on 5 of
+    8; the three elementwise misses differ only in the achieved reduction (at most
+    1.1e-17), with the step equal. On the real operator it does not hold: a diverted
+    certificate rung's terminal value moves from 0.27948523220464483 to
+    0.279485232201572 (3.07e-12, 55,355 ulps), The lead accepted re-basing the
+    certificate digest per slice, so bit identity to 52bfefc0 is no longer this
+    slice's gate. Under <code>vmap</code> the stream costs 14.3 times the
+    base body at width 16, because every slot and every phase branch executes.
+    In fresh processes, <code>tests/test_fixed_point.py</code> passes 45 of 45, and
+    <code>tests/test_reduced_newton.py</code> fails only the four tests that fail at the base. The
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#single-site-krylov">detailed record</a>
+    carries the counts, the control and the reduced-Newton run.
+    This entry changes neither section state nor its followup.</p>
 
     <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>
     <p>Measured 2026-09-18: the pre-warm covers 3292 keys the lane never requests and none of the 1285 keys it

@@ -1177,6 +1177,402 @@ no failure: tests 1, 5, 18 and 19 fail with or without it, and tests 18 and 19 a
 <code>docs/figures/forward-solver-route-integrity/reduced-newton-abort/</code>. No file under
 <code>nova/</code> or <code>tests/</code> is changed, and no plan metadata or driving followup is changed.</p>
 </section>
+<section id="request-machine-boundary">
+<h2>Nested-JIT boundary proven; generic request-machine prototype not qualified</h2>
+<p>The assigned solver sources at <code>775720c77c5443e990a74b52ea464b73ce87b6aa</code>
+remain unchanged. Commit <code>d8d858ff09a39851885a738c2293544785df32be</code> adds
+<code>test_nested_jit_calls_inline_each_operator_request</code> to
+<code>tests/test_fixed_point.py</code>. The measured reproduction is
+<q>nested_jit_lowered_bodies=1 nested_jit_optimized_bodies=3</q>.
+The CPU test passes (one test, 3.89 s). It establishes that counting lowered
+callees cannot establish executable sharing.</p>
+<figure><img src="/nova/figures/forward-solver-route-integrity/operator-machine/request-flow.svg"
+alt="Three inlined nested-JIT operator bodies compared with a toy shared request body and the unqualified full Newton expansion">
+<figcaption>The single-body toy machine preserves live operands; its successful
+controls do not qualify the much larger Newton continuation expansion.</figcaption></figure>
+<p>The experimental code under
+<code>docs/figures/forward-solver-route-integrity/operator-machine/</code> lowers
+operator requests into a program-counter <code>lax.while_loop</code>, carries live
+operands, and resumes the selected caller. The scalar control measures one
+optimized body versus three per-request bodies. Conditional, forward/reverse scan,
+while-loop and linearization probes return bit-identical outputs. The declared
+negative control, <q>revert the single body to per-request evaluation</q>, raises
+<q>AssertionError: single-body guard refused 3 per-request bodies</q> with exit 1.
+This is a toy-body instrument control, not the required whole-certificate
+instruction-rise control.</p>
+<p>The full Newton probe first refused <code>custom_linear_solve</code>.
+After adding its solve boundary, it did not complete compilation before the
+8:20 allocation timeout (job 1275678); the untransformed toy solve compiled in
+2.212582 s. Its staged continuation census is 255 blocks, 880 carried registers
+and eight distinct operator signatures. No full-solver state or production
+sharing claim follows from this experiment. The two-attempt fence stops further
+implementation; the prototype is retained as evidence, not imported by production.</p>
+<table>
+<thead><tr><th>Requested weak-row cells</th><th>Unchanged-source optimized instructions</th><th>Required ceiling</th><th>CPU compile seconds</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>300</td><td>342,055</td><td>203,078</td><td>177.358552</td><td>Over ceiling</td></tr>
+<tr><td>1000</td><td>344,858</td><td>204,531</td><td>178.647035</td><td>Over ceiling</td></tr>
+</tbody>
+</table>
+<p>Both rows ran as separate fresh Python processes inside one <code>all_debug</code>
+allocation, job 1275682, with four CPUs and 96 GiB. The measurement HEAD is
+<code>d8d858ff09a39851885a738c2293544785df32be</code>, whose only change is the new
+test; both solver files have the same bytes as the assigned base. The combined
+solver source digest is <code>9220784d0817001b7cc03dc5a7782369acc3da85d49c2575cc0d84acacf86bac</code>.
+These are fresh baseline counts, not counts from a changed solver. The optimized
+HLO dumps are retained outside git at
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T103934949557-fsri-one-traced-operator-state-machine/optimized-hlo/</code>.</p>
+<p>The exact two-file baseline command is
+<code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_fixed_point.py tests/test_reduced_newton.py -q</code>.
+It ran in a fresh CPU process at the assigned base and aborted with payload exit
+134 during <code>tests/test_reduced_newton.py::test_prescribed_currents_reuse_one_program</code>
+at line 244, inside JAX <code>backend_compile_and_load</code>. The progress stream
+contains an earlier <code>F</code>, but the abort prevented pytest from emitting
+its test identity or summary; no completed baseline or added-failure count is
+claimed. The remaining duplicate census in that allocation was cancelled after
+the abort. No after-suite was launched.</p>
+<p>The certificate test redirects <code>PART_ROOT</code> to a temporary path but
+leaves <code>FIGURE_ROOT</code> pointing into the checkout. The baseline run therefore
+rewrote the tracked PNG and SVG at
+<code>docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.{png,svg}</code>.
+The SVG diff contains 6,032 inserted and 13,846 deleted lines. These paths are outside
+the exclusive scope; they are preserved, unstaged and uncommitted. The worktree was
+clean at orientation, and neither file has a commit in the preceding two hours.
+The anomaly is reported rather than restored.</p>
+<p>Next options are explicit solver request states, or a common primal/linearized
+operator interface followed by shared request scheduling. Explicit states are the
+preferred next attempt because the generic continuation expansion adds a large
+carried-state product and retains multiple signatures. Resumption must first
+adjudicate the two generated figures and isolate all certificate output roots in
+the test. The baseline abort must then be measured in fresh processes without
+hiding the earlier failure. Production implementation, a completed baseline and
+after-suite comparison, both reduced instruction ceilings, and the whole-program
+negative control remain unmet. Four-row GPU bit identity remains a separate
+follow-on. No plan status or driving followup is closed.</p>
+<p>Artifacts in the directory above: <code>nested-jit.log</code>,
+<code>probe.log</code>, <code>control-probe.log</code>,
+<code>control-probe-retry.log</code>, <code>solver-probe.log</code>,
+<code>solver-probe-retry.log</code>, <code>state-census.log</code>,
+<code>operator-layouts.log</code>, <code>negative-control.log</code>,
+<code>baseline-tests.log</code>, <code>census-300.log</code>,
+<code>census-1000.log</code>, and both <code>baseline-*.json</code> receipts.
+The Python drivers, shell launchers and request-flow SVG accompany the logs.</p>
+</section>
+<section id="explicit-live-requests">
+<h2>Explicit live requests: retained design state, refused whole-solve ceiling</h2>
+<p>The coordinator adjudicated the final attempt to use explicit request states,
+leave Krylov outside the operator body, separate the two baseline test files into
+fresh CPU processes on one allocation, and delete the two generated figure
+byproducts without committing them. The retained source commits are
+<code>674ad986d155cf5c403d2cbb1201db7a6b15f2a7</code> (request contract),
+<code>364f92c3663f16f817ca873c573db1d4aa0aef91</code> (fixed-point streams),
+<code>f2d952c89c2183bcad54a311ed866fc67125da73</code> (real-operator counter test),
+and <code>a359f8fed22b69798a5668c33a1dc9708f830405</code> (reduced requests).</p>
+<p><code>OperatorRequestKind</code> defines residual, merit, acceptance, recovery,
+reconciliation and JVP. <code>OperatorRequest</code> carries kind, state, vector,
+shadow and incumbent-authority flag with fixed leaf shapes. One
+<code>lax.switch</code> selects the read authority; the shared map/JVP evaluates
+that request's own state. <code>run_operator_requests</code> serves fixed-capacity
+streams through one scan. The fixed-point route shares candidate-family scoring
+and solved/damped/incoming reconciliation. The reduced route serves residuals
+and Jacobian columns through the common request body. The dense/Krylov solve
+remains in its caller. These integrations still leave distinct caller streams
+in the whole solve; they do not establish its required single body.</p>
+<figure><img src="/nova/figures/forward-solver-route-integrity/explicit-requests/request-flow.svg"
+alt="Fixed request payload, read-authority switch, live map and tangent response, with external linear-solve composition and the remaining whole-solve duplication">
+<figcaption>The shared-body boundary is proved within a request stream. Separate
+streams still inline separate bodies, which the whole-program count refuses.</figcaption></figure>
+<p>The real weak-row operator at 300 requested cells passes its executable
+boundary proof. Its optimized full-flux residual-shadow selection appears once
+for one call, three times for nested dependent calls, and once for a three-step
+scan; the nested and scanned terminal arrays are bit-identical. The new test
+<code>test_real_operator_request_calls_inline_unless_they_share_a_scan</code>
+passes in 48.12 s. The initial optimization-barrier counter saw zero even in its
+known-present control, so it was rejected; XLA removes that barrier. Its failed
+log remains beside the corrected counter, which uses the physical full-flux
+output root and qualifies both single and duplicated controls.</p>
+<table>
+<thead><tr><th>Requested weak-row cells</th><th>Unchanged-source baseline</th><th>Explicit streams</th><th>Required ceiling</th><th>Candidate compile seconds</th></tr></thead>
+<tbody>
+<tr><td>300</td><td>342,055</td><td>302,553</td><td>203,078</td><td>160.183121</td></tr>
+<tr><td>1000</td><td>344,858</td><td>304,913</td><td>204,531</td><td>167.133377</td></tr>
+</tbody>
+</table>
+<p>Both candidate rows and the per-request control run in separate processes on
+one <code>all_debug</code> allocation, job 1275701, four CPUs and 128 GiB. The
+candidate source digest is
+<code>e5fa1479a94cb6f52e549ea2ae5c77bae3e19143dc82cf1f31f3168d8ce7c695</code>,
+identical for both measurements and the committed solver files. The printed HEAD
+changes between measurements because tests and the already-measured reduced
+source were committed; the digest verifies that the measured solver bytes did
+not change. The exact refusing lines are:</p>
+<pre>AssertionError: operator state-machine ceiling refused: 300 cells has 302553 instructions &gt; 203078
+AssertionError: operator state-machine ceiling refused: 1000 cells has 304913 instructions &gt; 204531</pre>
+<p id="explicit-negative-result">The whole-program negative control completes.
+Its first log line is the declared mutation,
+<q>revert the single body to per-request evaluation</q>, and it prints the
+applied unroll counts before compiling. The 300-cell program grows from
+<strong>302,553 to 532,366 optimized instructions</strong>, with 350.545511 s
+compile wall. Its receipt and log report
+<code>NEGATIVE_CONTROL_PASS instructions=532366 shared=302553</code>.
+This confirms that the retained streams share executable bodies, while both
+candidate size ceilings independently remain refused.</p>
+<p>The split baseline allocation 1275692 runs each named file in its own fresh
+CPU process. <code>tests/test_fixed_point.py</code> passes 42 cases in 141.27 s.
+The reduced file records failures in
+<code>test_diverted_normalised_certificate_rung_retains_finite_fallback</code>
+and <code>test_reduced_newton_reaches_the_production_fixed_point</code>, passes
+<code>test_prescribed_currents_reuse_one_program</code>, then aborts with exit
+134 during <code>test_threshold_one_reproduces_the_refusal_only_policy</code>
+at line 425. This is an incomplete baseline, with two named assertion failures
+and a later compile abort, not an empty or green result. The coordinator
+classifies the lane's compile abort as the known LLVM section-memory defect;
+the current log itself records the abort inside compilation.</p>
+<p>The candidate fixed-point file passes all 44 cases in 132.73 s; the subsequently
+added real-operator regression separately passes one case. The independent
+reduced request residual/JVP/Jacobian contract passes one case in 143.23 s.
+The default-wiring gates pass 97 cases in 7.31 s. A fallback prescribed-current
+process also passes one case in 318.95 s, but it starts after the source edit:
+its inherited allocation-start revision header is explicitly corrected at the
+end of its log, and it is candidate evidence, not baseline evidence.</p>
+<p id="explicit-reduced-result">The candidate reduced-file process also aborts
+with SIGABRT during <code>test_threshold_one_reproduces_the_refusal_only_policy</code>.
+Before that abort, it reproduces both named baseline failures and additionally
+fails <code>test_ladder_scoring_evaluates_one_map_per_accepted_step</code>,
+which passed in the base process. The observed prefix therefore has one added
+failure, independently blocking acceptance; this is not dismissed as the known
+compile abort. Both processes stop before the remaining tests, so no completed
+all-file failure census or zero-added-failure claim is made. The same added
+failure passes in isolation (one test, 311.37 s) without any source change.
+Its failure in the suite is therefore unresolved and not independently
+reproduced; no deterministic cause or repaired regression is claimed. The
+observed in-suite delta remains in the manifest and the isolated log is retained.</p>
+<p>The two tracked figure byproducts at
+<code>docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.{png,svg}</code>
+are deleted from this worktree, never staged or committed, as adjudicated.
+Follow-on for the plan owning
+<code>test_diverted_normalised_certificate_rung_retains_finite_fallback</code>:
+the test redirects <code>PART_ROOT</code> but not <code>FIGURE_ROOT</code> or
+<code>DIAGNOSTIC_ROOT</code>, so its outputs are not isolated. That fixture
+repair is recorded rather than folded into this final attempt.</p>
+<p>Artifacts are under
+<code>docs/figures/forward-solver-route-integrity/explicit-requests/</code>:
+the split baseline and candidate logs, <code>split-suites.json</code>,
+<code>operator-boundary.json</code>, both <code>candidate-*.json</code> receipts,
+<code>negative-control.log</code>, the executable drivers and diagram.
+Large optimized HLO dumps are retained outside git in the run's
+<code>optimized-hlo/</code> directory, which the manifest names explicitly.
+The exact live-read and external-linear-solve probes pass where measured;
+whole-solve body sharing, both size ceilings and complete suite evidence remain
+unmet. Four-row GPU bit identity remains a separate follow-on. No section,
+driving followup, sprint or primary branch is changed.</p>
+</section>
+<section id="operator-sharing-census">
+<h2>Unshared live-map sites of the certificate program</h2>
+<p>Commits <code>f803b640cfcfda7aa9e50ead083eb667cfd27e0f</code> (autouse
+cache-clearing fixture in <code>tests/test_reduced_newton.py</code>) and
+<code>9a3dc3a7f5f7b009e8a3cd2473fa3c9205e15287</code> (census driver, receipts
+and figure). The source digest of <code>nova/equilibrium/fixed_point.py</code>
+and <code>reduced_newton.py</code> at this head is
+<code>e5fa1479a94cb6f52e549ea2ae5c77bae3e19143dc82cf1f31f3168d8ce7c695</code>.
+That is the digest recorded in the <code>candidate-*.json</code> receipts, so the
+optimized counts of 302,553 (300 cells) and 304,913 (1000 cells) apply to this
+head without a new compile. Both still exceed 203,078 and 204,531.</p>
+<p><code>census.py</code> reads the retained optimized HLO. It assigns each
+instruction whose scope path passes through a map-internal segment
+(<code>compact_clipped_current_moments</code> or
+<code>read_qualification</code>) to the scope in front of that segment, and
+marks the site shared when that scope is a <code>jit(evaluate)</code> request
+body.</p>
+<table>
+<thead><tr><th>Program</th><th>Total</th><th>Map sites</th><th>Map instructions</th><th>Shared bodies</th><th>Shared instructions</th><th>Direct instructions</th></tr></thead>
+<tbody>
+<tr><td>300 cells</td><td>302,553</td><td>35</td><td>167,672</td><td>6</td><td>30,554</td><td>137,118</td></tr>
+<tr><td>1000 cells</td><td>304,913</td><td>35</td><td>167,786</td><td>6</td><td>30,578</td><td>137,208</td></tr>
+<tr><td>300 cells, per-request control</td><td>532,366</td><td>35</td><td>268,802</td><td>6</td><td>126,712</td><td>142,090</td></tr>
+</tbody></table>
+<p>The control row is the instrument check. Unrolling the request scans
+multiplies the shared bodies, and the census reports the shared share rising
+fourfold, so it sees body duplication where it is known to exist.</p>
+<p>By kind, the 300-cell direct sites hold 37,161 primal, 63,481 tangent
+(<code>jax.linearize</code>/<code>jvp</code>) and 36,476 linear-transpose
+instructions. Reaching the ceiling needs at least 99,475 instructions removed,
+which is 73% of the direct share. Even if every map application went through
+one tangent body and one transpose body, the program would sit near
+150,000 instructions, so the ceiling is reachable only by near-total
+sharing. That sharing needs a transpose request kind, which the current request
+body lacks. The largest direct sites, by scope depth under
+<code>jit(solve)</code>, are 20,209, 17,749, 17,352, 16,171, 12,671, 10,015 and
+10,013 instructions. Every row is in <code>census-candidate-300.json</code>.
+The source call families are the <code>jax.linearize</code> calls in
+<code>newton_body</code>, <code>attempt_step</code>,
+<code>acceptance_map</code> and the <code>newton_krylov</code> telemetry
+tangent; the <code>jax.linear_transpose</code> in
+<code>_rebuilt_model_promotion</code>; and the direct primal line-search reads
+through <code>acceptance_map_fn</code> and <code>model_map_fn</code>.</p>
+<figure>
+<img src="/nova/figures/forward-solver-route-integrity/operator-sharing/instruction-budget-300.png" alt="Instruction split of the 300-cell program against the ceiling">
+<figcaption>300-cell weak certificate program split by where each optimized
+instruction originates. The dashed line is the 203,078 ceiling.</figcaption>
+</figure>
+<p id="operator-sharing-callers"><code>callers.py</code> names the solver
+code behind each site with more than 1,000 instructions. The map's own
+instructions carry the traceback of its first trace, so instead it walks the
+module stack-frame table from the instructions the caller emitted in the same
+scope. Two request-stream scopes (<code>run_operator_requests</code>, 16,171
+and 12,671) sit in <code>closed_call</code> scopes rather than
+<code>jit(evaluate)</code>. The census counts them as direct, so its direct
+share overstates the truly unshared share by about 28,800. That leaves about
+108,300 instructions outside every request stream. Removing 99,475 therefore
+needs more than 90% of them shared, or the eight stream bodies merged into one
+as well. The
+largest unshared callers are the damped-normal-equation GMRES of
+<code>_rebuilt_model_promotion</code>, the gradient of
+<code>_steepest_descent_promotion</code>, the Newton GMRES of
+<code>_qualified_krylov_step</code>, the Arnoldi columns of
+<code>_projected_krylov_condition</code>, <code>_record_merit</code> and
+<code>_backtracking_scores</code>. JAX's batched GMRES applies its operator
+in two places, the restart residual and the Arnoldi column. So each GMRES site
+inlines its action twice, which is visible as the 10,015 / 10,013 pair.</p>
+<table>
+<thead><tr><th>Instructions</th><th>Inside a <code>jit(evaluate)</code> body</th><th>Kinds</th><th>Nearest solver frame of the site&rsquo;s own instructions</th></tr></thead>
+<tbody>
+<tr><td>20,209</td><td>no</td><td>jvp 5,275, primal 7,658, transpose 7,276</td><td><code>_rebuilt_model_promotion.damping_trial</code> (line 1567)</td></tr>
+<tr><td>17,749</td><td>no</td><td>jvp 227, primal 9,938, transpose 7,584</td><td><code>_smooth_relative_sup_merit</code> (line 1029)</td></tr>
+<tr><td>17,352</td><td>no</td><td>jvp 10,462, transpose 6,890</td><td><code>_steepest_descent_promotion</code> (line 1668)</td></tr>
+<tr><td>16,171</td><td>no</td><td>jvp 8,005, primal 8,166</td><td><code>run_operator_requests.serve</code> (line 989)</td></tr>
+<tr><td>12,671</td><td>no</td><td>jvp 12,671</td><td><code>run_operator_requests</code> (line 991)</td></tr>
+<tr><td>10,015</td><td>no</td><td>jvp 2,677, transpose 7,338</td><td><code>_rebuilt_model_promotion.damping_trial</code> (line 1541)</td></tr>
+<tr><td>10,013</td><td>no</td><td>jvp 2,675, transpose 7,338</td><td><code>_rebuilt_model_promotion.damping_trial</code> (line 1541)</td></tr>
+<tr><td>8,170</td><td>yes</td><td>jvp 8,170</td><td><code>_smooth_relative_sup_merit</code> (line 1029)</td></tr>
+<tr><td>7,916</td><td>no</td><td>jvp 7,916</td><td><code>_qualified_krylov_step</code> (line 2044)</td></tr>
+<tr><td>7,726</td><td>yes</td><td>jvp 7,726</td><td><code>operator_request_body.evaluate</code> (line 945)</td></tr>
+<tr><td>7,722</td><td>yes</td><td>jvp 7,722</td><td><code>_smooth_relative_sup_merit</code> (line 1029)</td></tr>
+<tr><td>2,694</td><td>no</td><td>jvp 2,694</td><td><code>_record_merit</code> (line 1042)</td></tr>
+<tr><td>2,632</td><td>no</td><td>jvp 2,632</td><td><code>_projected_krylov_condition.arnoldi_column</code> (line 812)</td></tr>
+<tr><td>2,626</td><td>no</td><td>jvp 2,626</td><td><code>_qualified_krylov_step</code> (line 2044)</td></tr>
+<tr><td>2,623</td><td>no</td><td>jvp 2,623</td><td><code>_projected_krylov_condition</code> (line 840)</td></tr>
+<tr><td>2,614</td><td>no</td><td>jvp 2,614</td><td><code>_backtracking_scores</code> (line 1242)</td></tr>
+<tr><td>2,407</td><td>no</td><td>primal 2,407</td><td><code>_active_set_newton_krylov</code> (line 4125)</td></tr>
+<tr><td>1,886</td><td>no</td><td>primal 1,886</td><td><code>_newton_krylov_inner</code> (line 3507)</td></tr>
+</tbody></table>
+<p id="operator-sharing-suites">Test gate: <code>suite.sh</code> runs each file
+in its own fresh <code>all_debug</code> process (jobs 1276212 and 1276213) at
+<code>f803b640</code>, with <code>TMPDIR=/tmp</code>,
+<code>JAX_PLATFORMS=cpu</code> and the shared interpreter, and writes
+<code>after-fixed_point.log</code> and <code>after-reduced_newton.log</code>.
+<code>tests/test_fixed_point.py</code> passes 45 of 45 (EXIT=0, 201 s).
+<code>tests/test_reduced_newton.py</code> now runs to completion for the first
+time: 18 passed and 4 failed, EXIT=1, 2,321 s, and no process abort. Base and
+prior-candidate processes both aborted by test 9. Two failures are the base ids,
+<code>test_diverted_normalised_certificate_rung_retains_finite_fallback</code>
+and <code>test_reduced_newton_reaches_the_production_fixed_point</code>. The
+earlier suite-only failure of
+<code>test_ladder_scoring_evaluates_one_map_per_accepted_step</code> now passes in
+the suite, so it was process-cache state rather than solver behaviour. Two
+further failures sit where no base process ever reached:
+<code>test_compiled_slice_matches_the_fused_host_route</code> and
+<code>test_compiled_slice_caches_one_executable_per_static_policy</code>. Both
+are the same assertion, that the compiled slice's terminal state equals the
+fused host route's state bitwise. The first also fails when run alone at HEAD
+(job 1276224, 509 s), so it is not an effect of process order. It also fails
+alone at the recorded base <code>775720c7</code> (job 1276228, 479 s, same
+assertion at line 833), so it predates this node. The second compiled-slice
+failure makes the same bitwise comparison on the same slice. No failure is
+added against the base.</p>
+</section>
+<section id="single-site-krylov">
+<h2>The qualified Krylov step served from one scan site</h2>
+<p>The solver change is in <code>nova/equilibrium/fixed_point.py</code>:
+<code>_single_site_krylov</code>, plus the Arnoldi condition split into seed,
+column update and measurement. Every application in
+<code>_qualified_krylov_step</code> is one slot of a <code>lax.scan</code> whose
+body calls <code>linear_action</code> once, gated off by <code>lax.cond</code> after
+the machine is done. A phase switch routes each result to the probe, a condition
+column, the GMRES start, an Arnoldi column, a restart residual, or the
+achieved-residual check. Capacity is <code>1 + K + 1 + K(K + 1) + 1</code>, which is 83
+at <code>K = 8</code>. An optimisation barrier on the requested vector and on the
+action keeps the operator out of its consumers' fusions.</p>
+<table><thead><tr><th>Program (job 1276452, <code>96cbb2f0</code>)</th><th>300 cells</th><th>1000 cells</th><th>Qualified-step live-map sites (300)</th></tr></thead><tbody>
+<tr><td>Base design state <code>52bfefc0</code> (recorded)</td><td>302,553</td><td>304,913</td><td>3 sites, 13,165</td></tr>
+<tr><td>Per-site control (base body rebound)</td><td>302,550</td><td>304,910</td><td>3 sites, 13,165</td></tr>
+<tr><td>Single-site stream</td><td>284,792</td><td>287,117</td><td>1 site, 2,696</td></tr>
+<tr><td>Stream minus control</td><td>&minus;17,758</td><td>&minus;17,793</td><td>&minus;2 sites, &minus;10,469</td></tr>
+</tbody></table>
+<p>Each compile took 169&ndash;185 s. The control applies the declared mutation:
+it calls the operator directly at each GMRES application site again, and its log
+repeats that line. The control's sites return to the base table (7,916 and 2,626
+instructions at the base scopes). The caller tool keeps only frames from the
+solver files, so the executed control body is attributed through a copy of its
+HLO that names its pseudo-filename <code>fixed_point.py</code>. Without that copy
+the control read zero qualified-step sites, which was the instrument's miss.
+Receipts: <code>/nova/figures/forward-solver-route-integrity/single-site-krylov/qualified-step.json</code>,
+<code>program-*.json</code>, <code>census-*.json</code> and <code>callers-*.json</code>.</p>
+<p id="single-site-krylov-identity">Bit identity, toy operators only
+(<code>toy_identity.py</code>, same job). Without the fence, a dense arm had
+differed in the step by 1.2e-15. With the fence, the stream matches the base body
+fenced the same way on 8 of 8 dense cases (6 of 8 against the unfenced base). The
+elementwise arm matches on 5 of 8 against either reference. The three misses differ
+only in <code>achieved_reduction</code>, by at most 1.1e-17, where the residual has
+cancelled to rounding; the step, conditioning and qualification are equal. The likely
+cause, not yet isolated: the stream evaluates the achieved check at the same site
+and on the same input as the last restart residual, while the base evaluates it at
+a separate site that is compiled on its own. The real-operator
+reading is recorded <a href="#single-site-krylov-real-operator">below</a>. The operator-boundary
+script exercises only <code>operator_request_body</code>, which this change
+leaves untouched.</p>
+<p id="single-site-krylov-public">The stream imports no private jax
+module. Local helpers in <code>fixed_point.py</code> give the highest-precision
+product and norm, the thresholded normalisation, the twice-at-most classical
+Gram-Schmidt and the positive normal-equation least squares. They follow the
+operation order of the library's batched GMRES, and the restart model is a
+plain identity of the residual dtype. <code>toy_self_identity.py</code> recorded
+every field of the 16 toy cases before the rewrite. After it, the stream
+reproduces 144 of 144 fields bitwise (<code>toy-self-compare.log</code>). The same
+comparison with the GMRES tolerance raised to 1e-3 reports 128 of 144 and exits 1
+(<code>toy-self-compare-perturbed.log</code>), so the check can fail. At the
+rewritten revision <code>8d02dd0f</code>, fresh <code>all_debug</code> processes
+reproduce the earlier results. The 300-cell stream census still measures 284,792
+instructions (job 1276568, compile 159 s, <code>census-stream-300-rerun.log</code>).
+<code>tests/test_fixed_point.py</code> passes 45 of 45 (job 1276569, EXIT=0, 148 s).
+<code>tests/test_reduced_newton.py</code> gives 18 passed and 4 failed, with no
+abort (job 1276570, EXIT=1, 1,289 s). The failing tests are the same four ids,
+and the diverted rung reads 0.279485232201572 again, bitwise unchanged by the
+rewrite.</p>
+<p id="single-site-krylov-test"><code>tests/test_single_site_krylov.py</code>
+traces the step with its operator under a named scope. It counts that
+operator's contraction through every nested jaxpr and requires exactly one site;
+a second test checks that the step still solves a full-dimension dense system.
+Both pass (<code>single-site-test.log</code>). With the base per-site body rebound by
+<code>per_site.install()</code>, which calls the operator directly at each
+GMRES application site again, the site test fails with <code>assert 11 == 1</code>
+(<code>single-site-test-mutated.log</code>).</p>
+<p id="single-site-krylov-vmap">Batched cost (<code>vmap_cost.py</code>): one
+width-16 vmapped step on a dense 1529-square operator with eight iterations takes
+a median of 1.240 s for the stream against 0.086 s for the base body, a ratio of
+14.3. Under <code>vmap</code>, the cond and the phase switch become selects, so
+all 83 slots apply the operator and run every consumer branch. Unbatched, the
+slots after the machine finishes apply nothing.</p>
+<p id="single-site-krylov-tests">Tests (<code>suite.sh</code>, one fresh
+<code>all_debug</code> process per file). <code>tests/test_fixed_point.py</code>
+passes 45 of 45 (job 1276455, EXIT=0, 148 s). <code>tests/test_reduced_newton.py</code>
+(job 1276456, EXIT=1, 1,308 s) completes without an abort: 18 passed, 4 failed.
+The failure ids are the four recorded at the base:
+<code>test_diverted_normalised_certificate_rung_retains_finite_fallback</code>,
+<code>test_reduced_newton_reaches_the_production_fixed_point</code>,
+<code>test_compiled_slice_matches_the_fused_host_route</code> and
+<code>test_compiled_slice_caches_one_executable_per_static_policy</code>. No
+failure is added.</p>
+<p id="single-site-krylov-real-operator">The first of those failures prints a
+terminal value of a real-operator solve, so it is the one real-operator bitwise
+reading this node has. At <code>f803b640</code>, whose solver sources equal
+<code>52bfefc0</code>, it reads <code>0.27948523220464483</code>; under the fenced
+stream it reads <code>0.279485232201572</code>. That is an absolute difference of
+3.07e-12, a relative difference of 1.1e-11, and 55,355 units in the last place.
+The fence therefore does not restore bit identity on the real operator, and the
+certificate terminal state is expected to move by the same order. Whether to
+re-base the certificate digest on the stream is a lead decision.</p>
+</section>
 </main>
 </body>
 </html>

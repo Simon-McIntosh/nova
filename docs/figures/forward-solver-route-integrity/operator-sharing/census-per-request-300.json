@@ -1,0 +1,340 @@
+{
+  "hlo": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T103934949557-fsri-one-traced-operator-state-machine/optimized-hlo/per-request-300.hlo.txt",
+  "optimized_instructions": 532366,
+  "map_site_count": 35,
+  "map_instructions": 268802,
+  "shared_body_sites": 6,
+  "shared_body_instructions": 126712,
+  "direct_map_instructions": 142090,
+  "rows": [
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/jit(evaluate)",
+      "instructions": 41666,
+      "shared_body": true,
+      "depth": 3,
+      "kinds": {
+        "jvp": 41666
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/jit(evaluate)",
+      "instructions": 30544,
+      "shared_body": true,
+      "depth": 3,
+      "kinds": {
+        "jvp": 30544
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun",
+      "instructions": 21489,
+      "shared_body": false,
+      "depth": 3,
+      "kinds": {
+        "jvp": 14599,
+        "transpose": 6890
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
+      "instructions": 20209,
+      "shared_body": false,
+      "depth": 4,
+      "kinds": {
+        "jvp": 5275,
+        "transpose": 7276,
+        "primal": 7658
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun",
+      "instructions": 17749,
+      "shared_body": false,
+      "depth": 3,
+      "kinds": {
+        "primal": 9938,
+        "jvp": 227,
+        "transpose": 7584
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/jit(evaluate)",
+      "instructions": 17524,
+      "shared_body": true,
+      "depth": 1,
+      "kinds": {
+        "jvp": 17524
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
+      "instructions": 16171,
+      "shared_body": false,
+      "depth": 4,
+      "kinds": {
+        "jvp": 8005,
+        "primal": 8166
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/jit(evaluate)/jvp()/cond/branch_0_fun",
+      "instructions": 16170,
+      "shared_body": true,
+      "depth": 3,
+      "kinds": {
+        "primal": 16170
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/jit(evaluate)/jvp()/cond/branch_0_fun",
+      "instructions": 13860,
+      "shared_body": true,
+      "depth": 3,
+      "kinds": {
+        "primal": 13860
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body",
+      "instructions": 13048,
+      "shared_body": false,
+      "depth": 2,
+      "kinds": {
+        "jvp": 13048
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body/while/body",
+      "instructions": 10015,
+      "shared_body": false,
+      "depth": 6,
+      "kinds": {
+        "jvp": 2677,
+        "transpose": 7338
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body",
+      "instructions": 10013,
+      "shared_body": false,
+      "depth": 5,
+      "kinds": {
+        "jvp": 2675,
+        "transpose": 7338
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun",
+      "instructions": 7916,
+      "shared_body": false,
+      "depth": 2,
+      "kinds": {
+        "jvp": 7916
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/jit(evaluate)/cond/branch_1_fun",
+      "instructions": 6948,
+      "shared_body": true,
+      "depth": 1,
+      "kinds": {
+        "primal": 6948
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body",
+      "instructions": 2694,
+      "shared_body": false,
+      "depth": 3,
+      "kinds": {
+        "jvp": 2694
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
+      "instructions": 2632,
+      "shared_body": false,
+      "depth": 3,
+      "kinds": {
+        "jvp": 2632
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/while/body",
+      "instructions": 2626,
+      "shared_body": false,
+      "depth": 4,
+      "kinds": {
+        "jvp": 2626
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body",
+      "instructions": 2623,
+      "shared_body": false,
+      "depth": 3,
+      "kinds": {
+        "jvp": 2623
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun",
+      "instructions": 2610,
+      "shared_body": false,
+      "depth": 3,
+      "kinds": {
+        "jvp": 2610
+      }
+    },
+    {
+      "site": "jit(solve)",
+      "instructions": 2407,
+      "shared_body": false,
+      "depth": 0,
+      "kinds": {
+        "primal": 2407
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_0_fun",
+      "instructions": 2310,
+      "shared_body": false,
+      "depth": 4,
+      "kinds": {
+        "primal": 2310
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_0_fun",
+      "instructions": 2310,
+      "shared_body": false,
+      "depth": 3,
+      "kinds": {
+        "primal": 2310
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/branch_0_fun",
+      "instructions": 2310,
+      "shared_body": false,
+      "depth": 4,
+      "kinds": {
+        "primal": 2310
+      }
+    },
+    {
+      "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun",
+      "instructions": 1633,
+      "shared_body": false,
+      "depth": 1,
+      "kinds": {
+        "primal": 1633
+      }
+    },
+    {
+      "site": "",
+      "instructions": 1042,
+      "shared_body": false,
+      "depth": 0,
+      "kinds": {
+        "jvp": 922,
+        "primal": 110,
+        "transpose": 10
+      }
+    },
+    {
+      "site": "cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun",
+      "instructions": 76,
+      "shared_body": false,
+      "depth": 2,
+      "kinds": {
+        "primal": 66,
+        "transpose": 10
+      }
+    },
+    {
+      "site": "cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun",
+      "instructions": 68,
+      "shared_body": false,
+      "depth": 2,
+      "kinds": {
+        "transpose": 10,
+        "jvp": 58
+      }
+    },
+    {
+      "site": "cond/branch_1_fun/while/body",
+      "instructions": 58,
+      "shared_body": false,
+      "depth": 1,
+      "kinds": {
+        "jvp": 58
+      }
+    },
+    {
+      "site": "cond/branch_1_fun/while/body/cond/branch_1_fun",
+      "instructions": 21,
+      "shared_body": false,
+      "depth": 1,
+      "kinds": {
+        "jvp": 21
+      }
+    },
+    {
+      "site": "while/body/while/body",
+      "instructions": 16,
+      "shared_body": false,
+      "depth": 2,
+      "kinds": {
+        "transpose": 10,
+        "jvp": 6
+      }
+    },
+    {
+      "site": "while/body",
+      "instructions": 16,
+      "shared_body": false,
+      "depth": 1,
+      "kinds": {
+        "transpose": 10,
+        "jvp": 6
+      }
+    },
+    {
+      "site": "cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun",
+      "instructions": 7,
+      "shared_body": false,
+      "depth": 2,
+      "kinds": {
+        "jvp": 7
+      }
+    },
+    {
+      "site": "cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body",
+      "instructions": 7,
+      "shared_body": false,
+      "depth": 2,
+      "kinds": {
+        "jvp": 7
+      }
+    },
+    {
+      "site": "cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/while/body",
+      "instructions": 7,
+      "shared_body": false,
+      "depth": 3,
+      "kinds": {
+        "jvp": 7
+      }
+    },
+    {
+      "site": "cond/branch_1_fun/while/body/cond/branch_1_fun/while/body",
+      "instructions": 7,
+      "shared_body": false,
+      "depth": 2,
+      "kinds": {
+        "jvp": 7
+      }
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+revision=775720c77c5443e990a74b52ea464b73ce87b6aa plus uncommitted measurement prototype; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine; command=python solver-probe.py (before custom-linear-solve support)
+direct wall 2.223116861656308
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/solver-probe.py", line 19, in <module>
+    compiled=jax.jit(lambda x: shared_operator_call(solve,x)).lower(x).compile()
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/solver-probe.py", line 19, in <lambda>
+    compiled=jax.jit(lambda x: shared_operator_call(solve,x)).lower(x).compile()
+                               ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 227, in shared_operator_call
+    result = Machine().execute(closed, flat)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 199, in execute
+    entry = self.lower(closed, inputs, outputs, -1)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 88, in lower
+    pc = self.control(group, [resolve(v) for v in group.invars],
+                      [env[v] for v in group.outvars], pc)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 150, in control
+    body = self.lower(params["body_jaxpr"], [*inputs[nc:nc+nb], *carry], carry, test)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 88, in lower
+    pc = self.control(group, [resolve(v) for v in group.invars],
+                      [env[v] for v in group.outvars], pc)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 136, in control
+    entries = [self.lower(branch, inputs[1:], outputs, next_pc) for branch in params["branches"]]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 88, in lower
+    pc = self.control(group, [resolve(v) for v in group.invars],
+                      [env[v] for v in group.outvars], pc)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 136, in control
+    entries = [self.lower(branch, inputs[1:], outputs, next_pc) for branch in params["branches"]]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 88, in lower
+    pc = self.control(group, [resolve(v) for v in group.invars],
+                      [env[v] for v in group.outvars], pc)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 150, in control
+    body = self.lower(params["body_jaxpr"], [*inputs[nc:nc+nb], *carry], carry, test)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 88, in lower
+    pc = self.control(group, [resolve(v) for v in group.invars],
+                      [env[v] for v in group.outvars], pc)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 136, in control
+    entries = [self.lower(branch, inputs[1:], outputs, next_pc) for branch in params["branches"]]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 88, in lower
+    pc = self.control(group, [resolve(v) for v in group.invars],
+                      [env[v] for v in group.outvars], pc)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 176, in control
+    body = self.lower(closed, [*inputs[:nc], *carry, *slices], [*carry, *values], advance)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 88, in lower
+    pc = self.control(group, [resolve(v) for v in group.invars],
+                      [env[v] for v in group.outvars], pc)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 193, in control
+    raise ValueError(f"shared operator under unsupported control primitive {name}")
+ValueError: shared operator under unsupported control primitive custom_linear_solve
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.

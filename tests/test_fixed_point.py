@@ -1091,5 +1091,189 @@ def test_runtime_precision_selects_fixed_point_state_dtype():
     assert single.trace.dtype == jnp.float32
 
 
+def test_nested_jit_calls_inline_each_operator_request():
+    """A shared lowered callee is not a shared executable operator body."""
+    import re
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
+    operator = jax.jit(jnp.sin)
+
+    def requests(state):
+        return operator(operator(operator(state)))
+
+    initial = jnp.arange(4, dtype=jnp.float64)
+    lowered = jax.jit(requests).lower(initial)
+    compiled = lowered.compile()
+    lowered_bodies = lowered.as_text().count("stablehlo.sine")
+    optimized_bodies = len(re.findall(r" = f64\[4\].* sine\(", compiled.as_text()))
+    print(
+        f"nested_jit_lowered_bodies={lowered_bodies} "
+        f"nested_jit_optimized_bodies={optimized_bodies}"
+    )
+    assert lowered_bodies == 1
+    assert optimized_bodies == 3
+    np.testing.assert_array_equal(compiled(initial), jnp.sin(jnp.sin(jnp.sin(initial))))
+
+
+def test_operator_request_stream_preserves_live_reads_and_local_tangents():
+    """Every request owns its field and only the selected mask is held fixed."""
+    from nova.equilibrium.fixed_point import (
+        OperatorRequest,
+        OperatorRequestKind,
+        operator_request_body,
+        run_operator_requests,
+    )
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
+
+    def mapped(state, shadow, slope):
+        return jnp.where(shadow, state, slope * state**2 + 1.0)
+
+    def promoted(state, previous, slope):
+        del previous, slope
+        return state > 0.0
+
+    states = jnp.asarray(
+        [
+            [-0.5, 0.25],
+            [-0.25, 0.5],
+            [0.5, -0.5],
+            [-0.5, 0.5],
+            [0.25, -0.25],
+            [0.5, -0.25],
+        ],
+        dtype=jnp.float64,
+    )
+    vectors = jnp.ones_like(states)
+    shadows = jnp.zeros_like(states, dtype=bool)
+    incumbent = jnp.asarray([True, True, False, True, False, True])
+    requests = OperatorRequest(
+        jnp.arange(len(OperatorRequestKind), dtype=jnp.int32),
+        states,
+        vectors,
+        shadows,
+        incumbent,
+    )
+    body = operator_request_body(mapped, promoted)
+    observed = jax.jit(lambda payload: run_operator_requests(body, payload, 0.25))(
+        requests
+    )
+    expected_shadow = (
+        shadows.at[OperatorRequestKind.ACCEPTANCE]
+        .set(states[OperatorRequestKind.ACCEPTANCE] > 0.0)
+        .at[OperatorRequestKind.RECONCILIATION]
+        .set(states[OperatorRequestKind.RECONCILIATION] > 0.0)
+    )
+    np.testing.assert_array_equal(observed.shadow, expected_shadow)
+    np.testing.assert_array_equal(
+        observed.mapped, jnp.where(expected_shadow, states, 0.25 * states**2 + 1.0)
+    )
+    np.testing.assert_array_equal(
+        observed.tangent, jnp.where(expected_shadow, vectors, 0.5 * states * vectors)
+    )
+    assert not np.array_equal(observed.mapped[0], observed.mapped[1])
+
+
+def test_krylov_solve_composes_requests_without_entering_the_operator_body():
+    """The request body has no linear solve; its caller owns Krylov control."""
+    from jax.extend import core
+    from nova.equilibrium.fixed_point import (
+        OperatorRequestKind,
+        operator_request,
+        operator_request_body,
+    )
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
+    body = operator_request_body(lambda state, _shadow: 0.25 * state)
+    request = operator_request(
+        OperatorRequestKind.JVP,
+        jnp.ones(2, dtype=jnp.float64),
+        jnp.zeros(2, dtype=bool),
+        vector=jnp.ones(2, dtype=jnp.float64),
+    )
+
+    def primitives(jaxpr):
+        found = set()
+        for equation in jaxpr.eqns:
+            found.add(equation.primitive.name)
+            for nested in core.jaxprs_in_params(equation.params):
+                found.update(primitives(nested))
+        return found
+
+    assert "custom_linear_solve" not in primitives(jax.make_jaxpr(body)(request))
+
+    def solve(rhs):
+        def action(vector):
+            return vector - body(request._replace(vector=vector)).tangent
+
+        return jax.scipy.sparse.linalg.gmres(action, rhs, restart=2, maxiter=2)[0]
+
+    rhs = jnp.asarray([0.75, 1.5], dtype=jnp.float64)
+    assert "custom_linear_solve" in primitives(jax.make_jaxpr(solve)(rhs))
+    np.testing.assert_allclose(jax.jit(solve)(rhs), [1.0, 2.0], atol=1e-14, rtol=0)
+
+
+@pytest.mark.slow
+def test_real_operator_request_calls_inline_unless_they_share_a_scan():
+    """Count actual full-flux output roots after optimizing a real operator."""
+    import re
+    from benchmarks.solve_program_size_gate import _certificate_operands
+    from nova.equilibrium.fixed_point import (
+        OperatorRequestKind,
+        operator_request,
+        operator_request_body,
+    )
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
+    profile, seed, topology, target, request = _certificate_operands(
+        "weak-rotation-reactor-static", -300
+    )
+    operator = profile.operator
+    external = operator.external(request.current, request.prescribed_current)
+    state = jnp.asarray(seed, dtype=jnp.float64)
+    shadow = operator.residual_shadow_mask(state, topology)
+    body = operator_request_body(operator.traced_flux_map_with_shadow(topology, target))
+
+    @jax.jit
+    def one(value, shadow, external, operator):
+        return body(
+            operator_request(OperatorRequestKind.RESIDUAL, value, shadow),
+            external,
+            operator,
+            target,
+        ).mapped
+
+    def nested(value, shadow, external, operator):
+        first = one(value, shadow, external, operator)
+        second = one(first, shadow, external, operator)
+        return one(second, shadow, external, operator)
+
+    def streamed(value, shadow, external, operator):
+        def serve(carry, _):
+            return one(carry, shadow, external, operator), None
+
+        return jax.lax.scan(serve, value, None, length=3)[0]
+
+    counts = {}
+    results = {}
+    for label, function in (("one", one), ("nested", nested), ("streamed", streamed)):
+        compiled = jax.jit(function).lower(state, shadow, external, operator).compile()
+        counts[label] = sum(
+            bool(re.search(rf" = f64\[{state.size}\].* select\(", line))
+            and "/jit(evaluate)/" in line
+            for line in compiled.as_text().splitlines()
+        )
+        results[label] = compiled(state, shadow, external, operator)
+    print(f"real_operator_optimized_bodies={counts}")
+    assert counts["one"] == 1, "known-present real operator boundary was not seen"
+    assert counts["nested"] == 3
+    assert counts["streamed"] == 1
+    np.testing.assert_array_equal(results["nested"], results["streamed"])
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

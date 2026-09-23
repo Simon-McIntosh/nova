@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="193">
+<meta name="plan-version" content="194">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
 <meta name="plan-impl" content="0.92">
@@ -1562,6 +1562,9 @@ truncated figures file was removed and a worker plan-version meta bump reverted.
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260923T1015-trip-panels-exonerate-capacity" data-who="reckon-ship" data-when="2026-09-23T10:15:00+02:00">
     <div class="r-comment-body">S18 trip-panel finding (unreviewed; H200 job 1276423, worktree pcrf-production-route-trip-panels, tip 03fa0d1a8): the moment-bank capacity repair is exonerated as the cause of the exact-mode production collapse. Non-finite moments are zero on every trip, both before (664ade0c3) and after the repair. The failure is the first active-set step: from a good seed (83 core cells, λ 0.98) trip 1 returns 4 to 24 core cells, moves the axis 0.27 m outboard, and leaves four closed current islands in outboard wall cut cells. λ then rescales 0.6 to 6 kA back to 37 kA (λ 6 to 62) inside the unrefusing band (1e-6, 1e6). Chord mode collapses the same way. The wall cut-cell islands are S19's to attribute: f-cca-wall-cut-cell-islands-at-trip-one.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20260923T092847056643-cca-census-partition-probe-reads-the-full-state" data-who="reckon-ship" data-when="2026-09-23T12:07:41.082Z">
+    <div class="r-comment-body"><p>census probe reads the full state; bank overflow count read off the census currents; per-cell rows indexed by cell; exact terminal total finite at 14,013,835 A (target 16.31 MA); booking gate re-pinned to a non-converged state, followup f-cca-booking-gate-pins-a-non-converged-state; conditional on the map-fidelity gate; reviews 78 and 88</p></div>
 </div>
 </section>
 

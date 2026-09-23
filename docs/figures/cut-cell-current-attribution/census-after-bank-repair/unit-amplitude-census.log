@@ -1,0 +1,10 @@
+revision=4b7b59ad6357d7621460f12e10620dab07495545 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-census-partition-probe-reads-the-full-state command=unit amplitude census
+UNIT_AMPLITUDE_CENSUS case=weak-rotation-reactor-static cells=135 seed_digest_matches=False amplitude_gate=False seed:chord=2.03658855, terminal:chord=1.02767379, seed:exact=2.15372483, terminal:exact=1.16419044
+realised_cells=135 nonfinite_cell_current_signatures=0 exact_total_finite=True
+overflow_by_state_mode={'seed': {'chord': 0, 'exact': 0}, 'terminal': {'chord': 0, 'exact': 0}}
+analytic_totals_a={'seed': 16314568.877155293, 'terminal': 16314568.877155293}
+chord_totals_a={'seed': 8010834.263747064, 'terminal': 15875439.764504185}
+exact_totals_a={'seed': 7575142.892262417, 'terminal': 14013835.43717596}
+analytic_target_current_a=16314773.311828371
+amplitude_gate={'seed': False, 'terminal': False}
+seed_digest_matches_commit=False

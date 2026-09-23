@@ -421,6 +421,52 @@ census verdict is inferred from the missing receipt. The allocation receipt and
 all three gate logs are under
 <code>docs/figures/cut-cell-current-attribution/exact-bank-capacity</code>.</p>
 
+<h3 id="s6-census-full-state">Full-state partition probe: terminal census after callback-capacity repair</h3>
+<p><strong>Worker outcome, 2026-09-23; section and driving followup remain open.</strong>
+The previously recorded probe defect reproduces in the declared negative control:
+passing the sliced state to <code>operator._fixed_design_read</code> again raises
+<code>ValueError: own-node null census requires the direct sampling flux values</code>.
+The repair in commit <code>87d11db6c</code> passes the complete 772-row state
+(135 grid, 121 wall, and authored direct-sampling rows) to the fixed-design read.
+The census then completes at revision <code>4b7b59ad6</code> over all 135 realised
+cells, with zero non-finite cell-current signatures and a finite exact total at
+the terminal state.</p>
+<p>The final single <code>all_debug</code> allocation (job <code>1276584</code>;
+<code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>, root interpreter
+directly, no <code>uv</code>) exits 0. Seed totals are analytic
+<code>16,314,568.877 A</code>, chord <code>8,010,834.264 A</code>, exact
+<code>7,575,142.892 A</code>; terminal totals are analytic
+<code>16,314,568.877 A</code>, chord <code>15,875,439.765 A</code>, exact
+<code>14,013,835.437 A</code>, against the analytic target
+<code>16,314,773.312 A</code>. The bank-overflow count is zero for chord and
+exact at both seed and terminal states, and <code>exact_total_finite=True</code>.
+The amplitude gate remains false at both states (seed chord/exact
+<code>2.03658855 / 2.15372483</code>; terminal chord/exact
+<code>1.02767379 / 1.16419044</code>), so the current deficit remains an open
+physics result rather than being normalised away.</p>
+<p>Fresh-process focused gates pass: <code>tests/test_moment_path_separatrix_test.py</code>
+1 test, <code>tests/test_continuous_confined_moments.py</code> 3 tests, and
+<code>tests/test_exact_bank_callback_capacity.py</code> 3 tests. The complete
+receipt, logs, exit markers and report are under
+<code>docs/figures/cut-cell-current-attribution/census-after-bank-repair</code>;
+the ranked and poloidal difference figures are linked below. Nothing under
+<code>nova/</code> changed, and this worker does not resolve its own followup.</p>
+<p><strong>Review repairs, commit <code>247e5aa4a</code>.</strong> The outboard
+booking gate was red at head because it pinned the terminal totals before the
+recorded repairs moved them; the gate was green at its pinning revision
+<code>8a33b741b</code>, and the topology guard that landed after it made the
+slicing probe refuse, so the census repair repaired that read. Re-pinned the gate
+to the measured terminal totals chord <code>15,875,439.765 A</code> / exact
+<code>14,013,835.437 A</code> and the outboard cells 83/116 at
+<code>112,349.668 A</code>, with the mechanism in the module docstring. Red log
+at <code>237e3e931</code> (2 failed, 1 passed) and green log at
+<code>247e5aa4a</code> (3 passed in 161.63 s) sit with the receipt. A stray
+truncated figures file was removed and a worker plan-version meta bump reverted.</p>
+<figure>
+  <img src="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-contours.svg" alt="Poloidal difference contours for the full-state unit-amplitude census after the bank-capacity repair." style="max-width:100%">
+  <figcaption>Full-state census difference contours; the ranked per-cell comparison is also available as <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-ranked.svg">SVG</a> and <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-ranked.png">PNG</a>. The complete quantitative report is <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/report.md">here</a>.</figcaption>
+</figure>
+
 <h2 id="s7">§7 — Wire the typed census saddle into the production spline-chain clip and re-solve the diverted certificate rows</h2>
 <p>The wedge split landed on the oracle (core-side current within 1e-13 relative of the analytic wedge integral at 110, 300 and 500 cells) but the production spline route discards it because the operator passes no saddle vertex, and the oracle compares the carrier against its own emitted polygons. Pass the typed census saddle as the clip's saddle vertex, consume the four region-owned moment profiles in the plasma partition and the null read, and make the oracle independent of the carrier by integrating the analytic current over the region bounded by the separatrix branches and the cell edges. Gate: the independent oracle at 110, 300 and 500 cells on all_debug, then one H200 job re-solving the four diverted certificate rows with the four limited rows as the bit-identical negative control.</p>
 

@@ -24,26 +24,39 @@ Those numbers are the receipt's *before* state.  They were taken at revision
 at this revision, under the operator's own absent-saddle reading of the
 fixture:
 
-    chord clip                    15,868,149.09 A
-    exact clip                    15,491,114.13 A
+    chord clip                    15,875,439.76 A
+    exact clip                    14,013,835.44 A
     cells 83, 104, 106, 108, 116  nonzero in both clip modes
     chord order                   16 cells book zero, 41 cells differ between modes
 
 So the receipt's outboard hole -- five cells booking zero in both clip modes --
-is not present at this revision.  Cell 83 books 113,536.53 A, the four others
-book between 1.12e5 A and 1.92e5 A, and for all five the chord and exact clips
-select the same geometry (identical bookings and identical clip vertex counts),
-so the two modes agree on these cells rather than one dropping them.  The
-instrument is not degenerate: 41 of 135 cells still differ between the modes and
-16 cells book zero in chord mode, so the curved clip does clip.
+is not present at this revision.  Cells 83 and 116 book 112,349.67 A each, the
+other three between 1.92e5 A and 1.93e5 A, and for all five the chord and exact
+clips select the same geometry (identical bookings and identical clip vertex
+counts), so the two modes agree on these cells rather than one dropping them.
+The instrument is not degenerate: 41 of 135 cells still differ between the modes
+and 16 cells book zero in chord mode, so the curved clip does clip.
 
-The movement is consistent with the separatrix-clip repair merged as 5a703429b,
-which the receipt predates.  ``RECEIPT_TOTALS_A`` records the before-state and
-``BOOKED_TOTALS_A`` pins what this revision books, so the pair states the
-movement rather than one number standing for both.  What the booking repair
-must still reach is the analytic target of 16,314,773.31 A within one percent:
-the exact clip books 0.950 of it here, so the total is short for reasons other
-than these five cells.
+Two changes landed between the pinning revision and this one, and they move
+these totals together; they cannot be separated here because the slicing probe
+the partition repair replaced now refuses.  The census partition probe now
+passes the whole 772-row state to the fixed-design read rather than a 256-row
+slice, so the base masks both clips select over carry the authored
+direct-sampling rows rather than the grid and wall rows alone; and the
+direct-sampling rows shift the outboard partition.  The bank-capacity repair
+raises the exact clip's moment bank to at least one slot per mesh cell, so a
+quadratic level that marks more than one cell books its current instead of
+failing closed to nan.  Together they moved the chord total 15,868,149.09 ->
+15,875,439.76 A and the exact total 15,491,114.13 -> 14,013,835.44 A, and moved
+cells 83 and 116 from 113,536.53 / 112,093.47 A to 112,349.67 A each.  The
+movement from the receipt is consistent with the separatrix-clip repair merged
+as 5a703429b, which the receipt predates.  ``RECEIPT_TOTALS_A`` records the
+receipt's before-state and ``BOOKED_TOTALS_A`` pins what this revision books, so
+the pair states the movement rather than one number standing for both.
+
+What the booking repair must still reach is the analytic target of
+16,314,773.31 A within one percent: the exact clip books 0.859 of it here, so
+the total is short for reasons other than these five cells.
 
 The absent census saddle
 ------------------------
@@ -105,7 +118,7 @@ RECEIPT_TOTALS_A = {"chord": 15_540_896.52, "exact": 15_148_862.10}
 
 #: Booked totals this revision produces on the same committed terminal state,
 #: in amperes, one per clip mode.
-BOOKED_TOTALS_A = {"chord": 15_868_149.094491, "exact": 15_491_114.132435}
+BOOKED_TOTALS_A = {"chord": 15_875_439.764504185, "exact": 14_013_835.43717596}
 
 #: Cut cells the receipt booked zero current for in either clip mode.  Their
 #: centroids sit on the outboard side of the machine, where the separatrix
@@ -116,11 +129,11 @@ OUTBOARD_HOLE_CELLS = (83, 104, 106, 108, 116)
 #: state, in amperes, per clip mode.  Every one of the five books a nonzero
 #: current in both modes; the receipt recorded zero for all five.
 MEASURED_CELL_CURRENT_A: dict[int, dict[str, float]] = {
-    83: {"chord": 113_536.53228908387, "exact": 113_536.53228908387},
+    83: {"chord": 112_349.6683601459, "exact": 112_349.6683601459},
     104: {"chord": 192_269.94030158775, "exact": 192_269.94030158775},
     106: {"chord": 192_343.79043466656, "exact": 192_343.79043466656},
     108: {"chord": 192_269.94030158763, "exact": 192_269.94030158763},
-    116: {"chord": 112_093.46642055141, "exact": 112_093.46642055141},
+    116: {"chord": 112_349.6683601451, "exact": 112_349.6683601451},
 }
 
 #: Relative agreement required between the recomputed total and the pinned

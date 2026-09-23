@@ -145,13 +145,31 @@ def _lane() -> dict[str, Any]:
     }
 
 
+def _terminal_flags(equilibrium: Any) -> tuple[bool, str]:
+    """Read the terminal state's converged flag and termination name directly.
+
+    The certificate telemetry helper walks the per-trip globalisation arrays,
+    and on the reduced-Newton route those arrays desynchronise: a
+    zero-dimensional cycle-damping array sits beside a nonzero active-set trip
+    count, so the helper raises IndexError.  These two fields are all this
+    census needs, and both read as scalars from the fixed-point history.
+    """
+
+    history = equilibrium.fixed_point
+    converged = bool(np.asarray(history.converged).reshape(-1)[0])
+    reason = recovery.fixed_point.FixedPointTerminationReason(
+        int(np.asarray(history.termination_reason).reshape(-1)[0])
+    )
+    return converged, reason.name.lower()
+
+
 def _terminal_fields(equilibrium: Any, operator: Any, target_current: float):
     """Return the terminal lambda, residual, convergence and support census."""
 
     terminal = equilibrium.fixed_point
     terminal_flux = np.asarray(equilibrium.flux, dtype=np.float64)
     amplitude = float(equilibrium.normalisation.amplitude)
-    telemetry = certificate._production_solver_receipt(equilibrium)
+    converged, termination = _terminal_flags(equilibrium)
     masks = operator.current_domain_masks(terminal_flux)
     core_cells = int(np.sum(np.asarray(masks.core)))
     support_current = float(target_current) / amplitude if amplitude else None
@@ -160,8 +178,8 @@ def _terminal_fields(equilibrium: Any, operator: Any, target_current: float):
         "terminal_fixed_point_residual": (
             float(terminal.residual) if np.isfinite(terminal.residual) else None
         ),
-        "converged": bool(telemetry.get("converged")),
-        "termination": telemetry.get("termination"),
+        "converged": converged,
+        "termination": termination,
         "terminal_core_cell_count": core_cells,
         "terminal_support_current_a": support_current,
         "normalisation_policy": equilibrium.normalisation.policy_name,

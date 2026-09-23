@@ -273,7 +273,9 @@
     carries the site table and the test disposition. In one fresh
     <code>all_debug</code> process at <code>f803b640</code>,
     <code>tests/test_fixed_point.py</code> passes 45 of 45 (EXIT=0, 201 s),
-    including the nested-call regression. This entry changes neither
+    including the nested-call regression. <code>tests/test_reduced_newton.py</code>
+    completes without an abort for the first time: 18 passed and 4 failed. All
+    four failures are present at the base, so none is added. This entry changes neither
     section state nor its followup.</p>
 
     <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>

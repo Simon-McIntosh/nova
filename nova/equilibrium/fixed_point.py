@@ -2145,26 +2145,6 @@ def _gmres_restart_start(unit_residual: jax.Array, restart: int):
     return basis, hessenberg
 
 
-def _when(predicate: jax.Array, update: Callable, state):
-    """Apply ``update`` to ``state`` only where ``predicate`` holds.
-
-    The gate is a loop that runs at most once. Unbatched it is a conditional;
-    under ``vmap`` it runs once when any member's predicate holds and not at
-    all otherwise, holding the other members' state by the loop's select,
-    where a batched ``lax.cond`` evaluates the update for every member on
-    every call.
-    """
-
-    def body(carry):
-        _, state = carry
-        return jnp.asarray(False), update(state)
-
-    _, state = jax.lax.while_loop(
-        lambda carry: carry[0], body, (jnp.asarray(predicate), state)
-    )
-    return state
-
-
 def _single_site_krylov(
     linear_action: Callable[[jax.Array], jax.Array],
     residual_vector: jax.Array,
@@ -2271,7 +2251,7 @@ def _single_site_krylov(
         index = index + 1
         proceed = (index < restart) & ~breakdown
 
-        def project(_candidate):
+        def project(_):
             beta = (
                 jnp.zeros_like(hessenberg, shape=(restart + 1,))
                 .at[0]
@@ -2280,7 +2260,7 @@ def _single_site_krylov(
             coefficients = _gmres_lstsq(hessenberg.T, beta)
             return stream.solution + _gmres_dot(basis[..., :-1], coefficients)
 
-        candidate = _when(~proceed, project, stream.candidate)
+        candidate = jax.lax.cond(proceed, lambda _: stream.candidate, project, None)
         return stream._replace(
             phase=jnp.where(
                 proceed, _KrylovPhase.ARNOLDI, _KrylovPhase.RESTART_RESIDUAL
@@ -2325,22 +2305,13 @@ def _single_site_krylov(
         return stream.phase != _KrylovPhase.DONE
 
     def serve(stream):
-        phase = stream.phase
-        vector = jax.lax.switch(phase, requests, stream)
+        vector = jax.lax.switch(stream.phase, requests, stream)
         # The barrier keeps the operator's arithmetic out of its consumers'
         # fusions, so each application rounds as a standalone evaluation.
         action = jax.lax.optimization_barrier(
             linear_action(jax.lax.optimization_barrier(vector))
         )
-        # One gate per consumer, each keyed on the slot's entry phase, so a
-        # batch runs only the consumers some member's phase selects.
-        for index, consume in enumerate(consumers):
-            stream = _when(
-                phase == index,
-                lambda state, consume=consume: consume(state, action),
-                stream,
-            )
-        return stream
+        return jax.lax.switch(stream.phase, consumers, stream, action)
 
     stream = jax.lax.while_loop(pending, serve, initial)
     info = jnp.where(jnp.isnan(_gmres_norm(stream.solution)), -1, 0)

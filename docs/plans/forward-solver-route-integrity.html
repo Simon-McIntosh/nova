@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.58">
 </head>
@@ -323,6 +323,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260923T0425-abort-attributed" data-who="reckon-ship" data-when="2026-09-23T04:25:00Z">
     <div class="r-comment-body">Node 1 of the fourth attempt landed on the claude-opus 5.5 lane: fsri-attribute-the-reduced-newton-abort, merged at 62959ec6b, review 97. It confirms the lane serves through the crew surface. The exit 134 is memory-map exhaustion in the CPU JIT linker, not a solver defect. Two followups are queued: the per-test cache clear and the four failures at HEAD. Node 2 (whole-solve request scheduling on opus) follows once the cache clear lands, so that its zero-added-failures gate can run the whole file in one process.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260922T210521062333-fsri-attribute-the-reduced-newton-abort" data-who="reckon-ship" data-when="2026-09-23T01:26:48.270Z">
+    <div class="r-comment-body"><p>report only on claude-opus 5.5: exit 134 is memory-map exhaustion (vm.max_map_count 65530) in the CPU JIT linker; clearing JAX caches per test removes it; review 97</p></div>
 </div>
 </section>
 </main>

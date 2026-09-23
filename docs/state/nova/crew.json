@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T05:00:42",
+  "updated": "2026-09-23T05:16:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7993,10 +7993,15 @@
         "id": "s19n-opus-1",
         "harness": "claude-opus",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-22"
+        "session_id": "a2110dd8-c4a2-47e9-bd9c-a4f62c0b4735",
+        "session_model": "claude-opus-5-5",
+        "sessions": {
+          "{\"alias\":\"opus 5.5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5-5\",\"sandbox\":\"worktree-full\"}": "a2110dd8-c4a2-47e9-bd9c-a4f62c0b4735"
+        },
+        "created": "2026-09-22",
+        "session_owners": {
+          "{\"alias\":\"opus 5.5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5-5\",\"sandbox\":\"worktree-full\"}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19n-opus-2",
@@ -272292,6 +272297,429 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T210521062333-fsri-attribute-the-reduced-newton-abort",
+        "plan": "forward-solver-route-integrity",
+        "section": "\u00a73",
+        "node": "fsri-attribute-the-reduced-newton-abort",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 906,
+                "cached_input_tokens": 330144,
+                "input_tokens": 331052,
+                "output_tokens": 49,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 331101,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "6bd9bb1d-4fb2-4080-a881-bf22212dd1b2",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "at main HEAD, one all_debug job (TMPDIR=/tmp in submit and payload, JAX_PLATFORMS=cpu, interpreter ~/Code/nova/.venv/bin/python, no uv, --mem=64G, time 00:59:00) runs the whole file in one process and reproduces the abort, and separate fresh processes run the aborting test alone and the tests before it; docs/figures/forward-solver-route-integrity/reduced-newton-abort/report.md states whether the abort is a compile-memory abort (LLVM allocateMappedMemory or program-count growth across the process), a numerical abort, or a runtime assertion, citing the log line, the peak RSS or program count before the abort, and the smallest ordered test subset that reproduces it; every log is committed beside the report; no file under nova/ or tests/ changes",
+          "estimated_hours": null,
+          "goal": "a report names the mechanism of the SIGABRT exit 134 that ends tests/test_reduced_newton.py at test_threshold_one_reproduces_the_refusal_only_policy in one process (followup f-fsri-s3-fourth-attempt-on-opus, node 1)",
+          "id": "fsri-attribute-the-reduced-newton-abort",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "unknown",
+            "metered": true,
+            "observed_at": "2026-09-21T06:19:19.748Z",
+            "read_at": "2026-09-22T21:05:24Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 61.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T210521062333-fsri-attribute-the-reduced-newton-abort/manifest.md",
+          "negative_control": "",
+          "plan": "forward-solver-route-integrity",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/figures/forward-solver-route-integrity/reduced-newton-abort",
+            "docs/plans/forward-solver-route-integrity.html",
+            "docs/evidence/archive/forward-solver-route-integrity-landed.html",
+            "docs/figures/forward-solver-route-integrity"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19n-opus-1",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5.5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-22T21:06:04Z",
+        "completed_at": "2026-09-23T01:26:48.270Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 15630,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 15644,
+        "stalled": true,
+        "time_budget": "40m",
+        "base_sha": "f5af729a9de6a2287ebd2b528cea278d5bdb3157",
+        "commits": [
+          "913b3443e082c53ef80fb57ff27b3e0f9c11c231",
+          "d6a96d592a7fc63daea385143493eb6d0831a32f",
+          "77fa507140646db50504aa65e3abeccae84acef7",
+          "779b0e9769c0f9a6fa51b13836566e560efd4662",
+          "2779edff352feb3f071c87ff61970abf44607adc",
+          "d4435ff5c3eeac1be025d066b3880e4c79712655"
+        ],
+        "changed_lines": {
+          "added": 22638,
+          "removed": 0,
+          "files": 52
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T210521062333-fsri-attribute-the-reduced-newton-abort/manifest.md",
+        "scope_changed": false,
+        "session_id": "a2110dd8-c4a2-47e9-bd9c-a4f62c0b4735",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 75.0,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-28T20:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 39980,
+            "cache_creation_input_tokens_cumulative": 39980,
+            "cache_read_input_tokens": 4654288,
+            "cache_read_input_tokens_cumulative": 4654288,
+            "inference_geo": "not_available",
+            "input_tokens": 44,
+            "input_tokens_cumulative": 44,
+            "output_tokens": 18140,
+            "output_tokens_cumulative": 18140,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 6.456523399999998,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 6.456523399999998
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-23T01:26:48.270Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1330,
+              "budget_seconds": 2400,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+              "elapsed_seconds": 3730,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 6239,
+              "log_fresh": false,
+              "manifest_commits": [
+                "199427458",
+                "51f2bef22",
+                "feba54328"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "f7fc496f2f8f34c060632aee43235ffc6b4fd74b8e2bb745de468bad3b9598eb",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T120036305507-fsa-repair-low-state-level-array/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260922T120036305507-fsa-repair-low-state-level-array --gate <verdict> --commit 199427458 --commit 51f2bef22 --commit feba54328",
+              "node": "fsa-repair-low-state-level-array",
+              "phase": "working",
+              "plan": "figure-and-solver-audit",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": true,
+              "review_status": "parsed",
+              "run_id": "r-20260922T120036305507-fsa-repair-low-state-level-array",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 6290,
+              "terminal_at": "2026-09-22T19:20:42Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-low-state-level-array"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2400,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1622,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 6684,
+              "log_fresh": false,
+              "manifest_commits": [
+                "e6a49e81d3862e094e4f086e1e1e6a5835337826",
+                "a6978a4200313e2f77772ec3824c72d7af4fbe43"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "8d356855046c63d345194fe07e1e7716666d285855515ca818a5cf42e00289be",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T184641881958-fsa-repair-the-cell-count-sign/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan figure-and-solver-audit --section '\u00a73' --role review --spec-level exact --node review-of-fsa-repair-the-cell-count-sign --goal 'attach an independent review to run r-20260922T184641881958-fsa-repair-the-cell-count-sign' --done-when 'the review for r-20260922T184641881958-fsa-repair-the-cell-count-sign stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T184641881958-fsa-repair-the-cell-count-sign.json --time-budget 40m --session s19-codex-20260916 --allow-unreconciled-runs --local",
+              "node": "fsa-repair-the-cell-count-sign",
+              "phase": "starting",
+              "plan": "figure-and-solver-audit",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260922T184641881958-fsa-repair-the-cell-count-sign",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 6719,
+              "terminal_at": "2026-09-22T19:13:33Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-the-cell-count-sign"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 1800,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1062,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1900,
+              "log_fresh": false,
+              "manifest_commits": [
+                "7f0207965",
+                "e0b686d22"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "6682bb385c076b3fe55e595ec25f4fd3db728ec3fad00a57a7e48f28550fb1df",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T201525376677-cpu-probe-returns-the-child-exit-status/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan cpu-compile-abort --section '\u00a72' --role review --spec-level exact --node review-of-cpu-probe-returns-the-child-exit-status --goal 'attach an independent review to run r-20260922T201525376677-cpu-probe-returns-the-child-exit-status' --done-when 'the review for r-20260922T201525376677-cpu-probe-returns-the-child-exit-status stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T201525376677-cpu-probe-returns-the-child-exit-status.json --time-budget 30m --session s19-codex-20260916 --allow-unreconciled-runs --local",
+              "node": "cpu-probe-returns-the-child-exit-status",
+              "phase": "starting",
+              "plan": "cpu-compile-abort",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260922T201525376677-cpu-probe-returns-the-child-exit-status",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 1962,
+              "terminal_at": "2026-09-22T20:32:51Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cpu-probe-returns-the-child-exit-status"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 19,
+            "evidence": 20,
+            "fit": 19,
+            "goal_fidelity": 20,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 97
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 11814917,
+          "cumulative_input_tokens": 12166202,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 481.343,
+          "generated_tokens": 64193,
+          "generation_seconds": 213.715,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 22.7,
+          "machine_seconds": 267.628,
+          "peak_input_tokens": 226978,
+          "tokens_per_second": 300.37,
+          "wall_tokens_per_second": 133.36
+        },
+        "follow_on_paths": [
+          "tests/test_reduced_newton.py",
+          "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort",
+          "session_id": "a2110dd8-c4a2-47e9-bd9c-a4f62c0b4735",
+          "session_source": "pointer",
+          "retained_at": "2026-09-23T01:26:48.270Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.55,
+        "impl_move": {
+          "plan": "forward-solver-route-integrity",
+          "at_dispatch": 0.55,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "gate-not-passing"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "lane_advisory": {
+          "backend": "claude-opus",
+          "burn_multiple": null,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "no projected exhaustion is available for 'claude-opus'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+          "horizon_ends_at": "2026-09-22T21:45:24.485569+00:00",
+          "horizon_seconds": 2400,
+          "metered": true,
+          "observed_at": "2026-09-21T06:19:19.748Z",
+          "precedes_horizon": null,
+          "projected_exhaustion_at": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "seconds_until_reset": 0,
+          "state": "quiet",
+          "utilisation_pct": 61.0
+        },
+        "lane_declaration": {
+          "backend": "claude-opus",
+          "headroom": "unknown",
+          "metered": true,
+          "observed_at": "2026-09-21T06:19:19.748Z",
+          "read_at": "2026-09-22T21:05:24Z",
+          "resolved_backend": "claude-opus",
+          "utilisation_pct": 61.0
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "backend declares no lane document",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 30.0,
+        "orientation_input_tokens": 2885135.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -272758,6 +273186,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3257
+    "_version": 3259
   }
 }

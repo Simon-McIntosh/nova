@@ -1,36 +1,12 @@
-revision=52bfefc0a0f02412d8910aaccb632bfbd9fd43b5 plus uncommitted single-site stream; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step; command=python docs/figures/forward-solver-route-integrity/single-site-krylov/toy_identity.py  (login node, seconds, JAX_PLATFORMS=cpu)
-5 2 0.10474576300381205 1
-5 8 1.1151510117705948e-15 1
-12 2 0.9113352808294345 1
-Traceback (most recent call last):
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step/docs/figures/forward-solver-route-integrity/single-site-krylov/toy_identity.py", line 42, in <module>
-    np.testing.assert_array_equal(np.asarray(a), np.asarray(b), err_msg=field)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/numpy/testing/_private/utils.py", line 1121, in assert_array_equal
-    assert_array_compare(operator.__eq__, actual, desired, err_msg=err_msg,
-    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                         verbose=verbose, header='Arrays are not equal',
-                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                         strict=strict)
-                         ^^^^^^^^^^^^^^
-  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/numpy/testing/_private/utils.py", line 983, in assert_array_compare
-    raise AssertionError(msg)
-AssertionError: 
-Arrays are not equal
-step
-Mismatched elements: 11 / 12 (91.7%)
-First 5 mismatches are at indices:
- [0]: -0.0008328870383252189 (ACTUAL), -0.0008328870383249188 (DESIRED)
- [1]: 0.24689102221409823 (ACTUAL), 0.246891022214098 (DESIRED)
- [2]: 0.8500573269100089 (ACTUAL), 0.8500573269100093 (DESIRED)
- [3]: -0.030074362615882262 (ACTUAL), -0.030074362615882172 (DESIRED)
- [4]: 0.40574545071461604 (ACTUAL), 0.405745450714615 (DESIRED)
-Max absolute difference among violations: 1.19348975e-15
-Max relative difference among violations: 3.60321565e-13
- ACTUAL: array([-8.328870e-04,  2.468910e-01,  8.500573e-01, -3.007436e-02,
-        4.057455e-01, -2.749161e-01, -2.091903e-01,  2.898373e-01,
-        7.341136e-02,  1.353169e-01, -6.821273e-02, -3.741000e-01])
- DESIRED: array([-8.328870e-04,  2.468910e-01,  8.500573e-01, -3.007436e-02,
-        4.057455e-01, -2.749161e-01, -2.091903e-01,  2.898373e-01,
-        7.341136e-02,  1.353169e-01, -6.821273e-02, -3.741000e-01])
-EXIT=1
+revision=e84cbcaee756d32c35a724369769954d0040741e tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step command=/home/ITER/mcintos/Code/nova/.venv/bin/python toy_identity.py dense job=1276452
+{"size": 5, "iterations": 2, "base": {}, "base-fenced": {}}
+{"size": 5, "iterations": 8, "base": {}, "base-fenced": {}}
+{"size": 12, "iterations": 2, "base": {}, "base-fenced": {}}
+{"size": 12, "iterations": 8, "base": {"step": 1.1934897514720433e-15, "unconditioned_step": 1.1934897514720433e-15, "achieved_reduction": 3.3306690738754696e-16}, "base-fenced": {}}
+{"size": 40, "iterations": 2, "base": {}, "base-fenced": {}}
+{"size": 40, "iterations": 8, "base": {}, "base-fenced": {}}
+{"size": 3, "iterations": 2, "base": {}, "base-fenced": {}}
+{"size": 3, "iterations": 8, "base": {"step": 2.7755575615628914e-17, "unconditioned_step": 2.7755575615628914e-17, "achieved_reduction": 3.082156583454298e-17}, "base-fenced": {}}
+TOY_BASE bit_identical=6/8
+TOY_BASE_FENCED bit_identical=8/8
+EXIT=0

@@ -1,32 +1,86 @@
 SOLOVEV_COMPILATION_CACHE directory=/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe version=runtime-ea5c55820be3d80549fe
-SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=case_and_machine
-SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=case_and_machine elapsed_seconds=1.287689
-SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=operator_and_seed
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=operator_and_seed elapsed_seconds=30.000
-SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=operator_and_seed elapsed_seconds=32.854405
-SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=production_solve
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=30.000
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=60.001
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=90.001
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=120.001
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=150.001
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=180.002
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=210.002
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=240.002
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=270.002
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=300.002
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=330.002
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=360.003
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=390.003
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=420.003
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=450.003
-SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=480.003
-SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=489.836375
-SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=accuracy_scoring
-SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=accuracy_scoring elapsed_seconds=1.039985
-SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=figure_render
-SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=figure_render elapsed_seconds=0.816945
-ROW diverted-single-null trips=6
-  _rebuilt_model_promotion executions=22
-  _steepest_descent_promotion executions=12
-CENSUS-OK rows=1
+SOLOVEV_STAGE_BEGIN case=weak-rotation-reactor-static requested_cells=-300 stage=case_and_machine
+SOLOVEV_STAGE_END case=weak-rotation-reactor-static requested_cells=-300 stage=case_and_machine elapsed_seconds=0.161754
+SOLOVEV_STAGE_BEGIN case=weak-rotation-reactor-static requested_cells=-300 stage=operator_and_seed
+SOLOVEV_STAGE_END case=weak-rotation-reactor-static requested_cells=-300 stage=operator_and_seed elapsed_seconds=23.695824
+SOLOVEV_STAGE_BEGIN case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=30.000
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=60.001
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=90.001
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=120.001
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=150.001
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=181.949
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=211.983
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=241.983
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=271.984
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=301.984
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=331.984
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=361.984
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=391.984
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=421.984
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=451.985
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=481.985
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=511.985
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=541.985
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=571.986
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=601.986
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=631.986
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=661.986
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=691.986
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=721.986
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=751.987
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=781.987
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=811.987
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=841.987
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=871.987
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=901.987
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=931.988
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=961.988
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=991.988
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1021.988
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1051.988
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1081.988
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1111.989
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1141.989
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1171.989
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1201.989
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1231.989
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1261.989
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1291.990
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1321.990
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1351.990
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1381.990
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1411.990
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1441.990
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1471.991
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1501.991
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1531.991
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1561.991
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1591.991
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1621.991
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1651.992
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1681.992
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1711.992
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1741.992
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1771.992
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1801.992
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1831.993
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1861.993
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1891.993
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1921.993
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1951.993
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=1981.994
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=2011.994
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=2041.994
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=2071.994
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=2101.994
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=2131.994
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=2161.995
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=2191.995
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=2221.995
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=2251.995
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=2281.995
+SOLOVEV_STAGE_HEARTBEAT case=weak-rotation-reactor-static requested_cells=-300 stage=production_solve elapsed_seconds=2311.995
+slurmstepd: error: *** STEP 1276472.0 ON 98dci4-clu-3141 CANCELLED AT 2026-09-23T11:00:14 ***
+srun: error: 98dci4-clu-3141: task 0: Terminated
+srun: Force Terminated StepId=1276472.0

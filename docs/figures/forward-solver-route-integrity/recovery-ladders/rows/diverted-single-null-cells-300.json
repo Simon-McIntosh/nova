@@ -1,0 +1,55 @@
+{
+  "case": "diverted-single-null",
+  "cells": -300,
+  "executions": {
+    "_rebuilt_model_promotion": 22,
+    "_steepest_descent_promotion": 12
+  },
+  "executions_per_trip": {
+    "_rebuilt_model_promotion": 3.6666666666666665,
+    "_steepest_descent_promotion": 2.0
+  },
+  "fired_in_trips": {
+    "_rebuilt_model_promotion": [
+      1,
+      1,
+      1,
+      1,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      4,
+      5,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "_steepest_descent_promotion": [
+      1,
+      1,
+      1,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  "requested_cells": -300,
+  "terminal_fixed_point_residual": 0.27948523220464483,
+  "trips": 6
+}

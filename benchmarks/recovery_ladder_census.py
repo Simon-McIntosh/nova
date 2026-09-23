@@ -142,6 +142,10 @@ def run(rows, output, scratch_root):
             events = list(_EVENTS)
             counts, trips, trip_total = _attribute(events)
             solver = row.get("solver", {}) if isinstance(row, dict) else {}
+            recorded = solver.get("production_telemetry") or {}
+            converged = solver.get("converged")
+            if converged is None:
+                converged = recorded.get("converged")
             per_solve = {}
             per_trip = {}
             for name in COUNTED:
@@ -156,7 +160,7 @@ def run(rows, output, scratch_root):
                     "case": case,
                     "cells": cells,
                     "requested_cells": cells,
-                    "converged": solver.get("converged"),
+                    "converged": converged,
                     "termination": solver.get("termination"),
                     "residual_status": solver.get(
                         "terminal_fixed_point_residual_status"
@@ -170,15 +174,55 @@ def run(rows, output, scratch_root):
                     ),
                 }
             )
+            _store(output, receipts[-1])
+            _merged(output, rows)
     finally:
         _restore(solovev_certificate, saved)
+    payload = _merged(output, rows)
+    return payload
+
+
+FENCE_BASE = "52bfefc0a0f02412d8910"
+
+
+def _row_file(output, case, cells):
+    return output / "rows" / ("%s-cells%d.json" % (case, cells))
+
+
+def _store(output, receipt):
+    path = _row_file(output, receipt["case"], receipt["cells"])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+
+
+def _load(output):
+    store = output / "rows"
+    receipts = []
+    if store.is_dir():
+        for path in sorted(store.glob("*.json")):
+            receipts.append(json.loads(path.read_text()))
+    return receipts
+
+
+def _merged(output, requested):
+    receipts = _load(output)
+    have = {(row["case"], row["cells"]) for row in receipts}
+    missing = [
+        "%s:%d" % (case, cells)
+        for case, cells in requested
+        if (case, cells) not in have
+    ]
     payload = {
+        "fence_base_sha": FENCE_BASE,
         "base_sha": _base_sha(),
         "fixed_point_digest": _digest(),
         "instruction_census": _instruction_share(),
+        "complete": not missing,
+        "missing": missing,
         "verdict": _verdict(receipts),
         "rows": receipts,
     }
+    output.mkdir(parents=True, exist_ok=True)
     (output / "report.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n"
     )
@@ -239,7 +283,14 @@ def _markdown(payload):
     lines = []
     lines.append("# Recovery-ladder executions per certificate solve")
     lines.append("")
-    lines.append("Base revision `%s`." % payload["base_sha"])
+    lines.append("Fence base revision `%s`." % payload["fence_base_sha"])
+    lines.append("")
+    lines.append("Worktree head `%s`." % payload["base_sha"])
+    lines.append("")
+    lines.append(
+        "Complete: `%s`; missing rows: `%s`."
+        % (payload["complete"], ", ".join(payload["missing"]) or "none")
+    )
     lines.append("")
     lines.append("**Verdict.** %s" % payload["verdict"])
     lines.append("")
@@ -312,7 +363,11 @@ def main(argv=None):
         for name, count in sorted(row["executions"].items()):
             print("  %s executions=%d" % (name, count))
     print("VERDICT %s" % payload["verdict"])
-    print("CENSUS-OK rows=%d" % len(payload["rows"]))
+    if payload["complete"]:
+        print("CENSUS-OK rows=%d" % len(payload["rows"]))
+    else:
+        print("CENSUS-PARTIAL rows=%d" % len(payload["rows"]))
+        print("MISSING %s" % " ".join(payload["missing"]))
     return 0
 
 

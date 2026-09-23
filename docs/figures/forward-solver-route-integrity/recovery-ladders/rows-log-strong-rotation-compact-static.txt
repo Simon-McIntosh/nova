@@ -1,0 +1,8 @@
+ROW-BEGIN case=strong-rotation-compact-static cells=-300 slurm_job=1276598 host=98dci4-clu-3141.iter.org 2026-09-23T12:20:12+02:00
+SOLOVEV_COMPILATION_CACHE directory=/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe version=runtime-ea5c55820be3d80549fe
+SOLOVEV_STAGE_BEGIN case=strong-rotation-compact-static requested_cells=-300 stage=case_and_machine
+SOLOVEV_STAGE_END case=strong-rotation-compact-static requested_cells=-300 stage=case_and_machine elapsed_seconds=0.153489
+SOLOVEV_STAGE_BEGIN case=strong-rotation-compact-static requested_cells=-300 stage=operator_and_seed
+SOLOVEV_STAGE_HEARTBEAT case=strong-rotation-compact-static requested_cells=-300 stage=operator_and_seed elapsed_seconds=30.000
+SOLOVEV_STAGE_END case=strong-rotation-compact-static requested_cells=-300 stage=operator_and_seed elapsed_seconds=46.906601
+SOLOVEV_STAGE_BEGIN case=strong-rotation-compact-static requested_cells=-300 stage=production_solve

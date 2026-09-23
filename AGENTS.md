@@ -414,33 +414,25 @@ cards and the memory, and it is the one that refuses:
 `sacctmgr show qos gpu_0003_grpa` reads `cpu=30,gres/gpu=4,mem=650G` with
 `DenyOnLimit`.
 
-**The reservation admits no job at all, and the serve is not the reason.**
-Measured 2026-09-21 and reproduced: the deepseek serve (job 1273253) runs under
-QoS `normal`, not `gpu_0003_grpa`, so it consumes none of that QoS's
-`gres/gpu=4`; cards 1, 2 and 3 on the node are idle and in nobody's hands. What
-refuses is the reservation itself:
+**The reservation admits jobs, and `--test-only` misreports it.** Measured
+2026-09-23 09:20: every `sbatch --test-only` into `gpu_0003_grpA` predicted a
+start on 2026-10-07, fourteen days out. That included a request naming no GPU.
+The same shape submitted for real (probe job 1276415, one card, two cores,
+8 GB) started within seconds on 98dci4-gpu-0003 and listed an H200 NVL. The
+production-route ladder (1276244) had been admitted the same way that morning.
+The 2026-09-21 refusal (`Requested node configuration is not available` on the
+minimal request) is fixed: the reservation now carries
+`CoreIDs=15-29,47-61`, not `(null)`.
 
-```bash
-sbatch --test-only --account=grpa --partition=betelgeuse --reservation=gpu_0003_grpA \
-  --nodes=1 --ntasks=1 --time=00:01:00 --wrap=true
-# allocation failure: Requested node configuration is not available
-```
-
-That is the minimal request, one task with no cores, memory or cards named,
-and it is refused in one call; the same request into `gpu_0003_grpB` fails with
-"Access denied to requested reservation", which rules out permissions, and a
-group B job sits stuck identically. The cause is the cluster configuration
-(two `CoreCnt=30` reservations with `CoreIDs=(null)` on a 64-core node under
-`sched/builtin`), an SDCC matter, so stopping or shrinking the serve would
-change nothing. `CoreIDs=(null)` against a declared `CoreCnt=30` is the tell:
-the reservation claims thirty cores and holds none, so a job restricted to it
-resolves to an empty core set, which is why SLURM answers with a *configuration*
-refusal rather than a shortage and why neither free resources nor a smaller
-request changes anything. Backfill is therefore not the remedy — a job that can
-never be placed is skipped by backfill too. Leave a correctly shaped H200 job
-queued so it runs the moment the reservation is repaired, and route the work per
-the hierarchy below. The node's live budget and the serving footprint are kept
-in imas-ambix `imas_ambix/agent/AGENTS.md`.
+A fourteen-day estimate therefore says nothing about admission, and a worker
+that routes off the H200 on it lands on titan while the H200 has free cards.
+One node did exactly that three times in a row that morning. **Never decide
+the rung from a `--test-only` estimate.** Submit to betelgeuse and read
+`squeue -j <id> -o '%T %R'` a minute later. Only a job still `PENDING` with a
+resource or configuration reason counts as "betelgeuse will not admit it".
+Check free cards with `scontrol show node 98dci4-gpu-0003 | grep AllocTRES`
+against `Gres=gpu:h200:8`. The node's live budget and the serving footprint are
+kept in imas-ambix `imas_ambix/agent/AGENTS.md`.
 
 ### Compute hierarchy: H200, then titan, then CPU (binding, lead 2026-09-21)
 
@@ -450,8 +442,8 @@ rung, and that is a scope defect in the brief rather than a worker's choice.
 
 | Rung | Submission | When |
 |---|---|---|
-| 1. H200 | `--partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1` | always first; leave the job queued even when the reservation refuses |
-| 2. titan (P100) | `--partition=titan --gres=gpu:1` | whenever betelgeuse will not admit the job |
+| 1. H200 | `--partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1` | always first; submit for real and read `squeue`, never a `--test-only` estimate |
+| 2. titan (P100) | `--partition=titan --gres=gpu:1` | only when a real betelgeuse submission is still pending on a resource or configuration reason |
 | 3. CPU | `--partition=all_debug` (or `sirius` past the hour) with `JAX_PLATFORMS=cpu` | only when neither GPU rung can serve the shape |
 
 **Titan is a working JAX lane, measured rather than assumed.** The worry is that

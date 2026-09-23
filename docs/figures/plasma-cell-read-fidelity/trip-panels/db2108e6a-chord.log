@@ -1,0 +1,5 @@
+revision=db2108e6adaca770cda30e39e052d9dcf20e18a9 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-db2108e6a command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py', 'arm', '--revision', 'db2108e6adaca770cda30e39e052d9dcf20e18a9', '--clip', 'chord', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels']
+BUILD db2108e6adaca770cda30e39e052d9dcf20e18a9 chord
+SOLVE route=newton_krylov
+CAPTURE trip=1 residual=0.49574734038068 lambda_calls=50
+ARM_COMPLETE {"revision": "db2108e6adaca770cda30e39e052d9dcf20e18a9", "clip_mode": "chord", "terminal_residual": 0.49574734038068097, "trip_count": 1, "saddle_loss_trip": 1}

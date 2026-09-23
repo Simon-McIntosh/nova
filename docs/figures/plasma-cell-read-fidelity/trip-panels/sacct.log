@@ -1,4 +1,5 @@
-revision=638c996ee7bf33aa669be930c8912380e39ab784 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels command=sacct -j 1276326 --format=JobID,State,Elapsed,ExitCode,Start,End,NodeList -n -P
-1276326|CANCELLED by 39486|00:04:10|0:0|2026-09-23T09:17:24|2026-09-23T09:21:34|98dci4-gpu-0002
-1276326.batch|CANCELLED|00:04:11|0:15|2026-09-23T09:17:24|2026-09-23T09:21:35|98dci4-gpu-0002
-1276326.extern|COMPLETED|00:04:10|0:0|2026-09-23T09:17:24|2026-09-23T09:21:34|98dci4-gpu-0002
+JobID|State|ExitCode|Elapsed|Partition|NodeList
+1276423|COMPLETED|0:0|00:30:09|betelgeuse|98dci4-gpu-0003
+1276423.batch|COMPLETED|0:0|00:30:09||98dci4-gpu-0003
+1276423.extern|COMPLETED|0:0|00:30:09||98dci4-gpu-0003
+1276423.0|CANCELLED|0:15|00:30:09||98dci4-gpu-0003

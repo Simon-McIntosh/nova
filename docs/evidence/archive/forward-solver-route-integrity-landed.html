@@ -1443,6 +1443,39 @@ assertion at line 833), so it predates this node. The second compiled-slice
 failure makes the same bitwise comparison on the same slice. No failure is
 added against the base.</p>
 </section>
+
+  <section id="recovery-ladder-executions">
+    <h2>Recovery-ladder executions per certificate solve</h2>
+    <p>Commits <code>513568ec29053607c6f206458cc09bb6f6a6dc42</code>,
+    <code>8538baf7dbf5b92af3fe5aa87bd6948403cdbd49</code> and
+    <code>9632ad11e013c0a1f2d853f4c281db080ad4f76f</code> land
+    <code>benchmarks/recovery_ladder_census.py</code> and its receipt under
+    <code>docs/figures/forward-solver-route-integrity/recovery-ladders/</code>.
+    The driver wraps the rebuild and descent rungs of the Newton recovery ladder
+    so each runtime execution emits an ordered debug callback, and wraps the trip
+    entry point so every execution is attributed to the fixed-point trip that
+    produced it.</p>
+    <p>The certificate row the reduced-Newton test exercises,
+    <code>diverted-single-null</code> at requested cells <code>-300</code>, ran as
+    one <code>all_debug</code> job with <code>JAX_PLATFORMS=cpu</code>. Over its six
+    trips the rebuild rung ran 22 times and the descent rung 12 times; the
+    committed operator census attributes 40237 of 302553 optimised instructions
+    to the rebuild rung (13.30 percent) and 17352 to the descent rung (5.74
+    percent).</p>
+    <table>
+      <thead><tr><th>Path</th><th>Executions</th><th>Instructions</th><th>Share</th></tr></thead>
+      <tbody>
+        <tr><td><code>_rebuilt_model_promotion</code> rebuilt-model rung</td><td>22</td><td>40237</td><td>13.30%</td></tr>
+        <tr><td>steepest-descent rung</td><td>12</td><td>17352</td><td>5.74%</td></tr>
+      </tbody>
+    </table>
+    <p>The instrumented solve and the uninstrumented test run both terminate at
+    fixed-point residual <code>0.27948523220464483</code>, so the counter does not
+    perturb what it counts. The test instead asserts
+    <code>2.248351582217136</code> and fails at this revision with the census
+    absent from the process, so that expected constant is stale and its repair
+    sits outside this node's write scope.</p>
+  </section>
 </main>
 </body>
 </html>

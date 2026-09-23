@@ -17,8 +17,8 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-modified" content="2026-09-23">
 <meta name="plan-effort-hours" content="10.0">
-<meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="36">
+<meta name="plan-impl" content="0.8">
+<meta name="plan-version" content="39">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -137,6 +137,44 @@
 <p><strong>Measured: collapse reproduced, lambda-specific near-null interpretation unsupported.</strong> H200 job <code>1276502</code> completed in 10 min 45 s. The seed carries 83 core cells and 38,009.95 A, λ 0.98183. The first full Newton trial collapses to one core cell and zero current; non-finite normalization and merit refuse it. The first accepted trial is the one-eighth step: 12 core cells, 1,624.64 A, λ 22.9709, step norm 0.300511 Wb, predicted/actual merit decreases 0.320763/0.877867, model trusted. After ten accepted Newton promotions the trip ends unconverged at residual 0.631151 with 24 core cells, 6,072.66 A and λ 6.14547. All 83 nonlinear map evaluations have finite raw support moments; zero current nevertheless gives non-finite λ.</p>
 <p>On 717 unshadowed coordinates, the first accepted displacement places 87.6597% of its energy in the normalized map’s near-null subspace and 87.5844% with λ fixed; the full-trip figures are 93.1478% and 93.1840%. Both map Jacobians have 655 near-null directions under the declared relative threshold 1e-6. The Newton residual Jacobians have none: their smallest singular values are 0.00341597 and 0.00231068. The first accepted step’s cosine with the local support-shrink gradient is −0.00247588; the full-trip cosine is 0.00297421. Holding λ fixed leaves the geometric projections unchanged, so the declared control explicitly returns <code>not-supported</code>. The map’s large null space alone does not identify the mechanism of this collapse. The <a href="/nova/evidence/archive/plasma-cell-read-fidelity-landed#first-step-directions">complete record</a> links both own-level PNG/SVG panels, singular vectors, every trial, raw event states and controls. No solver repair, followup closure or terminal section status is authored.</p>
 </div>
+<p><strong>Gate before dynamics (lead 2026-09-23 16:00: "we need to do better than this; I hope we are not chasing bugs in nonsense psi maps").</strong> Every node today read solver dynamics off states that are not plasmas from trip 1 on. The chord trip-1 panel shows a steep band on shared levels, filament islands at the wall, and about seven spurious saddles. Two numbers point upstream of the dynamics: the production seed's merit is 1.80, and starting from the exact analytic state the route still sits at residual 0.264 after its first trip. If the certificate's forward map cannot reproduce the analytic Solov'ev state at the reduced rung, 132 cells is not a valid test case. Every census, line-search and constraint question asked there is then downstream of an unresolved map. No further dynamics node runs until the map is shown to reproduce the analytic state at a stated rung. The vertical-constraint node below waits behind this gate, and the figure relabel is withdrawn.</p>
+<p><strong>Node <code>pcrf-map-fidelity-at-the-analytic-state</code> (next).</strong></p>
+<p><strong>Deliverable.</strong> The certificate production route's λ-normalised forward map, evaluated once at the analytic Solov'ev state with no solve, for the diverted and reactor-static cases, in exact and chord clip modes, at each requested rung the certificate declares (110 cells upward through the ladder), in one GPU job at a pinned revision. For each row the receipt records:</p>
+<ul>
+<li>the relative mismatch between the mapped and analytic states, sup and RMS over the state nodes;</li>
+<li>the support the map builds at the analytic state: core-cell count against the analytic plasma's cells, unscaled support current against the analytic plasma current, and λ;</li>
+<li>the exterior contribution separately from the plasma response, each compared with its analytic counterpart;</li>
+<li>non-finite support counts.</li>
+</ul>
+<p><strong>Panels.</strong> For the reduced rung and the first rung that passes: the mapped and analytic states on shared levels with both null sets and the wall, plus the mismatch field on its own levels.</p>
+<p><strong>Done when.</strong></p>
+<ul>
+<li>The receipt names the smallest rung at which the map mismatch falls below 1e-2 in each clip mode, or says that none does.</li>
+<li>It states which component carries the mismatch where it fails: the support, the plasma response or the exterior.</li>
+<li>The negative control runs: the same evaluation at the analytic state shifted vertically by one pitch must raise the mismatch by a recorded amount, showing the measure can see a displaced plasma.</li>
+</ul>
+<p><strong>Node <code>pcrf-vertical-constraint-on-the-certificate-route</code> (behind the map-fidelity gate; lead 2026-09-23 15:10).</strong></p>
+<p><strong>Why.</strong> The lead asked whether the stalls come from a missing vertical constraint. It is missing. <code>_certificate_solve_request</code> (<code>benchmarks/solovev_certificate.py</code>) passes no <code>constraint_pairs</code>, and did not at 9aebe5fae either, so the production route has never held the current centroid. The case is a coil-less fixture with a prescribed exterior boundary condition.</p>
+<p><strong>The mechanism exists on the constrainable routes</strong> (<code>newton_krylov</code>, which the certificate uses, and <code>reduced_newton</code>), like λ holds the net current:</p>
+<ul>
+<li><code>CurrentCentroidConstraint(components=("centroid_z",))</code> is compensated either by a circuit current (<code>CircuitCurrentUnknown</code>, demonstrated only on machines with coils) or by a bounded exterior field (<code>BoundedExteriorFieldUnknown</code>, written for coil-less fixtures and wired in no benchmark).</li>
+<li>In the <code>ConstraintElimination</code> form, an outer loop moves the target until the correction reaches a prescribed value, for example zero.</li>
+</ul>
+<p>The diverted case is the elongated, vertically unstable one, and it fails worst. Its trip states drift vertically, by −0.26 m and +0.36 m in the two exact arms.</p>
+<p><strong>Deliverable.</strong> One GPU job at a pinned revision, stated in the receipt, because Krylov slice 1 moves the step by about 1e-11. The diverted case in exact clip mode at requested 110 cells, from the production seed and the analytic seed, with two arms each:</p>
+<ol>
+<li>the route as it stands;</li>
+<li>the route with <code>centroid_z</code> held by the radial-field column of <code>BoundedExteriorFieldUnknown</code>, in the elimination form driving the correction field to zero.</li>
+</ol>
+<p>The receipt also records whether the Newton residual's smallest singular direction at each seed is the vertical-displacement mode, meaning current displaced odd in z, and the first step's projection onto it.</p>
+<p><strong>Done when.</strong> The receipt states per arm the terminal residual, trips, the X-point distance, the axis height per trip, the core-cell count and support current per trip, and the correction field. It states whether the constrained arms keep the plasma and converge where the unconstrained arms do not. Panels exist on shared and own levels. The negative control runs: the constrained arm with the correction field forced to zero from the start must reproduce the unconstrained arm.</p>
+<p><strong>Figure correction, lead 2026-09-23 15:55.</strong> <code>docs/figures/plasma-cell-read-fidelity/first-step/accepted-trip.png</code> is titled "accepted-trip" with only the residual in the caption. "Accepted" is the line search's decision: the trip-1 state's merit, 0.92, fell below the seed's 1.80. The state is not a valid plasma: the axis is about 0.27 m outboard, no X-point is admitted, the current sits in four closed islands in the outboard wall cut cells, 24 of the seed's 83 core cells remain, and λ = 6.1 scales 6.1 kA of unscaled support to the 37 kA target. The figure draws only the state's own levels, with no shared-level reference panel, which the plotting rules require. Render-only node <code>pcrf-first-step-panel-says-what-was-accepted</code>, local lane, after the vertical-constraint node releases the figure paths:</p>
+<ul>
+<li>retitle the panel as the trip-1 state selected by the line search on a merit decrease, not a valid plasma;</li>
+<li>add the shared-level panel beside the analytic reference;</li>
+<li>caption the step fraction, merit against the seed, core cells, unscaled support current, λ, "no saddle admitted" and the revision.</li>
+</ul>
+<p>The label is the finding, stated plainly: the acceptance test has no plasma-validity criterion.</p>
 <p><strong>Node <code>pcrf-support-current-refusal</code> (after the lambda census).</strong> The route refuses a state whose unscaled support current, or core-cell count, falls below a stated fraction of the seed's, and reports λ beside it. It replaces reliance on <code>SCALAR_CURRENT_AMPLITUDE_BAND</code> (1e-6, 1e6), which refuses nothing. The receipt's plasma check gains the same criterion, because an O-point inside a closed contour is satisfied by degenerate islands. S19 measured λ from 0.93 to 1.05 on chord clip, and from 2 to 5.6 on exact support, where it diagnosed an exact-support deficit rather than an operating point. No threshold is set until S19's λ census over the bank rows lands.</p>
 <p>A route that returns a state with no plasma, without refusing it, is a separate defect from the mechanism. It is recorded here for the repair node, and nothing is authored before the panels name the mechanism.</p>
 <p><strong>Operational note for the next session.</strong> The local lane was taken down at 06:12:04 by a user-wide scancel from an imas-efit worker (guard now in the user-space agent rules); hold local dispatches until imas-ambix reports the serve restored, and route reviews there once it is. Two H200 jobs of the ladder were lost to that event; the third (1276244) blocks rather than resubmits if cancelled again.</p>
@@ -264,6 +302,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260923T102749862525-review-of-pcrf-first-step-degenerate-direction" data-who="reckon-ship" data-when="2026-09-23T10:47:49Z">
     <div class="r-comment-body"><p>first-step review stored, 92 of 100: supports the globalization reading; lambda control could not discriminate; 1/16 and 1/32 evaluated but not selected</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260923-first-step-landed" data-who="reckon-ship" data-when="2026-09-23T14:05:00+00:00">
+    <div class="r-comment-body">pcrf-first-step-degenerate-direction merged at d86706e57 (tip 0081c85c1), with the codex review stored at 92. The review supports the globalization reading, with one correction to the earlier comment: the step fractions 1/16 and 1/32 are evaluated in the vectorised score pass but not selected; the selector takes the first sufficient factor in descending order, which is the most collapsed finite state and also the one with the lowest merit. So the residual merit is not a valid objective across support changes. The review adds that the declared lambda control could not change its observable by construction, and that the final JSON was assembled by an uncommitted inline script. The reading was measured at b0a432d18. Krylov slice 1 (e62c8110e) changes only the fusion of the step arithmetic and moves it by about 1.1e-11 relative, so the reading holds to that tolerance, not bitwise. pcrf-seed-policy-at-main delivered before review (its record landed straight on main at edbd943f7 and a96e3e949, because the worker's plan write resolved to the main checkout): the analytic seed (amplitude 1.0 times analytic) keeps the plasma but stalls at 0.264, the disc seed (1.49 times) and the production seed (4.71 times) collapse, and every arm stops on the active-set stall. Its review is running on the local lane.</div>
 </div>
 </section>
 </main>

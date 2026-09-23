@@ -906,6 +906,43 @@
     state's pressure and toroidal-field volume integrals to the landed diagnostic, and state the same toroidal-term provenance in the bank
     receipt. This worker does not resolve the driving followup or claim section closure.</p>
   </section>
+  <section id="centroid-figure-render-flags">
+    <h2>The centroid figures regenerate from their receipts and carry the flags those receipts record (7de20b731, ed85fc284; base e1f123955)</h2>
+    <p><strong>Node:</strong> <code>cna-centroid-bars-carry-the-qualified-flag</code> (run <code>r-20260922T202859456444</code>, implement role,
+    detached worktree). Driving followup <code>f-fsa-figrepair-centroid</code>: two figures scored 68 and 49 as MISREPRESENTS PHYSICS by the
+    independent figure audit <code>fsa-audit-figures-newton-krylov</code>.</p>
+    <p><strong>What changed.</strong> <code>benchmarks/constraint_centroid_receipt.py</code> gained a <code>--render</code> mode that redraws both
+    centroid figures from the committed measurement receipts with no solve, writing PNG and SVG and a render receipt. That render receipt
+    (<code>render-receipt.json</code>) records, per bar, the label, the <code>qualified</code> and <code>converged</code> flags, the termination
+    string and the residual, alongside the sha256 of every receipt the render read; the test
+    <code>tests/test_constraint_centroid_render.py</code> re-reads it and requires each bar to agree with its measurement receipt.</p>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/centroid/two-rows.png"
+           alt="Two panels of log-scale terminal-residual bars, three arms per row of two bank rows, each bar annotated with its residual, its qualified or converged flag and its termination, and every bar the receipt does not endorse hatched; a third panel shows the P6 compensating current in kilovolt-amperes."
+           width="1000">
+      <figcaption>Every bar carries the flag its receipt records and the arms the receipt does not endorse are hatched; the title states the
+      receipt's own count of qualified rows. The 21989/55 held prototype reads <code>converged=False</code> beside its 3.4840e-09 residual while
+      its own termination string says <code>converged</code> &mdash; a contradiction inside the measurement receipt, displayed rather than
+      concealed. The vector companion is
+      <a href="/nova/figures/constraint-augmented-newton-krylov/centroid/two-rows.svg">published beside the PNG</a>, and the second figure,
+      the compensator stability comparison, is
+      <a href="/nova/figures/constraint-augmented-newton-krylov/centroid/converged-compensator.svg">likewise published</a>. Every value shown is
+      machine-readable in
+      <code>/nova/figures/constraint-augmented-newton-krylov/centroid/render-receipt.json</code>.</figcaption>
+    </figure>
+    <p><strong>Result.</strong> The two-rows title states <code>0 of 2 rows qualified by the receipt</code>; residuals are printed in exponent
+    form, flags and terminations in a column above each bar. The compensator panels took their category axes from each row's own
+    <code>leading_circuits</code> (21986/46: sol, p3_upper, p6_upper; 21989/55: p3_lower, p3_upper, p6_lower) instead of one axis shared across
+    two rows of different circuit sets, and each title states its row's seed-to-converged angle, 12.60&deg; and 4.06&deg;.</p>
+    <p><strong>Gate and control.</strong> <code>pytest -p no:cacheprovider tests/test_constraint_centroid_render.py</code>: 6 passed in 15.77 s at
+    revision <code>7de20b731</code>, log <code>/tmp/cna_logs/cna_centroid_render_gate.log</code>. Negative control, declared string
+    <code>drop the qualified flag from the bar annotation</code>, applied to a copy of the render receipt with one bar's flag key dropped:
+    1 failed, 5 passed, the failure being exactly the flag test.</p>
+    <p><strong>Deviation.</strong> The briefed wording had the test assert every bar label equals a coil family named in
+    <code>two-rows.json</code>; that receipt carries no <code>family</code> token at all (zero occurrences, checked by hand), so the test reads
+    the receipt's own coil-family strings instead: the per-row <code>actuator.definition</code>, and <code>leading_circuits[].family</code> for
+    the compensator bars. This worker does not resolve the driving followup.</p>
+  </section>
 </main>
 </body>
 </html>

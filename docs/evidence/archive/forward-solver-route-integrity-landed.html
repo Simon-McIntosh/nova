@@ -1377,6 +1377,47 @@ through <code>acceptance_map_fn</code> and <code>model_map_fn</code>.</p>
 <figcaption>300-cell weak certificate program split by where each optimized
 instruction originates. The dashed line is the 203,078 ceiling.</figcaption>
 </figure>
+<p id="operator-sharing-callers"><code>callers.py</code> names the solver
+code behind each site with more than 1,000 instructions. The map's own
+instructions carry the traceback of its first trace, so instead it walks the
+module stack-frame table from the instructions the caller emitted in the same
+scope. Two request-stream scopes (<code>run_operator_requests</code>, 16,171
+and 12,671) sit in <code>closed_call</code> scopes rather than
+<code>jit(evaluate)</code>. The census counts them as direct, so its direct
+share overstates the truly unshared share by about 28,800. That leaves about
+108,300 instructions outside every request stream. Removing 99,475 therefore
+needs more than 90% of them shared, or the eight stream bodies merged into one
+as well. The
+largest unshared callers are the damped-normal-equation GMRES of
+<code>_rebuilt_model_promotion</code>, the gradient of
+<code>_steepest_descent_promotion</code>, the Newton GMRES of
+<code>_qualified_krylov_step</code>, the Arnoldi columns of
+<code>_projected_krylov_condition</code>, <code>_record_merit</code> and
+<code>_backtracking_scores</code>. JAX's batched GMRES applies its operator
+in two places, the restart residual and the Arnoldi column. So each GMRES site
+inlines its action twice, which is visible as the 10,015 / 10,013 pair.</p>
+<table>
+<thead><tr><th>Instructions</th><th>Inside a <code>jit(evaluate)</code> body</th><th>Kinds</th><th>Nearest solver frame of the site&rsquo;s own instructions</th></tr></thead>
+<tbody>
+<tr><td>20,209</td><td>no</td><td>jvp 5,275, primal 7,658, transpose 7,276</td><td><code>_rebuilt_model_promotion.damping_trial</code> (line 1567)</td></tr>
+<tr><td>17,749</td><td>no</td><td>jvp 227, primal 9,938, transpose 7,584</td><td><code>_smooth_relative_sup_merit</code> (line 1029)</td></tr>
+<tr><td>17,352</td><td>no</td><td>jvp 10,462, transpose 6,890</td><td><code>_steepest_descent_promotion</code> (line 1668)</td></tr>
+<tr><td>16,171</td><td>no</td><td>jvp 8,005, primal 8,166</td><td><code>run_operator_requests.serve</code> (line 989)</td></tr>
+<tr><td>12,671</td><td>no</td><td>jvp 12,671</td><td><code>run_operator_requests</code> (line 991)</td></tr>
+<tr><td>10,015</td><td>no</td><td>jvp 2,677, transpose 7,338</td><td><code>_rebuilt_model_promotion.damping_trial</code> (line 1541)</td></tr>
+<tr><td>10,013</td><td>no</td><td>jvp 2,675, transpose 7,338</td><td><code>_rebuilt_model_promotion.damping_trial</code> (line 1541)</td></tr>
+<tr><td>8,170</td><td>yes</td><td>jvp 8,170</td><td><code>_smooth_relative_sup_merit</code> (line 1029)</td></tr>
+<tr><td>7,916</td><td>no</td><td>jvp 7,916</td><td><code>_qualified_krylov_step</code> (line 2044)</td></tr>
+<tr><td>7,726</td><td>yes</td><td>jvp 7,726</td><td><code>operator_request_body.evaluate</code> (line 945)</td></tr>
+<tr><td>7,722</td><td>yes</td><td>jvp 7,722</td><td><code>_smooth_relative_sup_merit</code> (line 1029)</td></tr>
+<tr><td>2,694</td><td>no</td><td>jvp 2,694</td><td><code>_record_merit</code> (line 1042)</td></tr>
+<tr><td>2,632</td><td>no</td><td>jvp 2,632</td><td><code>_projected_krylov_condition.arnoldi_column</code> (line 812)</td></tr>
+<tr><td>2,626</td><td>no</td><td>jvp 2,626</td><td><code>_qualified_krylov_step</code> (line 2044)</td></tr>
+<tr><td>2,623</td><td>no</td><td>jvp 2,623</td><td><code>_projected_krylov_condition</code> (line 840)</td></tr>
+<tr><td>2,614</td><td>no</td><td>jvp 2,614</td><td><code>_backtracking_scores</code> (line 1242)</td></tr>
+<tr><td>2,407</td><td>no</td><td>primal 2,407</td><td><code>_active_set_newton_krylov</code> (line 4125)</td></tr>
+<tr><td>1,886</td><td>no</td><td>primal 1,886</td><td><code>_newton_krylov_inner</code> (line 3507)</td></tr>
+</tbody></table>
 <p id="operator-sharing-suites">Test gate: <code>suite.sh</code> runs each file
 in its own fresh <code>all_debug</code> process (jobs 1276212 and 1276213) at
 <code>f803b640</code>, with <code>TMPDIR=/tmp</code>,

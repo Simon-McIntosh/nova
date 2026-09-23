@@ -18,7 +18,7 @@
 <meta name="plan-modified" content="2026-09-23">
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-impl" content="0.88">
-<meta name="plan-version" content="49">
+<meta name="plan-version" content="50">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -373,6 +373,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260923-seed-policy-landed" data-who="reckon-ship" data-when="2026-09-23T17:25:00+00:00">
     <div class="r-comment-body">pcrf-seed-policy-at-main merged at 3b8287d7b (tip 9988d6258), with the local-lane review stored at 82. Its record, which landed on main earlier at edbd943f7 and a96e3e949, stands. At main, exact clip mode, requested 110 cells, neither seed policy converges. The diverted analytic seed (flux amplitude 1.0 times analytic) keeps the plasma but stalls at residual 0.264. The disc seed (1.49 times) and the production seed (4.71 times) collapse. The map-fidelity gate has since shown this rung is not a valid footing (the exact map misses the analytic state by 45 percent), so the receipt is a record of that footing and not a finding about seeding. The review found three provenance defects and no disagreement about values. The npz keys named after a seed hold each arm's terminal state. The record credits the reactor-static arms to fed676eec, which was committed after job 1276643 ended; the module at launch was 83f40323a. The control log named for the diverted control (1276643) does not carry the receipt's control numbers, which come from job 1276711; the two agree to 2.5e-7 relative.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260923T125253572588-review-of-pcrf-seed-policy-at-main" data-who="reckon-ship" data-when="2026-09-23T17:21:27.278Z">
+    <div class="r-comment-body"><p>seed-policy review stored, 82 of 100: provenance defects only</p></div>
 </div>
 </section>
 </main>

@@ -134,6 +134,37 @@ def physical_from_coefficients(coefficients, second):
     return result
 
 
+def reference_boundaries(exact, fixture):
+    """Refine a core loop by projecting edge midpoints onto analytic zero flux.
+
+    Normal projection stays on the local separatrix branch near the saddle,
+    where a radial sign-change scan can jump over the narrow positive interval.
+    The prescribed saddle remains an unchanged endpoint at every refinement.
+    """
+    from shapely.geometry import Polygon
+
+    if getattr(exact, "x_point", None) is None:
+        return (
+            Polygon(fixture._analytic_separatrix(exact, points=11521)),
+            Polygon(fixture._analytic_separatrix(exact, points=23041)),
+        )
+    vertices = fixture._analytic_separatrix(exact, points=2881)
+    previous = None
+    for _ in range(3):
+        midpoints = (vertices + np.roll(vertices, -1, axis=0)) / 2
+        for _ in range(8):
+            gradient = exact.gradient(midpoints)
+            value = exact.flux(midpoints)
+            denominator = np.sum(gradient**2, axis=1)
+            assert np.all(denominator > 0)
+            midpoints -= value[:, None] * gradient / denominator[:, None]
+        assert np.max(np.abs(exact.flux(midpoints))) < 1e-12
+        refined = np.empty((2 * len(vertices), 2))
+        refined[::2], refined[1::2] = vertices, midpoints
+        previous, vertices = vertices, refined
+    return Polygon(previous), Polygon(vertices)
+
+
 def measure(case_name, rung, output):
     import jax
     import jax.numpy as jnp
@@ -157,8 +188,7 @@ def measure(case_name, rung, output):
             np.asarray(mesh.cell_nodes), np.asarray(mesh.cell_vertex_count), strict=True
         )
     ]
-    boundary = Polygon(fixture._analytic_separatrix(exact, points=11521))
-    fine_boundary = Polygon(fixture._analytic_separatrix(exact, points=23041))
+    boundary, fine_boundary = reference_boundaries(exact, fixture)
     assert boundary.is_valid and fine_boundary.is_valid
     wall = Polygon(machine.wall_node)
     density = source.toroidal_current_density
@@ -386,7 +416,7 @@ def measure(case_name, rung, output):
         "case": case_name,
         "requested_cells": rung,
         "realised_cells": len(centres),
-        "true_boundary_sampling_points": 23041,
+        "true_boundary_sampling_points": len(fine_boundary.exterior.coords) - 1,
         "boundary_refinement_l1_current_relative": reference_refinement,
         "class_precedence": list(CLASSES[i] for i in (2, 3, 1, 0, 4)),
         "modes": results,
@@ -498,12 +528,12 @@ def render(rows, output):
             axis.set_title(title + "\n% target current per cell")
         for axis in axes:
             poloidal.draw_wall(axis, units=units)
-            _draw_nulls(axis, analytic_nulls, blue, hollow=True)
-            _draw_nulls(axis, meta["mapped_nulls"], DEFAULT_INK, hollow=False)
+            _draw_nulls(axis, analytic_nulls, units, blue)
+            _draw_nulls(axis, meta["mapped_nulls"], units, DEFAULT_INK)
             poloidal_axes(axis)
         figure.suptitle(
             f"{case_name}: 300 requested cells; evaluation only, no solve\n"
-            "Blue hollow nulls: analytic; solid nulls: archived exact map; "
+            "Large blue nulls: analytic; small nulls: archived exact map; "
             "current contours interpolate cell totals\n"
             "Shared error levels (% target/cell): "
             + ", ".join(f"{x:.3g}" for x in levels),

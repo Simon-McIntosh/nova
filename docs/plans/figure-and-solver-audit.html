@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="23">
+<meta name="plan-impl" content="0.96">
+<meta name="plan-version" content="24">
 </head>
 <body>
   <main class="plan-doc">
@@ -391,6 +391,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260922T194621769437-review-of-fsa-repair-the-cell-count-sign" data-who="reckon-ship" data-when="2026-09-22T22:25:11.741Z">
     <div class="r-comment-body"><p>review stored</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260923T0425-low-state-nan-landed" data-who="reckon-ship" data-when="2026-09-23T04:25:00Z">
+    <div class="r-comment-body">fsa-low-state-amplitude-nan-attribution merged at 06b1c43d6 (review 94): the nan in the low-state discriminator at 342 cells is the moment bank's fail-closed overflow in clipped_support_current_moments. Its repair is f-cca-exact-bank-capacity-overflow on cut-cell-current-attribution, after which fsa-repair-low-state-level-array retries its one H200 solve. Review note: the guard citation forward_operator.py:3590 points at the decorator; the def is at 3591.</div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

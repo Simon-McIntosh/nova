@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-modified" content="2026-09-22">
-<meta name="plan-version" content="17">
+<meta name="plan-modified" content="2026-09-23">
+<meta name="plan-version" content="18">
 <meta name="plan-blocks" content="millisecond-converged-solve">
-<meta name="plan-impl" content="0.55">
+<meta name="plan-impl" content="0.58">
 </head>
 <body>
   <main class="plan-doc">
@@ -279,6 +279,16 @@
     <div class="r-fu-body">Lead decision 2026-09-22 on f-fsri-s3-decide-after-three-attempts. Base: the committed design state at 8dbc6cbb (worktree fsri-one-traced-operator-state-machine). Node 1 (investigate): attribute the SIGABRT exit 134 in tests/test_reduced_newton.py at test_threshold_one_reproduces_the_refusal_only_policy, which appears at base and candidate alike, and the candidate-only in-suite failure of test_ladder_scoring_evaluates_one_map_per_accepted_step, which passes alone. Node 2 (implement): whole-solve explicit request scheduling so that distinct caller streams share one operator body, gated by the existing refusals, 300 cells at or under 203,078 instructions and 1000 cells at or under 204,531, with zero added failures in tests/test_fixed_point.py and tests/test_reduced_newton.py in fresh processes, and the 532,366-instruction per-request control as the negative control. Both nodes run on the claude-opus backend.</div>
     <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
     </article>
+<article class="r-fu" data-id="f-fsri-clear-jax-caches-between-reduced-newton-tests" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Clear JAX caches after each reduced-Newton test so one process never reaches the map-count ceiling</h4>
+    <div class="r-fu-body">From fsri-attribute-the-reduced-newton-abort (claude-opus 5.5, merged 62959ec6b, review 97): tests/test_reduced_newton.py aborts at exit 134 because the process's memory-map count reaches vm.max_map_count 65,530 about 20 tests in. With jax.clear_caches() and gc.collect() after every test, the whole file ran to EXIT=1 with no abort and exactly the four pre-existing failures. Add that as an autouse fixture scoped to the file. Gate: the whole file in one all_debug process with no abort, the same four failures and no others; the negative control (remove the fixture) reproduces the abort or a map-count peak above 60,000.</div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-four-reduced-newton-failures-at-head" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Repair the four tests/test_reduced_newton.py failures present at main HEAD</h4>
+    <div class="r-fu-body">The abort attribution's cache-cleared arm ran every test at f5af729a9. Four fail independently of the abort: test 1 test_diverted_normalised_certificate_rung_retains_finite_fallback (assert 2.340823366528062 == 2.248351582217136), test 5 (assert False), and tests 18 and 19 (AssertionError: assert False). Attribute and repair each, one node per test.</div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-fsri-nk-attempt-fence" data-who="coordinator" data-when="2026-09-19T13:55:00Z">
@@ -310,6 +320,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-coord-20260922-s3-third-attempt-refused" data-who="reckon-ship" data-when="2026-09-22T12:10:00Z">
     <div class="r-comment-body"><p>Third attempt on the strongest lane (astra, run r-20260922T103934949557, promoted failed as a correct refusal). Design landed in the worktree, not merged: an explicit request enum with a fixed payload, one lax.switch live map and JVP body, request streams consumed by the fixed-point candidate scoring, reconciliation and the reduced residual and Jacobian columns; the Krylov solve stays outside the body. Measured on one all_debug allocation: optimised instruction counts fall from the banked baseline 342,055 and 344,858 to <strong>302,553 and 304,913</strong> at 300 and 1000 cells against the section ceiling 203,078 and 204,531, so the gate refuses; the per-request control grows to 532,366, confirming the mechanism. test_fixed_point 44 passed (42 at base); the reduced-Newton file aborts at exit 134 in both trees with one suite-only added failure (test_ladder_scoring_evaluates_one_map_per_accepted_step) that passes alone. Distinct caller streams still inline distinct bodies, so whole-solve request scheduling is the unimplemented remainder. The section contract said a third attempt routes to a stronger class; none exists, so the next step is a lead decision (followup below), not a fourth attempt.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260923T0425-abort-attributed" data-who="reckon-ship" data-when="2026-09-23T04:25:00Z">
+    <div class="r-comment-body">Node 1 of the fourth attempt landed on the claude-opus 5.5 lane: fsri-attribute-the-reduced-newton-abort, merged at 62959ec6b, review 97. It confirms the lane serves through the crew surface. The exit 134 is memory-map exhaustion in the CPU JIT linker, not a solver defect. Two followups are queued: the per-test cache clear and the four failures at HEAD. Node 2 (whole-solve request scheduling on opus) follows once the cache clear lands, so that its zero-added-failures gate can run the whole file in one process.</div>
 </div>
 </section>
 </main>

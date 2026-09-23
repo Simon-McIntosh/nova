@@ -1,0 +1,256 @@
+{
+  "revision": "fc662f6cfda73bc2936a11a868f27107c88601f4",
+  "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-seed-policy-at-main",
+  "slurm_job_id": "1276595",
+  "slurm_partition": "betelgeuse",
+  "devices": [
+    "cuda:0"
+  ],
+  "jax_platform": "gpu",
+  "x64": true,
+  "support_clip_mode": "exact",
+  "requested_cells": -110,
+  "cases": [
+    {
+      "case": "diverted-single-null",
+      "requested_cells": -110,
+      "realised_cells": 132,
+      "characteristic_pitch_m": 0.15145387287104764,
+      "reference_nulls": {
+        "axis_rz_m": [
+          1.7869104924134618,
+          0.046151482164328565
+        ],
+        "x_point_rz_m": [
+          1.5107863810710611,
+          -1.0275005315610446
+        ],
+        "qualified_saddles_rz_m": [
+          [
+            1.5107863810710611,
+            -1.0275005315610446
+          ]
+        ],
+        "retained_count": [
+          1,
+          1
+        ],
+        "axis_flux_wb": 0.005713819178329534,
+        "boundary_flux_wb": -7.866768735850362e-07
+      },
+      "arms": [
+        {
+          "seed_policy": "analytic",
+          "seed_receipt": {
+            "seed_policy": "analytic",
+            "seed_state_digest": "6215c9f34c86f29eeb70f2773966d3c0142f965d621cd3d31c1359a93c354182"
+          },
+          "active_set_budget": 16,
+          "terminal_residual": 0.26431135828708235,
+          "converged": false,
+          "qualified": false,
+          "trip_count": 2,
+          "per_trip_residual_history": [
+            {
+              "trip": 1,
+              "residual": 0.26431135828708235
+            },
+            {
+              "trip": 2,
+              "residual": 0.26431135828708235
+            }
+          ],
+          "terminal_axis_rz_m": [
+            1.782528085704607,
+            0.04357089671749643
+          ],
+          "terminal_x_point_rz_m": [
+            1.5068404903720451,
+            -1.0059369793322033
+          ],
+          "reference_x_point_rz_m": [
+            1.5107863810710611,
+            -1.0275005315610446
+          ],
+          "x_point_distance_m": 0.021921606650392854,
+          "certificate_position_bound_m": 0.15145387287104764,
+          "certificate_residual_bound": 1e-12,
+          "jax_platform": "gpu",
+          "terminal_nulls": {
+            "axis_rz_m": [
+              1.782528085704607,
+              0.04357089671749643
+            ],
+            "x_point_rz_m": [
+              1.5068404903720451,
+              -1.0059369793322033
+            ],
+            "qualified_saddles_rz_m": [
+              [
+                1.5068404903720451,
+                -1.0059369793322033
+              ],
+              [
+                1.4824971028758567,
+                -0.9773497472323375
+              ]
+            ],
+            "retained_count": [
+              3,
+              2
+            ],
+            "axis_flux_wb": 0.005978512312517272,
+            "boundary_flux_wb": -0.000365499518566394
+          },
+          "termination_reason": 10,
+          "wall_seconds": 166.61286819912493,
+          "compilation_cache_hit": false,
+          "nonfinite_cell_current": 0,
+          "nonfinite_radial_moment": 0,
+          "nonfinite_vertical_moment": 0,
+          "nonfinite_moment_total": 0,
+          "moment_values": 132
+        },
+        {
+          "seed_policy": "current_centroid_disc",
+          "seed_receipt": {
+            "seed_policy": "current_centroid_disc",
+            "seed_state_digest": "85c4ce76c65d0eed9ece3ca2b1c15ed2f923a1b2d2f8594d698eb86859404356",
+            "seed_construction": "current_centroid_disc",
+            "seed_branch_index": 0,
+            "seed_radius_m": 0.649709176903539,
+            "supported_cell_count": 58,
+            "stored_flux_samples_used": false
+          },
+          "active_set_budget": 16,
+          "terminal_residual": 0.41517451604506767,
+          "converged": false,
+          "qualified": false,
+          "trip_count": 14,
+          "per_trip_residual_history": [
+            {
+              "trip": 1,
+              "residual": 0.4167282747633721
+            },
+            {
+              "trip": 2,
+              "residual": 0.4157976282654774
+            },
+            {
+              "trip": 3,
+              "residual": 0.4153237095553135
+            },
+            {
+              "trip": 4,
+              "residual": 0.41520416117271647
+            },
+            {
+              "trip": 5,
+              "residual": 0.4151891845177249
+            },
+            {
+              "trip": 6,
+              "residual": 0.4151816936927747
+            },
+            {
+              "trip": 7,
+              "residual": 0.41517794784418083
+            },
+            {
+              "trip": 8,
+              "residual": 0.4151760745817285
+            },
+            {
+              "trip": 9,
+              "residual": 0.4151751380799191
+            },
+            {
+              "trip": 10,
+              "residual": 0.41517466982908213
+            },
+            {
+              "trip": 11,
+              "residual": 0.41517455260999386
+            },
+            {
+              "trip": 12,
+              "residual": 0.4151745234172512
+            },
+            {
+              "trip": 13,
+              "residual": 0.41517451604506767
+            },
+            {
+              "trip": 14,
+              "residual": 0.41517451604506767
+            }
+          ],
+          "terminal_axis_rz_m": [
+            1.5757835390296824,
+            0.045470286879425725
+          ],
+          "terminal_x_point_rz_m": [
+            1.982782666991347,
+            -0.05956629881705121
+          ],
+          "reference_x_point_rz_m": [
+            1.5107863810710611,
+            -1.0275005315610446
+          ],
+          "x_point_distance_m": 1.0768830822518514,
+          "certificate_position_bound_m": 0.15145387287104764,
+          "certificate_residual_bound": 1e-12,
+          "jax_platform": "gpu",
+          "terminal_nulls": {
+            "axis_rz_m": [
+              1.5757835390296824,
+              0.045470286879425725
+            ],
+            "x_point_rz_m": [
+              1.982782666991347,
+              -0.05956629881705121
+            ],
+            "qualified_saddles_rz_m": [
+              [
+                1.7823995770045746,
+                -0.8305854316685373
+              ],
+              [
+                1.982782666991347,
+                -0.05956629881705121
+              ],
+              [
+                1.8714664630268696,
+                0.8516163785262904
+              ]
+            ],
+            "retained_count": [
+              5,
+              3
+            ],
+            "axis_flux_wb": 0.028426643802977065,
+            "boundary_flux_wb": 0.013590579294826068
+          },
+          "termination_reason": 10,
+          "wall_seconds": 212.3153424113989,
+          "compilation_cache_hit": true,
+          "nonfinite_cell_current": 0,
+          "nonfinite_radial_moment": 0,
+          "nonfinite_vertical_moment": 0,
+          "nonfinite_moment_total": 0,
+          "moment_values": 132
+        }
+      ],
+      "state_file": "diverted-single-null-seed-policy.npz",
+      "wall_units": [
+        [
+          0,
+          121,
+          true,
+          "vessel"
+        ]
+      ]
+    }
+  ],
+  "negative_control": []
+}

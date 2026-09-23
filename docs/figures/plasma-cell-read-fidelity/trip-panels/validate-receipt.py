@@ -35,6 +35,7 @@ for arm in r["arms"]:
     assert arm["shape_controls"] == {"analytic": True, "linear_ramp": False}
     assert arm["analytic_shape"]["is_plasma"]
     states = [arm["seed"], *arm["trips"]]
+    panels += len(states)
     assert arm["seed"]["trip"] == 0
     for state in states:
         shape = state["shape"]
@@ -89,7 +90,6 @@ for arm in r["arms"]:
         )
         for kind in ["png", "svg"]:
             assert (root / panel[kind]).stat().st_size > 1000
-        panels += 1
     assert loss == arm["saddle_loss_trip"]
 loss = before["saddle_loss_trip"]
 verdict = "neither"

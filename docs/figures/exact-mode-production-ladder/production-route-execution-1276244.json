@@ -20,5 +20,14 @@
   ],
   "reason": "original newest-first job continues unchanged; about 1h50 remaining at decision time for six rungs at about 20 minutes each",
   "time_limit": "03:00:00",
-  "supplement_authorized": "one titan job covers oldest five revisions to prevent time-limit loss of decisive controls"
+  "supplement_authorized": "one titan job covers oldest five revisions to prevent time-limit loss of decisive controls",
+  "terminal_accounting": {
+    "JobID": "1276244",
+    "State": "TIMEOUT",
+    "Elapsed": "03:00:03",
+    "ExitCode": "0:0",
+    "Start": "2026-09-23T06:27:06",
+    "End": "2026-09-23T09:27:09"
+  },
+  "termination_reason": "scheduler time limit, not an external cancellation"
 }

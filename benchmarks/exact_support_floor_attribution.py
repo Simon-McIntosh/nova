@@ -226,7 +226,19 @@ def production_analytic_moments(support, density, centres, scales):
 
     points = centres[:, None, :] + scales[:, None, :] * _DENSITY_SAMPLE_LOCAL
     coefficients = _density_coefficients(density(points[..., 0], points[..., 1]))
-    moments = jax.jit(_sampled_arc_polynomial_moments)(
+
+    def one_cell(vertices, count, centre, scale, coefficient, moment_centre):
+        result = _sampled_arc_polynomial_moments(
+            vertices[None],
+            count[None],
+            centre[None],
+            scale[None],
+            coefficient[None],
+            moment_centre[None],
+        )
+        return jnp.stack([value[0] for value in result])
+
+    moments = jax.jit(jax.vmap(one_cell))(
         jnp.asarray(support.support_vertices),
         jnp.asarray(support.vertex_count),
         jnp.asarray(centres),
@@ -235,10 +247,10 @@ def production_analytic_moments(support, density, centres, scales):
         jnp.asarray(support.centroids),
     )
     return np.where(
-        np.asarray(support.vertex_count)[None, :] >= 3,
+        np.asarray(support.vertex_count)[:, None] >= 3,
         np.asarray(jax.device_get(moments)),
         0.0,
-    ).T
+    )
 
 
 def measure(case_name, rung, output):
@@ -481,7 +493,9 @@ def measure(case_name, rung, output):
                 "rung": rung,
                 "mode": mode,
                 "count": len(invalid),
-                "geometric_region_rule": "union of faces with nonzero winding, either sign",
+                "geometric_region_rule": (
+                    "union of faces with nonzero winding, either sign"
+                ),
                 "analytic_current_fraction_in_non_simple_cells": float(
                     true[non_simple, 0].sum() / true[:, 0].sum()
                 ),

@@ -1,0 +1,76 @@
+revision=40f8864a7c3994a2fc9a9717dd2414af0afaec7f tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py']
+devices=[CudaDevice(id=0)] x64=True
+BUILD diverted-single-null-cells-110
+EVALUATE diverted-single-null-cells-110 exact
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/lax/lax.py", line 215, in _broadcast_shapes_uncached
+    return _try_broadcast_shapes(*rank_promoted_shapes, name='broadcast_shapes')
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/lax/lax.py", line 128, in _try_broadcast_shapes
+    raise TypeError(f'{name} got incompatible shapes for broadcasting: '
+                    f'{", ".join(map(str, map(tuple, shapes)))}.')
+TypeError: broadcast_shapes got incompatible shapes for broadcasting: (1, 132), (132, 2).
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/lax/lax.py", line 193, in broadcast_shapes
+    return _broadcast_shapes_cached(*shapes)
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/lax/lax.py", line 199, in _broadcast_shapes_cached
+    return _broadcast_shapes_uncached(*shapes)
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/lax/lax.py", line 218, in _broadcast_shapes_uncached
+    raise ValueError(f"Incompatible shapes for broadcasting: shapes={list(shapes)}") from err
+ValueError: Incompatible shapes for broadcasting: shapes=[(132,), (132, 2)]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/lax/lax.py", line 215, in _broadcast_shapes_uncached
+    return _try_broadcast_shapes(*rank_promoted_shapes, name='broadcast_shapes')
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/lax/lax.py", line 128, in _try_broadcast_shapes
+    raise TypeError(f'{name} got incompatible shapes for broadcasting: '
+                    f'{", ".join(map(str, map(tuple, shapes)))}.')
+TypeError: broadcast_shapes got incompatible shapes for broadcasting: (1, 132), (132, 2).
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py", line 944, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py", line 925, in main
+    rows.append(measure(case, rung, args.output))
+                ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py", line 435, in measure
+    formula = production_analytic_moments(
+        support, density, np.asarray(field_centres), np.asarray(field_scales)
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py", line 229, in production_analytic_moments
+    moments = jax.jit(_sampled_arc_polynomial_moments)(
+        jnp.asarray(support.support_vertices),
+    ...<4 lines>...
+        jnp.asarray(support.centroids),
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/nova/equilibrium/clip_quadrature.py", line 266, in _sampled_arc_polynomial_moments
+    area_scale
+    ~~~~~~~~~~
+    * scale
+    ^~~~~~~
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/array_methods.py", line 1532, in op
+    return getattr(self.aval, f"_{name}")(self, *args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/array_methods.py", line 774, in _operator_mul
+    return ufuncs.multiply(self, cast(ArrayLike, other))
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/ufunc_api.py", line 182, in __call__
+    return call(*args)
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/ufuncs.py", line 1280, in multiply
+    x, y = promote_args("multiply", x, y)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/util.py", line 229, in promote_args
+    return promote_shapes(fun_name, *promote_dtypes(*args))
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/util.py", line 59, in promote_shapes
+    result_rank = len(lax.broadcast_shapes(*shapes))
+                      ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+ValueError: Incompatible shapes for broadcasting: shapes=[(132,), (132, 2)]
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.

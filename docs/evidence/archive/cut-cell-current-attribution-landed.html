@@ -2826,6 +2826,48 @@ Nothing under <code>nova/</code> changed. The section, gate and driving followup
 remain open; this worker does not resolve its own followup.</p>
 </section>
 
+<section id="exact-bank-callback-capacity">
+<h2>Callback moment-bank capacity: inherited capacity overflow repaired</h2>
+<p><strong>Worker outcome, 2026-09-23; callback repair landed, terminal census held by an independent probe defect.</strong>
+The named defect reproduces in a two-cell support whose quadratic level crosses
+both cells: with inherited <code>cut_cell_capacity=1</code>, the callback returns
+six non-finite moments and exits 1. The red receipt begins with the declared
+mutation string, <code>pass the inherited cut_cell_capacity to the callback again</code>.
+Commit <code>896e5da8f5984fc8ff852675ea4c6aed7ff2dfba</code> floors the callback
+capacity at <code>max(int(cut_cell_capacity), support.support_vertices.shape[0])</code>.
+The three-test regression then passes in 25.62 seconds: two cells are confirmed
+cut, inherited capacity one is confirmed insufficient, and every returned moment
+is finite and nonzero. The focused red and green receipts are
+<a href="/nova/figures/cut-cell-current-attribution/exact-bank-capacity/negative-control.log">negative-control.log</a>
+and <a href="/nova/figures/cut-cell-current-attribution/exact-bank-capacity/callback-capacity-test.log">callback-capacity-test.log</a>.</p>
+
+<h3>Fresh-process focused gates</h3>
+<p>One <code>all_debug</code> allocation, job <code>1276260</code>, ran with
+<code>TMPDIR=/tmp</code> in submit and payload, <code>JAX_PLATFORMS=cpu</code>,
+the root Nova interpreter directly, no <code>uv</code>, 4 CPUs, 64 GiB and a
+59-minute limit. Fresh process <code>tests/test_exact_clip_moments.py</code>
+passed 13 tests in 57.86 seconds, and fresh process
+<code>tests/test_exact_clip_seed.py</code> passed 3 tests in 4.68 seconds.
+Their receipts are <a href="/nova/figures/cut-cell-current-attribution/exact-bank-capacity/exact-clip-moments.log">exact-clip-moments.log</a>
+and <a href="/nova/figures/cut-cell-current-attribution/exact-bank-capacity/exact-clip-seed.log">exact-clip-seed.log</a>.</p>
+
+<h3>Census gate refused before current integration</h3>
+<p>The same allocation's <code>benchmarks/unit_amplitude_current_census.py</code>
+does not produce a terminal current receipt. Its existing
+<code>_partition_probe</code> slices the state before
+<code>operator._fixed_design_read</code>, which requires the full 772-row state,
+and raises <code>ValueError: own-node null census requires the direct sampling
+flux values</code>. The log therefore proves neither zero overflowing bank
+signatures nor a finite exact total; no such verdict is inferred. This is the
+already surfaced benchmark defect outside this worker's write paths and remains
+a follow-on for the coordinator, rather than being repaired here. The failed
+census log, scheduler receipt and runner are
+<a href="/nova/figures/cut-cell-current-attribution/exact-bank-capacity/unit-amplitude-census.log">unit-amplitude-census.log</a>,
+<a href="/nova/figures/cut-cell-current-attribution/exact-bank-capacity/slurm-1276260.log">slurm-1276260.log</a>
+and <code>run_compute_gates.sh</code>. The section and driving followup remain
+open.</p>
+</section>
+
 </main>
 </body>
 </html>

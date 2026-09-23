@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="185">
+<meta name="plan-version" content="186">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
 <meta name="plan-impl" content="0.9">
@@ -393,6 +393,33 @@ coordinator: <code>benchmarks/unit_amplitude_current_census._partition_probe</co
 slices the state before <code>operator._fixed_design_read</code>, which requires
 the full 772-row state vector, so the census's own probe raises at HEAD; this
 report traces the partition from the whole state instead.</p>
+
+<h3 id="s6-exact-bank-callback-capacity">Callback bank capacity: repair landed; terminal census remains held by an independent probe defect</h3>
+<p><strong>2026-09-23 worker outcome; source and regression test landed, section and driving followup remain open.</strong>
+The terminal exact-mode defect reproduced with the declared negative control: passing
+the inherited <code>cut_cell_capacity=1</code> into the re-derived quadratic callback
+for a two-cell crossing returned six non-finite moments (exit 1; see the
+<a href="/nova/figures/cut-cell-current-attribution/exact-bank-capacity/negative-control.log">red receipt</a>).
+Commit <code>896e5da8f</code> now floors the callback capacity at the leading
+dimension of <code>support.support_vertices</code>, so the callback can represent
+every cell its own re-derived boundary marks. The new three-test fixture proves the
+quadratic level crosses both cells, proves inherited capacity one is insufficient,
+and observes finite nonzero moments after the repair; the focused process passes
+3 tests in 25.62 seconds. The source, test, and red/green receipts are in commits
+<code>896e5da8f</code>, <code>09ff97d61</code> and <code>86a1c1b4d</code>.</p>
+<p>The required single <code>all_debug</code> allocation (job <code>1276260</code>,
+<code>JAX_PLATFORMS=cpu</code>, root interpreter, no <code>uv</code>,
+<code>TMPDIR=/tmp</code>, 4 CPUs, 64 GiB, 59 minutes) passed
+<code>tests/test_exact_clip_moments.py</code> in a fresh process (13 passed in
+57.86 seconds) and <code>tests/test_exact_clip_seed.py</code> in a fresh process
+(3 passed in 4.68 seconds). The unit-amplitude census did not reach current
+integration: its existing <code>_partition_probe</code> slices the state before
+<code>operator._fixed_design_read</code>, which requires the full 772-row state,
+and exits with the recorded <code>ValueError</code>. This is outside this node's
+write scope and is retained as a follow-on; no zero-overflow or finite-terminal
+census verdict is inferred from the missing receipt. The allocation receipt and
+all three gate logs are under
+<code>docs/figures/cut-cell-current-attribution/exact-bank-capacity</code>.</p>
 
 <h2 id="s7">§7 — Wire the typed census saddle into the production spline-chain clip and re-solve the diverted certificate rows</h2>
 <p>The wedge split landed on the oracle (core-side current within 1e-13 relative of the analytic wedge integral at 110, 300 and 500 cells) but the production spline route discards it because the operator passes no saddle vertex, and the oracle compares the carrier against its own emitted polygons. Pass the typed census saddle as the clip's saddle vertex, consume the four region-owned moment profiles in the plasma partition and the null read, and make the oracle independent of the carrier by integrating the analytic current over the region bounded by the separatrix branches and the cell edges. Gate: the independent oracle at 110, 300 and 500 cells on all_debug, then one H200 job re-solving the four diverted certificate rows with the four limited rows as the bit-identical negative control.</p>

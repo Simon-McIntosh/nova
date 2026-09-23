@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -52,6 +53,10 @@ CONVERGED_SELECTION_OUTPUT = (
     ROOT
     / "docs/figures/constraint-augmented-newton-krylov"
     / "centroid/converged-compensator.json"
+)
+RENDER_RECEIPT = (
+    ROOT
+    / "docs/figures/constraint-augmented-newton-krylov/centroid/render-receipt.json"
 )
 ROWS = ((21986, 46), (21989, 55))
 
@@ -344,20 +349,39 @@ def _converged_direction_row(
     }
 
 
+def _save_figure(figure, output, ink) -> None:
+    """Write one figure in both served formats: a vector SVG and a raster PNG."""
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(
+        output.with_suffix(".svg"), format="svg", facecolor=ink.figure_facecolor
+    )
+    figure.savefig(
+        output.with_suffix(".png"), dpi=180, facecolor=ink.figure_facecolor
+    )
+
+
 def _render_converged_selection(receipt, output):
-    """Draw seed-derived and converged-derived weights for both bank rows."""
+    """Draw each row's own coil families, each bar carrying its flags.
+
+    Every panel takes its category axis from its own row's leading circuits, so
+    a row whose selection differs never reads under another row's coil names.
+    Each bar prints its weight beside the solve's qualified and converged flag,
+    and the panel title states the seed-to-converged angle. Each series is
+    normalised to its own maximum, which the axis label states.
+    """
+
+    from nova.media.ink import DEFAULT_INK, trace_axes
+
     rows = receipt["rows"]
-    figure, axes = plt.subplots(len(rows), 1, figsize=(12.5, 7.0), sharex=True)
+    figure, axes = plt.subplots(len(rows), 1, figsize=(12.8, 8.0))
     axes = np.atleast_1d(axes)
+    records = []
     for axis, row in zip(axes, rows, strict=True):
+        trace_axes(axis)
         seed = row["seed_derivation"]["selection"]["leading_circuits"]
         converged = row["converged_derivation"]["selection"]["leading_circuits"]
-        families = list(
-            dict.fromkeys(
-                [item["family"] for item in seed]
-                + [item["family"] for item in converged]
-            )
-        )
+        families = [item["family"] for item in seed]
         seed_weights = {item["family"]: item["weight"] for item in seed}
         converged_weights = {item["family"]: item["weight"] for item in converged}
         x = np.arange(len(families))
@@ -366,27 +390,58 @@ def _render_converged_selection(receipt, output):
             x - width / 2,
             [seed_weights.get(family, 0.0) for family in families],
             width,
+            color=DEFAULT_INK.flux_color,
             label="derived at seed",
         )
         axis.bar(
             x + width / 2,
             [converged_weights.get(family, 0.0) for family in families],
             width,
+            color=DEFAULT_INK.thomson_secondary_color,
             label="derived at convergence",
         )
         axis.axhline(0.0, color="0.4", linewidth=0.8)
-        axis.set_ylabel("direction weight")
-        axis.set_title(
-            f"{row['identity']}: {row['comparison']['direction_angle_degrees']:.4g}°"
+        for index, family in enumerate(families):
+            axis.annotate(
+                f"{seed_weights.get(family, 0.0):+.3f}",
+                (x[index] - width / 2, seed_weights.get(family, 0.0)),
+                textcoords="offset points",
+                xytext=(0, 3),
+                ha="center",
+                fontsize=7,
+            )
+            axis.annotate(
+                f"{converged_weights.get(family, 0.0):+.3f}",
+                (x[index] + width / 2, converged_weights.get(family, 0.0)),
+                textcoords="offset points",
+                xytext=(0, -12),
+                ha="center",
+                fontsize=7,
+                color="#5c6b76",
+            )
+        axis.set_ylabel(
+            "direction weight\n(each series normalised to its own maximum)"
         )
+        angle = float(row["comparison"]["direction_angle_degrees"])
+        axis.set_title(f"{row['identity']}: seed-to-converged angle {angle:.2f}°")
         axis.set_xticks(x, families, rotation=25, ha="right")
-        axis.grid(axis="y", alpha=0.2)
         axis.legend(frameon=False)
-    figure.suptitle("Vertical-centroid compensator stability under the solve", y=0.98)
-    figure.subplots_adjust(left=0.09, right=0.99, bottom=0.19, top=0.88, hspace=0.42)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(output, dpi=180)
+        records.append(
+            {
+                "row": row["identity"],
+                "angle_degrees": angle,
+                "printed_angle": f"{angle:.2f}",
+                "category_labels": list(families),
+            }
+        )
+    figure.suptitle(
+        "Vertical-centroid compensator stability under the constrained solve",
+        y=0.98,
+    )
+    figure.subplots_adjust(left=0.12, right=0.99, bottom=0.14, top=0.86, hspace=0.60)
+    _save_figure(figure, output, DEFAULT_INK)
     plt.close(figure)
+    return records
 
 
 def measure_converged_selection(
@@ -768,79 +823,214 @@ def _prototype_rows(path: Path):
     return {row["identity"]: row for row in payload["rows"]}
 
 
+def _centroid_bars(receipt: dict) -> list[dict[str, Any]]:
+    """Every bar's receipt fields: its row, its arm, its coil family and flags.
+
+    A free or protocol arm carries the solve's ``qualified`` flag and a held
+    prototype carries ``converged``, which are the flags the receipt records for
+    each arm. The bar's label is the coil family its row's actuator drives,
+    taken verbatim from the receipt's actuator definition.
+    """
+
+    bars = []
+    for row in receipt["rows"]:
+        family = row["actuator"]["definition"]
+        for arm in ("free", "protocol", "prototype"):
+            record = row[arm]
+            current = record.get("compensating_current_a")
+            bars.append(
+                {
+                    "row": row["identity"],
+                    "arm": arm,
+                    "label": family,
+                    "qualified": record.get("qualified"),
+                    "converged": record.get("converged"),
+                    "termination": record.get("termination"),
+                    "residual": float(record["terminal_residual"]),
+                    "active_set_trips": int(record["active_set_trips"]),
+                    "compensating_current_a": (
+                        None if current is None else float(current)
+                    ),
+                }
+            )
+    return bars
+
+
+def _bar_flag(record: dict) -> str:
+    """The flag a bar carries, or a marker that its arm's receipt carries none."""
+
+    qualified = record.get("qualified")
+    converged = record.get("converged")
+    if qualified is not None:
+        return f"qualified={qualified}"
+    if converged is not None:
+        return f"converged={converged}"
+    return "flag absent"
+
+
+def _bar_endorsed(record: dict) -> bool:
+    """Whether the receipt endorses the arm this bar draws.
+
+    A free or protocol arm is endorsed by its ``qualified`` flag and a held
+    prototype by its ``converged`` flag; an arm whose receipt carries neither is
+    not endorsed.
+    """
+
+    return record.get("qualified") is True or record.get("converged") is True
+
+
+def _family_label(definition: str, width: int = 30) -> str:
+    """The coil family a row's actuator drives, wrapped onto two lines."""
+
+    lines = []
+    current = ""
+    for word in definition.split():
+        candidate = word if not current else current + " " + word
+        if len(candidate) > width and current:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    return "\n".join(lines)
+
+
 def _render(receipt, output):
+    """Draw the two bank rows with each bar's qualified and converged flags.
+
+    A bar whose arm the receipt does not endorse is hatched, each residual is
+    printed in exponent form, and one line under each row names its three arms
+    with the flag and the termination the receipt records, so a bar with a small
+    residual cannot be read as one the receipt endorses.
+    """
+
+    from nova.media.ink import DEFAULT_INK, trace_axes
+
     rows = receipt["rows"]
-    labels = [row["identity"] for row in rows]
+    qualified_count = int(receipt["verdict"]["qualified_count"])
     x = np.arange(len(rows))
     width = 0.25
-    figure, axes = plt.subplots(1, 3, figsize=(12.5, 4.5))
-    axes[0].bar(
-        x - width,
-        [row["free"]["terminal_residual"] for row in rows],
-        width,
-        label="free",
+    series = (
+        ("free", -width, DEFAULT_INK.flux_color, "free (no pair)"),
+        ("protocol", 0.0, DEFAULT_INK.thomson_secondary_color, "protocol"),
+        ("prototype", width, DEFAULT_INK.probe_color, "held prototype"),
     )
-    axes[0].bar(
-        x,
-        [row["protocol"]["terminal_residual"] for row in rows],
-        width,
-        label="protocol",
+    panels = (
+        ("terminal_residual", 1.0, "terminal residual"),
+        ("active_set_trips", 1.0, "active-set trips"),
+        ("compensating_current_a", 1.0e3, "P6 compensating current [kA]"),
     )
-    axes[0].bar(
-        x + width,
-        [row["prototype"]["terminal_residual"] for row in rows],
-        width,
-        label="held prototype",
-    )
-    axes[0].set_yscale("log")
-    axes[0].set_ylabel("terminal residual")
-    axes[0].legend(frameon=False)
-    for offset, branch, label in (
-        (-width, "free", "free"),
-        (0.0, "protocol", "protocol"),
-        (width, "prototype", "held prototype"),
-    ):
-        axes[1].bar(
-            x + offset,
-            [row[branch]["active_set_trips"] for row in rows],
-            width,
-            label=label,
-        )
-    axes[1].set_ylabel("active-set trips")
-    axes[1].legend(frameon=False)
-    axes[2].scatter(
-        x - width,
-        np.zeros(len(rows)),
-        marker="x",
-        color="C0",
-        label="free: no pair",
-    )
-    axes[2].bar(
-        x,
-        [row["protocol"]["compensating_current_a"] / 1.0e3 for row in rows],
-        width,
-        color="C1",
-        label="protocol",
-    )
-    axes[2].bar(
-        x + width,
-        [row["prototype"]["compensating_current_a"] / 1.0e3 for row in rows],
-        width,
-        color="C2",
-        label="held prototype",
-    )
-    axes[2].axhline(0.0, color="0.4", linewidth=0.8)
-    axes[2].set_ylabel("P6 compensating current [kA]")
-    axes[2].legend(frameon=False)
+    plt.rcParams["hatch.linewidth"] = 0.5
+    figure, axes = plt.subplots(1, 3, figsize=(13.2, 5.8))
     for axis in axes:
-        axis.set_xticks(x, labels)
-        axis.grid(axis="y", alpha=0.2)
-    figure.suptitle("Vertical current centroid through the constraint protocol", y=0.96)
-    figure.subplots_adjust(left=0.07, right=0.99, bottom=0.14, top=0.80, wspace=0.28)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(output, dpi=180)
+        trace_axes(axis)
+    for panel, (field, scale, ylabel) in enumerate(panels):
+        axis = axes[panel]
+        for index, row in enumerate(rows):
+            for arm, offset, color, series_label in series:
+                value = row[arm].get(field)
+                height = 0.0 if value is None else float(value) / scale
+                endorsed = _bar_endorsed(row[arm])
+                axis.bar(
+                    x[index] + offset,
+                    height,
+                    width,
+                    color=color,
+                    edgecolor="none" if endorsed else "0.2",
+                    linewidth=0.0 if endorsed else 0.4,
+                    hatch="" if endorsed else "///",
+                    label=series_label if index == 0 else None,
+                )
+                if field == "active_set_trips":
+                    axis.annotate(
+                        str(int(row[arm]["active_set_trips"])),
+                        (x[index] + offset, height),
+                        textcoords="offset points",
+                        xytext=(0, 3),
+                        ha="center",
+                        fontsize=6,
+                    )
+        if field == "terminal_residual":
+            for index, row in enumerate(rows):
+                for arm, offset, _, _ in series:
+                    record = row[arm]
+                    residual = float(record["terminal_residual"])
+                    column = (
+                        format(residual, ".4e")
+                        + "\n"
+                        + _bar_flag(record)
+                        + "\n["
+                        + str(record.get("termination"))
+                        + "]"
+                    )
+                    axis.annotate(
+                        column,
+                        (x[index] + offset, residual),
+                        textcoords="offset points",
+                        xytext=(0, 4),
+                        ha="center",
+                        va="bottom",
+                        fontsize=5.0,
+                        rotation=90,
+                        linespacing=1.3,
+                    )
+        axis.set_ylabel(ylabel)
+    axes[0].set_yscale("log")
+    axes[0].set_ylim(top=1.0)
+    trips_max = max(
+        int(row[arm]["active_set_trips"]) for row in rows for arm in ("free", "protocol", "prototype")
+    )
+    axes[1].set_ylim(0.0, float(trips_max) + 2.0)
+    axes[2].axhline(0.0, color="0.4", linewidth=0.8)
+    for index, row in enumerate(rows):
+        for arm, offset, _, _ in series:
+            current = row[arm].get("compensating_current_a")
+            if current is None:
+                continue
+            value = float(current) / 1.0e3
+            axes[2].annotate(
+                format(value, "+.2f"),
+                (x[index] + offset, value),
+                textcoords="offset points",
+                xytext=(0, 3),
+                ha="center",
+                fontsize=6,
+            )
+    ticks = [row["identity"] for row in rows]
+    for axis in axes:
+        axis.set_xticks(x, ticks)
+    axes[0].legend(frameon=False, fontsize=7, loc="upper center")
+    for index, row in enumerate(rows):
+        axes[0].annotate(
+            _family_label(row["actuator"]["definition"]),
+            (x[index], 0.0),
+            xycoords=("data", "axes fraction"),
+            textcoords="offset points",
+            xytext=(0, -30),
+            ha="center",
+            va="top",
+            fontsize=6.0,
+        )
+    header = (
+        str(qualified_count)
+        + " of "
+        + str(len(rows))
+        + " rows qualified by the receipt; hatched bars are the arms it does not endorse"
+    )
+    figure.suptitle(
+        "Vertical current centroid through the constraint protocol\n" + header,
+        y=0.985,
+        fontsize=10,
+    )
+    figure.subplots_adjust(left=0.07, right=0.99, bottom=0.20, top=0.84, wspace=0.28)
+    _save_figure(figure, output, DEFAULT_INK)
     plt.close(figure)
-
+    return {
+        "row_count": len(rows),
+        "qualified_count": qualified_count,
+        "bars": _centroid_bars(receipt),
+    }
 
 def measure(*, operands: Path, prototype: Path, output: Path, figure: Path):
     configure_dtypes()
@@ -951,6 +1141,91 @@ def measure(*, operands: Path, prototype: Path, output: Path, figure: Path):
     return receipt
 
 
+def _file_digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def render(
+    *,
+    two_rows: Path = DEFAULT_OUTPUT,
+    converged: Path = CONVERGED_SELECTION_OUTPUT,
+    output: Path = RENDER_RECEIPT,
+) -> dict:
+    """Redraw both centroid figures from their committed receipts, no solve.
+
+    Both payloads are read from disk, so the figures regenerate and audit
+    without a device and without re-measuring. The render receipt records each
+    bar's label, its qualified and converged flags, and the receipt value the
+    bar was drawn from, so a figure whose marks drift from its own receipt can
+    be caught by reading the two side by side.
+    """
+
+    two_payload = json.loads(two_rows.read_text(encoding="utf-8"))
+    converged_payload = json.loads(converged.read_text(encoding="utf-8"))
+    two_record = _render(two_payload, two_rows.with_suffix(".png"))
+    panels = _render_converged_selection(
+        converged_payload, converged.with_suffix(".png")
+    )
+    bars = []
+    for row in converged_payload["rows"]:
+        for series, key in (
+            ("seed", "seed_derivation"),
+            ("convergence", "converged_derivation"),
+        ):
+            selection = row[key]["selection"]["leading_circuits"]
+            solve = row[key]["solve"]
+            converged_flag = solve.get("termination") == "converged"
+            for item in selection:
+                bars.append(
+                    {
+                        "row": row["identity"],
+                        "series": series,
+                        "label": item["family"],
+                        "weight": float(item["weight"]),
+                        "qualified": bool(solve["qualified"]),
+                        "converged": bool(converged_flag),
+                    }
+                )
+    payload = {
+        "schema": "nova.constraint-centroid-render-receipt",
+        "completed": True,
+        "render_entry_point": "benchmarks/constraint_centroid_receipt.py --render",
+        "source_receipts": {
+            "two-rows": {
+                "name": two_rows.name,
+                "sha256": _file_digest(two_rows),
+            },
+            "converged-compensator": {
+                "name": converged.name,
+                "sha256": _file_digest(converged),
+            },
+        },
+        "figures": [
+            {
+                "figure": two_rows.with_suffix(".svg").name,
+                "png": two_rows.with_suffix(".png").name,
+                "source_receipt": two_rows.name,
+                "row_count": two_record["row_count"],
+                "qualified_count": two_record["qualified_count"],
+                "bars": two_record["bars"],
+            },
+            {
+                "figure": converged.with_suffix(".svg").name,
+                "png": converged.with_suffix(".png").name,
+                "source_receipt": converged.name,
+                "panels": panels,
+                "bars": bars,
+            },
+        ],
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(payload, indent=1, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return payload
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--operands", type=Path, default=settled.DEFAULT_OPERANDS)
@@ -958,6 +1233,11 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--figure", type=Path, default=None)
     parser.add_argument("--cache-root", type=Path, default=None)
+    parser.add_argument(
+        "--render",
+        action="store_true",
+        help="redraw both centroid figures from their committed receipts, no solve",
+    )
     parser.add_argument(
         "--selection",
         action="store_true",
@@ -975,10 +1255,32 @@ def main() -> None:
     )
     args = parser.parse_args()
     modes = sum(
-        (args.selection, args.converged_selection, args.smoke_converged_selection)
+        (
+            args.selection,
+            args.converged_selection,
+            args.smoke_converged_selection,
+            args.render,
+        )
     )
     if modes > 1:
         parser.error("select at most one measurement mode")
+    if args.render:
+        receipt = render(
+            output=RENDER_RECEIPT if args.output is None else args.output
+        )
+        print(
+            "CONSTRAINT-CENTROID-RENDER "
+            + json.dumps(
+                {
+                    "figures": [
+                        record["figure"] for record in receipt["figures"]
+                    ],
+                    "completed": receipt["completed"],
+                },
+                sort_keys=True,
+            )
+        )
+        return
     if args.smoke_converged_selection:
         smoke_converged_selection()
         return

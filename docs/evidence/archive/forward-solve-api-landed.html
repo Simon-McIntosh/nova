@@ -960,6 +960,40 @@ remove the draw_wall call applied and the wall assertion failing) and the census
 imports the changed driver, so no other test is affected; no failure was added against the base
 revision <code>e1f1239559</code>.</p>
 </section>
+<section id="section-imports-without-vedo">
+<h2>A section imports without the viz extra (2026-09-23)</h2>
+<p>A consumer carrying no renderer could not import <code>nova.geometry.section</code>.
+The module imported <code>vedo</code> at module scope, and it also imported
+<code>VtkFrame</code> from <code>nova.geometry.vtkgen</code>, whose module subclasses
+<code>vedo.Mesh</code> in its class body — so blocking <code>vedo</code> failed the import
+twice over, once directly and once through that dependency. The declared brief named only
+the first site as the module's sole use; the second is what a section's own
+transform path still pulls in, and both had to move.</p>
+<table>
+<thead><tr><th>site</th><th>before</th><th>after</th></tr></thead>
+<tbody>
+<tr><td><code>vedo</code></td><td>module scope</td><td>inside <code>Section.plot</code>, the only call</td></tr>
+<tr><td><code>VtkFrame</code></td><td>module scope</td><td>inside <code>Section._append</code>, the only construction</td></tr>
+<tr><td><code>mesh_array</code> annotation</td><td>evaluated name</td><td>deferred (<code>from __future__ import annotations</code>) with a <code>TYPE_CHECKING</code> import</td></tr>
+</tbody></table>
+<p>The import chain a viz-free consumer now walks is
+<code>nova</code> &rarr; <code>nova.geometry</code> &rarr; <code>nova.geometry.section</code> &rarr;
+<code>frenet</code>, <code>rotate</code>, <code>numpy</code>, <code>shapely</code>; no node of it
+imports <code>vedo</code>. Verified by importing the module in a subprocess with
+<code>sys.modules['vedo'] = None</code>, which makes <code>import vedo</code> raise as an absent
+optional dependency does.</p>
+<p>Gate: <code>tests/test_section_imports_without_vedo.py</code>, 1 passed. It carries its own
+positive control — the subprocess asserts that <code>import vedo</code> raises
+(<code>the vedo block is not in force</code>) before importing the section, so a passing run
+shows the block was actually present rather than silently absent. The declared negative control
+restored the module-level <code>import vedo</code> and the same test failed with
+<code>ModuleNotFoundError: import of vedo halted</code> at <code>section.py</code> line 11. The
+direct importer <code>tests/test_volume.py</code> still passes, 21 passed.</p>
+<p>Gate logs: <code>gate-green.log</code> (1 passed) and <code>negative-control.log</code>
+(1 failed, the restored module-level import) under run
+<code>r-20260923T094923779940-fsapi-section-imports-vedo-only-to-render</code>. Both were run at
+the committed revision <code>ede455961036038ccdb4aae785caea7c7bbebc01</code>.</p>
+</section>
 </main>
 </body>
 </html>

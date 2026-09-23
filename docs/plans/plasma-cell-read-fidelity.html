@@ -18,7 +18,7 @@
 <meta name="plan-modified" content="2026-09-23">
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -243,6 +243,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260923T081305255811-review-of-pcrf-production-route-trip-panels" data-who="reckon-ship" data-when="2026-09-23T08:31:49Z">
     <div class="r-comment-body"><p>trip-panels review stored, 78 of 100: the first active-set step collapses the good seed; in-step support finiteness unmeasured; plasma-shape guard circular; stale final.txt</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260923-first-step-read" data-who="reckon-ship" data-when="2026-09-23T10:25:00+00:00">
+    <div class="r-comment-body">First-step node delivered, before review (worktree pcrf-first-step-degenerate-direction, tip 0081c85c1, H200 job 1276502 COMPLETED in 10:45). The degenerate-direction hypothesis is refuted, and the section's negative control could not have discriminated: the accepted step and the current gradient are held fixed, so their projection cannot change with lambda. The spectra settle it instead. The Newton residual Jacobian at the seed is not near-singular: smallest singular value 3.4e-3 against a largest of 212, for both the normalised and the fixed-lambda maps. The map itself has rank about 86 of 717, which is structural, since its output depends only on the support's current moments. What the trials show is a globalization failure. The seed is right in shape (83 core cells, axis and X-point on the analytic ones) but wrong in flux amplitude: its range is about [-0.056, 0.009] Wb against the analytic [-0.007, 0.006] Wb, and its merit is 1.80. The first Newton step has norm 0.30 Wb, about 23 times the whole analytic flux range. The linear model, which holds the seed's active set fixed, predicts an exact solve (predicted merit 1.5e-13). The backtracking ladder evaluates factors 1, 1/2 and 1/4 onto a state with 1 core cell and zero support current, where lambda is undefined, and rejects them. It accepts 1/8, the first merit below the seed's 1.80: 12 core cells, 1.6 kA, lambda 23, merit 0.92. The less collapsed factors 1/16 (43 cells, merit 1.05) and 1/32 (68 cells, merit 1.14) also decrease the merit but are never reached. The second inner attempt then shrinks the support to 10 cells (lambda 48). Reading: an oversized step from an amplitude-wrong seed, through a linear model that assumes the seed's support, with a line search that accepts the first merit decrease from the top, where a collapsed support has a lower residual than the bad seed. This ties the collapse to the seed policy: the last converging receipt, 9aebe5fae, used a current-centroid disc seed. The review must say whether the trial sequence supports this reading. The repair is then authored from it, as correcting the step's validity region or the seed amplitude, not as damping.</div>
 </div>
 </section>
 </main>

@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="94">
+<meta name="plan-version" content="95">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -327,7 +327,10 @@
     <div class="r-comment-body">fsa-contract-details landed: commit 4be45c62 merged. The two section 1 details the review found unimplemented are closed: seed_policy admits ColdSeedPortfolio beside ExplicitSolveSeed and the receipt records seed_provenance (portfolio class, limited or diverted selection, plasma current, centroid); compilation_cache_hit is observed, reading False on the first and True on the second identical request in one process, instead of echoing the request field. tests/test_forward_solve_request.py 5 passed on all_debug CPU x64; resolved-defaults round-trip unchanged. Section 1 is now complete in full; sections 3 (transport) and the section 5 rerun remain. impl 0.7 to 0.78.</div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260922T203513486341-fsapi-sol-ledger-panel-draws-wall-and-nulls" data-who="reckon-ship" data-when="2026-09-22T22:23:02.122Z">
-    <div class="r-comment-body"><p>SOL ledger panel draws wall and limited-state nulls from a render receipt; merged bbc49e7af; review 82; the worker&#x27;s gate logs (2 passed, control red) were not retained in the worktree, so the gate is re-run and committed by fsapi-sol-ledger-receipt-revision-and-gate</p></div>
+    <div class="r-comment-body"><p>SOL ledger panel draws wall and limited-state nulls from a render receipt; merged bbc49e7af; review 82; the worker's gate logs (2 passed, control red) were not retained in the worktree, so the gate is re-run and committed by fsapi-sol-ledger-receipt-revision-and-gate</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260923T011500964367-review-of-fsapi-sol-ledger-panel-draws-wall-and-nulls" data-who="reckon-ship" data-when="2026-09-23T01:32:58.413Z">
+    <div class="r-comment-body"><p>review 82</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T154423854324" data-who="coordinator" data-when="2026-09-04T15:45:00Z">
     <div class="r-comment-body"><p>§1 landed: commit <code>7b6936bf</code> merged at <code>a675c63f</code>. <code>nova/equilibrium/solve_request.py</code> declares the frozen <code>ForwardSolveRequest</code>, its nested <code>ForwardSolvePolicy</code>, the version-keyed default table (installed Nova version; public policy Newton 10, GMRES 30, warmup 0, kernel tolerance 1e-8, qualification 1e-10) and the frozen <code>ForwardSolveReceipt</code> (qualification, termination, per-trip residual and mask histories, globalisation decisions, amplitude history, topology plus polish receipt, compilation-cache hit or miss, wall seconds, resolved defaults with the resolving version). <code>ForwardProfile.solve</code> accepts a request and returns a receipt by delegating to the unchanged keyword path, proved bit-identical on the CPU fixture; <code>PerturbedSeedPolicy</code> now reads its defaults from the same table. The EFIT parity producer is the migrated exemplar: it builds its request from the table and records Newton 12, GMRES 12 and qualification 1e-8 as explicit deviations in the receipt, closing the drift the inventory named. Gate: schema test plus the seven referee IDs, 12 cases green; evidence anchor <code>forward-solve-api-landed.html#request-and-receipt</code>. §2 route migrations proceed on the seam; the default-wiring test reads <code>resolved_defaults</code> from these receipts.</p></div>

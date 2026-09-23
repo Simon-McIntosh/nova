@@ -1437,9 +1437,11 @@ further failures sit where no base process ever reached:
 <code>test_compiled_slice_caches_one_executable_per_static_policy</code>. Both
 are the same assertion, that the compiled slice's terminal state equals the
 fused host route's state bitwise. The first also fails when run alone at HEAD
-(job 1276224, 509 s), so it is not an effect of process order. Its isolated
-run at the recorded base <code>775720c7</code> is job 1276228; the manifest
-carries its outcome. Neither failure is attributed here.</p>
+(job 1276224, 509 s), so it is not an effect of process order. It also fails
+alone at the recorded base <code>775720c7</code> (job 1276228, 479 s, same
+assertion at line 833), so it predates this node. The second compiled-slice
+failure makes the same bitwise comparison on the same slice. No failure is
+added against the base.</p>
 </section>
 </main>
 </body>

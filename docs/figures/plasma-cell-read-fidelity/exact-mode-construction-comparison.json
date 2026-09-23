@@ -4368,7 +4368,27 @@
               "vessel"
             ]
           ],
-          "state_file": "diverted-single-null-production-construction.npz"
+          "state_file": "diverted-single-null-production-construction.npz",
+          "panel": {
+            "caption": "diverted-single-null / production\nconverged=False; trips=4\nresidual=0.175034",
+            "axis_off": true,
+            "contour_segments": [
+              19,
+              15
+            ],
+            "reference_markers": {
+              "x_points_drawn": 1,
+              "x_points_dropped_outside_wall": 0,
+              "strike_points_drawn": 0,
+              "other_x_points_drawn": 2
+            },
+            "terminal_markers": {
+              "x_points_drawn": 1,
+              "x_points_dropped_outside_wall": 0,
+              "strike_points_drawn": 0,
+              "other_x_points_drawn": 0
+            }
+          }
         },
         {
           "route": "analytic_hex",
@@ -8674,7 +8694,27 @@
               "vessel"
             ]
           ],
-          "state_file": "diverted-single-null-analytic_hex-construction.npz"
+          "state_file": "diverted-single-null-analytic_hex-construction.npz",
+          "panel": {
+            "caption": "diverted-single-null / analytic_hex\nconverged=False; trips=7\nresidual=0.152101",
+            "axis_off": true,
+            "contour_segments": [
+              19,
+              21
+            ],
+            "reference_markers": {
+              "x_points_drawn": 1,
+              "x_points_dropped_outside_wall": 0,
+              "strike_points_drawn": 0,
+              "other_x_points_drawn": 2
+            },
+            "terminal_markers": {
+              "x_points_drawn": 1,
+              "x_points_dropped_outside_wall": 0,
+              "strike_points_drawn": 0,
+              "other_x_points_drawn": 0
+            }
+          }
         }
       ],
       "differences": [
@@ -8705,7 +8745,24 @@
         "request.seed_policy.state.sha256",
         "seed_state.sha256"
       ],
-      "conclusion": "both_constructions_fail_to_converge"
+      "conclusion": "both_constructions_fail_to_converge",
+      "shared_contour_levels_wb": [
+        1.361644435324944e-05,
+        0.00042077378249441257,
+        0.0008279311206355757,
+        0.001235088458776739,
+        0.001642245796917902,
+        0.0020494031350590655,
+        0.002456560473200228,
+        0.0028637178113413916,
+        0.0032708751494825543,
+        0.003678032487623718,
+        0.004085189825764881,
+        0.004492347163906044,
+        0.0048995045020472075,
+        0.00530666184018837,
+        0.005713819178329534
+      ]
     },
     {
       "case": "weak-rotation-reactor-static",
@@ -13116,11 +13173,31 @@
               "vessel"
             ]
           ],
-          "state_file": "weak-rotation-reactor-static-production-construction.npz"
+          "state_file": "weak-rotation-reactor-static-production-construction.npz",
+          "panel": {
+            "caption": "weak-rotation-reactor-static / production\nconverged=False; trips=4\nresidual=0.0750083",
+            "axis_off": true,
+            "contour_segments": [
+              14,
+              15
+            ],
+            "reference_markers": {
+              "x_points_drawn": 0,
+              "x_points_dropped_outside_wall": 0,
+              "strike_points_drawn": 0,
+              "other_x_points_drawn": 0
+            },
+            "terminal_markers": {
+              "x_points_drawn": 0,
+              "x_points_dropped_outside_wall": 0,
+              "strike_points_drawn": 0,
+              "other_x_points_drawn": 0
+            }
+          }
         },
         {
           "route": "analytic_hex",
-          "status": "not-measured",
+          "status": "measured",
           "construction": {
             "request": {
               "type": "nova.equilibrium.solve_request.ForwardSolveRequest",
@@ -17354,6 +17431,131 @@
                 0.0
               ]
             }
+          },
+          "arm": "analytic_hex",
+          "active_set_budget": 16,
+          "residual": 0.04707617032680829,
+          "converged": false,
+          "qualified": false,
+          "trip_count": 3,
+          "per_trip_residual_history": [
+            {
+              "trip": 1,
+              "residual": 0.04707896271873737
+            },
+            {
+              "trip": 2,
+              "residual": 0.04707617032680829
+            },
+            {
+              "trip": 3,
+              "residual": 0.04707617032680829
+            }
+          ],
+          "terminal_axis_rz_m": [
+            6.188941539416108,
+            7.497219236929364e-05
+          ],
+          "terminal_x_point_rz_m": null,
+          "reference_axis_rz_m": [
+            6.194958772632181,
+            0.00013499785829806932
+          ],
+          "reference_x_point_rz_m": null,
+          "x_point_distance_m": null,
+          "x_point_distance_status": "no_admitted_reference_saddle",
+          "certificate_position_bound_m": 0.46606341035820315,
+          "certificate_residual_bound": 1e-12,
+          "jax_platform": "gpu",
+          "nulls": {
+            "axis_rz_m": [
+              6.188941539416108,
+              7.497219236929364e-05
+            ],
+            "x_point_rz_m": null,
+            "qualified_saddles_rz_m": [],
+            "retained_count": [
+              3,
+              0
+            ],
+            "axis_flux_wb": 49.54589959483202,
+            "boundary_flux_wb": -0.08276602317830808
+          },
+          "termination_reason": 10,
+          "resolved_defaults": {
+            "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
+            "policy": {
+              "route": "newton_krylov",
+              "newton_steps": 10,
+              "gmres_iterations": 30,
+              "warmup": 0,
+              "relaxation": 0.5,
+              "step_cap": 10.0,
+              "active_set_steps": 16,
+              "kernel_tolerance": 1e-12,
+              "qualification_tolerance": 1e-12,
+              "current_pin": true,
+              "settled_exit": true,
+              "own_mask_acceptance": true,
+              "continuation": true,
+              "best_iterate_retention": true,
+              "stagnation_stop": true,
+              "exact_kernels": true,
+              "cached_machine": true,
+              "compilation_cache": true
+            },
+            "deviations": {
+              "kernel_tolerance": 1e-12,
+              "qualification_tolerance": 1e-12
+            },
+            "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+          },
+          "wall_seconds": 262.3168556019664,
+          "compilation_cache_hit": false,
+          "reference_nulls": {
+            "axis_rz_m": [
+              6.194958772632181,
+              0.00013499785829806932
+            ],
+            "x_point_rz_m": null,
+            "qualified_saddles_rz_m": [],
+            "retained_count": [
+              3,
+              0
+            ],
+            "axis_flux_wb": 49.94187078939037,
+            "boundary_flux_wb": 1.1345091532888318e-15
+          },
+          "realised_cells": 135,
+          "carrier_identity": "analytic-hex:weak-rotation-reactor-static:-110",
+          "wall_units": [
+            [
+              0,
+              121,
+              true,
+              "vessel"
+            ]
+          ],
+          "state_file": "weak-rotation-reactor-static-analytic_hex-construction.npz",
+          "panel": {
+            "caption": "weak-rotation-reactor-static / analytic_hex\nconverged=False; trips=3\nresidual=0.0470762",
+            "axis_off": true,
+            "contour_segments": [
+              14,
+              14
+            ],
+            "reference_markers": {
+              "x_points_drawn": 0,
+              "x_points_dropped_outside_wall": 0,
+              "strike_points_drawn": 0,
+              "other_x_points_drawn": 0
+            },
+            "terminal_markers": {
+              "x_points_drawn": 0,
+              "x_points_dropped_outside_wall": 0,
+              "strike_points_drawn": 0,
+              "other_x_points_drawn": 0
+            }
           }
         }
       ],
@@ -17384,7 +17586,26 @@
         "request.carrier_identity",
         "request.seed_policy.state.sha256",
         "seed_state.sha256"
+      ],
+      "conclusion": "both_constructions_fail_to_converge",
+      "shared_contour_levels_wb": [
+        1.1345091532888318e-15,
+        3.5672764849564564,
+        7.134552969912911,
+        10.701829454869367,
+        14.269105939825822,
+        17.836382424782276,
+        21.40365890973873,
+        24.970935394695186,
+        28.53821187965164,
+        32.10548836460809,
+        35.67276484956455,
+        39.24004133452101,
+        42.80731781947746,
+        46.37459430443391,
+        49.94187078939037
       ]
     }
-  ]
+  ],
+  "status": "complete"
 }

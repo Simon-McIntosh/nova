@@ -960,6 +960,82 @@ remove the draw_wall call applied and the wall assertion failing) and the census
 imports the changed driver, so no other test is affected; no failure was added against the base
 revision <code>e1f1239559</code>.</p>
 </section>
+<section id="net-current-scaling-census">
+<h2>The net-current amplitude at seed and terminal per forward route: the banked chord seed is not reproduced (2026-09-23)</h2>
+<p>Node <code>fsapi-net-current-scaling-census-per-route</code>, run
+<code>r-20260923T101830553419-fsapi-net-current-scaling-census-per-route</code>, working tree
+<code>ad4bcb87d</code>. The census measures, per forward route, the amplitude the net-current
+normalisation applies at the seed and at the terminal state of a certificate row:
+<code>lambda = target_current / sum(unscaled cell current)</code>, produced by
+<code>ForwardFluxOperator.current_normalisation_amplitude</code> and admitted only within
+<code>SCALAR_CURRENT_AMPLITUDE_BAND</code> at <code>nova/equilibrium/source.py:116</code>.</p>
+<p>Eight of the twelve planned rows are measured: the four <code>newton_krylov</code> and the four
+<code>reduced_newton</code> routes at <code>chord</code> clip over the four certificate cases, each at
+<code>-110</code> requested cells. Both routes share one cold seed per case, so the seed column is the
+same number twice and the routes separate only in the terminal column. The driver
+(<code>benchmarks/net_current_scaling_census.py</code>) runs one row per process with
+<code>--row-out`</code> and flushes its JSON the moment the row lands, then merges the per-row files in
+an assemble mode, because the whole-plan job lost its fifth row to a JAX materialisation error
+(<code>INTERNAL: Failed to materialize symbols { wrapped_broadcast.11 }</code>) after four chord rows had
+already persisted.</p>
+<table>
+<thead><tr><th>route</th><th>clip</th><th>case</th><th>seed lambda</th><th>terminal lambda</th><th>converged</th><th>termination</th><th>core cells</th><th>support current (A)</th></tr></thead>
+<tbody>
+<tr><td>newton_krylov</td><td>chord</td><td>weak-rotation-reactor-static</td><td>2.0366</td><td>1.8112</td><td>false</td><td>active_set_settled</td><td>54</td><td>9007823.304</td></tr>
+<tr><td>newton_krylov</td><td>chord</td><td>moderate-rotation-conventional-static</td><td>2.0619</td><td>1.7776</td><td>false</td><td>active_set_settled</td><td>56</td><td>914126.030</td></tr>
+<tr><td>newton_krylov</td><td>chord</td><td>strong-rotation-compact-static</td><td>1.8908</td><td>3.0344</td><td>false</td><td>active_set_settled</td><td>32</td><td>82800.386</td></tr>
+<tr><td>newton_krylov</td><td>chord</td><td>diverted-single-null</td><td>1.0004</td><td>11.9871</td><td>false</td><td>active_set_settled</td><td>4</td><td>3113.282</td></tr>
+<tr><td>reduced_newton</td><td>chord</td><td>weak-rotation-reactor-static</td><td>2.0366</td><td>1.7156</td><td>false</td><td>active_set_settled</td><td>62</td><td>9509911.739</td></tr>
+<tr><td>reduced_newton</td><td>chord</td><td>moderate-rotation-conventional-static</td><td>2.0619</td><td>1.6008</td><td>false</td><td>active_set_settled</td><td>63</td><td>1015090.424</td></tr>
+<tr><td>reduced_newton</td><td>chord</td><td>strong-rotation-compact-static</td><td>1.8908</td><td>1.8194</td><td>false</td><td>sufficient_decrease_refused</td><td>55</td><td>138096.275</td></tr>
+<tr><td>reduced_newton</td><td>chord</td><td>diverted-single-null</td><td>1.0004</td><td>53.8026</td><td>false</td><td>active_set_settled</td><td>1</td><td>693.635</td></tr>
+</tbody></table>
+<p><strong>No row converged under the locked fixed-point residual bound</strong>, so the per-route
+statement the census owes — whether lambda stays within 0.9 to 1.1 on converged rows — has no rows to
+state it over. The terminal amplitudes nevertheless run from 1.6008 to 53.8026, and the diverted
+<code>reduced_newton</code> row moves furthest (1.0004 at seed to 53.8026), which is the signature of the
+terminal support having collapsed to a single core cell (support current 693.6 A against the seed's own
+unscaled sum) while the solver reports <code>active_set_settled</code>.</p>
+<h3>Reconciliation against the banked history</h3>
+<table>
+<thead><tr><th>banked</th><th>banked seed / terminal</th><th>measured seed / terminal</th><th>delta</th><th>matching</th></tr></thead>
+<tbody>
+<tr><td>chord weak-rotation-reactor-static -110, newton_krylov</td><td>0.930 / 1.050</td><td>2.0366 / 1.8112</td><td>+1.1066 / +0.7612</td><td>row measured, value not reproduced</td></tr>
+<tr><td>chord weak-rotation-reactor-static -110, reduced_newton</td><td>0.930 / 1.050</td><td>2.0366 / 1.7156</td><td>+1.1066 / +0.6656</td><td>row measured, value not reproduced</td></tr>
+<tr><td>exact support weak-rotation-reactor-static -110</td><td>2.201 / 5.561</td><td colspan="2">not run</td><td>no row: the exact clip mode did not finish (below)</td></tr>
+<tr><td>diverted production seed</td><td>0.980 / n/a</td><td colspan="2">not run at this resolution</td><td>banked at eighty-three cells, this census runs -110</td></tr>
+</tbody></table>
+<p><strong>The banked chord weak seed 0.930 is not reproduced: the census seeds at 2.0366, a delta of
++1.1066, and both routes agree on it to four decimals.</strong> The banked <em>seed</em> is the
+declared-current normalisation of the cold seed state, so the two numbers describe the same quantity and
+one of them is wrong about the field it was taken on; the reconciliation is recorded here rather than
+reconciled away. The banked diverted production seed (0.980) is stated at an eighty-three-cell
+resolution, so no row at <code>-110</code> matches it and this census cannot speak to it.</p>
+<h3>Rows that did not run, and why</h3>
+<p>The four <code>newton_krylov/exact/*</code> rows did not finish inside a one-hour
+<code>all_debug</code> allocation. Each was run as its own job (1276656 to 1276659,
+<code>--time=00:59:00</code>, <code>TMPDIR=/tmp</code> in the submit environment and in the payload, the
+shared interpreter invoked directly with no <code>uv</code>) and each log under
+<code>docs/figures/forward-solve-api/net-current-scaling/logs/exact-*.log</code> ends
+<code>CANCELLED ... DUE TO TIME LIMIT</code> with no row file written. The exact clip mode is therefore
+unmeasurable on the CPU lane at this wall; the recorded follow-on is a GPU lane, whose compile ratio
+against CPU on this repository has been measured near 870 times.</p>
+<p>Receipt and log: <code>docs/figures/forward-solve-api/net-current-scaling/report.json</code>,
+<code>report.md</code>, <code>census.log</code> (the whole-plan job), the per-row files under
+<code>rows/</code> and the per-job logs under <code>logs/</code>, all committed at
+<code>ad4bcb87d</code>. No file under <code>nova/</code> changed.</p>
+<h3>Follow-ons recorded, not taken</h3>
+<p><strong>(1)</strong> The four exact-clip rows need a GPU lane; the one-hour <code>all_debug</code>
+allocation cannot carry them, measured on all four. <strong>(2)</strong>
+<code>benchmarks/solovev_certificate._production_solver_receipt</code> desynchronises its per-trip arrays
+on the reduced-Newton route: it indexes <code>cycle_damping[index]</code> against a nonzero trip count
+while the array is zero-dimensional, raising <code>IndexError</code> at line 721 on all four
+<code>reduced_newton</code> rows. That file is outside this node's fence, so the driver reads
+<code>history.converged</code> and <code>history.termination_reason</code> directly instead and the defect
+is reported, not fixed. <strong>(3)</strong> The poloidal flux contour panels the plotting rules require
+of a terminal forward state are not rendered by this node: the census driver runs the row loop without
+the certificate painters, so this record carries a table and not a panel.</p>
+</section>
 </main>
 </body>
 </html>

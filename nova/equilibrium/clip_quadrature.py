@@ -899,6 +899,7 @@ def _flux_selected_current_moments(
     selected = jnp.asarray(selection, dtype=bool) & jnp.asarray(field.active)
     coefficient = -jnp.asarray(field.coefficient)
     coefficient = coefficient.at[:, 0].add(1.0)
+    cut_cell_capacity = max(int(cut_cell_capacity), int(vertices.shape[0]))
 
     def integrate(sign, closure):
         clipped = _quadratic_support(
@@ -920,6 +921,9 @@ def _flux_selected_current_moments(
             selected,
         )
         clipped = clipped._replace(support_vertices=moving_vertices)
+        # The re-derived level marks cut cells over this call's whole mesh, not
+        # only the cells the caller's bank was sized for, so the callback's
+        # capacity is raised to at least one slot per cell it can mark.
         return clipped_support_current_moments(
             clipped,
             selected & clipped.included,

@@ -2245,11 +2245,15 @@ def _single_site_krylov(
 
     def serve(stream, _):
         vector = jax.lax.switch(stream.phase, requests, stream)
-        action = jax.lax.cond(
-            stream.phase == _KrylovPhase.DONE,
-            jnp.zeros_like,
-            linear_action,
-            vector,
+        # The barrier keeps the operator's arithmetic out of its consumers'
+        # fusions, so each application rounds as a standalone evaluation.
+        action = jax.lax.optimization_barrier(
+            jax.lax.cond(
+                stream.phase == _KrylovPhase.DONE,
+                jnp.zeros_like,
+                linear_action,
+                jax.lax.optimization_barrier(vector),
+            )
         )
         return jax.lax.switch(stream.phase, consumers, stream, action), None
 

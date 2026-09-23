@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-23">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 </head>
 <body>
   <main class="plan-doc">
@@ -243,6 +243,11 @@
 <article class="r-fu" data-id="f-fsa-production-route-receipt-revision" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Stamp every production-route receipt with the source revision it was solved at</h4>
     <div class="r-fu-body">S18 (nova-37) had to date an exact-mode receipt with git log on the file, because production-route receipts carry no source revision field. Add a source_revision field (git rev-parse HEAD of the tree that ran) to the production-route receipt writers, with a test asserting that it is present.</div>
+    <pre class="r-fu-prompt">/reckon-ship figure-and-solver-audit</pre>
+    </article>
+<article class="r-fu" data-id="f-fsa-painters-draw-field-outside-the-wall" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Check every poloidal painter for field drawn outside the first wall by a convex-hull triangulation</h4>
+    <div class="r-fu-body">Found by the S18 coordinator (nova-08) on docs/figures/plasma-cell-read-fidelity/exact-mode-construction-comparison.png, job 1276214 at f5af729a9: the panel draws flux outside the first wall because its Delaunay triangulation spans the convex hull of the nodes. The plotting rules require the vessel drawn on every flux panel, and a field drawn beyond it is invented. Audit nova/media/poloidal.py and every benchmark renderer that contours a scattered-node field; mask triangles whose centroid lies outside the wall units; add a test that fails when any drawn contour vertex lies outside the wall polygon.</div>
     <pre class="r-fu-prompt">/reckon-ship figure-and-solver-audit</pre>
     </article>
 </section>

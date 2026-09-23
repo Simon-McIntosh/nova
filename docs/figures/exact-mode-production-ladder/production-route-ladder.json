@@ -1,0 +1,49 @@
+{
+  "revision_ladder": [
+    "b43714114",
+    "08dd0dda1",
+    "ee17f9570",
+    "2e38dc877",
+    "337eb81ee",
+    "23a8522b6",
+    "450bab78a",
+    "a17431153",
+    "f5af729a9"
+  ],
+  "execution_order": [
+    "f5af729a9",
+    "a17431153",
+    "450bab78a",
+    "23a8522b6",
+    "337eb81ee",
+    "2e38dc877",
+    "ee17f9570",
+    "08dd0dda1",
+    "b43714114"
+  ],
+  "requested_cells": 110,
+  "route": "certificate production current-moment seed",
+  "slurm_job_id": "1276236",
+  "slurm_partition": "betelgeuse",
+  "negative_control": "run the main rung with the production route in chord clip mode (the current production default) and observe whether it converges, so the receipt separates exact clip mode from the route itself",
+  "rows": [],
+  "status": "incomplete",
+  "gate_passed": false,
+  "measured_arm_count": 0,
+  "interruption": {
+    "job_id": "1276236",
+    "scheduler_state": "CANCELLED by 39486",
+    "elapsed": "00:02:28",
+    "worker_cancelled_this_job": false,
+    "convergence_attribution": "unavailable: no terminal arm produced",
+    "negative_control": "not run",
+    "prior_attempt": {
+      "job_id": "1276232",
+      "elapsed": "00:08:28",
+      "worker_cancelled_this_job": true,
+      "reason": "CUDA-only platform list prevented debug callback CPU transfer",
+      "exception": "jax.debug.callback failed to find a local CPU device to place the inputs on"
+    }
+  },
+  "interrupted_arm_receipt": "f5af729a9-diverted-single-null-exact.json"
+}

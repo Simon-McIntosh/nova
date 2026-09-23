@@ -644,10 +644,36 @@ def measure(args):
             f"residual={row.get('terminal_residual')}",
             flush=True,
         )
-    payload["status"] = "complete"
+    payload["gate_passed"] = evidence_complete(payload)
+    payload["status"] = "complete" if payload["gate_passed"] else "incomplete"
     write_json(path, payload)
-    print("MEASUREMENT_COMPLETE", flush=True)
-    return 0
+    print(f"MEASUREMENT_COMPLETE gate_passed={payload['gate_passed']}", flush=True)
+    return int(not payload["gate_passed"])
+
+
+def evidence_complete(payload):
+    """Refuse a complete ladder when an expected arm or health census is absent."""
+    optional_build_failures = {"08dd0dda1", "ee17f9570", "2e38dc877"}
+    expected = {(revision, case, "exact") for revision in REVISIONS for case in CASES}
+    expected |= {(REVISIONS[-1], case, "chord") for case in CASES}
+    rows = payload["rows"]
+    identities = {(row["revision"], row["case"], row["clip_mode"]) for row in rows}
+    if identities != expected or len(rows) != len(expected):
+        return False
+    return all(
+        (
+            row["status"] == "measured"
+            and row.get("support_health_status") == "measured"
+            and len(row["support_health"]["per_trip"]) == row["trip_count"]
+            and row["exit_status"] == 0
+        )
+        or (
+            row["revision"] in optional_build_failures
+            and row["status"] == "not-measured"
+            and bool(row.get("exception"))
+        )
+        for row in rows
+    )
 
 
 def main():
@@ -662,7 +688,16 @@ def main():
     all_rows.add_argument("--scratch", type=Path, required=True)
     all_rows.add_argument("--output", type=Path, required=True)
     all_rows.add_argument("--logs", type=Path, required=True)
+    validation = sub.add_parser("validate")
+    validation.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if args.command == "validate":
+        payload = json.loads(args.output.read_text())
+        passed = evidence_complete(payload)
+        print(
+            "COMPLETE" if passed else "REFUSED: incomplete production ladder evidence"
+        )
+        return int(not passed)
     return arm(args) if args.command == "arm" else measure(args)
 
 

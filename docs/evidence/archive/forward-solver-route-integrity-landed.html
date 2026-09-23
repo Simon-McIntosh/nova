@@ -1423,7 +1423,23 @@ in its own fresh <code>all_debug</code> process (jobs 1276212 and 1276213) at
 <code>f803b640</code>, with <code>TMPDIR=/tmp</code>,
 <code>JAX_PLATFORMS=cpu</code> and the shared interpreter, and writes
 <code>after-fixed_point.log</code> and <code>after-reduced_newton.log</code>.
-The disposition is recorded below once the jobs leave the queue.</p>
+<code>tests/test_fixed_point.py</code> passes 45 of 45 (EXIT=0, 201 s).
+<code>tests/test_reduced_newton.py</code> now runs to completion for the first
+time: 18 passed and 4 failed, EXIT=1, 2,321 s, and no process abort. Base and
+prior-candidate processes both aborted by test 9. Two failures are the base ids,
+<code>test_diverted_normalised_certificate_rung_retains_finite_fallback</code>
+and <code>test_reduced_newton_reaches_the_production_fixed_point</code>. The
+earlier suite-only failure of
+<code>test_ladder_scoring_evaluates_one_map_per_accepted_step</code> now passes in
+the suite, so it was process-cache state rather than solver behaviour. Two
+further failures sit where no base process ever reached:
+<code>test_compiled_slice_matches_the_fused_host_route</code> and
+<code>test_compiled_slice_caches_one_executable_per_static_policy</code>. Both
+are the same assertion, that the compiled slice's terminal state equals the
+fused host route's state bitwise. The first also fails when run alone at HEAD
+(job 1276224, 509 s), so it is not an effect of process order. Its isolated
+run at the recorded base <code>775720c7</code> is job 1276228; the manifest
+carries its outcome. Neither failure is attributed here.</p>
 </section>
 </main>
 </body>

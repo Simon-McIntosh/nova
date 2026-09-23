@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="190">
+<meta name="plan-version" content="191">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
 <meta name="plan-impl" content="0.91">
@@ -970,6 +970,11 @@ all three gate logs are under
     <div class="r-fu-body">From the same attribution: cells 2, 35, 75, 89, 114, 126, 128 and 134 carry zero exact area at both the seed and the terminal state. At the terminal state, cells 2, 75, 89, 114, 126 and 134 have 2/15 to 3/13 vertices inside the boundary level, yet no polygon is traced. This is a geometry outcome independent of the bank overflow. Report only: name the clip step that discards the polygon for each cell.</div>
     <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §6</pre>
     </article>
+<article class="r-fu" data-id="f-cca-wall-cut-cell-islands-at-trip-one" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship cut-cell-current-attribution §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Attribute the four closed current islands in the outboard wall cut cells at trip 1 of the diverted exact production route</h4>
+    <div class="r-fu-body">Report only. Read trip-panels.json from the S18 worktree pcrf-production-route-trip-panels (tip 03fa0d1a8; per-trip cell_current_a and flood labels). For trip 1 of the diverted exact route, list every current-carrying cell with: whether it is a wall cut cell, its clipped polygon area, its vertex inside-count against the boundary level, its level-set crossings, and its flood label. The result must say whether the islands are exact-clip support at the wall or support that the active-set step created outside the separatrix.</div>
+    <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §6</pre>
+    </article>
 </section>
 
 <section data-reckon="questions" id="questions" class="r-questions">
@@ -1493,7 +1498,10 @@ all three gate logs are under
     <div class="r-comment-body"><p>partial: seed cells wholly outside the support; terminal cells 2, 75, 126, 134 dropped at separatrix_clip.py:1405 or :1409; per-stage recorder emitted nothing; worker session hit its context window</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20260923T035145216176-cca-exact-bank-callback-capacity-from-the-mesh" data-who="reckon-ship" data-when="2026-09-23T04:50:00.360Z">
-    <div class="r-comment-body"><p>callback capacity floored at the call&#x27;s cell count; 3 passed; negative control all-nan; exact-clip moments 13 and seed 3 pass; terminal census unmeasured behind the partition probe; review 87</p></div>
+    <div class="r-comment-body"><p>callback capacity floored at the call's cell count; 3 passed; negative control all-nan; exact-clip moments 13 and seed 3 pass; terminal census unmeasured behind the partition probe; review 87</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260923T1015-trip-panels-exonerate-capacity" data-who="reckon-ship" data-when="2026-09-23T10:15:00+02:00">
+    <div class="r-comment-body">S18 trip-panel finding (unreviewed; H200 job 1276423, worktree pcrf-production-route-trip-panels, tip 03fa0d1a8): the moment-bank capacity repair is exonerated as the cause of the exact-mode production collapse. Non-finite moments are zero on every trip, both before (664ade0c3) and after the repair. The failure is the first active-set step: from a good seed (83 core cells, λ 0.98) trip 1 returns 4 to 24 core cells, moves the axis 0.27 m outboard, and leaves four closed current islands in outboard wall cut cells. λ then rescales 0.6 to 6 kA back to 37 kA (λ 6 to 62) inside the unrefusing band (1e-6, 1e6). Chord mode collapses the same way. The wall cut-cell islands are S19's to attribute: f-cca-wall-cut-cell-islands-at-trip-one.</div>
 </div>
 </section>
 

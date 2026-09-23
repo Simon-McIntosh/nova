@@ -26,9 +26,9 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 <meta name="plan-blocks" content="millisecond-converged-solve">
-<meta name="plan-impl" content="0.58">
+<meta name="plan-impl" content="0.64">
 </head>
 <body>
   <main class="plan-doc">
@@ -479,6 +479,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260923T092552167639-review-of-fsri-single-site-krylov-for-the-qualified-step" data-who="reckon-ship" data-when="2026-09-23T09:45:43.345Z">
     <div class="r-comment-body"><p>first-pass review 71: private jax._src imports, no test, stale paragraph; all three fixed on resume</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260923T1335-slice-one-landed" data-who="reckon-ship" data-when="2026-09-23T13:35:00+02:00">
+    <div class="r-comment-body">Landed on main at e62c8110e: the route-integrity design state (explicit request streams, and the per-test cache-clear fixture that removes the reduced-Newton map-count abort) plus single-site Krylov slice 1 (fsri-single-site-krylov-for-the-qualified-step, claude-opus 5.5, second review 83). _qualified_krylov_step now applies its operator at one scan-served site, built on public JAX only. Instructions at 300 cells fall 302,553 to 284,792 (287,117 at 1000). tests/test_fixed_point.py passes 45; tests/test_reduced_newton.py has the same four failures as its base; tests/test_single_site_krylov.py pins the single site and reddens under the per-site mutation. Under the lead's re-base ruling, one real-operator terminal value moves by 3.07e-12. Open: the vmapped cost is 14.3x until slice 2 (f-fsri-single-site-krylov-vmap-exit), then the two promotion ladders. The pre-warm finding also lands here: the H200 lane was admitted, but the pin missed 679 solve programs (458 s of compile) because it was built at another revision, so every solve-touching commit invalidates the pin. Ceiling still 203,078 / 204,531.</div>
 </div>
 </section>
 </main>

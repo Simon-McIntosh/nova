@@ -485,7 +485,9 @@
       },
       "diagnostic_census_input": "null_flux_pool",
       "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/2e38dc877-weak-rotation-reactor-static.log",
-      "exit_status": 143
+      "exit_status": null,
+      "scheduler_batch_exit_status": "0:15",
+      "exit_status_qualification": "Child return code was not observed because the entire allocation was cancelled; retain the measured scheduler signal status."
     },
     {
       "revision": "337eb81ee",

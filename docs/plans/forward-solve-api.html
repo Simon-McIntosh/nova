@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="102">
+<meta name="plan-version" content="103">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -163,10 +163,11 @@
     <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Promotion run r-20260919T231747888058-fsa-coil-edit-under-the-vertical-constraint, commit c920e30d, benchmarks/coil_edit_latency.py: the required twenty-edit regeneration aborts at the LLVM section allocation after nine edits, so the persisted census and redraw in the done-when are absent. Repair the allocation/compile route or split the sweep into durable one-edit receipts, then require the regenerated fixture and panel before promotion. recommends_skill=/reckon-ship forward-solve-api §5.</p></div>
     <pre class="r-fu-prompt">/reckon-ship forward-solve-api</pre>
     </article>
-<article class="r-fu" data-id="f-fsapi-sol-ledger-receipt-revision-and-gate" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solve-api" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsapi-sol-ledger-receipt-revision-and-gate" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solve-api" data-resolved-at="2026-09-23T16:48:20+00:00" data-resolved-by="nova-cc">
     <h4 class="r-fu-title">Stamp the SOL ledger receipt with its source revision and commit its gate logs</h4>
     <div class="r-fu-body">The review of fsapi-sol-ledger-panel-draws-wall-and-nulls (82) found that sol-ledger-census.json carries no source_revision, that tests/test_sol_ledger_render.py only checks the title against the receipt it was rendered from, and that the gate and control logs sit under an uncommitted logs/ directory. Add source_revision (git rev-parse HEAD of the tree that ran the census), assert it is present, and commit the gate and control logs under docs/figures/forward-solve-api/sol-ledger-census/.</div>
     <pre class="r-fu-prompt">/reckon-ship forward-solve-api</pre>
+    <p class="r-fu-outcome">Merged at c160c62be (run r-20260923T045912073859, review 97). The SOL ledger census stamps its receipt with its source revision, the receipt is regenerated with the stamp, the gate and negative-control logs are committed, and tests/test_sol_ledger_render.py asserts the stamp; dropping it reddens the gate. The review's two durability notes stay with the record: the render metrics name artifacts by absolute worktree paths, and the title-split assertion compares the title against the mapping it was composed from.</p>
     </article>
 <article class="r-fu" data-id="f-fsapi-core-dependency-surface" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solve-api" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Decide nova&#x27;s core dependency surface: jax and pandas are imported by core modules but declared only as extras</h4>

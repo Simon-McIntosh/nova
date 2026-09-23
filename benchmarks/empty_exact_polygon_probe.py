@@ -158,16 +158,19 @@ def _full_probe(operator, state: np.ndarray) -> dict[str, Any]:
         operator._support_curve_centre,
         operator._support_curve_scale,
     )
-    node_coordinates = np.asarray(
-        operator.moment_geometry.atomic_mesh.node_coordinates, dtype=np.float64
-    )
-    curved_vertex = np.asarray(
-        level(jnp.asarray(node_coordinates)), dtype=np.float64
-    ).reshape(-1)
-    if curved_vertex.shape[0] != node_coordinates.shape[0]:
+    atomic_mesh = operator.moment_geometry.atomic_mesh
+    node_coordinates = np.asarray(atomic_mesh.node_coordinates, dtype=np.float64)
+    # The level evaluator carries one local row per cell, so it is applied to a
+    # cell-batched vertex array: axis 0 is the cell, exactly as the traced clip
+    # calls it. A flat node array would broadcast the local rows against every
+    # vertex and return one level per cell-vertex pair.
+    cell_nodes = np.asarray(atomic_mesh.cell_nodes)
+    cell_points = jnp.asarray(node_coordinates)[jnp.asarray(cell_nodes)]
+    curved_cell = np.asarray(level(cell_points), dtype=np.float64)
+    if curved_cell.shape[0] != cell_nodes.shape[0]:
         raise RuntimeError(
-            "curved level and mesh vertices disagree: "
-            f"{curved_vertex.shape} versus {node_coordinates.shape}"
+            "curved level and cell count disagree: "
+            f"{curved_cell.shape} versus {cell_nodes.shape}"
         )
     participation = (
         np.asarray(moment_masks.profile_participation, dtype=bool)
@@ -184,9 +187,9 @@ def _full_probe(operator, state: np.ndarray) -> dict[str, Any]:
         "vertex_participation": curve["vertex_participation"],
         "participation": participation,
         "inside_boundary": inside_boundary,
-        "curved_vertex": curved_vertex,
+        "curved_cell": curved_cell,
         "node_coordinates": node_coordinates,
-        "curved": curved_vertex > 0.0,
+        "curved_cell_inside": curved_cell > 0.0,
         "boundary_flux_wb": float(np.asarray(topology.boundary_flux)),
         "boundary": inside_boundary > 0.0,
     }
@@ -198,7 +201,7 @@ def _cell_geometry(probe: dict[str, Any], mesh, cell: int) -> dict[str, Any]:
     index = np.asarray(mesh.cell_nodes)[cell][:count]
     if count < 3:
         raise RuntimeError(f"cell {cell} carries only {count} vertices")
-    curved = probe["curved"][index]
+    curved = probe["curved_cell_inside"][cell][:count]
     boundary = probe["boundary"][index]
     following = np.roll(np.arange(count), -1)
     straddle = curved != curved[following]
@@ -229,7 +232,7 @@ def _cell_geometry(probe: dict[str, Any], mesh, cell: int) -> dict[str, Any]:
         "inside_vertices_on_edges": inside_curved,
         "candidate_vertex_count_from_inputs": inside_curved + unique_crossing,
         "curved_level_per_vertex": [
-            float(value) for value in probe["curved_vertex"][index]
+            float(value) for value in probe["curved_cell"][cell][:count]
         ],
         "boundary_level_per_vertex": [
             float(value) for value in probe["inside_boundary"][index]

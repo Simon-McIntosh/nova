@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T06:31:44",
+  "updated": "2026-09-23T06:36:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -278580,6 +278580,337 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260923T005516937486-pcrf-attribute-the-exact-mode-fixed-point",
+        "plan": "plasma-cell-read-fidelity",
+        "section": "\u00a71",
+        "node": "pcrf-attribute-the-exact-mode-fixed-point",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1989,
+                "cached_input_tokens": 476581,
+                "input_tokens": 478602,
+                "output_tokens": 1858,
+                "reasoning_output_tokens": 59,
+                "total_tokens": 480460,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "benchmarks/plasma_cell_terminal_state.py (from the pcrf-terminal-state-is-one-trip worktree at 3d2222f9e, imported by file location, not modified) is driven over a revision ladder in ONE GPU sbatch job (first --partition=betelgeuse --reservation=gpu_0003_grpA --account=grpa --gres=gpu:1 --cpus-per-task=4 --mem=64G --time=02:00:00; if pending past 15 minutes cancel and resubmit identically to --partition=titan --gres=gpu:1 and say so; TMPDIR=/tmp in the submit environment and the payload, XLA_PYTHON_CLIENT_PREALLOCATE=false, no compilation cache root, the root interpreter run directly, uv never invoked): the revisions are b43714114, 08dd0dda1, ee17f9570, 2e38dc877, 337eb81ee, 23a8522b6, 450bab78a, a17431153 and main f5af729a9, each materialised as a detached scratch worktree in a directory named scratch-revisions inside this run own worktree, one subdirectory per revision named by its short sha (git worktree add --detach with that path and that sha; never git stash, never git checkout in any tree that is not the scratch tree, scratch trees removed with git worktree remove at the end) and run in its own subprocess with PYTHONPATH pointing at that scratch tree so its own nova package is the one imported (print nova.__file__ per arm as proof); per revision and per case (diverted-single-null, weak-rotation-reactor-static; exact clip mode; requested 110 cells; certificate default active-set policy) the receipt docs/figures/plasma-cell-read-fidelity/exact-mode-fixed-point-attribution.json records the revision, converged flag, trip count, per-trip residual history, terminal residual, terminal X-point distance to the reference in metres, the cut-cell capacity overflow flag or receipt the operator exposes at that revision (or that no such receipt exists), whether clipped_support_current_moments is finite, the realised cell count, and nova.__file__; the receipt names the first revision in ladder order whose default-policy arm is not converged where its predecessor was, or states that every revision is unconverged or every revision converged; where a revision fails to import or to build the construction, the receipt records the exception text and the arm is marked not-measured rather than skipped silently; the figure docs/figures/plasma-cell-read-fidelity/exact-mode-fixed-point-attribution.png with an SVG beside it draws for the diverted case one poloidal line-contour panel per revision on one shared level array with axis off, the wall units via draw_wall, both null sets via draw_nulls, and the caption per panel stating revision, converged, trips and residual, plus one line plot of terminal residual against ladder position; the plan section text gains an appended paragraph naming the attributed landing and citing the receipt and figure by project-absolute src; the declared negative control is run and its log recorded; ruff check and format pass over any new module; the manifest is written before the wait with wait_probe as a JSON argument vector printing IN_QUEUE or LEFT_QUEUE and wait_terminal LEFT_QUEUE and its gate fields name the sbatch job",
+          "estimated_hours": 3.0,
+          "goal": "attribute the flat exact-mode residual at the reduced rung to the operator landing that moved it",
+          "id": "pcrf-attribute-the-exact-mode-fixed-point",
+          "lane_declaration": {
+            "backend": "codex-astra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-23T00:55:28Z",
+            "read_at": "2026-09-23T00:55:30Z",
+            "resolved_backend": "codex-astra",
+            "utilisation_pct": 68.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T005516937486-pcrf-attribute-the-exact-mode-fixed-point/manifest.md",
+          "negative_control": "run the b43714114 arm with active_set_steps forced to one and observe its receipt read converged false with the one-trip residual, distinguishing the ladder measurement from a policy artefact",
+          "plan": "plasma-cell-read-fidelity",
+          "requested_backend": "codex-astra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/plasma_cell_fixed_point_attribution.py",
+            "docs/figures/plasma-cell-read-fidelity",
+            "docs/plans/plasma-cell-read-fidelity.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point",
+            "docs/evidence/archive/plasma-cell-read-fidelity-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s18-pta-cost-a",
+        "backend": "codex-astra",
+        "local": false,
+        "agent": {
+          "alias": "astra6",
+          "backend": "codex-astra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-6-astra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-23T00:56:53Z",
+        "completed_at": "2026-09-23T03:46:15Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 10162,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "03a5743e01cf0e586b03704113c879690747cf98",
+        "commits": [
+          "7c42f8691789f18932906cb2d5d5bbf19da35df0",
+          "99513b73e2c0794e372a2bd9e9f0d0a7360da9f2",
+          "53630225fc5b06c08eef22f196b0bceaf8c84acd",
+          "0989a8142f2404efb750a1afac530d84d050d9c0",
+          "5fa76301d449a9a5185b57a1fcfee5a7da507eb4",
+          "613d9178ab64795e953f766c15d2626bcf40f031",
+          "08bc9bef42cc10b8fb8965d4b5509d3652717fe6",
+          "878783fc3ebe206ac4ec96079f7ef885e8e182b2",
+          "baf990b08ecd04cad1e747a99c717afb8e60c5ce",
+          "83beabafc4013a0d31c1eb1557a217cc34658d26",
+          "40c1bdb5faed6ba2a454c6208df2d99ce72e3d88",
+          "80f792a1a0b41e8e71710ffdb2114bd57ac39f56",
+          "bc797b454e729ba66e95dfe164d4bfdacf355e07",
+          "66f51b3a9d1bff44e12377e5bb84898f803d62e2",
+          "065fb75de6165c458b3e64f787929055c82324ff"
+        ],
+        "changed_lines": {
+          "added": 63372,
+          "removed": 0,
+          "files": 23
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "construction comparison driver on betelgeuse job 1276214: certificate production route beside the analytic-hex construction, exact clip mode, requested 110 cells, both cases",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T005516937486-pcrf-attribute-the-exact-mode-fixed-point/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T005516937486-pcrf-attribute-the-exact-mode-fixed-point/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0cbc4-00e4-72e2-acbf-23028b77f094",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 28197504,
+            "cached_input_tokens_cumulative": 28197504,
+            "input_tokens": 28556098,
+            "input_tokens_cumulative": 28556098,
+            "output_tokens": 112944,
+            "output_tokens_cumulative": 112944,
+            "reasoning_output_tokens": 52942,
+            "reasoning_output_tokens_cumulative": 52942
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-23T03:46:15Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 73.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-23T03:46:15Z"
+            }
+          ],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "notional_cost_usd": "no_dated_rate",
+            "rate_basis": "no_dated_rate"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 2626,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 10902,
+              "log_fresh": false,
+              "manifest_commits": [
+                "b67d45901a66c45313ffab3116f2d3aaa4cb3543",
+                "34479a5a7cd5de863b60da9b8f039d6005f36fe6",
+                "3d2222f9e091af165f74d052dfd57ab8fb897eb3"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "d74100a2091c3e4d201d9dd81ca9b07b4580ce18e6d965b5336d9bce0d284656",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T210948946758-pcrf-terminal-state-is-one-trip/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan plasma-cell-read-fidelity --section '\u00a71' --role review --spec-level exact --node review-of-pcrf-terminal-state-is-one-trip --goal 'attach an independent review to run r-20260922T210948946758-pcrf-terminal-state-is-one-trip' --done-when 'the review for r-20260922T210948946758-pcrf-terminal-state-is-one-trip stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260922T210948946758-pcrf-terminal-state-is-one-trip.json --time-budget 55m --session s18-fable-20260922 --allow-unreconciled-runs --local",
+              "node": "pcrf-terminal-state-is-one-trip",
+              "phase": "starting",
+              "plan": "plasma-cell-read-fidelity",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260922T210948946758-pcrf-terminal-state-is-one-trip",
+              "session": "s18-fable-20260922",
+              "terminal_age_seconds": 10938,
+              "terminal_at": "2026-09-22T21:53:46Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-terminal-state-is-one-trip"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 4,
+            "evidence": 14,
+            "fit": 18,
+            "goal_fidelity": 9,
+            "scope_discipline": 15
+          },
+          "absent": [],
+          "total": 60
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 28197504,
+          "cumulative_input_tokens": 56753602,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 165886
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point",
+          "session_id": "01a0cbc4-00e4-72e2-acbf-23028b77f094",
+          "session_source": "stream",
+          "retained_at": "2026-09-23T03:46:15Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "promoted_revision": "065fb75de6165c458b3e64f787929055c82324ff",
+        "plan_impl_at_dispatch": 0.0,
+        "impl_move": {
+          "plan": "plasma-cell-read-fidelity",
+          "at_dispatch": 0.0,
+          "at_complete": 0.7,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "lane_advisory": {
+          "backend": "codex-astra",
+          "burn_multiple": 2.660249941783746,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "'codex-astra' is projected to exhaust at 2026-09-24T23:56:01Z, which is after this node's 3300s horizon ending 2026-09-23T01:50:30.486160+00:00",
+          "horizon_ends_at": "2026-09-23T01:50:30.486160+00:00",
+          "horizon_seconds": 3300,
+          "metered": true,
+          "observed_at": "2026-09-23T00:55:28Z",
+          "precedes_horizon": false,
+          "projected_exhaustion_at": "2026-09-24T23:56:01Z",
+          "resets_at": "2026-09-28T05:58:53Z",
+          "seconds_until_reset": 450204,
+          "state": "quiet",
+          "utilisation_pct": 68.0
+        },
+        "lane_declaration": {
+          "backend": "codex-astra",
+          "headroom": "known",
+          "metered": true,
+          "observed_at": "2026-09-23T00:55:28Z",
+          "read_at": "2026-09-23T00:55:30Z",
+          "resolved_backend": "codex-astra",
+          "utilisation_pct": 68.0
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "backend declares no lane document",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 224.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -279046,6 +279377,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3272
+    "_version": 3273
   }
 }

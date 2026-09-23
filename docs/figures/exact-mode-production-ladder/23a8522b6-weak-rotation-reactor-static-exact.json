@@ -1,0 +1,116 @@
+{
+  "revision": "23a8522b6",
+  "case": "weak-rotation-reactor-static",
+  "clip_mode": "exact",
+  "status": "not-measured",
+  "exception": "Traceback (most recent call last):\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/benchmarks/plasma_cell_production_ladder.py\", line 302, in measure_arm\n    solve = profile.solve(request)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/23a8522b6/nova/equilibrium/forward.py\", line 2689, in solve\n    return self._solve_request(initial_flux)\n           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/23a8522b6/nova/equilibrium/forward.py\", line 2289, in _solve_request\n    return self._solve_imposed_request(request)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/23a8522b6/nova/equilibrium/forward.py\", line 2547, in _solve_imposed_request\n    polish_receipt = active._terminal_polish_receipt(equilibrium)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/23a8522b6/nova/equilibrium/forward.py\", line 2620, in _terminal_polish_receipt\n    qualification = reader.read_qualification(\n        physical,\n        self.operator.polarity,\n        material,\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/23a8522b6/nova/equilibrium/topology.py\", line 1141, in read_qualification\n    raise ValueError(\n        \"own-node null census requires the direct sampling flux values\"\n    )\nValueError: own-node null census requires the direct sampling flux values\n--------------------\nFor simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.\n",
+  "slurm_job_id": "1276244",
+  "slurm_partition": "betelgeuse",
+  "seed_policy": {
+    "status": "measured",
+    "type": "nova.equilibrium.solve_request.ExplicitSolveSeed",
+    "construction_type": "current_centroid_disc",
+    "factory": "profile.cold_seed_portfolio",
+    "state_sha256": "9024e86683cbdc78545b4c2143fc18e2f90bce09adb994e44c461dfb80447e5d",
+    "state_dtype": "float64",
+    "state_shape": [
+      772
+    ],
+    "seed_radius_m": 1.564079053601776
+  },
+  "harness_sha256": "a3da4222cc038dec40a10c6ca3067deface21eaa29b07002b82516ce2a71f7cc",
+  "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/23a8522b6/nova/__init__.py",
+  "full_revision": "23a8522b6b0ab27216c46db7d150e2b96433f347",
+  "devices": [
+    "cuda:0"
+  ],
+  "device_kinds": [
+    "NVIDIA H200 NVL"
+  ],
+  "realised_cells": 135,
+  "carrier_identity": "solovev:weak-rotation-reactor-static:-110",
+  "reference_nulls": {
+    "axis_rz_m": [
+      6.194958772632181,
+      0.00013499785829806932
+    ],
+    "x_point_rz_m": null,
+    "qualified_saddles_rz_m": [],
+    "retained_count": [
+      3,
+      0
+    ],
+    "axis_flux_wb": 49.94187078939037,
+    "boundary_flux_wb": 1.1345091532888318e-15
+  },
+  "seed_receipt": {
+    "factory": "profile.cold_seed_portfolio",
+    "requested_class": "limited",
+    "branch_index": 0,
+    "construction": "current_centroid_disc",
+    "plasma_current_a": 16314773.311828371,
+    "current_centroid_m": [
+      6.063530173332898,
+      0.0
+    ],
+    "seed_radius_m": 1.564079053601776,
+    "supported_cell_count": 36,
+    "anchor_available": true,
+    "anchor_m": [
+      7.801395788445413,
+      -5.030890007447734e-11
+    ],
+    "declared_axis_m": [
+      6.063530173332898,
+      0.0
+    ],
+    "declared_boundary_m": [
+      7.801395788445413,
+      -5.030890007447734e-11
+    ],
+    "stored_flux_samples_used": false,
+    "current_target_provenance": {
+      "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+      "quadrature_nodes": 512,
+      "quadrature_current_a": 16314773.311828367,
+      "declared_current_a": 16314773.311828371,
+      "quadrature_relative_closure": 2.2833846522164315e-16,
+      "current_centroid_m": [
+        6.063530173332898,
+        0.0
+      ]
+    },
+    "state_sha256_binary64": "9024e86683cbdc78545b4c2143fc18e2f90bce09adb994e44c461dfb80447e5d"
+  },
+  "seed_amplitude": 1.005778470533948,
+  "fixture_cache": {
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
+    "semantic_key": "0eb458e6edb500a7",
+    "hit": true,
+    "lock_wait_seconds": 7.0938840508461e-06,
+    "build_seconds": 0.0
+  },
+  "current_receipt": {
+    "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+    "quadrature_nodes": 512,
+    "quadrature_current_a": 16314773.311828367,
+    "declared_current_a": 16314773.311828371,
+    "quadrature_relative_closure": 2.2833846522164315e-16,
+    "current_centroid_m": [
+      6.063530173332898,
+      0.0
+    ]
+  },
+  "seed_sha256": "9024e86683cbdc78545b4c2143fc18e2f90bce09adb994e44c461dfb80447e5d",
+  "active_set_budget": 16,
+  "observer": {
+    "method": "host callback copies selected state at native trip reconcile",
+    "native_function_sha256": "5f3d41010da058238abd4204cf02ac65e468dbde474871c2baec6fcaf417dea1",
+    "inserted_statement": "jax.debug.callback(_capture_trip, trip_active, index, selected_state, selected_residual, ordered=True)",
+    "solver_values_modified": false
+  },
+  "wall_seconds": 671.066010594368,
+  "measurement_complete": true,
+  "exit_status": 1,
+  "producer_log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-production-route-ladder/authorized-retry/23a8522b6-weak-rotation-reactor-static-exact.log"
+}

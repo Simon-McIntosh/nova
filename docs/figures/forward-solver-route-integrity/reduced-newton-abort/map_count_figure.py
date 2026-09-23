@@ -18,7 +18,7 @@ ARMS = sys.argv[1:] or [
     "abort-alone",
 ]
 
-fig, ax = plt.subplots(figsize=(8, 4.2))
+fig, ax = plt.subplots(figsize=(10, 4.2))
 for name in ARMS:
     rows = [
         line.split()
@@ -38,7 +38,7 @@ ax.set_xlabel("elapsed (min)")
 ax.set_ylabel("entries in /proc/<pid>/maps")
 ax.set_ylim(0, 70000)
 ax.spines[["top", "right"]].set_visible(False)
-ax.legend(fontsize=8, frameon=False, loc="lower right")
+ax.legend(fontsize=8, frameon=False, loc="upper left", bbox_to_anchor=(1.0, 1.0))
 ax.set_title("tests/test_reduced_newton.py, fresh processes at main HEAD", fontsize=9)
 fig.tight_layout()
 stem = "map-count-bisect" if sys.argv[1:] else "map-count"

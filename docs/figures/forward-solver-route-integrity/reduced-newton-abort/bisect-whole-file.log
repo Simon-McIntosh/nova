@@ -24,4 +24,16 @@ tests/test_reduced_newton.py::test_fused_trip_boundary_solves_to_the_dispatched_
 tests/test_reduced_newton.py::test_batched_tail_scores_the_grades_the_serial_ladder_dispatches PASSED [ 66%]
 tests/test_reduced_newton.py::test_step_kernel_returns_the_residual_sup_norm PASSED [ 71%]
 tests/test_reduced_newton.py::test_batched_tail_scoring_walks_the_serial_route PASSED [ 76%]
-tests/test_reduced_newton.py::test_batched_tail_scoring_walks_the_serial_route_on_the_default_lane 
+tests/test_reduced_newton.py::test_batched_tail_scoring_walks_the_serial_route_on_the_default_lane PASSED [ 80%]
+tests/test_reduced_newton.py::test_compiled_slice_matches_the_fused_host_route FAILED [ 85%]
+tests/test_reduced_newton.py::test_compiled_slice_caches_one_executable_per_static_policy FAILED [ 90%]
+tests/test_reduced_newton.py::test_compiled_slice_replays_the_host_step_and_trip_counters PASSED [ 95%]
+tests/test_reduced_newton.py::test_compiled_slice_keeps_a_nonconverged_result_masked Fatal Python error: Aborted
+
+Thread 0x00007f44a77fe640 [asyncio_8] (most recent call first):
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/concurrent/futures/thread.py", line 116 in _worker
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1024 in run
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1082 in _bootstrap_inner
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/threading.py", line 1044 in _bootstrap
+
+EXIT=134

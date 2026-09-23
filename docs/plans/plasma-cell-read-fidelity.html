@@ -43,6 +43,8 @@
 
 <p><strong>First live attribution arm (2026-09-23).</strong> At <code>b43714114</code>, the pinned driver returns <code>converged=false</code> after two trips, both at residual <code>0.25868037764800167</code>. The 132-cell state admits no terminal saddle and its analytic-state read admits none either, so an X-point distance is unavailable rather than zero. Both direct clipped-current and operator-current moments are finite; the recomputed capacity predicate is <code>44 &lt;= 132</code> cut cells, with no overflow. The <a href="/nova/figures/plasma-cell-read-fidelity/b43714114-diverted-single-null.json">first arm receipt</a> establishes an unconverged starting point for the ladder. Later revisions and the one-trip control are still running, so no first loss of convergence is attributed.</p>
 
+<p><strong>One-trip negative control.</strong> At <code>b43714114</code>, forcing <code>active_set_steps=1</code> gives <code>converged=false</code>, one trip and residual <code>0.2586805230398537</code>. The guard fires with <code>converged assertion refused: forced_one_trip residual=0.25868052304 converged=False trips=1</code>. The <a href="/nova/figures/plasma-cell-read-fidelity/b43714114-diverted-single-null-one-trip.json">control receipt</a> and its log retain that refusal. The default and truncated arms both fail; giving this baseline additional active-set trips does not remove its plateau.</p>
+
 </section>
 
 <section id="s2"><h2>§2 The wall-node private shadow is read from the nearest cell, not from the node</h2>

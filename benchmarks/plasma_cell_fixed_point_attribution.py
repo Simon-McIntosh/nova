@@ -475,6 +475,10 @@ def describe_value(value):
     """Retain scalar values and exact array identities for construction comparison."""
     import numpy as np
 
+    if isinstance(value, type | np.dtype):
+        return str(value)
+    if isinstance(value, Enum):
+        return describe_value(value.value)
     if value is None or isinstance(value, str | bool | int):
         return value
     if isinstance(value, float):
@@ -503,10 +507,6 @@ def describe_value(value):
                 for entry in fields(value)
             },
         }
-    if isinstance(value, type | np.dtype):
-        return str(value)
-    if isinstance(value, Enum):
-        return describe_value(value.value)
     if callable(value):
         from nova.equilibrium.forward_operator import _callable_semantic_identity
 

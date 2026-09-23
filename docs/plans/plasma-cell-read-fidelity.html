@@ -18,7 +18,7 @@
 <meta name="plan-modified" content="2026-09-23">
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -114,6 +114,25 @@
 <li><strong>Dynamically:</strong> per trip, and for the seed, record the λ amplitude, the net current the support carries against the target, and a count proving the scaling branch executed on that trip.</li>
 </ul>
 <p>A trip whose state has no closed contour in the vessel while the scaling reads armed is a direct violation of the invariant, and the receipt names it as one.</p>
+<p><strong>Node <code>pcrf-first-step-degenerate-direction</code> (next, authored 2026-09-23 10:40 from the reviewed trip panels).</strong></p>
+<p><strong>Why.</strong> The trip panels, reviewed at 78, name the first Newton-Krylov active-set step as what collapses a good seed. The seed has 83 core cells and 38 kA of unscaled support; after the step there are 4 to 24 core cells, the axis sits 0.27 m outboard, current islands appear in the outboard wall cut cells, and λ is 6 to 62. Neither the census nor a support overflow on the returned states explains it. Support finiteness inside the step was not measured.</p>
+<p><strong>The hypothesis.</strong> imas-efit met the same shape on WEST 57410: a converged 2.5 cm current filament, caused by basis freedom the constraints could not realise, with the filament living along the degenerate direction. Here, with the net-current λ free, a shrinking support costs the λ-normalised map almost nothing, because λ restores the total current. So support collapse may be a near-null direction of that map's Jacobian, and the first step may run along it.</p>
+<p><strong>Deliverable.</strong> The certificate production route at the dispatch base: diverted case, exact clip mode, requested 110 cells, one GPU job. The receipt carries three things.</p>
+<ol>
+<li>At the seed: the smallest singular values and right singular vectors of the Jacobian of the λ-normalised map the step uses, with each vector's projection onto a support-shrink direction. That direction is the flux change that lowers the unscaled support current at fixed λ-normalised current.</li>
+<li>For the accepted first step: its projection onto those singular vectors and onto the support-shrink direction, together with its norm, predicted and actual merit decrease, and trust decision.</li>
+<li>For every inner Krylov or line-search trial of trip 1: core-cell count, unscaled support current, λ, non-finite support count, and whether the trial was accepted.</li>
+</ol>
+<p><strong>Done when.</strong></p>
+<ul>
+<li>The receipt names the first trial at which the core-cell count or support current collapses.</li>
+<li>It states whether the accepted step lies mainly along a near-null direction of the λ-normalised Jacobian, with the singular values and projections as numbers.</li>
+<li>It states whether any trial carried non-finite support.</li>
+<li>A negative control is run: the same analysis on the chord-clip seed, or with λ held fixed at its seed value, must change the projection reading.</li>
+<li>Panels exist, drawn under the plotting rules, for the seed and for the accepted trip-1 state on their own levels.</li>
+</ul>
+<p>The repair, whether that removes the degenerate direction or constrains the support, is authored from this receipt and not before. It removes the direction; it does not damp the step or add basin escape.</p>
+<p><strong>Node <code>pcrf-support-current-refusal</code> (after the lambda census).</strong> The route refuses a state whose unscaled support current, or core-cell count, falls below a stated fraction of the seed's, and reports λ beside it. It replaces reliance on <code>SCALAR_CURRENT_AMPLITUDE_BAND</code> (1e-6, 1e6), which refuses nothing. The receipt's plasma check gains the same criterion, because an O-point inside a closed contour is satisfied by degenerate islands. S19 measured λ from 0.93 to 1.05 on chord clip, and from 2 to 5.6 on exact support, where it diagnosed an exact-support deficit rather than an operating point. No threshold is set until S19's λ census over the bank rows lands.</p>
 <p>A route that returns a state with no plasma, without refusing it, is a separate defect from the mechanism. It is recorded here for the repair node, and nothing is authored before the panels name the mechanism.</p>
 <p><strong>Operational note for the next session.</strong> The local lane was taken down at 06:12:04 by a user-wide scancel from an imas-efit worker (guard now in the user-space agent rules); hold local dispatches until imas-ambix reports the serve restored, and route reviews there once it is. Two H200 jobs of the ladder were lost to that event; the third (1276244) blocks rather than resubmits if cancelled again.</p>
 <p id="production-route-trip-panels-landing"><strong>Trip-capture implementation landed; measurement running.</strong> Commit <code>297b880f724224aa4dfc234bf7d73c6bbde90678</code> captures native trip boundaries and tests the ordered reading rule. One titan job, <code>1276299</code>, measures both requested exact revisions and the chord first-trip control, after H200 admission predicted a start outside the time fence. See the <a href="/nova/evidence/archive/plasma-cell-read-fidelity-landed.html#production-route-trip-panels">cumulative evidence anchor</a>. No support or census mechanism is attributed before the per-trip receipts land. Section and followup closure remain with the coordinator.</p>

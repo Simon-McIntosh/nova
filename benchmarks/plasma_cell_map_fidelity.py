@@ -274,7 +274,7 @@ def measure_pair(case_name, requested, output):
             "fixture_closure_sup_wb": float(
                 np.max(np.abs(analytic_external + analytic_plasma - analytic))
             ),
-            "exterior_counterfactual_one_percent_detected": not passes(
+            "exterior_counterfactual_two_percent_detected": not passes(
                 norms(0.02 * analytic_external, analytic_external)
             ),
             "failure_component": "none"

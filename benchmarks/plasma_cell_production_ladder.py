@@ -8,6 +8,7 @@ recomputed after the solve from those states with the revision's own integrator.
 from __future__ import annotations
 
 import argparse
+import fcntl
 import hashlib
 import inspect
 import json
@@ -16,7 +17,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
-from time import perf_counter
+from time import perf_counter, sleep
 import traceback
 
 
@@ -55,7 +56,7 @@ def strict_json(value):
 
 
 def write_json(path, payload):
-    temporary = path.with_suffix(".pending")
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.pending")
     temporary.write_text(
         json.dumps(strict_json(payload), indent=2, allow_nan=False) + "\n"
     )
@@ -201,7 +202,7 @@ def seed_policy_receipt(request, construction):
     }
 
 
-def arm(args):
+def measure_arm(args):
     row = {
         "revision": args.revision,
         "case": args.case,
@@ -209,6 +210,7 @@ def arm(args):
         "status": "not-measured",
         "exception": None,
         "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+        "slurm_partition": os.environ.get("SLURM_JOB_PARTITION"),
         "seed_policy": {
             "status": "not-built",
             "type": None,
@@ -245,6 +247,7 @@ def arm(args):
         assert jax.devices("cpu"), "trip observation needs a local CPU device"
         print(f"NOVA_FILE {row['nova_file']}", flush=True)
         row["devices"] = [str(device) for device in jax.devices()]
+        row["device_kinds"] = [device.device_kind for device in jax.devices()]
         set_support_clip_mode(args.mode)
         carrier, source, exact = certificate._case(args.case)
         machine = certificate._case_machine(args.case, carrier, exact, -110)
@@ -404,6 +407,179 @@ def arm(args):
     return int(
         row["status"] != "measured" or row.get("support_health_status") != "measured"
     )
+
+
+def finished_receipt(path):
+    """Distinguish a terminal arm from its durable construction checkpoint."""
+    if not path.exists():
+        return None
+    row = json.loads(path.read_text())
+    if row.get("measurement_complete") or isinstance(
+        row.get("wall_seconds"), int | float
+    ):
+        return row
+    return None
+
+
+def arm(args):
+    """Keep the first completed arm while serializing competing producers."""
+    lock_path = args.output.with_suffix(".lock")
+    with lock_path.open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        existing = finished_receipt(args.output)
+        if existing is not None:
+            print(
+                f"REUSE {args.revision} {args.case} {args.mode} "
+                f"producer_job={existing.get('slurm_job_id')}",
+                flush=True,
+            )
+            return int(existing.get("exit_status", existing["status"] != "measured"))
+        status = measure_arm(args)
+        row = json.loads(args.output.read_text())
+        row["measurement_complete"] = True
+        row["exit_status"] = status
+        log = getattr(args, "log", None)
+        if log is None:
+            try:
+                target = os.readlink("/proc/self/fd/1")
+                log = target if target.startswith("/") else None
+            except OSError:
+                log = None
+        row["producer_log"] = None if log is None else str(log)
+        write_json(args.output, row)
+        return status
+
+
+def collect_rows(output):
+    """Assemble terminal files from their actual producers, regardless of order."""
+    rows = []
+    for revision in REVISIONS:
+        for case in CASES:
+            modes = ("exact", "chord") if revision == REVISIONS[-1] else ("exact",)
+            for mode in modes:
+                path = output / f"{revision}-{case}-{mode}.json"
+                row = finished_receipt(path)
+                if row is None:
+                    continue
+                assert row.get("slurm_job_id"), "terminal arm has no producer job"
+                expected = (revision, case, mode)
+                actual = (row["revision"], row["case"], row["clip_mode"])
+                assert actual == expected, f"receipt identity differs: {path}"
+                row.setdefault("exit_status", int(row["status"] != "measured"))
+                row["log"] = row.get("producer_log") or row.get("log")
+                rows.append(row)
+    return rows
+
+
+def assemble(output):
+    """Read every finished rung and preserve the allocation split as evidence."""
+    jobs = [
+        json.loads(path.read_text())
+        for path in sorted(output.glob("production-route-execution-*.json"))
+    ]
+    rows = collect_rows(output)
+    payload = {
+        "revision_ladder": list(REVISIONS),
+        "requested_cells": 110,
+        "route": "certificate production current-moment seed",
+        "negative_control": NEGATIVE_CONTROL,
+        "execution_jobs": jobs,
+        "execution_job_count": len(jobs),
+        "execution_reason": (
+            "The newest-first H200 allocation had about 1h50 remaining for six "
+            "rungs at about 20 minutes per rung. A second, explicitly authorized "
+            "titan allocation starts at the oldest decisive revisions so the "
+            "H200 time limit cannot discard every early convergence control."
+        ),
+        "receipt_selection": (
+            "first terminal file per revision, case and clip mode; per-arm file "
+            "lock prevents replacement by a later producer"
+        ),
+        "rows": rows,
+        "attribution": attribution(rows),
+    }
+    payload["gate_passed"] = evidence_complete(payload)
+    payload["status"] = "complete" if payload["gate_passed"] else "incomplete"
+    return payload
+
+
+def job_in_queue(job):
+    result = subprocess.run(
+        ["squeue", "-h", "-j", job, "-o", "%i"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return bool(result.stdout.strip())
+
+
+def segment(args):
+    """Measure an ordered subset and publish after the other assembler stops."""
+    args.output.mkdir(parents=True, exist_ok=True)
+    args.logs.mkdir(parents=True, exist_ok=True)
+    job = os.environ["SLURM_JOB_ID"]
+    descriptor = {
+        "job_id": job,
+        "partition": os.environ.get("SLURM_JOB_PARTITION"),
+        "revision_order": args.revisions,
+        "cases": list(CASES),
+        "clip_mode": "exact",
+        "reason": "oldest-first coverage of decisive controls before time limits",
+        "peer_job": args.peer_job,
+    }
+    write_json(args.output / f"production-route-execution-{job}.json", descriptor)
+    snapshot = args.logs / "assembled-receipt.json"
+    for revision in args.revisions:
+        for case in CASES:
+            name = f"{revision}-{case}-exact"
+            path = args.output / f"{name}.json"
+            log = args.logs / f"{name}.log"
+            tree = args.scratch / revision
+            command = [
+                sys.executable,
+                str(Path(__file__).resolve()),
+                "arm",
+                "--revision",
+                revision,
+                "--case",
+                case,
+                "--mode",
+                "exact",
+                "--output",
+                str(path),
+                "--log",
+                str(log),
+            ]
+            with log.open("w") as stream:
+                stream.write(
+                    f"revision={revision} tree={tree} command={json.dumps(command)}\n"
+                )
+                stream.flush()
+                result = subprocess.run(
+                    command,
+                    cwd=tree,
+                    env=dict(os.environ, PYTHONPATH=str(tree)),
+                    stdout=stream,
+                    stderr=subprocess.STDOUT,
+                    check=False,
+                )
+            print(f"SEGMENT_ROW {revision} {case} exit={result.returncode}", flush=True)
+            write_json(snapshot, assemble(args.output))
+    print(f"WAIT_FOR_ASSEMBLER job={args.peer_job}", flush=True)
+    while job_in_queue(args.peer_job):
+        sleep(30)
+    accounting = subprocess.check_output(
+        ["sacct", "-j", args.peer_job, "--format=JobID,State,Elapsed,ExitCode", "-P"],
+        text=True,
+    )
+    (args.logs / "peer-scheduler.log").write_text(accounting)
+    payload = assemble(args.output)
+    write_json(args.output / f"{STEM}.json", payload)
+    render(payload, args.output)
+    write_json(args.output / f"{STEM}.json", payload)
+    write_json(snapshot, payload)
+    print(f"ASSEMBLY_COMPLETE gate_passed={payload['gate_passed']}", flush=True)
+    return int(not payload["gate_passed"])
 
 
 def attribution(rows):
@@ -722,10 +898,17 @@ def main():
     single.add_argument("--case", required=True, choices=CASES)
     single.add_argument("--mode", required=True, choices=("exact", "chord"))
     single.add_argument("--output", type=Path, required=True)
+    single.add_argument("--log", type=Path)
     all_rows = sub.add_parser("measure")
     all_rows.add_argument("--scratch", type=Path, required=True)
     all_rows.add_argument("--output", type=Path, required=True)
     all_rows.add_argument("--logs", type=Path, required=True)
+    subset = sub.add_parser("segment")
+    subset.add_argument("--scratch", type=Path, required=True)
+    subset.add_argument("--output", type=Path, required=True)
+    subset.add_argument("--logs", type=Path, required=True)
+    subset.add_argument("--revisions", nargs="+", choices=REVISIONS, required=True)
+    subset.add_argument("--peer-job", required=True)
     validation = sub.add_parser("validate")
     validation.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -736,6 +919,8 @@ def main():
             "COMPLETE" if passed else "REFUSED: incomplete production ladder evidence"
         )
         return int(not passed)
+    if args.command == "segment":
+        return segment(args)
     return arm(args) if args.command == "arm" else measure(args)
 
 

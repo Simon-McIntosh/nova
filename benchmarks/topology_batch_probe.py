@@ -31,6 +31,13 @@ per-kernel compiles are paid once and the warm measurement dominates.
         JAX_ENABLE_COMPILATION_CACHE=1 PYTHONPATH="$TOPOLOGY_PROBE_ROOT"; \\
         "$TOPOLOGY_PROBE_ROOT/.venv/bin/python" -m \\
         benchmarks.topology_batch_probe --output <json> --figure <png>'
+
+The ``render`` operand rebuilds every arm figure from its committed receipt and
+writes ``render-receipt.json`` beside them, so a figure can be redrawn (or a
+title corrected) without touching the device:
+
+    python -m benchmarks.topology_batch_probe render \\
+        --figure-root docs/figures/playable-forward-solve/topology-batch
 """
 
 from __future__ import annotations
@@ -52,6 +59,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 import zarr
 
@@ -82,6 +90,15 @@ BATCHES = (1, 8, 16, 64)
 REPEATS = 3
 #: the per-element growth tolerance before a kernel is flagged as not amortising
 GROWTH_FACTOR = 1.25
+#: the amortisation the ratio panel guides the eye to (an eight-fold saving)
+AMORTISATION_FLOOR = 1.0 / 8.0
+RENDER_SCHEMA = "nova.topology-batch-render-receipt"
+RENDER_RECEIPT_NAME = "render-receipt.json"
+#: every per-element wall panel spans the serial and the vmapped columns, whose
+#: unit costs differ by up to three decades; a linear axis buries all but the
+#: slowest series on the floor, so both share one log decade axis and the ratio
+#: panel stays linear about its 1.0 crossing.
+WALL_PANEL_SCALES = ("log", "log")
 
 
 def _source_revision() -> str:
@@ -171,6 +188,10 @@ class KernelSpec:
 def main() -> None:
     """Parse the caller's operands, measure and persist the receipt."""
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "operand", nargs="?", choices=("measure", "render"), default="measure"
+    )
+    parser.add_argument("--figure-root", type=Path, default=None)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
     parser.add_argument("--data-store", default=SHOT_STORE)
@@ -181,6 +202,10 @@ def main() -> None:
         help="receipt label for this run (e.g. before, after)",
     )
     args = parser.parse_args()
+
+    if args.operand == "render":
+        render(args.figure_root or args.figure.parent)
+        return
 
     configure_dtypes()
     configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
@@ -450,9 +475,24 @@ def main() -> None:
     print("PROBE-DONE", json.dumps({"grown": grown}, sort_keys=True), flush=True)
 
 
-def _draw_figure(receipt: dict[str, Any], output: Path) -> None:
+def _figure_title(receipt: dict[str, Any]) -> str:
+    """Return the suptitle naming the measurement's arm and its revision.
+
+    The row-index list the probe measured over identifies the variance pool in
+    the receipt's ``identity`` field; it is a data record, and interpolating it
+    as a title runs the integers off both canvas edges while naming neither the
+    arm nor the revision the measurement belongs to.
+    """
+    shot = str(receipt.get("identity", "")).split("/")[0]
+    return (
+        f"Topology batch probe — {receipt['tag']} arm on MAST {shot} — revision "
+        f"{receipt['source_commit'][:8]}"
+    )
+
+
+def _draw_figure(receipt: dict[str, Any], output: Path) -> dict[str, Any]:
     """Draw per-element wall and the vmap/serial ratio against batch."""
-    figure, axes = plt.subplots(1, 3, figsize=(14.0, 4.4))
+    figure, axes = plt.subplots(1, 3, figsize=(14.0, 4.7))
     batches = list(BATCHES)
     colours = ["#3b6ea5", "#a53b3b", "#2d7a4f", "#a5843b", "#6f3ba5"]
     names = [
@@ -505,18 +545,103 @@ def _draw_figure(receipt: dict[str, Any], output: Path) -> None:
         axes[2].set_ylabel("vmap/serial per element")
         axes[2].set_xlabel("batch")
         axes[2].grid(axis="y", alpha=0.2)
-    axes[0].legend(frameon=False, fontsize=7, loc="upper right")
-    axes[1].legend(frameon=False, fontsize=7, loc="upper right")
-    axes[2].legend(frameon=False, fontsize=7, loc="upper right")
-    figure.suptitle(
-        f"Topology batch probe on {receipt['identity']} — "
-        f"{receipt['source_commit'][:8]}",
-        y=0.97,
+    axes[0].set_yscale(WALL_PANEL_SCALES[0])
+    axes[1].set_yscale(WALL_PANEL_SCALES[1])
+    floor = Line2D(
+        [0],
+        [0],
+        color="#888888",
+        lw=1.0,
+        ls="--",
+        label="vmap/serial = 1/8 amortisation floor",
     )
-    figure.subplots_adjust(left=0.08, right=0.99, bottom=0.13, top=0.84, wspace=0.3)
+    handles, labels = axes[0].get_legend_handles_labels()
+    figure.legend(
+        handles + [floor],
+        labels + [floor.get_label()],
+        loc="lower center",
+        ncol=len(labels) + 1,
+        frameon=False,
+        fontsize=8,
+        bbox_to_anchor=(0.5, 0.005),
+    )
+    title = _figure_title(receipt)
+    figure.suptitle(title, y=0.96)
+    figure.subplots_adjust(left=0.07, right=0.99, bottom=0.19, top=0.87, wspace=0.28)
     output.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(output, dpi=180)
+    png = output.with_suffix(".png")
+    svg = output.with_suffix(".svg")
+    figure.savefig(png, dpi=180)
+    figure.savefig(svg)
     plt.close(figure)
+    return {
+        "figure": png.name,
+        "svg": svg.name,
+        "arm": receipt["tag"],
+        "revision": receipt["source_commit"],
+        "title": title,
+        "series": names,
+        "panels": [
+            {
+                "panel": "vmap wall per element [ms]",
+                "yscale": WALL_PANEL_SCALES[0],
+                "series": names,
+            },
+            {
+                "panel": "serial wall per element [ms]",
+                "yscale": WALL_PANEL_SCALES[1],
+                "series": names,
+            },
+            {
+                "panel": "vmap/serial per element",
+                "yscale": "linear",
+                "series": names,
+            },
+        ],
+        "source_receipt": output.with_suffix(".json").name,
+    }
+
+
+def _sha256(path: Path) -> str:
+    """Return the hex digest of a file, so a render names its source."""
+    import hashlib
+
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def render(figure_directory: Path) -> dict[str, Any]:
+    """Rebuild every arm figure from its committed receipt.
+
+    Nothing here builds a machine or enters a solve: each arm's per-element
+    wall and ratio are read from the receipt the measurement wrote, so a title,
+    a panel scale or a served file name can be corrected without a device.
+    """
+    figure_directory = Path(figure_directory).resolve()
+    receipts = sorted(figure_directory.glob("topology-batch-*.json"))
+    if not receipts:
+        raise ValueError(f"no arm receipts under {figure_directory}")
+    records = []
+    for path in receipts:
+        receipt = json.loads(path.read_text(encoding="utf-8"))
+        record = _draw_figure(receipt, path.with_suffix(".png"))
+        record["source_receipt"] = path.name
+        record["source_receipt_sha256"] = _sha256(path)
+        records.append(record)
+    render_receipt = {
+        "schema": RENDER_SCHEMA,
+        "completed": True,
+        "render_entry_point": "benchmarks/topology_batch_probe.py render",
+        "figure_directory": figure_directory.name,
+        "figures": records,
+    }
+    (figure_directory / RENDER_RECEIPT_NAME).write_text(
+        json.dumps(render_receipt, indent=2) + "\n", encoding="utf-8"
+    )
+    print(
+        "TOPOLOGY_BATCH_RENDER=" + json.dumps(sorted(r["arm"] for r in records)),
+        flush=True,
+    )
+    return render_receipt
 
 
 def _write_json(receipt: dict[str, Any], output: Path) -> None:

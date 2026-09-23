@@ -1,0 +1,161 @@
+{
+  "schema": "nova.topology-batch-render-receipt",
+  "completed": true,
+  "render_entry_point": "benchmarks/topology_batch_probe.py render",
+  "figure_directory": "topology-batch",
+  "figures": [
+    {
+      "figure": "topology-batch-after.png",
+      "svg": "topology-batch-after.svg",
+      "arm": "after",
+      "revision": "c358440959cf456461927bc31a27646150aecd6d",
+      "title": "Topology batch probe \u2014 after arm on MAST 22086 \u2014 revision c3584409",
+      "series": [
+        "flood_fill_core",
+        "label_connected_components",
+        "label_hex_connected_components",
+        "label_saddle_aware_hex_connected_components",
+        "traced_flux_surface_bins"
+      ],
+      "panels": [
+        {
+          "panel": "vmap wall per element [ms]",
+          "yscale": "log",
+          "series": [
+            "flood_fill_core",
+            "label_connected_components",
+            "label_hex_connected_components",
+            "label_saddle_aware_hex_connected_components",
+            "traced_flux_surface_bins"
+          ]
+        },
+        {
+          "panel": "serial wall per element [ms]",
+          "yscale": "log",
+          "series": [
+            "flood_fill_core",
+            "label_connected_components",
+            "label_hex_connected_components",
+            "label_saddle_aware_hex_connected_components",
+            "traced_flux_surface_bins"
+          ]
+        },
+        {
+          "panel": "vmap/serial per element",
+          "yscale": "linear",
+          "series": [
+            "flood_fill_core",
+            "label_connected_components",
+            "label_hex_connected_components",
+            "label_saddle_aware_hex_connected_components",
+            "traced_flux_surface_bins"
+          ]
+        }
+      ],
+      "source_receipt": "topology-batch-after.json",
+      "source_receipt_sha256": "5eb9b4e91660b601474d40bc29fddafd4943c99d79ddf3a8806b78ac01ece4cb"
+    },
+    {
+      "figure": "topology-batch-before.png",
+      "svg": "topology-batch-before.svg",
+      "arm": "before",
+      "revision": "c358440959cf456461927bc31a27646150aecd6d",
+      "title": "Topology batch probe \u2014 before arm on MAST 22086 \u2014 revision c3584409",
+      "series": [
+        "flood_fill_core",
+        "label_connected_components",
+        "label_hex_connected_components",
+        "label_saddle_aware_hex_connected_components",
+        "traced_flux_surface_bins"
+      ],
+      "panels": [
+        {
+          "panel": "vmap wall per element [ms]",
+          "yscale": "log",
+          "series": [
+            "flood_fill_core",
+            "label_connected_components",
+            "label_hex_connected_components",
+            "label_saddle_aware_hex_connected_components",
+            "traced_flux_surface_bins"
+          ]
+        },
+        {
+          "panel": "serial wall per element [ms]",
+          "yscale": "log",
+          "series": [
+            "flood_fill_core",
+            "label_connected_components",
+            "label_hex_connected_components",
+            "label_saddle_aware_hex_connected_components",
+            "traced_flux_surface_bins"
+          ]
+        },
+        {
+          "panel": "vmap/serial per element",
+          "yscale": "linear",
+          "series": [
+            "flood_fill_core",
+            "label_connected_components",
+            "label_hex_connected_components",
+            "label_saddle_aware_hex_connected_components",
+            "traced_flux_surface_bins"
+          ]
+        }
+      ],
+      "source_receipt": "topology-batch-before.json",
+      "source_receipt_sha256": "f2f85daf9f50d68c8c5a140bcf993a413bf2d71185329f7185e071cafdeb785a"
+    },
+    {
+      "figure": "topology-batch-corrected.png",
+      "svg": "topology-batch-corrected.svg",
+      "arm": "corrected",
+      "revision": "c358440959cf456461927bc31a27646150aecd6d",
+      "title": "Topology batch probe \u2014 corrected arm on MAST 22086 \u2014 revision c3584409",
+      "series": [
+        "flood_fill_core",
+        "label_connected_components",
+        "label_hex_connected_components",
+        "label_saddle_aware_hex_connected_components",
+        "traced_flux_surface_bins"
+      ],
+      "panels": [
+        {
+          "panel": "vmap wall per element [ms]",
+          "yscale": "log",
+          "series": [
+            "flood_fill_core",
+            "label_connected_components",
+            "label_hex_connected_components",
+            "label_saddle_aware_hex_connected_components",
+            "traced_flux_surface_bins"
+          ]
+        },
+        {
+          "panel": "serial wall per element [ms]",
+          "yscale": "log",
+          "series": [
+            "flood_fill_core",
+            "label_connected_components",
+            "label_hex_connected_components",
+            "label_saddle_aware_hex_connected_components",
+            "traced_flux_surface_bins"
+          ]
+        },
+        {
+          "panel": "vmap/serial per element",
+          "yscale": "linear",
+          "series": [
+            "flood_fill_core",
+            "label_connected_components",
+            "label_hex_connected_components",
+            "label_saddle_aware_hex_connected_components",
+            "traced_flux_surface_bins"
+          ]
+        }
+      ],
+      "source_receipt": "topology-batch-corrected.json",
+      "source_receipt_sha256": "4e7a46a84755be289958a069e82e2e29033a2ac04385f355b6c0c55bf4ac9e8a"
+    }
+  ]
+}

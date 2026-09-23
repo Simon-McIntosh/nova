@@ -1930,6 +1930,38 @@ standalone kernel wall only. Receipts: <code>~/.config/reckon/crew/reports/nova/
     <figcaption>boundary-wall-proximity. Recovered from worktree <code>pfs-boundary-routing</code> at <code>6ab5ae30</code>.</figcaption>
   </figure>
 </section>
+<section id="topology-batch-arm-figures">
+  <h2 id="topology-batch-arm-figures-h">Topology-batch arm figures: titled by arm and revision, readable at the middle panel</h2>
+  <p>The three connectivity-kernel arm figures measured on the MAST 22086 lattice flux were
+  rendered from their committed receipts by
+  <code>benchmarks/topology_batch_probe.py render</code>, which needs no device and no solve.
+  Each suptitle now names its arm and the revision it was measured at, and the middle
+  per-element wall panel is drawn on a log ordinate.</p>
+  <figure>
+    <img src="/nova/figures/playable-forward-solve/topology-batch/topology-batch-corrected.png" alt="Three stacked panels for the corrected arm: peak device bytes against batch size, per-element wall against batch size on a log ordinate, and the vmapped-over-serial wall ratio with the one-eighth amortisation floor drawn as a dashed guide. Five connectivity kernels are drawn as separate series with one shared legend below the panels.">
+    <figcaption>The corrected arm, title <code>Topology batch probe — corrected arm on MAST 22086 — revision c3584409</code>. The middle panel previously passed its own row-index pool as the suptitle and set its range from the single
+      <code>label_connected_components</code> serial unit cost near 131 ms, which compressed the other four series into a 10 ms band at the axis floor; it is the same measurement, and the log ordinate is what makes all five series
+      visible at once. The dashed guide line, the one-eighth amortisation floor the probe computes, is now labelled from the shared legend rather than left unexplained.</figcaption>
+  </figure>
+  <table>
+    <caption>The three arm figures and the suptitle each carries</caption>
+    <thead><tr><th scope="col">Figure</th><th scope="col">Suptitle</th></tr></thead>
+    <tbody>
+      <tr><th scope="row"><code>topology-batch-before.png</code></th><td>Topology batch probe — before arm on MAST 22086 — revision c3584409</td></tr>
+      <tr><td><code>topology-batch-after.png</code></td><td>Topology batch probe — after arm on MAST 22086 — revision c3584409</td></tr>
+      <tr><td><code>topology-batch-corrected.png</code></td><td>Topology batch probe — corrected arm on MAST 22086 — revision c3584409</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Repairs.</strong> (1) The suptitle interpolated the receipt's <code>identity</code> field, which is the shot joined to the sorted row-index pool, so each figure carried an
+  integer list where its title belonged. The title is now composed from the arm receipt's own <code>tag</code> and <code>source_commit</code>, and <code>identity</code> stays as the data record it is.
+  (2) Both per-element wall panels take a log ordinate, for the reason above. (3) Three overlapping in-axes legends became one shared legend below the panels, which also labels the
+  previously unlabelled amortisation guide. (4) The third arm is named by what distinguishes it, <code>corrected</code> — the third arm in the source commit's own words, baseline, exploratory and corrected —
+  rather than by the version suffix <code>after2</code>; the receipt moved with it, and the submission harness moved to <code>run_topology_batch_probe.sh</code> because its stem's trailing digit
+  would otherwise have been the last served name in the directory ending in a digit. PNG and SVG are written for each arm.</p>
+  <p><strong>Gate and negative control.</strong> <code>tests/test_topology_batch_render.py</code> reads <code>render-receipt.json</code> only: 8 passed on the login node with no device. The
+  negative control re-renders from a receipt whose titles carry the row-index list again and whose middle panel is returned to a linear ordinate, and five checks fail against the three that pass: the middle wall panel is no longer on a log axis, the title names neither arm nor revision, the title holds a comma-separated integer run, the title no longer agrees with its source receipt, and the files the receipt names are not beside the mutated receipt. The render receipt records the source receipt, arm, revision, title and per-panel ordinate of each figure, so a rendered panel can be audited against its measurement
+  without re-running the kernels.</p>
+</section>
 </main>
 </body>
 </html>

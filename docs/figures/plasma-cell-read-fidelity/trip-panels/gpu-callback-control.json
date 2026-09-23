@@ -11,11 +11,11 @@
   "gpu_devices": [
     {
       "device": "cuda:0",
-      "kind": "Tesla P100-PCIE-16GB"
+      "kind": "NVIDIA H200 NVL"
     }
   ],
   "cpu_devices": [
     "cpu:0"
   ],
-  "slurm_job_id": "1276326"
+  "slurm_job_id": "1276423"
 }

@@ -7,3 +7,4 @@ Authorized retry: H200 preflight 1276322 predicted 2026-10-07T09:12:53. Actual s
 
 Coordinator correction: titan job 1276326 was deliberately cancelled to reroute this still-authorized retry to H200. Main rule 30bdedaeb036d9e14dd6a5430b12264480d3c4ea replaces test-only routing.
 Real H200 submission at 2026-09-23T09:29:41+02:00: job 1276423; account grpa, partition betelgeuse, reservation gpu_0003_grpA, gres gpu:1, 4 CPUs, 32G, 40 minutes. No test-only preflight used.
+One-minute real-submission observation at 2026-09-23T09:30:57+02:00 (76 seconds after submission): squeue -j 1276423 -o '%T %R' returned RUNNING 98dci4-gpu-0003. No fallback and no cancellation.

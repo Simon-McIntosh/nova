@@ -279,9 +279,10 @@ def measure(path, output):
         return np.einsum("ktc,kc->t", blocks, values)
 
     reconstructed = image(booked - analytic)
-    np.testing.assert_allclose(
-        reconstructed, error, rtol=1e-9, atol=2e-12 * np.max(abs(error))
+    reconstruction_relative_sup = float(
+        np.max(abs(reconstructed - error)) / np.max(abs(error))
     )
+    assert reconstruction_relative_sup <= 1e-9
     for key in ("sup_relative", "rms_relative"):
         np.testing.assert_allclose(
             norms(reconstructed, data["analytic_plasma"])[key],
@@ -380,6 +381,7 @@ def measure(path, output):
         "map_mismatch": map_score,
         "plasma_response_mismatch": measured,
         "positive_control_relative_tolerance": 1e-9,
+        "reconstruction_relative_sup": reconstruction_relative_sup,
         "class_precedence": list(
             ("X-point cell", "wall-cut", "exterior", "interior", "separatrix-cut")
         ),

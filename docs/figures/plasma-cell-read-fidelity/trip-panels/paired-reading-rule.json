@@ -1,0 +1,81 @@
+{
+  "verdict": "census-read",
+  "slurm_job_id": "1276423",
+  "partition": "betelgeuse",
+  "device": "NVIDIA H200 NVL",
+  "scope": "completed exact arms; chord control still pending",
+  "construction_fields_equal": {
+    "request": true,
+    "operator": true,
+    "profile_newton_steps": true,
+    "policy": true,
+    "active_set_budget": true,
+    "newton_steps": true,
+    "exterior_source": true,
+    "exterior": true,
+    "moments": true,
+    "target_current": true,
+    "clip_mode": true,
+    "cell_polygons": true,
+    "seed_state": true,
+    "carrier_identity": true,
+    "cell_polygons_digest": true
+  },
+  "arms": [
+    {
+      "revision": "664ade0c32ac72ac3c37f34f711012f69fa68f5e",
+      "terminal_residual": 0.06191658112663247,
+      "trip_count": 7,
+      "saddle_loss_trip": 1,
+      "first_non_plasma_state": null,
+      "first_closed_contour_invariant_violation": null,
+      "nonfinite_moments_per_trip": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "lambda_execution_counts": [
+        132,
+        100,
+        238,
+        48,
+        48,
+        48,
+        150
+      ]
+    },
+    {
+      "revision": "db2108e6adaca770cda30e39e052d9dcf20e18a9",
+      "terminal_residual": 0.07758702150111606,
+      "trip_count": 8,
+      "saddle_loss_trip": 1,
+      "first_non_plasma_state": null,
+      "first_closed_contour_invariant_violation": null,
+      "nonfinite_moments_per_trip": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "lambda_execution_counts": [
+        107,
+        132,
+        210,
+        48,
+        48,
+        48,
+        48,
+        150
+      ]
+    }
+  ],
+  "qualification": "Classification follows the declared per-trip support/census rule. Captured states are measured; finiteness of every rejected inner trial is not measured. The capacity repair changes the trajectory, so no claim that it is numerically inert is made."
+}

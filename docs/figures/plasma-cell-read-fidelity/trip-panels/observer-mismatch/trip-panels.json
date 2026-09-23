@@ -1,0 +1,10 @@
+{
+  "status": "in-progress",
+  "slurm_job_id": "1276299",
+  "slurm_partition": "titan",
+  "driver_sha256": "44a907a6ba5a14fcae4655930fe3ec6dd470cb5bbd847c9027976c363ff6be86",
+  "dispatch_base": "db2108e6adaca770cda30e39e052d9dcf20e18a9",
+  "pre_repair_revision": "664ade0c32ac72ac3c37f34f711012f69fa68f5e",
+  "negative_control_log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/negative-control.log",
+  "arms": []
+}

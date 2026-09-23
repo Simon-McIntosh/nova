@@ -1,0 +1,151 @@
+revision=664ade0c32ac72ac3c37f34f711012f69fa68f5e tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3 command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py', 'arm', '--revision', '664ade0c32ac72ac3c37f34f711012f69fa68f5e', '--clip', 'exact', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels']
+BUILD 664ade0c32ac72ac3c37f34f711012f69fa68f5e exact
+SOLVE route=newton_krylov
+E0923 08:59:06.370579 3548162 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0923 09:00:53.041680 3548091 slow_operation_alarm.cc:140] The operation took 3m46.671272956s
+
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py", line 474, in main
+    measure_arm(args)
+    ~~~~~~~~~~~^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py", line 168, in measure_arm
+    solved = built["profile"].solve(request)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2751, in solve
+    return self._solve_request(initial_flux)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2351, in _solve_request
+    return self._solve_imposed_request(request)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2554, in _solve_imposed_request
+    equilibrium = active.solve(
+        initial_flux,
+    ...<11 lines>...
+        **policy.kernel_options(),
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2803, in solve
+    equilibrium = self._solve_accelerated(
+        route,
+    ...<5 lines>...
+        **resolved_options,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 1943, in _solve_accelerated
+    return self._receipt(
+           ~~~~~~~~~~~~~^
+        history.state,
+        ^^^^^^^^^^^^^^
+    ...<4 lines>...
+        prescribed_current,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 1705, in _receipt
+    self._integral_state(flux, requested_class, target_current)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 1390, in _integral_state
+    return self.operator.normalised_current_moments_and_observation(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        flux, target_current, requested_class
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward_operator.py", line 3678, in normalised_current_moments_and_observation
+    amplitude = self.current_normalisation_amplitude(
+        target_current, jnp.sum(moments.cell_current)
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward_operator.py", line 3640, in current_normalisation_amplitude
+    if not isinstance(admissible, jax.core.Tracer) and not bool(admissible):
+                                                           ~~~~^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/array.py", line 296, in __bool__
+    return bool(self._value)
+                ^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/profiler.py", line 420, in wrapper
+    return func(*args, **kwargs)
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/array.py", line 642, in _value
+    npy_value, did_copy = self._single_device_array_to_np_array_did_copy()
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+jax.errors.JaxRuntimeError: INTERNAL: CpuCallback error calling callback: Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py", line 484, in <module>
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py", line 474, in main
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py", line 168, in measure_arm
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2751, in solve
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2351, in _solve_request
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2554, in _solve_imposed_request
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2803, in solve
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 1937, in _solve_accelerated
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/traceback_util.py", line 195, in reraise_with_filtered_traceback
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 266, in cache_miss
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 142, in _run_python_pjit
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 1222, in _pjit_call_impl_python
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/profiler.py", line 420, in wrapper
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/pxla.py", line 413, in __call__
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/callback.py", line 869, in _wrapped_callback
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/callback.py", line 816, in _wrapped_callback
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/debugging.py", line 200, in _callback
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/debugging.py", line 91, in debug_callback_impl
+RuntimeError: jax.debug.callback failed to find a local CPU device to place the inputs on. Make sure "cpu" is listed in --jax_platforms or the JAX_PLATFORMS environment variable. [executable_name='jit_bitwise_and']
+Exception ignored in atexit callback <function clean_up at 0x7f56adcd66c0>:
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api.py", line 2765, in clean_up
+    clear_backends(_crash=True)
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api.py", line 2741, in clear_backends
+    effects_barrier()
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api.py", line 2664, in effects_barrier
+    dispatch.runtime_tokens.block_until_ready()
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/dispatch.py", line 169, in block_until_ready
+    token.block_until_ready()
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/core.py", line 3061, in block_until_ready
+    self._buf.block_until_ready()
+jax.errors.JaxRuntimeError: INTERNAL: CpuCallback error calling callback: Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py", line 484, in <module>
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py", line 474, in main
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py", line 168, in measure_arm
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2751, in solve
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2351, in _solve_request
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2554, in _solve_imposed_request
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2803, in solve
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 1937, in _solve_accelerated
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/traceback_util.py", line 195, in reraise_with_filtered_traceback
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 266, in cache_miss
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 142, in _run_python_pjit
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 1222, in _pjit_call_impl_python
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/profiler.py", line 420, in wrapper
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/pxla.py", line 413, in __call__
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/callback.py", line 869, in _wrapped_callback
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/callback.py", line 816, in _wrapped_callback
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/debugging.py", line 200, in _callback
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/debugging.py", line 91, in debug_callback_impl
+RuntimeError: jax.debug.callback failed to find a local CPU device to place the inputs on. Make sure "cpu" is listed in --jax_platforms or the JAX_PLATFORMS environment variable. [executable_name='jit_solve']
+Exception ignored in atexit callback <function wait_for_tokens at 0x7f56adcbe770>:
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/dispatch.py", line 178, in wait_for_tokens
+    runtime_tokens.block_until_ready()
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/dispatch.py", line 169, in block_until_ready
+    token.block_until_ready()
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/core.py", line 3061, in block_until_ready
+    self._buf.block_until_ready()
+jax.errors.JaxRuntimeError: INTERNAL: CpuCallback error calling callback: Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py", line 484, in <module>
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py", line 474, in main
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py", line 168, in measure_arm
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2751, in solve
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2351, in _solve_request
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2554, in _solve_imposed_request
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 2803, in solve
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/equilibrium/forward.py", line 1937, in _solve_accelerated
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/traceback_util.py", line 195, in reraise_with_filtered_traceback
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 266, in cache_miss
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 142, in _run_python_pjit
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 1222, in _pjit_call_impl_python
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/profiler.py", line 420, in wrapper
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/pxla.py", line 413, in __call__
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/callback.py", line 869, in _wrapped_callback
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/callback.py", line 816, in _wrapped_callback
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/debugging.py", line 200, in _callback
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/debugging.py", line 91, in debug_callback_impl
+RuntimeError: jax.debug.callback failed to find a local CPU device to place the inputs on. Make sure "cpu" is listed in --jax_platforms or the JAX_PLATFORMS environment variable. [executable_name='jit_solve']

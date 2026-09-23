@@ -1,0 +1,10 @@
+revision=297b880f724224aa4dfc234bf7d73c6bbde90678 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels command=sbatch --test-only --partition=betelgeuse --reservation=gpu_0003_grpA --nodes=1 --ntasks=1 --cpus-per-task=2 --gres=gpu:1 --mem=32G --time=00:35:00 --wrap=true
+H200 preflight: Job 1276296 to start at 2026-10-07T08:35:14 on 98dci4-gpu-0003.
+Titan preflight: Job 1276297 to start at 2026-09-23T08:35:26 on 98dci4-gpu-0002.
+Actual submission: 1276299, titan, 1 GPU, 2 CPUs, 32G, 35 minutes. No H200 measurement job was queued to duplicate the measurement later.
+
+Authorized retry: H200 preflight 1276322 predicted 2026-10-07T09:12:53. Actual single submission 1276326, titan, 1 GPU, 4 CPUs, 32G, 40 minutes, JAX_PLATFORMS=cuda,cpu and XLA_PYTHON_CLIENT_PREALLOCATE=false.
+
+Coordinator correction: titan job 1276326 was deliberately cancelled to reroute this still-authorized retry to H200. Main rule 30bdedaeb036d9e14dd6a5430b12264480d3c4ea replaces test-only routing.
+Real H200 submission at 2026-09-23T09:29:41+02:00: job 1276423; account grpa, partition betelgeuse, reservation gpu_0003_grpA, gres gpu:1, 4 CPUs, 32G, 40 minutes. No test-only preflight used.
+One-minute real-submission observation at 2026-09-23T09:30:57+02:00 (76 seconds after submission): squeue -j 1276423 -o '%T %R' returned RUNNING 98dci4-gpu-0003. No fallback and no cancellation.

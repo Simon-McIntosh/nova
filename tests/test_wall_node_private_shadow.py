@@ -1,4 +1,4 @@
-"""Wall-carrier ownership follows polygon containment across a narrow leg."""
+"""Private wall flags follow node flux and admitted saddle height limits."""
 
 from types import SimpleNamespace
 
@@ -9,11 +9,12 @@ import pytest
 
 from benchmarks.topology_parity_harness import (
     _production_operator,
+    bilinear_node_flux,
     exit_code,
     finalize_receipt,
 )
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
-from nova.equilibrium.forward_operator import _wall_node_cell_owners
+from nova.equilibrium.topology import private_wall_node_read
 from nova.jax.config import configure_dtypes
 
 
@@ -83,13 +84,27 @@ def _narrow_leg(monkeypatch, wall=None, wall_flux=None):
     return operator, masks, physical, state
 
 
-def test_narrow_private_leg_uses_wall_node_containing_cell(monkeypatch):
-    operator, masks, physical, _state = _narrow_leg(monkeypatch)
+def test_narrow_private_leg_uses_wall_node_flux(monkeypatch):
+    operator, masks, physical, state = _narrow_leg(monkeypatch)
     nearest = np.asarray(masks.private_flux[operator._wall_carrier_index])
-    expected = np.array([True, True, False, False, False, False])
+    expected = (
+        np.asarray(physical[operator.grid.node_number :]) <= float(state.x_point_flux)
+    ) & (np.asarray(operator.wall.coordinate[:, 1]) < float(state.x_point[1]))
     assert np.count_nonzero(nearest != expected) == 2
     actual = operator._carrier_shadow_read(physical, masks)["private_wall_node_mask"]
     np.testing.assert_array_equal(actual, expected)
+
+
+@pytest.mark.parametrize("label, flux", [(0, 0.5), (3, 2.0)])
+def test_contained_wall_nodes_use_flux_instead_of_cell_label(monkeypatch, label, flux):
+    operator, masks, physical, state = _narrow_leg(monkeypatch)
+    masks = masks._replace(label=jnp.full_like(masks.label, label))
+    physical = physical.at[operator.grid.node_number :].set(flux)
+    wall_flux = np.asarray(physical[operator.grid.node_number :])
+    height_band = np.asarray(operator.wall.coordinate[:, 1]) < state.x_point[1]
+    expected = (wall_flux <= float(state.x_point_flux)) & height_band
+    actual = operator._carrier_shadow_read(physical, masks, state)
+    np.testing.assert_array_equal(actual["private_wall_node_mask"], expected)
 
 
 @pytest.mark.parametrize("polarity", [-1, 1])
@@ -104,8 +119,9 @@ def test_uncontained_nodes_use_own_flux_and_saddle_height(monkeypatch, polarity)
         state.x_point_flux = -state.x_point_flux
     read = jax.jit(lambda flux: operator._carrier_shadow_read(flux, masks, state))
     result = read(physical)
-    assert int(result["wall_node_fallback_count"]) == 4
-    np.testing.assert_array_equal(result["wall_node_fallback_mask"], True)
+    np.testing.assert_array_equal(
+        result["wall_node_height_band"], [True, True, False, True]
+    )
     np.testing.assert_array_equal(
         result["private_wall_node_mask"], [True, False, False, False]
     )
@@ -115,16 +131,35 @@ def test_uncontained_nodes_use_own_flux_and_saddle_height(monkeypatch, polarity)
     assert not np.any(absent["private_wall_node_mask"])
 
 
-def test_polygon_ownership_includes_edges_and_marks_uncovered_nodes():
-    polygons = (
-        np.array([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]),
-        np.array([[1.0, 0.0], [2.0, 0.0], [2.0, 1.0], [1.0, 1.0]]),
-    )
-    points = np.array([[0.5, 0.5], [1.0, 0.5], [1.5, 0.5], [3.0, 0.5]])
+def test_private_height_bands_exclude_axis_interval_and_require_a_saddle():
+    configure_dtypes()
+    height = jnp.array([-2.0, -1.0, 0.0, 1.0, 2.0])
+    saddles = jnp.array([[1.0, -1.0], [1.0, 1.0], [jnp.nan, jnp.nan]])
+    reading = private_wall_node_read(jnp.full(5, 0.5), height, 0.0, 1.0, -1.0, saddles)
     np.testing.assert_array_equal(
-        _wall_node_cell_owners(points, polygons), [0, 0, 1, -1]
+        reading["private_wall_node_mask"], [True, False, False, False, True]
     )
-    np.testing.assert_array_equal(_wall_node_cell_owners(points, ()), -1)
+    absent = private_wall_node_read(
+        jnp.full(5, 0.5), height, 0.0, 1.0, -1.0, jnp.full_like(saddles, jnp.nan)
+    )
+    assert not np.any(absent["private_wall_node_mask"])
+
+
+def test_bilinear_raster_reads_nodes_between_nonuniform_grid_samples():
+    radius = np.array([1.0, 2.0, 4.0])
+    height = np.array([-2.0, 0.0, 3.0])
+    points = np.array([[1.5, -0.5], [3.0, 2.0], [4.0, 3.0]])
+
+    def field(r, z):
+        return 2.0 * r - 3.0 * z + r * z
+
+    values = field(radius[:, None], height[None, :])
+    np.testing.assert_array_equal(
+        bilinear_node_flux(values, radius, height, points),
+        field(points[:, 0], points[:, 1]),
+    )
+    with pytest.raises(ValueError, match="interpolation domain"):
+        bilinear_node_flux(values, radius, height, [[0.0, 0.0]])
 
 
 @pytest.mark.parametrize("marginal", [False, True])

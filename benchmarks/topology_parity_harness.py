@@ -25,7 +25,7 @@ from nova.equilibrium.flux_surface_connectivity import fit_tensor_spline
 from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
-from nova.equilibrium.topology import NoQualifiedAxisError
+from nova.equilibrium.topology import NoQualifiedAxisError, private_wall_node_read
 from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import configure_dtypes
 from nova.media.ink import DEFAULT_INK, poloidal_axes
@@ -452,6 +452,34 @@ def _nearest_candidate(candidates, point):
     return int(np.argmin(np.where(finite, distance, np.inf)))
 
 
+def bilinear_node_flux(values, radius, height, points):
+    """Sample the raster at physical node positions without a nearest-cell proxy."""
+    radius, height = np.asarray(radius), np.asarray(height)
+    points = np.asarray(points)
+    if np.any(~np.isfinite(points)) or np.any(
+        (points[:, 0] < radius[0])
+        | (points[:, 0] > radius[-1])
+        | (points[:, 1] < height[0])
+        | (points[:, 1] > height[-1])
+    ):
+        raise ValueError("wall nodes must lie within the raster interpolation domain")
+    field = np.asarray(values).reshape((radius.size, height.size))
+    radial = np.clip(
+        np.searchsorted(radius, points[:, 0], side="right") - 1, 0, radius.size - 2
+    )
+    vertical = np.clip(
+        np.searchsorted(height, points[:, 1], side="right") - 1, 0, height.size - 2
+    )
+    r = (points[:, 0] - radius[radial]) / (radius[radial + 1] - radius[radial])
+    z = (points[:, 1] - height[vertical]) / (height[vertical + 1] - height[vertical])
+    return (
+        (1 - r) * (1 - z) * field[radial, vertical]
+        + r * (1 - z) * field[radial + 1, vertical]
+        + (1 - r) * z * field[radial, vertical + 1]
+        + r * z * field[radial + 1, vertical + 1]
+    )
+
+
 def _retained_raster_read(values, radius, height, inside, axis, x_candidates, wall):
     """Evaluate the retained raster boundary and class diagnostic."""
     shape = (radius.size, height.size)
@@ -462,7 +490,7 @@ def _retained_raster_read(values, radius, height, inside, axis, x_candidates, wa
     finite_x = x_candidates[np.all(np.isfinite(x_candidates), axis=1)]
     x_flux = surface(jnp.asarray(finite_x[:, 0]), jnp.asarray(finite_x[:, 1]))
     candidate_state = jnp.c_[jnp.asarray(finite_x), x_flux, jnp.zeros(len(finite_x))]
-    return traced_boundary_read(
+    reading = traced_boundary_read(
         field,
         jnp.asarray(radius),
         jnp.asarray(height),
@@ -480,6 +508,23 @@ def _retained_raster_read(values, radius, height, inside, axis, x_candidates, wa
         classification_x=candidate_state,
         classification_wall=wall_state[:3],
     )
+    nearest_private = reading["private_wall_node_mask"]
+    saddle_flux = reading["psi_axis"] + reading["u_xpoint"] * (
+        reading["psi_out"] - reading["psi_axis"]
+    )
+    admitted = reading["classification_x_inside_wall"]
+    reading.update(
+        private_wall_node_read(
+            jnp.asarray(bilinear_node_flux(values, radius, height, wall)),
+            jnp.asarray(wall[:, 1]),
+            axis[1],
+            saddle_flux,
+            1,
+            jnp.where(admitted[:, None], jnp.asarray(finite_x), jnp.nan),
+        )
+    )
+    reading["nearest_in_material_private_wall_node_mask"] = nearest_private
+    return reading
 
 
 def _replay_row(row, governed):
@@ -618,33 +663,34 @@ def _replay_row(row, governed):
     shadow = operator._carrier_shadow_read(physical, masks, state)
     cell_private = np.asarray(shadow["private_wall_node_mask"], dtype=bool)
     raster_private = np.asarray(retained["private_wall_node_mask"], dtype=bool)
-    owner = np.asarray(operator._wall_carrier_index, dtype=int)
-    containing = np.asarray(operator._wall_containing_cell_index, dtype=int)
-    fallback = np.asarray(shadow["wall_node_fallback_mask"], dtype=bool)
+    nearest_private = np.asarray(
+        retained["nearest_in_material_private_wall_node_mask"], dtype=bool
+    )
     wall_differing = np.flatnonzero(cell_private != raster_private)
     wall_rows = [
         {
             "index": int(index),
             "position_m": wall[index].tolist(),
-            "nearest_cell_index": int(owner[index]),
-            "nearest_cell_label": int(replayed[owner[index]]),
-            "containing_cell_index": int(containing[index]),
-            "containing_cell_label": None
-            if fallback[index]
-            else int(replayed[containing[index]]),
             "node_flux": float(wall_flux[index]),
+            "raster_bilinear_node_flux": float(retained["wall_node_flux"][index]),
             "admitted_saddle_flux": float(shadow["admitted_saddle_flux"]),
-            "used_flux_height_fallback": bool(fallback[index]),
-            "cell_authority_private": bool(cell_private[index]),
-            "retained_raster_private": bool(raster_private[index]),
+            "raster_admitted_saddle_flux": float(retained["admitted_saddle_flux"]),
+            "node_flux_private_side": bool(
+                shadow["wall_node_private_flux_side"][index]
+            ),
+            "raster_flux_private_side": bool(
+                retained["wall_node_private_flux_side"][index]
+            ),
+            "node_height_band": bool(shadow["wall_node_height_band"][index]),
+            "raster_height_band": bool(retained["wall_node_height_band"][index]),
+            "node_flux_private": bool(cell_private[index]),
+            "raster_bilinear_private": bool(raster_private[index]),
+            "nearest_in_material_raster_private": bool(nearest_private[index]),
             "adjudication": (
-                "uncontained node: node flux and admitted saddle height band"
-                if fallback[index]
-                else "containing polygon flood label"
-            )
-            + "; retained raster uses nearest in-material raster node",
+                "node-flux and bilinear-raster flux/saddle/height operands recorded"
+            ),
         }
-        for index in wall_differing
+        for index in range(len(wall))
     ]
     record.update(
         replayable=True,
@@ -665,15 +711,24 @@ def _replay_row(row, governed):
         committed_class_disagreement=class_disagreement,
         wall_node_census={
             "node_count": int(len(wall)),
-            "cell_authority_private_count": int(np.count_nonzero(cell_private)),
-            "retained_raster_private_count": int(np.count_nonzero(raster_private)),
+            "node_flux_private_count": int(np.count_nonzero(cell_private)),
+            "raster_bilinear_private_count": int(np.count_nonzero(raster_private)),
+            "nearest_in_material_private_count": int(np.count_nonzero(nearest_private)),
+            "nearest_in_material_differing_count": int(
+                np.count_nonzero(nearest_private != cell_private)
+            ),
             "differing_node_count": int(len(wall_differing)),
-            "differing_nodes": wall_rows,
-            "fallback_node_count": int(shadow["wall_node_fallback_count"]),
-            "fallback_node_indices": np.flatnonzero(fallback).tolist(),
-            "containing_cell_indices": containing.tolist(),
-            "cell_authority_private": cell_private.tolist(),
-            "retained_raster_private": raster_private.tolist(),
+            "differing_nodes": [wall_rows[index] for index in wall_differing],
+            "nodes": wall_rows,
+            "node_height_limits_m": [
+                _margin_value(float(shadow[key]))
+                for key in ("private_height_lower", "private_height_upper")
+            ],
+            "raster_height_limits_m": [
+                _margin_value(float(retained[key]))
+                for key in ("private_height_lower", "private_height_upper")
+            ],
+            "nearest_in_material_retention": "diagnostic third column for one release",
         },
     )
     record.update(
@@ -914,9 +969,18 @@ def _plot(rows, path):
         axis.legend(loc="upper right", fontsize=6, frameon=False)
     for axis in flat_axes[len(rows) :]:
         axis.set_visible(False)
+    figure.supxlabel(
+        "Private: node flux on the admitted saddle's private side and height beyond an "
+        "admitted saddle limit; no cell-label ownership.",
+        fontsize=9,
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
     figure.savefig(path.with_suffix(".svg"))
+    svg = path.with_suffix(".svg")
+    svg.write_text(
+        "\n".join(line.rstrip() for line in svg.read_text().splitlines()) + "\n"
+    )
     plt.close(figure)
 
 
@@ -954,6 +1018,13 @@ def run(
     pending = [row for row in replayable if row["marginal_solver_basin"] is None]
     receipt = {
         "schema": "nova.topology-cell-parity",
+        "wall_private_rule": "finite node flux with polarity*(psi_node-psi_saddle)>=0 "
+        "and height below the lower or above the upper admitted saddle limit; "
+        "a side with no saddle has no private height band",
+        "raster_wall_sampling": (
+            "bilinear at each wall node; retained nearest-in-material "
+            "flags are diagnostic only and do not gate parity"
+        ),
         **cache_authority(cache),
         "qualification_receipts": [
             Path(path).resolve().as_posix() for path in qualification_path

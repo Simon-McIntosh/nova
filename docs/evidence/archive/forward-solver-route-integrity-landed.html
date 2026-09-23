@@ -1443,6 +1443,58 @@ assertion at line 833), so it predates this node. The second compiled-slice
 failure makes the same bitwise comparison on the same slice. No failure is
 added against the base.</p>
 </section>
+<section id="single-site-krylov">
+<h2>The qualified Krylov step served from one scan site</h2>
+<p>The solver change is in <code>nova/equilibrium/fixed_point.py</code>:
+<code>_single_site_krylov</code>, plus the Arnoldi condition split into seed,
+column update and measurement. Every application in
+<code>_qualified_krylov_step</code> is one slot of a <code>lax.scan</code> whose
+body calls <code>linear_action</code> once, gated off by <code>lax.cond</code> after
+the machine is done. A phase switch routes each result to the probe, a condition
+column, the GMRES start, an Arnoldi column, a restart residual, or the
+achieved-residual check. Capacity is <code>1 + K + 1 + K(K + 1) + 1</code>, which is 83
+at <code>K = 8</code>. An optimisation barrier on the requested vector and on the
+action keeps the operator out of its consumers' fusions.</p>
+<table><thead><tr><th>Program (job 1276452, <code>96cbb2f0</code>)</th><th>300 cells</th><th>1000 cells</th><th>Qualified-step live-map sites (300)</th></tr></thead><tbody>
+<tr><td>Base design state <code>52bfefc0</code> (recorded)</td><td>302,553</td><td>304,913</td><td>3 sites, 13,165</td></tr>
+<tr><td>Per-site control (base body rebound)</td><td>302,550</td><td>304,910</td><td>3 sites, 13,165</td></tr>
+<tr><td>Single-site stream</td><td>284,792</td><td>287,117</td><td>1 site, 2,696</td></tr>
+<tr><td>Stream minus control</td><td>&minus;17,758</td><td>&minus;17,793</td><td>&minus;2 sites, &minus;10,469</td></tr>
+</tbody></table>
+<p>Each compile took 169&ndash;185 s. The control applies the declared mutation:
+it calls the operator directly at each GMRES application site again, and its log
+repeats that line. The control's sites return to the base table (7,916 and 2,626
+instructions at the base scopes). The caller tool keeps only frames from the
+solver files, so the executed control body is attributed through a copy of its
+HLO that names its pseudo-filename <code>fixed_point.py</code>. Without that copy
+the control read zero qualified-step sites, which was the instrument's miss.
+Receipts: <code>/nova/figures/forward-solver-route-integrity/single-site-krylov/qualified-step.json</code>,
+<code>program-*.json</code>, <code>census-*.json</code> and <code>callers-*.json</code>.</p>
+<p id="single-site-krylov-identity">Bit identity, toy operators only
+(<code>toy_identity.py</code>, same job). Without the fence, a dense arm had
+differed in the step by 1.2e-15. With the fence, the stream matches the base body
+fenced the same way on 8 of 8 dense cases (6 of 8 against the unfenced base). The
+elementwise arm matches on 5 of 8 against either reference. The three misses differ
+only in <code>achieved_reduction</code>, by at most 1.1e-17, where the residual has
+cancelled to rounding; the step, conditioning and qualification are equal. The likely
+cause, not yet isolated: the stream evaluates the achieved check at the same site
+and on the same input as the last restart residual, while the base evaluates it at
+a separate site that is compiled on its own. The real-operator terminal
+comparison against <code>52bfefc0</code> has not run. The operator-boundary
+script exercises only <code>operator_request_body</code>, which this change
+leaves untouched.</p>
+<p id="single-site-krylov-vmap">Batched cost (<code>vmap_cost.py</code>): one
+width-16 vmapped step on a dense 1529-square operator with eight iterations takes
+a median of 1.240 s for the stream against 0.086 s for the base body, a ratio of
+14.3. Under <code>vmap</code>, the cond and the phase switch become selects, so
+all 83 slots apply the operator and run every consumer branch. Unbatched, the
+slots after the machine finishes apply nothing.</p>
+<p id="single-site-krylov-tests">Tests (<code>suite.sh</code>, one fresh
+<code>all_debug</code> process per file). <code>tests/test_fixed_point.py</code>
+passes 45 of 45 (job 1276455, EXIT=0, 148 s). <code>tests/test_reduced_newton.py</code>
+(job 1276456) was still running when this record was written, and its outcome
+goes to the node manifest.</p>
+</section>
 </main>
 </body>
 </html>

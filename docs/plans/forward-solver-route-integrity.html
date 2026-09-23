@@ -278,6 +278,29 @@
     four failures are present at the base, so none is added. This entry changes neither
     section state nor its followup.</p>
 
+    <h3 id="s3-single-site-krylov">One operator site for the qualified Krylov step</h3>
+    <p><code>_qualified_krylov_step</code> now applies its linear action at one call site
+    inside a fixed-capacity <code>lax.scan</code>. The site serves the finite-action
+    probe, the condition Arnoldi columns, the restarted batched GMRES and the
+    achieved-residual check (83 slots at eight iterations). An optimisation
+    barrier fences each application from its consumers. The GMRES arithmetic uses
+    the <code>jax.scipy</code> helpers slot for slot. In one <code>all_debug</code>
+    job the weak certificate program measures <strong>284,792 / 287,117
+    instructions</strong> at 300 / 1000 cells, below 302,553 / 304,913 but still above
+    203,078 / 204,531. The per-site control, the base body rebound in the same job,
+    measures 302,550 / 304,910. The qualified step's live-map sites fall from three
+    (13,165 instructions) to one (2,696).</p>
+    <p>Bitwise equality is shown on toy operators only. Against the base with the
+    same fence, the dense arm is equal on 8 of 8 cases and the elementwise arm on 5 of
+    8; the three elementwise misses differ only in the achieved reduction (at most
+    1.1e-17), with the step equal. The real-operator terminal comparison against
+    52bfefc0 has not run. Under <code>vmap</code> the stream costs 14.3 times the
+    base body at width 16, because every slot and every phase branch executes.
+    <code>tests/test_fixed_point.py</code> passes 45 of 45 in a fresh process. The
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#single-site-krylov">detailed record</a>
+    carries the counts, the control and the reduced-Newton run.
+    This entry changes neither section state nor its followup.</p>
+
     <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>
     <p>Measured 2026-09-18: the pre-warm covers 3292 keys the lane never requests and none of the 1285 keys it
     does, so the lane's 1341 hits all came from that target's own earlier run on the same directory; a lane

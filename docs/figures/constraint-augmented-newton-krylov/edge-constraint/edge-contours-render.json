@@ -1,0 +1,180 @@
+{
+  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cna-edge-contours-print-exponent-errors/docs/figures/constraint-augmented-newton-krylov/edge-constraint/edge-contours.png",
+  "levels_wb": [
+    -1.23874863301634,
+    -1.0947744717501446,
+    -0.9508003104839491,
+    -0.8068261492177538,
+    -0.6628519879515583,
+    -0.5188778266853629,
+    -0.37490366541916753,
+    -0.23092950415297198,
+    -0.08695534288677664,
+    0.05701881837941869,
+    0.20099297964561424,
+    0.3449671409118096
+  ],
+  "marker_keys": [
+    "reference (free) flux",
+    "terminal (solved) flux",
+    "reference magnetic axis",
+    "reference x-point",
+    "solved magnetic axis",
+    "solved x-point",
+    "qualified null outside the wall",
+    "commanded edge point",
+    "achieved edge point"
+  ],
+  "panels": [
+    {
+      "commanded_displacement_mm": 5.0,
+      "title": "5 mm command\nerror 3.28e-11 mm; 1 trip",
+      "axis_off": true,
+      "terminal_position_error_mm": 3.275591603513206e-11,
+      "reference_null_set": {
+        "magnetic_axis_rz_m": [
+          0.9033613060950432,
+          0.022469960077991312
+        ],
+        "x_point_rz_m": [
+          [
+            0.5849783468400666,
+            1.2305027246683182
+          ]
+        ]
+      },
+      "solved_null_set": {
+        "magnetic_axis_rz_m": [
+          0.9064451175174701,
+          0.02390419086750188
+        ],
+        "x_point_rz_m": [
+          [
+            0.586692225799187,
+            1.2336051024315111
+          ]
+        ]
+      },
+      "reference_null_tally": {
+        "x_points_drawn": 1,
+        "x_points_dropped_outside_wall": 0,
+        "strike_points_drawn": 0,
+        "other_x_points_drawn": 0
+      },
+      "solved_null_tally": {
+        "x_points_drawn": 1,
+        "x_points_dropped_outside_wall": 0,
+        "strike_points_drawn": 0,
+        "other_x_points_drawn": 0
+      },
+      "target_point_rz_m": [
+        1.403560841279119,
+        0.022469960077991312
+      ],
+      "achieved_point_rz_m": [
+        1.4035608412791518,
+        0.022469960077991312
+      ]
+    },
+    {
+      "commanded_displacement_mm": 10.0,
+      "title": "10 mm command\nerror 1.36e-11 mm; 1 trip",
+      "axis_off": true,
+      "terminal_position_error_mm": 1.3553394517806794e-11,
+      "reference_null_set": {
+        "magnetic_axis_rz_m": [
+          0.9033613060950432,
+          0.022469960077991312
+        ],
+        "x_point_rz_m": [
+          [
+            0.5849783468400666,
+            1.2305027246683182
+          ]
+        ]
+      },
+      "solved_null_set": {
+        "magnetic_axis_rz_m": [
+          0.9095888367995495,
+          0.02725798971025696
+        ],
+        "x_point_rz_m": [
+          [
+            0.588802988449609,
+            1.2365694758919246
+          ]
+        ]
+      },
+      "reference_null_tally": {
+        "x_points_drawn": 1,
+        "x_points_dropped_outside_wall": 0,
+        "strike_points_drawn": 0,
+        "other_x_points_drawn": 0
+      },
+      "solved_null_tally": {
+        "x_points_drawn": 1,
+        "x_points_dropped_outside_wall": 0,
+        "strike_points_drawn": 0,
+        "other_x_points_drawn": 0
+      },
+      "target_point_rz_m": [
+        1.408560841279119,
+        0.022469960077991312
+      ],
+      "achieved_point_rz_m": [
+        1.4085608412791326,
+        0.022469960077991312
+      ]
+    },
+    {
+      "commanded_displacement_mm": 20.0,
+      "title": "20 mm command\nerror 3.93e-09 mm; 1 trip",
+      "axis_off": true,
+      "terminal_position_error_mm": 3.929318675988114e-09,
+      "reference_null_set": {
+        "magnetic_axis_rz_m": [
+          0.9033613060950432,
+          0.022469960077991312
+        ],
+        "x_point_rz_m": [
+          [
+            0.5849783468400666,
+            1.2305027246683182
+          ]
+        ]
+      },
+      "solved_null_set": {
+        "magnetic_axis_rz_m": [
+          0.9175749665282869,
+          0.03948678021996343
+        ],
+        "x_point_rz_m": [
+          [
+            0.5944441923035051,
+            1.2397128835432378
+          ]
+        ]
+      },
+      "reference_null_tally": {
+        "x_points_drawn": 1,
+        "x_points_dropped_outside_wall": 0,
+        "strike_points_drawn": 0,
+        "other_x_points_drawn": 0
+      },
+      "solved_null_tally": {
+        "x_points_drawn": 1,
+        "x_points_dropped_outside_wall": 0,
+        "strike_points_drawn": 0,
+        "other_x_points_drawn": 0
+      },
+      "target_point_rz_m": [
+        1.418560841279119,
+        0.022469960077991312
+      ],
+      "achieved_point_rz_m": [
+        1.4185608412830484,
+        0.022469960077991312
+      ]
+    }
+  ]
+}

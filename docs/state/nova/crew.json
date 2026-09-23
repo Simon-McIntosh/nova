@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T17:40:30",
+  "updated": "2026-09-23T18:12:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -293692,6 +293692,359 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260923T081204369954-review-of-pcrf-production-route-ladder",
+        "plan": "plasma-cell-read-fidelity",
+        "section": "\u00a71",
+        "node": "review-of-pcrf-production-route-ladder",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 425,
+                "cached_input_tokens": 784663,
+                "input_tokens": 785092,
+                "output_tokens": 32,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 785124,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "6bd9bb1d-4fb2-4080-a881-bf22212dd1b2",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "the review for r-20260923T034949217912-pcrf-production-route-ladder stores a parsed record scoring all 5 dimensions in the range 0..20",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260923T034949217912-pcrf-production-route-ladder",
+          "id": "review-of-pcrf-production-route-ladder",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-23T08:12:09Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": 23,
+            "binding_observed": "unknown",
+            "detail": "",
+            "headroom": 0,
+            "mean_context": 109231,
+            "observed_at": "2026-09-23T08:11:46Z",
+            "state": "fresh",
+            "suggested_shelf_life_seconds": 45
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T081204369954-review-of-pcrf-production-route-ladder/manifest.md",
+          "negative_control": "",
+          "plan": "plasma-cell-read-fidelity",
+          "requested_backend": null,
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260923T034949217912-pcrf-production-route-ladder.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "session-71ebec9b1921ac205409",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-23T08:13:07Z",
+        "completed_at": "2026-09-23T09:46:41.245Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5604,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 5614,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "30bdedaeb036d9e14dd6a5430b12264480d3c4ea",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T081204369954-review-of-pcrf-production-route-ladder/manifest.md",
+        "scope_changed": false,
+        "session_id": "d9810c77-5889-4c4e-b9b5-32a40f9aad05",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3614125,
+            "input_tokens_cumulative": 3614125,
+            "output_tokens": 20659,
+            "output_tokens_cumulative": 20659,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-23T09:46:41.245Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1185,
+              "budget_seconds": 2400,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "effective_phase": "starting",
+              "elapsed_seconds": 3585,
+              "external_wait": null,
+              "interruption": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 7742,
+              "log_fresh": false,
+              "manifest_commits": [
+                "2bf422abe",
+                "f2dcc15cd"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "18e522d88739ed5b27e008d8cf5a4998b8bf9da5c3e5c73a82903dd06af3c190",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan plasma-cell-read-fidelity --section '\u00a74' --role review --spec-level exact --node review-of-pcrf-shadow-telemetry-test-follows-the-node-flux-rule --goal 'attach an independent review to run r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule' --done-when 'the review for r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule.json --time-budget 40m --session s18-fable-20260922 --allow-unreconciled-runs --local",
+              "node": "pcrf-shadow-telemetry-test-follows-the-node-flux-rule",
+              "phase": "starting",
+              "plan": "plasma-cell-read-fidelity",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule",
+              "session": "s18-fable-20260922",
+              "terminal_age_seconds": 7845,
+              "terminal_at": "2026-09-23T06:01:39Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-shadow-telemetry-test-follows-the-node-flux-rule"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 711,
+              "budget_seconds": 2400,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "effective_phase": "working",
+              "elapsed_seconds": 3111,
+              "external_wait": null,
+              "interruption": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 4356,
+              "log_fresh": false,
+              "manifest_commits": [
+                "e8b613cef",
+                "6a78bd168"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "dea73e5d6c1aa7db3ccf117392b6c96fdbde5af2f66ccf7941fe286241c23818",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T051120272884-pcrf-terminal-panel-markers-and-record-corrections/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan plasma-cell-read-fidelity --section '\u00a74' --role review --spec-level exact --node review-of-pcrf-terminal-panel-markers-and-record-corrections --goal 'attach an independent review to run r-20260923T051120272884-pcrf-terminal-panel-markers-and-record-corrections' --done-when 'the review for r-20260923T051120272884-pcrf-terminal-panel-markers-and-record-corrections stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260923T051120272884-pcrf-terminal-panel-markers-and-record-corrections.json --time-budget 40m --session s18-fable-20260922 --allow-unreconciled-runs --local",
+              "node": "pcrf-terminal-panel-markers-and-record-corrections",
+              "phase": "working",
+              "plan": "plasma-cell-read-fidelity",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260923T051120272884-pcrf-terminal-panel-markers-and-record-corrections",
+              "session": "s18-fable-20260922",
+              "terminal_age_seconds": 4478,
+              "terminal_at": "2026-09-23T06:57:46Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-terminal-panel-markers-and-record-corrections"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 7619266,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1262.512,
+          "generated_tokens": 45841,
+          "generation_seconds": 1195.643,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.8,
+          "machine_seconds": 66.869,
+          "peak_input_tokens": 166800,
+          "tokens_per_second": 38.34,
+          "wall_tokens_per_second": 36.31
+        },
+        "follow_on_paths": [
+          "benchmarks/plasma_cell_production_ladder.py:622"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review run: produces a review record",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/review-of-pcrf-production-route-ladder",
+          "session_id": "d9810c77-5889-4c4e-b9b5-32a40f9aad05",
+          "session_source": "stream",
+          "retained_at": "2026-09-23T09:46:41.245Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "promoted_revision": "30bdedaeb036d9e14dd6a5430b12264480d3c4ea",
+        "plan_impl_at_dispatch": 0.7,
+        "impl_move": {
+          "plan": "plasma-cell-read-fidelity",
+          "at_dispatch": 0.7,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "lane_advisory": {
+          "backend": "clive",
+          "burn_multiple": null,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+          "horizon_ends_at": "2026-09-23T09:07:09.053720+00:00",
+          "horizon_seconds": 3300,
+          "metered": false,
+          "observed_at": null,
+          "precedes_horizon": null,
+          "projected_exhaustion_at": null,
+          "resets_at": null,
+          "seconds_until_reset": null,
+          "state": "quiet",
+          "utilisation_pct": null
+        },
+        "lane_declaration": {
+          "backend": null,
+          "headroom": null,
+          "metered": false,
+          "observed_at": null,
+          "read_at": "2026-09-23T08:12:09Z",
+          "resolved_backend": "clive",
+          "utilisation_pct": null
+        },
+        "lane_reading": {
+          "age_seconds": 23,
+          "binding_observed": "unknown",
+          "detail": "",
+          "headroom": 0,
+          "mean_context": 109231,
+          "observed_at": "2026-09-23T08:11:46Z",
+          "state": "fresh",
+          "suggested_shelf_life_seconds": 45
+        },
+        "tool_steps": 47.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -294186,6 +294539,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3317
+    "_version": 3318
   }
 }

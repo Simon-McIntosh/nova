@@ -18,7 +18,7 @@
 <meta name="plan-modified" content="2026-09-23">
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-impl" content="0.82">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -280,6 +280,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260923-ladder-landed" data-who="reckon-ship" data-when="2026-09-23T16:05:00+00:00">
     <div class="r-comment-body">pcrf-production-route-ladder merged at 962507668 (tip f4d0e532a), as the accepted partial receipt; H200 job 1276244 ended TIMEOUT at its 3-hour limit. The rungs it measured read identically. The decisive older rungs did not build. Chord mode fails at main too. Local-lane review 79: its finding is that the transition selector takes the first pair in oldest-to-newest order, whereas the plan asks for the newest transition counting back from main. That is latent, since this receipt holds no transition. The map-fidelity gate since found the certificate map 9.5 to 45 percent off at this rung, so the ladder stands as a record of that footing and not as an attribution.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260923T081204369954-review-of-pcrf-production-route-ladder" data-who="reckon-ship" data-when="2026-09-23T09:46:41.245Z">
+    <div class="r-comment-body"><p>ladder review stored, 79 of 100: transition selector takes the oldest transition; latent on this receipt</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260923-one-trip-refuted-and-cluster-measured" data-who="" data-when="">
     <div class="r-comment-body">§1 measurement landed in worktree pcrf-terminal-state-is-one-trip (tip 3d2222f9e, H200 job 1276138): the one-trip explanation is refuted. With the certificate default policy the diverted case sits at residual 0.15210 from trip 1 through trip 7 (X-point 8.2 cm off in both arms) and the reactor-static case at 0.0471 flat over 3 trips; the receipt names the solver route as owner, no panel is described as converged, and the figure docs/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.png draws analytic, one-trip and default-policy panels per case under the plotting rules. The saddle cluster is measured too: the three analytic-state saddle candidates sit 2.0 to 2.8 cm apart (0.13 to 0.18 of the 0.151 m pitch) while _root_uncertainty gives each a radius of 1.7e-13 m and the active merge radius is 8.6e-15 m, so the merge criterion can never fold neighbouring cells' roots of one physical saddle: the uncertainty is a roundoff floor where a discretisation-scale radius is what the merge needs. The exact-clip seed receipt for the reactor-static case committed at 14:35 on 09-22 (b43714114) reads converged in two trips at this rung, so the fixed point moved in the landings between that revision and main; pcrf-attribute-the-exact-mode-fixed-point runs the ladder b43714114, 08dd0dda1, ee17f9570, 2e38dc877, 337eb81ee, 23a8522b6, 450bab78a, a17431153, f5af729a9 with the cut-cell capacity overflow flag recorded per arm (S19's lead: an overflow that silently shrinks the support reads as flat non-convergence).</div>

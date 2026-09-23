@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T12:50:03",
+  "updated": "2026-09-23T12:59:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -284820,6 +284820,273 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule",
+        "plan": "plasma-cell-read-fidelity",
+        "section": "\u00a74",
+        "node": "pcrf-shadow-telemetry-test-follows-the-node-flux-rule",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 272,
+                "cached_input_tokens": 653828,
+                "input_tokens": 654102,
+                "output_tokens": 3084,
+                "reasoning_output_tokens": 1790,
+                "total_tokens": 657186,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "tests/test_plasma_cell_shadow_telemetry.py no longer asserts owner_label == PlasmaDomain.PRIVATE_FLUX for a wall node; its oracle is the rule the decision wall-node-private-shadow-is-flux-at-the-node states (a wall node is private when its flux lies on the private side of the admitted saddle flux and it sits within the X-point height band), computed independently in the test from the fixture flux, saddle flux and height band rather than by calling the production helper; at least one fixture places a wall node whose nearest cell centre carries a different label from the node-flux verdict so the two rules disagree and the test discriminates; the file runs in ONE fresh all_debug sbatch job (--time=00:59:00 --cpus-per-task=4 --mem=32G, TMPDIR=/tmp exported in the submit environment and in the payload, JAX_PLATFORMS=cpu, PYTHONPATH=this worktree, the root interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider run directly, uv never invoked, no srun) and passes, with the same command at the base revision recorded beside it; the declared negative control is run and its log recorded; ruff check and format pass over the file; the plan gains one appended sentence naming the run; the manifest is written before the wait with wait_probe as a JSON argument vector printing IN_QUEUE or LEFT_QUEUE and wait_terminal LEFT_QUEUE and its gate fields name the sbatch pytest run",
+          "estimated_hours": 1.0,
+          "goal": "make tests/test_plasma_cell_shadow_telemetry.py assert the node-flux private wall rule instead of the retired label-owned rule",
+          "id": "pcrf-shadow-telemetry-test-follows-the-node-flux-rule",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-23T05:03:10Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule/manifest.md",
+          "negative_control": "restore the label-owned assertion in a scratch copy of the test and observe it fail on the discriminating fixture under the node-flux production rule",
+          "plan": "plasma-cell-read-fidelity",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/test_plasma_cell_shadow_telemetry.py",
+            "docs/plans/plasma-cell-read-fidelity.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-shadow-telemetry-test-follows-the-node-flux-rule",
+            "docs/evidence/archive/plasma-cell-read-fidelity-landed.html",
+            "docs/figures/plasma-cell-read-fidelity"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s18-pta-repin-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-23T05:03:37Z",
+        "completed_at": "2026-09-23T06:03:22.042Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3575,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3585,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "0a4b51368256f8e9bdb6ab94a4fe7ad514b34d3e",
+        "commits": [
+          "2bf422abed7f1f2d689ffdbc72e2d06d092deffb",
+          "f2dcc15cd39bb2d00ecb8cd2c517cb189acc1801"
+        ],
+        "changed_lines": {
+          "added": 75,
+          "removed": 135,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_plasma_cell_shadow_telemetry.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule/gate.log",
+          "log_digest": "sha256:caddcdae935d53a0f851a66d1467657d5184c865b8f29616adeae1f6a7a422ca"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule/manifest.md",
+        "scope_changed": false,
+        "session_id": "cecc84be-624d-4134-b45d-2d1a3abb1451",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 7987108,
+            "input_tokens_cumulative": 7987108,
+            "output_tokens": 54533,
+            "output_tokens_cumulative": 54533,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-23T06:03:22.042Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 8154155,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3581.291,
+          "generated_tokens": 62000,
+          "generation_seconds": 3323.308,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.5,
+          "machine_seconds": 257.983,
+          "peak_input_tokens": 165747,
+          "tokens_per_second": 18.66,
+          "wall_tokens_per_second": 17.31
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-shadow-telemetry-test-follows-the-node-flux-rule",
+          "session_id": "cecc84be-624d-4134-b45d-2d1a3abb1451",
+          "session_source": "stream",
+          "retained_at": "2026-09-23T06:03:22.042Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "promoted_revision": "f2dcc15cd39bb2d00ecb8cd2c517cb189acc1801",
+        "plan_impl_at_dispatch": 0.7,
+        "impl_move": {
+          "plan": "plasma-cell-read-fidelity",
+          "at_dispatch": 0.7,
+          "at_complete": 0.75,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "test_paths": [
+            "tests/test_plasma_cell_shadow_telemetry.py"
+          ],
+          "declaration": "restore the label-owned assertion in a scratch copy of the test and observe it fail on the discriminating fixture under the node-flux production rule",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-shadow-telemetry-test-follows-the-node-flux-rule/negative_control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-shadow-telemetry-test-follows-the-node-flux-rule/negative_control.log"
+        },
+        "review_waiver": {
+          "reason": "the stored review (97, claude-sonnet-5) read main at 4d51fba1a, which contains both promoted commits 2bf422abe and f2dcc15cd since their merge at c6a723f1d; the reviewed tree is the promoted content"
+        },
+        "lane_advisory": {
+          "backend": "clive",
+          "burn_multiple": null,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+          "horizon_ends_at": "2026-09-23T05:43:10.760118+00:00",
+          "horizon_seconds": 2400,
+          "metered": false,
+          "observed_at": null,
+          "precedes_horizon": null,
+          "projected_exhaustion_at": null,
+          "resets_at": null,
+          "seconds_until_reset": null,
+          "state": "quiet",
+          "utilisation_pct": null
+        },
+        "lane_declaration": {
+          "backend": null,
+          "headroom": null,
+          "metered": false,
+          "observed_at": null,
+          "read_at": "2026-09-23T05:03:10Z",
+          "resolved_backend": "clive",
+          "utilisation_pct": null
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "lane document carries no 'binding_observed'",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 67.0,
+        "orientation_input_tokens": 1297408.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -285314,6 +285581,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3295
+    "_version": 3296
   }
 }

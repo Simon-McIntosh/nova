@@ -1,0 +1,23 @@
+revision=52bfefc0a0f02412d8910aaccb632bfbd9fd43b5 plus uncommitted single-site stream; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step; command=python docs/figures/forward-solver-route-integrity/single-site-krylov/toy_identity.py elementwise (login node, seconds, JAX_PLATFORMS=cpu)
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step/docs/figures/forward-solver-route-integrity/single-site-krylov/toy_identity.py", line 42, in <module>
+    np.testing.assert_array_equal(np.asarray(a), np.asarray(b), err_msg=field)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/numpy/testing/_private/utils.py", line 1121, in assert_array_equal
+    assert_array_compare(operator.__eq__, actual, desired, err_msg=err_msg,
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         verbose=verbose, header='Arrays are not equal',
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         strict=strict)
+                         ^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/numpy/testing/_private/utils.py", line 983, in assert_array_compare
+    raise AssertionError(msg)
+AssertionError: 
+Arrays are not equal
+achieved_reduction
+Mismatched elements: 1 / 1 (100%)
+Max absolute difference among violations: 1.0977547e-17
+Max relative difference among violations: 9.441196e-14
+ ACTUAL: array(0.000116)
+ DESIRED: array(0.000116)
+EXIT=1

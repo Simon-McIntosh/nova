@@ -485,6 +485,31 @@ then choose signed-winding or geometric-region semantics. The driving followup
 and section remain open. See the
 <a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#exact-support-polygon-refusal">refusal evidence and unmet measures</a>.</p>
 
+<h3 id="s6-exact-support-floor-attribution">Analytic-state attribution: simple cut-cell moment evaluation carries the deficit</h3>
+<p><strong>2026-09-23 completed measurement; coordinator closure pending.</strong>
+The resumed evaluation at <code>150a1398c478e2b11d7a25de5195e280838dd856</code>
+measured both cases, all five rungs and both clip modes in H200 job
+<code>1276905</code> (265 seconds). Artifacts are banked at
+<code>9b0784d4266ade86d067e58d7e7ae6c69edd2f8f</code>.
+Simple separatrix-cut moment evaluation carries the main deficit at every rung.
+Non-simple exact supports occur only in diverted 110 (one cell) and 300 (seven);
+their signed production-formula minus nonzero-winding lobe-union currents are
+<code>−0.110578 A</code> and <code>+3.10e-8 A</code>. The three finer diverted
+rows and all weak-rotation rows have none. Their original vertex chains,
+atomic cells and branch pieces are persisted without repair.</p>
+<p>The requested three terms alone do not close on the two non-simple rows:
+booked current minus the analytic-density formula adds <code>+78.597290 A</code>
+at diverted 110 and <code>−76.512758 A</code> at 300. This remainder is reported
+separately; the four-term identity closes cell by cell. The coarse centroid is
+<code>35.062133 mm</code> low, within 1 mm of the reviewed 35.4 mm, and all ten
+revised chord controls pass (largest absolute-deficit ratio
+<code>0.0770406 &lt; 0.1</code>). The unchanged analytic sampler accepts 5,761
+points for diverted and 23,041 requested points, yielding 23,040 vertices, for
+weak rotation. No solve or production repair ran. The next investigation is
+inside the moment path on simple cut cells and the non-simple integration
+remainder. The driving followup remains open for coordinator adjudication.
+See <a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#exact-support-floor-attribution">the complete attribution, controls and panels</a>.</p>
+
 <h2 id="s7">§7 — Wire the typed census saddle into the production spline-chain clip and re-solve the diverted certificate rows</h2>
 <p>The wedge split landed on the oracle (core-side current within 1e-13 relative of the analytic wedge integral at 110, 300 and 500 cells) but the production spline route discards it because the operator passes no saddle vertex, and the oracle compares the carrier against its own emitted polygons. Pass the typed census saddle as the clip's saddle vertex, consume the four region-owned moment profiles in the plasma partition and the null read, and make the oracle independent of the carrier by integrating the analytic current over the region bounded by the separatrix branches and the cell edges. Gate: the independent oracle at 110, 300 and 500 cells on all_debug, then one H200 job re-solving the four diverted certificate rows with the four limited rows as the bit-identical negative control.</p>
 

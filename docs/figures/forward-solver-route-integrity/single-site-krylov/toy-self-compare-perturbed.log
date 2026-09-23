@@ -1,0 +1,20 @@
+revision=7f5ed5f47def14ba0cb35ea9a2a815d634ac8edc plus public-helper rewrite; positive control: _GMRES_RELATIVE_TOLERANCE set to 1e-3 before toy_self_identity.py compare
+revision=7f5ed5f47def14ba0cb35ea9a2a815d634ac8edc mode=compare
+DIFFERS dense-5-2-requested_tolerance 0.00099
+DIFFERS dense-5-8-requested_tolerance 0.00099
+DIFFERS dense-12-2-requested_tolerance 0.00099
+DIFFERS dense-12-8-requested_tolerance 0.00099
+DIFFERS dense-40-2-requested_tolerance 0.00099
+DIFFERS dense-40-8-requested_tolerance 0.00099
+DIFFERS dense-3-2-requested_tolerance 0.00099
+DIFFERS dense-3-8-requested_tolerance 0.00099
+DIFFERS elementwise-5-2-requested_tolerance 0.00099
+DIFFERS elementwise-5-8-requested_tolerance 0.00099
+DIFFERS elementwise-12-2-requested_tolerance 0.00099
+DIFFERS elementwise-12-8-requested_tolerance 0.00099
+DIFFERS elementwise-40-2-requested_tolerance 0.00099
+DIFFERS elementwise-40-8-requested_tolerance 0.00099
+DIFFERS elementwise-3-2-requested_tolerance 0.00099
+DIFFERS elementwise-3-8-requested_tolerance 0.00099
+TOY_STREAM_SELF_IDENTITY equal=128/144
+EXIT=1

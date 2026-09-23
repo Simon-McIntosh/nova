@@ -48,17 +48,6 @@ from typing import Any, Literal, NamedTuple
 import jax
 import jax.numpy as jnp
 import numpy as np
-from jax._src import dtypes as _jax_dtypes
-from jax._src.lax import lax as _lax_internal
-from jax._src.scipy.sparse.linalg import (
-    _add as _gmres_add,
-    _dot as _gmres_dot,
-    _iterative_classical_gram_schmidt as _gmres_classical_gram_schmidt,
-    _lstsq as _gmres_lstsq,
-    _norm as _gmres_norm,
-    _safe_normalize as _gmres_safe_normalize,
-    _sub as _gmres_sub,
-)
 
 from nova.jax.config import Precision, resolve_precision
 from nova.equilibrium.manifold_advance import (
@@ -2071,13 +2060,88 @@ class _KrylovStream(NamedTuple):
     achieved_action: jax.Array
 
 
-def _gmres_restart_start(unit_residual: jax.Array, restart: int):
-    """Seed one batched-GMRES restart exactly as ``jax.scipy`` does."""
-    basis = jnp.pad(unit_residual[..., None], ((0, 0), (0, restart)))
-    dtype, weak_type = _jax_dtypes.lattice_result_type(unit_residual)
-    hessenberg = _lax_internal._convert_element_type(
-        jnp.eye(restart, restart + 1, dtype=dtype), weak_type=weak_type
+def _gmres_dot(left: jax.Array, right: jax.Array) -> jax.Array:
+    """Highest-precision product, the contraction every GMRES reduction uses."""
+    return jnp.dot(left, right, precision=jax.lax.Precision.HIGHEST)
+
+
+def _gmres_norm(vector: jax.Array) -> jax.Array:
+    """Euclidean norm of a real vector as the root of its own inner product."""
+    return jnp.sqrt(jnp.vdot(vector, vector, precision=jax.lax.Precision.HIGHEST))
+
+
+def _gmres_safe_normalize(
+    vector: jax.Array, thresh: jax.Array | None = None
+) -> tuple[jax.Array, jax.Array]:
+    """Unit vector and norm, both zero when the norm is at or below ``thresh``.
+
+    The default threshold is the machine epsilon of the vector's dtype.
+    """
+    norm = _gmres_norm(vector)
+    if thresh is None:
+        thresh = jnp.finfo(norm.dtype).eps
+    use_norm = norm > jnp.asarray(thresh, dtype=vector.dtype)
+    unit = jnp.where(use_norm, vector / norm.astype(vector.dtype), 0.0)
+    return unit, jnp.where(use_norm, norm, 0.0)
+
+
+def _gmres_classical_gram_schmidt(
+    basis: jax.Array, vector: jax.Array, vector_norm: jax.Array
+) -> tuple[jax.Array, jax.Array]:
+    """Orthogonalise ``vector`` against the columns of ``basis``, twice at most.
+
+    The second pass runs only when the overlaps are not already small against
+    the vector's norm, the "twice is enough" criterion; the returned overlaps
+    accumulate both passes.
+    """
+    max_iterations = 2
+    overlaps = jnp.zeros(basis.shape[-1], dtype=basis.dtype)
+
+    def project(carry):
+        iteration, vector, overlaps, scaled_norm = carry
+        projection = jnp.einsum(
+            "...n,...->n", basis, vector, precision=jax.lax.Precision.HIGHEST
+        )
+        vector = vector - _gmres_dot(basis, projection)
+        overlaps = overlaps + projection
+
+        def measure_cond(state):
+            iteration, pending, _, _ = state
+            return jnp.logical_and(pending, iteration < (max_iterations - 1))
+
+        def measure(state):
+            iteration, _, vector, _ = state
+            _, measured = _gmres_safe_normalize(vector)
+            return iteration, False, vector, measured / jnp.sqrt(2.0)
+
+        _, _, vector, scaled_norm = jax.lax.while_loop(
+            measure_cond, measure, (iteration, True, vector, scaled_norm)
+        )
+        return iteration + 1, vector, overlaps, scaled_norm
+
+    def repeat(carry):
+        iteration, _, overlaps, scaled_norm = carry
+        _, overlap_norm = _gmres_safe_normalize(overlaps)
+        return jnp.logical_and(
+            iteration < (max_iterations - 1), overlap_norm < scaled_norm
+        )
+
+    carry = project((0, vector, overlaps, vector_norm / jnp.sqrt(2.0)))
+    _, vector, overlaps, _ = jax.lax.while_loop(repeat, project, carry)
+    return vector, overlaps
+
+
+def _gmres_lstsq(matrix: jax.Array, rhs: jax.Array) -> jax.Array:
+    """Least-squares coefficients through the positive normal equations."""
+    return jax.scipy.linalg.solve(
+        _gmres_dot(matrix.T, matrix), _gmres_dot(matrix.T, rhs), assume_a="pos"
     )
+
+
+def _gmres_restart_start(unit_residual: jax.Array, restart: int):
+    """Seed one batched-GMRES restart: the unit residual and an identity model."""
+    basis = jnp.pad(unit_residual[..., None], ((0, 0), (0, restart)))
+    hessenberg = jnp.eye(restart, restart + 1, dtype=unit_residual.dtype)
     return basis, hessenberg
 
 
@@ -2106,8 +2170,8 @@ def _single_site_krylov(
     restart = min(gmres_iterations, size)
     maxiter = gmres_iterations
     capacity = 1 + gmres_iterations + 1 + maxiter * (restart + 1) + 1
-    dtype, _ = _jax_dtypes.lattice_result_type(residual_vector)
-    eps = _jax_dtypes.finfo(dtype).eps
+    dtype = residual_vector.dtype
+    eps = jnp.finfo(dtype).eps
     atol = jnp.maximum(_GMRES_RELATIVE_TOLERANCE * _gmres_norm(residual_vector), 0.0)
     zeros = jnp.zeros_like(residual_vector)
     basis, hessenberg = _gmres_restart_start(zeros, restart)
@@ -2168,13 +2232,13 @@ def _single_site_krylov(
         )
 
     def gmres_start_slot(stream, action):
-        return restarted(stream, _gmres_sub(residual_vector, action))
+        return restarted(stream, residual_vector - action)
 
     def arnoldi_slot(stream, action):
         index = stream.arnoldi_index
         _, norm_before = _gmres_safe_normalize(action)
         orthogonal, overlaps = _gmres_classical_gram_schmidt(
-            stream.basis, action, norm_before, max_iterations=2
+            stream.basis, action, norm_before
         )
         unit_vector, norm_after = _gmres_safe_normalize(
             orthogonal, thresh=eps * norm_before
@@ -2193,9 +2257,7 @@ def _single_site_krylov(
                 .set(stream.residual_norm.astype(dtype))
             )
             coefficients = _gmres_lstsq(hessenberg.T, beta)
-            return _gmres_add(
-                stream.solution, _gmres_dot(basis[..., :-1], coefficients)
-            )
+            return stream.solution + _gmres_dot(basis[..., :-1], coefficients)
 
         candidate = jax.lax.cond(proceed, lambda _: stream.candidate, project, None)
         return stream._replace(
@@ -2213,7 +2275,7 @@ def _single_site_krylov(
         stream = stream._replace(
             solution=stream.candidate, restarts=stream.restarts + 1
         )
-        return restarted(stream, _gmres_sub(residual_vector, action))
+        return restarted(stream, residual_vector - action)
 
     def achieved_slot(stream, action):
         return stream._replace(

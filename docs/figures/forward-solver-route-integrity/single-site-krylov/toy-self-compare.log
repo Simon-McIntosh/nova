@@ -1,0 +1,4 @@
+revision=7f5ed5f47def14ba0cb35ea9a2a815d634ac8edc plus public-helper rewrite of fixed_point.py; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step; command=python docs/figures/forward-solver-route-integrity/single-site-krylov/toy_self_identity.py compare (login node, seconds)
+revision=7f5ed5f47def14ba0cb35ea9a2a815d634ac8edc mode=compare
+TOY_STREAM_SELF_IDENTITY equal=144/144
+EXIT=0

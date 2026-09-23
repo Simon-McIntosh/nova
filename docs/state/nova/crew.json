@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T08:51:51",
+  "updated": "2026-09-23T10:31:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4405,10 +4405,15 @@
         "id": "s18-pcrf-a2",
         "harness": "codex-astra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-22"
+        "session_id": "01a0ccf5-90ab-71b0-ba5b-793e7ff1101a",
+        "session_model": "gpt-6-astra",
+        "sessions": {
+          "{\"alias\":\"astra6\",\"backend\":\"codex-astra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-6-astra\",\"sandbox\":\"worktree-full\"}": "01a0ccf5-90ab-71b0-ba5b-793e7ff1101a"
+        },
+        "created": "2026-09-22",
+        "session_owners": {
+          "{\"alias\":\"astra6\",\"backend\":\"codex-astra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-6-astra\",\"sandbox\":\"worktree-full\"}": "s18-fable-20260922"
+        }
       },
       {
         "id": "s18-pcrf-c1",
@@ -284177,16 +284182,16 @@
         "backend": "claude-opus",
         "purpose": "dispatch",
         "opened_at": "2026-09-23T05:48:55Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-23T07:41:27Z",
+        "held_seconds": 6752,
         "utilisation_pct": 94.0,
         "resets_at": "2026-09-27T06:00:00Z",
         "effective_ceiling_pct": 92.0,
         "reason": "utilisation 94% with burn multiple unknown is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve) Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "dispatch",
         "resumption_fired": false
       }
     ],
-    "_version": 3287
+    "_version": 3289
   }
 }

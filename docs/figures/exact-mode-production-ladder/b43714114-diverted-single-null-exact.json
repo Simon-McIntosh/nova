@@ -1,0 +1,16 @@
+{
+  "revision": "b43714114",
+  "case": "diverted-single-null",
+  "clip_mode": "exact",
+  "status": "not-measured",
+  "exception": null,
+  "slurm_job_id": "1276244",
+  "slurm_partition": "betelgeuse",
+  "seed_policy": {
+    "status": "not-built",
+    "type": null,
+    "construction_type": null,
+    "state_sha256": null
+  },
+  "harness_sha256": "31391483468c608927aaf75dd839e08e6a5b9e7a13c2eb5c1abe6e9443dd88de"
+}

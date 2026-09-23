@@ -1,0 +1,416 @@
+{
+  "revision": "f5af729a9",
+  "case": "weak-rotation-reactor-static",
+  "clip_mode": "chord",
+  "status": "measured",
+  "exception": null,
+  "slurm_job_id": "1276244",
+  "seed_policy": {
+    "status": "measured",
+    "type": "nova.equilibrium.solve_request.ExplicitSolveSeed",
+    "construction_type": "current_centroid_disc",
+    "factory": "profile.cold_seed_portfolio",
+    "state_sha256": "145cce9cd1b809d64311141fc2b61417237a3f89c9a7808781f87df2136da12a",
+    "state_dtype": "float64",
+    "state_shape": [
+      772
+    ],
+    "seed_radius_m": 1.564079053601776
+  },
+  "harness_sha256": "60536750f31a9ec55a478b122bdd65231cc3aa6e7b58bd347a4d07fe745547b3",
+  "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/f5af729a9/nova/__init__.py",
+  "full_revision": "f5af729a9de6a2287ebd2b528cea278d5bdb3157",
+  "devices": [
+    "cuda:0"
+  ],
+  "realised_cells": 135,
+  "carrier_identity": "solovev:weak-rotation-reactor-static:-110",
+  "reference_nulls": {
+    "axis_rz_m": [
+      6.194958772632181,
+      0.00013499785829806932
+    ],
+    "x_point_rz_m": null,
+    "qualified_saddles_rz_m": [],
+    "retained_count": [
+      3,
+      0
+    ],
+    "axis_flux_wb": 49.94187078939037,
+    "boundary_flux_wb": 1.1345091532888318e-15
+  },
+  "seed_receipt": {
+    "factory": "profile.cold_seed_portfolio",
+    "requested_class": "limited",
+    "branch_index": 0,
+    "construction": "current_centroid_disc",
+    "plasma_current_a": 16314773.311828371,
+    "current_centroid_m": [
+      6.063530173332898,
+      0.0
+    ],
+    "seed_radius_m": 1.564079053601776,
+    "supported_cell_count": 36,
+    "anchor_available": true,
+    "anchor_m": [
+      7.801395788445413,
+      -5.030890007447734e-11
+    ],
+    "declared_axis_m": [
+      6.063530173332898,
+      0.0
+    ],
+    "declared_boundary_m": [
+      7.801395788445413,
+      -5.030890007447734e-11
+    ],
+    "stored_flux_samples_used": false,
+    "current_target_provenance": {
+      "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+      "quadrature_nodes": 512,
+      "quadrature_current_a": 16314773.311828367,
+      "declared_current_a": 16314773.311828371,
+      "quadrature_relative_closure": 2.2833846522164315e-16,
+      "current_centroid_m": [
+        6.063530173332898,
+        0.0
+      ]
+    },
+    "state_sha256_binary64": "145cce9cd1b809d64311141fc2b61417237a3f89c9a7808781f87df2136da12a"
+  },
+  "seed_amplitude": 2.036588546796,
+  "fixture_cache": {
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
+    "semantic_key": "0eb458e6edb500a7",
+    "hit": true,
+    "lock_wait_seconds": 7.4338167905807495e-06,
+    "build_seconds": 0.0
+  },
+  "current_receipt": {
+    "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+    "quadrature_nodes": 512,
+    "quadrature_current_a": 16314773.311828367,
+    "declared_current_a": 16314773.311828371,
+    "quadrature_relative_closure": 2.2833846522164315e-16,
+    "current_centroid_m": [
+      6.063530173332898,
+      0.0
+    ]
+  },
+  "seed_sha256": "145cce9cd1b809d64311141fc2b61417237a3f89c9a7808781f87df2136da12a",
+  "active_set_budget": 16,
+  "observer": {
+    "method": "host callback copies selected state at native trip reconcile",
+    "native_function_sha256": "5f3d41010da058238abd4204cf02ac65e468dbde474871c2baec6fcaf417dea1",
+    "inserted_statement": "jax.debug.callback(_capture_trip, trip_active, index, selected_state, selected_residual, ordered=True)",
+    "solver_values_modified": false
+  },
+  "converged": false,
+  "qualified": false,
+  "trip_count": 14,
+  "terminal_residual": 0.05245103919634117,
+  "per_trip_residual_history": [
+    {
+      "trip": 1,
+      "residual": 0.05255408736543541
+    },
+    {
+      "trip": 2,
+      "residual": 0.05254447718241892
+    },
+    {
+      "trip": 3,
+      "residual": 0.05253485982581941
+    },
+    {
+      "trip": 4,
+      "residual": 0.0525252351060905
+    },
+    {
+      "trip": 5,
+      "residual": 0.052515602826120104
+    },
+    {
+      "trip": 6,
+      "residual": 0.05250596278084974
+    },
+    {
+      "trip": 7,
+      "residual": 0.052496314756865975
+    },
+    {
+      "trip": 8,
+      "residual": 0.0524866585319754
+    },
+    {
+      "trip": 9,
+      "residual": 0.05247699387474131
+    },
+    {
+      "trip": 10,
+      "residual": 0.052467320543998636
+    },
+    {
+      "trip": 11,
+      "residual": 0.05245763828833937
+    },
+    {
+      "trip": 12,
+      "residual": 0.052451436820622414
+    },
+    {
+      "trip": 13,
+      "residual": 0.05245103919634117
+    },
+    {
+      "trip": 14,
+      "residual": 0.05245103919634117
+    }
+  ],
+  "terminal_nulls": {
+    "axis_rz_m": [
+      6.404584745577163,
+      -1.215199678815416e-06
+    ],
+    "x_point_rz_m": null,
+    "qualified_saddles_rz_m": [],
+    "retained_count": [
+      3,
+      0
+    ],
+    "axis_flux_wb": 94.83635284649293,
+    "boundary_flux_wb": 34.24232096497957
+  },
+  "terminal_axis_rz_m": [
+    6.404584745577163,
+    -1.215199678815416e-06
+  ],
+  "terminal_x_point_rz_m": null,
+  "reference_axis_rz_m": [
+    6.194958772632181,
+    0.00013499785829806932
+  ],
+  "reference_x_point_rz_m": null,
+  "x_point_distance_m": null,
+  "x_point_distance_status": "no_admitted_reference_saddle",
+  "resolved_defaults": {
+    "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
+    "policy": {
+      "route": "newton_krylov",
+      "newton_steps": 10,
+      "gmres_iterations": 30,
+      "warmup": 0,
+      "relaxation": 0.5,
+      "step_cap": 10.0,
+      "active_set_steps": 16,
+      "kernel_tolerance": 1e-12,
+      "qualification_tolerance": 1e-12,
+      "current_pin": true,
+      "settled_exit": true,
+      "own_mask_acceptance": true,
+      "continuation": true,
+      "best_iterate_retention": true,
+      "stagnation_stop": true,
+      "exact_kernels": true,
+      "cached_machine": true,
+      "compilation_cache": true
+    },
+    "deviations": {
+      "kernel_tolerance": 1e-12,
+      "qualification_tolerance": 1e-12
+    },
+    "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+  },
+  "termination_reason": 10,
+  "wall_units": [
+    [
+      0,
+      121,
+      true,
+      "vessel"
+    ]
+  ],
+  "state_file": "f5af729a9-weak-rotation-reactor-static-chord.npz",
+  "support_health": {
+    "counter_positive_control": {
+      "nonfinite_entries": 2,
+      "expected": 2
+    },
+    "integrator": "    def support_current_moments(\n        self,\n        profile,\n        centroid_flux,\n        sample_flux,\n        support,\n    ) -> CellCurrentMoments:\n        \"\"\"Evaluate every nonempty support through one moment callable.\"\"\"\n        if self.moment_geometry is None:\n            raise ValueError(\"moment geometry is required for current moments\")\n        field = flux_field_polynomial(\n            self._support_moment_stencils, centroid_flux, sample_flux\n        )\n        selected = field.active & (jnp.asarray(support.vertex_count) >= 3)\n        moment_integrator = (\n            clipped_support_current_moments\n            if _SUPPORT_CLIP_MODE == \"chord\"\n            else _cell_banked_current_moments\n        )\n        moments = moment_integrator(\n            support,\n            selected,\n            field,\n            profile,\n            cut_cell_capacity=self._cut_cell_bank_capacity,\n        )\n        return CellCurrentMoments(*moments)\n",
+    "capacity_receipt": "no public overflow receipt; recomputed native selected boundary count > cut-cell bank capacity",
+    "cut_cell_capacity": 135,
+    "per_trip": [
+      {
+        "trip": 1,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 2,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 3,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 4,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 5,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 6,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 7,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 8,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 9,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 10,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 11,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 12,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 13,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      },
+      {
+        "trip": 14,
+        "nonfinite_clipped_moment_entries": 0,
+        "nonfinite_entries_per_profile": [
+          0
+        ],
+        "nonfinite_combined_moment_entries": 0,
+        "selected_cut_cells_per_profile": [
+          0
+        ],
+        "cut_cell_capacity_overflow": false
+      }
+    ],
+    "max_nonfinite_clipped_moment_entries": 0
+  },
+  "support_health_status": "measured",
+  "wall_seconds": 530.1841608751565
+}

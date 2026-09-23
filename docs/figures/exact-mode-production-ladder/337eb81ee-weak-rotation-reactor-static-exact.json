@@ -1,0 +1,28 @@
+{
+  "revision": "337eb81ee",
+  "case": "weak-rotation-reactor-static",
+  "clip_mode": "exact",
+  "status": "not-measured",
+  "exception": "Traceback (most recent call last):\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/benchmarks/plasma_cell_production_ladder.py\", line 271, in measure_arm\n    seed, _, seed_receipt = certificate._production_seed(\n                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        profile, args.case, target, centroid, current_receipt\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/337eb81ee/benchmarks/solovev_certificate.py\", line 667, in _production_seed\n    portfolio = profile.cold_seed_portfolio(\n        target_current,\n        centroid,\n        diverted_geometry=geometry,\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/337eb81ee/nova/equilibrium/forward.py\", line 742, in cold_seed_portfolio\n    neutral = self._clip_consistent_seed(\n        neutral,\n        float(plasma_current),\n        TopologyClass.LIMITED,\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/337eb81ee/nova/equilibrium/forward.py\", line 936, in _clip_consistent_seed\n    lower_error = current_error(0.0)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/337eb81ee/nova/equilibrium/forward.py\", line 930, in current_error\n    moments = self.operator.cell_current_moments(\n        shifted(level_fraction), requested_class=requested_class\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/337eb81ee/nova/equilibrium/forward_operator.py\", line 3514, in cell_current_moments\n    self._support_partition(psi, requested_class)\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/337eb81ee/nova/equilibrium/forward_operator.py\", line 3237, in _support_partition\n    profile_support = self._profile_support(\n        masks, topology, physical, sample_psi_norm\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/337eb81ee/nova/equilibrium/forward_operator.py\", line 3334, in _profile_support\n    traced_support = _traced_clip(\n        atomic_mesh.node_coordinates,\n    ...<8 lines>...\n        arc_tracer=_implicit_traced_level_arc,\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/337eb81ee/nova/equilibrium/separatrix_clip.py\", line 1001, in _traced_clip\n    result = jax.vmap(clip_one)(jnp.arange(cells))\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/337eb81ee/nova/equilibrium/separatrix_clip.py\", line 983, in clip_one\n    evaluator = evaluator.for_cell(index)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/337eb81ee/nova/equilibrium/forward_operator.py\", line 518, in for_cell\n    centre=self.centre[index][None, :],\n           ~~~~~~~~~~~^^^^^^^\njax.errors.TracerArrayConversionError: The numpy.ndarray conversion method __array__() was called on traced array with shape int64[]\nThis BatchTracer with object id 139981644062096 was created on line:\n  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/337eb81ee/nova/equilibrium/separatrix_clip.py:1001:13 (_traced_clip)\nSee https://docs.jax.dev/en/latest/errors.html#jax.errors.TracerArrayConversionError\n--------------------\nFor simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.\n",
+  "slurm_job_id": "1276244",
+  "slurm_partition": "betelgeuse",
+  "seed_policy": {
+    "status": "not-built",
+    "type": null,
+    "construction_type": null,
+    "state_sha256": null
+  },
+  "harness_sha256": "8aafea9fd0af78785e460bfd57a8bcd4bd5ea3f1daaed40a484cc0571f7d4092",
+  "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/337eb81ee/nova/__init__.py",
+  "full_revision": "337eb81ee82e139b9f94598554bf49ea27faaafe",
+  "devices": [
+    "cuda:0"
+  ],
+  "device_kinds": [
+    "NVIDIA H200 NVL"
+  ],
+  "wall_seconds": 30.648057186976075,
+  "measurement_complete": true,
+  "exit_status": 1,
+  "producer_log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-production-route-ladder/authorized-retry/337eb81ee-weak-rotation-reactor-static-exact.log"
+}

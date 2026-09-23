@@ -1,0 +1,1170 @@
+"""Measure certificate production solves across isolated source revisions.
+
+The observer copies selected trip states from the native reconcile function.
+It leaves every operand, branch and return value intact; support health is
+recomputed after the solve from those states with the revision's own integrator.
+"""
+
+from __future__ import annotations
+
+import argparse
+import fcntl
+import hashlib
+import inspect
+import json
+import math
+import os
+from pathlib import Path
+import subprocess
+import sys
+from time import perf_counter, sleep
+import traceback
+
+
+REVISIONS = (
+    "9aebe5fae",
+    "b43714114",
+    "08dd0dda1",
+    "ee17f9570",
+    "2e38dc877",
+    "337eb81ee",
+    "23a8522b6",
+    "450bab78a",
+    "a17431153",
+    "f5af729a9",
+)
+CASES = ("diverted-single-null", "weak-rotation-reactor-static")
+STEM = "production-route-ladder"
+NEGATIVE_CONTROL = (
+    "run the main rung with the production route in chord clip mode (the current "
+    "production default) and observe whether it converges, so the receipt "
+    "separates exact clip mode from the route itself"
+)
+
+
+def strict_json(value):
+    """Retain missing numerical values as JSON nulls, never nonstandard tokens."""
+    if isinstance(value, dict):
+        return {key: strict_json(item) for key, item in value.items()}
+    if isinstance(value, list | tuple):
+        return [strict_json(item) for item in value]
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if hasattr(value, "tolist"):
+        return strict_json(value.tolist())
+    return value
+
+
+def write_json(path, payload):
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.pending")
+    temporary.write_text(
+        json.dumps(strict_json(payload), indent=2, allow_nan=False) + "\n"
+    )
+    temporary.replace(path)
+
+
+def finite_float(value):
+    scalar = float(value)
+    return scalar if math.isfinite(scalar) else None
+
+
+def nulls(operator, state):
+    import jax.numpy as jnp
+    import numpy as np
+
+    state = jnp.asarray(state)
+    _, topology = operator.read(state)
+    if hasattr(operator, "null_flux_pool"):
+        pool = operator.null_flux_pool(state)
+    elif hasattr(operator, "_null_flux_pool"):
+        pool = operator._null_flux_pool(state)
+    else:
+        pool, _ = operator.topology.split_flux_map(state)
+    census = operator._fixed_design_topology.grid.candidate_table_status(pool)
+    assert int(census["retained_count"][0]) > 0, "known-present axis was not read"
+    candidates = np.asarray(census["retained_candidate"])[1]
+    valid = np.asarray(census["retained_valid"])[1]
+
+    def point(value):
+        array = np.asarray(value)
+        return array.tolist() if np.all(np.isfinite(array)) else None
+
+    return {
+        "axis_rz_m": point(topology.axis),
+        "x_point_rz_m": point(topology.x_point),
+        "qualified_saddles_rz_m": candidates[valid, :2].tolist(),
+        "retained_count": np.asarray(census["retained_count"]).tolist(),
+        "axis_flux_wb": finite_float(topology.axis_flux),
+        "boundary_flux_wb": finite_float(topology.boundary_flux),
+    }
+
+
+def observe_trips():
+    """Insert a host observation at the native selected-state boundary."""
+    import numpy as np
+    from nova.equilibrium import fixed_point
+
+    states = {}
+
+    def capture(active, index, state, residual):
+        if bool(active):
+            states[int(index)] = (np.asarray(state).copy(), float(residual))
+
+    native = fixed_point._active_set_newton_krylov
+    source = inspect.getsource(native)
+    marker = "        if stream_active_set:\n"
+    assert source.count(marker) == 1, "trip observation boundary is ambiguous"
+    insertion = (
+        "        jax.debug.callback(_capture_trip, trip_active, index, "
+        "selected_state, selected_residual, ordered=True)\n"
+    )
+    namespace = dict(native.__globals__, _capture_trip=capture)
+    exec(
+        compile(
+            source.replace(marker, insertion + marker), inspect.getfile(native), "exec"
+        ),
+        namespace,
+    )
+    fixed_point._active_set_newton_krylov = namespace[native.__name__]
+    return states, {
+        "method": "host callback copies selected state at native trip reconcile",
+        "native_function_sha256": hashlib.sha256(source.encode()).hexdigest(),
+        "inserted_statement": insertion.strip(),
+        "solver_values_modified": False,
+    }
+
+
+def support_reader(operator):
+    """Return a compiled native-moment census with explicit overflow provenance."""
+    import jax
+    import jax.numpy as jnp
+    from nova.equilibrium.forward_operator import flux_field_polynomial
+
+    def count_nonfinite(values):
+        return sum(jnp.sum(~jnp.isfinite(value)) for value in values)
+
+    positive = int(count_nonfinite((jnp.array([0.0, jnp.nan, jnp.inf]),)))
+    assert positive == 2, "non-finite counter missed two known-present entries"
+
+    @jax.jit
+    def read(state):
+        masks, _, samples, support = operator._support_partition(state)
+        if hasattr(operator, "_moment_support_masks"):
+            masks = operator._moment_support_masks(masks, support)
+        counts = []
+        cuts = []
+
+        def integrate(profile, centroid_flux, sample_flux, selected_support):
+            values = operator.support_current_moments(
+                profile, centroid_flux, sample_flux, selected_support
+            )
+            field = flux_field_polynomial(
+                operator._support_moment_stencils, centroid_flux, sample_flux
+            )
+            selected = field.active & (selected_support.vertex_count >= 3)
+            cuts.append(jnp.sum(selected & selected_support.boundary))
+            counts.append(count_nonfinite(values))
+            return values
+
+        moments = operator.source.current_moments(
+            masks, integrate, support, sample_flux=samples
+        )
+        assert counts, "native clipped-support moment callable was not reached"
+        return jnp.stack(counts), jnp.stack(cuts), count_nonfinite(moments)
+
+    source = inspect.getsource(type(operator).support_current_moments)
+    return read, {
+        "counter_positive_control": {"nonfinite_entries": positive, "expected": 2},
+        "integrator": source,
+        "capacity_receipt": (
+            "no public overflow receipt; recomputed native selected boundary "
+            "count > cut-cell bank capacity"
+        ),
+        "cut_cell_capacity": int(operator._cut_cell_bank_capacity),
+    }
+
+
+def seed_policy_receipt(request, construction):
+    """Describe the native construction and the exact state passed to the seam."""
+    import numpy as np
+
+    policy = request.seed_policy
+    state = np.asarray(policy.state)
+    return {
+        "status": "measured",
+        "type": f"{type(policy).__module__}.{type(policy).__qualname__}",
+        "construction_type": construction["construction"],
+        "factory": construction["factory"],
+        "state_sha256": hashlib.sha256(state.tobytes(order="C")).hexdigest(),
+        "state_dtype": str(state.dtype),
+        "state_shape": list(state.shape),
+        "seed_radius_m": construction.get("seed_radius_m"),
+    }
+
+
+def measure_arm(args):
+    row = {
+        "revision": args.revision,
+        "case": args.case,
+        "clip_mode": args.mode,
+        "status": "not-measured",
+        "exception": None,
+        "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+        "slurm_partition": os.environ.get("SLURM_JOB_PARTITION"),
+        "seed_policy": {
+            "status": "not-built",
+            "type": None,
+            "construction_type": None,
+            "state_sha256": None,
+        },
+        "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    }
+    write_json(args.output, row)
+    started = perf_counter()
+    try:
+        import nova
+        import jax
+        from nova.jax.config import configure_dtypes
+
+        configure_dtypes()
+        assert jax.config.jax_enable_x64 is True
+        import jax.numpy as jnp
+        import numpy as np
+        from benchmarks import solovev_certificate as certificate
+        from nova.equilibrium.forward import ForwardProfile
+        from nova.equilibrium.forward_operator import set_support_clip_mode
+        from nova.equilibrium.stencil_mesh import StencilMesh
+        from scripts.analytic_oracle_fixtures import measure as fixture
+        from scripts.oracle_rebaseline import measure as recovery
+
+        row["nova_file"] = str(Path(nova.__file__).resolve())
+        row["full_revision"] = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], text=True
+        ).strip()
+        assert Path(row["nova_file"]).is_relative_to(Path.cwd())
+        assert row["full_revision"].startswith(args.revision)
+        assert jax.default_backend() == "gpu"
+        assert jax.devices("cpu"), "trip observation needs a local CPU device"
+        print(f"NOVA_FILE {row['nova_file']}", flush=True)
+        row["devices"] = [str(device) for device in jax.devices()]
+        row["device_kinds"] = [device.device_kind for device in jax.devices()]
+        set_support_clip_mode(args.mode)
+        carrier, source, exact = certificate._case(args.case)
+        machine = certificate._case_machine(args.case, carrier, exact, -110)
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
+        )
+        analytic = certificate._exact_state(args.case, exact, coordinates)
+        empty = fixture.forward_operator(source, machine)
+        moments, exterior, fixture_cache = fixture.cached_fixture_exterior(
+            source, exact, machine, empty, analytic
+        )
+        operator = fixture.forward_operator(source, machine, exterior)
+        profile = ForwardProfile(
+            operator,
+            StencilMesh(machine.node, machine.stencil, machine.area),
+            newton_steps=recovery.NEWTON_STEPS,
+        )
+        target, centroid, current_receipt = certificate._closed_form_current_target(
+            args.case, source, operator, moments
+        )
+        seed, _, seed_receipt = certificate._production_seed(
+            profile, args.case, target, centroid, current_receipt
+        )
+        seed_moments = operator.cell_current_moments(seed)
+        seed_amplitude = float(
+            operator.current_normalisation_amplitude(
+                target, jnp.sum(seed_moments.cell_current)
+            )
+        )
+        identity = f"solovev:{args.case}:-110"
+        request = certificate._certificate_solve_request(
+            profile, seed, float(target), carrier_identity=identity
+        )
+        row["seed_policy"] = seed_policy_receipt(request, seed_receipt)
+        write_json(args.output, row)
+        reference = nulls(operator, analytic)
+        row.update(
+            {
+                "realised_cells": len(machine.node),
+                "carrier_identity": identity,
+                "reference_nulls": reference,
+                "seed_receipt": seed_receipt,
+                "seed_amplitude": finite_float(seed_amplitude),
+                "fixture_cache": fixture_cache,
+                "current_receipt": current_receipt,
+                "seed_sha256": hashlib.sha256(np.asarray(seed).tobytes()).hexdigest(),
+                "active_set_budget": request.policy.active_set_steps,
+            }
+        )
+        write_json(args.output, row)
+        trip_states, row["observer"] = observe_trips()
+        solve = profile.solve(request)
+        terminal = np.asarray(jax.block_until_ready(solve.equilibrium.flux))
+        jax.effects_barrier()
+        history = solve.equilibrium.fixed_point
+        trips = int(history.active_set_iterations)
+        residuals = np.asarray(history.active_set_residuals)[:trips]
+        assert sorted(trip_states) == list(range(trips)), (
+            "trip state census is incomplete"
+        )
+        np.testing.assert_allclose(
+            [trip_states[i][1] for i in range(trips)], residuals, rtol=1e-13, atol=0
+        )
+        terminal_nulls = nulls(operator, terminal)
+        reference_x, terminal_x = (
+            reference["x_point_rz_m"],
+            terminal_nulls["x_point_rz_m"],
+        )
+        row.update(
+            {
+                "status": "measured",
+                "converged": bool(history.converged),
+                "qualified": bool(solve.qualified),
+                "trip_count": trips,
+                "terminal_residual": finite_float(history.residual),
+                "per_trip_residual_history": [
+                    {"trip": i + 1, "residual": finite_float(r)}
+                    for i, r in enumerate(residuals)
+                ],
+                "terminal_nulls": terminal_nulls,
+                "terminal_axis_rz_m": terminal_nulls["axis_rz_m"],
+                "terminal_x_point_rz_m": terminal_x,
+                "reference_axis_rz_m": reference["axis_rz_m"],
+                "reference_x_point_rz_m": reference_x,
+                "x_point_distance_m": float(
+                    np.linalg.norm(np.asarray(terminal_x) - reference_x)
+                )
+                if reference_x is not None and terminal_x is not None
+                else None,
+                "x_point_distance_status": "measured"
+                if reference_x is not None and terminal_x is not None
+                else "no_admitted_reference_saddle"
+                if reference_x is None
+                else "terminal_saddle_absent",
+                "resolved_defaults": solve.resolved_defaults.to_dict(),
+                "termination_reason": int(solve.termination_reason),
+                "wall_units": [
+                    [int(a), int(b), bool(c), k]
+                    for a, b, c, k in zip(
+                        operator.wall_unit_offsets[:-1],
+                        operator.wall_unit_offsets[1:],
+                        operator.wall_unit_closed,
+                        operator.wall_unit_kinds,
+                        strict=True,
+                    )
+                ],
+            }
+        )
+        state_path = args.output.with_suffix(".npz")
+        np.savez(
+            state_path,
+            coordinates=coordinates,
+            wall=machine.wall_node,
+            analytic=analytic,
+            terminal=terminal,
+            seed=np.asarray(request.seed_policy.state),
+            trip_states=np.stack([trip_states[i][0] for i in range(trips)]),
+        )
+        row["state_file"] = state_path.name
+        write_json(args.output, row)
+        reader, health = support_reader(operator)
+        health["per_trip"] = []
+        for index in range(trips):
+            counts, cuts, total = jax.device_get(
+                reader(jnp.asarray(trip_states[index][0]))
+            )
+            health["per_trip"].append(
+                {
+                    "trip": index + 1,
+                    "nonfinite_clipped_moment_entries": int(np.sum(counts)),
+                    "nonfinite_entries_per_profile": counts.tolist(),
+                    "nonfinite_combined_moment_entries": int(total),
+                    "selected_cut_cells_per_profile": cuts.tolist(),
+                    "cut_cell_capacity_overflow": bool(
+                        np.any(cuts > health["cut_cell_capacity"])
+                    ),
+                }
+            )
+        health["max_nonfinite_clipped_moment_entries"] = max(
+            x["nonfinite_clipped_moment_entries"] for x in health["per_trip"]
+        )
+        row["support_health"] = health
+        row["support_health_status"] = "measured"
+        print(
+            f"RESULT converged={row['converged']} trips={trips} "
+            f"residual={row['terminal_residual']} "
+            f"nonfinite={health['max_nonfinite_clipped_moment_entries']}",
+            flush=True,
+        )
+    except Exception:
+        row["exception"] = traceback.format_exc()
+        if row["status"] == "measured":
+            row["support_health_status"] = "not-measured"
+        print(row["exception"], flush=True)
+    row["wall_seconds"] = perf_counter() - started
+    write_json(args.output, row)
+    return int(
+        row["status"] != "measured" or row.get("support_health_status") != "measured"
+    )
+
+
+def finished_receipt(path):
+    """Distinguish a terminal arm from its durable construction checkpoint."""
+    if not path.exists():
+        return None
+    row = json.loads(path.read_text())
+    if row.get("measurement_complete") or isinstance(
+        row.get("wall_seconds"), int | float
+    ):
+        return row
+    return None
+
+
+def arm(args):
+    """Keep the first completed arm while serializing competing producers."""
+    lock_path = args.output.with_suffix(".lock")
+    with lock_path.open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        existing = finished_receipt(args.output)
+        if existing is not None:
+            print(
+                f"REUSE {args.revision} {args.case} {args.mode} "
+                f"producer_job={existing.get('slurm_job_id')}",
+                flush=True,
+            )
+            return int(existing.get("exit_status", existing["status"] != "measured"))
+        status = measure_arm(args)
+        row = json.loads(args.output.read_text())
+        row["measurement_complete"] = True
+        row["exit_status"] = status
+        log = getattr(args, "log", None)
+        if log is None:
+            try:
+                target = os.readlink("/proc/self/fd/1")
+                log = target if target.startswith("/") else None
+            except OSError:
+                log = None
+        row["producer_log"] = None if log is None else str(log)
+        write_json(args.output, row)
+        return status
+
+
+def collect_rows(output):
+    """Assemble terminal files from their actual producers, regardless of order."""
+    rows = []
+    for revision in REVISIONS:
+        for case in CASES:
+            modes = ("exact", "chord") if revision == REVISIONS[-1] else ("exact",)
+            for mode in modes:
+                path = output / f"{revision}-{case}-{mode}.json"
+                row = finished_receipt(path)
+                if row is None:
+                    continue
+                assert row.get("slurm_job_id"), "terminal arm has no producer job"
+                expected = (revision, case, mode)
+                actual = (row["revision"], row["case"], row["clip_mode"])
+                assert actual == expected, f"receipt identity differs: {path}"
+                row.setdefault("exit_status", int(row["status"] != "measured"))
+                row["log"] = row.get("producer_log") or row.get("log")
+                rows.append(row)
+    return rows
+
+
+def assemble(output):
+    """Read every finished rung and preserve the allocation split as evidence."""
+    jobs = [
+        json.loads(path.read_text())
+        for path in sorted(output.glob("production-route-execution-*.json"))
+    ]
+    rows = collect_rows(output)
+    payload = {
+        "revision_ladder": list(REVISIONS),
+        "requested_cells": 110,
+        "route": "certificate production current-moment seed",
+        "negative_control": NEGATIVE_CONTROL,
+        "execution_jobs": jobs,
+        "execution_job_count": len(jobs),
+        "execution_reason": (
+            "The newest-first H200 allocation had about 1h50 remaining for six "
+            "rungs at about 20 minutes per rung. A second, explicitly authorized "
+            "titan allocation starts at the oldest decisive revisions so the "
+            "H200 time limit cannot discard every early convergence control."
+        ),
+        "receipt_selection": (
+            "first terminal file per revision, case and clip mode; per-arm file "
+            "lock prevents replacement by a later producer"
+        ),
+        "rows": rows,
+        "attribution": attribution(rows),
+    }
+    payload["gate_passed"] = evidence_complete(payload)
+    payload["status"] = "complete" if payload["gate_passed"] else "incomplete"
+    return payload
+
+
+def job_in_queue(job):
+    result = subprocess.run(
+        ["squeue", "-h", "-j", job, "-o", "%i"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return bool(result.stdout.strip())
+
+
+def segment(args):
+    """Measure an ordered subset and publish after the other assembler stops."""
+    args.output.mkdir(parents=True, exist_ok=True)
+    args.logs.mkdir(parents=True, exist_ok=True)
+    job = os.environ["SLURM_JOB_ID"]
+    descriptor = {
+        "job_id": job,
+        "partition": os.environ.get("SLURM_JOB_PARTITION"),
+        "revision_order": args.revisions,
+        "cases": list(CASES),
+        "clip_mode": "exact",
+        "reason": "oldest-first coverage of decisive controls before time limits",
+        "peer_job": args.peer_job,
+    }
+    write_json(args.output / f"production-route-execution-{job}.json", descriptor)
+    snapshot = args.logs / "assembled-receipt.json"
+    for revision in args.revisions:
+        for case in CASES:
+            name = f"{revision}-{case}-exact"
+            path = args.output / f"{name}.json"
+            log = args.logs / f"{name}.log"
+            tree = args.scratch / revision
+            command = [
+                sys.executable,
+                str(Path(__file__).resolve()),
+                "arm",
+                "--revision",
+                revision,
+                "--case",
+                case,
+                "--mode",
+                "exact",
+                "--output",
+                str(path),
+                "--log",
+                str(log),
+            ]
+            with log.open("w") as stream:
+                stream.write(
+                    f"revision={revision} tree={tree} command={json.dumps(command)}\n"
+                )
+                stream.flush()
+                result = subprocess.run(
+                    command,
+                    cwd=tree,
+                    env=dict(os.environ, PYTHONPATH=str(tree)),
+                    stdout=stream,
+                    stderr=subprocess.STDOUT,
+                    check=False,
+                )
+            print(f"SEGMENT_ROW {revision} {case} exit={result.returncode}", flush=True)
+            write_json(snapshot, assemble(args.output))
+    print(f"WAIT_FOR_ASSEMBLER job={args.peer_job}", flush=True)
+    while job_in_queue(args.peer_job):
+        sleep(30)
+    accounting = subprocess.check_output(
+        ["sacct", "-j", args.peer_job, "--format=JobID,State,Elapsed,ExitCode", "-P"],
+        text=True,
+    )
+    (args.logs / "peer-scheduler.log").write_text(accounting)
+    payload = assemble(args.output)
+    write_json(args.output / f"{STEM}.json", payload)
+    render(payload, args.output)
+    write_json(args.output / f"{STEM}.json", payload)
+    write_json(snapshot, payload)
+    print(f"ASSEMBLY_COMPLETE gate_passed={payload['gate_passed']}", flush=True)
+    return int(not payload["gate_passed"])
+
+
+def attribution(rows):
+    result = {}
+    for case in CASES:
+        ordered = [
+            next(
+                (
+                    r
+                    for r in rows
+                    if r["case"] == case
+                    and r["revision"] == rev
+                    and r["clip_mode"] == "exact"
+                ),
+                None,
+            )
+            for rev in REVISIONS
+        ]
+        measured = [r for r in ordered if r and r["status"] == "measured"]
+        transitions = [
+            {"predecessor": a["revision"], "first_nonconverged": b["revision"]}
+            for a, b in zip(ordered, ordered[1:])
+            if a
+            and b
+            and a["status"] == b["status"] == "measured"
+            and a["converged"]
+            and not b["converged"]
+        ]
+        verdict = (
+            "converged_to_nonconverged_transition"
+            if transitions
+            else "all_measured_revisions_converged"
+            if measured and all(r["converged"] for r in measured)
+            else "all_measured_revisions_unconverged"
+            if measured and all(not r["converged"] for r in measured)
+            else "no_adjacent_transition_attributed"
+        )
+        result[case] = {
+            "verdict": verdict,
+            "first_transition": transitions[0] if transitions else None,
+            "attempted": sum(
+                r is not None
+                and (r["status"] != "not-run" or bool(r.get("source_receipt")))
+                for r in ordered
+            ),
+            "measured": len(measured),
+            "unmeasured_revisions": [
+                rev
+                for rev, r in zip(REVISIONS, ordered, strict=True)
+                if not r or r["status"] != "measured"
+            ],
+        }
+    return result
+
+
+def draw_nulls(axis, reading, units, style):
+    import numpy as np
+    from nova.media import poloidal
+
+    admitted = reading["x_point_rz_m"]
+    others = np.asarray(reading["qualified_saddles_rz_m"]).reshape(-1, 2)
+    if admitted is not None:
+        others = others[np.linalg.norm(others - admitted, axis=1) > 1e-10]
+    return poloidal.draw_nulls(
+        axis,
+        magnetic_axis=reading["axis_rz_m"],
+        x_points=admitted,
+        other_x_points=others,
+        contain=units,
+        style=style,
+    )
+
+
+def render(payload, output):
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from benchmarks import solovev_certificate as certificate
+    from nova.media import poloidal
+    from nova.media.ink import DEFAULT_INK, poloidal_axes
+    from nova.media.sources.frame import WallUnit
+
+    rows = {
+        r["revision"]: r
+        for r in payload["rows"]
+        if r["case"] == CASES[0] and r["clip_mode"] == "exact"
+    }
+    measured = [
+        rows[r] for r in REVISIONS if r in rows and rows[r]["status"] == "measured"
+    ]
+    if not measured:
+        return
+    ref = measured[0]["reference_nulls"]
+    with np.load(output / measured[0]["state_file"]) as data:
+        levels = poloidal.contour_levels(
+            data["analytic"],
+            count=15,
+            axis=ref["axis_flux_wb"],
+            boundary=ref["boundary_flux_wb"],
+        )
+    payload["shared_contour_levels_wb"] = levels.tolist()
+    panel_rows = (len(measured) + 2) // 3
+    figure = plt.figure(figsize=(15, 4 * panel_rows + 2), constrained_layout=True)
+    grid = figure.add_gridspec(
+        panel_rows + 1, 3, height_ratios=[1] * panel_rows + [0.65]
+    )
+    reference_style = DEFAULT_INK.variant(
+        axis_color="#3366cc",
+        xpoint_color="#3366cc",
+        axis_markersize=9,
+        xpoint_markersize=11,
+    )
+    terminal_style = DEFAULT_INK.variant(axis_markersize=4, xpoint_markersize=5)
+    for index, row in enumerate(measured):
+        revision = row["revision"]
+        axis = figure.add_subplot(grid[index // 3, index % 3])
+        poloidal_axes(axis)
+        with np.load(output / row["state_file"]) as data:
+            units = tuple(
+                WallUnit(data["wall"][a:b, 0], data["wall"][a:b, 1], closed=c, kind=k)
+                for a, b, c, k in row["wall_units"]
+            )
+            segments = []
+            for field, color in (("analytic", "#91ace2"), ("terminal", "#444444")):
+                radial, vertical, raster = certificate._raster_field(
+                    data["coordinates"], data[field], data["wall"]
+                )
+                contours = poloidal.draw_flux_contours(
+                    axis, radial, vertical, raster, levels, color=color
+                )
+                count = sum(
+                    len(part) > 1 for group in contours.allsegs for part in group
+                )
+                assert count > 0, "known-present contour field was not rendered"
+                segments.append(count)
+            poloidal.draw_wall(axis, units=units)
+            reference_marks = draw_nulls(
+                axis, row["reference_nulls"], units, reference_style
+            )
+            terminal_marks = draw_nulls(
+                axis, row["terminal_nulls"], units, terminal_style
+            )
+        bad = row.get("support_health", {}).get(
+            "max_nonfinite_clipped_moment_entries", "unmeasured"
+        )
+        caption = (
+            f"{revision} | converged={row['converged']}\n"
+            f"trips={row['trip_count']} | "
+            f"residual={row['terminal_residual']:.6g}\n"
+            f"non-finite moment entries (max/trip)={bad}"
+        )
+        axis.set_title(caption, fontsize=9)
+        row["panel"] = {
+            "caption": caption,
+            "axis_off": not axis.axison,
+            "contour_segments": segments,
+            "reference_markers": reference_marks,
+            "terminal_markers": terminal_marks,
+        }
+    trend = figure.add_subplot(grid[panel_rows, :])
+    for case, color in zip(CASES, ("#444444", "#bb5533"), strict=True):
+        values = {
+            r["revision"]: r.get("terminal_residual")
+            for r in payload["rows"]
+            if r["case"] == case and r["clip_mode"] == "exact"
+        }
+        trend.plot(
+            range(len(REVISIONS)),
+            [values.get(r) or np.nan for r in REVISIONS],
+            "o-",
+            color=color,
+            label=case,
+        )
+    trend.set_xticks(range(len(REVISIONS)), REVISIONS, rotation=25)
+    trend.set_yscale("log")
+    trend.set_ylabel("Terminal residual")
+    trend.legend(fontsize=9)
+    trend.spines[["top", "right"]].set_visible(False)
+    figure.suptitle(
+        "Certificate production route in exact clip mode — diverted case", fontsize=16
+    )
+    figure.supxlabel(
+        "Blue contours and large blue nulls: analytic state. "
+        "Gray contours and small red nulls: terminal state.\n"
+        "Triangles: axes; filled crosses: admitted saddles; "
+        "hollow crosses: other qualified saddles. One shared physical level array.",
+        fontsize=10,
+    )
+    figure.savefig(output / f"{STEM}.png", dpi=160)
+    figure.savefig(output / f"{STEM}.svg")
+    plt.close(figure)
+
+
+def measure(args):
+    args.output.mkdir(parents=True, exist_ok=True)
+    args.logs.mkdir(parents=True, exist_ok=True)
+    path = args.output / f"{STEM}.json"
+    payload = {
+        "revision_ladder": list(REVISIONS),
+        "execution_order": list(reversed(REVISIONS)),
+        "requested_cells": 110,
+        "route": "certificate production current-moment seed",
+        "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+        "slurm_partition": os.environ.get("SLURM_JOB_PARTITION"),
+        "negative_control": NEGATIVE_CONTROL,
+        "rows": [],
+    }
+    write_json(path, payload)
+    tasks = [(r, c, "exact") for r in reversed(REVISIONS) for c in CASES]
+    tasks[2:2] = [(REVISIONS[-1], c, "chord") for c in CASES]
+    for revision, case, mode in tasks:
+        tree = args.scratch / revision
+        name = f"{revision}-{case}-{mode}"
+        row_path = args.output / f"{name}.json"
+        log = args.logs / f"{name}.log"
+        command = [
+            sys.executable,
+            str(Path(__file__).resolve()),
+            "arm",
+            "--revision",
+            revision,
+            "--case",
+            case,
+            "--mode",
+            mode,
+            "--output",
+            str(row_path),
+        ]
+        with log.open("w") as stream:
+            if mode == "chord":
+                stream.write(NEGATIVE_CONTROL + "\n")
+            stream.write(
+                f"revision={revision} tree={tree} command={json.dumps(command)}\n"
+            )
+            stream.flush()
+            result = subprocess.run(
+                command,
+                cwd=tree,
+                env=dict(os.environ, PYTHONPATH=str(tree)),
+                stdout=stream,
+                stderr=subprocess.STDOUT,
+                check=False,
+            )
+        row = (
+            json.loads(row_path.read_text())
+            if row_path.exists()
+            else {
+                "revision": revision,
+                "case": case,
+                "clip_mode": mode,
+                "status": "not-measured",
+                "exception": f"subprocess exited {result.returncode} without receipt",
+            }
+        )
+        row.update(log=str(log), exit_status=result.returncode)
+        payload["rows"].append(row)
+        payload["attribution"] = attribution(payload["rows"])
+        write_json(path, payload)
+        render(payload, args.output)
+        write_json(path, payload)
+        print(
+            f"ROW {revision} {case} {mode}: {row['status']} "
+            f"residual={row.get('terminal_residual')}",
+            flush=True,
+        )
+    payload["gate_passed"] = evidence_complete(payload)
+    payload["status"] = "complete" if payload["gate_passed"] else "incomplete"
+    write_json(path, payload)
+    print(f"MEASUREMENT_COMPLETE gate_passed={payload['gate_passed']}", flush=True)
+    return int(not payload["gate_passed"])
+
+
+def evidence_complete(payload):
+    """Refuse a complete ladder when an expected arm or health census is absent."""
+    optional_build_failures = {"08dd0dda1", "ee17f9570", "2e38dc877"}
+    expected = {(revision, case, "exact") for revision in REVISIONS for case in CASES}
+    expected |= {(REVISIONS[-1], case, "chord") for case in CASES}
+    rows = payload["rows"]
+    identities = {(row["revision"], row["case"], row["clip_mode"]) for row in rows}
+    if identities != expected or len(rows) != len(expected):
+        return False
+    return all(
+        (
+            row["status"] == "measured"
+            and row.get("support_health_status") == "measured"
+            and len(row["support_health"]["per_trip"]) == row["trip_count"]
+            and row["exit_status"] == 0
+            and row.get("seed_policy", {}).get("status") == "measured"
+            and bool(row["seed_policy"].get("type"))
+            and bool(row["seed_policy"].get("construction_type"))
+            and len(row["seed_policy"].get("state_sha256", "")) == 64
+        )
+        or (
+            row["revision"] in optional_build_failures
+            and row["status"] == "not-measured"
+            and bool(row.get("exception"))
+        )
+        for row in rows
+    )
+
+
+def partial_rows(output):
+    """Account for every requested arm without inventing missing observations."""
+    rows = []
+    for revision in REVISIONS:
+        for case in CASES:
+            modes = ("exact", "chord") if revision == REVISIONS[-1] else ("exact",)
+            for mode in modes:
+                path = output / f"{revision}-{case}-{mode}.json"
+                if path.exists():
+                    row = json.loads(path.read_text())
+                    row["raw_status"] = row["status"]
+                    if (
+                        row["status"] == "measured"
+                        and row.get("support_health_status") == "measured"
+                    ):
+                        row["status"] = "measured"
+                    elif row.get("exception"):
+                        row["status"] = "not-built"
+                        row["failure_stage"] = (
+                            "terminal_receipt_qualification"
+                            if "_terminal_polish_receipt" in row["exception"]
+                            else "construction_or_solve_receipt"
+                        )
+                    else:
+                        row["status"] = "not-run"
+                        row["not_run_reason"] = (
+                            "started but interrupted before a terminal receipt; "
+                            "no exception was recorded"
+                        )
+                    row["source_receipt"] = path.name
+                else:
+                    row = {
+                        "revision": revision,
+                        "case": case,
+                        "clip_mode": mode,
+                        "status": "not-run",
+                        "slurm_job_id": None,
+                        "not_run_reason": (
+                            "arm was not reached before the allocation ended"
+                        ),
+                        "seed_policy": {
+                            "status": "not-built",
+                            "type": None,
+                            "construction_type": None,
+                            "state_sha256": None,
+                        },
+                    }
+                rows.append(row)
+    return rows
+
+
+def partial_receipt_complete(payload):
+    """Accept unmeasured arms only in a terminal, populated partial record."""
+    expected = {(r, c, "exact") for r in REVISIONS for c in CASES}
+    expected |= {(REVISIONS[-1], c, "chord") for c in CASES}
+    rows = payload["rows"]
+    identities = {(r["revision"], r["case"], r["clip_mode"]) for r in rows}
+    state = payload.get("gate_job_state", "")
+    if (
+        identities != expected
+        or len(rows) != len(expected)
+        or not payload.get("gate_job_id")
+        or not state.startswith(
+            (
+                "COMPLETED",
+                "TIMEOUT",
+                "CANCELLED",
+                "FAILED",
+                "OUT_OF_MEMORY",
+                "NODE_FAIL",
+                "PREEMPTED",
+            )
+        )
+    ):
+        return False
+    measured = [r for r in rows if r["status"] == "measured"]
+    if not measured:
+        return False
+    for row in rows:
+        if row["status"] == "measured":
+            if (
+                not row.get("slurm_job_id")
+                or row.get("support_health_status") != "measured"
+                or len(row.get("support_health", {}).get("per_trip", []))
+                != row.get("trip_count")
+                or not isinstance(row.get("converged"), bool)
+                or row.get("terminal_residual") is None
+                or len(row.get("seed_policy", {}).get("state_sha256", "")) != 64
+            ):
+                return False
+        elif row["status"] == "not-built":
+            if not row.get("exception"):
+                return False
+        elif row["status"] == "not-run":
+            if not row.get("not_run_reason"):
+                return False
+        else:
+            return False
+    return True
+
+
+def partial_conclusion(rows):
+    """Compare rounded values while retaining their full numerical precision."""
+    comparison = {}
+    for case in CASES:
+        selected = [
+            next(
+                (
+                    r
+                    for r in rows
+                    if r["revision"] == revision
+                    and r["case"] == case
+                    and r["clip_mode"] == "exact"
+                    and r["status"] == "measured"
+                ),
+                None,
+            )
+            for revision in REVISIONS[-3:]
+        ]
+        rounded = [
+            None if row is None else format(row["terminal_residual"], ".5g")
+            for row in selected
+        ]
+        comparison[case] = {
+            "revisions": list(REVISIONS[-3:]),
+            "residuals": [
+                None if r is None else r["terminal_residual"] for r in selected
+            ],
+            "five_significant_digits": rounded,
+            "identical_to_five_significant_digits": None not in rounded
+            and len(set(rounded)) == 1,
+        }
+    chords = [r for r in rows if r["clip_mode"] == "chord"]
+    older_missing = [
+        {"revision": r["revision"], "case": r["case"], "status": r["status"]}
+        for r in rows
+        if r["revision"] in REVISIONS[:-3] and r["status"] != "measured"
+    ]
+    return {
+        "newest_three": comparison,
+        "main_chord_unconverged": len(chords) == len(CASES)
+        and all(r["status"] == "measured" and not r["converged"] for r in chords),
+        "decisive_unmeasured_arms": older_missing,
+        "attribution": (
+            "not-attributed: decisive older arms are unavailable to this driver"
+            if older_missing
+            else "all older arms measured; see transition receipts"
+        ),
+        "adapter_scope": (
+            "per-revision construction and receipt adapters are outside this node"
+        ),
+    }
+
+
+def finalize_partial(args):
+    """Publish an honest partial ladder after its scientific allocation ends."""
+    if job_in_queue(args.gate_job):
+        raise RuntimeError(
+            "refusing partial finalization while the gate job is in queue"
+        )
+    args.logs.mkdir(parents=True, exist_ok=True)
+    command = [
+        "sacct",
+        "-j",
+        args.gate_job,
+        "--format=JobID,State,Elapsed,ExitCode",
+        "-P",
+    ]
+    accounting = subprocess.check_output(command, text=True)
+    (args.logs / "gate-scheduler.log").write_text(accounting)
+    records = [line.split("|") for line in accounting.splitlines()[1:]]
+    gate = next(row for row in records if row[0] == args.gate_job)
+    payload = assemble(args.output)
+    payload["assembly_provenance"] = {
+        "revision": subprocess.check_output(
+            [
+                "git",
+                "-C",
+                str(Path(__file__).resolve().parents[1]),
+                "rev-parse",
+                "HEAD",
+            ],
+            text=True,
+        ).strip(),
+        "driver_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+        "command": [sys.executable, *sys.argv],
+    }
+    print("ASSEMBLY_SOURCE " + json.dumps(payload["assembly_provenance"]), flush=True)
+    payload["full_ladder_gate_passed"] = payload["gate_passed"]
+    payload["rows"] = partial_rows(args.output)
+    payload.update(
+        gate_job_id=args.gate_job,
+        gate_job_state=gate[1],
+        gate_job_elapsed=gate[2],
+        gate_job_exit_code=gate[3],
+        coverage="partial",
+        acceptance="explicit partial-ladder closure",
+        status_semantics={
+            "measured": "terminal solve and support-health receipt available",
+            "not-built": (
+                "driver could not produce the complete certificate arm; "
+                "exception and failure stage retained"
+            ),
+            "not-run": (
+                "unattempted or interrupted before a terminal receipt; "
+                "no exception invented"
+            ),
+        },
+    )
+    payload["attribution"] = attribution(payload["rows"])
+    payload["conclusion"] = partial_conclusion(payload["rows"])
+    data_qualified = partial_receipt_complete(payload)
+    payload["gate_passed"] = False
+    payload["status"] = "rendering" if data_qualified else "incomplete"
+    write_json(args.output / f"{STEM}.json", payload)
+    if not data_qualified:
+        raise RuntimeError("partial receipt failed explicit coverage validation")
+    render(payload, args.output)
+    panels = [
+        row
+        for row in payload["rows"]
+        if row["case"] == CASES[0]
+        and row["clip_mode"] == "exact"
+        and row["status"] == "measured"
+    ]
+    assert panels and all(
+        row["panel"]["axis_off"] and all(row["panel"]["contour_segments"])
+        for row in panels
+    ), "measured contour panels are incomplete"
+    payload["figure_files"] = [f"{STEM}.png", f"{STEM}.svg"]
+    payload["gate_passed"] = True
+    payload["status"] = "complete"
+    write_json(args.output / f"{STEM}.json", payload)
+    print("PARTIAL_LADDER_COMPLETE " + json.dumps(payload["conclusion"]), flush=True)
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+    single = sub.add_parser("arm")
+    single.add_argument("--revision", required=True)
+    single.add_argument("--case", required=True, choices=CASES)
+    single.add_argument("--mode", required=True, choices=("exact", "chord"))
+    single.add_argument("--output", type=Path, required=True)
+    single.add_argument("--log", type=Path)
+    all_rows = sub.add_parser("measure")
+    all_rows.add_argument("--scratch", type=Path, required=True)
+    all_rows.add_argument("--output", type=Path, required=True)
+    all_rows.add_argument("--logs", type=Path, required=True)
+    subset = sub.add_parser("segment")
+    subset.add_argument("--scratch", type=Path, required=True)
+    subset.add_argument("--output", type=Path, required=True)
+    subset.add_argument("--logs", type=Path, required=True)
+    subset.add_argument("--revisions", nargs="+", choices=REVISIONS, required=True)
+    subset.add_argument("--peer-job", required=True)
+    finalization = sub.add_parser("finalize-partial")
+    finalization.add_argument("--output", type=Path, required=True)
+    finalization.add_argument("--logs", type=Path, required=True)
+    finalization.add_argument("--gate-job", required=True)
+    validation = sub.add_parser("validate")
+    validation.add_argument("--output", type=Path, required=True)
+    validation.add_argument("--partial", action="store_true")
+    args = parser.parse_args()
+    if args.command == "validate":
+        payload = json.loads(args.output.read_text())
+        passed = (
+            partial_receipt_complete(payload)
+            if args.partial
+            else evidence_complete(payload)
+        )
+        print(
+            "COMPLETE" if passed else "REFUSED: incomplete production ladder evidence"
+        )
+        return int(not passed)
+    if args.command == "finalize-partial":
+        return finalize_partial(args)
+    if args.command == "segment":
+        return segment(args)
+    return arm(args) if args.command == "arm" else measure(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

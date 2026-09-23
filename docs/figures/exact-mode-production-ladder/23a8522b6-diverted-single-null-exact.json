@@ -1,0 +1,121 @@
+{
+  "revision": "23a8522b6",
+  "case": "diverted-single-null",
+  "clip_mode": "exact",
+  "status": "not-measured",
+  "exception": "Traceback (most recent call last):\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/benchmarks/plasma_cell_production_ladder.py\", line 299, in arm\n    )\n    \n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/23a8522b6/nova/equilibrium/forward.py\", line 2689, in solve\n    return self._solve_request(initial_flux)\n           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/23a8522b6/nova/equilibrium/forward.py\", line 2289, in _solve_request\n    return self._solve_imposed_request(request)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/23a8522b6/nova/equilibrium/forward.py\", line 2547, in _solve_imposed_request\n    polish_receipt = active._terminal_polish_receipt(equilibrium)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/23a8522b6/nova/equilibrium/forward.py\", line 2620, in _terminal_polish_receipt\n    qualification = reader.read_qualification(\n        physical,\n        self.operator.polarity,\n        material,\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/23a8522b6/nova/equilibrium/topology.py\", line 1141, in read_qualification\n    raise ValueError(\n        \"own-node null census requires the direct sampling flux values\"\n    )\nValueError: own-node null census requires the direct sampling flux values\n--------------------\nFor simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.\n",
+  "slurm_job_id": "1276244",
+  "seed_policy": {
+    "status": "measured",
+    "type": "nova.equilibrium.solve_request.ExplicitSolveSeed",
+    "construction_type": "axis_saddle_geometry",
+    "factory": "profile.cold_seed_portfolio",
+    "state_sha256": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883",
+    "state_dtype": "float64",
+    "state_shape": [
+      730
+    ],
+    "seed_radius_m": 0.649709176903539
+  },
+  "harness_sha256": "60536750f31a9ec55a478b122bdd65231cc3aa6e7b58bd347a4d07fe745547b3",
+  "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder/scratch-revisions/23a8522b6/nova/__init__.py",
+  "full_revision": "23a8522b6b0ab27216c46db7d150e2b96433f347",
+  "devices": [
+    "cuda:0"
+  ],
+  "realised_cells": 132,
+  "carrier_identity": "solovev:diverted-single-null:-110",
+  "reference_nulls": {
+    "axis_rz_m": [
+      1.7869104924134618,
+      0.046151482164328565
+    ],
+    "x_point_rz_m": [
+      1.4930225591761932,
+      -1.0188319093078109
+    ],
+    "qualified_saddles_rz_m": [
+      [
+        1.5107863810710611,
+        -1.0275005315610446
+      ],
+      [
+        1.4930225591761932,
+        -1.0188319093078109
+      ],
+      [
+        1.506509523756129,
+        -1.000151395931814
+      ]
+    ],
+    "retained_count": [
+      1,
+      3
+    ],
+    "axis_flux_wb": 0.005713819178329534,
+    "boundary_flux_wb": 1.361644435324944e-05
+  },
+  "seed_receipt": {
+    "factory": "profile.cold_seed_portfolio",
+    "requested_class": "diverted",
+    "branch_index": 1,
+    "construction": "axis_saddle_geometry",
+    "plasma_current_a": 37319.34592471112,
+    "current_centroid_m": [
+      1.7120154725908823,
+      0.030254757713386198
+    ],
+    "seed_radius_m": 0.649709176903539,
+    "supported_cell_count": 58,
+    "anchor_available": true,
+    "anchor_m": [
+      1.5019897592858353,
+      -1.019292805308505
+    ],
+    "declared_axis_m": [
+      1.7870647018106887,
+      0.0467736265648528
+    ],
+    "declared_boundary_m": [
+      1.5025279999999999,
+      -1.01728
+    ],
+    "stored_flux_samples_used": false,
+    "current_target_provenance": {
+      "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+      "declared_current_a": 37319.34592471112,
+      "current_centroid_m": [
+        1.7120154725908823,
+        0.030254757713386198
+      ],
+      "closed_form_flux_samples_used_for_current_support_only": true
+    },
+    "state_sha256_binary64": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883"
+  },
+  "seed_amplitude": 0.9818308983647959,
+  "fixture_cache": {
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
+    "semantic_key": "833a17bde1b7b150",
+    "hit": true,
+    "lock_wait_seconds": 7.807277143001556e-06,
+    "build_seconds": 0.0
+  },
+  "current_receipt": {
+    "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+    "declared_current_a": 37319.34592471112,
+    "current_centroid_m": [
+      1.7120154725908823,
+      0.030254757713386198
+    ],
+    "closed_form_flux_samples_used_for_current_support_only": true
+  },
+  "seed_sha256": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883",
+  "active_set_budget": 16,
+  "observer": {
+    "method": "host callback copies selected state at native trip reconcile",
+    "native_function_sha256": "5f3d41010da058238abd4204cf02ac65e468dbde474871c2baec6fcaf417dea1",
+    "inserted_statement": "jax.debug.callback(_capture_trip, trip_active, index, selected_state, selected_residual, ordered=True)",
+    "solver_values_modified": false
+  },
+  "wall_seconds": 634.9784018453211
+}

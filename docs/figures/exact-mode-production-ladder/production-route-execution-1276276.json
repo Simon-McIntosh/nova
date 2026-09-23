@@ -1,0 +1,27 @@
+{
+  "job_id": "1276276",
+  "partition": "titan",
+  "revision_order": [
+    "9aebe5fae",
+    "b43714114",
+    "08dd0dda1",
+    "ee17f9570",
+    "2e38dc877"
+  ],
+  "cases": [
+    "diverted-single-null",
+    "weak-rotation-reactor-static"
+  ],
+  "clip_mode": "exact",
+  "reason": "oldest-first coverage of decisive controls before time limits",
+  "peer_job": "1276244",
+  "scheduler_state": "CANCELLED by 39486",
+  "elapsed": "00:01:22",
+  "worker_cancelled_job": false,
+  "terminal_arm_count": 0,
+  "disposition": "authorized stop; H200 continues and final partial ladder is accepted",
+  "cancellation_authorized": true,
+  "cancellation_authority": "coordinator",
+  "coordinator_reported_local_time": "07:46",
+  "cancellation_reason": "decisive older revisions require construction adapters outside this node"
+}

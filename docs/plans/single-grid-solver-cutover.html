@@ -16,7 +16,7 @@
 <meta name="plan-sprint" content="S18">
 <meta name="plan-graph-handle" content="hexgrid">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-09-22">
+<meta name="plan-modified" content="2026-09-23">
 <meta name="plan-effort-hours" content="44.0">
 <meta name="plan-depends-on" content="hex-grid-derisk-gates,split-spline-production-basis,plasma-cell-topology-authority">
 <meta name="plan-blocks" content="efit-baseline-demonstration">
@@ -25,8 +25,9 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-informs" content="hex-cell-single-grid-feasibility,efit-fixed-input-reproduction,diiid-residual-stall-mechanism,cut-cell-current-attribution">
+<meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 </head>
 <body>
 <main class="plan-doc">
@@ -72,6 +73,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260922-carrier-and-grid" data-who="reckon-ship" data-when="2026-09-22T10:45:00+00:00">
     <div class="r-comment-body">Section 2 is substantially landed ahead of any dispatch, and section 4 gains an independent corroboration. CARRIER: the full-axis carrier is built, pinned and rebuilt on the traced kernel (identity 75029bb0, digest eaa48962, shape 4262 by 101, every stored circuit carried, cache-only reload entering no direct Green builder, warm load 0.040 s). The stride-1 carrier guard incident this section exists to not repeat DID recur and was repaired at source: the loader now resolves a carrier's contract from its own identity rather than from a module default, and an identity pinned by no grid still raises. Two recorded figures are stale in our favour: the rebuild cost 1849.6 s on eight CPU cores against the 5768 s budgeted by the S16 session, and the kernel share is now about 4 s. GATES: the twenty-edit coil-edit sweep ran at both grids on one P100 with the same shot, slice and coil (p4_upper, circuit 8). Seven of seventeen edits converged on the full axes against ten of twenty at the stride; matched index for index, three GAIN (2, 10, 16) and six LOSE (3, 5, 7, 13, 14, 15), eight agree. So the grid reshuffles which edits close rather than raising the fraction. A separate three-edit probe at two percent near the base frame went one of three to three of three, so the grid matters for small excursions and does not explain the sweep. The mechanism is drawn rather than inferred in docs/figures/mast-centroid-capability/sweep-full-axis/matched-edit-both-grids.png: the two grids admit DIFFERENT saddles, the stride state anchoring a lower saddle while the reference x-point sits upper and unreached. Read alongside this section's recorded stride-1 DIII-D score of 0.083, the cutover must state its per-machine signature rather than claim an improvement across the board. Receipts: docs/figures/mast-centroid-capability/{full-axis-carrier,kernel-backends,sweep-full-axis}/.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260923-topology-dependency-satisfied" data-who="" data-when="">
+    <div class="r-comment-body">plasma-cell-topology-authority shipped on 2026-09-22 (final push edcba74f0), so all three plan dependencies are satisfied and the only blocker is the gate g-s19-clip-mode-lands-first. Two facts the cutover's §1 convergence claim must absorb from plasma-cell-read-fidelity before it dispatches: in exact clip mode at the reduced rung the certificate production route on main does not converge (diverted 0.175 with the admitted saddle 1.33 m from the reference; reactor-static 0.075; H200 job 1276214), and the last converging exact production receipt is 9aebe5fae of 2026-09-15 under a current-centroid disc seed; the production-route ladder and the seed-policy measurement on that plan settle which of the two moved. The wall-node private shadow is now the flux at the node and the saddle merge radius carries a tenth of the pitch, both landed with the twelve-row parity unchanged.</div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260922-s19-sequencing" data-who="reckon-ship" data-when="2026-09-22T11:05:00+00:00">
     <div class="r-comment-body">Sequencing with S19, agreed between coordinators 2026-09-22 at the lead's instruction and recorded on cut-cell-current-attribution as f-cca-agree-sequencing-with-the-single-grid-cutover. Sequence (a): S19 lands its production clip-mode change and certificate FIRST on the current representation, holding nova/equilibrium/forward_operator.py, source.py and domain.py; this section follows and carries the clipped booking across as the one production mode. fixed_point.py is free and S19 does not need it for that step. The reason is not merely scheduling: the lead has retired chord mode, so a cutover going first would preserve a mode that is no longer the certificate mode, and going second means cutting over one mode rather than two. This constraint was held only in coordinator messages until now; it is a gate (g-s19-clip-mode-lands-first) so roadmap carries it rather than a comment nobody reads. One caveat handed to S19 and worth repeating here: the carrier pins do NOT witness a changed booking. The semantic identity digests input arrays and the stored response digest is self-consistent, so a kernel or booking change passes every loader check silently; the certificate and consumer-bank deltas are the only witnesses. Separately, the null-generator adoption (the topology read and nova/biot/null.py) is S18 territory by subject and awaits the lead naming its owner; S19's twin-loop diagnosis feeds it, and the 22086/43 matched-edit frame has been added to that diagnosis as a second test frame.</div>

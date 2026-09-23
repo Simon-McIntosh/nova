@@ -1479,10 +1479,28 @@ only in <code>achieved_reduction</code>, by at most 1.1e-17, where the residual 
 cancelled to rounding; the step, conditioning and qualification are equal. The likely
 cause, not yet isolated: the stream evaluates the achieved check at the same site
 and on the same input as the last restart residual, while the base evaluates it at
-a separate site that is compiled on its own. The real-operator terminal
-comparison against <code>52bfefc0</code> has not run. The operator-boundary
+a separate site that is compiled on its own. The real-operator
+reading is recorded <a href="#single-site-krylov-real-operator">below</a>. The operator-boundary
 script exercises only <code>operator_request_body</code>, which this change
 leaves untouched.</p>
+<p id="single-site-krylov-public">The stream imports no private jax
+module. Local helpers in <code>fixed_point.py</code> give the highest-precision
+product and norm, the thresholded normalisation, the twice-at-most classical
+Gram-Schmidt and the positive normal-equation least squares. They follow the
+operation order of the library's batched GMRES, and the restart model is a
+plain identity of the residual dtype. <code>toy_self_identity.py</code> recorded
+every field of the 16 toy cases before the rewrite. After it, the stream
+reproduces 144 of 144 fields bitwise (<code>toy-self-compare.log</code>). The same
+comparison with the GMRES tolerance raised to 1e-3 reports 128 of 144 and exits 1
+(<code>toy-self-compare-perturbed.log</code>), so the check can fail.</p>
+<p id="single-site-krylov-test"><code>tests/test_single_site_krylov.py</code>
+traces the step with its operator under a named scope. It counts that
+operator's contraction through every nested jaxpr and requires exactly one site;
+a second test checks that the step still solves a full-dimension dense system.
+Both pass (<code>single-site-test.log</code>). With the base per-site body rebound by
+<code>per_site.install()</code>, which calls the operator directly at each
+GMRES application site again, the site test fails with <code>assert 11 == 1</code>
+(<code>single-site-test-mutated.log</code>).</p>
 <p id="single-site-krylov-vmap">Batched cost (<code>vmap_cost.py</code>): one
 width-16 vmapped step on a dense 1529-square operator with eight iterations takes
 a median of 1.240 s for the stream against 0.086 s for the base body, a ratio of

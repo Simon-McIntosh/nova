@@ -283,8 +283,10 @@
     inside a fixed-capacity <code>lax.scan</code>. The site serves the finite-action
     probe, the condition Arnoldi columns, the restarted batched GMRES and the
     achieved-residual check (83 slots at eight iterations). An optimisation
-    barrier fences each application from its consumers. The GMRES arithmetic uses
-    the <code>jax.scipy</code> helpers slot for slot. In one <code>all_debug</code>
+    barrier fences each application from its consumers. The GMRES is built from local
+    helpers on public jax APIs, in the operation order of the library's batched
+    GMRES. <code>tests/test_single_site_krylov.py</code> pins one operator site and
+    fails with 11 sites when the per-site body is rebound. In one <code>all_debug</code>
     job the weak certificate program measures <strong>284,792 / 287,117
     instructions</strong> at 300 / 1000 cells, below 302,553 / 304,913 but still above
     203,078 / 204,531. The per-site control, the base body rebound in the same job,
@@ -295,8 +297,9 @@
     8; the three elementwise misses differ only in the achieved reduction (at most
     1.1e-17), with the step equal. On the real operator it does not hold: a diverted
     certificate rung's terminal value moves from 0.27948523220464483 to
-    0.279485232201572 (3.07e-12, 55,355 ulps), so re-basing the certificate digest
-    is a lead decision. Under <code>vmap</code> the stream costs 14.3 times the
+    0.279485232201572 (3.07e-12, 55,355 ulps), The lead accepted re-basing the
+    certificate digest per slice, so bit identity to 52bfefc0 is no longer this
+    slice's gate. Under <code>vmap</code> the stream costs 14.3 times the
     base body at width 16, because every slot and every phase branch executes.
     In fresh processes, <code>tests/test_fixed_point.py</code> passes 45 of 45, and
     <code>tests/test_reduced_newton.py</code> fails only the four tests that fail at the base. The

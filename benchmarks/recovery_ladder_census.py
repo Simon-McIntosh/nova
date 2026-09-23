@@ -13,6 +13,7 @@ import contextlib
 import functools
 import hashlib
 import json
+import tempfile
 import threading
 from pathlib import Path
 
@@ -124,12 +125,12 @@ def _restore(solovev, saved):
         setattr(solovev, name, value)
 
 
-def run(rows, output):
+def run(rows, output, scratch_root):
 
     from benchmarks import solovev_certificate
 
     output.mkdir(parents=True, exist_ok=True)
-    scratch = output / "scratch"
+    scratch = scratch_root
     scratch.mkdir(parents=True, exist_ok=True)
     saved = _redirect(solovev_certificate, scratch)
     receipts = []
@@ -153,7 +154,13 @@ def run(rows, output):
             receipts.append(
                 {
                     "case": case,
+                    "cells": cells,
                     "requested_cells": cells,
+                    "converged": solver.get("converged"),
+                    "termination": solver.get("termination"),
+                    "residual_status": solver.get(
+                        "terminal_fixed_point_residual_status"
+                    ),
                     "trips": trip_total,
                     "executions": per_solve,
                     "executions_per_trip": per_trip,
@@ -169,6 +176,7 @@ def run(rows, output):
         "base_sha": _base_sha(),
         "fixed_point_digest": _digest(),
         "instruction_census": _instruction_share(),
+        "verdict": _verdict(receipts),
         "rows": receipts,
     }
     (output / "report.json").write_text(
@@ -176,6 +184,35 @@ def run(rows, output):
     )
     (output / "report.md").write_text(_markdown(payload))
     return payload
+
+
+def _verdict(rows):
+    converged = [row for row in rows if row["converged"]]
+    fired = [row for row in converged if sum(row["executions"].values()) > 0]
+    total = sum(sum(row["executions"].values()) for row in rows)
+    if not rows:
+        return "no certificate row was measured"
+    if not converged:
+        return (
+            "no measured row converged, so ladder activity is reported on "
+            "non-converging rows only"
+        )
+    if fired:
+        return (
+            "%d of %d converging rows enter a recovery ladder (%d rung "
+            "executions over those rows), so the ladders are a hot path on "
+            "converging rows"
+            % (
+                len(fired),
+                len(converged),
+                sum(sum(r["executions"].values()) for r in fired),
+            )
+        )
+    return (
+        "none of the %d converging rows enters a recovery ladder (%d rung "
+        "executions across all measured rows), so the ladders are a rare "
+        "fallback reached only off the converging path" % (len(converged), total)
+    )
 
 
 def _base_sha():
@@ -204,6 +241,8 @@ def _markdown(payload):
     lines.append("")
     lines.append("Base revision `%s`." % payload["base_sha"])
     lines.append("")
+    lines.append("**Verdict.** %s" % payload["verdict"])
+    lines.append("")
     header = "| path | instructions | share of %d |" % total
     lines.append(header)
     lines.append("| --- | --- | --- |")
@@ -215,11 +254,12 @@ def _markdown(payload):
         lines.append("| `%s` | %d | %.4f%% |" % (name, value, share * 100.0))
     lines.append("")
     for row in rows:
-        lines.append(
-            "## `%s` at %d requested cells" % (row["case"], row["requested_cells"])
-        )
+        lines.append("## `%s` at %d requested cells" % (row["case"], row["cells"]))
         lines.append("")
         lines.append("Trips: %d." % row["trips"])
+        lines.append(
+            "Converged `%s`; termination `%s`." % (row["converged"], row["termination"])
+        )
         lines.append("")
         lines.append("| path | executions | per trip | trips |")
         lines.append("| --- | --- | --- | --- |")
@@ -258,13 +298,20 @@ def main(argv=None):
         help="certificate row, qualified by requested cells",
     )
     parser.add_argument("--output", default=str(OUTPUT_ROOT))
+    parser.add_argument("--scratch", default="")
     args = parser.parse_args(argv)
     rows = [parse_row(value) for value in args.row]
-    payload = run(rows, Path(args.output))
+    scratch = (
+        Path(args.scratch)
+        if args.scratch
+        else Path(tempfile.gettempdir()) / "recovery-ladder-census"
+    )
+    payload = run(rows, Path(args.output), scratch)
     for row in payload["rows"]:
         print("ROW %s trips=%d" % (row["case"], row["trips"]))
         for name, count in sorted(row["executions"].items()):
             print("  %s executions=%d" % (name, count))
+    print("VERDICT %s" % payload["verdict"])
     print("CENSUS-OK rows=%d" % len(payload["rows"]))
     return 0
 

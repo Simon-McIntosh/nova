@@ -292,9 +292,15 @@ def _production_seed(context: dict[str, Any]) -> tuple[np.ndarray, dict[str, Any
 
 
 def _partition_probe(operator, state: np.ndarray, mode: str) -> dict[str, Any]:
-    """Trace one mode's partition, retaining the base and promoted masks."""
+    """Trace one mode's partition, retaining the base and promoted masks.
+
+    The fixed-design read consumes the authored direct-sampling rows alongside
+    the grid rows, so the whole state vector is passed; a slice down to the
+    physical node count drops the sampling rows and the own-node null census
+    refuses it.
+    """
     set_support_clip_mode(mode)
-    physical = jnp.asarray(state)[: operator.physical_node_number]
+    physical = jnp.asarray(state)
     base_masks, topology, _connected, _admitted = operator._fixed_design_read(physical)
     sample_flux = operator.sample_node_flux(jnp.asarray(state))
     sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span

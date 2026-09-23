@@ -1,0 +1,74 @@
+{
+  "$id": "nova.net-current-scaling-row",
+  "lane": {
+    "cpu_count": 4,
+    "hostname": "98dci4-clu-4073.iter.org",
+    "jax_enable_x64": true,
+    "jax_platform": "cpu",
+    "job_id": "1276678",
+    "node": "98dci4-clu-4073",
+    "partition": "all_debug",
+    "tmpdir": "/tmp"
+  },
+  "revision": "26fc98cff318fd9c0cab291fb9869fa7130a9e9c",
+  "row": {
+    "case": "strong-rotation-compact-static",
+    "clip_mode": "chord",
+    "converged": false,
+    "elapsed_seconds": 70.21830168552697,
+    "lambda_within_neighbourhood": null,
+    "normalisation_policy": "declared_scalar_current",
+    "realised_cells": 135,
+    "requested_cells": -110,
+    "route": "reduced_newton",
+    "seed": {
+      "anchor_available": true,
+      "anchor_m": [
+        1.0902999676767633,
+        0.005210856843975905
+      ],
+      "branch_index": 0,
+      "construction": "current_centroid_disc",
+      "current_centroid_m": [
+        0.8875010108629255,
+        0.0
+      ],
+      "current_target_provenance": {
+        "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+        "current_centroid_m": [
+          0.8875010108629255,
+          0.0
+        ],
+        "declared_current_a": 251245.90891804622,
+        "quadrature_current_a": 251245.90891804622,
+        "quadrature_nodes": 512,
+        "quadrature_relative_closure": 0.0
+      },
+      "declared_axis_m": [
+        0.8875010108629255,
+        0.0
+      ],
+      "declared_boundary_m": [
+        1.0902999676767633,
+        0.005210856843975905
+      ],
+      "factory": "profile.cold_seed_portfolio",
+      "plasma_current_a": 251245.90891804622,
+      "requested_class": "limited",
+      "seed_radius_m": 0.18257506240510613,
+      "state_sha256_binary64": "e60ef066d303048460a46057bc926ec461ddae472e8759521f46a2102ac34c2b",
+      "stored_flux_samples_used": false,
+      "supported_cell_count": 39
+    },
+    "seed_lambda": 1.8907511583421348,
+    "seed_support_current_a": 132881.5311361998,
+    "solver_route": "reduced_newton",
+    "target_current_a": 251245.90891804622,
+    "terminal_core_cell_count": 55,
+    "terminal_fixed_point_residual": 0.05272644187320817,
+    "terminal_lambda": 1.8193532721239911,
+    "terminal_rescaled": true,
+    "terminal_support_current_a": 138096.2745210725,
+    "termination": "sufficient_decrease_refused"
+  }
+}

@@ -54,6 +54,16 @@ NEGATIVE_CONTROL = (
     "arm of the exact-mode construction comparison within one percent"
 )
 EXPECTED_ONE_TRIP_RESIDUAL = 0.7166
+# A committed one-trip receipt for the same construction, recorded so the
+# control reports against both the declared number and the one on disk.
+COMMITTED_ONE_TRIP_RECEIPT = (
+    "docs/figures/plasma-cell-read-fidelity/"
+    "b43714114-diverted-single-null-one-trip.json"
+)
+COMMITTED_ONE_TRIP_RESIDUAL = 0.2586805230398537
+DECLARED_CONTROL_SOURCE = "declared in the dispatch brief"
+COMMITTED_CONTROL_SOURCE = "committed one-trip receipt " + COMMITTED_ONE_TRIP_RECEIPT
+NO_EXPECTATION_SOURCE = "no declared expectation for this arm"
 ONE_TRIP_RELATIVE_TOLERANCE = 0.01
 FIGURE_STEM = "seed-policy-at-main"
 FIGURE_URL = "/nova/figures/plasma-cell-read-fidelity-seed"
@@ -412,50 +422,98 @@ def _run_case(built, receipt, output, negative_log):
         analytic=built["analytic"],
         **states,
     )
-    if case_name == CASES[0] and analytic_arm["seed_policy"] == "analytic":
-        request = certificate._certificate_solve_request(
+    if case_name == CASES[0]:
+        control_arms = [
+            (
+                "analytic_seed",
+                seeds["analytic"][0],
+                seeds["analytic"][1],
+                [
+                    (EXPECTED_ONE_TRIP_RESIDUAL, DECLARED_CONTROL_SOURCE),
+                    (COMMITTED_ONE_TRIP_RESIDUAL, COMMITTED_CONTROL_SOURCE),
+                ],
+            )
+        ]
+        prod_seed, _branch, prod_receipt = certificate._production_seed(
             profile,
-            seeds["analytic"][0],
+            case_name,
             float(built["target_current"]),
-            carrier_identity=carrier,
+            built["centroid"],
+            built["current_receipt"],
         )
-        one_request = replace(
-            request, policy=replace(request.policy, active_set_steps=1)
+        control_arms.append(
+            (
+                "production_route_seed",
+                prod_seed,
+                prod_receipt,
+                [(None, NO_EXPECTATION_SOURCE)],
+            )
         )
-        mutation, _state = _arm(
-            profile, one_request, operator, reference, pitch, seeds["analytic"][1]
-        )
-        _one_trip_control(mutation, row, receipt, negative_log)
+        for label, seed, seed_receipt, expectations in control_arms:
+            request = certificate._certificate_solve_request(
+                profile,
+                seed,
+                float(built["target_current"]),
+                carrier_identity=carrier,
+            )
+            one_request = replace(
+                request, policy=replace(request.policy, active_set_steps=1)
+            )
+            mutation, _state = _arm(
+                profile, one_request, operator, reference, pitch, seed_receipt
+            )
+            receipt["negative_control"].extend(
+                _one_trip_control(mutation, row, negative_log, label, expectations)
+            )
     _write_json(output / (FIGURE_STEM + ".json"), receipt)
 
 
-def _one_trip_control(mutation, row, receipt, negative_log):
-    """The declared control: one trip must refuse the convergence claim."""
+def _one_trip_control(mutation, row, negative_log, arm_label, expectations):
+    """Record the declared control for one forced one-trip arm.
+
+    The refusal is the control and it is asserted.  An expectation is
+    recorded beside the measured one-trip residual rather than asserted,
+    so an expectation that fails to reproduce reads as a finding about
+    the receipt it came from instead of stopping the measurement.
+    """
     residual = mutation["terminal_residual"]
-    relative = abs(residual / EXPECTED_ONE_TRIP_RESIDUAL - 1.0)
-    record = {
-        "case": row["case"],
-        "declared_control": NEGATIVE_CONTROL,
-        "one_trip_residual": residual,
-        "expected_one_trip_residual": EXPECTED_ONE_TRIP_RESIDUAL,
-        "relative_tolerance": ONE_TRIP_RELATIVE_TOLERANCE,
-        "reproduces_production_arm": relative <= ONE_TRIP_RELATIVE_TOLERANCE,
-        "converged": mutation["converged"],
-        "refused": False,
-    }
     try:
         require_converged(mutation)
     except ValueError as error:
-        record["refused"] = True
-        record["reason"] = str(error)
-        with negative_log.open("a") as stream:
-            stream.write("case=" + row["case"] + " " + str(error) + "\n")
+        reason = str(error)
     else:
         raise AssertionError("forced-one-trip control did not refuse")
-    assert record["reproduces_production_arm"], "one-trip residual differs"
+    with negative_log.open("a") as stream:
+        stream.write("case=" + row["case"] + " arm=" + arm_label + " " + reason + "\n")
+    base = {
+        "case": row["case"],
+        "control_arm": arm_label,
+        "one_trip_residual": residual,
+        "declared_control": NEGATIVE_CONTROL,
+        "converged": mutation["converged"],
+        "trip_count": mutation["trip_count"],
+        "termination_reason": mutation["termination_reason"],
+        "refused": True,
+        "reason": reason,
+        "receipt": mutation,
+    }
     assert mutation["trip_count"] == 1
-    record["receipt"] = mutation
-    receipt["negative_control"].append(record)
+    records = []
+    for expected, source in expectations:
+        record = dict(base)
+        if expected is None:
+            relative = None
+        else:
+            relative = abs(residual / expected - 1.0)
+        record["expected_residual"] = expected
+        record["expected_source"] = source
+        record["relative_difference"] = relative
+        record["relative_tolerance"] = ONE_TRIP_RELATIVE_TOLERANCE
+        record["reproduces_expected"] = (
+            None if relative is None else relative <= ONE_TRIP_RELATIVE_TOLERANCE
+        )
+        records.append(record)
+    return records
 
 
 def measure(output, negative_log):

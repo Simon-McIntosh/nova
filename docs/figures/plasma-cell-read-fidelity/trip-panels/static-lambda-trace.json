@@ -1,0 +1,92 @@
+{
+  "source_revisions": [
+    "db2108e6adaca770cda30e39e052d9dcf20e18a9",
+    "664ade0c32ac72ac3c37f34f711012f69fa68f5e"
+  ],
+  "route": [
+    {
+      "file": "benchmarks/solovev_certificate.py",
+      "line": 2221,
+      "site": "_measure constructs production seed and target"
+    },
+    {
+      "file": "benchmarks/solovev_certificate.py",
+      "line": 2241,
+      "site": "_certificate_solve_request(profile, seed, target_current, solovev identity)"
+    },
+    {
+      "file": "benchmarks/solovev_certificate.py",
+      "line": 2133,
+      "site": "_certificate_solve_request sets explicit seed, target_current and 1e-12 tolerances"
+    },
+    {
+      "file": "nova/equilibrium/solve_request.py",
+      "line": 235,
+      "site": "policy default newton_krylov; current_pin=True at line 244"
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": 2524,
+      "site": "_solve_imposed_request guards current_pin and passes target_current to active.solve at 2558"
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": 2689,
+      "site": "solve selects accelerated newton_krylov route"
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": 1895,
+      "site": "_solve_accelerated passes target_current to compiled history program"
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": 1952,
+      "site": "_accelerated_history_program binds ordinary and shadowed maps with target_current"
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": 2018,
+      "site": "compiled solve invokes fixed_point.newton_krylov"
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 4028,
+      "site": "traced_flux_map passes active_target to active.internal"
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 4082,
+      "site": "traced_flux_map_with_shadow passes active_target to active.internal"
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 3829,
+      "site": "internal selects normalised_current_moments when target_current is not None"
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 3652,
+      "site": "normalised_current_moments forms moments, divides target by net current, then scales"
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 3619,
+      "site": "current_normalisation_amplitude enforces finite, same-sign and amplitude-band guards"
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 3612,
+      "site": "scaled_current_moments multiplies each integrated moment by amplitude"
+    }
+  ],
+  "bypasses_or_guards": [
+    "Only target_current=None takes the unscaled internal branch; this request passes a finite nonzero target.",
+    "current_pin=False together with a non-null target raises ValueError before the solve; it does not silently disable scaling.",
+    "The frozen-partition shortcut in traced_flux_map_with_shadow is attached only when target_current is None; it is not attached for this construction.",
+    "No constraint pairs are supplied, so the augmented route is not selected.",
+    "Exact versus chord and linear versus point moments change integration, but a non-null target still selects normalization.",
+    "The admissible amplitude band is [1e-6,1e6] in nova/equilibrium/source.py:116; inadmissible eager calls raise and traced calls return NaN, rather than bypass scaling."
+  ],
+  "count_semantics": "Ordered callbacks in the actual scaled_current_moments branch count runtime executions between native active-set carries, including trial-map and primal linearisation evaluations. Per-state amplitudes and net currents are separately re-evaluated from captured flux; seed execution count is one explicitly labelled native map replay."
+}

@@ -200,9 +200,7 @@ def _solve_row(
         operator.current_normalisation_amplitude(target_current, seed_support)
     )
     request = ForwardSolveRequest.from_defaults(
-        carrier_identity=(
-            f"census:{case_name}:{requested_cells}:{clip_mode}:{route}"
-        ),
+        carrier_identity=(f"census:{case_name}:{requested_cells}:{clip_mode}:{route}"),
         source_profile=profile.source,
         seed_policy=ExplicitSolveSeed(seed),
         policy_overrides={
@@ -235,7 +233,9 @@ def _solve_row(
     row["lambda_within_neighbourhood"] = (
         None
         if not row["converged"]
-        else bool(LAMBDA_NEIGHBOURHOOD[0] <= row["terminal_lambda"] <= LAMBDA_NEIGHBOURHOOD[1])
+        else bool(
+            LAMBDA_NEIGHBOURHOOD[0] <= row["terminal_lambda"] <= LAMBDA_NEIGHBOURHOOD[1]
+        )
     )
     row["elapsed_seconds"] = perf_counter() - started
     return row
@@ -343,12 +343,20 @@ def _verdicts(rows: list[dict[str, Any]]) -> dict[str, Any]:
     for row in rows:
         key = f"{row['route']}/{row['clip_mode']}"
         bucket = routes.setdefault(
-            key, {"route": row["route"], "clip_mode": row["clip_mode"], "rows": 0, "converged_rows": 0}
+            key,
+            {
+                "route": row["route"],
+                "clip_mode": row["clip_mode"],
+                "rows": 0,
+                "converged_rows": 0,
+            },
         )
         bucket["rows"] += 1
         if row["converged"]:
             bucket["converged_rows"] += 1
-            bucket.setdefault("converged_terminal_lambda", []).append(row["terminal_lambda"])
+            bucket.setdefault("converged_terminal_lambda", []).append(
+                row["terminal_lambda"]
+            )
             bucket.setdefault("converged_seed_lambda", []).append(row["seed_lambda"])
     for bucket in routes.values():
         terminal = bucket.get("converged_terminal_lambda", [])
@@ -362,9 +370,9 @@ def _verdicts(rows: list[dict[str, Any]]) -> dict[str, Any]:
         ]
         bucket["terminal_lambda_min"] = min(terminal) if terminal else None
         bucket["terminal_lambda_max"] = max(terminal) if terminal else None
-        bucket["all_converged_terminal_within_neighbourhood"] = (
-            bool(terminal) and len(inside) == len(terminal)
-        )
+        bucket["all_converged_terminal_within_neighbourhood"] = bool(terminal) and len(
+            inside
+        ) == len(terminal)
     return routes
 
 
@@ -372,14 +380,47 @@ def _quantile(values: list[float], q: float) -> float | None:
     return None if not values else float(np.quantile(np.asarray(values), q))
 
 
+def _plan_rows(routes: set[str]) -> list[tuple[str, str, str]]:
+    plan: list[tuple[str, str, str]] = []
+    if "certificate" in routes:
+        plan.append(("newton_krylov", "chord", "certificate"))
+        plan.append(("newton_krylov", "exact", "certificate"))
+    if "reduced-newton" in routes:
+        plan.append(("reduced_newton", "chord", "reduced-newton"))
+    return plan
+
+
+def _redirect_certificate_roots(output_root: Path) -> None:
+    certificate.FIGURE_ROOT = output_root / "certificate" / "panels"
+    certificate.PART_ROOT = output_root / "certificate" / "parts"
+    certificate.DIAGNOSTIC_ROOT = output_root / "certificate" / "diagnostics"
+
+
+def _cold_seed_reads(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    reads: list[dict[str, Any]] = []
+    for row in rows:
+        reads.append(
+            {
+                "route": "cold-seed",
+                "clip_mode": row["clip_mode"],
+                "case": row["case"],
+                "requested_cells": row["requested_cells"],
+                "seed_lambda": row["seed_lambda"],
+                "seed_support_current_a": row["seed_support_current_a"],
+                "terminal_lambda": row["terminal_lambda"],
+                "converged": row["converged"],
+                "note": "cold-seed state of the certificate row above",
+            }
+        )
+    return reads
+
+
 def run(output_root: Path, routes: set[str]) -> dict[str, Any]:
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("the net-current scaling census requires extended precision")
 
-    certificate.FIGURE_ROOT = output_root / "certificate" / "panels"
-    certificate.PART_ROOT = output_root / "certificate" / "parts"
-    certificate.DIAGNOSTIC_ROOT = output_root / "certificate" / "diagnostics"
+    _redirect_certificate_roots(output_root)
 
     report: dict[str, Any] = {
         "$id": "nova.net-current-scaling-census",
@@ -420,19 +461,7 @@ def run(output_root: Path, routes: set[str]) -> dict[str, Any]:
             )
 
     if "cold-seed" in routes:
-        for row in list(report["rows"]):
-            seed_row = {
-                "route": "cold-seed",
-                "clip_mode": row["clip_mode"],
-                "case": row["case"],
-                "requested_cells": row["requested_cells"],
-                "seed_lambda": row["seed_lambda"],
-                "seed_support_current_a": row["seed_support_current_a"],
-                "terminal_lambda": row["terminal_lambda"],
-                "converged": row["converged"],
-                "note": "cold-seed state of the certificate row above",
-            }
-            report["reads"].append(seed_row)
+        report["reads"].extend(_cold_seed_reads(report["rows"]))
         _write_json(report_path, report)
 
     report["reads"].append(_read_sol_ledger())
@@ -449,6 +478,102 @@ def run(output_root: Path, routes: set[str]) -> dict[str, Any]:
     print(
         f"NET_CURRENT_EXIT rows={report['completed_rows']} "
         f"reads={len(report['reads'])}",
+        flush=True,
+    )
+    return report
+
+
+def run_single_row(
+    output_root: Path,
+    route: str,
+    clip_mode: str,
+    case_name: str,
+    row_out: Path,
+) -> dict[str, Any]:
+    """Run one certificate row and flush it to its own file as it lands."""
+
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("the net-current scaling census requires extended precision")
+    _redirect_certificate_roots(output_root)
+    row = _solve_row(case_name, CERTIFICATE_CELLS, clip_mode, route)
+    _write_json(
+        row_out,
+        {
+            "$id": "nova.net-current-scaling-row",
+            "revision": _revision(),
+            "lane": _lane(),
+            "row": row,
+        },
+    )
+    print(
+        "NET_CURRENT_ROW "
+        f"route={route} mode={clip_mode} case={case_name} "
+        f"seed={row['seed_lambda']:.6f} terminal={row['terminal_lambda']:.6f} "
+        f"converged={row['converged']} core={row['terminal_core_cell_count']}",
+        flush=True,
+    )
+    return row
+
+
+def assemble(output_root: Path, rows_dir: Path) -> dict[str, Any]:
+    """Merge per-row files into the report beside any rows already measured."""
+
+    report = json.loads((output_root / REPORT_JSON).read_text(encoding="utf-8"))
+    seen = {(row["route"], row["clip_mode"], row["case"]) for row in report["rows"]}
+    missing: list[str] = []
+    for path in sorted(Path(rows_dir).glob("*.json")):
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        row = payload["row"]
+        key = (row["route"], row["clip_mode"], row["case"])
+        if key in seen:
+            continue
+        report["rows"].append(row)
+        seen.add(key)
+
+    order = {
+        (plan_route, plan_clip, case): index
+        for index, (plan_route, plan_clip, _label, case) in enumerate(
+            (plan_row + (case,))
+            for plan_row in _plan_rows({"certificate", "reduced-newton"})
+            for case in certificate.CASE_NAMES
+        )
+    }
+    report["rows"].sort(
+        key=lambda row: order.get(
+            (row["route"], row["clip_mode"], row["case"]), len(order)
+        )
+    )
+
+    expected = len(order)
+    for key, index in order.items():
+        if key not in seen:
+            missing.append(f"{key[0]}/{key[1]}/{key[2]}")
+
+    report["reads"] = _cold_seed_reads(report["rows"])
+    report["reads"].append(_read_sol_ledger())
+    report["reads"].append(_read_mast_bank())
+    report["reconciliation"] = _reconcile(report["rows"])
+    report["reads"].insert(
+        0,
+        {
+            "route": "assembly",
+            "status": "assembled",
+            "rows": len(report["rows"]),
+            "expected_rows": expected,
+            "missing_rows": missing,
+            "reason": (
+                "per-row files merged over the rows already measured in report.json"
+            ),
+        },
+    )
+    report["verdicts"] = _verdicts(report["rows"])
+    report["completed_rows"] = len(report["rows"])
+    _write_json(output_root / REPORT_JSON, report)
+    (output_root / REPORT_MD).write_text(_markdown(report), encoding="utf-8")
+    print(
+        f"NET_CURRENT_EXIT rows={report['completed_rows']} "
+        f"expected={expected} missing={len(missing)} reads={len(report['reads'])}",
         flush=True,
     )
     return report
@@ -493,8 +618,7 @@ def _markdown(report: dict[str, Any]) -> str:
     lines += ["", "## Routes read from committed receipts", ""]
     for entry in report["reads"]:
         lines.append(
-            f"- **{entry['route']}** ({entry.get('status')}): "
-            f"{entry.get('reason', '')}"
+            f"- **{entry['route']}** ({entry.get('status')}): {entry.get('reason', '')}"
         )
     lines += ["", "## Reconciliation against the banked history", ""]
     for label, entry in report["reconciliation"].items():
@@ -533,13 +657,55 @@ def main() -> int:
         default="certificate,cold-seed,reduced-newton",
         help="comma-separated subset of certificate,cold-seed,reduced-newton",
     )
+    parser.add_argument(
+        "--row-out",
+        type=Path,
+        default=None,
+        help="run one --route/--clip-mode/--case row and flush it here",
+    )
+    parser.add_argument("--route", default=None)
+    parser.add_argument("--clip-mode", default=None)
+    parser.add_argument("--case", default=None)
+    parser.add_argument("--rows-dir", type=Path, default=None)
     arguments = parser.parse_args()
     routes = {name.strip() for name in arguments.routes.split(",") if name.strip()}
+    if arguments.rows_dir is not None:
+        mode = f"assemble rows_dir={arguments.rows_dir}"
+    elif arguments.row_out is not None:
+        mode = (
+            f"row route={arguments.route} clip={arguments.clip_mode} "
+            f"case={arguments.case}"
+        )
+    else:
+        mode = f"junctions={sorted(routes)}"
     print(
         f"NET_CURRENT_CENSUS revision={_revision()} tree={ROOT} "
-        f"argv={' '.join(sys.argv)} junctions={sorted(routes)}",
+        f"mode={mode} argv={' '.join(sys.argv)}",
         flush=True,
     )
+    if arguments.rows_dir is not None:
+        report = assemble(arguments.output_root, arguments.rows_dir)
+        return 0 if report["completed_rows"] else 1
+    if arguments.row_out is not None:
+        absent = [
+            name
+            for name, value in (
+                ("--route", arguments.route),
+                ("--clip-mode", arguments.clip_mode),
+                ("--case", arguments.case),
+            )
+            if not value
+        ]
+        if absent:
+            parser.error("--row-out requires " + ", ".join(absent))
+        run_single_row(
+            arguments.output_root,
+            arguments.route,
+            arguments.clip_mode,
+            arguments.case,
+            arguments.row_out,
+        )
+        return 0
     report = run(arguments.output_root, routes)
     return 0 if report["completed_rows"] else 1
 

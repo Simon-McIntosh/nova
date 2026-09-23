@@ -54,16 +54,23 @@ NEGATIVE_CONTROL = (
     "arm of the exact-mode construction comparison within one percent"
 )
 EXPECTED_ONE_TRIP_RESIDUAL = 0.7166
-# A committed one-trip receipt for the same construction, recorded so the
-# control reports against both the declared number and the one on disk.
+CONSTRUCTION_COMPARISON_RECEIPT = (
+    "docs/figures/plasma-cell-read-fidelity/exact-mode-construction-comparison.json"
+)
+# The declared number is trip one of the diverted case's production arm in
+# the construction comparison; carried at its stored precision so the
+# reproduction band is measured against the receipt rather than the prose.
+PRODUCTION_TRIP_ONE_RESIDUAL = 0.7165572322836796
 COMMITTED_ONE_TRIP_RECEIPT = (
     "docs/figures/plasma-cell-read-fidelity/"
     "b43714114-diverted-single-null-one-trip.json"
 )
 COMMITTED_ONE_TRIP_RESIDUAL = 0.2586805230398537
 DECLARED_CONTROL_SOURCE = "declared in the dispatch brief"
-COMMITTED_CONTROL_SOURCE = "committed one-trip receipt " + COMMITTED_ONE_TRIP_RECEIPT
-NO_EXPECTATION_SOURCE = "no declared expectation for this arm"
+PRODUCTION_CONTROL_SOURCE = (
+    "trip one of the production arm in " + CONSTRUCTION_COMPARISON_RECEIPT
+)
+COMMITTED_CONTROL_SOURCE = "forced one-trip arm in " + COMMITTED_ONE_TRIP_RECEIPT
 ONE_TRIP_RELATIVE_TOLERANCE = 0.01
 FIGURE_STEM = "seed-policy-at-main"
 FIGURE_URL = "/nova/figures/plasma-cell-read-fidelity-seed"
@@ -450,7 +457,7 @@ def _run_case(built, receipt, output, negative_log):
                 "production_route_seed",
                 prod_seed,
                 prod_receipt,
-                [(None, NO_EXPECTATION_SOURCE)],
+                [(PRODUCTION_TRIP_ONE_RESIDUAL, PRODUCTION_CONTROL_SOURCE)],
             )
         )
         for label, seed, seed_receipt, expectations in control_arms:

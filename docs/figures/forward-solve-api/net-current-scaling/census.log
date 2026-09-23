@@ -1,0 +1,127 @@
+NET_CURRENT_CENSUS revision=423672965012bd504f128143ab9669be62e2841c tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route argv=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/benchmarks/net_current_scaling_census.py --output-root /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/docs/figures/forward-solve-api/net-current-scaling junctions=['certificate', 'cold-seed', 'reduced-newton']
+NET_CURRENT_ROW route=newton_krylov mode=chord case=weak-rotation-reactor-static seed=2.036589 terminal=1.811178 converged=False core=54
+NET_CURRENT_ROW route=newton_krylov mode=chord case=moderate-rotation-conventional-static seed=2.061925 terminal=1.777645 converged=False core=56
+NET_CURRENT_ROW route=newton_krylov mode=chord case=strong-rotation-compact-static seed=1.890751 terminal=3.034357 converged=False core=32
+NET_CURRENT_ROW route=newton_krylov mode=chord case=diverted-single-null seed=1.000372 terminal=11.987140 converged=False core=4
+E0923 13:15:03.697685  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.703238  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.707098  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.707744  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.712712  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.713481  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.714349  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.720335  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.720574  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.725903  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.730492  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.731502  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.741408  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.743883  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.755893  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.756427  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.760243  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.762445  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.764963  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.766032  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.767079  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.771811  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.772490  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.774591  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.774971  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.779036  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.782530  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.784369  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.784655  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.789184  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.789887  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.796218  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.797067  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.798274  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.802694  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.811260  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.813120  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.814944  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.822325  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.827586  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.828825  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.834384  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.836853  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.843516  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.846545  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.851296  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.854026  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.857644  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.860900  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.860926  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.861291  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.865051  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.874019  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.877898  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.879575  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.888053  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.894531  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.897645  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.899721  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.900394  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.908648  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.909898  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.911201  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.912680  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.916811  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.917027  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.919359  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.920630  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.922106  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.927993  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.932229  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.933139  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.933372  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.933585  615096 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.938007  615093 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.938855  615095 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+E0923 13:15:03.946718  615094 execution_engine.cc:54] LLVM compilation error: Cannot allocate memory
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/benchmarks/net_current_scaling_census.py", line 548, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/benchmarks/net_current_scaling_census.py", line 543, in main
+    report = run(arguments.output_root, routes)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/benchmarks/net_current_scaling_census.py", line 411, in run
+    row = _solve_row(case_name, CERTIFICATE_CELLS, clip_mode, route)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/benchmarks/net_current_scaling_census.py", line 192, in _solve_row
+    seed, requested_class, seed_receipt = certificate._production_seed(
+                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        profile, case_name, target_current, centroid, current_receipt
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/benchmarks/solovev_certificate.py", line 667, in _production_seed
+    portfolio = profile.cold_seed_portfolio(
+        target_current,
+        centroid,
+        diverted_geometry=geometry,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/nova/equilibrium/forward.py", line 772, in cold_seed_portfolio
+    anchors, anchor_flux, anchor_available = jax.vmap(anchor)(flux, requested)
+                                             ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/nova/equilibrium/forward.py", line 766, in anchor
+    _masks, topology = self.operator.read(branch_flux, branch_class)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/nova/equilibrium/forward_operator.py", line 3182, in read
+    masks, topology, _connected, admitted = self._fixed_design_read(
+                                            ~~~~~~~~~~~~~~~~~~~~~~~^
+        physical, requested_class
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/nova/equilibrium/forward_operator.py", line 3013, in _fixed_design_read
+    result = self._fixed_design_topology.read_qualification(
+        physical,
+    ...<3 lines>...
+        private_wall_node_mask,
+    )
+jax.errors.JaxRuntimeError: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_5>, { wrapped_broadcast.11 }) }
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.

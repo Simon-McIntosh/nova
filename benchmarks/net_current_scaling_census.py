@@ -331,14 +331,31 @@ def _reconcile(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """Compare measured amplitudes against the banked history."""
 
     index = {
-        (row["case"], row["requested_cells"], row["clip_mode"]): row for row in rows
+        (
+            row["route"],
+            row["case"],
+            row["requested_cells"],
+            row["clip_mode"],
+        ): row
+        for row in rows
     }
+    routes = sorted({row["route"] for row in rows})
     out: dict[str, Any] = {}
     for label, banked in BANKED_HISTORY.items():
-        key = (banked["case"], banked["requested_cells"], banked["clip_mode"])
-        measured = index.get(key)
-        entry = {"banked": banked, "measured": None}
-        if measured is not None:
+        matched = False
+        for route in routes:
+            measured = index.get(
+                (
+                    route,
+                    banked["case"],
+                    banked["requested_cells"],
+                    banked["clip_mode"],
+                )
+            )
+            if measured is None:
+                continue
+            matched = True
+            entry: dict[str, Any] = {"banked": banked, "measured": None, "route": route}
             entry["measured"] = {
                 "seed_lambda": measured["seed_lambda"],
                 "terminal_lambda": measured["terminal_lambda"],
@@ -350,7 +367,18 @@ def _reconcile(rows: list[dict[str, Any]]) -> dict[str, Any]:
                 entry[f"{state}_delta"] = (
                     None if target is None or got is None else got - target
                 )
-        out[label] = entry
+            entry["reason"] = f"measured on the {route} route"
+            out[f"{label} [{route}]"] = entry
+        if not matched:
+            out[label] = {
+                "banked": banked,
+                "measured": None,
+                "reason": (
+                    "no row in this run matches case="
+                    f"{banked['case']} requested_cells={banked['requested_cells']} "
+                    f"clip_mode={banked['clip_mode']}"
+                ),
+            }
     return out
 
 
@@ -427,7 +455,11 @@ def _cold_seed_reads(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "seed_support_current_a": row["seed_support_current_a"],
                 "terminal_lambda": row["terminal_lambda"],
                 "converged": row["converged"],
-                "note": "cold-seed state of the certificate row above",
+                "status": "derived-from-row",
+                "reason": (
+                    "read off the certificate row above, which records the seed "
+                    "state and the terminal state of the same forward solve"
+                ),
             }
         )
     return reads
@@ -538,6 +570,7 @@ def assemble(output_root: Path, rows_dir: Path) -> dict[str, Any]:
     """Merge per-row files into the report beside any rows already measured."""
 
     report = json.loads((output_root / REPORT_JSON).read_text(encoding="utf-8"))
+    report["revision"] = _revision()
     seen = {(row["route"], row["clip_mode"], row["case"]) for row in report["rows"]}
     missing: list[str] = []
     for path in sorted(Path(rows_dir).glob("*.json")):
@@ -585,6 +618,20 @@ def assemble(output_root: Path, rows_dir: Path) -> dict[str, Any]:
             ),
         },
     )
+    report["not_run"] = [
+        {
+            "row": key,
+            "reason": (
+                "the exact clip mode did not finish inside a one-hour all_debug "
+                "allocation; its job log under logs/ records 'CANCELLED ... DUE TO "
+                "TIME LIMIT' and no row file was written, so its seed and terminal "
+                "lambda are absent from this census"
+                if key.split("/")[1] == "exact"
+                else "no per-row file was written for this row"
+            ),
+        }
+        for key in missing
+    ]
     report["verdicts"] = _verdicts(report["rows"])
     report["completed_rows"] = len(report["rows"])
     _write_json(output_root / REPORT_JSON, report)
@@ -595,6 +642,10 @@ def assemble(output_root: Path, rows_dir: Path) -> dict[str, Any]:
         flush=True,
     )
     return report
+
+
+def _four_dp(value: float | None) -> str:
+    return "n/a" if value is None else f"{value:.4f}"
 
 
 def _markdown(report: dict[str, Any]) -> str:
@@ -633,11 +684,15 @@ def _markdown(report: dict[str, Any]) -> str:
                 ),
             )
         )
-    lines += ["", "## Routes read from committed receipts", ""]
+    lines += ["", "## How each route was read", ""]
     for entry in report["reads"]:
         lines.append(
             f"- **{entry['route']}** ({entry.get('status')}): {entry.get('reason', '')}"
         )
+    if report.get("not_run"):
+        lines += ["", "## Planned rows that did not run", ""]
+        for entry in report["not_run"]:
+            lines.append(f"- **{entry['row']}**: {entry['reason']}")
     lines += ["", "## Reconciliation against the banked history", ""]
     for label, entry in report["reconciliation"].items():
         measured = entry.get("measured")
@@ -645,15 +700,18 @@ def _markdown(report: dict[str, Any]) -> str:
         if measured is None:
             lines.append(
                 f"- **{label}**: banked seed {banked['seed_lambda']} / terminal "
-                f"{banked['terminal_lambda']}; no matching row in this run."
+                f"{banked['terminal_lambda']}; {entry.get('reason', 'no matching row')}"
+                f" (banked note: {banked.get('note', '')})."
             )
             continue
         lines.append(
             f"- **{label}**: banked seed {banked['seed_lambda']} / terminal "
-            f"{banked['terminal_lambda']} (measured seed {measured['seed_lambda']:.4f} / "
-            f"terminal {measured['terminal_lambda']:.4f}, converged "
-            f"{measured['converged']}); delta seed {entry.get('seed_delta')}, "
-            f"delta terminal {entry.get('terminal_delta')}."
+            f"{banked['terminal_lambda']} (measured seed "
+            f"{_four_dp(measured['seed_lambda'])} / terminal "
+            f"{_four_dp(measured['terminal_lambda'])}, converged "
+            f"{measured['converged']}); delta seed "
+            f"{_four_dp(entry.get('seed_delta'))}, delta terminal "
+            f"{_four_dp(entry.get('terminal_delta'))}."
         )
     lines += ["", "## Verdict per route on converged rows", ""]
     for key, bucket in report["verdicts"].items():

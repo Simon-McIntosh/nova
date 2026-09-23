@@ -51,6 +51,8 @@
 
 <p><strong>Diverted construction inputs at f5af729a9.</strong> Comparison job <code>1276214</code> has independently built both routes in one GPU process. The <a href="/nova/figures/plasma-cell-read-fidelity/exact-mode-construction-comparison.json">construction receipt</a> finds only carrier identity and seed-state bytes differ (each appears both directly and in the request). Policy, active-set budget, Newton steps, target current, exterior values, physical moments, cell-polygon digest and all serialized operator construction fields are equal. The production and analytic-hex terminal solves remain pending; input differences alone are not a convergence result.</p>
 
+<p><strong>Diverted terminal comparison: both constructions fail.</strong> At <code>f5af729a9</code> in exact mode, the independently built production construction stops unconverged after four trips at residual <code>0.17503373772714848</code>, with X-point offset <code>1.3312810695389203 m</code>. The analytic-hex construction stops unconverged after seven trips at <code>0.15210120896157825</code>, with offset <code>0.08206281404473818 m</code>. Both offsets are relative to the common analytic-state topology read. The seed change selects a different failed terminal state; it does not produce a green production arm in this measurement. The <a href="/nova/figures/plasma-cell-read-fidelity/exact-mode-construction-comparison.json">paired receipt</a> retains all per-trip residuals, both carrier identities and the complete field comparison. The reactor-static pair and contour figure remain pending.</p>
+
 </section>
 
 <section id="s2"><h2>§2 The wall-node private shadow is read from the nearest cell, not from the node</h2>

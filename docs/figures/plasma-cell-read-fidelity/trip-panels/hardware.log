@@ -1,0 +1,4 @@
+revision=297b880f724224aa4dfc234bf7d73c6bbde90678 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels command=srun --jobid=1276299 --overlap --ntasks=1 --cpus-per-task=1 nvidia-smi --query-gpu=name,memory.total,utilization.gpu --format=csv
+name, memory.total [MiB], utilization.gpu [%]
+Tesla P100-PCIE-16GB, 16384 MiB, 0 %
+This inventory sample occurred during host construction; it is not a throughput measurement.

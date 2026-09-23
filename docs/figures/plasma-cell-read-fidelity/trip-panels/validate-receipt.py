@@ -13,6 +13,9 @@ assert r["status"] == "complete", "physical measurement is incomplete"
 assert r["slurm_job_id"]
 assert r["sacct_state"] == "COMPLETED"
 assert r["sacct_exit_code"] == "0:0"
+assert r["gpu_callback_control"]["passed"]
+assert r["gpu_callback_control"]["captured"] == [7.0]
+assert r["lambda_static_trace"]["route"]
 assert len(r["arms"]) == 3
 before, after, control = r["arms"]
 assert before["revision"] == r["pre_repair_revision"]
@@ -29,6 +32,42 @@ for arm in r["arms"]:
     assert arm["certificate_residual_bound"] == 1e-12
     assert math.isfinite(arm["terminal_residual"])
     assert arm["terminal_residual"] == arm["trips"][-1]["residual"]
+    assert arm["shape_controls"] == {"analytic": True, "linear_ramp": False}
+    assert arm["analytic_shape"]["is_plasma"]
+    states = [arm["seed"], *arm["trips"]]
+    assert arm["seed"]["trip"] == 0
+    for state in states:
+        shape = state["shape"]
+        current = state["lambda"]
+        assert current["scaling_execution_count"] > 0
+        assert current["scaling_armed"] and current["plasma_cells_enabled"]
+        assert current["target_current_a"] != 0
+        assert shape["flux_min_wb"] < shape["flux_max_wb"]
+        assert shape["rms_gradient_wb_per_m"] >= 0
+        assert shape["is_plasma"] == (
+            shape["has_o_point_inside_plasma_cells"]
+            and shape["closed_contour_about_o_point"]
+        )
+        assert state["closed_contour_invariant_violation"] == (
+            not shape["has_closed_contour"]
+        )
+        assert len(state["panel"]["views"]) == 2
+        assert all(view["axis_off"] for view in state["panel"]["views"])
+        for kind in ["png", "svg"]:
+            assert (root / state["panel"][kind]).stat().st_size > 1000
+    first = next(
+        (state["trip"] for state in states if not state["shape"]["is_plasma"]), None
+    )
+    assert arm["first_non_plasma_state"] == first
+    first = next(
+        (
+            state["trip"]
+            for state in states
+            if state["closed_contour_invariant_violation"]
+        ),
+        None,
+    )
+    assert arm["first_closed_contour_invariant_violation"] == first
     loss = None
     for index, row in enumerate(arm["trips"], 1):
         assert row["trip"] == index

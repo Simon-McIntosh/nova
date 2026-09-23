@@ -52,8 +52,11 @@ def compatible_nulls(driver, operator, state):
         return driver._native_nulls(operator, state)
     np, jnp = driver.np, driver.jnp
     _, topology = operator.read(jnp.asarray(state, dtype=jnp.float64))
-    grid_flux, _ = operator.topology.split_flux_map(jnp.asarray(state))
-    census = operator._fixed_design_topology.grid.candidate_table_status(grid_flux)
+    if hasattr(operator, "_null_flux_pool"):
+        pool = operator._null_flux_pool(jnp.asarray(state))
+    else:
+        pool, _ = operator.topology.split_flux_map(jnp.asarray(state))
+    census = operator._fixed_design_topology.grid.candidate_table_status(pool)
     assert int(census["retained_count"][0]) > 0, "axis positive control is empty"
     saddles = np.asarray(census["retained_candidate"])[1]
     valid = np.asarray(census["retained_valid"])[1]
@@ -120,6 +123,7 @@ def arm(arguments):
         "status": "not-measured",
         "nova_file": None,
         "exception": None,
+        "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }
     started = perf_counter()
     try:
@@ -177,6 +181,8 @@ def arm(arguments):
                 "reference_nulls": reference,
                 "diagnostic_census_input": "null_flux_pool"
                 if hasattr(operator, "null_flux_pool")
+                else "_null_flux_pool"
+                if hasattr(operator, "_null_flux_pool")
                 else "native_grid_flux",
             }
         )

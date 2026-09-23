@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T12:59:35",
+  "updated": "2026-09-23T13:08:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -285087,6 +285087,280 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260923T051120272884-pcrf-terminal-panel-markers-and-record-corrections",
+        "plan": "plasma-cell-read-fidelity",
+        "section": "\u00a74",
+        "node": "pcrf-terminal-panel-markers-and-record-corrections",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1279,
+                "cached_input_tokens": 664668,
+                "input_tokens": 665949,
+                "output_tokens": 675,
+                "reasoning_output_tokens": 137,
+                "total_tokens": 666624,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "in benchmarks/plasma_cell_terminal_state.py the analytic panel draws its null set once, and on every panel the large reference markers are drawn after the small panel-state markers or with a hollow style that leaves them visible, so the three-candidate saddle cluster of the analytic state is legible in the PNG; the figure docs/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.png and its SVG are regenerated from the four stored state files diverted-single-null-trip-arms.npz and their siblings in that directory without any solve (render only, on ONE all_debug sbatch job with --time=00:30:00 --cpus-per-task=2 --mem=16G, TMPDIR=/tmp in the submit environment and the payload, JAX_PLATFORMS=cpu, PYTHONPATH=this worktree, the root interpreter run directly, uv never invoked), keeping the plotting rules (line contours on the shared level array per row, axis off, wall units via draw_wall, both null sets via draw_nulls, captions with residual, converged flag and trip count); the terminal-state node record in docs/evidence/archive/plasma-cell-read-fidelity-landed.html gains one appended sentence stating that its scheduler log carries a python step CANCELLED with exit 0:15 at 32 minutes beside the COMPLETED job 1276138 and what that step was; the re-pin record in docs/evidence/archive/plasma-cell-topology-authority-landed.html gains one appended sentence giving job 1276081 the sacct elapsed of 10 s in place of the 55 s figure (append only: git diff HEAD on both records shows zero deleted lines); the declared negative control is run and its log recorded; ruff check and format pass over the module; the manifest is written before the wait with wait_probe as a JSON argument vector printing IN_QUEUE or LEFT_QUEUE and wait_terminal LEFT_QUEUE and its gate fields name the render job",
+          "estimated_hours": 1.0,
+          "goal": "redraw the terminal-state figure so the reference null markers stay visible under the panel-state markers",
+          "id": "pcrf-terminal-panel-markers-and-record-corrections",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-23T05:11:21Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T051120272884-pcrf-terminal-panel-markers-and-record-corrections/manifest.md",
+          "negative_control": "render once with the drawing order restored to the original and observe by pixel count at the reference cluster position that the large markers are covered, recorded in the log beside the repaired render count",
+          "plan": "plasma-cell-read-fidelity",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/plasma_cell_terminal_state.py",
+            "docs/figures/plasma-cell-read-fidelity",
+            "docs/evidence/archive/plasma-cell-read-fidelity-landed.html",
+            "docs/evidence/archive/plasma-cell-topology-authority-landed.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-terminal-panel-markers-and-record-corrections",
+            "docs/plans/plasma-cell-read-fidelity.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s18-pcrf-c1",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-23T05:11:42Z",
+        "completed_at": "2026-09-23T06:59:49.178Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6478,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6487,
+        "stalled": true,
+        "time_budget": "40m",
+        "base_sha": "218addacf512bf1f316a64bd2204a37bfd83136e",
+        "commits": [
+          "e8b613cef78def96918b95c9eb1dd424e4af76ad",
+          "6a78bd1688459dc86f8b73ea58d2ce428af88e1c"
+        ],
+        "changed_lines": {
+          "added": 445,
+          "removed": 235,
+          "files": 6
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sbatch all_debug render-only: python -m benchmarks.plasma_cell_terminal_state --render-only --draw-order reference-last",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T051120272884-pcrf-terminal-panel-markers-and-record-corrections/gate.log",
+          "log_digest": "sha256:bd6810d1415d0e5f92332fe76f5c8fbe0fe8e214db853046a263e3f68b4774ad"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T051120272884-pcrf-terminal-panel-markers-and-record-corrections/manifest.md",
+        "scope_changed": false,
+        "session_id": "88189741-28b6-4fd7-8a60-0a7eb0f30142",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 4090213,
+            "input_tokens_cumulative": 4090213,
+            "output_tokens": 21640,
+            "output_tokens_cumulative": 21640,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-23T06:59:49.178Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "goal_fidelity": 19,
+            "evidence": 19,
+            "scope_discipline": 20,
+            "durability": 18,
+            "fit": 19
+          },
+          "absent": [],
+          "total": 95
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 11485580,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3105.498,
+          "generated_tokens": 61217,
+          "generation_seconds": 3008.351,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 25.5,
+          "machine_seconds": 97.147,
+          "peak_input_tokens": 122607,
+          "tokens_per_second": 20.35,
+          "wall_tokens_per_second": 19.71
+        },
+        "follow_on_paths": [
+          "render.sh",
+          "render-attempt1.log"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-terminal-panel-markers-and-record-corrections",
+          "session_id": "88189741-28b6-4fd7-8a60-0a7eb0f30142",
+          "session_source": "stream",
+          "retained_at": "2026-09-23T06:59:49.178Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "promoted_revision": "6a78bd1688459dc86f8b73ea58d2ce428af88e1c",
+        "plan_impl_at_dispatch": 0.7,
+        "impl_move": {
+          "plan": "plasma-cell-read-fidelity",
+          "at_dispatch": 0.7,
+          "at_complete": 0.75,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "lane_advisory": {
+          "backend": "clive",
+          "burn_multiple": null,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+          "horizon_ends_at": "2026-09-23T05:51:21.645640+00:00",
+          "horizon_seconds": 2400,
+          "metered": false,
+          "observed_at": null,
+          "precedes_horizon": null,
+          "projected_exhaustion_at": null,
+          "resets_at": null,
+          "seconds_until_reset": null,
+          "state": "quiet",
+          "utilisation_pct": null
+        },
+        "lane_declaration": {
+          "backend": null,
+          "headroom": null,
+          "metered": false,
+          "observed_at": null,
+          "read_at": "2026-09-23T05:11:21Z",
+          "resolved_backend": "clive",
+          "utilisation_pct": null
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "lane document carries no 'binding_observed'",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 61.0,
+        "orientation_input_tokens": 1847082.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -285581,6 +285855,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3296
+    "_version": 3297
   }
 }

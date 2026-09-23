@@ -15,9 +15,9 @@ import numpy as np
 from benchmarks import unit_amplitude_current_census as census
 
 
-output_root = Path(os.environ["CENSUS_OUTPUT_ROOT"])
-census.OUTPUT_ROOT = output_root
-census.RECEIPT = output_root / "receipt.json"
+output_root = str(Path(os.environ["CENSUS_OUTPUT_ROOT"]))
+census.OUTPUT_ROOT = Path(output_root)
+census.RECEIPT = Path(output_root) / "receipt.json"
 result = census.measure()
 
 
@@ -31,10 +31,12 @@ def nonfinite_count(values) -> int:
 
 overflow = {
     state_name: {
-        mode: nonfinite_count(row[mode + "_current_a"])
+        mode: nonfinite_count(
+            [row[mode + "_current_a"] for row in rows]
+        )
         for mode in census.CLIP_MODES
     }
-    for state_name, row in result["per_cell"].items()
+    for state_name, rows in result["per_cell"].items()
 }
 total_overflow = sum(
     count for per_mode in overflow.values() for count in per_mode.values()
@@ -47,7 +49,10 @@ chord_totals = {
     name: state["unit_amplitude_totals_a"]["chord"]
     for name, state in result["states"].items()
 }
-analytic_total = result["target_current_a"]
+analytic_totals = {
+    name: float(np.sum([row["analytic_exact_current_a"] for row in rows]))
+    for name, rows in result["per_cell"].items()
+}
 print(
     "realised_cells=%d nonfinite_cell_current_signatures=%d exact_total_finite=%s"
     % (
@@ -62,6 +67,13 @@ print(
     flush=True,
 )
 print("overflow_by_state_mode=%r" % overflow, flush=True)
+print("analytic_totals_a=%r" % analytic_totals, flush=True)
 print("chord_totals_a=%r" % chord_totals, flush=True)
 print("exact_totals_a=%r" % exact_totals, flush=True)
-print("analytic_target_current_a=%r" % analytic_total, flush=True)
+print("analytic_target_current_a=%r" % result["target_current_a"], flush=True)
+print("amplitude_gate=%r" % result["verification"]["amplitude_gate"], flush=True)
+print(
+    "seed_digest_matches_commit=%r"
+    % result["seed"]["digest_matches_commit"],
+    flush=True,
+)

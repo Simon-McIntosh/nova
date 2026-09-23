@@ -18,7 +18,7 @@
 <meta name="plan-modified" content="2026-09-23">
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -108,6 +108,12 @@
 <li>the axis and saddle positions the read admits.</li>
 </ol>
 <p>Each state is drawn on the shared levels and on its own levels, so its shape is visible whatever its range. The first trip at which the state stops being a plasma is the trip the mechanism acts on, and the verdict names it.</p>
+<p><strong>Invariant, lead 2026-09-23 08:55.</strong> With a net plasma current and the plasma cells enabled, the state always has closed contours in the vessel. The λ net-plasma-current scaling is what guarantees this. The node therefore confirms that the scaling is armed on the hot path, both statically and dynamically.</p>
+<ul>
+<li><strong>Statically:</strong> trace the certificate production route, in exact clip mode at requested 110 cells, to the site where λ scales the support current to the target plasma current. Name each file and line on that route. Name any policy, flag or branch that can bypass the scaling for this construction.</li>
+<li><strong>Dynamically:</strong> per trip, and for the seed, record the λ amplitude, the net current the support carries against the target, and a count proving the scaling branch executed on that trip.</li>
+</ul>
+<p>A trip whose state has no closed contour in the vessel while the scaling reads armed is a direct violation of the invariant, and the receipt names it as one.</p>
 <p>A route that returns a state with no plasma, without refusing it, is a separate defect from the mechanism. It is recorded here for the repair node, and nothing is authored before the panels name the mechanism.</p>
 <p><strong>Operational note for the next session.</strong> The local lane was taken down at 06:12:04 by a user-wide scancel from an imas-efit worker (guard now in the user-space agent rules); hold local dispatches until imas-ambix reports the serve restored, and route reviews there once it is. Two H200 jobs of the ladder were lost to that event; the third (1276244) blocks rather than resubmits if cancelled again.</p>
 </section>

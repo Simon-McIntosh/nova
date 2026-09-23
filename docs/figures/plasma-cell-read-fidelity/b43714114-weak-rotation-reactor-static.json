@@ -1,0 +1,125 @@
+{
+  "revision": "b43714114",
+  "case": "weak-rotation-reactor-static",
+  "arm": "default_policy",
+  "status": "measured",
+  "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/scratch-revisions/b43714114/nova/__init__.py",
+  "exception": null,
+  "harness_sha256": "a9c991e58045b02e8d16c0f99fd5e2e1a04217ddd9fcbaa102037122f046888f",
+  "full_revision": "b4371411497eee506f426bd2fe5785dc88a82095",
+  "realised_cells": 135,
+  "reference_nulls": {
+    "axis_rz_m": [
+      6.18487689585388,
+      -1.354472090042691e-14
+    ],
+    "x_point_rz_m": null,
+    "qualified_saddles_rz_m": [],
+    "retained_count": [
+      2,
+      0
+    ],
+    "axis_flux_wb": 49.94611545553129,
+    "boundary_flux_wb": 1.1345091532888318e-15
+  },
+  "diagnostic_census_input": "native_grid_flux",
+  "active_set_budget": 16,
+  "residual": 0.047076170476157406,
+  "converged": false,
+  "qualified": false,
+  "trip_count": 3,
+  "per_trip_residual_history": [
+    {
+      "trip": 1,
+      "residual": 0.04707896286807811
+    },
+    {
+      "trip": 2,
+      "residual": 0.047076170476157406
+    },
+    {
+      "trip": 3,
+      "residual": 0.047076170476157406
+    }
+  ],
+  "terminal_axis_rz_m": [
+    6.178889480410041,
+    0.0005614477017239772
+  ],
+  "terminal_x_point_rz_m": null,
+  "reference_axis_rz_m": [
+    6.18487689585388,
+    -1.354472090042691e-14
+  ],
+  "reference_x_point_rz_m": null,
+  "x_point_distance_m": null,
+  "x_point_distance_status": "no_admitted_reference_saddle",
+  "certificate_position_bound_m": 0.46606341035820315,
+  "certificate_residual_bound": 1e-12,
+  "jax_platform": "gpu",
+  "nulls": {
+    "axis_rz_m": [
+      6.178889480410041,
+      0.0005614477017239772
+    ],
+    "x_point_rz_m": null,
+    "qualified_saddles_rz_m": [],
+    "retained_count": [
+      1,
+      0
+    ],
+    "axis_flux_wb": 49.551334452865774,
+    "boundary_flux_wb": -0.08276601449449199
+  },
+  "termination_reason": 10,
+  "resolved_defaults": {
+    "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
+    "policy": {
+      "route": "newton_krylov",
+      "newton_steps": 10,
+      "gmres_iterations": 30,
+      "warmup": 0,
+      "relaxation": 0.5,
+      "step_cap": 10.0,
+      "active_set_steps": 16,
+      "kernel_tolerance": 1e-12,
+      "qualification_tolerance": 1e-12,
+      "current_pin": true,
+      "settled_exit": true,
+      "own_mask_acceptance": true,
+      "continuation": true,
+      "best_iterate_retention": true,
+      "stagnation_stop": true,
+      "exact_kernels": true,
+      "cached_machine": true,
+      "compilation_cache": true
+    },
+    "deviations": {
+      "kernel_tolerance": 1e-12,
+      "qualification_tolerance": 1e-12
+    },
+    "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+  },
+  "wall_seconds": 683.1203974606469,
+  "compilation_cache_hit": false,
+  "terminal_residual": 0.047076170476157406,
+  "wall_units": [
+    [
+      0,
+      121,
+      true,
+      "vessel"
+    ]
+  ],
+  "state_file": "b43714114-weak-rotation-reactor-static.npz",
+  "moment_diagnostic": {
+    "cut_cell_capacity": 135,
+    "selected_cut_cell_count": 44,
+    "cut_cell_capacity_overflow": false,
+    "capacity_receipt": "recomputed operator integrator predicate: cut_count > capacity",
+    "clipped_support_current_moments_finite": true,
+    "operator_current_moments_finite": true,
+    "moment_calls": 1
+  },
+  "total_wall_seconds": 753.5582553856075
+}

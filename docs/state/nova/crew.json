@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T18:38:37",
+  "updated": "2026-09-23T18:43:26",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5267,6 +5267,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-esf-1",
+        "harness": "codex-astra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-23"
       },
       {
         "id": "s19c-figure-recovery-c",
@@ -296734,6 +296743,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3323
+    "_version": 3324
   }
 }

@@ -2921,6 +2921,52 @@ misses 0) are committed beside the receipt. A stray truncated file left under th
 figures tree was removed, and a worker plan-version meta bump was reverted so the plans meta lines are not advanced by a worker edit. Nothing under
 <code>nova/</code> changed.</p>
 </section>
+<section id="exact-support-polygon-refusal">
+<h2>Exact support at the analytic state: attribution blocked on a non-simple polygon</h2>
+<p><strong>2026-09-23; incomplete measurement, no production repair.</strong>
+The benchmark at <code>918f4edb457a28e466be7be79c7570efb4a9eaec</code>
+uses physical moments before coupling-basis conversion, an independent
+signed-triangle quadrature over each support, and an analytic core-region
+integral. The intended identity is true minus booked = support-geometry error
+minus moment-integration error. It retains the archived target separately:
+the diverted fixture target is an integral on traced supports, not an
+independent integral of the true plasma region.</p>
+<p>The second H200 job <code>1276896</code> (one GPU, eight cores, 64 GB,
+double precision) matched coordinates, analytic state, finite moments, and
+coupling and physical moments from the reviewed archive. Its support fraction
+matched <code>0.9541772190883415</code> within relative tolerance
+<code>1e-9</code>. It then stopped with
+<code>AssertionError: invalid exact polygons: [9]</code> on diverted 110.
+A repaired region and signed-winding integration of the returned chain need not
+agree. No choice was made implicitly, and no integration-versus-geometry
+attribution is claimed.</p>
+<p><strong>Preserved preflight.</strong> Job <code>1276895</code> stopped
+before support evaluation because the production analytic separatrix sampler
+at 11,521 points reported <code>zero-flux lobe is not star-shaped at angle
+4.450549</code>. Benchmark-local normal projection now refines the established
+2,881-point contour, preserving the saddle endpoint. The second job passed the
+analytic flux residual bound <code>1e-12 Wb</code> and the current-refinement
+bound <code>1e-5</code> relative L1. The production sampler is unchanged.
+Scheduler elapsed times were 16 and 28 seconds, both exit <code>1:0</code>.</p>
+<p><strong>Unmet measures.</strong> The failed process did not persist the
+invalid polygon's vertices or intermediate integrals. The explicit 35.4 mm
+centroid positive control, chord control, per-class decomposition, remaining
+nine case/rung rows, and 300-cell panels are absent. A missing panel is not a
+passing numerical result. Next capture the refused vertices and atomic cell,
+inspect the intersection, and settle support semantics before resuming.</p>
+<p>The archived diverted chord 110 fraction is
+<code>1.003530216161609</code>, a 0.353% excess. It passes a signed missing-current
+criterion but fails absolute agreement within <code>1e-3</code>. That distinction
+must survive the resumed gate. Concave-polygon and hole-subtraction instrument
+controls and scoped Ruff checks passed. Driver commits:
+<code>b2fd0f22e98b51c68b56f157289b83369b6ee4ec</code> and
+<code>918f4edb457a28e466be7be79c7570efb4a9eaec</code>;
+preflight log commit <code>d91a9c7e11d4bf6cbe231f440e76fe4e4cee50a7</code>.</p>
+<p><a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/report.json">Machine-readable blocker record</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/report.md">Detailed report</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/job.log">Exact-polygon refusal log</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/boundary-preflight.log">Boundary-sampling refusal log</a>.</p>
+</section>
 </main>
 </body>
 </html>

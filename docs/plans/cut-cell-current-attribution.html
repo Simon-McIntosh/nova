@@ -467,6 +467,24 @@ truncated figures file was removed and a worker plan-version meta bump reverted.
   <figcaption>Full-state census difference contours; the ranked per-cell comparison is also available as <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-ranked.svg">SVG</a> and <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-ranked.png">PNG</a>. The complete quantitative report is <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/report.md">here</a>.</figcaption>
 </figure>
 
+<h3 id="s6-exact-support-polygon-refusal">Exact-support attribution: non-simple polygon blocks the integral</h3>
+<p><strong>2026-09-23 worker checkpoint; attribution incomplete.</strong>
+The evaluation-only H200 job <code>1276896</code>, using driver revision
+<code>918f4edb457a28e466be7be79c7570efb4a9eaec</code>, matched the reviewed
+110-cell diverted exact support fraction <code>0.9541772190883415</code>
+within relative tolerance <code>1e-9</code>, then refused
+<code>invalid exact polygons: [9]</code>. The same-polygon analytic integral
+requires a meaning for this non-simple chain; silently repairing it would change
+the attribution. The per-cell split, explicit 35.4 mm centroid check, chord
+control and remaining rungs are unmeasured. No production change or solve ran.
+The driver and refusal logs are committed at <code>b2fd0f22e98b51c68b56f157289b83369b6ee4ec</code>,
+<code>918f4edb457a28e466be7be79c7570efb4a9eaec</code> and
+<code>d91a9c7e11d4bf6cbe231f440e76fe4e4cee50a7</code>.
+The next step is to capture cell 9's vertices and inspect the intersection,
+then choose signed-winding or geometric-region semantics. The driving followup
+and section remain open. See the
+<a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#exact-support-polygon-refusal">refusal evidence and unmet measures</a>.</p>
+
 <h2 id="s7">§7 — Wire the typed census saddle into the production spline-chain clip and re-solve the diverted certificate rows</h2>
 <p>The wedge split landed on the oracle (core-side current within 1e-13 relative of the analytic wedge integral at 110, 300 and 500 cells) but the production spline route discards it because the operator passes no saddle vertex, and the oracle compares the carrier against its own emitted polygons. Pass the typed census saddle as the clip's saddle vertex, consume the four region-owned moment profiles in the plasma partition and the null read, and make the oracle independent of the carrier by integrating the analytic current over the region bounded by the separatrix branches and the cell edges. Gate: the independent oracle at 110, 300 and 500 cells on all_debug, then one H200 job re-solving the four diverted certificate rows with the four limited rows as the bit-identical negative control.</p>
 

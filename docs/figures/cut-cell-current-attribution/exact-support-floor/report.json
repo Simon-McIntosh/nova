@@ -1,0 +1,69 @@
+{
+  "status": "blocked",
+  "completed": false,
+  "source_revision": "918f4edb457a28e466be7be79c7570efb4a9eaec",
+  "orientation_base_revision": "66b5c51cc99bb80d5084987cfbc5860f1d648b9a",
+  "reviewed_input_revision": "701a2f84cc6b48312d3d1efb44d108e69107a78f",
+  "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/exact_support_floor_attribution.py",
+  "job_id": 1276896,
+  "device": "CudaDevice(id=0)",
+  "x64": true,
+  "jobs": [
+    {
+      "id": 1276895,
+      "state": "FAILED",
+      "elapsed_seconds": 16,
+      "exit_code": "1:0",
+      "log": "boundary-preflight.log"
+    },
+    {
+      "id": 1276896,
+      "state": "FAILED",
+      "elapsed_seconds": 28,
+      "exit_code": "1:0",
+      "log": "job.log"
+    }
+  ],
+  "attempted_case": "diverted-single-null",
+  "requested_cells": 110,
+  "attempted_clip_mode": "exact",
+  "invalid_polygon_cells": [
+    9
+  ],
+  "refusal": "AssertionError: invalid exact polygons: [9]",
+  "reached_checks": [
+    "concave constant-density integral and hole subtraction passed",
+    "analytic boundary midpoint projections passed the 1e-12 Wb residual bound",
+    "true-region current refinement passed the 1e-5 relative L1 bound",
+    "coordinates identical to archive and analytic state within 1e-12 Wb",
+    "all physical moments finite",
+    "coupling moments matched archive at rtol 1e-8 and atol 1e-7",
+    "support fraction matched archive at rtol 1e-9",
+    "physical moments matched archive after undoing coupling basis conversion"
+  ],
+  "archived_exact_support_fraction": 0.9541772190883415,
+  "archived_fraction_reproduced_within_rtol": 1e-09,
+  "values_not_persisted": "The failed process did not serialize per-cell vertices or integrals before its polygon-validity assertion. Exact numeric values beyond the archived controls are unavailable.",
+  "unmet": [
+    "same-polygon analytic integral at non-simple cell 9",
+    "per-cell and per-class moment-versus-geometry attribution",
+    "35.4 mm low-centroid explicit positive control",
+    "chord negative control",
+    "remaining nine case/rung rows",
+    "300-cell line-contour panels"
+  ],
+  "rows": [],
+  "panels": [],
+  "negative_control": {
+    "declaration": "evaluate the same cells in chord clip mode",
+    "executed": false
+  },
+  "target_caveat": "The archived diverted target uses traced fixture supports; it is not an independent true-plasma-region integral.",
+  "scope": "Evaluation only; no solve and no change under nova/.",
+  "next_action": "Persist the refused polygon and its cell geometry, inspect self intersections, then decide signed-winding versus geometric-region semantics before resuming integration.",
+  "options": [
+    "signed-winding integration of the returned chain",
+    "explicitly repaired geometric region with the repair reported",
+    "investigate the production clip before integrating"
+  ]
+}

@@ -451,6 +451,17 @@ receipt, logs, exit markers and report are under
 <code>docs/figures/cut-cell-current-attribution/census-after-bank-repair</code>;
 the ranked and poloidal difference figures are linked below. Nothing under
 <code>nova/</code> changed, and this worker does not resolve its own followup.</p>
+<p><strong>Review repairs, commit <code>247e5aa4a</code>.</strong> The outboard
+booking gate was red at head because it pinned the terminal totals before the
+recorded repairs moved them; the gate was green at its pinning revision
+<code>8a33b741b</code>, and the topology guard that landed after it made the
+slicing probe refuse, so the census repair repaired that read. Re-pinned the gate
+to the measured terminal totals chord <code>15,875,439.765 A</code> / exact
+<code>14,013,835.437 A</code> and the outboard cells 83/116 at
+<code>112,349.668 A</code>, with the mechanism in the module docstring. Red log
+at <code>237e3e931</code> (2 failed, 1 passed) and green log at
+<code>247e5aa4a</code> (3 passed in 161.63 s) sit with the receipt. A stray
+truncated figures file was removed and a worker plan-version meta bump reverted.</p>
 <figure>
   <img src="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-contours.svg" alt="Poloidal difference contours for the full-state unit-amplitude census after the bank-capacity repair." style="max-width:100%">
   <figcaption>Full-state census difference contours; the ranked per-cell comparison is also available as <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-ranked.svg">SVG</a> and <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-ranked.png">PNG</a>. The complete quantitative report is <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/report.md">here</a>.</figcaption>

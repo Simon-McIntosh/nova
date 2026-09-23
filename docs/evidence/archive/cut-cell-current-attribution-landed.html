@@ -2903,6 +2903,23 @@ and this worker does not resolve its own followup.</p>
   <img src="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-contours.svg" alt="Poloidal difference contours for the full-state unit-amplitude census after the bank-capacity repair." style="max-width:100%">
   <figcaption>Full-state census difference contours. The ranked per-cell comparison is available as <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-ranked.svg">SVG</a> and <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-ranked.png">PNG</a>; the complete quantitative <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/report.md">report</a> carries the totals and gate receipts.</figcaption>
 </figure>
+<p><strong>Review repairs (commit <code>247e5aa4a</code>).</strong> The outboard
+booking gate <code>tests/test_outboard_hole_census_gate.py</code> was red at head:
+it pinned the terminal totals as chord <code>15,868,149.09 A</code> / exact
+<code>15,491,114.13 A</code> before the bank-capacity and partition-probe repairs
+moved them together. The gate was green at its pinning revision
+<code>8a33b741b</code>; the topology guard that landed after it
+(<code>08dd0dda1</code>) made the slicing probe refuse, which the probe repair
+then addressed, so the green point is the pinning revision rather than the
+commit before the bank repair. Re-pinned to the measured terminal totals chord
+<code>15,875,439.765 A</code> / exact <code>14,013,835.437 A</code> and to the two
+moved outboard cells 83 and 116 at <code>112,349.668 A</code> each, with the
+mechanism recorded in the module docstring. The red log at revision
+<code>237e3e931</code> (2 failed, 1 passed) and the green log at revision
+<code>247e5aa4a</code> (3 passed in 161.63 s, cache guard wall-clock-reliable,
+misses 0) are committed beside the receipt. A stray truncated file left under the
+figures tree was removed, and a worker plan-version meta bump was reverted so the plans meta lines are not advanced by a worker edit. Nothing under
+<code>nova/</code> changed.</p>
 </section>
 </main>
 </body>

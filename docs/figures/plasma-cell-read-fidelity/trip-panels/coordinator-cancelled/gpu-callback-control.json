@@ -1,0 +1,21 @@
+{
+  "captured": [
+    7.0
+  ],
+  "jvp_vmap_captured": [
+    2.0,
+    3.0
+  ],
+  "result": 8.0,
+  "passed": true,
+  "gpu_devices": [
+    {
+      "device": "cuda:0",
+      "kind": "Tesla P100-PCIE-16GB"
+    }
+  ],
+  "cpu_devices": [
+    "cpu:0"
+  ],
+  "slurm_job_id": "1276326"
+}

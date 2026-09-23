@@ -10,6 +10,7 @@ export JAX_PLATFORMS=cpu
 export PYTHONPATH="$WORKTREE"
 {
   echo "ROW-BEGIN case=$CASE cells=$CELLS slurm_job=${SLURM_JOB_ID:-none} host=$(hostname) $(date -Is)"
+  rm -rf /tmp/recovery-ladder-census/parts /tmp/recovery-ladder-census/diagnostics
   "$HOME/Code/nova/.venv/bin/python" "$WORKTREE/benchmarks/recovery_ladder_census.py" \
     --row "$CASE:$CELLS" \
     --output "$WORKTREE/docs/figures/forward-solver-route-integrity/recovery-ladders" \

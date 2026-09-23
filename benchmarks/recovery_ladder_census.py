@@ -112,11 +112,15 @@ def _instruction_share():
     }
 
 
-def _redirect(solovev, scratch):
+def _redirect(solovev, scratch, figures):
     saved = {}
     for name in ("FIGURE_ROOT", "PART_ROOT", "DIAGNOSTIC_ROOT"):
         saved[name] = getattr(solovev, name)
-        setattr(solovev, name, scratch)
+    # The rendered panel is receipted as a URL under docs/, so the figure root
+    # has to stay inside docs/ even when the surrounding run is redirected.
+    setattr(solovev, "FIGURE_ROOT", figures)
+    setattr(solovev, "PART_ROOT", scratch / "parts")
+    setattr(solovev, "DIAGNOSTIC_ROOT", scratch / "diagnostics")
     return saved
 
 
@@ -132,7 +136,9 @@ def run(rows, output, scratch_root):
     output.mkdir(parents=True, exist_ok=True)
     scratch = scratch_root
     scratch.mkdir(parents=True, exist_ok=True)
-    saved = _redirect(solovev_certificate, scratch)
+    figures = output / "scratch-figures"
+    figures.mkdir(parents=True, exist_ok=True)
+    saved = _redirect(solovev_certificate, scratch, figures)
     receipts = []
     try:
         for case, cells in rows:

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T06:05:22",
+  "updated": "2026-09-23T06:07:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -276009,6 +276009,384 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T103934949557-fsri-one-traced-operator-state-machine",
+        "plan": "forward-solver-route-integrity",
+        "section": "\u00a73",
+        "node": "fsri-one-traced-operator-state-machine",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5464,
+                "cached_input_tokens": 330038,
+                "input_tokens": 335504,
+                "output_tokens": 1959,
+                "reasoning_output_tokens": 621,
+                "total_tokens": 337463,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "576a27e3-ea0d-439c-9e63-3058761859c6",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "tests/test_fixed_point.py and tests/test_reduced_newton.py pass in a fresh CPU process with zero added failures against the base revision (both logs recorded), a new test proves three nested-JIT calls through the machine optimise to three inlined bodies (the optimised HLO is inspected and the count printed), the optimised instruction count of the 300- and 1000-cell weak certificate row programs is printed on one all_debug allocation and is at or below the interim 203,078 and 204,531, and the declared negative control (revert the single body to per-request evaluation) is applied, the instruction count is observed to rise, and the log is recorded; the GPU certificate bit-identity of the four rows is NOT this node, it is the follow-on node",
+          "estimated_hours": null,
+          "goal": "implement one lax state machine in the fixed-point and reduced-Newton routes whose sole traced operator body serves the residual, merit, acceptance, recovery, reconciliation and Jacobian-vector requests with the exact live read semantics retained",
+          "id": "fsri-one-traced-operator-state-machine",
+          "lane_declaration": {
+            "backend": "codex-astra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-22T10:39:37Z",
+            "read_at": "2026-09-22T10:39:39Z",
+            "resolved_backend": "codex-astra",
+            "utilisation_pct": 41.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T103934949557-fsri-one-traced-operator-state-machine/manifest.md",
+          "negative_control": "revert the single operator body to per-request evaluation and observe the 300-cell instruction count rise above the interim",
+          "plan": "forward-solver-route-integrity",
+          "requested_backend": "codex-astra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "open",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "nova/equilibrium/reduced_newton.py",
+            "tests/test_fixed_point.py",
+            "tests/test_reduced_newton.py",
+            "docs/figures/forward-solver-route-integrity",
+            "docs/plans/forward-solver-route-integrity.html",
+            "docs/evidence/archive/forward-solver-route-integrity-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "s19f-astra-1",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5.5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-22T10:39:59Z",
+        "completed_at": "2026-09-23T03:55:06.841Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3036,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 62107,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "775720c77c5443e990a74b52ea464b73ce87b6aa",
+        "commits": [
+          "d8d858ff09a39851885a738c2293544785df32be",
+          "7c74bf18b72f1b15d57f006f3eb6462cc6acba7b",
+          "674ad986d155cf5c403d2cbb1201db7a6b15f2a7",
+          "364f92c3663f16f817ca873c573db1d4aa0aef91",
+          "f2d952c89c2183bcad54a311ed866fc67125da73",
+          "a359f8fed22b69798a5668c33a1dc9708f830405",
+          "8dbc6cbb17c78979b108375965a0b63cebd1a081",
+          "f803b640cfcfda7aa9e50ead083eb667cfd27e0f",
+          "9a3dc3a7f5f7b009e8a3cd2473fa3c9205e15287",
+          "d8f3243cd35aa8a5e3ae17bb682e767abfb593f4",
+          "de025e5347b598d503b4a2352a3daa2e2613d43c",
+          "ad0ee3f6524eb7c753f9db3b126554303952aec0",
+          "274b0bffeb8db37a507204df3ef38870bb3f703d",
+          "20cd95a4599f05dfa9a8cfcc12a44cf5405d14cd",
+          "52bfefc0a0f02412d8910aaccb632bfbd9fd43b5"
+        ],
+        "changed_lines": {
+          "added": 6272,
+          "removed": 35,
+          "files": 74
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T103934949557-fsri-one-traced-operator-state-machine/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c8b3-79e4-7b81-b58c-797e1e2dd1be",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 16911488,
+            "cached_input_tokens_cumulative": 16911488,
+            "input_tokens": 17325175,
+            "input_tokens_cumulative": 17325175,
+            "output_tokens": 132437,
+            "output_tokens_cumulative": 132437,
+            "reasoning_output_tokens": 75343,
+            "reasoning_output_tokens_cumulative": 75343
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-23T03:55:06.841Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 46.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-23T03:55:06.841Z"
+            }
+          ],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "notional_cost_usd": "no_dated_rate",
+            "rate_basis": "no_dated_rate"
+          }
+        },
+        "lineage": {
+          "attempt": 3,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-23T03:04:21Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'codex' to 'claude'",
+              "from_backend": "codex-astra",
+              "from_harness": "codex",
+              "reason": "lead decision 2026-09-22: fourth section-3 attempt on the claude-opus 5.5 lane, on this run's committed design state (tip 8dbc6cbb)",
+              "session": "fresh",
+              "session_id": "01a0c8b3-79e4-7b81-b58c-797e1e2dd1be",
+              "session_source": "pointer",
+              "to_backend": "claude-opus",
+              "to_harness": "claude"
+            }
+          ],
+          "root_run_id": "r-20260922T103934949557-fsri-one-traced-operator-state-machine"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 43,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 141748,
+              "log_fresh": false,
+              "manifest_commits": [
+                "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
+                "0028295f5ba1e4c4d0c3ba0e1c98f0b0fbb4c9d1"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "28b0fa1a9d3559290e36bf25bbedc4839c9ef1861513ab5235f34a953247d5fe",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T180231259880-cca-one-certificate-row-per-process/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan cpu-compile-abort --section '\u00a72' --role review --spec-level exact --node review-of-cca-one-certificate-row-per-process --goal 'attach an independent review to run r-20260920T180231259880-cca-one-certificate-row-per-process' --done-when 'the review for r-20260920T180231259880-cca-one-certificate-row-per-process stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260920T180231259880-cca-one-certificate-row-per-process.json --time-budget 55m --session s19-codex-20260916 --allow-unreconciled-runs --local",
+              "node": "cca-one-certificate-row-per-process",
+              "phase": "complete",
+              "plan": "cpu-compile-abort",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T180231259880-cca-one-certificate-row-per-process",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 141753,
+              "terminal_at": "2026-09-20T19:17:11Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 625,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: Second allocation ran out - job 1274360 aborted at edit 16 on JIT mapping exhaustion with REGEN_DRIVER_EXIT=134 and EXIT_MARKER=134 after 15 of 20 edits; so edits 16 through 20 never ran and the states for edits 14 and 15 were never flushed; seven of the twenty states the done-when needs are absent. The census cannot pass on what landed and CENSUS_AGREES=0; both because 14 states are fewer than the 20 the figures are defined over (drawn_closed 5 of 14 against the required 12 of 20; axis_enclosing_cycle 13 of 14 against 14 of 20) and because the comparison basis itself is unestablished. The comparison basis needs a plan-level answer this worker cannot give - the provenance of the sweep-persistence record and the definition of its level field - and the per-state disagreement is already present at the unedited index 0; so it is not attributable to the constraint; the edit schedule or the level definition. The fixture was therefore not committed and the repository still carries the superseded panel. No resume seam exists in the driver and the archived rows cannot seed one; so completing this node requires the driver capability named in follow_ons before any further allocation is spent.",
+              "elapsed_seconds": 3925,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 107135,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1af882c9ce897d771f68e7158b9f321274358a94",
+                "570ac4bf5782de8353205d4600496e32b41d00a8"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0791ab9295230c76f0e7ba866041563829b22d42afa1542f10d83f009f569795",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint/manifest.md; resolve the blocker before resuming the run",
+              "node": "fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+              "phase": "complete",
+              "plan": "forward-solve-api",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260920T183837383609-fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint",
+                "session_id": "63238c6f-d618-43a9-b3b8-e682e544fc9e",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 107228,
+              "terminal_at": "2026-09-21T04:52:36Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-regenerate-the-coil-edit-fixture-under-the-centroid-constraint"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 16911488,
+          "cumulative_input_tokens": 34236663,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 207780
+        },
+        "follow_on_paths": [
+          "callers-candidate-300.json",
+          "docs/figures/gs-absolute-accuracy/solovev"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "lane-change",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "promoted_revision": "52bfefc0a0f02412d8910aaccb632bfbd9fd43b5",
+        "plan_impl_at_dispatch": 0.55,
+        "impl_move": {
+          "plan": "forward-solver-route-integrity",
+          "at_dispatch": 0.55,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "failure-classification:negative-result"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "test_paths": [
+            "tests/test_fixed_point.py",
+            "tests/test_reduced_newton.py"
+          ],
+          "reason": "gate-not-passing"
+        },
+        "lane_declaration": {
+          "backend": "codex-astra",
+          "headroom": "known",
+          "metered": true,
+          "observed_at": "2026-09-22T10:39:37Z",
+          "read_at": "2026-09-22T10:39:39Z",
+          "resolved_backend": "codex-astra",
+          "utilisation_pct": 41.0
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "backend declares no lane document",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 195.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -276475,6 +276853,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3267
+    "_version": 3268
   }
 }

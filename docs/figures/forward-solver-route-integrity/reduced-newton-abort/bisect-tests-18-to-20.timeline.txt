@@ -1,0 +1,3 @@
+1790123783.2 start 2532 736088 796120 tests/test_reduced_newton.py::test_compiled_slice_matches_the_fused_host_route
+1790124041.8 finish 27018 4217632 4366800 tests/test_reduced_newton.py::test_compiled_slice_matches_the_fused_host_route
+1790124041.9 start 27018 4217632 4366800 tests/test_reduced_newton.py::test_compiled_slice_caches_one_executable_per_static_policy

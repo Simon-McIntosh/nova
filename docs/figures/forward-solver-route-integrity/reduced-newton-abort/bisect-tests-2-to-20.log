@@ -1,0 +1,19 @@
+revision=d6a96d592a7fc63daea385143493eb6d0831a32f tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort host=98dci4-clu-3141.iter.org command=env JAX_ENABLE_COMPILATION_CACHE=true ABORT_TIMELINE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort/docs/figures/forward-solver-route-integrity/reduced-newton-abort/bisect-tests-2-to-20.timeline.txt /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -p abort_timeline -vv --tb=line tests/test_reduced_newton.py::test_reduced_coordinates_carry_the_whole_plasma_current tests/test_reduced_newton.py::test_prescribed_currents_reuse_one_program tests/test_reduced_newton.py::test_reconstruction_reproduces_the_production_flux_map tests/test_reduced_newton.py::test_reduced_newton_reaches_the_production_fixed_point tests/test_reduced_newton.py::test_dense_jacobian_is_square_on_the_reduced_state tests/test_reduced_newton.py::test_ladder_scoring_accepts_the_grade_the_eager_ladder_selects tests/test_reduced_newton.py::test_ladder_scoring_evaluates_one_map_per_accepted_step tests/test_reduced_newton.py::test_threshold_one_reproduces_the_refusal_only_policy tests/test_reduced_newton.py::test_threshold_one_reproduces_the_refusal_only_policy_on_the_default_lane tests/test_reduced_newton.py::test_adaptive_refresh_keeps_the_synthetic_machine_within_the_production_budget tests/test_reduced_newton.py::test_fused_trip_boundary_reproduces_the_dispatched_boundary tests/test_reduced_newton.py::test_fused_trip_boundary_solves_to_the_dispatched_terminal_state tests/test_reduced_newton.py::test_batched_tail_scores_the_grades_the_serial_ladder_dispatches tests/test_reduced_newton.py::test_step_kernel_returns_the_residual_sup_norm tests/test_reduced_newton.py::test_batched_tail_scoring_walks_the_serial_route tests/test_reduced_newton.py::test_batched_tail_scoring_walks_the_serial_route_on_the_default_lane tests/test_reduced_newton.py::test_compiled_slice_matches_the_fused_host_route tests/test_reduced_newton.py::test_compiled_slice_caches_one_executable_per_static_policy tests/test_reduced_newton.py::test_compiled_slice_replays_the_host_step_and_trip_counters
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 02:36:22 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 19 items
+
+tests/test_reduced_newton.py::test_reduced_coordinates_carry_the_whole_plasma_current PASSED [  5%]
+tests/test_reduced_newton.py::test_prescribed_currents_reuse_one_program PASSED [ 10%]
+tests/test_reduced_newton.py::test_reconstruction_reproduces_the_production_flux_map PASSED [ 15%]
+tests/test_reduced_newton.py::test_reduced_newton_reaches_the_production_fixed_point FAILED [ 21%]
+tests/test_reduced_newton.py::test_dense_jacobian_is_square_on_the_reduced_state PASSED [ 26%]
+tests/test_reduced_newton.py::test_ladder_scoring_accepts_the_grade_the_eager_ladder_selects PASSED [ 31%]
+tests/test_reduced_newton.py::test_ladder_scoring_evaluates_one_map_per_accepted_step PASSED [ 36%]
+tests/test_reduced_newton.py::test_threshold_one_reproduces_the_refusal_only_policy PASSED [ 42%]
+tests/test_reduced_newton.py::test_threshold_one_reproduces_the_refusal_only_policy_on_the_default_lane 

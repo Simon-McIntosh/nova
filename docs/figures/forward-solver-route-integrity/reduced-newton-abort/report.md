@@ -90,7 +90,33 @@ an abort.
 
 ## Smallest ordered subset
 
-BISECT-PENDING
+Not yet closed. All_debug job 1276172 runs six fresh processes over ordered
+subsets ending at test 20. `abort_timeline.py` records the map count at every
+test boundary. The subset is named once the long arms have EXIT lines.
+
+Established so far:
+
+| Arm | Status | Maps at last boundary | Peak maps | Peak RSS |
+|---|---|---|---|---|
+| `bisect-test-20-alone` | 1 passed, 251.56 s, EXIT=0 | 14,353 after test 20 | 27,015 | 4.12 GiB |
+| `bisect-tests-18-to-20` | test 18 FAILED, running test 19 | 27,018 after test 18 | 35,041 so far | 5.02 GiB |
+| `bisect-tests-10-to-20` | running | 6,368 after test 11 | — | — |
+| `bisect-tests-2-to-20` | running | 25,040 after test 6 | — | — |
+| `bisect-whole-file` | running | 34,203 after test 9 | — | — |
+| `bisect-whole-file-clear-caches` (`jax.clear_caches()` and `gc.collect()` after every test) | running | 2,979 after test 6 | — | — |
+
+- Test 20 does not abort alone: its own load peaks at 27,015 maps, well under
+  the ceiling. So the smallest reproducing subset has at least two members, and
+  what the earlier members contribute is the retained baseline.
+- The retained baseline is executables that JAX's compilation caches keep
+  alive. With the caches cleared after every test, the boundary count stays
+  near 3,000 (2,972 to 2,979 over the first six tests) against 31,850 at the
+  same boundary without clearing. This is consistent with this plan's earlier
+  census, in which one executable's load added 11,456 mappings. A few such
+  executables held at once, plus the one being loaded, reach 65,530.
+- Test 18 alone leaves 27,018 retained maps, as much as test 20's peak. On
+  that arithmetic, tests 18 and 19 retained, plus test 20's load, can cross the
+  ceiling; `bisect-tests-18-to-20` is the arm that decides it.
 
 Each arm's pytest log (`*.log`; its first line names revision, tree, host and
 command), its 5 s memory samples (`*.memory.txt`) and, for the bisect arms, its

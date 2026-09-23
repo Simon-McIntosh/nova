@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="plasma-cell-read-fidelity-landed">
+<meta name="plan-title" content="Plasma-cell read fidelity execution record">
+<meta name="plan-summary" content="Exact-support revision measurements and retained qualifications">
+<meta name="plan-evidence-for" content="plasma-cell-read-fidelity">
+<meta name="plan-recorded-at" content="2026-09-23">
+<title>Plasma-cell read fidelity execution record</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Plasma-cell read fidelity execution record</h1></header>
+<section id="exact-mode-fixed-point-attribution">
+<h2>Exact-mode fixed-point revision attribution</h2>
+<p><strong>Measurement in progress.</strong> The harness at <code>7c42f8691789f18932906cb2d5d5bbf19da35df0</code> is committed; H200 job <code>1276177</code> is running. No operator landing has yet been attributed.</p>
+<p>The ladder is <code>b43714114 → 08dd0dda1 → ee17f9570 → 2e38dc877 → 337eb81ee → 23a8522b6 → 450bab78a → a17431153 → f5af729a9</code>. Each revision is a detached scratch worktree and runs in its own process with that tree on <code>PYTHONPATH</code>. Both <code>diverted-single-null</code> and <code>weak-rotation-reactor-static</code> use requested 110 cells, exact clipping and the certificate default active-set policy. A separate diverted arm at the first revision forces one trip and must refuse convergence.</p>
+<p>The terminal-state driver is imported by file location from the sibling worktree at <code>3d2222f9e</code>; its bytes match that commit (SHA-256 <code>ce0fc85df9c84e18dba8094cd45d08bec17bc0ebb875bc9e2e34ff8459c61bb6</code>). For revisions without <code>null_flux_pool</code>, diagnostic null census reads use their native grid-flux input; the solve remains the pinned driver's public request-receipt route. Capacity telemetry recomputes the operator integrator's selected-cut-count predicate alongside direct clipped-current and operator-current finiteness; this is a diagnostic calculation, not a new native receipt.</p>
+<p>Harness verification passed four independent cases: all-converged, all-unconverged, a known first transition, and refusal to attribute across a missing predecessor. Ruff check and format check passed. The log is <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-attribute-the-exact-mode-fixed-point/harness-check.log</code>. The GPU gate uses one H200, four CPUs, 64 GiB and a two-hour allocation. The payload invokes the shared root interpreter directly, sets <code>TMPDIR=/tmp</code> and disables GPU preallocation, without setting a compilation-cache root.</p>
+<p>Pending: all nineteen arm receipts, the per-case transition verdict, the shared-level poloidal comparison and terminal-residual plot, and cleanup of the nine scratch revisions after the job leaves the queue. The plan section and followup remain open for coordinator adjudication.</p>
+</section>
+</main></body></html>

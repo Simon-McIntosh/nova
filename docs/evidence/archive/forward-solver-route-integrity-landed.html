@@ -1329,6 +1329,61 @@ whole-solve body sharing, both size ceilings and complete suite evidence remain
 unmet. Four-row GPU bit identity remains a separate follow-on. No section,
 driving followup, sprint or primary branch is changed.</p>
 </section>
+<section id="operator-sharing-census">
+<h2>Unshared live-map sites of the certificate program</h2>
+<p>Commits <code>f803b640cfcfda7aa9e50ead083eb667cfd27e0f</code> (autouse
+cache-clearing fixture in <code>tests/test_reduced_newton.py</code>) and
+<code>9a3dc3a7f5f7b009e8a3cd2473fa3c9205e15287</code> (census driver, receipts
+and figure). The source digest of <code>nova/equilibrium/fixed_point.py</code>
+and <code>reduced_newton.py</code> at this head is
+<code>e5fa1479a94cb6f52e549ea2ae5c77bae3e19143dc82cf1f31f3168d8ce7c695</code>.
+That is the digest recorded in the <code>candidate-*.json</code> receipts, so the
+optimized counts of 302,553 (300 cells) and 304,913 (1000 cells) apply to this
+head without a new compile. Both still exceed 203,078 and 204,531.</p>
+<p><code>census.py</code> reads the retained optimized HLO. It assigns each
+instruction whose scope path passes through a map-internal segment
+(<code>compact_clipped_current_moments</code> or
+<code>read_qualification</code>) to the scope in front of that segment, and
+marks the site shared when that scope is a <code>jit(evaluate)</code> request
+body.</p>
+<table>
+<thead><tr><th>Program</th><th>Total</th><th>Map sites</th><th>Map instructions</th><th>Shared bodies</th><th>Shared instructions</th><th>Direct instructions</th></tr></thead>
+<tbody>
+<tr><td>300 cells</td><td>302,553</td><td>35</td><td>167,672</td><td>6</td><td>30,554</td><td>137,118</td></tr>
+<tr><td>1000 cells</td><td>304,913</td><td>35</td><td>167,786</td><td>6</td><td>30,578</td><td>137,208</td></tr>
+<tr><td>300 cells, per-request control</td><td>532,366</td><td>35</td><td>268,802</td><td>6</td><td>126,712</td><td>142,090</td></tr>
+</tbody></table>
+<p>The control row is the instrument check. Unrolling the request scans
+multiplies the shared bodies, and the census reports the shared share rising
+fourfold, so it sees body duplication where it is known to exist.</p>
+<p>By kind, the 300-cell direct sites hold 37,161 primal, 63,481 tangent
+(<code>jax.linearize</code>/<code>jvp</code>) and 36,476 linear-transpose
+instructions. Reaching the ceiling needs at least 99,475 instructions removed,
+which is 73% of the direct share. Even if every map application went through
+one tangent body and one transpose body, the program would sit near
+150,000 instructions, so the ceiling is reachable only by near-total
+sharing. That sharing needs a transpose request kind, which the current request
+body lacks. The largest direct sites, by scope depth under
+<code>jit(solve)</code>, are 20,209, 17,749, 17,352, 16,171, 12,671, 10,015 and
+10,013 instructions. Every row is in <code>census-candidate-300.json</code>.
+The source call families are the <code>jax.linearize</code> calls in
+<code>newton_body</code>, <code>attempt_step</code>,
+<code>acceptance_map</code> and the <code>newton_krylov</code> telemetry
+tangent; the <code>jax.linear_transpose</code> in
+<code>_rebuilt_model_promotion</code>; and the direct primal line-search reads
+through <code>acceptance_map_fn</code> and <code>model_map_fn</code>.</p>
+<figure>
+<img src="/nova/figures/forward-solver-route-integrity/operator-sharing/instruction-budget-300.png" alt="Instruction split of the 300-cell program against the ceiling">
+<figcaption>300-cell weak certificate program split by where each optimized
+instruction originates. The dashed line is the 203,078 ceiling.</figcaption>
+</figure>
+<p id="operator-sharing-suites">Test gate: <code>suite.sh</code> runs each file
+in its own fresh <code>all_debug</code> process (jobs 1276212 and 1276213) at
+<code>f803b640</code>, with <code>TMPDIR=/tmp</code>,
+<code>JAX_PLATFORMS=cpu</code> and the shared interpreter, and writes
+<code>after-fixed_point.log</code> and <code>after-reduced_newton.log</code>.
+The disposition is recorded below once the jobs leave the queue.</p>
+</section>
 </main>
 </body>
 </html>

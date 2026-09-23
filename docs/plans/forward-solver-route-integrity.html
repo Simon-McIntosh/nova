@@ -236,6 +236,40 @@
     The generated PNG/SVG are deleted from the worktree as adjudicated and are
     not committed. This entry changes neither section state nor its followup.</p>
 
+    <h3 id="s3-operator-sharing-census">Where the unshared instructions sit; ceilings still refuse</h3>
+    <p>The fourth attempt, on the committed design state, lands two things.
+    Commit <code>f803b640cfcfda7aa9e50ead083eb667cfd27e0f</code> adds an autouse
+    fixture to <code>tests/test_reduced_newton.py</code> that calls
+    <code>jax.clear_caches()</code> and <code>gc.collect()</code> after each test,
+    so a whole-file process no longer keeps every loaded executable until the
+    memory-map count reaches <code>vm.max_map_count</code>. Commit
+    <code>9a3dc3a7f5f7b009e8a3cd2473fa3c9205e15287</code> attributes every optimized
+    instruction of the certificate programs to the live-map site that emitted it.
+    The solver source digest (<code>e5fa1479&hellip;</code>) is unchanged from the
+    measured candidate, so the counts remain
+    <strong>302,553 / 304,913 against 203,078 / 204,531</strong>. Whole-solve
+    request scheduling was not implemented in this attempt.</p>
+    <figure>
+    <img src="/nova/figures/forward-solver-route-integrity/operator-sharing/instruction-budget-300.png" alt="Optimized instruction split of the 300-cell weak certificate program against its ceiling">
+    <figcaption>300-cell program: 134,881 instructions sit outside the live map,
+    30,554 in the six shared request bodies, and 137,118 in direct map calls
+    (37,161 primal, 63,481 tangent, 36,476 linear transpose). The ceiling falls
+    inside the direct primal band.</figcaption>
+    </figure>
+    <p>The ceiling needs at least 99,475 instructions removed. That is 73% of the
+    direct map instructions, and it includes linear transposes, which the request
+    body has no kind for. The unshared stream is the direct <code>jax.linearize</code>
+    sites (<code>newton_body</code>, <code>attempt_step</code>,
+    <code>acceptance_map</code>, the <code>newton_krylov</code> telemetry
+    tangent), the <code>jax.linear_transpose</code> in
+    <code>_rebuilt_model_promotion</code>, and the direct primal line-search reads.
+    Together they are 29 sites; 18 of them hold more than 1,000 instructions
+    each, 136,508 in all. The per-request control raises the shared-body
+    share from 30,554 to 126,712, so the census does resolve body duplication. The
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#operator-sharing-census">detailed record</a>
+    carries the site table and the test disposition. This entry changes neither
+    section state nor its followup.</p>
+
     <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>
     <p>Measured 2026-09-18: the pre-warm covers 3292 keys the lane never requests and none of the 1285 keys it
     does, so the lane's 1341 hits all came from that target's own earlier run on the same directory; a lane

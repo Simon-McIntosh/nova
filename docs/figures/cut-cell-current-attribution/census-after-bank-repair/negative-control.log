@@ -1,0 +1,5 @@
+revision=abd30a39bc96ded8e28ceed8e23a3ef5fb9e5a86 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-census-partition-probe-reads-the-full-state command=negative control: pass the sliced state to _fixed_design_read again
+declared mutation: pass the sliced state to _fixed_design_read again
+full_state_rows=772 physical_node_number=256
+full_state_read_ok=True diverted=False
+REFUSED_AS_EXPECTED=own-node null census requires the direct sampling flux values

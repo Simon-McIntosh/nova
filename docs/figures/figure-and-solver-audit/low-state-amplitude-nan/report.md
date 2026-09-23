@@ -50,6 +50,56 @@ an overflowing measure is silently converted to nan at the kernel boundary and
 travels up as a plausible-looking float until the quotient it feeds is compared
 against the band.
 
+## The capacity that overflows, and the count that exceeds it
+
+The overflow test is
+
+```python
+cut_count = jnp.sum(boundary, dtype=jnp.int32)   # clip_quadrature.py:754
+overflow  = cut_count > capacity                 # clip_quadrature.py:816
+```
+
+with `boundary = selected & support.boundary` (`clip_quadrature.py:733`) and
+`capacity = int(cut_cell_capacity)`.
+
+**The capacity is `cut_cell_bank_capacity`, and its value at this state is 342.**
+It is the mesh-static cut-cell bank bound, computed by
+`cut_cell_bank_capacity()` (`nova/equilibrium/clip_quadrature.py:352`) as
+
+```
+min(len(point), hull_count + _ROW_CROSSING_CAPACITY * row_count)
+```
+
+with `_ROW_CROSSING_CAPACITY = 4` (`clip_quadrature.py:34`), `hull_count` the
+cells carrying no complete quadratic ring and `row_count` the distinct carrier
+row heights. It is stored as `self._cut_cell_bank_capacity` at
+`nova/equilibrium/forward_operator.py:2586` and passed to the kernel at
+`forward_operator.py:3230`, `:3517` and `:3541`.
+
+The value 342 is not inferred here. It is recorded for this exact row in
+`docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-large-buffers-300.json`,
+whose `dimension_context` reads
+
+```json
+"atomic_support_capacity": 24,
+"cells": 342,
+"cut_cell_bank_capacity": 342,
+"exact_support_capacity": 3072,
+```
+
+so the `min(len(point), ...)` cap is what binds: the row bound
+`hull_count + 4 * row_count` meets or exceeds the mesh's own cell count of 342,
+and 342 equals `cells`. This is why the guard fires on this row rather than on a
+larger one — the bank is sized by the mesh, so it cannot absorb a boundary set
+larger than the mesh.
+
+**The count that exceeds it** is `cut_count`, the number of supports flagged
+both selected and boundary (`clip_quadrature.py:733`): it is **greater than 342**
+at 342 cells, against a capacity of 342. `cut_count` is a device value summed
+inside the kernel, and this node did not measure its numeric value — recording
+it needs a further job, and none was run. What the record establishes is the
+pair: capacity 342, exceeded, with the entire resulting structure set to nan.
+
 ## The state it appears in
 
 | field | value |

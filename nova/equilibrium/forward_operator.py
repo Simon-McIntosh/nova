@@ -87,6 +87,7 @@ from nova.equilibrium.stencil_mesh import (
 from nova.equilibrium.topology import (
     Topology,
     TopologyState,
+    private_wall_node_read,
     require_qualified_axis,
 )
 from nova.linalg.split_spline import fit_split_spline
@@ -3119,19 +3120,35 @@ class ForwardFluxOperator:
             wall_unit_vessel=self._wall_unit_vessel,
         )
 
-    def _carrier_shadow_read(self, physical, masks: DomainMasks):
-        """Return wall-shadow operands from the carrier's own topology read."""
+    def _carrier_shadow_read(self, physical, masks: DomainMasks, topology=None):
+        """Read every wall node's flux against the admitted saddle and height band.
+
+        Cell masks are accepted alongside the completed topology read but do
+        not determine a wall flag: even an excluded-material cell can contain
+        a wall node on the private side of the saddle.
+        """
         if not hasattr(self, "_wall_carrier_index"):
             # Lightweight composition fixtures supply the operands directly
             # without constructing carrier geometry.
             return self._connectivity_read(physical, None, classify=False)
-        grid_flux, _wall_flux = self.topology.split_flux_map(physical)
+        _grid_flux, wall_flux = self.topology.split_flux_map(physical)
         _vmap_o, vmap_x = self._fixed_design_topology.grid(
             self._null_flux_pool(physical)
         )
+        if topology is None:
+            topology = self._fixed_design_read(physical)[1]
+        admitted = self._fixed_design_topology.contained_x_candidates(vmap_x)
+        reading = private_wall_node_read(
+            wall_flux,
+            self.wall.coordinate[:, 1],
+            topology.axis[1],
+            topology.x_point_flux,
+            self.polarity,
+            jnp.where(admitted[:, None], vmap_x[:, :2], jnp.nan),
+        )
         return {
+            **reading,
             "xset": vmap_x[:, :2],
-            "private_wall_node_mask": masks.private_flux[self._wall_carrier_index],
         }
 
     def topology_margin(self, psi) -> jax.Array:
@@ -3726,7 +3743,7 @@ class ForwardFluxOperator:
         masks = saddle_qualified_domains(
             masks, self._private_flux_saddle_present(topology)
         )
-        reading = self._carrier_shadow_read(physical, masks)
+        reading = self._carrier_shadow_read(physical, masks, topology)
         previous_wall_shadow = self._previous_wall_shadow(previous_shadow)
         if previous_wall_shadow is None:
             previous_wall_shadow = jnp.zeros(self.wall.node_number, dtype=bool)

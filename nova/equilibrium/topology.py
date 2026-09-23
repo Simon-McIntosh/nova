@@ -49,6 +49,44 @@ qualifying as if it were the confined region.
 """
 
 
+def x_point_height_limits(axis_height, qualified_x_points):
+    """Bound the axis-facing height interval with admitted saddle positions.
+
+    A side with no saddle beyond the axis has an infinite limit and casts no
+    private shadow. Finite wall heights outside this interval are in the
+    private-shadow height bands; a height on either limit is not shadowed.
+    """
+    points = jnp.asarray(qualified_x_points)
+    finite = jnp.all(jnp.isfinite(points[:, :2]), axis=1)
+    lower = jnp.min(jnp.where(finite, points[:, 1], jnp.inf), initial=jnp.inf)
+    upper = jnp.max(jnp.where(finite, points[:, 1], -jnp.inf), initial=-jnp.inf)
+    return (
+        jnp.where(lower > axis_height, -jnp.inf, lower),
+        jnp.where(upper < axis_height, jnp.inf, upper),
+    )
+
+
+def private_wall_node_read(
+    node_flux, node_height, axis_height, saddle_flux, polarity, qualified_x_points
+):
+    """Read private wall flux at each node, independently of cell ownership."""
+    flux = jnp.asarray(node_flux)
+    height = jnp.asarray(node_height)
+    lower, upper = x_point_height_limits(axis_height, qualified_x_points)
+    flux_side = jnp.isfinite(flux) & (polarity * (flux - saddle_flux) >= 0.0)
+    height_band = jnp.isfinite(height) & ((height < lower) | (height > upper))
+    qualified = jnp.isfinite(saddle_flux) & jnp.isfinite(axis_height)
+    return {
+        "private_wall_node_mask": qualified & flux_side & height_band,
+        "wall_node_flux": flux,
+        "admitted_saddle_flux": saddle_flux,
+        "wall_node_private_flux_side": flux_side,
+        "wall_node_height_band": height_band,
+        "private_height_lower": lower,
+        "private_height_upper": upper,
+    }
+
+
 class TopologyState(NamedTuple):
     """Axis, boundary-selection and wall-limit state read from one flux map.
 
@@ -716,9 +754,9 @@ class Topology(Pytree):
                 surface,
             )
             if containment_required is None:
-                screened = self._wall_anchor_selection(
-                    masked_flux, polarity, eligible
-                )[0]
+                screened = self._wall_anchor_selection(masked_flux, polarity, eligible)[
+                    0
+                ]
                 if x_point_flux is None:
                     containment_required = jnp.asarray(False)
                 else:
@@ -752,19 +790,16 @@ class Topology(Pytree):
         """Return boundary data structure."""
         # x-point vertical bounds
         contained_x = self.contained_x_candidates(vmap_x)
-        x_heights = jnp.where(contained_x, vmap_x[:, 1], jnp.nan)
-        x_height_min = jnp.nanmin(x_heights)
-        x_height_max = jnp.nanmax(x_heights)
+        x_height_min, x_height_max = x_point_height_limits(
+            data_o[1], jnp.where(contained_x[:, None], vmap_x[:, :2], jnp.nan)
+        )
         # select grid x-point
         data_x = self.x_point_data(vmap_x, polarity, data_o[2])
         # o-point and w-point heights
-        o_height = data_o[1]
         w_height = data_w[1]
         # A wall contact vertically beyond the x-point band lies in the
         # private-flux shadow of a null, so it cannot bind the plasma; a side
         # with no x-point beyond the axis casts no shadow (bound at infinity).
-        x_height_min = jnp.where(x_height_min > o_height, -jnp.inf, x_height_min)
-        x_height_max = jnp.where(x_height_max < o_height, jnp.inf, x_height_max)
         # asses plasma operational mode
         selection_flux = jnp.asarray(
             jnp.r_[data_x[2], data_w[2]], dtype=self.grid.fit_dtype

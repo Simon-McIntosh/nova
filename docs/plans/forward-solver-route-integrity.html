@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.58">
 </head>
@@ -304,6 +304,11 @@
     <div class="r-fu-body">The whole-cell and certificate solves close the mesh, coupling blocks and stencils into the trace as constants (compile-cost census: about 55 MiB captured at 300 cells), so every geometry value change recompiles and the executable carries the literals. The batched-operator-boundary plan already made member data traced arguments on the batched route; passing the mesh as arguments measured 337 s compile against 535 s for the closure at 300 cells. Apply the same boundary to the certificate route, gated on bit-identical terminal states and a one-program-for-two-geometries check.</div>
     <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §2</pre>
     </article>
+<article class="r-fu" data-id="f-fsri-single-site-krylov-vmap-exit" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Slice 2: make the single-site Krylov stream exit early under vmap</h4>
+    <div class="r-fu-body">Under vmap the lax.cond gating each of the 83 slots becomes a select, so every slot applies the operator: the stream is 14.3 times slower than the per-site base at width 16 (1.240 s against 0.086 s). Replace the fixed-capacity cond-gated scan with a while_loop (or a batched exit) that stops when every member is DONE. Gate: vmapped width-16 cost at or below the base's, the unbatched instruction count no higher than slice 1's 284,792, the certificate rows within the re-base bounds, zero added test failures.</div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-fsri-nk-attempt-fence" data-who="coordinator" data-when="2026-09-19T13:55:00Z">
@@ -352,7 +357,10 @@
     <div class="r-comment-body">Lead directive 2026-09-23 ("we need to fix this"), after the transpose-kind slice measured 339,490 instructions against 302,553 because the operator body inlines once per GMRES call site. Three lines of work start now, all based on the design state at 52bfefc0: (1) single-site Krylov redesign on the claude-opus 5.5 lane, owning fixed_point.py and reduced_newton.py; (2) splitting the rarely-taken recovery ladders into separately compiled programs, starting with a measurement node and implemented after (1) lands, because both edit fixed_point.py; (3) section 4's pre-warm pin, so the lanes stop paying cold compiles for programs they request. The certificate route's operator geometry is also still closed into the trace as constants (about 55 MiB captured at 300 cells; mesh as arguments measured 337 s compile against 535 s for the closure); moving it to operands is f-fsri-operator-geometry-as-operands.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260923T042057247197-fsri-transpose-request-kind-for-the-rebuilt-model-promotion" data-who="reckon-ship" data-when="2026-09-23T05:15:27.565Z">
-    <div class="r-comment-body"><p>negative result: a transpose request kind routed _rebuilt_model_promotion&#x27;s transpose through the shared body bit-identically, but the program grew 302553 to 339490 (300 cells) because the body inlines once per GMRES call site; not merged; single-site Krylov is the prerequisite (f-fsri-single-site-krylov)</p></div>
+    <div class="r-comment-body"><p>negative result: a transpose request kind routed _rebuilt_model_promotion's transpose through the shared body bit-identically, but the program grew 302553 to 339490 (300 cells) because the body inlines once per GMRES call site; not merged; single-site Krylov is the prerequisite (f-fsri-single-site-krylov)</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260923T1045-lead-rebase-per-slice" data-who="reckon-ship" data-when="2026-09-23T10:45:00+02:00">
+    <div class="r-comment-body">Lead decision 2026-09-23: the single-site Krylov redesign is accepted by re-basing per slice, not by bit identity to the prior program. XLA fuses an operator differently inside a scan, so identical arithmetic is not bitwise-equal: slice 1 moved one real-operator terminal value by 3.07e-12 (1.1e-11 relative, 55,355 ulps) even with a fusion barrier. Each slice therefore re-pins the certificate terminal digest. It must keep the four certificate rows' convergence, qualification, and axis and X-point positions within a relative change of 1e-10, add no test failures, and show its negative control. Slice 1 (fsri-single-site-krylov-for-the-qualified-step, _qualified_krylov_step): 302,553 to 284,792 instructions at 300 cells and 304,913 to 287,117 at 1000; live-map sites 3 to 1; fixed_point 45/45; reduced_newton shows the same four failures as the base. Its vmapped call is 14.3 times slower at width 16 because the cond becomes a select, so slice 2 replaces the cond with a while_loop exit before any batched caller adopts the stream.</div>
 </div>
 </section>
 </main>

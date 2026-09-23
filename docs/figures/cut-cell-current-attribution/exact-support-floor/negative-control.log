@@ -1,0 +1,13 @@
+evaluate the same cells in chord clip mode
+source_revision=150a1398c478e2b11d7a25de5195e280838dd856 job=1276905
+Pass when abs(chord signed missing fraction) < 0.1 * abs(exact signed missing fraction).
+diverted-single-null 110: exact=0.0458227809116585 chord=-0.00353021616160909 ratio=0.0770406354955841 PASS=True
+diverted-single-null 300: exact=0.0247305648178198 chord=0.000812233835946974 ratio=0.0328433192662755 PASS=True
+diverted-single-null 500: exact=0.0107659065834934 chord=-2.83585793761088e-05 ratio=0.00263410973856943 PASS=True
+diverted-single-null 1000: exact=0.0186969505236501 chord=-0.000446006667129462 ratio=0.023854513952171 PASS=True
+diverted-single-null 2500: exact=0.0129149320989987 chord=-0.00010788674478257 ratio=0.0083536439801286 PASS=True
+weak-rotation-reactor-static 110: exact=0.0620114897585569 chord=7.13053004712805e-05 ratio=0.00114987239862982 PASS=True
+weak-rotation-reactor-static 300: exact=0.0186326499904852 chord=2.14451341296051e-05 ratio=0.00115094386147736 PASS=True
+weak-rotation-reactor-static 500: exact=0.00968728842834587 chord=1.93554026546305e-05 ratio=0.00199802068430159 PASS=True
+weak-rotation-reactor-static 1000: exact=0.0141230533768067 chord=1.43123542545309e-05 ratio=0.00101340367926634 PASS=True
+weak-rotation-reactor-static 2500: exact=0.0107543556516194 chord=1.29758827761561e-05 ratio=0.00120656998861686 PASS=True

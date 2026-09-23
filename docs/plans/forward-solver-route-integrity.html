@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="30">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.66">
 </head>
@@ -496,6 +496,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260923T074118384717-fsri-single-site-krylov-for-the-qualified-step" data-who="reckon-ship" data-when="2026-09-23T10:15:37.275Z">
     <div class="r-comment-body"><p>single-site _qualified_krylov_step; 302553 to 284792 instructions at 300 cells; fixed_point 45 passed; reduced_newton same four failures as base; single-site test with per-site mutation; re-based per slice (3.07e-12); vmap 14.3x pending slice 2; second review 83</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260923T053958876734-fsri-recovery-ladder-execution-and-size-census" data-who="reckon-ship" data-when="2026-09-23T12:12:22.384Z">
+    <div class="r-comment-body"><p>recovery ladders execute on every trip of the non-converging certificate rows; at least 19.03 percent of optimised instructions (two of five entries counted, lower bound); review 72, findings in f-fsri-ladder-census-counts-every-entry</p></div>
 </div>
 </section>
 </main>

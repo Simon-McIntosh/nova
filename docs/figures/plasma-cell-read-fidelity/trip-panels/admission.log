@@ -1,0 +1,4 @@
+revision=297b880f724224aa4dfc234bf7d73c6bbde90678 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels command=sbatch --test-only --partition=betelgeuse --reservation=gpu_0003_grpA --nodes=1 --ntasks=1 --cpus-per-task=2 --gres=gpu:1 --mem=32G --time=00:35:00 --wrap=true
+H200 preflight: Job 1276296 to start at 2026-10-07T08:35:14 on 98dci4-gpu-0003.
+Titan preflight: Job 1276297 to start at 2026-09-23T08:35:26 on 98dci4-gpu-0002.
+Actual submission: 1276299, titan, 1 GPU, 2 CPUs, 32G, 35 minutes. No H200 measurement job was queued to duplicate the measurement later.

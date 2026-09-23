@@ -620,7 +620,11 @@ def attribution(rows):
         result[case] = {
             "verdict": verdict,
             "first_transition": transitions[0] if transitions else None,
-            "attempted": sum(r is not None for r in ordered),
+            "attempted": sum(
+                r is not None
+                and (r["status"] != "not-run" or bool(r.get("source_receipt")))
+                for r in ordered
+            ),
             "measured": len(measured),
             "unmeasured_revisions": [
                 rev
@@ -1052,6 +1056,22 @@ def finalize_partial(args):
     records = [line.split("|") for line in accounting.splitlines()[1:]]
     gate = next(row for row in records if row[0] == args.gate_job)
     payload = assemble(args.output)
+    payload["assembly_provenance"] = {
+        "revision": subprocess.check_output(
+            [
+                "git",
+                "-C",
+                str(Path(__file__).resolve().parents[1]),
+                "rev-parse",
+                "HEAD",
+            ],
+            text=True,
+        ).strip(),
+        "driver_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+        "command": [sys.executable, *sys.argv],
+    }
+    print("ASSEMBLY_SOURCE " + json.dumps(payload["assembly_provenance"]), flush=True)
     payload["full_ladder_gate_passed"] = payload["gate_passed"]
     payload["rows"] = partial_rows(args.output)
     payload.update(

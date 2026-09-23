@@ -2867,6 +2867,43 @@ and <code>run_compute_gates.sh</code>. The section and driving followup remain
 open.</p>
 </section>
 
+<section id="full-state-census-after-bank-repair">
+<h2>Full-state partition probe: terminal census after callback-capacity repair</h2>
+<p><strong>Worker outcome, 2026-09-23; section and driving followup remain open.</strong>
+The previously recorded probe defect reproduces in the declared negative control:
+passing the sliced state to <code>operator._fixed_design_read</code> again raises
+<code>ValueError: own-node null census requires the direct sampling flux values</code>.
+The repair in commit <code>87d11db6c</code> passes the complete 772-row state
+(135 grid, 121 wall, and authored direct-sampling rows) to the fixed-design read.
+The census then completes at revision <code>4b7b59ad6</code> over all 135 realised
+cells, with zero non-finite cell-current signatures and a finite exact total at
+the terminal state.</p>
+<p>The final single <code>all_debug</code> allocation (job <code>1276584</code>;
+<code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>, root interpreter
+directly, no <code>uv</code>) exits 0. Seed totals are analytic
+<code>16,314,568.877 A</code>, chord <code>8,010,834.264 A</code>, exact
+<code>7,575,142.892 A</code>; terminal totals are analytic
+<code>16,314,568.877 A</code>, chord <code>15,875,439.765 A</code>, exact
+<code>14,013,835.437 A</code>, against the analytic target
+<code>16,314,773.312 A</code>. The bank-overflow count is zero for chord and
+exact at both seed and terminal states, and <code>exact_total_finite=True</code>.
+The amplitude gate remains false at both states (seed chord/exact
+<code>2.03658855 / 2.15372483</code>; terminal chord/exact
+<code>1.02767379 / 1.16419044</code>), so the current deficit remains an open
+physics result rather than being normalised away.</p>
+<p>Fresh-process focused gates pass: <code>tests/test_moment_path_separatrix_test.py</code>
+1 test, <code>tests/test_continuous_confined_moments.py</code> 3 tests, and
+<code>tests/test_exact_bank_callback_capacity.py</code> 3 tests. The complete
+receipt, logs, exit markers and report are under
+<code>docs/figures/cut-cell-current-attribution/census-after-bank-repair</code>.
+The negative control log records the declared mutation verbatim and the expected
+refusal; its exit status is 1 by design. Nothing under <code>nova/</code> changed,
+and this worker does not resolve its own followup.</p>
+<figure>
+  <img src="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-contours.svg" alt="Poloidal difference contours for the full-state unit-amplitude census after the bank-capacity repair." style="max-width:100%">
+  <figcaption>Full-state census difference contours. The ranked per-cell comparison is available as <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-ranked.svg">SVG</a> and <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/difference-ranked.png">PNG</a>; the complete quantitative <a href="/nova/figures/cut-cell-current-attribution/census-after-bank-repair/report.md">report</a> carries the totals and gate receipts.</figcaption>
+</figure>
+</section>
 </main>
 </body>
 </html>

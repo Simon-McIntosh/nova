@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T06:31:26",
+  "updated": "2026-09-23T06:31:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -278332,6 +278332,254 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260923T033420709514-review-of-pcrf-merge-radius-carries-the-pitch",
+        "plan": "plasma-cell-read-fidelity",
+        "section": "\u00a73",
+        "node": "review-of-pcrf-merge-radius-carries-the-pitch",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 442,
+                "cached_input_tokens": 541075,
+                "input_tokens": 541521,
+                "output_tokens": 52,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 541573,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "6bd9bb1d-4fb2-4080-a881-bf22212dd1b2",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "the review for r-20260923T025855016553-pcrf-merge-radius-carries-the-pitch stores a parsed record scoring all 5 dimensions in the range 0..20",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260923T025855016553-pcrf-merge-radius-carries-the-pitch",
+          "id": "review-of-pcrf-merge-radius-carries-the-pitch",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-23T03:34:26Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T033420709514-review-of-pcrf-merge-radius-carries-the-pitch/manifest.md",
+          "negative_control": "",
+          "plan": "plasma-cell-read-fidelity",
+          "requested_backend": null,
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260923T025855016553-pcrf-merge-radius-carries-the-pitch.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "session-71ebec9b1921ac205409",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-23T03:35:29Z",
+        "completed_at": "2026-09-23T04:04:59.571Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1693,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1770,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9511694b211942b29a9e23cd995bcea70bcfd2e1",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T033420709514-review-of-pcrf-merge-radius-carries-the-pitch/manifest.md",
+        "scope_changed": false,
+        "session_id": "82136814-ff1a-46ff-afd3-4f595b6de358",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2731661,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 34375,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-23T04:04:59.571Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 42105010,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1407.085,
+          "generated_tokens": 642630,
+          "generation_seconds": 1316.659,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.4,
+          "machine_seconds": 90.426,
+          "peak_input_tokens": 150892,
+          "tokens_per_second": 488.08,
+          "wall_tokens_per_second": 456.71
+        },
+        "follow_on_paths": [
+          "docs/plans/plasma-cell-read-fidelity.html:65",
+          "docs/figures/plasma-cell-read-fidelity/merge-radius-parity.json:6",
+          "1276216.0"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/review-of-pcrf-merge-radius-carries-the-pitch",
+          "session_id": "82136814-ff1a-46ff-afd3-4f595b6de358",
+          "session_source": "pointer",
+          "retained_at": "2026-09-23T04:04:59.571Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "promoted_revision": "9511694b211942b29a9e23cd995bcea70bcfd2e1",
+        "plan_impl_at_dispatch": 0.4,
+        "impl_move": {
+          "plan": "plasma-cell-read-fidelity",
+          "at_dispatch": 0.4,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "lane_advisory": {
+          "backend": "clive",
+          "burn_multiple": null,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+          "horizon_ends_at": "2026-09-23T04:29:26.083991+00:00",
+          "horizon_seconds": 3300,
+          "metered": false,
+          "observed_at": null,
+          "precedes_horizon": null,
+          "projected_exhaustion_at": null,
+          "resets_at": null,
+          "seconds_until_reset": null,
+          "state": "quiet",
+          "utilisation_pct": null
+        },
+        "lane_declaration": {
+          "backend": null,
+          "headroom": null,
+          "metered": false,
+          "observed_at": null,
+          "read_at": "2026-09-23T03:34:26Z",
+          "resolved_backend": "clive",
+          "utilisation_pct": null
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "lane document carries no 'binding_observed'",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 8.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -278798,6 +279046,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3271
+    "_version": 3272
   }
 }

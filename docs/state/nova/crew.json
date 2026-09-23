@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T18:12:39",
+  "updated": "2026-09-23T18:16:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -294045,6 +294045,349 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260923T034949217912-pcrf-production-route-ladder",
+        "plan": "plasma-cell-read-fidelity",
+        "section": "\u00a71",
+        "node": "pcrf-production-route-ladder",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4356,
+                "cached_input_tokens": 579733,
+                "input_tokens": 584121,
+                "output_tokens": 2404,
+                "reasoning_output_tokens": 526,
+                "total_tokens": 586525,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "a new module benchmarks/plasma_cell_production_ladder.py drives the certificate production route (the construction benchmarks/solovev_certificate.py itself builds and solves for a row, carrier identity solovev, exactly as the production arm of docs/figures/plasma-cell-read-fidelity/exact-mode-construction-comparison.json was built) in exact clip mode at requested 110 cells for both cases diverted-single-null and weak-rotation-reactor-static with the certificate default policy, over the revision ladder b43714114, 337eb81ee, 23a8522b6, 450bab78a, a17431153 and main f5af729a9 (the three middle landings 08dd0dda1, ee17f9570 and 2e38dc877 are attempted too and marked not-measured with the exception text when the production construction fails to build there), each revision materialised as a detached scratch worktree in a directory named scratch-revisions inside this run own worktree with one subdirectory per revision named by its short sha (git worktree add --detach, never git stash, never git checkout in any tree that is not the scratch tree, scratch trees removed with git worktree remove at the end) and run in its own subprocess with PYTHONPATH at that scratch tree so its own nova package is imported (nova.__file__ printed per arm), all inside ONE GPU sbatch job (first --partition=betelgeuse --reservation=gpu_0003_grpA --account=grpa --gres=gpu:1 --cpus-per-task=4 --mem=64G --time=03:00:00; if pending past 15 minutes cancel and resubmit identically to --partition=titan --gres=gpu:1 and say so; TMPDIR=/tmp in the submit environment and the payload, XLA_PYTHON_CLIENT_PREALLOCATE=false, no compilation cache root, the root interpreter run directly, uv never invoked), running the ladder from main backwards so the newest rungs land first and a time limit loses the oldest; per revision and case the receipt docs/figures/exact-mode-production-ladder/production-route-ladder.json records converged, trip count, per-trip residual history, terminal residual, terminal and reference axis and X-point with the X-point distance in metres, realised cells, nova.__file__, and the support-health instrument: the count of non-finite entries in the clipped support current moments per trip and whatever cut-cell capacity overflow receipt the operator or clip_quadrature exposes at that revision (or that none exists), so a fail-closed support reads as overflow rather than as flat non-convergence; the receipt names the first revision in ladder order whose production arm is not converged where its predecessor converged, or states the whole ladder is one way; the figure docs/figures/exact-mode-production-ladder/production-route-ladder.png with an SVG beside it draws for the diverted case one poloidal line-contour panel per measured revision on one shared level array with axis off, the wall units via draw_wall, the analytic-state nulls and the terminal-state nulls via draw_nulls in their own styles, and a caption per panel stating revision, converged, trips, residual and the non-finite moment count, plus one line plot of terminal residual against ladder position; the plan section text gains an appended paragraph naming the attributed landing or the one-way ladder and citing the receipt and figure by project-absolute src; the declared negative control is run and its log recorded; ruff check and format pass over the new module; the manifest is written before the wait with wait_probe as a JSON argument vector printing IN_QUEUE or LEFT_QUEUE and wait_terminal LEFT_QUEUE and its gate fields name the sbatch job",
+          "estimated_hours": 3.5,
+          "goal": "name the operator landing at which the certificate production route in exact clip mode stopped converging at the reduced rung",
+          "id": "pcrf-production-route-ladder",
+          "lane_declaration": {
+            "backend": "codex-astra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-23T03:49:55Z",
+            "read_at": "2026-09-23T03:49:57Z",
+            "resolved_backend": "codex-astra",
+            "utilisation_pct": 73.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T034949217912-pcrf-production-route-ladder/manifest.md",
+          "negative_control": "run the main rung with the production route in chord clip mode (the current production default) and observe whether it converges, so the receipt separates exact clip mode from the route itself",
+          "plan": "plasma-cell-read-fidelity",
+          "requested_backend": "codex-astra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/plasma_cell_production_ladder.py",
+            "docs/figures/exact-mode-production-ladder",
+            "docs/plans/plasma-cell-read-fidelity.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-production-route-ladder",
+            "docs/evidence/archive/plasma-cell-read-fidelity-landed.html",
+            "docs/figures/plasma-cell-read-fidelity"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s18-pcrf-a1",
+        "backend": "codex-astra",
+        "local": false,
+        "agent": {
+          "alias": "astra6",
+          "backend": "codex-astra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-6-astra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-23T03:50:59Z",
+        "completed_at": "2026-09-23T08:10:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 15564,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "e2edd8775bff1f89d6ed2d9cd76153d39f440ec2",
+        "commits": [
+          "f4d0e532a5f3c82852bd7c0b093f89d37e55fe77"
+        ],
+        "changed_lines": {
+          "added": 26,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "python benchmarks/plasma_cell_production_ladder.py validate --partial",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T034949217912-pcrf-production-route-ladder/gate.log",
+          "log_digest": "sha256:954be167ac38b9a5ccedcbb1df7c0b786d6f606b371120bc8532a1f58b40ca4e"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T034949217912-pcrf-production-route-ladder/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0cc63-6777-73e0-91c1-bd765e285b2b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 22226944,
+            "cached_input_tokens_cumulative": 22226944,
+            "input_tokens": 22904915,
+            "input_tokens_cumulative": 22904915,
+            "output_tokens": 132680,
+            "output_tokens_cumulative": 132680,
+            "reasoning_output_tokens": 44800,
+            "reasoning_output_tokens_cumulative": 44800
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-23T08:10:23Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 80.0,
+              "resets_at": 1790575133,
+              "observed_at": "2026-09-23T08:10:23Z"
+            }
+          ],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "notional_cost_usd": "no_dated_rate",
+            "rate_basis": "no_dated_rate"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1988,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1025,
+              "log_fresh": false,
+              "manifest_commits": [
+                "a1f4717e8a8a13296cdf55d96d617a014f232866",
+                "406a9e8b8b041f224a2f702e81c7a0fa7177768d",
+                "3408567b35d4d0b19c63129d032e73f475d4efe8",
+                "357c38d32e8f2a88b0cdf799fb7f6c3bfe76f288"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "a9023cc8c4b784ffcbd9815856be8a6f7d563f0ca490f388f8fb0218297c36f0",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T025855016553-pcrf-merge-radius-carries-the-pitch/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan plasma-cell-read-fidelity --section '\u00a73' --role review --spec-level exact --node review-of-pcrf-merge-radius-carries-the-pitch --goal 'attach an independent review to run r-20260923T025855016553-pcrf-merge-radius-carries-the-pitch' --done-when 'the review for r-20260923T025855016553-pcrf-merge-radius-carries-the-pitch stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260923T025855016553-pcrf-merge-radius-carries-the-pitch.json --time-budget 55m --session s18-fable-20260922 --allow-unreconciled-runs --local",
+              "node": "pcrf-merge-radius-carries-the-pitch",
+              "phase": "starting",
+              "plan": "plasma-cell-read-fidelity",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260923T025855016553-pcrf-merge-radius-carries-the-pitch",
+              "session": "s18-fable-20260922",
+              "terminal_age_seconds": 1089,
+              "terminal_at": "2026-09-23T03:32:11Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-merge-radius-carries-the-pitch"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 14,
+            "evidence": 15,
+            "fit": 18,
+            "goal_fidelity": 13,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 79
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 22226944,
+          "cumulative_input_tokens": 45131859,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 177480
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 5,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-ladder",
+          "session_id": "01a0cc63-6777-73e0-91c1-bd765e285b2b",
+          "session_source": "stream",
+          "retained_at": "2026-09-23T08:10:23Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "promoted_revision": "f4d0e532a5f3c82852bd7c0b093f89d37e55fe77",
+        "plan_impl_at_dispatch": 0.4,
+        "impl_move": {
+          "plan": "plasma-cell-read-fidelity",
+          "at_dispatch": 0.4,
+          "at_complete": 0.82,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 1,
+          "declared": 17,
+          "missing": [
+            "02fe1e9c33516dff01557e37ab785b354bad4a30",
+            "0c227f6ea53bd4e116efe8aa08edeec2ab6756b4",
+            "0c2e50b22ad683c6f0cac2ed8606188e0be85808",
+            "19e83bd5a77faec083562fad720926519776e92c",
+            "561b0215fb1b257188b9888d2db5d8bdf539d005",
+            "635635cff9531341209ea2cf64ccef569f29dc22",
+            "663a089d250f4637f10e97bd76978c8b628165fc",
+            "78176fa2fd80f019bbd2f4a1f497cf3ed755e72f",
+            "8e8d98f64dc95ee57a20907c1dbe456affc1e386",
+            "a7d14f9705f14da8caff3d3d52461de6f4039c23",
+            "a844c09ed8644289dab6e4efb98bc800fcd99103",
+            "af23e8a6d7ed2e89ebada21f9d3b5f313f451658",
+            "be3cd0096eee5e34450aeedbe1765d903ebb6d1f",
+            "c76a53bc624b6552757efe2857300a276364ffd7",
+            "c7ca0814c2a2b11c3132ea583d0f632615e5c1f9",
+            "ede31106f921d018e87e33a4474511222fd6b39b"
+          ],
+          "message": "run 'r-20260923T034949217912-pcrf-production-route-ladder' has a passing gate presenting 1 commit(s) of the 17 its manifest declares; missing: 02fe1e9c33516dff01557e37ab785b354bad4a30, 0c227f6ea53bd4e116efe8aa08edeec2ab6756b4, 0c2e50b22ad683c6f0cac2ed8606188e0be85808, 19e83bd5a77faec083562fad720926519776e92c, 561b0215fb1b257188b9888d2db5d8bdf539d005, 635635cff9531341209ea2cf64ccef569f29dc22, 663a089d250f4637f10e97bd76978c8b628165fc, 78176fa2fd80f019bbd2f4a1f497cf3ed755e72f, 8e8d98f64dc95ee57a20907c1dbe456affc1e386, a7d14f9705f14da8caff3d3d52461de6f4039c23, a844c09ed8644289dab6e4efb98bc800fcd99103, af23e8a6d7ed2e89ebada21f9d3b5f313f451658, be3cd0096eee5e34450aeedbe1765d903ebb6d1f, c76a53bc624b6552757efe2857300a276364ffd7, c7ca0814c2a2b11c3132ea583d0f632615e5c1f9, ede31106f921d018e87e33a4474511222fd6b39b. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "lane_advisory": {
+          "backend": "codex-astra",
+          "burn_multiple": 2.6747605459733554,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "'codex-astra' is projected to exhaust at 2026-09-25T01:29:57Z, which is after this node's 3300s horizon ending 2026-09-23T04:44:57.460744+00:00",
+          "horizon_ends_at": "2026-09-23T04:44:57.460744+00:00",
+          "horizon_seconds": 3300,
+          "metered": true,
+          "observed_at": "2026-09-23T03:49:55Z",
+          "precedes_horizon": false,
+          "projected_exhaustion_at": "2026-09-25T01:29:57Z",
+          "resets_at": "2026-09-28T05:58:53Z",
+          "seconds_until_reset": 439737,
+          "state": "quiet",
+          "utilisation_pct": 73.0
+        },
+        "lane_declaration": {
+          "backend": "codex-astra",
+          "headroom": "known",
+          "metered": true,
+          "observed_at": "2026-09-23T03:49:55Z",
+          "read_at": "2026-09-23T03:49:57Z",
+          "resolved_backend": "codex-astra",
+          "utilisation_pct": 73.0
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "backend declares no lane document",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 143.0,
+        "orientation_input_tokens": 14958362.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -294539,6 +294882,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3318
+    "_version": 3319
   }
 }

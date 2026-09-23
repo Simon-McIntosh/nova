@@ -110,7 +110,13 @@ for mode in ("stream", "per-site"):
             run["qualified_step_map_sites"] = share["sites"]
             run["qualified_step_map_instructions"] = share["instructions"]
             run["qualified_step_map_site_rows"] = share["rows"]
-        run["qualified_step_non_map_instructions"] = frame_share(program["hlo_path"])
+        hlo = program["hlo_path"]
+        if mode == "per-site":
+            # the exec'd base body carries a pseudo-filename; the named copy
+            # maps it to fixed_point.py so the caller tools keep its frames
+            hlo = hlo.replace(".hlo.txt", ".named.hlo.txt")
+        run["hlo_attributed"] = hlo
+        run["qualified_step_non_map_instructions"] = frame_share(hlo)
         receipt["runs"][f"{mode}-{cells}"] = run
 for cells in (300, 1000):
     stream, per_site = receipt["runs"].get(f"stream-{cells}"), receipt["runs"].get(f"per-site-{cells}")

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T10:31:03",
+  "updated": "2026-09-23T10:46:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -283712,6 +283712,349 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260923T062936465924-pcrf-production-route-trip-panels",
+        "plan": "plasma-cell-read-fidelity",
+        "section": "\u00a74",
+        "node": "pcrf-production-route-trip-panels",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3086,
+                "cached_input_tokens": 186499,
+                "input_tokens": 189587,
+                "output_tokens": 1348,
+                "reasoning_output_tokens": 138,
+                "total_tokens": 190935,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "df0e98d4-1e76-4caf-90cf-12f74386be2a",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "receipt docs/figures/plasma-cell-read-fidelity/trip-panels/trip-panels.json records, for the dispatch base and for 664ade0c3, the diverted exact-clip terminal residual, trip count, the trip at which the admitted saddle leaves the 0.15 m bound (or never), and the non-finite clipped-support moment count per trip, all from ONE SLURM job on betelgeuse H200 (titan if betelgeuse will not admit it) whose job id and sacct state are in the receipt; per-trip line-contour panels exist as PNG and SVG with analytic and admitted null sets, the wall, flood labels as cell outlines and the non-finite count in each caption, plus the chord-clip first-trip control panel; the section reading rule is applied and its verdict (support-overflow, census-read, or neither with the combination stated) is written in the receipt, the evidence anchor and a plan section comment; the declared negative control is executed and its log recorded",
+          "estimated_hours": null,
+          "goal": "Name the mechanism that loses the admitted saddle between active-set trips of the certificate production route at the reduced rung, from per-trip poloidal panels at two revisions",
+          "id": "pcrf-production-route-trip-panels",
+          "lane_declaration": {
+            "backend": "codex-astra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-23T06:29:43Z",
+            "read_at": "2026-09-23T06:29:44Z",
+            "resolved_backend": "codex-astra",
+            "utilisation_pct": 75.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T062936465924-pcrf-production-route-trip-panels/manifest.md",
+          "negative_control": "the reading-rule function is fed a synthetic arm pair with non-finite moments at the saddle-loss trip in the pre-repair arm and a retained saddle in the repaired arm, and must return support-overflow; fed a pair where both arms lose the saddle with all-finite moments it must return census-read; swapping the two inputs must change the verdict",
+          "plan": "plasma-cell-read-fidelity",
+          "requested_backend": "codex-astra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/plasma_cell_trip_panels.py",
+            "docs/figures/plasma-cell-read-fidelity/trip-panels",
+            "docs/plans/plasma-cell-read-fidelity.html",
+            "docs/evidence/archive/plasma-cell-read-fidelity-landed.html",
+            "docs/figures/plasma-cell-read-fidelity"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s18-pcrf-a2",
+        "backend": "codex-astra",
+        "local": false,
+        "agent": {
+          "alias": "astra6",
+          "backend": "codex-astra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-6-astra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-23T06:30:39Z",
+        "completed_at": "2026-09-23T08:08:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5866,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5866,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "db2108e6adaca770cda30e39e052d9dcf20e18a9",
+        "commits": [
+          "03fa0d1a89e20c646abe0e84f82841cce030904a"
+        ],
+        "changed_lines": {
+          "added": 3,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "python3 docs/figures/plasma-cell-read-fidelity/trip-panels/validate-receipt.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T062936465924-pcrf-production-route-trip-panels/gate.log",
+          "log_digest": "sha256:5e7e489d9586eba8ca06e918c444858f6705350b60948cd42d21069370d98dc1"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T062936465924-pcrf-production-route-trip-panels/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0ccf5-90ab-71b0-ba5b-793e7ff1101a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 26368896,
+            "cached_input_tokens_cumulative": 26368896,
+            "input_tokens": 26851857,
+            "input_tokens_cumulative": 26851857,
+            "output_tokens": 118373,
+            "output_tokens_cumulative": 118373,
+            "reasoning_output_tokens": 49709,
+            "reasoning_output_tokens_cumulative": 49709
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-23T08:08:25Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 80.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-23T08:08:25Z"
+            }
+          ],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "notional_cost_usd": "no_dated_rate",
+            "rate_basis": "no_dated_rate"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1185,
+              "budget_seconds": 2400,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "effective_phase": "starting",
+              "elapsed_seconds": 3585,
+              "external_wait": null,
+              "interruption": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1602,
+              "log_fresh": false,
+              "manifest_commits": [
+                "2bf422abe",
+                "f2dcc15cd"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "18e522d88739ed5b27e008d8cf5a4998b8bf9da5c3e5c73a82903dd06af3c190",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan plasma-cell-read-fidelity --section '\u00a74' --role review --spec-level exact --node review-of-pcrf-shadow-telemetry-test-follows-the-node-flux-rule --goal 'attach an independent review to run r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule' --done-when 'the review for r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule.json --time-budget 40m --session s18-fable-20260922 --allow-unreconciled-runs --local",
+              "node": "pcrf-shadow-telemetry-test-follows-the-node-flux-rule",
+              "phase": "starting",
+              "plan": "plasma-cell-read-fidelity",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260923T050307886093-pcrf-shadow-telemetry-test-follows-the-node-flux-rule",
+              "session": "s18-fable-20260922",
+              "terminal_age_seconds": 1705,
+              "terminal_at": "2026-09-23T06:01:39Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-shadow-telemetry-test-follows-the-node-flux-rule"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 15,
+            "evidence": 14,
+            "fit": 16,
+            "goal_fidelity": 13,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 78
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 26368896,
+          "cumulative_input_tokens": 26851857,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 168082,
+          "generation_seconds": 4685.341,
+          "machine_seconds": 1178.662,
+          "tokens_per_second": 35.87
+        },
+        "follow_on_paths": [
+          "census/solver"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels",
+          "session_id": "01a0ccf5-90ab-71b0-ba5b-793e7ff1101a",
+          "session_source": "pointer",
+          "retained_at": "2026-09-23T08:08:25Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "promoted_revision": "03fa0d1a89e20c646abe0e84f82841cce030904a",
+        "plan_impl_at_dispatch": 0.7,
+        "impl_move": {
+          "plan": "plasma-cell-read-fidelity",
+          "at_dispatch": 0.7,
+          "at_complete": 0.75,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 1,
+          "declared": 16,
+          "missing": [
+            "0088fed886aa51515af70251404e34f3437678ce",
+            "03e40ede15e9618486d0562fcefb0dc025ad1b6b",
+            "13074594c9ccaaddb3a768aa8f598d4b6b1731d2",
+            "297b880f724224aa4dfc234bf7d73c6bbde90678",
+            "4466fc9860b74526d0291a8f04469f169dca02be",
+            "5ca26a53ce72cdbc7356683ad23ff1ba1ec288ac",
+            "638c996ee7bf33aa669be930c8912380e39ab784",
+            "6b03430b004f35ba724154169bfabb4c2fc2c0f1",
+            "819c458765b2fe43c1e39336857e73bed6a62e50",
+            "8ae29261fa7390ba59dc7bebb7408fa1f2cb6278",
+            "919c951749815dbf0165ef994a2c65a3771cc494",
+            "b438ba68715b25aaa9330d45e2bc876cb75af4f5",
+            "c2a8d469728f36cabdbd3799e60ed2ea1d545873",
+            "d15c5933ae4ebffa5c517b687f8c7c4324f9afa6",
+            "d164857fef0ce3e8f911a6bcc0447679d3b780a1"
+          ],
+          "message": "run 'r-20260923T062936465924-pcrf-production-route-trip-panels' has a passing gate presenting 1 commit(s) of the 16 its manifest declares; missing: 0088fed886aa51515af70251404e34f3437678ce, 03e40ede15e9618486d0562fcefb0dc025ad1b6b, 13074594c9ccaaddb3a768aa8f598d4b6b1731d2, 297b880f724224aa4dfc234bf7d73c6bbde90678, 4466fc9860b74526d0291a8f04469f169dca02be, 5ca26a53ce72cdbc7356683ad23ff1ba1ec288ac, 638c996ee7bf33aa669be930c8912380e39ab784, 6b03430b004f35ba724154169bfabb4c2fc2c0f1, 819c458765b2fe43c1e39336857e73bed6a62e50, 8ae29261fa7390ba59dc7bebb7408fa1f2cb6278, 919c951749815dbf0165ef994a2c65a3771cc494, b438ba68715b25aaa9330d45e2bc876cb75af4f5, c2a8d469728f36cabdbd3799e60ed2ea1d545873, d15c5933ae4ebffa5c517b687f8c7c4324f9afa6, d164857fef0ce3e8f911a6bcc0447679d3b780a1. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "lane_advisory": {
+          "backend": "codex-astra",
+          "burn_multiple": 2.5971795180102033,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "'codex-astra' is projected to exhaust at 2026-09-25T04:30:04Z, which is after this node's 3300s horizon ending 2026-09-23T07:24:44.749603+00:00",
+          "horizon_ends_at": "2026-09-23T07:24:44.749603+00:00",
+          "horizon_seconds": 3300,
+          "metered": true,
+          "observed_at": "2026-09-23T06:29:43Z",
+          "precedes_horizon": false,
+          "projected_exhaustion_at": "2026-09-25T04:30:04Z",
+          "resets_at": "2026-09-28T05:58:53Z",
+          "seconds_until_reset": 430149,
+          "state": "quiet",
+          "utilisation_pct": 75.0
+        },
+        "lane_declaration": {
+          "backend": "codex-astra",
+          "headroom": "known",
+          "metered": true,
+          "observed_at": "2026-09-23T06:29:43Z",
+          "read_at": "2026-09-23T06:29:44Z",
+          "resolved_backend": "codex-astra",
+          "utilisation_pct": 75.0
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "backend declares no lane document",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 225.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -284192,6 +284535,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3289
+    "_version": 3290
   }
 }

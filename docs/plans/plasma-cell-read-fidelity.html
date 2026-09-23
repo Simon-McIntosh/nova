@@ -18,7 +18,7 @@
 <meta name="plan-modified" content="2026-09-23">
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -237,6 +237,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260923-trip-panels-landed" data-who="reckon-ship" data-when="2026-09-23T08:35:00+00:00">
     <div class="r-comment-body">pcrf-production-route-trip-panels merged at 040f1a2df (tip 03fa0d1a8), with the codex review stored at 78 of 100. The review supports the coordinator reading over the node's census-read label. The receipt shows the first Newton-Krylov active-set step producing the collapsed state from a good seed; it does not show a census misreading a still-good state. Two limits the review adds. First, support finiteness was measured on the seed and the returned trip states only, not inside the step or on rejected inner trials, so zero non-finite moments cannot exclude a transient support or attribution failure inside the step that created the collapse. Second, the plasma-shape guard accepts any census O-point inside any closed contour: the maximum enclosing area contracts from 1.446 m2 at the seed to about 0.39 m2 at trip 1 while is_plasma stays true. The review also found that the run's final.txt is the stale pre-resume blocked record, superseded by the complete manifest. So the mechanism is named to the step, not to the census, and not to a support overflow on the returned states. The repair node is authored next, from this record, with an in-step instrument as its first measurement. The support-current guard is its own node and waits on S19's lambda census over the bank rows. S19 carries the wall cut-cell islands as a separate report node.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260923T062936465924-pcrf-production-route-trip-panels" data-who="reckon-ship" data-when="2026-09-23T08:08:25Z">
+    <div class="r-comment-body"><p>first active-set step collapses a good 83-cell seed to 4-24 core cells with lambda 6-62 scaling it back to target; support overflow excluded on returned states; review 78</p></div>
 </div>
 </section>
 </main>

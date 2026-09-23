@@ -19,7 +19,7 @@
       "arms": [
         {
           "route": "production",
-          "status": "not-measured",
+          "status": "measured",
           "construction": {
             "request": {
               "type": "nova.equilibrium.solve_request.ForwardSolveRequest",
@@ -4229,7 +4229,146 @@
               ],
               "closed_form_flux_samples_used_for_current_support_only": true
             }
-          }
+          },
+          "arm": "production",
+          "active_set_budget": 16,
+          "residual": 0.17503373772714848,
+          "converged": false,
+          "qualified": false,
+          "trip_count": 4,
+          "per_trip_residual_history": [
+            {
+              "trip": 1,
+              "residual": 0.7165572322836796
+            },
+            {
+              "trip": 2,
+              "residual": 0.1752824953040698
+            },
+            {
+              "trip": 3,
+              "residual": 0.17503373772714848
+            },
+            {
+              "trip": 4,
+              "residual": 0.17503373772714848
+            }
+          ],
+          "terminal_axis_rz_m": [
+            2.2514673081725416,
+            -0.1424775492112419
+          ],
+          "terminal_x_point_rz_m": [
+            1.939553798886077,
+            0.23532882125101423
+          ],
+          "reference_axis_rz_m": [
+            1.7869104924134618,
+            0.046151482164328565
+          ],
+          "reference_x_point_rz_m": [
+            1.4930225591761932,
+            -1.0188319093078109
+          ],
+          "x_point_distance_m": 1.3312810695389203,
+          "x_point_distance_status": "measured",
+          "certificate_position_bound_m": 0.15145387287104764,
+          "certificate_residual_bound": 1e-12,
+          "jax_platform": "gpu",
+          "nulls": {
+            "axis_rz_m": [
+              2.2514673081725416,
+              -0.1424775492112419
+            ],
+            "x_point_rz_m": [
+              1.939553798886077,
+              0.23532882125101423
+            ],
+            "qualified_saddles_rz_m": [
+              [
+                1.939553798886077,
+                0.23532882125101423
+              ]
+            ],
+            "retained_count": [
+              5,
+              1
+            ],
+            "axis_flux_wb": 0.21222755736395396,
+            "boundary_flux_wb": 0.16142008887412707
+          },
+          "termination_reason": 10,
+          "resolved_defaults": {
+            "nova_version": "0.11.0.post7465+gb1f649d7b.d20260922",
+            "policy": {
+              "route": "newton_krylov",
+              "newton_steps": 10,
+              "gmres_iterations": 30,
+              "warmup": 0,
+              "relaxation": 0.5,
+              "step_cap": 10.0,
+              "active_set_steps": 16,
+              "kernel_tolerance": 1e-12,
+              "qualification_tolerance": 1e-12,
+              "current_pin": true,
+              "settled_exit": true,
+              "own_mask_acceptance": true,
+              "continuation": true,
+              "best_iterate_retention": true,
+              "stagnation_stop": true,
+              "exact_kernels": true,
+              "cached_machine": true,
+              "compilation_cache": true
+            },
+            "deviations": {
+              "kernel_tolerance": 1e-12,
+              "qualification_tolerance": 1e-12
+            },
+            "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054"
+          },
+          "wall_seconds": 472.0258960928768,
+          "compilation_cache_hit": false,
+          "reference_nulls": {
+            "axis_rz_m": [
+              1.7869104924134618,
+              0.046151482164328565
+            ],
+            "x_point_rz_m": [
+              1.4930225591761932,
+              -1.0188319093078109
+            ],
+            "qualified_saddles_rz_m": [
+              [
+                1.5107863810710611,
+                -1.0275005315610446
+              ],
+              [
+                1.4930225591761932,
+                -1.0188319093078109
+              ],
+              [
+                1.506509523756129,
+                -1.000151395931814
+              ]
+            ],
+            "retained_count": [
+              1,
+              3
+            ],
+            "axis_flux_wb": 0.005713819178329534,
+            "boundary_flux_wb": 1.361644435324944e-05
+          },
+          "realised_cells": 132,
+          "carrier_identity": "solovev:diverted-single-null:-110",
+          "wall_units": [
+            [
+              0,
+              121,
+              true,
+              "vessel"
+            ]
+          ],
+          "state_file": "diverted-single-null-production-construction.npz"
         },
         {
           "route": "analytic_hex",

@@ -911,6 +911,55 @@ only changing receipt prose.</p>
 <code>r-20260922T165225717709-fsa-port-the-regenerated-fixture-onto-the-current-driver</code>.
 No test failure was added against the base driver.</p>
 </section>
+<section id="sol-ledger-panel">
+<h2>The common-SOL ledger panel draws its wall, its axis and its boundary nulls (2026-09-22)</h2>
+<p>Defect: the committed <code>sol-ledger-current.png</code> had a suptitle clipped at both edges
+(left text and a trailing ampere digit cut off), a wall that was passed as two coordinate arrays and
+never reached the frame, and per-cell labels below reading size. The panel now draws the first wall
+over the unit collection from the receipt that carries it, the axis, the fitted boundary and the
+ampere split in a title each of whose lines is measured in pixels before it is drawn.</p>
+<p>The panel is rendered from the receipt alone (<code>render_from_receipt</code>,
+benchmark entry point <code>--render-only</code>): no solve, no fixture chain, 33 s of import and
+about 40 s of wall on the login node. The receipt carries the wall polyline, the fitted boundary, the
+nulls, the 31 carrying common-SOL cell polygons with their currents, the contour levels and the
+fitted title lines.</p>
+<table>
+<thead><tr><th>Measure</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>wall nodes drawn / units closed</td><td>61 / 1</td></tr>
+<tr><td>axis drawn / admitted null class</td><td>true / wall_contact</td></tr>
+<tr><td>boundary contact points drawn</td><td>1</td></tr>
+<tr><td>widest title line / canvas</td><td>1488 px / 1728 px</td></tr>
+<tr><td>common-SOL split drawn in the title</td><td>1072.7057 A = 844.4895 A in 16 fitted-cut cells + 228.2162 A in 15 fully open cells</td></tr>
+</tbody></table>
+<p>The terminal topology is LIMITED: <code>topology_branch.x_point</code> is (NaN, NaN), so no saddle
+is admitted and the boundary nulls are the wall-contact points. They are read from the labelled
+strike points and, when those are empty, from the same terminal state <code>wall_point</code>; the
+this node first capture exported an empty set and drew no boundary null, which the new gate caught. The
+fitted red boundary crosses the black wall at the contact point.</p>
+<p>Regenerating the receipt moved the census numbers: the split is 1072.7057 / 844.4895 / 228.2162 A against
+the earlier receipt 1072.7116 / 844.2978 / 228.4138 A, <code>plasma_current_a</code> moved from
+547973.1120 A to 547979.0200 (relative 1.1e-05) and the per-cell currents moved with it, on identical
+nova code (this worktree parent is the commit the earlier receipt came from). Two consecutive
+regenerations on all_debug give bit-identical numbers to each other, so the drift is a lane or
+revision difference in the terminal state rather than run-to-run instability; it is recorded here
+rather than smoothed away, and the gate reads the split from the receipt it renders.</p>
+<figure><img src="/nova/figures/forward-solve-api/sol-ledger-census/sol-ledger-current.png"
+alt="Common-SOL ledger panel: the vessel wall, the red fitted boundary and the magnetic axis over grey solved flux contours, with the 31 carrying common-SOL cells outlined in red and labelled by their current, and the census ampere split in the title"
+width="1200"><figcaption>The common-SOL ledger panel rendered from
+<code>docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json</code> with no solve:
+grey line contours of the solved flux, the black first wall closed over its unit collection, the red
+fitted boundary, the axis and the wall-contact nulls, and the census ampere split in a fitted title.</figcaption></figure>
+<p>Gate logs under run
+<code>r-20260922T203513486341-fsapi-sol-ledger-panel-draws-wall-and-nulls</code>:
+<code>gate-positive.log</code> (2 passed), <code>gate-negative.log</code> (the declared negative control
+remove the draw_wall call applied and the wall assertion failing) and the census regeneration logs
+<code>census-regen.log</code> and <code>census-regen-2.log</code>. The regeneration is one
+<code>all_debug</code> job of about 20 minutes with <code>TMPDIR=/tmp</code>, CPU x64 selected, no
+<code>uv</code> on the compute node. The gate <code>tests/test_sol_ledger_render.py</code> is the only file that
+imports the changed driver, so no other test is affected; no failure was added against the base
+revision <code>e1f1239559</code>.</p>
+</section>
 </main>
 </body>
 </html>

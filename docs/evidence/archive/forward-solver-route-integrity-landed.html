@@ -1476,6 +1476,55 @@ added against the base.</p>
     absent from the process, so that expected constant is stale and its repair
     sits outside this node's write scope.</p>
   </section>
+  <section id="recovery-ladder-family-census">
+    <h2>The ladder across the four certificate rows</h2>
+    <p>Commits <code>64175a093ad15cbaccc3d377c78c84a5e4726569</code> and
+    <code>db634db22995b3ee92a8f2e31dbed0eef1de32b8</code> complete the census over
+    every certificate row the reduced-Newton tests exercise, at requested cells
+    <code>-300</code>. The driver stores each row's receipt as it lands and
+    rebuilds the merged report from the stored receipts, so a job that ends
+    before its row finishes still leaves the rows that landed; it also takes the
+    panel root from inside the landing record's own figures tree, because the
+    rendered panel is receipted as a URL relative to <code>docs/</code>.</p>
+    <table>
+      <thead><tr><th>Row</th><th>Trips</th><th>Rebuilt-model rung</th><th>Steepest-descent rung</th><th>Terminal residual</th><th>Converged</th></tr></thead>
+      <tbody>
+        <tr><td>weak-rotation-reactor-static</td><td>16</td><td>155</td><td>135</td><td>0.0553</td><td>no</td></tr>
+        <tr><td>moderate-rotation-conventional-static</td><td>11</td><td>84</td><td>73</td><td>0.0498</td><td>no</td></tr>
+        <tr><td>strong-rotation-compact-static</td><td>8</td><td>48</td><td>39</td><td>0.0251</td><td>no</td></tr>
+        <tr><td>diverted-single-null</td><td>6</td><td>22</td><td>12</td><td>0.2795</td><td>see below</td></tr>
+      </tbody>
+    </table>
+    <p>Every row terminates <code>active_set_settled</code> with a residual between
+    <code>0.0251</code> and <code>0.2795</code>, against the terminal bound
+    <code>1e-12</code>, so no measured row converges and the rare-fallback branch
+    is not exercised by any certificate row at this revision. On every row each
+    rung fires in essentially every trip: the rebuilt-model rung fires in all
+    trips of all four rows, and the steepest-descent rung in fifteen of sixteen
+    trips on the weak-rotation row and in all trips of the other three. The
+    driver's family verdict reads, verbatim: <em>every counted ladder rung fires
+    in at least half the trips on the measured rows, none of which converged, so
+    the ladders are a hot path rather than a rare fallback</em>. The two rungs together carry 57589 of
+    302553 optimised instructions, 19.03 percent of the solve program.</p>
+    <p>Two routes were measured and they disagree on the diverting row, which is
+    the reason the live counter exists. The persisted certificate parts record
+    the diverting row converging at <code>5.63e-15</code> over two trips with
+    neither rung activated, while a fresh solve at the fence base revision runs
+    six trips, activates both rungs in every trip, and stops at
+    <code>0.27948523220464483</code>. The persisted parts therefore describe the
+    revision that wrote them, not the fence base, and the committed reader of
+    those parts, <code>benchmarks/recovery_ladder_telemetry.py</code>, reports each
+    static row activating both rungs on ten promotions with sixty backtracking
+    trials for the same revision its parts came from. Only the live counter
+    speaks for the base revision; the diverting row's earlier receipt predates the
+    convergence field; the record's own control run, in which the test fails
+    against the same expected constant with the census absent from the process,
+    establishes that the row does not converge there.</p>
+    <p>The four rows cannot share one window: their production solves take 2148 to
+    2624 seconds each, so one <code>all_debug</code> job holds one row inside its
+    59-minute limit and the census runs as one job per row, each recording its row
+    as it lands.</p>
+  </section>
 </main>
 </body>
 </html>

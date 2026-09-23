@@ -226,6 +226,7 @@ def _merged(output, requested):
         "complete": not missing,
         "missing": missing,
         "verdict": _verdict(receipts),
+        "family_verdict": _family_verdict(receipts),
         "rows": receipts,
     }
     output.mkdir(parents=True, exist_ok=True)
@@ -237,8 +238,8 @@ def _merged(output, requested):
 
 
 def _verdict(rows):
-    converged = [row for row in rows if row["converged"]]
-    fired = [row for row in converged if sum(row["executions"].values()) > 0]
+    converged = [row for row in rows if row.get("converged")]
+    fired = [row for row in converged if sum(row.get("executions", {}).values()) > 0]
     total = sum(sum(row["executions"].values()) for row in rows)
     if not rows:
         return "no certificate row was measured"
@@ -262,6 +263,38 @@ def _verdict(rows):
         "none of the %d converging rows enters a recovery ladder (%d rung "
         "executions across all measured rows), so the ladders are a rare "
         "fallback reached only off the converging path" % (len(converged), total)
+    )
+
+
+def _family_verdict(rows):
+    ratios = []
+    for row in rows:
+        trips = row.get("trips") or 0
+        if not trips:
+            continue
+        for fired in row.get("fired_in_trips", {}).values():
+            ratios.append(len(set(fired)) / trips)
+    if not ratios:
+        return (
+            "no ladder rung was observed in the measured rows, so no row "
+            "indicates whether the ladders are a fallback or a hot path"
+        )
+    hot = sum(1 for value in ratios if value >= 0.5)
+    converged = [row for row in rows if row.get("converged")]
+    if hot == len(ratios):
+        where = (
+            "converging rows"
+            if converged
+            else "the measured rows, none of which converged"
+        )
+        return (
+            "every counted ladder rung fires in at least half the trips on %s, "
+            "so the ladders are a hot path rather than a rare fallback" % where
+        )
+    return (
+        "%d of %d counted ladder rungs fire in at least half the trips on the "
+        "measured rows, so the ladders are part of the working path rather "
+        "than a rare fallback" % (hot, len(ratios))
     )
 
 
@@ -300,6 +333,8 @@ def _markdown(payload):
     lines.append("")
     lines.append("**Verdict.** %s" % payload["verdict"])
     lines.append("")
+    lines.append("**Family verdict.** %s" % payload["family_verdict"])
+    lines.append("")
     header = "| path | instructions | share of %d |" % total
     lines.append(header)
     lines.append("| --- | --- | --- |")
@@ -315,7 +350,8 @@ def _markdown(payload):
         lines.append("")
         lines.append("Trips: %d." % row["trips"])
         lines.append(
-            "Converged `%s`; termination `%s`." % (row["converged"], row["termination"])
+            "Converged `%s`; termination `%s`."
+            % (row.get("converged"), row.get("termination"))
         )
         lines.append("")
         lines.append("| path | executions | per trip | trips |")
@@ -350,9 +386,14 @@ def main(argv=None):
     parser.add_argument(
         "--row",
         action="append",
-        required=True,
+        default=[],
         metavar="CASE:CELLS",
         help="certificate row, qualified by requested cells",
+    )
+    parser.add_argument(
+        "--merge-only",
+        action="store_true",
+        help="rewrite the merged report from the stored receipts, solving nothing",
     )
     parser.add_argument("--output", default=str(OUTPUT_ROOT))
     parser.add_argument("--scratch", default="")
@@ -363,7 +404,13 @@ def main(argv=None):
         if args.scratch
         else Path(tempfile.gettempdir()) / "recovery-ladder-census"
     )
-    payload = run(rows, Path(args.output), scratch)
+    if args.merge_only and not rows:
+        parser.error("--merge-only needs the --row list it should expect")
+    payload = (
+        _merged(Path(args.output), rows)
+        if args.merge_only
+        else run(rows, Path(args.output), scratch)
+    )
     for row in payload["rows"]:
         print("ROW %s trips=%d" % (row["case"], row["trips"]))
         for name, count in sorted(row["executions"].items()):

@@ -191,6 +191,23 @@
     banked beside the census. This is the plan's critical-risk section: it changes the semantics surface of
     every solve, and its gate is the exact certificate, never a tolerance.</p>
 
+    <h3 id="s3-reduced-newton-abort-landing">Reduced-Newton exit 134: memory-map exhaustion in the CPU JIT linker</h3>
+    <p>The SIGABRT that ends <code>tests/test_reduced_newton.py</code> in one process is a compile-memory abort.
+    It is not a numerical abort and not an assertion. At main HEAD f5af729a9, the native frames symbolise to
+    <code>llvm::report_fatal_error</code> in <code>RuntimeDyldImpl::emitSection</code> ("Unable to allocate
+    section memory"). That fires when the process's memory-map count reaches <code>vm.max_map_count</code>
+    65,530: the last samples before the two whole-file aborts read 62,814 and 65,078 maps, against 8.6 GiB of
+    RSS in a 64 GiB allocation. The persistent cache is not necessary, since with it disabled the abort moves
+    to a fresh compile-and-load at the same call site. Clearing JAX's caches after every test removes the abort:
+    the map count between tests then stays near 3,000, and the same four tests fail as before (tests 1, 5, 18
+    and 19). The abort has moved: <code>test_threshold_one_reproduces_the_refusal_only_policy</code> now passes
+    in-suite and alone, and the process aborts in test 20 or 21, a few hundred maps either side of the ceiling.
+    The smallest ordered subset observed to abort is tests 1 to 20. Tests 2 to 20, 10 to 20 (peak 62,797),
+    18 to 20, and 20 alone all complete. The full measurement is in the
+    <a href="/nova/figures/forward-solver-route-integrity/reduced-newton-abort/report.md">abort report</a> and the
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#reduced-newton-abort">cumulative landing record</a>.
+    This entry does not close the section or resolve its driving followup.</p>
+
     <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>
     <p>Measured 2026-09-18: the pre-warm covers 3292 keys the lane never requests and none of the 1285 keys it
     does, so the lane's 1341 hits all came from that target's own earlier run on the same directory; a lane

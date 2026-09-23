@@ -1,0 +1,2 @@
+/var/spool/slurm/d/job1276136/slurm_script: line 37: 3736211 Aborted                 (core dumped) env $extra "$PY" -m pytest -p no:cacheprovider -vv --tb=short "$@" >> "$log" 2>&1
+/var/spool/slurm/d/job1276136/slurm_script: line 37: 3736223 Aborted                 (core dumped) env $extra "$PY" -m pytest -p no:cacheprovider -vv --tb=short "$@" >> "$log" 2>&1

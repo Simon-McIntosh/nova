@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.58">
 </head>
@@ -361,6 +361,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260923T1045-lead-rebase-per-slice" data-who="reckon-ship" data-when="2026-09-23T10:45:00+02:00">
     <div class="r-comment-body">Lead decision 2026-09-23: the single-site Krylov redesign is accepted by re-basing per slice, not by bit identity to the prior program. XLA fuses an operator differently inside a scan, so identical arithmetic is not bitwise-equal: slice 1 moved one real-operator terminal value by 3.07e-12 (1.1e-11 relative, 55,355 ulps) even with a fusion barrier. Each slice therefore re-pins the certificate terminal digest. It must keep the four certificate rows' convergence, qualification, and axis and X-point positions within a relative change of 1e-10, add no test failures, and show its negative control. Slice 1 (fsri-single-site-krylov-for-the-qualified-step, _qualified_krylov_step): 302,553 to 284,792 instructions at 300 cells and 304,913 to 287,117 at 1000; live-map sites 3 to 1; fixed_point 45/45; reduced_newton shows the same four failures as the base. Its vmapped call is 14.3 times slower at width 16 because the cond becomes a select, so slice 2 replaces the cond with a while_loop exit before any batched caller adopts the stream.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260923T092552167639-review-of-fsri-single-site-krylov-for-the-qualified-step" data-who="reckon-ship" data-when="2026-09-23T09:45:43.345Z">
+    <div class="r-comment-body"><p>first-pass review 71: private jax._src imports, no test, stale paragraph; all three fixed on resume</p></div>
 </div>
 </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T19:26:56",
+  "updated": "2026-09-23T19:42:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -297324,6 +297324,276 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260923T051507666077-pcrf-seed-policy-at-main",
+        "plan": "plasma-cell-read-fidelity",
+        "section": "\u00a74",
+        "node": "pcrf-seed-policy-at-main",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1186,
+                "cached_input_tokens": 666972,
+                "input_tokens": 668160,
+                "output_tokens": 130,
+                "reasoning_output_tokens": 80,
+                "total_tokens": 668290,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "a new module benchmarks/plasma_cell_seed_policy.py drives the certificate production route (benchmarks/solovev_certificate.py own construction, carrier identity solovev, exact clip mode, requested 110 cells, certificate default policy) for both cases diverted-single-null and weak-rotation-reactor-static under two seed policies in ONE GPU sbatch job (first --partition=betelgeuse --reservation=gpu_0003_grpA --account=grpa --gres=gpu:1 --cpus-per-task=4 --mem=64G --time=01:30:00; if pending past 15 minutes cancel that one job by its id and resubmit identically to --partition=titan --gres=gpu:1 and say so; TMPDIR=/tmp in the submit environment and the payload, XLA_PYTHON_CLIENT_PREALLOCATE=false, the root interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python run directly, uv never invoked; if the job is cancelled by anything other than this worker, record sacct output and block rather than resubmit): seed one is the explicit analytic state the route uses today, seed two is the current-centroid disc seed that the receipt docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/weak-rotation-reactor-static-production-route-reduced.json records (seed construction current_centroid_disc, radius 1.5641 m for that case; the diverted case uses the same construction with its own radius, and the module prints the seed state digest per arm); the receipt docs/figures/plasma-cell-read-fidelity-seed/seed-policy-at-main.json records per case and arm the seed policy, seed state digest, converged flag, trip count, per-trip residual history, terminal residual, terminal and reference X-point with their distance in metres, and the per-trip count of non-finite clipped-support current moments; the figure docs/figures/plasma-cell-read-fidelity-seed/seed-policy-at-main.png with an SVG beside it draws for the diverted case the analytic state beside the two terminal states as line-contour poloidal panels on one shared level array, axis off, wall units via draw_wall, both null sets via draw_nulls, captions with seed policy, residual, converged flag and trip count; the receipt states in one field whether the disc seed converges where the analytic seed does not, or both fail, or both converge; the plan gains one appended paragraph citing the receipt and figure by project-absolute src; the declared negative control is run and its log recorded; ruff check and format pass over the new module; the manifest is written before the wait with wait_probe as a JSON argument vector printing IN_QUEUE or LEFT_QUEUE and wait_terminal LEFT_QUEUE and its gate fields name the sbatch job",
+          "estimated_hours": 2.0,
+          "goal": "measure whether the certificate production route converges in exact clip mode at the reduced rung on main when seeded from a current-centroid disc as the last converging receipt was",
+          "id": "pcrf-seed-policy-at-main",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-23T05:15:09Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T051507666077-pcrf-seed-policy-at-main/manifest.md",
+          "negative_control": "run the analytic-seed arm of the diverted case with the active-set budget forced to one trip and observe the receipt read converged false with residual 0.7166 at trip one, reproducing the production arm of exact-mode-construction-comparison.json within one percent",
+          "plan": "plasma-cell-read-fidelity",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/plasma_cell_seed_policy.py",
+            "docs/figures/plasma-cell-read-fidelity-seed",
+            "docs/plans/plasma-cell-read-fidelity.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-seed-policy-at-main",
+            "docs/evidence/archive/plasma-cell-read-fidelity-landed.html",
+            "docs/figures/plasma-cell-read-fidelity"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s18-pcrf-c2",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-23T05:15:34Z",
+        "completed_at": "2026-09-23T12:38:58.713Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 26593,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 26604,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "22acdbadad8bbd377aca06d21873ea6b3f814d8f",
+        "commits": [
+          "9988d62582815b734b6cbe2880196d98283729c6",
+          "fed676eec74864daa292a2e9ba1ffa3b5b208a8c",
+          "83f40323a12f128d01a4fd790796fe046d3e94e8",
+          "c4ee54d26cb421035117cd1c06caa5983d75711a",
+          "8824771b818ffb2fc1777863a4ff1f5a1cff49dc",
+          "fc662f6cfda73bc2936a11a868f27107c88601f4",
+          "c89260cc96ddf92dae5266b71f2370efeaa82f07",
+          "a38318fa4a33a6946305c6574d6cdbdaa61f314c",
+          "d1870963bca1e2e6cbb2e96bfeb64d5cf06446f9"
+        ],
+        "changed_lines": {
+          "added": 56,
+          "removed": 38470,
+          "files": 6
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sbatch betelgeuse H200 --mem=64G: payload.sh SEED_POLICY_MODE=complete (job 1276711)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T051507666077-pcrf-seed-policy-at-main/gate.log",
+          "log_digest": "sha256:4d0c1ba760c75007c4080c6571e16f629fbe568b754f59454152f1488e2634a1"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T051507666077-pcrf-seed-policy-at-main/manifest.md",
+        "scope_changed": false,
+        "session_id": "b8672669-e33e-46b1-a1eb-33b67b99b8f7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 19892894,
+            "input_tokens_cumulative": 19892894,
+            "output_tokens": 102585,
+            "output_tokens_cumulative": 102585,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-23T12:38:58.713Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 53011912,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 6280.868,
+          "generated_tokens": 300823,
+          "generation_seconds": 3931.697,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.7,
+          "machine_seconds": 2349.171,
+          "peak_input_tokens": 166637,
+          "tokens_per_second": 76.51,
+          "wall_tokens_per_second": 47.9
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-seed-policy-at-main",
+          "session_id": "b8672669-e33e-46b1-a1eb-33b67b99b8f7",
+          "session_source": "stream",
+          "retained_at": "2026-09-23T12:38:58.713Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "promoted_revision": "d1870963bca1e2e6cbb2e96bfeb64d5cf06446f9",
+        "plan_impl_at_dispatch": 0.7,
+        "impl_move": {
+          "plan": "plasma-cell-read-fidelity",
+          "at_dispatch": 0.7,
+          "at_complete": 0.88,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "review_waiver": {
+          "reason": "the stored review (82) read the tip 9988d6258, of which every promoted commit is an ancestor; the reviewed tree is the promoted content"
+        },
+        "lane_advisory": {
+          "backend": "clive",
+          "burn_multiple": null,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+          "horizon_ends_at": "2026-09-23T06:10:09.767190+00:00",
+          "horizon_seconds": 3300,
+          "metered": false,
+          "observed_at": null,
+          "precedes_horizon": null,
+          "projected_exhaustion_at": null,
+          "resets_at": null,
+          "seconds_until_reset": null,
+          "state": "quiet",
+          "utilisation_pct": null
+        },
+        "lane_declaration": {
+          "backend": null,
+          "headroom": null,
+          "metered": false,
+          "observed_at": null,
+          "read_at": "2026-09-23T05:15:09Z",
+          "resolved_backend": "clive",
+          "utilisation_pct": null
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "lane document carries no 'binding_observed'",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 78.0,
+        "orientation_input_tokens": 5638739.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -297818,6 +298088,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3327
+    "_version": 3328
   }
 }

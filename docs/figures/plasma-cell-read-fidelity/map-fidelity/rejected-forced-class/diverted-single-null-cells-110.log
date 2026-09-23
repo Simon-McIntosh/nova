@@ -1,0 +1,3 @@
+revision=7d9cd7c92eb319d5f30b914055d49b7fc87f2d54 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-map-fidelity-at-the-analytic-state command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-map-fidelity-at-the-analytic-state/benchmarks/plasma_cell_map_fidelity.py', '--case', 'diverted-single-null', '--cells', '-110', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-map-fidelity-at-the-analytic-state/docs/figures/plasma-cell-read-fidelity/map-fidelity']
+BUILD case=diverted-single-null requested=-110
+MAP case=diverted-single-null requested=-110 mode=exact

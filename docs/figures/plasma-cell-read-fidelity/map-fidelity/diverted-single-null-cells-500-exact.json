@@ -1,0 +1,182 @@
+{
+  "status": "measured",
+  "case": "diverted-single-null",
+  "requested_cells": -500,
+  "clip_mode": "exact",
+  "realised_cells": 550,
+  "state_nodes": 2226,
+  "pitch_m": 0.07103816322006563,
+  "mismatch": {
+    "sup_relative": 0.12087931349317264,
+    "rms_relative": 0.07381720395358182,
+    "sup_wb": 0.0010817760836591378,
+    "rms_wb": 0.00023967413486382366,
+    "sup_over_reference_span": 0.07381087187525122,
+    "rms_over_reference_span": 0.016353251959875623,
+    "reference_sup_wb": 0.008949224250187666,
+    "reference_rms_wb": 0.003246860108851278,
+    "finite": true
+  },
+  "raw_composition_mismatch": {
+    "sup_relative": 0.12087931349317264,
+    "rms_relative": 0.07642667316484669,
+    "sup_wb": 0.0010817760836591378,
+    "rms_wb": 0.0002481467163511552,
+    "sup_over_reference_span": 0.07381087187525122,
+    "rms_over_reference_span": 0.016931346295718883,
+    "reference_sup_wb": 0.008949224250187666,
+    "reference_rms_wb": 0.003246860108851278,
+    "finite": true
+  },
+  "passes": false,
+  "core_cell_count": 343,
+  "analytic_centre_inside_cell_count": 302,
+  "analytic_plasma_support_cell_count": 337,
+  "positive_area_support_cell_count": 343,
+  "missing_analytic_support_cells": 0,
+  "extra_support_cells": 6,
+  "unscaled_support_current_a": 36770.466486803176,
+  "analytic_plasma_current_a": 37170.642147815015,
+  "analytic_discrete_moment_current_a": 37170.642147815015,
+  "unscaled_over_analytic_current": 0.9892340934165066,
+  "lambda": 1.0108830727278224,
+  "current_target_provenance": {
+    "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+    "declared_current_a": 37170.642147815015,
+    "current_centroid_m": [
+      1.7129729329076127,
+      0.034493158263529396
+    ],
+    "closed_form_flux_samples_used_for_current_support_only": true
+  },
+  "nonfinite_support_moments": 0,
+  "nonfinite_support_areas": 0,
+  "nonzero_support_moments": 1029,
+  "support_moment_elements": 1650,
+  "shadow_copied_state_nodes": 11,
+  "exterior_mismatch": {
+    "sup_relative": 0.0,
+    "rms_relative": 0.0,
+    "sup_wb": 0.0,
+    "rms_wb": 0.0,
+    "sup_over_reference_span": 0.0,
+    "rms_over_reference_span": 0.0,
+    "reference_sup_wb": 0.1312621202821278,
+    "reference_rms_wb": 0.08739609896909688,
+    "finite": true
+  },
+  "plasma_response_mismatch": {
+    "sup_relative": 0.007989744711467071,
+    "rms_relative": 0.0028464645377600526,
+    "sup_wb": 0.0010817760836591347,
+    "rms_wb": 0.0002481467163511552,
+    "sup_over_reference_span": 0.01080293007053105,
+    "rms_over_reference_span": 0.0024780651601261686,
+    "reference_sup_wb": 0.13539557554405263,
+    "reference_rms_wb": 0.08717716769674828,
+    "finite": true
+  },
+  "scaled_current_l1_relative_error": 0.033835517537759444,
+  "composition_closure_sup_wb": 1.3877787807814457e-17,
+  "fixture_closure_sup_wb": 1.3877787807814457e-17,
+  "failure_component": "support/profile moment mismatch carried by plasma response",
+  "component_attribution_limit": "Analytic plasma and map share the Green operator; no independent kernel-accuracy claim.",
+  "negative_control": {
+    "vertical_shift_m": 0.07103816322006563,
+    "comparison": "shifted-input map against unshifted analytic reference",
+    "mismatch": {
+      "sup_relative": 0.7831283189697116,
+      "rms_relative": 1.0112325235217539,
+      "sup_wb": 0.007008390943132444,
+      "rms_wb": 0.003283330541395794,
+      "sup_over_reference_span": 0.4781908694130616,
+      "rms_over_reference_span": 0.22402555720711056,
+      "reference_sup_wb": 0.008949224250187666,
+      "reference_rms_wb": 0.003246860108851278,
+      "finite": true
+    },
+    "shifted_self_mismatch": {
+      "sup_relative": 0.5712467701395592,
+      "rms_relative": 0.7864990374155798,
+      "sup_wb": 0.005894738554952977,
+      "rms_wb": 0.0026431493286036985,
+      "sup_over_reference_span": 0.36779254740005757,
+      "rms_over_reference_span": 0.16491496877483838,
+      "reference_sup_wb": 0.010319075508318157,
+      "reference_rms_wb": 0.003360651701862261,
+      "finite": true
+    },
+    "increase": {
+      "sup_relative": 0.662249005476539,
+      "rms_relative": 0.937415319568172
+    },
+    "detected_in_both_norms": true,
+    "verdict": "displacement detected"
+  },
+  "reference_nulls": {
+    "axis_rz_m": [
+      1.7881722399735271,
+      0.04586022346271653
+    ],
+    "x_point_rz_m": [
+      1.5011136054305771,
+      -1.02364125030317
+    ],
+    "qualified_saddles_rz_m": [
+      [
+        1.5011136054305771,
+        -1.02364125030317
+      ]
+    ],
+    "retained_count": [
+      1,
+      1
+    ],
+    "axis_flux_wb": 0.005709509077288532,
+    "boundary_flux_wb": 6.031451745549399e-06
+  },
+  "mapped_nulls": {
+    "axis_rz_m": [
+      1.7987127462996462,
+      0.05560760548086781
+    ],
+    "x_point_rz_m": [
+      1.4922926527713642,
+      -0.9476272412024332
+    ],
+    "qualified_saddles_rz_m": [
+      [
+        1.4922926527713642,
+        -0.9476272412024332
+      ]
+    ],
+    "retained_count": [
+      7,
+      1
+    ],
+    "axis_flux_wb": 0.006021562163255325,
+    "boundary_flux_wb": 0.0003814882741935838
+  },
+  "wall_units": [
+    [
+      0,
+      121,
+      true,
+      "vessel"
+    ]
+  ],
+  "fixture_cache": {
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
+    "semantic_key": "e57b046871491e17",
+    "hit": true,
+    "lock_wait_seconds": 1.085083931684494e-05,
+    "build_seconds": 0.0
+  },
+  "jax_backend": "gpu",
+  "device": "cuda:0",
+  "x64": true,
+  "source_revision": "de29a1a303098542006dfe1b96575fce86ba535a",
+  "wall_seconds": 47.932483276352286,
+  "state_archive": "diverted-single-null-cells-500-exact.npz",
+  "exterior_counterfactual_two_percent_detected": true
+}

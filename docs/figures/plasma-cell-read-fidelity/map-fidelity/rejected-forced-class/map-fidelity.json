@@ -1,0 +1,34 @@
+{
+  "source_revision": "7d9cd7c92eb319d5f30b914055d49b7fc87f2d54",
+  "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-map-fidelity-at-the-analytic-state",
+  "command": [
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-map-fidelity-at-the-analytic-state/benchmarks/plasma_cell_map_fidelity.py"
+  ],
+  "slurm_job_id": "1276828",
+  "requested_rungs": [
+    -110,
+    -300,
+    -500,
+    -1000,
+    -2500
+  ],
+  "cases": [
+    "diverted-single-null",
+    "weak-rotation-reactor-static"
+  ],
+  "clip_modes": [
+    "exact",
+    "chord"
+  ],
+  "completed": false,
+  "rows": [],
+  "instrument_controls": {
+    "identity_accepted": true,
+    "two_percent_refused": true,
+    "nonfinite_refused": true,
+    "nonfinite_counter_sees_injected_nan": true
+  },
+  "metric": "sup(error)/sup(analytic), RMS(error)/RMS(analytic), all state nodes; both <1e-2",
+  "gauge": "same analytic-clipped fixture exterior; no flux re-zeroing",
+  "negative_control_declaration": "the same evaluation at the analytic state shifted vertically by one pitch must raise the recorded mismatch; if it does not, the measure cannot see a displaced plasma and the receipt says so"
+}

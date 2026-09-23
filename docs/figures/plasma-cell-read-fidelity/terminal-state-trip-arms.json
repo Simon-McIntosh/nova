@@ -859,5 +859,28 @@
       }
     }
   ],
-  "figure_src": "/nova/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.png"
+  "figure_src": "/nova/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.png",
+  "marker_pixel_census": [
+    {
+      "status": "measured",
+      "box_halfwidth_px": 16.0,
+      "panels": [
+        {
+          "reference_pixels": 675,
+          "panel_pixels": 0
+        },
+        {
+          "reference_pixels": 674,
+          "panel_pixels": 88
+        },
+        {
+          "reference_pixels": 674,
+          "panel_pixels": 88
+        }
+      ]
+    },
+    {
+      "status": "no_admitted_reference_saddle"
+    }
+  ]
 }

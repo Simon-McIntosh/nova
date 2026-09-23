@@ -21,6 +21,7 @@ import traceback
 
 
 REVISIONS = (
+    "9aebe5fae",
     "b43714114",
     "08dd0dda1",
     "ee17f9570",
@@ -182,6 +183,24 @@ def support_reader(operator):
     }
 
 
+def seed_policy_receipt(request, construction):
+    """Describe the native construction and the exact state passed to the seam."""
+    import numpy as np
+
+    policy = request.seed_policy
+    state = np.asarray(policy.state)
+    return {
+        "status": "measured",
+        "type": f"{type(policy).__module__}.{type(policy).__qualname__}",
+        "construction_type": construction["construction"],
+        "factory": construction["factory"],
+        "state_sha256": hashlib.sha256(state.tobytes(order="C")).hexdigest(),
+        "state_dtype": str(state.dtype),
+        "state_shape": list(state.shape),
+        "seed_radius_m": construction.get("seed_radius_m"),
+    }
+
+
 def arm(args):
     row = {
         "revision": args.revision,
@@ -189,8 +208,16 @@ def arm(args):
         "clip_mode": args.mode,
         "status": "not-measured",
         "exception": None,
+        "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+        "seed_policy": {
+            "status": "not-built",
+            "type": None,
+            "construction_type": None,
+            "state_sha256": None,
+        },
         "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }
+    write_json(args.output, row)
     started = perf_counter()
     try:
         import nova
@@ -215,6 +242,7 @@ def arm(args):
         assert Path(row["nova_file"]).is_relative_to(Path.cwd())
         assert row["full_revision"].startswith(args.revision)
         assert jax.default_backend() == "gpu"
+        assert jax.devices("cpu"), "trip observation needs a local CPU device"
         print(f"NOVA_FILE {row['nova_file']}", flush=True)
         row["devices"] = [str(device) for device in jax.devices()]
         set_support_clip_mode(args.mode)
@@ -250,6 +278,8 @@ def arm(args):
         request = certificate._certificate_solve_request(
             profile, seed, float(target), carrier_identity=identity
         )
+        row["seed_policy"] = seed_policy_receipt(request, seed_receipt)
+        write_json(args.output, row)
         reference = nulls(operator, analytic)
         row.update(
             {
@@ -330,6 +360,7 @@ def arm(args):
             wall=machine.wall_node,
             analytic=analytic,
             terminal=terminal,
+            seed=np.asarray(request.seed_policy.state),
             trip_states=np.stack([trip_states[i][0] for i in range(trips)]),
         )
         row["state_file"] = state_path.name
@@ -472,8 +503,11 @@ def render(payload, output):
             boundary=ref["boundary_flux_wb"],
         )
     payload["shared_contour_levels_wb"] = levels.tolist()
-    figure = plt.figure(figsize=(15, 14), constrained_layout=True)
-    grid = figure.add_gridspec(4, 3, height_ratios=[1, 1, 1, 0.65])
+    panel_rows = (len(REVISIONS) + 2) // 3
+    figure = plt.figure(figsize=(15, 4 * panel_rows + 2), constrained_layout=True)
+    grid = figure.add_gridspec(
+        panel_rows + 1, 3, height_ratios=[1] * panel_rows + [0.65]
+    )
     reference_style = DEFAULT_INK.variant(
         axis_color="#3366cc",
         xpoint_color="#3366cc",
@@ -538,7 +572,7 @@ def render(payload, output):
             "reference_markers": reference_marks,
             "terminal_markers": terminal_marks,
         }
-    trend = figure.add_subplot(grid[3, :])
+    trend = figure.add_subplot(grid[panel_rows, :])
     for case, color in zip(CASES, ("#444444", "#bb5533"), strict=True):
         values = {
             r["revision"]: r.get("terminal_residual")
@@ -666,6 +700,10 @@ def evidence_complete(payload):
             and row.get("support_health_status") == "measured"
             and len(row["support_health"]["per_trip"]) == row["trip_count"]
             and row["exit_status"] == 0
+            and row.get("seed_policy", {}).get("status") == "measured"
+            and bool(row["seed_policy"].get("type"))
+            and bool(row["seed_policy"].get("construction_type"))
+            and len(row["seed_policy"].get("state_sha256", "")) == 64
         )
         or (
             row["revision"] in optional_build_failures

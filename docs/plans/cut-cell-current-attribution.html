@@ -340,6 +340,60 @@ then to a single vmapped per-cell clip body. See the
 Figure commit <code>f2379a5f1</code> carries the inspected PNG/SVG pairs. Nothing under
 <code>nova/</code> changed, and this worker does not resolve its own followup.</p>
 
+<h3 id="s6-exact-support-deficit-per-cell">Exact-support deficit per cut cell: a fail-closed bank overflow, not a geometry zero</h3>
+<p><strong>2026-09-23 worker outcome; section, gate and driving followup remain open.</strong>
+At revision <code>1f85669c0</code>, the weak 110-requested/135-realised row was
+censused in <code>exact</code> and <code>chord</code> mode at both fixed states
+(the production cold seed and the committed chord terminal state) on a single
+<code>all_debug</code> job with <code>JAX_PLATFORMS=cpu</code>. Three hundred
+cells are <em>not</em> in this scope: this is the 135-realised row only.</p>
+<p>At the terminal state (boundary level 10.3951318 Wb) the traced clip is
+healthy &mdash; <code>area</code>, <code>full_area</code>, first and second area
+moments, <code>contour_area</code>, <code>included</code> and
+<code>vertex_count</code> are all finite, <code>refused_cell_count</code> is 4
+and <code>vertex_capacity</code> is 158 &mdash; yet the exact-mode current is
+<strong>NaN for every one of the 135 cells</strong>. The named cause is therefore
+not a geometry zero. Instrumenting every <code>clipped_support_current_moments</code>
+entry yields exactly one overflowing call:
+</p>
+<pre><code>cells=135  capacity=1  boundary_reduction=True  cut_count=2  overflow=True</code></pre>
+<p>This is the whole-cell branch of
+<code>forward_operator._cell_banked_current_moments</code>, which integrates the
+current with <code>cut_cell_capacity=1</code>, against the quadratic level-set
+boundary that <code>clip_quadrature._flux_selected_current_moments</code>
+re-derives and calls back in with at that inherited capacity. At the terminal
+state the quadratic level crosses two whole cells, so
+<code>clipped_support_current_moments</code> fails closed
+(<code>jnp.where(overflow, jnp.nan, value)</code>) and the entire exact-mode
+current field becomes undefined. At the seed state the same call has
+<code>cut_count=0</code>, no overflow, and the exact current is finite
+(0.1892 MA over the 43 cut cells). The chord route is unaffected: it passes the
+full cut-cell bank capacity (135) and its boundary-reduction cut count (30 seed,
+41 terminal) stays under it.</p>
+<p>Per-cut-cell readings against the analytic oracle total <strong>16.314569 MA</strong>
+(target 16.314773 MA). Seed: analytic 3.3763 MA, chord 0.6193 MA, exact
+0.1892 MA; 35 cells <code>empty-no-vertex-inside-level</code> and 8
+<code>shrunk-partial-polygon</code>. Terminal: analytic 3.3763 MA, chord
+2.9514 MA, exact undefined; all 43 cells
+<code>exact-current-undefined-bank-overflow</code>. The eight named cells
+[<code>2, 35, 75, 89, 114, 126, 128, 134</code>] all carry zero exact area and a
+zero exact current at both states; at the terminal state their chord currents
+are 12590.489 / 0.000 / 60425.556 / 5700.541 / 5700.541 / 12590.489 / 0.000 /
+60425.556 A against analytic 23242.042 / 8850.331 / 76394.816 / 6228.288 /
+6228.288 / 23242.042 / 8850.331 / 76394.816 A, with 2/15, 0/11, 3/13, 2/5, 2/5,
+2/15, 0/11 and 3/13 cell vertices inside the level. The per-vertex signed flux,
+the clipped polygon area per mode, and the call table that reproduces the
+overflow are in <code>report.json</code> and <code>report.md</code>; the poloidal
+map and the ranked clip comparison are in the figure. Nothing under
+<code>nova/</code> changed, and this worker does not resolve its own followup.</p>
+<p>See the
+<a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#exact-support-deficit-per-cell">per-cell attribution, bank-call receipt and figure</a>.
+Independent defect, outside this worker's write scope and surfaced for the
+coordinator: <code>benchmarks/unit_amplitude_current_census._partition_probe</code>
+slices the state before <code>operator._fixed_design_read</code>, which requires
+the full 772-row state vector, so the census's own probe raises at HEAD; this
+report traces the partition from the whole state instead.</p>
+
 <h2 id="s7">§7 — Wire the typed census saddle into the production spline-chain clip and re-solve the diverted certificate rows</h2>
 <p>The wedge split landed on the oracle (core-side current within 1e-13 relative of the analytic wedge integral at 110, 300 and 500 cells) but the production spline route discards it because the operator passes no saddle vertex, and the oracle compares the carrier against its own emitted polygons. Pass the typed census saddle as the clip's saddle vertex, consume the four region-owned moment profiles in the plasma partition and the null read, and make the oracle independent of the carrier by integrating the analytic current over the region bounded by the separatrix branches and the cell edges. Gate: the independent oracle at 110, 300 and 500 cells on all_debug, then one H200 job re-solving the four diverted certificate rows with the four limited rows as the bit-identical negative control.</p>
 

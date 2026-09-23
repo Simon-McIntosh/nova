@@ -2725,6 +2725,106 @@ exists. Nothing under <code>nova/</code> changes. The section, gate and driving 
 remain open for coordinator adjudication.</p>
 </section>
 
+<section id="exact-support-deficit-per-cell">
+<h2>Exact-support deficit per cut cell: a fail-closed moment-bank overflow, not a geometry zero</h2>
+<p><strong>Node <code>cca-exact-support-deficit-per-cell-attribution</code>, 2026-09-23, revision
+<code>1f85669c0</code>.</strong> The weak 110-requested / 135-realised certificate
+row is censused in <code>exact</code> and <code>chord</code> mode at two fixed
+states &mdash; the production cold seed and the committed chord terminal state
+&mdash; in one <code>all_debug</code> job with <code>JAX_PLATFORMS=cpu</code> and
+<code>TMPDIR=/tmp</code>, the root interpreter run directly and <code>uv</code>
+never invoked on the compute node. Scope is the 135-realised row only.</p>
+
+<h3>The traced clip is finite while the exact current is undefined</h3>
+<p>At the terminal state (boundary level <code>10.3951318</code> Wb, polarity 1,
+43 analytic cut cells) the traced support is healthy: <code>area</code>,
+<code>full_area</code>, the first and second area moments,
+<code>contour_area</code>, <code>included</code> and <code>vertex_count</code>
+are all finite, <code>refused_cell_count</code> is 4 and
+<code>vertex_capacity</code> is 158. The exact-mode current is nonetheless
+<strong>NaN for all 135 cells</strong>, so the named cause is not a geometry
+zero. Instrumenting every entry of
+<code>nova.equilibrium.clip_quadrature.clipped_support_current_moments</code>
+produces exactly one overflowing call:</p>
+<pre><code>cells=135  capacity=1  boundary_reduction=True  cut_count=2  overflow=True</code></pre>
+<p>This is the whole-cell branch of
+<code>forward_operator._cell_banked_current_moments</code>, which integrates the
+current with <code>cut_cell_capacity=1</code>, against the quadratic level-set
+boundary that <code>clip_quadrature._flux_selected_current_moments</code>
+re-derives and calls back in with at that inherited capacity. The quadratic level
+crosses two whole cells, so <code>clipped_support_current_moments</code> fails
+closed (<code>jnp.where(overflow, jnp.nan, value)</code>) and the entire
+exact-mode current field becomes undefined for every cell, cut or not. At the
+seed state (boundary level <code>35.8528226</code> Wb) the same call has
+<code>cut_count=0</code>, no overflow, and exact mode returns a finite current.
+The chord route is unaffected: it passes the full cut-cell bank capacity (135)
+and its boundary-reduction cut count (30 seed, 41 terminal) stays under it.</p>
+
+<h3>Cut-cell moment-bank call table (terminal state)</h3>
+<table>
+<tr><th>cells</th><th>capacity</th><th>boundary reduction</th><th>cut count</th><th>overflow</th></tr>
+<tr><td>135</td><td>135</td><td>False</td><td>0</td><td>False</td></tr>
+<tr><td>135</td><td>135</td><td>True</td><td>41</td><td>False</td></tr>
+<tr><td>135</td><td>1</td><td>False</td><td>0</td><td>False</td></tr>
+<tr><td>135</td><td>1</td><td>True</td><td>2</td><td><strong>True</strong></td></tr>
+</table>
+<p>At the seed state the corresponding <code>cells=135 capacity=1
+boundary_reduction=True</code> call reads <code>cut_count=0 overflow=False</code>;
+the <code>capacity=135 boundary_reduction=True</code> call reads 30. Both states
+also make four single-cell calls (<code>cells=1 capacity=1</code>) with cut counts
+0 or 1, none overflowing.</p>
+
+<h3>Per-cell readings against the analytic 16.314569 MA</h3>
+<p>Analytic oracle total over the cut cells is <strong>16.314569 MA</strong>;
+the target current is <strong>16.314773 MA</strong>. Over the 43 analytic cut
+cells the totals are &mdash; seed: analytic 3.3763 MA, chord 0.6193 MA, exact
+0.1892 MA (defined); 35 cells <code>empty-no-vertex-inside-level</code> and 8
+<code>shrunk-partial-polygon</code>. Terminal: analytic 3.3763 MA, chord
+2.9514 MA, exact undefined; all 43 cells
+<code>exact-current-undefined-bank-overflow</code>.</p>
+<p>The eight named cells [<code>2, 35, 75, 89, 114, 126, 128, 134</code>] all
+carry zero exact area and a zero exact current at both states. At the terminal
+state, against analytic current (A) / chord current (A) / vertices inside the
+boundary level:</p>
+<table>
+<tr><th>cell</th><th>analytic A</th><th>chord A</th><th>exact A</th><th>exact area m&#178;</th><th>vertices inside</th></tr>
+<tr><td>2</td><td>23242.042</td><td>12590.489</td><td>nan</td><td>0.0</td><td>2/15</td></tr>
+<tr><td>35</td><td>8850.331</td><td>0.000</td><td>nan</td><td>0.0</td><td>0/11</td></tr>
+<tr><td>75</td><td>76394.816</td><td>60425.556</td><td>nan</td><td>0.0</td><td>3/13</td></tr>
+<tr><td>89</td><td>6228.288</td><td>5700.541</td><td>nan</td><td>0.0</td><td>2/5</td></tr>
+<tr><td>114</td><td>6228.288</td><td>5700.541</td><td>nan</td><td>0.0</td><td>2/5</td></tr>
+<tr><td>126</td><td>23242.042</td><td>12590.489</td><td>nan</td><td>0.0</td><td>2/15</td></tr>
+<tr><td>128</td><td>8850.331</td><td>0.000</td><td>nan</td><td>0.0</td><td>0/11</td></tr>
+<tr><td>134</td><td>76394.816</td><td>60425.556</td><td>nan</td><td>0.0</td><td>3/13</td></tr>
+</table>
+<p>The per-vertex signed flux against the boundary level, the clipped polygon
+area per mode, <code>exact_participation</code>, <code>exact_included</code> and
+<code>exact_boundary_predicate</code> are carried per cell in
+<code>report.json</code>; <code>report.md</code> gives the same table readably.</p>
+
+<figure>
+  <img src="/nova/figures/cut-cell-current-attribution/exact-support-deficit/exact-support-deficit.svg" alt="Left column: clipped plasma area per cut cell, ranked by analytic area, for the seed and terminal states, with the analytic, chord and exact clips compared and the terminal exact clip drawn as a dashed undefined line. Right column: poloidal map of the cut-cell centroids inside the wall, red triangles marking cells with a traced exact polygon and open squares the eight named cells." style="max-width:100%">
+  <figcaption>Ranked clipped-area comparison and the poloidal cut-cell map. At the terminal state the exact clip has no defined per-cell area &mdash; the dashed zero line marks the fail-closed bank overflow that NaNs every cell's exact current &mdash; while the traced support itself remains finite. Source:
+  <code>docs/figures/cut-cell-current-attribution/exact-support-deficit/build_report.py</code>.</figcaption>
+</figure>
+
+<h3>Independent defect, outside this worker's write scope</h3>
+<p><code>benchmarks/unit_amplitude_current_census._partition_probe</code> slices
+the state before calling <code>operator._fixed_design_read</code>, which requires
+the full 772-row state vector (135 grid + 121 wall nodes plus the authored
+direct-sampling rows) and raises <code>ValueError: own-node null census requires
+the direct sampling flux values</code>. The census probe is therefore broken at
+HEAD; this report traces the partition from the whole state instead. Surfaced for
+the coordinator rather than repaired here, as the file is outside this node's
+write paths.</p>
+<p>Artifacts: <code>report.json</code>, <code>report.md</code>,
+<code>exact-support-deficit.png</code> / <code>.svg</code> and
+<code>build_report.py</code> under
+<code>docs/figures/cut-cell-current-attribution/exact-support-deficit/</code>.
+Nothing under <code>nova/</code> changed. The section, gate and driving followup
+remain open; this worker does not resolve its own followup.</p>
+</section>
+
 </main>
 </body>
 </html>

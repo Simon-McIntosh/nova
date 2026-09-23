@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T04:43:14",
+  "updated": "2026-09-23T04:52:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -271713,6 +271713,285 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T211725263915-pcrf-wall-node-shadow-from-the-node",
+        "plan": "plasma-cell-read-fidelity",
+        "section": "\u00a72",
+        "node": "pcrf-wall-node-shadow-from-the-node",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1757,
+                "cached_input_tokens": 433757,
+                "input_tokens": 435518,
+                "output_tokens": 50,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 435568,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "in nova/equilibrium/forward_operator.py the private_wall_node_mask published by _carrier_shadow_read is derived from the cell that contains the wall node (point-in-polygon over the committed cell polygons at construction, falling back to the flood evaluated at the node flux against the admitted saddle flux and the X-point height band only for nodes no polygon contains, with the fallback count recorded) and the nearest-centre lookup through _wall_carrier_index no longer decides the flag; the edit stays clear of the support clip-mode lines (the _SUPPORT_CLIP_MODE default and its consumers near lines 106-131 and 3200-3560), which another session owns; benchmarks/topology_parity_harness.py counts differing wall nodes beside differing cells and fails a row on either; the twelve-row replay through the harness runs as ONE GPU sbatch job (first --partition=betelgeuse --reservation=gpu_0003_grpA --account=grpa --gres=gpu:1 --cpus-per-task=4 --mem=64G --time=01:30:00; if pending past 15 minutes cancel and resubmit identically to --partition=titan --gres=gpu:1 and say so; TMPDIR=/tmp in the submit environment and the payload, PYTHONPATH=this worktree, the root interpreter run directly, uv never invoked) and its receipt docs/figures/plasma-cell-read-fidelity/wall-node-shadow-parity.json reads 0 differing cells on every row and 0 differing wall nodes on every row, or names each surviving node with its flux, the admitted saddle flux, the raster verdict and the cell verdict; the regenerated twelve-row figure docs/figures/plasma-cell-read-fidelity/wall-node-shadow-parity.png with an SVG beside it draws no differing-wall-node marker on any row and obeys the plotting rules (line contours, axis off, wall units via draw_wall, both null sets via draw_nulls); a new test file tests/test_wall_node_private_shadow.py builds a synthetic narrow private leg whose wall nodes have their nearest cell centre across the leg and asserts the published flag matches the flood at the node for every wall node; the declared negative control is run and its log recorded; the eighteen-file topology CPU lane (tests/test_analytic_single_null.py tests/test_banked_null_reads.py tests/test_fieldnull.py tests/test_forward_census.py tests/test_forward_secondary_null.py tests/test_hex_flood_coil_nulls.py tests/test_hex_flood_geometries.py tests/test_hex_flood_snowflake.py tests/test_hex_flood_sn_secondary.py tests/test_jax_null.py tests/test_null_generator_admission.py tests/test_plasma_cell_flood_families.py tests/test_plasma_cell_topology_read.py tests/test_solve_path_census_inputs.py tests/test_split_polish_nulls.py tests/test_stencil_nulls_dual_sweep.py tests/test_stencil_nulls.py tests/test_topology_parity_harness.py plus the new file) reports zero added failure IDs against the base revision in ONE fresh all_debug sbatch job (JAX_PLATFORMS=cpu, --time=00:59:00 --cpus-per-task=4 --mem=64G) with the baseline log recorded beside it; ruff check and format pass over the changed files; the plan section text gains an appended paragraph citing the receipt and figure by project-absolute src; the manifest is written before each wait with wait_probe as a JSON argument vector printing IN_QUEUE or LEFT_QUEUE and wait_terminal LEFT_QUEUE, and its gate fields name the parity sbatch job",
+          "estimated_hours": 3.0,
+          "goal": "derive each wall carrier node private-shadow flag from the flood at the node own position instead of from the nearest cell centre label",
+          "id": "pcrf-wall-node-shadow-from-the-node",
+          "lane_declaration": {
+            "backend": "codex-astra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-22T21:17:36Z",
+            "read_at": "2026-09-22T21:17:39Z",
+            "resolved_backend": "codex-astra",
+            "utilisation_pct": 66.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T211725263915-pcrf-wall-node-shadow-from-the-node/manifest.md",
+          "negative_control": "run the new regression test against the nearest-centre lookup restored in a scratch copy and observe it fail on the wall nodes across the leg",
+          "plan": "plasma-cell-read-fidelity",
+          "requested_backend": "codex-astra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/topology.py",
+            "benchmarks/topology_parity_harness.py",
+            "tests/test_wall_node_private_shadow.py",
+            "docs/figures/plasma-cell-read-fidelity",
+            "docs/plans/plasma-cell-read-fidelity.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-wall-node-shadow-from-the-node",
+            "docs/evidence/archive/plasma-cell-read-fidelity-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s18-pcrf-a2",
+        "backend": "codex-astra",
+        "local": false,
+        "agent": {
+          "alias": "astra6",
+          "backend": "codex-astra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-6-astra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-22T21:19:05Z",
+        "completed_at": "2026-09-23T01:16:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 14251,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "7eb21e74683888a8dcd337b7c3319dfa13f93dde",
+        "commits": [
+          "8b060f97e9f137e3bd0473bd7464e4f549820921",
+          "e3f324c811bd350953fec8b29b14e0967308667f",
+          "231087f1e7d8648f7727618f23a6df1379423b29",
+          "635195df870a11e74a1376156be970ba4c716bb3",
+          "4fb77b98d5493efe24f513a39c0465bc61169054",
+          "7a809f9fb9ae2d47292a72a7fb7daf542a60bdba",
+          "8468335788713ff6a81c0c35880965124d74f3e6"
+        ],
+        "changed_lines": {
+          "added": 44502,
+          "removed": 30,
+          "files": 12
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "python benchmarks/topology_parity_harness.py --output docs/figures/plasma-cell-read-fidelity/wall-node-shadow-parity.json --figure docs/figures/plasma-cell-read-fidelity/wall-node-shadow-parity.png (betelgeuse job 1276176)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T211725263915-pcrf-wall-node-shadow-from-the-node/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T211725263915-pcrf-wall-node-shadow-from-the-node/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0cafc-976a-70d0-928e-be2fca10e654",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13878144,
+            "cached_input_tokens_cumulative": 13878144,
+            "input_tokens": 14349649,
+            "input_tokens_cumulative": 14349649,
+            "output_tokens": 79919,
+            "output_tokens_cumulative": 79919,
+            "reasoning_output_tokens": 29760,
+            "reasoning_output_tokens_cumulative": 29760
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-23T01:16:36Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 69.0,
+              "resets_at": 1790575133,
+              "observed_at": "2026-09-23T01:16:36Z"
+            }
+          ],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "notional_cost_usd": "no_dated_rate",
+            "rate_basis": "no_dated_rate"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 18,
+            "evidence": 18,
+            "fit": 20,
+            "goal_fidelity": 19,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 95
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 13878144,
+          "cumulative_input_tokens": 28227793,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 109679
+        },
+        "follow_on_paths": [
+          "tests/test_plasma_cell_shadow_telemetry.py::test_carrier_private_wall_is_label_owned_with_raster_census"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-wall-node-shadow-from-the-node",
+          "session_id": "01a0cafc-976a-70d0-928e-be2fca10e654",
+          "session_source": "stream",
+          "retained_at": "2026-09-23T01:16:36Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.0,
+        "impl_move": {
+          "plan": "plasma-cell-read-fidelity",
+          "at_dispatch": 0.0,
+          "at_complete": 0.4,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "test_paths": [
+            "tests/test_wall_node_private_shadow.py"
+          ],
+          "declaration": "run the new regression test against the nearest-centre lookup restored in a scratch copy and observe it fail on the wall nodes across the leg",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-wall-node-shadow-from-the-node/node-flux/negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-wall-node-shadow-from-the-node/node-flux/negative-control.log"
+        },
+        "lane_advisory": {
+          "backend": "codex-astra",
+          "burn_multiple": 2.8204968768548095,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "'codex-astra' is projected to exhaust at 2026-09-24T18:55:09Z, which is after this node's 3300s horizon ending 2026-09-22T22:12:39.448590+00:00",
+          "horizon_ends_at": "2026-09-22T22:12:39.448590+00:00",
+          "horizon_seconds": 3300,
+          "metered": true,
+          "observed_at": "2026-09-22T21:17:36Z",
+          "precedes_horizon": false,
+          "projected_exhaustion_at": "2026-09-24T18:55:09Z",
+          "resets_at": "2026-09-28T05:58:53Z",
+          "seconds_until_reset": 463276,
+          "state": "quiet",
+          "utilisation_pct": 66.0
+        },
+        "lane_declaration": {
+          "backend": "codex-astra",
+          "headroom": "known",
+          "metered": true,
+          "observed_at": "2026-09-22T21:17:36Z",
+          "read_at": "2026-09-22T21:17:39Z",
+          "resolved_backend": "codex-astra",
+          "utilisation_pct": 66.0
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "backend declares no lane document",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 134.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -272179,6 +272458,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3255
+    "_version": 3256
   }
 }

@@ -18,7 +18,7 @@
 <meta name="plan-modified" content="2026-09-23">
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-impl" content="0.4">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -99,6 +99,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260923-wall-node-shadow-landed-and-reviews" data-who="" data-when="">
     <div class="r-comment-body">§2 closes at 785142185 (wall-node tip 846833578, review 95): the private wall flag is the node flux against the admitted saddle within the X-point height band, the harness compares the raster under the same rule at the node and gates on wall nodes beside cells, and the twelve-row replay reads 0 differing cells and 0 differing wall nodes on every row (H200 job 1276176) with the nineteen-file CPU lane at 190 passed and zero added failures. Review findings carried: the §2 node paragraph still states its done-when in containing-cell terms (the decision paragraph beneath it records the substitution); tests/test_plasma_cell_shadow_telemetry.py asserts the retired label-owned rule and passes only because both fixtures agree under both rules, so it is a green oracle for a retired rule outside every lane and its owner should migrate it to the node-flux rule; and the nearest-in-material diagnostic column the harness keeps for one release has no owner for its retirement. The §1 review (86) added: the analytic panel overpaints its large reference markers with the small panel-state markers, so the saddle cluster is legible only in the receipt; the node's scheduler log carries a python step CANCELLED 0:15 at 32 min beside the COMPLETED job that no record mentions; the position-bound refusal in require_converged is never exercised on this workload; and the certificate's converged reduced-rung receipt is a different carrier identity (solovev:diverted-single-null:-110) from the test's rebuilt analytic-hex construction, which is why the revision ladder, not that receipt, is the control.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260922T211725263915-pcrf-wall-node-shadow-from-the-node" data-who="reckon-ship" data-when="2026-09-23T01:16:36Z">
+    <div class="r-comment-body"><p>the private wall flag is the node flux against the admitted saddle within the X-point height band; twelve-row replay 0 differing cells and 0 differing wall nodes on every row (H200 job 1276176), nineteen-file CPU lane 190 passed with zero added failures, containing-cell attempt retained as the negative finding; merged at 785142185, review 95</p></div>
 </div>
 </section>
 </main>

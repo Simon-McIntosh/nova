@@ -243,6 +243,10 @@ def render(receipt, output):
     figure, axes = plt.subplots(
         len(receipt["cases"]), 3, figsize=(12, 9), constrained_layout=True
     )
+    # A one-row grid comes back as a flat sequence of axes, so indexing it by
+    # (row, column) fails; the receipt may carry a single case when a run is
+    # read part-way through.
+    axes = np.atleast_2d(axes)
     reference_style = DEFAULT_INK.variant(
         axis_color="#3366cc",
         xpoint_color="#3366cc",

@@ -1,0 +1,1131 @@
+{
+  "analytic": {
+    "cut_by_analytic_separatrix": [
+      2,
+      35,
+      75,
+      89,
+      114,
+      126,
+      128,
+      134
+    ],
+    "exact_area_m2": [
+      0.029731249353435962,
+      0.013457002599994904,
+      0.09425819368445426,
+      0.006911012637511639,
+      0.006911012637511638,
+      0.02973124935343622,
+      0.013457002599994957,
+      0.09425819368445434
+    ]
+  },
+  "case": "weak-rotation-reactor-static",
+  "figure_src": "/nova/figures/cut-cell-current-attribution/empty-exact-polygon/empty-exact-polygon.svg",
+  "named_cells": [
+    2,
+    35,
+    75,
+    89,
+    114,
+    126,
+    128,
+    134
+  ],
+  "realised_cells": 135,
+  "requested_cells": -110,
+  "revision": "3ecf5bc810200696f2c1e890e016652505472e02",
+  "states": {
+    "seed": {
+      "boundary_flux_wb": 35.852822588659905,
+      "cell_count": 135,
+      "cells": [
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -54.59681461514026,
+            -54.55941326212185,
+            -54.55941326194368,
+            -54.55403325518285,
+            -54.554033255301064,
+            -54.600503858594074,
+            -54.60050385901931,
+            -54.693099467558746,
+            -54.69309946823104,
+            -54.81854355554373,
+            -54.81854355633729,
+            -54.863037300233934,
+            -51.18854226431898,
+            -50.43181184529502,
+            -54.40513616761493
+          ],
+          "candidate_vertex_count_from_inputs": 0,
+          "cell": 2,
+          "cell_vertex_count": 15,
+          "crossing_edges_participating": [],
+          "curved_level_per_vertex": [
+            -0.7177627374182318,
+            -0.7231355599783367,
+            -0.7231355600165328,
+            -0.7308787928863403,
+            -0.7308787929349396,
+            -0.7394000228955138,
+            -0.7394000229463682,
+            -0.7474539290865465,
+            -0.7474539291314759,
+            -0.7541564153307352,
+            -0.7541564153651965,
+            -0.7558849285422031,
+            -0.6566894144350748,
+            -0.6443468657883837,
+            -0.7122620879855894
+          ],
+          "edges": 15,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 0,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 0,
+          "unique_crossing_edges": 0,
+          "vertex_level_participation": false,
+          "vertices_inside_boundary_level": 0,
+          "vertices_inside_curved_level": 0,
+          "vertices_outside_curved_level": 15
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -37.13252684243987,
+            -37.164645725228105,
+            -37.16464572542631,
+            -37.53729188140455,
+            -37.53729188208224,
+            -40.290489695578685,
+            -40.290489696530685,
+            -41.10606520844466,
+            -37.22752999916385,
+            -26.31209566182625,
+            -26.462780550838445
+          ],
+          "candidate_vertex_count_from_inputs": 0,
+          "cell": 35,
+          "cell_vertex_count": 11,
+          "crossing_edges_participating": [],
+          "curved_level_per_vertex": [
+            -0.481358040222615,
+            -0.48319467013632006,
+            -0.48319467015101547,
+            -0.4970418402902688,
+            -0.4970418403078443,
+            -0.5133977704153713,
+            -0.5133977704358714,
+            -0.5313464688236623,
+            -0.4794293956767001,
+            -0.3379537753669509,
+            -0.3454417389944005
+          ],
+          "edges": 11,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 0,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 0,
+          "unique_crossing_edges": 0,
+          "vertex_level_participation": false,
+          "vertices_inside_boundary_level": 0,
+          "vertices_inside_curved_level": 0,
+          "vertices_outside_curved_level": 11
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -54.863037300233934,
+            -54.95595653214442,
+            -54.95595653289098,
+            -55.076932531834345,
+            -55.07693253235627,
+            -54.67728604014094,
+            -54.677286040543734,
+            -54.748518573018835,
+            -54.74851857322379,
+            -54.752801048343436,
+            -50.60009709350945,
+            -47.44088791692168,
+            -51.18854226431898
+          ],
+          "candidate_vertex_count_from_inputs": 0,
+          "cell": 75,
+          "cell_vertex_count": 13,
+          "crossing_edges_participating": [],
+          "curved_level_per_vertex": [
+            -0.7558849285422031,
+            -0.7592571815768769,
+            -0.7592571816012228,
+            -0.7631025306360524,
+            -0.7631025306537271,
+            -0.7662942228086953,
+            -0.7662942228229381,
+            -0.7691816641535234,
+            -0.7691816641648757,
+            -0.7709359467263006,
+            -0.6395132980399274,
+            -0.6003503922345006,
+            -0.6566894144350748
+          ],
+          "edges": 13,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 0,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 0,
+          "unique_crossing_edges": 0,
+          "vertex_level_participation": false,
+          "vertices_inside_boundary_level": 0,
+          "vertices_inside_curved_level": 0,
+          "vertices_outside_curved_level": 13
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -26.633366774114787,
+            -24.56861742674648,
+            -24.568617422719065,
+            -20.0213243212053,
+            -19.75863802791242
+          ],
+          "candidate_vertex_count_from_inputs": 0,
+          "cell": 89,
+          "cell_vertex_count": 5,
+          "crossing_edges_participating": [],
+          "curved_level_per_vertex": [
+            -0.3318146851123753,
+            -0.3076939582727389,
+            -0.3076939582258204,
+            -0.25538598359198383,
+            -0.24724286423741543
+          ],
+          "edges": 5,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 0,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 0,
+          "unique_crossing_edges": 0,
+          "vertex_level_participation": false,
+          "vertices_inside_boundary_level": 0,
+          "vertices_inside_curved_level": 0,
+          "vertices_outside_curved_level": 5
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -20.021324320796555,
+            -24.568617422381905,
+            -24.568617426409336,
+            -26.633366773788943,
+            -19.758638027707452
+          ],
+          "candidate_vertex_count_from_inputs": 0,
+          "cell": 114,
+          "cell_vertex_count": 5,
+          "crossing_edges_participating": [],
+          "curved_level_per_vertex": [
+            -0.2553859835917059,
+            -0.30769395822219636,
+            -0.3076939582691133,
+            -0.3318146851072839,
+            -0.24724286423600178
+          ],
+          "edges": 5,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 0,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 0,
+          "unique_crossing_edges": 0,
+          "vertex_level_participation": false,
+          "vertices_inside_boundary_level": 0,
+          "vertices_inside_curved_level": 0,
+          "vertices_outside_curved_level": 5
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -54.86303730031541,
+            -54.818543556429375,
+            -54.81854355563581,
+            -54.69309946834559,
+            -54.693099467673306,
+            -54.60050385915527,
+            -54.60050385873002,
+            -54.554033255456346,
+            -54.554033255338126,
+            -54.559413262115264,
+            -54.55941326229345,
+            -54.596814615322714,
+            -54.40513616779353,
+            -50.43181184539157,
+            -51.18854226438611
+          ],
+          "candidate_vertex_count_from_inputs": 0,
+          "cell": 126,
+          "cell_vertex_count": 15,
+          "crossing_edges_participating": [],
+          "curved_level_per_vertex": [
+            -0.7558849285468501,
+            -0.754156415371039,
+            -0.7541564153365776,
+            -0.7474539291385129,
+            -0.7474539290935827,
+            -0.7394000229527613,
+            -0.739400022901906,
+            -0.7308787929393796,
+            -0.7308787928907794,
+            -0.7231355600185552,
+            -0.7231355599803582,
+            -0.7177627374184539,
+            -0.7122620879855583,
+            -0.644346865789112,
+            -0.6566894144390272
+          ],
+          "edges": 15,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 0,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 0,
+          "unique_crossing_edges": 0,
+          "vertex_level_participation": false,
+          "vertices_inside_boundary_level": 0,
+          "vertices_inside_curved_level": 0,
+          "vertices_outside_curved_level": 15
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -41.10606520842423,
+            -40.29048969648926,
+            -40.29048969553726,
+            -37.53729188197324,
+            -37.53729188129553,
+            -37.16464572533156,
+            -37.164645725133354,
+            -37.132526842348824,
+            -26.462780550808084,
+            -26.103704979691862,
+            -37.22752999914782
+          ],
+          "candidate_vertex_count_from_inputs": 0,
+          "cell": 128,
+          "cell_vertex_count": 11,
+          "crossing_edges_participating": [],
+          "curved_level_per_vertex": [
+            -0.53134646881997,
+            -0.5133977704293289,
+            -0.5133977704088287,
+            -0.49704184029965737,
+            -0.4970418402820831,
+            -0.4831946701428122,
+            -0.4831946701281168,
+            -0.4813580402145498,
+            -0.34544173899415626,
+            -0.3379537753671701,
+            -0.47942939567549936
+          ],
+          "edges": 11,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 0,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 0,
+          "unique_crossing_edges": 0,
+          "vertex_level_participation": false,
+          "vertices_inside_boundary_level": 0,
+          "vertices_inside_curved_level": 0,
+          "vertices_outside_curved_level": 11
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -54.75280104789158,
+            -54.74851857280282,
+            -54.74851857259786,
+            -54.6772860401888,
+            -54.677286039786004,
+            -55.07693253240477,
+            -55.076932531882846,
+            -54.95595653296064,
+            -54.95595653221409,
+            -54.86303730031541,
+            -51.18854226438611,
+            -47.553793689863944,
+            -50.600097093303376
+          ],
+          "candidate_vertex_count_from_inputs": 0,
+          "cell": 134,
+          "cell_vertex_count": 13,
+          "crossing_edges_participating": [],
+          "curved_level_per_vertex": [
+            -0.7709359467166657,
+            -0.7691816641561249,
+            -0.7691816641447744,
+            -0.7662942228172884,
+            -0.7662942228030492,
+            -0.7631025306523611,
+            -0.7631025306346846,
+            -0.7592571816040561,
+            -0.7592571815797085,
+            -0.7558849285468501,
+            -0.6566894144390272,
+            -0.6003503922361269,
+            -0.6395132980352642
+          ],
+          "edges": 13,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 0,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 0,
+          "unique_crossing_edges": 0,
+          "vertex_level_participation": false,
+          "vertices_inside_boundary_level": 0,
+          "vertices_inside_curved_level": 0,
+          "vertices_outside_curved_level": 13
+        }
+      ],
+      "control": {
+        "cells_checked": 8,
+        "crossing_matches": 0,
+        "per_cell": [
+          {
+            "agrees": false,
+            "cell": 2,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 35,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 75,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 89,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 114,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 126,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 128,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 134,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          }
+        ],
+        "post_arc_matches": 0
+      },
+      "exact_area_total_m2": 10.465021339118078,
+      "participation_count": 135
+    },
+    "terminal": {
+      "boundary_flux_wb": 10.39513183891403,
+      "cell_count": 135,
+      "cells": [
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -6.904795086931533,
+            -6.8064602671821355,
+            -6.806460266493355,
+            -6.6916348386403826,
+            -6.69163483798161,
+            -6.575932768103415,
+            -6.575932767354075,
+            -6.436331994732077,
+            -6.436331993778739,
+            -6.251745253237811,
+            -6.25174525199737,
+            -6.100443099947095,
+            1.0900448388639905,
+            1.5764978567328303,
+            -6.453211519662129
+          ],
+          "candidate_vertex_count_from_inputs": 6,
+          "cell": 2,
+          "cell_vertex_count": 15,
+          "crossing_edges_participating": [
+            10,
+            11,
+            12,
+            13
+          ],
+          "curved_level_per_vertex": [
+            -0.06621382581312218,
+            -0.09087188762507026,
+            -0.09087188779098199,
+            -0.11686733470270383,
+            -0.11686733481084843,
+            -0.12197935826935691,
+            -0.12197935820543648,
+            -0.09314500087270972,
+            -0.09314500059046793,
+            -0.03096279414187819,
+            -0.03096279370692656,
+            0.0043767931867861876,
+            -0.042690198726567985,
+            0.005239373882936604,
+            -0.056954065734601045
+          ],
+          "edges": 15,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 2,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 4,
+          "unique_crossing_edges": 4,
+          "vertex_level_participation": true,
+          "vertices_inside_boundary_level": 2,
+          "vertices_inside_curved_level": 2,
+          "vertices_outside_curved_level": 13
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -13.290991788870723,
+            -13.328575039155705,
+            -13.32857503935264,
+            -13.473899405031867,
+            -13.473899405173707,
+            -13.541133013832482,
+            -13.541133013888334,
+            -13.568017322430777,
+            -9.00674508085212,
+            -0.11461507993397824,
+            -2.4054640577486524
+          ],
+          "candidate_vertex_count_from_inputs": 0,
+          "cell": 35,
+          "cell_vertex_count": 11,
+          "crossing_edges_participating": [],
+          "curved_level_per_vertex": [
+            -0.07492420199950726,
+            -0.07062104482583098,
+            -0.07062104478986915,
+            -0.04856388684615785,
+            -0.048563886832568175,
+            -0.04936582694704189,
+            -0.0493658269630928,
+            -0.07450994924526239,
+            -0.08097122054521172,
+            -0.012549231097313873,
+            -0.03138060984172246
+          ],
+          "edges": 11,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 0,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 0,
+          "unique_crossing_edges": 0,
+          "vertex_level_participation": false,
+          "vertices_inside_boundary_level": 0,
+          "vertices_inside_curved_level": 0,
+          "vertices_outside_curved_level": 11
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -6.100443099947095,
+            -6.003521655893078,
+            -6.003521654328742,
+            -5.675887243645992,
+            -5.675887241770056,
+            -5.050391012401343,
+            -5.050391011172814,
+            -4.768829601624535,
+            -4.768829600443396,
+            -4.471554812433478,
+            2.3726602689250793,
+            7.024070093659466,
+            1.0900448388639905
+          ],
+          "candidate_vertex_count_from_inputs": 15,
+          "cell": 75,
+          "cell_vertex_count": 13,
+          "crossing_edges_participating": [
+            8,
+            9,
+            11,
+            12
+          ],
+          "curved_level_per_vertex": [
+            0.0043767931867861876,
+            0.04771856541248809,
+            0.04771856584184775,
+            0.11374009724606537,
+            0.11374009749383873,
+            0.1353290276908794,
+            0.13532902764790578,
+            0.09035653429417323,
+            0.09035653396399113,
+            -0.012354234129723807,
+            0.10180072898088,
+            0.040568493289349306,
+            -0.042690198726567985
+          ],
+          "edges": 13,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 11,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 4,
+          "unique_crossing_edges": 4,
+          "vertex_level_participation": true,
+          "vertices_inside_boundary_level": 3,
+          "vertices_inside_curved_level": 11,
+          "vertices_outside_curved_level": 2
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -0.21535850546512414,
+            -0.16463475978622633,
+            -0.16463475962137863,
+            0.03303278250559494,
+            3.9451414952386212
+          ],
+          "candidate_vertex_count_from_inputs": 0,
+          "cell": 89,
+          "cell_vertex_count": 5,
+          "crossing_edges_participating": [],
+          "curved_level_per_vertex": [
+            -0.09924555894646209,
+            -0.11366999167720634,
+            -0.11366999169041642,
+            -0.09728929810239129,
+            -0.03995156405561884
+          ],
+          "edges": 5,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 0,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 0,
+          "unique_crossing_edges": 0,
+          "vertex_level_participation": false,
+          "vertices_inside_boundary_level": 2,
+          "vertices_inside_curved_level": 0,
+          "vertices_outside_curved_level": 5
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            0.033032782509701875,
+            -0.16463475961753105,
+            -0.16463475978238584,
+            -0.2153585054613547,
+            3.9451414952416233
+          ],
+          "candidate_vertex_count_from_inputs": 0,
+          "cell": 114,
+          "cell_vertex_count": 5,
+          "crossing_edges_participating": [],
+          "curved_level_per_vertex": [
+            -0.09728929812835571,
+            -0.11366999164856298,
+            -0.1136699916353492,
+            -0.09924555887232245,
+            -0.0399515640400174
+          ],
+          "edges": 5,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 0,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 0,
+          "unique_crossing_edges": 0,
+          "vertex_level_participation": false,
+          "vertices_inside_boundary_level": 2,
+          "vertices_inside_curved_level": 0,
+          "vertices_outside_curved_level": 5
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -6.100443099947649,
+            -6.251745251997734,
+            -6.251745253238174,
+            -6.436331993778735,
+            -6.436331994732079,
+            -6.575932767353717,
+            -6.575932768103064,
+            -6.6916348379809625,
+            -6.691634838639735,
+            -6.8064602664924925,
+            -6.806460267181256,
+            -6.904795086930526,
+            -6.453211519661198,
+            1.5764978567320949,
+            1.0900448388628625
+          ],
+          "candidate_vertex_count_from_inputs": 6,
+          "cell": 126,
+          "cell_vertex_count": 15,
+          "crossing_edges_participating": [
+            0,
+            12,
+            13,
+            14
+          ],
+          "curved_level_per_vertex": [
+            0.004376793132252033,
+            -0.03096279377130884,
+            -0.03096279420627468,
+            -0.09314500065943321,
+            -0.0931450009416892,
+            -0.12197935825801665,
+            -0.12197935832190865,
+            -0.11686733483406897,
+            -0.11686733472591015,
+            -0.09087188778376287,
+            -0.09087188761786535,
+            -0.06621382578741475,
+            -0.05695406570742989,
+            0.005239373891171795,
+            -0.04269019876809921
+          ],
+          "edges": 15,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 2,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 4,
+          "unique_crossing_edges": 4,
+          "vertex_level_participation": true,
+          "vertices_inside_boundary_level": 2,
+          "vertices_inside_curved_level": 2,
+          "vertices_outside_curved_level": 13
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -13.568017322431473,
+            -13.541133013889244,
+            -13.541133013833395,
+            -13.473899405173798,
+            -13.47389940503195,
+            -13.328575039352899,
+            -13.328575039155968,
+            -13.29099178887099,
+            -2.405464057749067,
+            -0.12023910391163106,
+            -9.0067450808523
+          ],
+          "candidate_vertex_count_from_inputs": 0,
+          "cell": 128,
+          "cell_vertex_count": 11,
+          "crossing_edges_participating": [],
+          "curved_level_per_vertex": [
+            -0.07450994919749193,
+            -0.04936582687081148,
+            -0.049365826854755185,
+            -0.048563886714012836,
+            -0.048563886727609265,
+            -0.07062104467003456,
+            -0.07062104470599302,
+            -0.07492420188163307,
+            -0.03138060983332508,
+            -0.012549231098295088,
+            -0.08097122053211481
+          ],
+          "edges": 11,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 0,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 0,
+          "unique_crossing_edges": 0,
+          "vertex_level_participation": false,
+          "vertices_inside_boundary_level": 0,
+          "vertices_inside_curved_level": 0,
+          "vertices_outside_curved_level": 11
+        },
+        {
+          "area_m2": 0.0,
+          "boundary_level_per_vertex": [
+            -4.471554812433778,
+            -4.7688296004446675,
+            -4.768829601625805,
+            -5.050391011175144,
+            -5.050391012403654,
+            -5.675887241771168,
+            -5.675887243647104,
+            -6.003521654329486,
+            -6.003521655893817,
+            -6.100443099947649,
+            1.0900448388628625,
+            6.87324894192812,
+            2.3726602689245926
+          ],
+          "candidate_vertex_count_from_inputs": 15,
+          "cell": 134,
+          "cell_vertex_count": 13,
+          "crossing_edges_participating": [
+            0,
+            9,
+            10,
+            12
+          ],
+          "curved_level_per_vertex": [
+            -0.012354234050473423,
+            0.09035653404022526,
+            0.09035653437040025,
+            0.1353290276950858,
+            0.13532902773804523,
+            0.11374009749778935,
+            0.1137400972500231,
+            0.047718565804110824,
+            0.047718565374751165,
+            0.004376793132252033,
+            -0.04269019876809921,
+            0.04056849326696366,
+            0.10180072901476578
+          ],
+          "edges": 13,
+          "first_empty_stage": {
+            "line": 1405,
+            "reason": "the branch shoelace area is zero, so included = area > 0.0 is false at line 1408",
+            "stage": "traced_polygon_moments",
+            "vertex_count": 0
+          },
+          "included": false,
+          "inside_vertices_on_edges": 11,
+          "participation": true,
+          "profile_participation": true,
+          "stages": {
+            "branch_vertices": null,
+            "candidate_vertices": null,
+            "crossing_vertices": null,
+            "deduped_support_vertices": null,
+            "post_arc_vertices": null,
+            "saddle_chain_vertices": null
+          },
+          "straddling_edges_blocked_by_participation": [],
+          "straddling_edges_curved_level": 4,
+          "unique_crossing_edges": 4,
+          "vertex_level_participation": true,
+          "vertices_inside_boundary_level": 3,
+          "vertices_inside_curved_level": 11,
+          "vertices_outside_curved_level": 2
+        }
+      ],
+      "control": {
+        "cells_checked": 8,
+        "crossing_matches": 0,
+        "per_cell": [
+          {
+            "agrees": false,
+            "cell": 2,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 35,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 75,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 89,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 114,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 126,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 128,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          },
+          {
+            "agrees": false,
+            "cell": 134,
+            "production_vertex_count": 0,
+            "recorded_post_arc_vertex_count": null
+          }
+        ],
+        "post_arc_matches": 0
+      },
+      "exact_area_total_m2": 20.474122541304418,
+      "participation_count": 135
+    }
+  }
+}

@@ -1492,8 +1492,22 @@ slots after the machine finishes apply nothing.</p>
 <p id="single-site-krylov-tests">Tests (<code>suite.sh</code>, one fresh
 <code>all_debug</code> process per file). <code>tests/test_fixed_point.py</code>
 passes 45 of 45 (job 1276455, EXIT=0, 148 s). <code>tests/test_reduced_newton.py</code>
-(job 1276456) was still running when this record was written, and its outcome
-goes to the node manifest.</p>
+(job 1276456, EXIT=1, 1,308 s) completes without an abort: 18 passed, 4 failed.
+The failure ids are the four recorded at the base:
+<code>test_diverted_normalised_certificate_rung_retains_finite_fallback</code>,
+<code>test_reduced_newton_reaches_the_production_fixed_point</code>,
+<code>test_compiled_slice_matches_the_fused_host_route</code> and
+<code>test_compiled_slice_caches_one_executable_per_static_policy</code>. No
+failure is added.</p>
+<p id="single-site-krylov-real-operator">The first of those failures prints a
+terminal value of a real-operator solve, so it is the one real-operator bitwise
+reading this node has. At <code>f803b640</code>, whose solver sources equal
+<code>52bfefc0</code>, it reads <code>0.27948523220464483</code>; under the fenced
+stream it reads <code>0.279485232201572</code>. That is an absolute difference of
+3.07e-12, a relative difference of 1.1e-11, and 55,355 units in the last place.
+The fence therefore does not restore bit identity on the real operator, and the
+certificate terminal state is expected to move by the same order. Whether to
+re-base the certificate digest on the stream is a lead decision.</p>
 </section>
 </main>
 </body>

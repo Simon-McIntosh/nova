@@ -293,10 +293,13 @@
     <p>Bitwise equality is shown on toy operators only. Against the base with the
     same fence, the dense arm is equal on 8 of 8 cases and the elementwise arm on 5 of
     8; the three elementwise misses differ only in the achieved reduction (at most
-    1.1e-17), with the step equal. The real-operator terminal comparison against
-    52bfefc0 has not run. Under <code>vmap</code> the stream costs 14.3 times the
+    1.1e-17), with the step equal. On the real operator it does not hold: a diverted
+    certificate rung's terminal value moves from 0.27948523220464483 to
+    0.279485232201572 (3.07e-12, 55,355 ulps), so re-basing the certificate digest
+    is a lead decision. Under <code>vmap</code> the stream costs 14.3 times the
     base body at width 16, because every slot and every phase branch executes.
-    <code>tests/test_fixed_point.py</code> passes 45 of 45 in a fresh process. The
+    In fresh processes, <code>tests/test_fixed_point.py</code> passes 45 of 45, and
+    <code>tests/test_reduced_newton.py</code> fails only the four tests that fail at the base. The
     <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#single-site-krylov">detailed record</a>
     carries the counts, the control and the reduced-Newton run.
     This entry changes neither section state nor its followup.</p>

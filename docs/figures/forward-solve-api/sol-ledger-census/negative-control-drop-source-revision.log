@@ -1,0 +1,32 @@
+drop source_revision from the receipt writer
+07:43:40 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+.F..                                                                     [100%]
+=================================== FAILURES ===================================
+_______________ test_receipt_names_the_revision_it_was_solved_at _______________
+
+    def test_receipt_names_the_revision_it_was_solved_at():
+        """The committed receipt and the writer both carry a 40-hex source revision."""
+        ledger = _import_ledger()
+        payload = json.loads((RECEIPT / "sol-ledger-census.json").read_text())
+        _assert_receipt_revision(payload)
+>       _assert_receipt_revision(ledger.stamp_revision({}))
+
+tests/test_sol_ledger_render.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = {}
+
+    def _assert_receipt_revision(payload):
+        """Assert the receipt names the 40-hex revision it was solved at."""
+        revision = payload.get("source_revision")
+>       assert isinstance(revision, str), (
+            "the receipt must name the source revision it was solved at"
+        )
+E       AssertionError: the receipt must name the source revision it was solved at
+E       assert False
+E        +  where False = isinstance(None, str)
+
+tests/test_sol_ledger_render.py:64: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_sol_ledger_render.py::test_receipt_names_the_revision_it_was_solved_at
+1 failed, 3 passed in 22.68s

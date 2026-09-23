@@ -1604,6 +1604,7 @@
     ],
     "boundary_flux": 1.5405754225631885
   },
+  "source_revision": "3d8315dde084cd2af5bbc5e16052b143b411f7ee",
   "verdict": "the scrape-off-layer current is entirely full-cell labelling - no cell is geometrically cut - split 0.787252 in the 16 cells the fitted separatrix cuts and 0.212748 in the 15 fully open cells",
   "booking_line": {
     "receptor": "nova/equilibrium/observation.py:558 (current_ledger, common_sol)",

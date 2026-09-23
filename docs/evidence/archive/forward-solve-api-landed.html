@@ -1119,6 +1119,46 @@ is reported, not fixed. <strong>(3)</strong> The poloidal flux contour panels th
 of a terminal forward state are not rendered by this node: the census driver runs the row loop without
 the certificate painters, so this record carries a table and not a panel.</p>
 </section>
+<section id="sol-ledger-receipt-revision-and-gate">
+<h2>The SOL ledger census receipt states the revision it was solved at (2026-09-23)</h2>
+<p>Defect, found by the gate's own review (review 82 of
+<code>fsapi-sol-ledger-panel-draws-wall-and-nulls</code>): the committed census receipt carried no
+<code>source_revision</code>, so a reader could not tell which revision its numbers belonged to; the
+panel gate compared the drawn title against the receipt it had just rendered, so the split it asserted
+could not disagree with itself; and the gate and negative-control logs sat in an uncommitted directory.</p>
+<p>The writer now stamps the receipt from the tree the census runs in:
+<code>benchmarks/sol_ledger_current_census.py</code> records <code>git rev-parse HEAD</code> of that tree
+through <code>stamp_revision</code>. The gate (<code>tests/test_sol_ledger_render.py</code>) asserts the
+receipt names a 40-hex sha, that the writer's own stamp is one, and that the panel title's ampere split
+equals the receipt's <code>common_sol_split</code> to two decimals.</p>
+<p>The committed receipt was regenerated with the stamp by one <code>all_debug</code> CPU job (1276264
+<code>novacensus</code>, COMPLETED in 18:45; <code>TMPDIR=/tmp</code> in the submit and in the payload;
+the repository root environment's python invoked directly, never <code>uv</code> on the compute node).
+It carries <code>source_revision 3d8315dde084cd2af5bbc5e16052b143b411f7ee</code>, the revision the driver
+ran at. The artifact commit that carries the regenerated receipt changes no driver, so the stamp names
+the solve and not the artifact commit, and the two shas are not expected to be equal.</p>
+<p>Nothing moved in the re-solve. The split is 1072.7057484194079 A common SOL, 844.4895214595883 A in
+the 16 fitted-cut cells and 228.21622695981955 A in the 15 fully open cells, or 0.19576 percent of the
+547979.0199766452 A core, identical to the 2026-09-22 receipt to the last digit. This is a third
+regeneration landing on the same numbers, so the drift the earlier record noted between its own run and
+the run before it did not continue.</p>
+<p>The repair was reproduced before it was believed. Against the un-regenerated receipt the gate fails
+(1 failed, 3 passed) on the missing stamp, and that run is committed as
+<code>gate-before-regeneration.log</code>. After the regeneration the gate is green (4 passed), committed
+as <code>gate-sol-ledger-render.log</code>. The declared negative control repeats verbatim
+&#x27;drop source_revision from the receipt writer&#x27; on the first line of
+<code>negative-control-drop-source-revision.log</code>, applied with <code>SOL_LEDGER_DROP_REVISION=1</code>,
+and it was observed to fail: 1 failed, 3 passed, failing on the writer's own stamp dropped rather than on
+the committed receipt. The four logs sit beside the receipt under
+<code>docs/figures/forward-solve-api/sol-ledger-census/</code>. <code>tests/test_sol_ledger_render.py</code>
+is the only file importing the changed driver, so no other test is touched and no failure is added.</p>
+<figure><img src="/nova/figures/forward-solve-api/sol-ledger-census/sol-ledger-current.png"
+alt="Common-SOL ledger panel: the wall, the fitted boundary, the axis and the wall-contact nulls over grey solved flux contours, with the census ampere split in the title"
+width="1200"><figcaption>The panel the receipt renders, re-rendered in the regeneration that stamped
+<code>source_revision</code>: grey line contours of the solved flux, the black first wall closed over its
+unit collection, the red fitted boundary, the axis and the wall-contact nulls of the limited state, and
+the census ampere split in a fitted title.</figcaption></figure>
+</section>
 </main>
 </body>
 </html>

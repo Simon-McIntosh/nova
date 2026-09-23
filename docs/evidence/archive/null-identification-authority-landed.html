@@ -1742,6 +1742,42 @@ REPRO TypeError: missing a required keyword-only argument: 'carrier_identity'</c
   the declared refusal. Log: <code>logs/gate.log</code> under this run's directory. The focused render
   check reads a committed render receipt and imports nothing from the changed function, so it cannot
   move with this change; no full suite is claimed.</p>
+<section id="the-null-detection-knowledge-exchange-cites-record-paths">
+<h2>The null-detection knowledge exchange cites record paths</h2>
+<p>A knowledge-exchange report answering another facility's null-detection questions is written at
+<code>/home/ITER/mcintos/.config/reckon/crew/reports/ship-s13/nova-null-exchange.md</code>. Report-only: no source
+changed, so no gate and no receipt are claimed here; the report's citations are its evidence, and this
+anchor records what it maps and where each mapped record lives.</p>
+<p>The report answers three question groups — the shipped census design and its cost, return on experience,
+and six open issues — by pointing at records that already exist rather than restates them:</p>
+<ul>
+<li>the crossing-count mapping and its Kuijper citation: <code>nova/biot/null.py:143-161</code>;</li>
+<li>the per-cell quadratic-root admission and its containment rule:
+<code>nova/equilibrium/forward_operator.py:1077-1136</code> and <code>nova/biot/null.py:232-259</code>,
+adoption section <a href="#null-generator-adoption">#null-generator-adoption</a>
+(<code>docs/evidence/archive/plasma-cell-topology-authority-landed.html</code>);</li>
+<li>admitted-read device cost and the reduced read:
+<a href="#adopted-read-cost">#adopted-read-cost</a> and <a href="#adopted-read-cost-reduction">#adopted-read-cost-reduction</a>
+(<code>docs/evidence/archive/plasma-cell-topology-authority-landed.html</code>), receipts
+<code>docs/figures/plasma-cell-topology-authority/adopted-read-cost.json</code> and
+<code>.../adopted-read-cost-reduction.json</code>;</li>
+<li>the resolution receipt and its floors: <a href="#resolution-gate">#resolution-gate</a>;</li>
+<li>the overflow found by review and the all-origin fallback: <a href="#census-slot-exhaustion">#census-slot-exhaustion</a>;</li>
+<li>the finite class margin: <a href="#finite-class-margin">#finite-class-margin</a>;</li>
+<li>the operand partition and the settling cost: <a href="#the-operand-partition-is-the-first-stage-that-differs">#the-operand-partition-is-the-first-stage-that-differs</a>
+and <a href="#candidate-trip-doubling">#candidate-trip-doubling</a>;</li>
+<li>the raw-fit census versus its deduplicated representatives: <a href="#x-census-consistency">#x-census-consistency</a>;</li>
+<li>the boundary traced short of its saddle: <a href="#limited-boundary-wall-contact">#limited-boundary-wall-contact</a>
+and <a href="#the-persisted-boundary-follows-the-recorded-class">#the-persisted-boundary-follows-the-recorded-class</a>;</li>
+<li>the non-tautological comparator control, including the repaired bit-for-bit tautology:
+<a href="#accepted-unmoved-authorship">#accepted-unmoved-authorship</a>.</li>
+</ul>
+<p>One premise is corrected rather than answered: the cell-centred-and-vertex-centred twin-loop is not the
+shipped design — the vertex-centred census exists only as the measured spline-orbit prototype
+(<a href="#x-census-consistency">#x-census-consistency</a>), while the shipped admission is the per-cell
+own-node quadratic, with the cyclic sign count retained on spline-sampled ring orbits as a diagnostic that
+reports but no longer vetoes. The landing record for this exchange is in the plan at
+<code>docs/plans/null-identification-authority.html</code> section <code>s5</code>.</p>
 </section>
 </main>
 </body>

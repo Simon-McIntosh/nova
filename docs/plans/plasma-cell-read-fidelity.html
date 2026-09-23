@@ -17,8 +17,8 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-modified" content="2026-09-23">
 <meta name="plan-effort-hours" content="10.0">
-<meta name="plan-impl" content="0.82">
-<meta name="plan-version" content="45">
+<meta name="plan-impl" content="0.86">
+<meta name="plan-version" content="46">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -361,6 +361,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260923T084704160021-pcrf-first-step-degenerate-direction" data-who="reckon-ship" data-when="2026-09-23T09:14:10Z">
     <div class="r-comment-body"><p>degenerate direction refuted (Newton residual Jacobian well conditioned); collapse is globalization: seed several times the analytic flux amplitude, 0.30 Wb first step, selector takes a 12-cell support at the lowest merit; H200 job 1276502; review 92</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260923-map-fidelity-landed" data-who="reckon-ship" data-when="2026-09-23T16:25:00+00:00">
+    <div class="r-comment-body">pcrf-map-fidelity-at-the-analytic-state merged at 701a2f84c (tip 4a93d1e9e), with the codex review stored at 90. Three corrections and additions to the pre-review reading. First, the exact-mode wording: the review supports an exact-mode mismatch above the gate at every measured rung, but not a floor that resolution does not remove. The diverted sequence 0.45, 0.30, 0.12, 0.15, 0.12 is not monotonic and does not identify an asymptotic constant. So the claim is that exact mode passes at no measured rung. Second, the attribution is confirmed by recomputation over all twenty archives: zero non-finite moments, the exterior agreeing to 5.7e-14 Wb, and the plasma-response error equal to the whole map error. It is component attribution; the shared Green operator is not independently validated. Third, the lead's vertical question is answered at the rung where every solve collapsed. At 110 requested cells the exact support's current centroid sits 35.4 mm low and a vertical-gradient template explains 0.886 of the mismatch variance; at 300 cells it is 21.4 mm and 0.775. At 500 cells and above the vertical template explains 0.04 to 0.27 and radial fits dominate. So at the reduced rung the exact map displaces the plasma current vertically before any solve, and the route carries no vertical constraint to hold it. The review also found that the committed audit.py never requires the displacement control to have fired; that goes to the live-test node. The validity rule and ownership stand.</div>
 </div>
 </section>
 </main>

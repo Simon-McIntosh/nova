@@ -26,9 +26,9 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 <meta name="plan-blocks" content="millisecond-converged-solve">
-<meta name="plan-impl" content="0.64">
+<meta name="plan-impl" content="0.66">
 </head>
 <body>
   <main class="plan-doc">
@@ -424,6 +424,11 @@
     <div class="r-fu-body">Under vmap the lax.cond gating each of the 83 slots becomes a select, so every slot applies the operator: the stream is 14.3 times slower than the per-site base at width 16 (1.240 s against 0.086 s). Replace the fixed-capacity cond-gated scan with a while_loop (or a batched exit) that stops when every member is DONE. Gate: vmapped width-16 cost at or below the base's, the unbatched instruction count no higher than slice 1's 284,792, the certificate rows within the re-base bounds, zero added test failures.</div>
     <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
     </article>
+<article class="r-fu" data-id="f-fsri-ladder-census-counts-every-entry" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the recovery-ladder census count all five entries and fail on a renamed rung</h4>
+    <div class="r-fu-body"><p>From the review of the recovery-ladder census (72): benchmarks/recovery_ladder_census.py counts two of the five promotion and recovery entries defined in nova/equilibrium/fixed_point.py, so the report's 19.03 percent share is a lower bound. Its instrumented() also skips a counted path absent from the module, so a rename reads as zero executions rather than failing. The report names revision db634db22, one commit behind the tree that carries it. The census module benchmarks/recovery_ladder_telemetry.py was committed outside its fence and is accepted at promotion. Repair: count every entry, raise on a counted path that is absent, stamp the committing revision, and add a test that fails on a renamed rung. This is program-shape measurement, so it is not held by the map-fidelity gate. Benchmarks and tests only.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-fsri-nk-attempt-fence" data-who="coordinator" data-when="2026-09-19T13:55:00Z">
@@ -452,6 +457,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-fsri-20260922-ceiling-admits-the-clipped-hot-path" data-who="" data-when="">
     <div class="r-comment-body">Objective re-stated by the lead 2026-09-22 (decision production-clip-is-moment-preserving-and-coupling-frozen on cut-cell-current-attribution): the program-size ceiling this plan holds exists to admit the moment-preserving, Biot-interaction-frozen cell clips into the hot path. Every rung so far (597 to 146 to 126 to 88 MB) was measured in chord mode; the clipped mode's executable at HEAD is unmeasured since the swept support capacity was retired (3840 to 158 at 110 cells) and is the first node of the route-A path on the cut-cell plan (f-cca-measure-the-exact-mode-executable-at-head). If it sits over 100,000,000 bytes, the remedy is on the clip side first (exact-clip-moment-quadrature section 4: lower the clip and moment order, vmap the per-cell clip kernels so the lowered program carries one kernel body) and only then on this plan's section 3 (one traced evaluator body). Section 3 work touches fixed_point.py and reduced_newton.py and may run beside the census and the clip-side reduction, never beside the mode change in forward_operator.py and source.py.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260923T142626281818" data-who="" data-when="">
+    <div class="r-comment-body"></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-coord-20260922-s3-third-attempt-refused" data-who="reckon-ship" data-when="2026-09-22T12:10:00Z">
     <div class="r-comment-body"><p>Third attempt on the strongest lane (astra, run r-20260922T103934949557, promoted failed as a correct refusal). Design landed in the worktree, not merged: an explicit request enum with a fixed payload, one lax.switch live map and JVP body, request streams consumed by the fixed-point candidate scoring, reconciliation and the reduced residual and Jacobian columns; the Krylov solve stays outside the body. Measured on one all_debug allocation: optimised instruction counts fall from the banked baseline 342,055 and 344,858 to <strong>302,553 and 304,913</strong> at 300 and 1000 cells against the section ceiling 203,078 and 204,531, so the gate refuses; the per-request control grows to 532,366, confirming the mechanism. test_fixed_point 44 passed (42 at base); the reduced-Newton file aborts at exit 134 in both trees with one suite-only added failure (test_ladder_scoring_evaluates_one_map_per_accepted_step) that passes alone. Distinct caller streams still inline distinct bodies, so whole-solve request scheduling is the unimplemented remainder. The section contract said a third attempt routes to a stronger class; none exists, so the next step is a lead decision (followup below), not a fourth attempt.</p></div>

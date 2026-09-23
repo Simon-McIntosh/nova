@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-23T04:33:55",
+  "updated": "2026-09-23T04:43:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -271446,6 +271446,273 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260922T210948946758-pcrf-terminal-state-is-one-trip",
+        "plan": "plasma-cell-read-fidelity",
+        "section": "\u00a71",
+        "node": "pcrf-terminal-state-is-one-trip",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 317,
+                "cached_input_tokens": 429101,
+                "input_tokens": 429450,
+                "output_tokens": 3797,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 433247,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "aa768eb9-6037-4f5f-a22e-4c4ac0eef96b",
+            "session_id": "s18-fable-20260922"
+          },
+          "done_when": "a new module benchmarks/plasma_cell_terminal_state.py rebuilds the exact construction of tests/test_solve_path_census_inputs.py analytic_carrier (set_support_clip_mode exact, requested_cells -110, both cases diverted-single-null and weak-rotation-reactor-static, certificate._certificate_solve_request) and runs two arms per case in ONE GPU sbatch job (first --partition=betelgeuse --reservation=gpu_0003_grpA --account=grpa --gres=gpu:1 --cpus-per-task=4 --mem=64G --time=01:30:00; if squeue shows the job pending past 15 minutes, cancel and resubmit identically to --partition=titan --gres=gpu:1 and say so in the receipt; TMPDIR=/tmp exported in the submit environment and the payload, XLA_PYTHON_CLIENT_PREALLOCATE=false, PYTHONPATH=this worktree, the root interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python run directly, uv never invoked): arm one with policy active_set_steps=1 exactly as the test does, arm two with the certificate default policy; the receipt docs/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.json records per case and arm the per-trip residual history, converged flag, trip count, terminal axis and X-point, reference axis and X-point, the distance between terminal and reference X-point in metres, and the JAX platform; the one-trip arm reproduces residual 0.152 (diverted) and 0.0471 (reactor-static) within one percent; for the default-policy arm the receipt states converged true or false with its trip count and per-trip residuals, and when true the terminal X-point distance to the reference is at or below the certificate position bound named in benchmarks/solovev_certificate.py; the figure docs/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.png with an SVG beside it draws per case one row of three poloidal panels (analytic, one trip, default policy) with the committed nova.media painters: unfilled line contours on ONE shared level array per row, axis off, the wall units drawn with draw_wall over the unit collection, BOTH the analytic-state null set and that panel state null set drawn with draw_nulls in their own styles, and a caption per panel stating residual, converged flag and trip count; the analytic-state saddle cluster is measured: the three qualified saddle candidates within 0.15 m of the reference X-point are listed with their positions, their per-candidate uncertainty radius from _root_uncertainty at this pitch, the pairwise distances, and a boolean per pair stating whether the merge criterion (distance at or below the sum of the two uncertainties) holds, all in the receipt; the plan section text and the topology evidence record docs/evidence/archive/plasma-cell-topology-authority-landed.html gain one appended paragraph each (never rewriting existing lines: git diff HEAD on that record must show zero deleted lines) citing the new figure by project-absolute src and stating in one sentence that the earlier panel is the first-trip state; if the default-policy arm does not converge for a case, the appended paragraphs state that instead and name gs-absolute-accuracy-gates as the owner, and no panel is described as converged; the declared negative control is run and its log recorded; ruff check and format pass over the new module; the manifest is written before the wait with wait_probe as a JSON argument vector printing IN_QUEUE or LEFT_QUEUE and wait_terminal LEFT_QUEUE and its gate fields name the sbatch job",
+          "estimated_hours": 2.0,
+          "goal": "measure the exact-mode 132-cell solve of the topology terminal-polish figure in a one-trip arm beside a default-policy arm so the figure shows whichever state the receipt supports",
+          "id": "pcrf-terminal-state-is-one-trip",
+          "lane_declaration": {
+            "backend": "codex-astra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-22T21:09:54Z",
+            "read_at": "2026-09-22T21:09:55Z",
+            "resolved_backend": "codex-astra",
+            "utilisation_pct": 65.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T210948946758-pcrf-terminal-state-is-one-trip/manifest.md",
+          "negative_control": "run the default-policy arm with the active-set budget forced to one trip and observe the receipt assembly refuse the converged assertion for that arm",
+          "plan": "plasma-cell-read-fidelity",
+          "requested_backend": "codex-astra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/plasma_cell_terminal_state.py",
+            "docs/figures/plasma-cell-read-fidelity",
+            "docs/plans/plasma-cell-read-fidelity.html",
+            "docs/evidence/archive/plasma-cell-topology-authority-landed.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pcrf-terminal-state-is-one-trip",
+            "docs/evidence/archive/plasma-cell-read-fidelity-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s18-pcrf-a1",
+        "backend": "codex-astra",
+        "local": false,
+        "agent": {
+          "alias": "astra6",
+          "backend": "codex-astra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-6-astra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-22T21:10:36Z",
+        "completed_at": "2026-09-22T21:54:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2626,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2626,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "7eb21e74683888a8dcd337b7c3319dfa13f93dde",
+        "commits": [
+          "b67d45901a66c45313ffab3116f2d3aaa4cb3543",
+          "34479a5a7cd5de863b60da9b8f039d6005f36fe6",
+          "3d2222f9e091af165f74d052dfd57ab8fb897eb3"
+        ],
+        "changed_lines": {
+          "added": 37869,
+          "removed": 0,
+          "files": 10
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m benchmarks.plasma_cell_terminal_state --output docs/figures/plasma-cell-read-fidelity (betelgeuse job 1276138)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T210948946758-pcrf-terminal-state-is-one-trip/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T210948946758-pcrf-terminal-state-is-one-trip/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0caf4-d428-7910-a468-48aed979ee08",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11242112,
+            "cached_input_tokens_cumulative": 11242112,
+            "input_tokens": 11569687,
+            "input_tokens_cumulative": 11569687,
+            "output_tokens": 44305,
+            "output_tokens_cumulative": 44305,
+            "reasoning_output_tokens": 16175,
+            "reasoning_output_tokens_cumulative": 16175
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-22T21:54:22Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 67.0,
+              "resets_at": 1790575133,
+              "observed_at": "2026-09-22T21:54:22Z"
+            }
+          ],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "notional_cost_usd": "no_dated_rate",
+            "rate_basis": "no_dated_rate"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 13,
+            "evidence": 17,
+            "fit": 19,
+            "goal_fidelity": 18,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 86
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 11242112,
+          "cumulative_input_tokens": 22811799,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 60480
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-terminal-state-is-one-trip",
+          "session_id": "01a0caf4-d428-7910-a468-48aed979ee08",
+          "session_source": "stream",
+          "retained_at": "2026-09-22T21:54:22Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.0,
+        "impl_move": {
+          "plan": "plasma-cell-read-fidelity",
+          "at_dispatch": 0.0,
+          "at_complete": 0.0,
+          "verdict": "waived",
+          "reason": "the section stays open: the measurement refuted the candidate cause and the attribution node now owns the next step"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "lane_advisory": {
+          "backend": "codex-astra",
+          "burn_multiple": 2.786859678722831,
+          "cheaper_lane": {
+            "detail": "",
+            "lane": null,
+            "state": "not_evaluated"
+          },
+          "detail": "'codex-astra' is projected to exhaust at 2026-09-24T19:23:15Z, which is after this node's 3300s horizon ending 2026-09-22T22:04:55.449481+00:00",
+          "horizon_ends_at": "2026-09-22T22:04:55.449481+00:00",
+          "horizon_seconds": 3300,
+          "metered": true,
+          "observed_at": "2026-09-22T21:09:54Z",
+          "precedes_horizon": false,
+          "projected_exhaustion_at": "2026-09-24T19:23:15Z",
+          "resets_at": "2026-09-28T05:58:53Z",
+          "seconds_until_reset": 463738,
+          "state": "quiet",
+          "utilisation_pct": 65.0
+        },
+        "lane_declaration": {
+          "backend": "codex-astra",
+          "headroom": "known",
+          "metered": true,
+          "observed_at": "2026-09-22T21:09:54Z",
+          "read_at": "2026-09-22T21:09:55Z",
+          "resolved_backend": "codex-astra",
+          "utilisation_pct": 65.0
+        },
+        "lane_reading": {
+          "age_seconds": null,
+          "binding_observed": "unknown",
+          "detail": "backend declares no lane document",
+          "headroom": "unknown",
+          "mean_context": "unknown",
+          "observed_at": null,
+          "state": "unknown",
+          "suggested_shelf_life_seconds": null
+        },
+        "tool_steps": 182.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -271912,6 +272179,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3254
+    "_version": 3255
   }
 }

@@ -1,8 +1,8 @@
 {
   "status": "blocked",
-  "slurm_job_id": "1276305",
+  "slurm_job_id": "1276326",
   "slurm_partition": "titan",
-  "driver_sha256": "a22656a531142f9ac48eb801d559328732eadd42103e139f54dd81e4e7754570",
+  "driver_sha256": "ccb808c9696fb95f7d0d7976798e433f1b4c406f769ac30f52741ef2d0a510e0",
   "dispatch_base": "db2108e6adaca770cda30e39e052d9dcf20e18a9",
   "pre_repair_revision": "664ade0c32ac72ac3c37f34f711012f69fa68f5e",
   "negative_control_log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/negative-control.log",
@@ -13,7 +13,7 @@
       "clip_mode": "exact",
       "status": "not-measured",
       "trips": [],
-      "slurm_job_id": "1276305",
+      "slurm_job_id": "1276326",
       "devices": [
         "cuda:0"
       ],
@@ -4238,7 +4238,7 @@
           "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
           "semantic_key": "ef9fcf846f5e2260",
           "hit": true,
-          "lock_wait_seconds": 8.879229426383972e-06,
+          "lock_wait_seconds": 8.724629878997803e-06,
           "build_seconds": 0.0
         },
         "current_receipt": {
@@ -4252,61 +4252,1248 @@
         }
       },
       "realised_cells": 132,
-      "process_exit_status": 1,
-      "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/664ade0c3-exact.log",
-      "exception": "jax.debug.callback failed to find a local CPU device to place the inputs on. Make sure \"cpu\" is listed in --jax_platforms or the JAX_PLATFORMS environment variable.",
+      "analytic_shape": {
+        "flux_min_wb": -0.007035348039846904,
+        "flux_max_wb": 0.0056743930114831085,
+        "all_state_flux_min_wb": -0.010490890294917638,
+        "all_state_flux_max_wb": 0.0056743930114831085,
+        "rms_gradient_wb_per_m": 0.014380283505377275,
+        "o_points_inside_plasma_cells_rz_m": [
+          [
+            1.7869104924134627,
+            0.04615148216433451
+          ]
+        ],
+        "has_o_point_inside_plasma_cells": true,
+        "has_closed_contour": true,
+        "closed_contour_about_o_point": true,
+        "is_plasma": true,
+        "closed_contour_count": 109,
+        "closed_contours": [
+          {
+            "level_wb": 1.4586449562713037e-05,
+            "area_m2": 1.4904068351962614,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 2.801663857061149e-05,
+            "area_m2": 1.4841496884124168,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 7.894136354270298e-05,
+            "area_m2": 1.46598698187778,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00011388130152622904,
+            "area_m2": 1.4540384347801198,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00013610602548861514,
+            "area_m2": 1.4464650115388658,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00020720159968597474,
+            "area_m2": 1.4223933151038197,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00021317615348974417,
+            "area_m2": 1.4203812513114054,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00028593852941765204,
+            "area_m2": 1.3960320952572978,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00031247100545326017,
+            "area_m2": 1.387285001578269,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0003596222907071309,
+            "area_m2": 1.3719696116199676,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00041176585741677617,
+            "area_m2": 1.3553797354984782,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0004171158269236088,
+            "area_m2": 1.3537003007548394,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0005110607093802913,
+            "area_m2": 1.3243992702082,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0005862734238085061,
+            "area_m2": 1.3010527246192796,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0006103555613438073,
+            "area_m2": 1.29359777449304,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0007047258207639176,
+            "area_m2": 1.2645089615411362,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0007096504133073233,
+            "area_m2": 1.2629994474247435,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0007446249880943579,
+            "area_m2": 1.252315469324924,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0008089452652708384,
+            "area_m2": 1.2328288667878722,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.000851697907041264,
+            "area_m2": 1.2199883162892464,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0008914069515052203,
+            "area_m2": 1.20814017707491,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0009082401172343553,
+            "area_m2": 1.2031387619879723,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0009753092750483385,
+            "area_m2": 1.183248901325558,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0010075349691978704,
+            "area_m2": 1.1737202568692284,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0010219740326166955,
+            "area_m2": 1.169458044318728,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0011068298211613856,
+            "area_m2": 1.1444963549240967,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.001182307181685563,
+            "area_m2": 1.1224116420533585,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0012061246731249024,
+            "area_m2": 1.1154696211200954,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0013054195250884176,
+            "area_m2": 1.0866348920651279,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0013084819834288158,
+            "area_m2": 1.0857486734133948,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0014035399350213482,
+            "area_m2": 1.0583295094163383,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0014047143770519327,
+            "area_m2": 1.0579922861146929,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0015040092290154496,
+            "area_m2": 1.0297215369607753,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0015533158460987997,
+            "area_m2": 1.015804970909218,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0016033040809789647,
+            "area_m2": 1.0017467778194953,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.001647908730460396,
+            "area_m2": 0.9892440712412736,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0017025989329424798,
+            "area_m2": 0.9739664347196515,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0017519695599646126,
+            "area_m2": 0.9602196405438022,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0018018937849059967,
+            "area_m2": 0.9463559811598274,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0019011886368695118,
+            "area_m2": 0.9189918881836298,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00194117544088171,
+            "area_m2": 0.9080509198183997,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.002000483488833027,
+            "area_m2": 0.8919080284628453,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.002099778340796544,
+            "area_m2": 0.8651186136102414,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.002100712761034082,
+            "area_m2": 0.8648684228348591,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.002199073192760059,
+            "area_m2": 0.8386554421842998,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0022014147776370295,
+            "area_m2": 0.8380336194013902,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.002298368044723574,
+            "area_m2": 0.8123694749099721,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0023574346192486995,
+            "area_m2": 0.7968130180971078,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.002397662896687091,
+            "area_m2": 0.7862533941602775,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0024758323437111445,
+            "area_m2": 0.7658093211157144,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.002496957748650606,
+            "area_m2": 0.7602996998873932,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0025749091165971076,
+            "area_m2": 0.7400022624855402,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0025962526006141212,
+            "area_m2": 0.7344556620597796,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.002695547452577638,
+            "area_m2": 0.7087354928214087,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0027453396380415973,
+            "area_m2": 0.695883278316112,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0027948423045411532,
+            "area_m2": 0.6831578929973618,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0027958486775158204,
+            "area_m2": 0.6828996664987995,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0028500918353994557,
+            "area_m2": 0.6689321703890199,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0028941371565046684,
+            "area_m2": 0.6576044975257518,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0029934320084681852,
+            "area_m2": 0.6320934647806904,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.003047082311251756,
+            "area_m2": 0.6183915182968187,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0030927268604317004,
+            "area_m2": 0.6067900456391551,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0031920217123952155,
+            "area_m2": 0.5817319929724858,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0032791717278284564,
+            "area_m2": 0.5599210039207145,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0032913165643587323,
+            "area_m2": 0.556890939584586,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.003359341611925009,
+            "area_m2": 0.5399755584713877,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0033906114163222475,
+            "area_m2": 0.5322396231296674,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0034664602614837663,
+            "area_m2": 0.5135524629746933,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0034899062682857626,
+            "area_m2": 0.5077999220815238,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0035892011202492795,
+            "area_m2": 0.48359047097245167,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0036867579046090627,
+            "area_m2": 0.4600076271539358,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0036884959722127946,
+            "area_m2": 0.45958882103938226,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0037877908241763097,
+            "area_m2": 0.435747249035928,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.003839485446519701,
+            "area_m2": 0.42339571019014477,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0038870856761398266,
+            "area_m2": 0.4120401862243349,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0039408957760467414,
+            "area_m2": 0.39919898285082267,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.003986380528103342,
+            "area_m2": 0.3882822578304405,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00401932500267924,
+            "area_m2": 0.3803172048802541,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004085675380066857,
+            "area_m2": 0.3642271923725493,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004112580087262933,
+            "area_m2": 0.357666992789877,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004184970232030374,
+            "area_m2": 0.34011522833939495,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004284265083993889,
+            "area_m2": 0.31644417980953043,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00429361881088948,
+            "area_m2": 0.3142347840366087,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004383559935957406,
+            "area_m2": 0.2931462399247918,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004482854787920921,
+            "area_m2": 0.2701881490159075,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004542792624510525,
+            "area_m2": 0.25643703922787936,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004582149639884436,
+            "area_m2": 0.24741401287215348,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00463977658130797,
+            "area_m2": 0.23419595318428227,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004681444491847953,
+            "area_m2": 0.22464495095958079,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004736479331800707,
+            "area_m2": 0.2120227339363171,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004780739343811468,
+            "area_m2": 0.20187025838460254,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004880034195774983,
+            "area_m2": 0.17888873951624268,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.004894467349014001,
+            "area_m2": 0.17553533106681182,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0049793290477385,
+            "area_m2": 0.1558067243798017,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.005063128123015809,
+            "area_m2": 0.13675807220925315,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.005078623899702015,
+            "area_m2": 0.13324086468127014,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00517791875166553,
+            "area_m2": 0.1107548943159658,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.005197924904727883,
+            "area_m2": 0.10623828076786261,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.005277213603629047,
+            "area_m2": 0.08866445757725272,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.005376508455592562,
+            "area_m2": 0.06709674018663642,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.00539488248947765,
+            "area_m2": 0.0629806120500864,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.005475803307556077,
+            "area_m2": 0.044035346775781366,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.005480808805212114,
+            "area_m2": 0.042860723881570376,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.0055350587933141685,
+            "area_m2": 0.030241445225985222,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.005575098159519594,
+            "area_m2": 0.021736167710143688,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.005649446462776138,
+            "area_m2": 0.00670227130868338,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.005660885229722336,
+            "area_m2": 0.0028314825296172907,
+            "encloses_o_points": [
+              true
+            ]
+          },
+          {
+            "level_wb": 0.005663427177932601,
+            "area_m2": 0.0018854195694443503,
+            "encloses_o_points": [
+              false
+            ]
+          },
+          {
+            "level_wb": 0.005667451138549051,
+            "area_m2": 0.0007555757857169651,
+            "encloses_o_points": [
+              false
+            ]
+          }
+        ],
+        "tested_levels_wb": [
+          -0.006936053187883388,
+          -0.006903277271823118,
+          -0.006836758335919873,
+          -0.006737463483956357,
+          -0.006638168631992841,
+          -0.006538873780029325,
+          -0.00643957892806581,
+          -0.006340284076102294,
+          -0.006240989224138778,
+          -0.006221015954050097,
+          -0.0061416943721752625,
+          -0.0060423995202117465,
+          -0.0059431046682482305,
+          -0.005843809816284715,
+          -0.005814232642648947,
+          -0.005744514964321199,
+          -0.005645220112357683,
+          -0.005545925260394168,
+          -0.005446630408430652,
+          -0.005347335556467136,
+          -0.0052831616202893275,
+          -0.005248040704503621,
+          -0.005148745852540105,
+          -0.005049451000576589,
+          -0.004950156148613074,
+          -0.004920024256067355,
+          -0.004850861296649558,
+          -0.004751566444686042,
+          -0.0047434969900633644,
+          -0.004652271592722527,
+          -0.004604591685888768,
+          -0.004552976740759011,
+          -0.004453681888795495,
+          -0.00435438703683198,
+          -0.004255092184868464,
+          -0.004232410448809385,
+          -0.004155797332904948,
+          -0.004084428418796149,
+          -0.0040565024809414325,
+          -0.003957207628977916,
+          -0.003865291246491492,
+          -0.0038579127770144005,
+          -0.003758617925050885,
+          -0.003659323073087369,
+          -0.0035600282211238534,
+          -0.0035504373201136873,
+          -0.0034706703588291785,
+          -0.0034607333691603374,
+          -0.003361438517196822,
+          -0.003263394833577791,
+          -0.0032621436652333063,
+          -0.003179314558810757,
+          -0.0031628488132697903,
+          -0.0030980285121568947,
+          -0.0030635539613062743,
+          -0.003008696389924286,
+          -0.002964259109342759,
+          -0.0029367066930464677,
+          -0.002864964257379243,
+          -0.0028602031243995557,
+          -0.002765669405415727,
+          -0.0027587367708584863,
+          -0.0027250519734928454,
+          -0.0026684598271752933,
+          -0.002666374553452212,
+          -0.0026040567182320034,
+          -0.002567079701488696,
+          -0.002514909821506314,
+          -0.00246778484952518,
+          -0.0024251276669541317,
+          -0.0024003439139640113,
+          -0.002368489997561665,
+          -0.002356937389263951,
+          -0.0023252324892179647,
+          -0.0022906308895452696,
+          -0.002271118989633181,
+          -0.002269195145598149,
+          -0.0022254615363262267,
+          -0.002169900293634633,
+          -0.002153136008293165,
+          -0.0021288409629698097,
+          -0.0020706054416711177,
+          -0.0020397674993855343,
+          -0.0019992612638646675,
+          -0.0019713105897076018,
+          -0.0019577403058554884,
+          -0.0019329580968796545,
+          -0.0019026401216827372,
+          -0.0018720157377440858,
+          -0.0018413097379486939,
+          -0.0018143315817405014,
+          -0.0017727208857805706,
+          -0.0017544271637478857,
+          -0.001729263542982846,
+          -0.0017018059924616279,
+          -0.0016741431715415938,
+          -0.0016734260338170546,
+          -0.0016493144379521839,
+          -0.0016246229768815891,
+          -0.001598930392076534,
+          -0.0015795057755314333,
+          -0.0015741311818535386,
+          -0.0015258903812984978,
+          -0.0014748363298900235,
+          -0.0014287057958593029,
+          -0.0014006267964271043,
+          -0.0013820902510457938,
+          -0.0013755414779265075,
+          -0.0013472582740831135,
+          -0.0013149541703660244,
+          -0.0012988387591260306,
+          -0.0012762466259629915,
+          -0.0012162330714286084,
+          -0.0011858120808194172,
+          -0.0011769517739994755,
+          -0.001149435697197895,
+          -0.0010964695843266796,
+          -0.0010776569220359604,
+          -0.0010664054158303913,
+          -0.0010291394843585074,
+          -0.0010017513739424607,
+          -0.0009800426570593193,
+          -0.0009783620700724444,
+          -0.0009591565679092709,
+          -0.0008917839332791176,
+          -0.0008790672181089284,
+          -0.0008387687499470369,
+          -0.0008066170291187929,
+          -0.0007797723661454132,
+          -0.0007565884590171898,
+          -0.0007268829792525596,
+          -0.0006875092775893292,
+          -0.0006804775141818972,
+          -0.0006541203665311115,
+          -0.0006348093801676144,
+          -0.0005811826622183812,
+          -0.000577959499218165,
+          -0.000538220047933365,
+          -0.0004818878102548661,
+          -0.00047672816210617787,
+          -0.0004335741937497304,
+          -0.0003825929582913501,
+          -0.00038229558236356297,
+          -0.0003450215342921885,
+          -0.0002964942944958735,
+          -0.0002832981063278341,
+          -0.0002081505548127064,
+          -0.00018400325436431896,
+          -0.0001492481154585612,
+          -8.470840240080296e-05,
+          -4.080242203977006e-05,
+          1.4586449562713037e-05,
+          2.801663857061149e-05,
+          7.894136354270298e-05,
+          0.00011388130152622904,
+          0.00013610602548861514,
+          0.00020720159968597474,
+          0.00021317615348974417,
+          0.00028593852941765204,
+          0.00031247100545326017,
+          0.0003596222907071309,
+          0.00041176585741677617,
+          0.0004171158269236088,
+          0.0005110607093802913,
+          0.0005862734238085061,
+          0.0006103555613438073,
+          0.0007047258207639176,
+          0.0007096504133073233,
+          0.0007446249880943579,
+          0.0008089452652708384,
+          0.000851697907041264,
+          0.0008914069515052203,
+          0.0009082401172343553,
+          0.0009753092750483385,
+          0.0010075349691978704,
+          0.0010219740326166955,
+          0.0011068298211613856,
+          0.001182307181685563,
+          0.0012061246731249024,
+          0.0013054195250884176,
+          0.0013084819834288158,
+          0.0014035399350213482,
+          0.0014047143770519327,
+          0.0015040092290154496,
+          0.0015533158460987997,
+          0.0016033040809789647,
+          0.001647908730460396,
+          0.0017025989329424798,
+          0.0017519695599646126,
+          0.0018018937849059967,
+          0.0019011886368695118,
+          0.00194117544088171,
+          0.002000483488833027,
+          0.002099778340796544,
+          0.002100712761034082,
+          0.002199073192760059,
+          0.0022014147776370295,
+          0.002298368044723574,
+          0.0023574346192486995,
+          0.002397662896687091,
+          0.0024758323437111445,
+          0.002496957748650606,
+          0.0025749091165971076,
+          0.0025962526006141212,
+          0.002695547452577638,
+          0.0027453396380415973,
+          0.0027948423045411532,
+          0.0027958486775158204,
+          0.0028500918353994557,
+          0.0028941371565046684,
+          0.0029934320084681852,
+          0.003047082311251756,
+          0.0030927268604317004,
+          0.0031920217123952155,
+          0.0032791717278284564,
+          0.0032913165643587323,
+          0.003359341611925009,
+          0.0033906114163222475,
+          0.0034664602614837663,
+          0.0034899062682857626,
+          0.0035892011202492795,
+          0.0036867579046090627,
+          0.0036884959722127946,
+          0.0037877908241763097,
+          0.003839485446519701,
+          0.0038870856761398266,
+          0.0039408957760467414,
+          0.003986380528103342,
+          0.00401932500267924,
+          0.004085675380066857,
+          0.004112580087262933,
+          0.004184970232030374,
+          0.004284265083993889,
+          0.00429361881088948,
+          0.004383559935957406,
+          0.004482854787920921,
+          0.004542792624510525,
+          0.004582149639884436,
+          0.00463977658130797,
+          0.004681444491847953,
+          0.004736479331800707,
+          0.004780739343811468,
+          0.004880034195774983,
+          0.004894467349014001,
+          0.0049793290477385,
+          0.005063128123015809,
+          0.005078623899702015,
+          0.00517791875166553,
+          0.005197924904727883,
+          0.005277213603629047,
+          0.005376508455592562,
+          0.00539488248947765,
+          0.005475803307556077,
+          0.005480808805212114,
+          0.0055350587933141685,
+          0.005575098159519594,
+          0.005649446462776138,
+          0.005660885229722336,
+          0.005663427177932601,
+          0.005667451138549051
+        ],
+        "method": "unfilled contours of the piecewise-linear nodal interpolant; loops must close inside wall units and enclose an independently qualified O-point in the cell mesh",
+        "qualification": "finite-resolution level census, not a continuum absence theorem"
+      },
+      "shape_controls": {
+        "analytic": true,
+        "linear_ramp": false
+      },
       "terminal_residual": null,
       "trip_count": null,
       "saddle_loss_trip": null,
-      "nonfinite_moments_per_trip": null
+      "first_non_plasma_state": null,
+      "first_closed_contour_invariant_violation": null,
+      "interruption": "SLURM cancellation before first physical active-set capture",
+      "seed_partial": {
+        "state_file": "664ade0c3-exact-seed.npz",
+        "lambda_amplitude": 0.9792557836607928,
+        "target_plasma_current_a": 37221.46593682619,
+        "unscaled_net_support_current_a": 38009.95261695533,
+        "unscaled_current_derivation": "target divided by the native constructor seed amplitude; no captured-trip evaluation",
+        "nonfinite_moment_count": 0,
+        "moment_element_count": 396,
+        "moment_finiteness_source": "three constructor seed-moment arrays, each 132 binary64 entries, all finite in the saved provenance",
+        "scaling_execution_count": null,
+        "shape": null,
+        "admitted_nulls": null,
+        "qualification": "partial constructor evidence; runtime scaling count and seed contour diagnostic were not persisted before cancellation"
+      }
     },
     {
       "revision": "db2108e6adaca770cda30e39e052d9dcf20e18a9",
       "clip_mode": "exact",
       "status": "not-measured",
-      "reason": "Not started after pre-repair arm callback failure.",
+      "reason": "Not started before cancellation of the pre-repair solve.",
       "terminal_residual": null,
       "trip_count": null,
       "saddle_loss_trip": null,
-      "nonfinite_moments_per_trip": null
+      "first_non_plasma_state": null,
+      "first_closed_contour_invariant_violation": null
     },
     {
       "revision": "db2108e6adaca770cda30e39e052d9dcf20e18a9",
       "clip_mode": "chord",
       "status": "not-measured",
-      "reason": "Not started after pre-repair arm callback failure.",
+      "reason": "Not started before cancellation of the pre-repair solve.",
       "terminal_residual": null,
       "trip_count": null,
       "saddle_loss_trip": null,
-      "nonfinite_moments_per_trip": null
+      "first_non_plasma_state": null,
+      "first_closed_contour_invariant_violation": null
     }
   ],
-  "sacct_state": "FAILED",
-  "sacct_exit_code": "1:0",
-  "elapsed": "00:10:48",
+  "lambda_static_trace": {
+    "source_revisions": [
+      "db2108e6adaca770cda30e39e052d9dcf20e18a9",
+      "664ade0c32ac72ac3c37f34f711012f69fa68f5e"
+    ],
+    "route": [
+      {
+        "file": "benchmarks/solovev_certificate.py",
+        "line": 2221,
+        "site": "_measure constructs production seed and target"
+      },
+      {
+        "file": "benchmarks/solovev_certificate.py",
+        "line": 2241,
+        "site": "_certificate_solve_request(profile, seed, target_current, solovev identity)"
+      },
+      {
+        "file": "benchmarks/solovev_certificate.py",
+        "line": 2133,
+        "site": "_certificate_solve_request sets explicit seed, target_current and 1e-12 tolerances"
+      },
+      {
+        "file": "nova/equilibrium/solve_request.py",
+        "line": 235,
+        "site": "policy default newton_krylov; current_pin=True at line 244"
+      },
+      {
+        "file": "nova/equilibrium/forward.py",
+        "line": 2524,
+        "site": "_solve_imposed_request guards current_pin and passes target_current to active.solve at 2558"
+      },
+      {
+        "file": "nova/equilibrium/forward.py",
+        "line": 2689,
+        "site": "solve selects accelerated newton_krylov route"
+      },
+      {
+        "file": "nova/equilibrium/forward.py",
+        "line": 1895,
+        "site": "_solve_accelerated passes target_current to compiled history program"
+      },
+      {
+        "file": "nova/equilibrium/forward.py",
+        "line": 1952,
+        "site": "_accelerated_history_program binds ordinary and shadowed maps with target_current"
+      },
+      {
+        "file": "nova/equilibrium/forward.py",
+        "line": 2018,
+        "site": "compiled solve invokes fixed_point.newton_krylov"
+      },
+      {
+        "file": "nova/equilibrium/forward_operator.py",
+        "line": 4028,
+        "site": "traced_flux_map passes active_target to active.internal"
+      },
+      {
+        "file": "nova/equilibrium/forward_operator.py",
+        "line": 4082,
+        "site": "traced_flux_map_with_shadow passes active_target to active.internal"
+      },
+      {
+        "file": "nova/equilibrium/forward_operator.py",
+        "line": 3829,
+        "site": "internal selects normalised_current_moments when target_current is not None"
+      },
+      {
+        "file": "nova/equilibrium/forward_operator.py",
+        "line": 3652,
+        "site": "normalised_current_moments forms moments, divides target by net current, then scales"
+      },
+      {
+        "file": "nova/equilibrium/forward_operator.py",
+        "line": 3619,
+        "site": "current_normalisation_amplitude enforces finite, same-sign and amplitude-band guards"
+      },
+      {
+        "file": "nova/equilibrium/forward_operator.py",
+        "line": 3612,
+        "site": "scaled_current_moments multiplies each integrated moment by amplitude"
+      }
+    ],
+    "bypasses_or_guards": [
+      "Only target_current=None takes the unscaled internal branch; this request passes a finite nonzero target.",
+      "current_pin=False together with a non-null target raises ValueError before the solve; it does not silently disable scaling.",
+      "The frozen-partition shortcut in traced_flux_map_with_shadow is attached only when target_current is None; it is not attached for this construction.",
+      "No constraint pairs are supplied, so the augmented route is not selected.",
+      "Exact versus chord and linear versus point moments change integration, but a non-null target still selects normalization.",
+      "The admissible amplitude band is [1e-6,1e6] in nova/equilibrium/source.py:116; inadmissible eager calls raise and traced calls return NaN, rather than bypass scaling."
+    ],
+    "count_semantics": "Ordered callbacks in the actual scaled_current_moments branch count runtime executions between native active-set carries, including trial-map and primal linearisation evaluations. Per-state amplitudes and net currents are separately re-evaluated from captured flux; seed execution count is one explicitly labelled native map replay."
+  },
+  "gpu_callback_control": {
+    "captured": [
+      7.0
+    ],
+    "jvp_vmap_captured": [
+      2.0,
+      3.0
+    ],
+    "result": 8.0,
+    "passed": true,
+    "gpu_devices": [
+      {
+        "device": "cuda:0",
+        "kind": "Tesla P100-PCIE-16GB"
+      }
+    ],
+    "cpu_devices": [
+      "cpu:0"
+    ],
+    "slurm_job_id": "1276326"
+  },
+  "sacct_state": "CANCELLED by 39486",
+  "sacct_exit_code": "0:0",
+  "batch_exit_code": "0:15",
+  "elapsed": "00:04:10",
   "node": "98dci4-gpu-0002",
-  "jax_platforms": "cuda",
+  "start": "2026-09-23T09:17:24",
+  "end": "2026-09-23T09:21:34",
+  "jax_platforms": "cuda,cpu",
   "verdict": null,
   "verdict_status": "not-measured",
-  "blocker": "jax.debug.callback failed to find a local CPU device to place the inputs on. Make sure \"cpu\" is listed in --jax_platforms or the JAX_PLATFORMS environment variable.",
-  "resume_environment": {
-    "JAX_PLATFORMS": "cuda,cpu"
-  },
-  "stop_reason": "Second unsuccessful instrument attempt; numerical retries stopped at the dispatch repeated-failure fence.",
-  "prior_attempt": {
-    "job_id": "1276299",
-    "sacct_state": "CANCELLED by 39486",
-    "elapsed": "00:12:05",
-    "reason": "Observer targeted unused reduced-Newton host loop."
+  "blocker": "The one authorized retry was cancelled by uid 39486 before its first physical trip capture; no cancellation was issued by this worker in this retry.",
+  "log_tail": [
+    "GPU_CALLBACK_CONTROL_PASS captured=7 before any solve arm",
+    "BUILD 664ade0c32ac72ac3c37f34f711012f69fa68f5e exact",
+    "SOLVE route=newton_krylov",
+    "slurmstepd: error: *** JOB 1276326 ON 98dci4-gpu-0002 CANCELLED AT 2026-09-23T09:21:34 ***"
+  ],
+  "lambda_static_confirmation": {
+    "armed": true,
+    "current_pin": true,
+    "target_current_a": 37221.46593682619,
+    "plasma_cells_enabled": true,
+    "proof": "saved production construction and file/line trace",
+    "per_trip_runtime_execution_proven": false
   },
   "acceptance": {
     "physical_arms_measured": 0,
     "physical_arms_required": 3,
-    "captured_trips": 0,
+    "captured_physical_trips": 0,
+    "saved_seed_states": 1,
     "png_panels": 0,
     "svg_panels": 0,
-    "reading_rule_controls_passed": true,
-    "real_krylov_observer_control_passed": true,
+    "gpu_callback_control_passed": true,
+    "shape_controls_passed": true,
     "physical_reading_rule_applied": false
   }
 }

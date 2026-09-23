@@ -1,10 +1,4 @@
-revision=d164857fef0ce3e8f911a6bcc0447679d3b780a1 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels command=sacct -j 1276299,1276305 --format=JobID,State,Elapsed,ExitCode,NodeList -n -P
-1276299|CANCELLED by 39486|00:12:05|0:0|98dci4-gpu-0002
-1276299.batch|CANCELLED|00:12:06|0:15|98dci4-gpu-0002
-1276299.extern|COMPLETED|00:12:05|0:0|98dci4-gpu-0002
-1276299.0|COMPLETED|00:00:00|0:0|98dci4-gpu-0002
-1276299.1|COMPLETED|00:00:00|0:0|98dci4-gpu-0002
-1276305|FAILED|00:10:48|1:0|98dci4-gpu-0002
-1276305.batch|FAILED|00:10:48|1:0|98dci4-gpu-0002
-1276305.extern|COMPLETED|00:10:48|0:0|98dci4-gpu-0002
-1276305.0|COMPLETED|00:00:12|0:0|98dci4-gpu-0002
+revision=638c996ee7bf33aa669be930c8912380e39ab784 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels command=sacct -j 1276326 --format=JobID,State,Elapsed,ExitCode,Start,End,NodeList -n -P
+1276326|CANCELLED by 39486|00:04:10|0:0|2026-09-23T09:17:24|2026-09-23T09:21:34|98dci4-gpu-0002
+1276326.batch|CANCELLED|00:04:11|0:15|2026-09-23T09:17:24|2026-09-23T09:21:35|98dci4-gpu-0002
+1276326.extern|COMPLETED|00:04:10|0:0|2026-09-23T09:17:24|2026-09-23T09:21:34|98dci4-gpu-0002

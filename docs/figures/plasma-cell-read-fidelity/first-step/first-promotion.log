@@ -1,0 +1,4 @@
+revision=34c591907abe69e8b041c2e4b06abed5be1df706 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-first-step-degenerate-direction command=python derive-first-promotion.py
+{"job": "1276502", "event": 10, "norm_wb": 0.3005112388110497, "support_shrink_projection_wb": -0.0007440294997033275, "support_shrink_cosine": -0.002475879114029228, "predicted_merit_decrease": 0.32076273168625447, "actual_merit_decrease": 0.8778672985255654, "model_distrusted": false}
+PASS: first accepted Newton displacement projected on all four saved seed spectra
+Effective command: env TMPDIR=/tmp OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-first-step-degenerate-direction srun --jobid=1276502 --overlap --ntasks=1 --cpus-per-task=1 /home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/plasma-cell-read-fidelity/first-step/derive-first-promotion.py

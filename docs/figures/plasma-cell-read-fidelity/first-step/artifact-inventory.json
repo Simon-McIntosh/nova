@@ -1,0 +1,672 @@
+[
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/accepted-trip.png",
+    "bytes": 220553,
+    "sha256": "1fb6672af70a5c9d44b183828442e8dcb521d597bfda7c7d144b0b05f91405a7"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/accepted-trip.svg",
+    "bytes": 144390,
+    "sha256": "80ab651eca6082a50f446fff0f9001f317adbd8757e82955f3a62cb4777f9c3f"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/artifact-audit.log",
+    "bytes": 579,
+    "sha256": "b20fbec291440764e7817ddef6acfb05b4d9ba9678de7332b057f6c6d9ce10b7"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/derive-first-promotion.py",
+    "bytes": 2676,
+    "sha256": "57fc904c5f77141190675d6730e2fe3b9e73c1d31fe33c87b46b1d9030c28827"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00000.npz",
+    "bytes": 6612,
+    "sha256": "6397a75f926fbb06ce6d0da3840676d2eb50112120e5df27577f86368853a157"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00001.npz",
+    "bytes": 12194,
+    "sha256": "fd4d74eb0bfca52a10e9ace47905bad9d59cd3e7635132b15f7f6979fd73fc73"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00002.npz",
+    "bytes": 12194,
+    "sha256": "2efa991574ebea612dda96d2f9dda00b3ce919aa2edc51a23706812e2a61afce"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00003.npz",
+    "bytes": 12194,
+    "sha256": "af970cd5a3fdb937aa8cb60c2011340db13cbb7ee8c219bce8ce24cb117218d9"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00004.npz",
+    "bytes": 12194,
+    "sha256": "e5d641938a775f0c7d1ba71e6376864c50514017ad9005ab6ae9f52d50b04d89"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00005.npz",
+    "bytes": 12194,
+    "sha256": "e3b487646838dba5db31d1a8fd48aac5f53e4ea9a3ad71fad48f8fc219b201c3"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00006.npz",
+    "bytes": 12194,
+    "sha256": "ca6bd5f7fc5df4ee83b2b41cb080df50e08921b916913ebfa6ab553866666fc7"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00007.npz",
+    "bytes": 12194,
+    "sha256": "ddbbfcbc94000aabdff0d1465728cfd88f4b97401550e9088f8ecb22562eed33"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00008.npz",
+    "bytes": 38501,
+    "sha256": "61a5a730557468da984508f3b8f1539b5e4e688fe9f77aa0b4324a55080252a1"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00009.npz",
+    "bytes": 6355,
+    "sha256": "ac8b1353e1efba28a358e3fb6fe1b20ba588598492fab4ce34858ab6c1f8e7c5"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00010.npz",
+    "bytes": 19536,
+    "sha256": "74dbd0c65bbcc48e6e8ccfafb160942ffeaefec4d902332a3cc4582f901aeacc"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00011.npz",
+    "bytes": 12194,
+    "sha256": "3e1c7bd04cb7902446cda6c6c86673b23c6973787be36f18255c9127fbbb1581"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00012.npz",
+    "bytes": 12194,
+    "sha256": "8b2ce8f60b634583c3a4cb87168d791e5774095ac957d2a5b75dd2a65ddddea3"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00013.npz",
+    "bytes": 12194,
+    "sha256": "9a3d5cc039b7627aac3018e7578c55a96c864b83e32f87ad5a9d77c42987137a"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00014.npz",
+    "bytes": 12194,
+    "sha256": "66931ce6cd4b0d85f72fa6f8ca54d85d947231925fd6145b8fe8be7e409c90b0"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00015.npz",
+    "bytes": 12194,
+    "sha256": "07160df897c0f8cf35feafd5cd9085a89a6175a48fc4e72a82b660d90716c1d6"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00016.npz",
+    "bytes": 12194,
+    "sha256": "838f626d770a106e671adeeaca6ecba6d8f02d2082bd84ecfe61d4b914e05073"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00017.npz",
+    "bytes": 12194,
+    "sha256": "e5d641938a775f0c7d1ba71e6376864c50514017ad9005ab6ae9f52d50b04d89"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00018.npz",
+    "bytes": 38501,
+    "sha256": "189c39fa5c47087fb10dd6db872158bfbda612a3b24a7c47b82e0caf7fcee1bd"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00019.npz",
+    "bytes": 6355,
+    "sha256": "3638117510f1241bb3babcc0c8d414d979be9016746563605d7314a98d88b39f"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00020.npz",
+    "bytes": 19536,
+    "sha256": "fb1b0729dff2ce4ec9c23ea3d7dead1d7392650643371e5a84cd3a130b101ecd"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00021.npz",
+    "bytes": 12194,
+    "sha256": "639bb56e5512a089353811a492473c32d6dbbb929d57cf0aeef67672369c88ff"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00022.npz",
+    "bytes": 12194,
+    "sha256": "ffdebb82d857f1f7ada513e83aa63f6959b7279026e01cdd9895b1ff40f896be"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00023.npz",
+    "bytes": 12194,
+    "sha256": "194c3d63b875f8d24354b4e0432ecfdf38d0f76fd38c501148501931a01fb15d"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00024.npz",
+    "bytes": 12194,
+    "sha256": "a8494c8d4a4a99598fbd442268a2bc673f8d0f9d2ac2a6e5cf2386241eb98517"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00025.npz",
+    "bytes": 12194,
+    "sha256": "07d26383530450ce4098c2a97d02915f0da61dae7cbe258dfda0a0a8bc86441f"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00026.npz",
+    "bytes": 12194,
+    "sha256": "7e5a89f65206f9ebf78dbc150dd60634094e5cdaf3bc61243d83e271a4f49fb0"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00027.npz",
+    "bytes": 12194,
+    "sha256": "66931ce6cd4b0d85f72fa6f8ca54d85d947231925fd6145b8fe8be7e409c90b0"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00028.npz",
+    "bytes": 38501,
+    "sha256": "729ca09933748414153d49014ef84d25a975c638e63a52a2773856aa1f91245a"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00029.npz",
+    "bytes": 6355,
+    "sha256": "d3c80fb669b9210238f0d9e3925b9a29a4d8eaad8534506b425561763eaf07d4"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00030.npz",
+    "bytes": 19536,
+    "sha256": "c80b404a0c2b913e05693f9cbb3b9ffe70d3895792f4b40add81e9b2825582a5"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00031.npz",
+    "bytes": 12194,
+    "sha256": "bdedffc2456ff4e3f24d5a14965289ea5732c436b31ae8767ef6e805442dba6b"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00032.npz",
+    "bytes": 12194,
+    "sha256": "fa7cbd9ba334f3c4cdd298a65bc562cdd4328e4b1d42f9a8b29d04763e663f2a"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00033.npz",
+    "bytes": 12194,
+    "sha256": "5393bf108b1f239d5b18f621fb47da47e868b3710b87c3a104eaad873a8374a7"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00034.npz",
+    "bytes": 12194,
+    "sha256": "683dfa07ac4dc9921afc71bce53d34b5833aefa237d5663a3a9dc189a824511b"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00035.npz",
+    "bytes": 12194,
+    "sha256": "10bd7a49e0ae41332afd5f2b64be5df55807d9f6b031e1ceb648538ce222bd3c"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00036.npz",
+    "bytes": 12194,
+    "sha256": "5857f07f043eb42102b845c1d4ea9858a5a029a55fb08cabfa7af609bbe400fd"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00037.npz",
+    "bytes": 12194,
+    "sha256": "ffdebb82d857f1f7ada513e83aa63f6959b7279026e01cdd9895b1ff40f896be"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00038.npz",
+    "bytes": 38501,
+    "sha256": "ee7ba25633c184390b895e3837ec7f40db707e2cae3e05723fd25805070aca8d"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00039.npz",
+    "bytes": 6355,
+    "sha256": "ae7b12f49f9c6e57f92cc6b38a68becc901953bc75665244a50d4825b7951857"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00040.npz",
+    "bytes": 19536,
+    "sha256": "4896414e1329984499e4977c2ee5ecb9ff82c603654e19c592636d3e00358e68"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00041.npz",
+    "bytes": 12194,
+    "sha256": "cf1b116be7c40480b6d6eae14e7b6badf7601cec1cec4ad904d54f0d39c571b9"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00042.npz",
+    "bytes": 12194,
+    "sha256": "eba78e04498d059553ff3b7382c541f87f56c08b71bb5b8c310cf27b39defad9"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00043.npz",
+    "bytes": 12194,
+    "sha256": "c73b83cf7330d586938c97eb12fade94dfd1d5b2f1eafe9201bfba238d88f5c6"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00044.npz",
+    "bytes": 12194,
+    "sha256": "d6aaa006bf32160162ecb61c975fe266f724c4f2c8dbf28a10a22c89e4fad700"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00045.npz",
+    "bytes": 12194,
+    "sha256": "03bfc979473ac4b1a22f9dba3443e454b3d7bf3463e34c9b5c883617ffb37ca4"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00046.npz",
+    "bytes": 12194,
+    "sha256": "9b50612ad0ba676c045f32ccd180f31ba62ad57fdfeff2c7d1cd3b7565b1fffe"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00047.npz",
+    "bytes": 12194,
+    "sha256": "10bd7a49e0ae41332afd5f2b64be5df55807d9f6b031e1ceb648538ce222bd3c"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00048.npz",
+    "bytes": 38501,
+    "sha256": "29651ce2234bb9803fd69a1b5913eef4758e1aeafe88c1245e9e3195e5e20d42"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00049.npz",
+    "bytes": 6355,
+    "sha256": "eeaa7b1cb4422ccaadba3fb481c6408c87a6beb145d63e80ac61281e0b3813bc"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00050.npz",
+    "bytes": 19536,
+    "sha256": "361266fd46cb335e0cc9e646b8a16bd23e1d83011851244d2ddcb48f9380dba9"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00051.npz",
+    "bytes": 12194,
+    "sha256": "a0715d09df66d8adeccd6c2109ff03b419f50822be459d1e11b493874f8d50ec"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00052.npz",
+    "bytes": 12194,
+    "sha256": "bcec9f1ef802e58cfc14004abb12684a0711777914731f9e7bd81b8ea4f0a5cc"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00053.npz",
+    "bytes": 12194,
+    "sha256": "3af35094619a6278d457f5478e70bbe8d12eacd66b70ffe3af21f10b9e4f1ebb"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00054.npz",
+    "bytes": 12194,
+    "sha256": "04eb45accec9f3e8896426e0b06b60f8918b9febd1abd0e2c44a6883a7f0b073"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00055.npz",
+    "bytes": 12194,
+    "sha256": "7e92c622a38b24398116669aeeb6a8861520ac4164e886a9c2a5d51938bcf423"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00056.npz",
+    "bytes": 12194,
+    "sha256": "d13fb4a381c79592b66369ab324c2e109a6c7a123d5f6041a997c6f4e49385b4"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00057.npz",
+    "bytes": 12194,
+    "sha256": "eba78e04498d059553ff3b7382c541f87f56c08b71bb5b8c310cf27b39defad9"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00058.npz",
+    "bytes": 38501,
+    "sha256": "22f566cc717f64e30b246740c0e823d65715120e889efc994dbbd58f451f3a95"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00059.npz",
+    "bytes": 12194,
+    "sha256": "cd205baa02ae21e7831a601fb7a2ed2e0017ebe25321217cb3be1b61aa6ca2d4"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00060.npz",
+    "bytes": 12194,
+    "sha256": "cd205baa02ae21e7831a601fb7a2ed2e0017ebe25321217cb3be1b61aa6ca2d4"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00061.npz",
+    "bytes": 12194,
+    "sha256": "cd205baa02ae21e7831a601fb7a2ed2e0017ebe25321217cb3be1b61aa6ca2d4"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00062.npz",
+    "bytes": 12194,
+    "sha256": "cd205baa02ae21e7831a601fb7a2ed2e0017ebe25321217cb3be1b61aa6ca2d4"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00063.npz",
+    "bytes": 12194,
+    "sha256": "cd205baa02ae21e7831a601fb7a2ed2e0017ebe25321217cb3be1b61aa6ca2d4"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00064.npz",
+    "bytes": 12194,
+    "sha256": "cd205baa02ae21e7831a601fb7a2ed2e0017ebe25321217cb3be1b61aa6ca2d4"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00065.npz",
+    "bytes": 6355,
+    "sha256": "b9c0aa22326c3728f8f5a8598e8bd27f72701d68f2512fd6bb66b106fd474f38"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00066.npz",
+    "bytes": 19536,
+    "sha256": "f56a4d4fcd599874ae7004ba549a799242a65b4433c22d4856115bc3e9039557"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00067.npz",
+    "bytes": 12194,
+    "sha256": "6cf1c27fb06d2314c92202b100fe1be173c07ce225eaae0517f7752ffbc0a5de"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00068.npz",
+    "bytes": 12194,
+    "sha256": "0a2cd8df9e5426d637b52855d113f60cb8828e31f80b174f4ebd152e4468ecfc"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00069.npz",
+    "bytes": 12194,
+    "sha256": "2579cad1c7bb6619c06bc01a942e4178160031283d5dfca54681c53dbb069980"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00070.npz",
+    "bytes": 12194,
+    "sha256": "72dad069e0747583e686443b96b576570ca17eccc98e5cdf92ee3696c7a0c669"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00071.npz",
+    "bytes": 12194,
+    "sha256": "9327f0113474f366a80a27fee5caad1ff767703d892cf95a78c591a5c19257e1"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00072.npz",
+    "bytes": 12194,
+    "sha256": "df3d33c746d1936e98e218ef91010ddcf7e4b67f65908e4cbc74ee0a07e36143"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00073.npz",
+    "bytes": 12194,
+    "sha256": "5a4cdaffc3cbcc57fe0ff5d58fd6bf09c63b770a13b0e54fbb86758a38e9dbf1"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00074.npz",
+    "bytes": 38501,
+    "sha256": "db4e59a2a3a149d22524165a05911c84f4546fb16e9c0df46eac84c3623a820b"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00075.npz",
+    "bytes": 6355,
+    "sha256": "760b70a72b14a24609c42d4f856d146333eeec2b40b186ebf3eb313bf0f8bfb5"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00076.npz",
+    "bytes": 12194,
+    "sha256": "74c26507da5626b9e1e01ae61613db9904b6a673755fbdf697d46d4a89b87030"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00077.npz",
+    "bytes": 12194,
+    "sha256": "e4d99fb7c13a024cb6cb13323e57dae83bd7bc9f55815edc9da408910ab1be0b"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00078.npz",
+    "bytes": 12194,
+    "sha256": "e4d99fb7c13a024cb6cb13323e57dae83bd7bc9f55815edc9da408910ab1be0b"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00079.npz",
+    "bytes": 12194,
+    "sha256": "e4d99fb7c13a024cb6cb13323e57dae83bd7bc9f55815edc9da408910ab1be0b"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00080.npz",
+    "bytes": 12194,
+    "sha256": "e4d99fb7c13a024cb6cb13323e57dae83bd7bc9f55815edc9da408910ab1be0b"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00081.npz",
+    "bytes": 12194,
+    "sha256": "e4d99fb7c13a024cb6cb13323e57dae83bd7bc9f55815edc9da408910ab1be0b"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00082.npz",
+    "bytes": 12194,
+    "sha256": "e4d99fb7c13a024cb6cb13323e57dae83bd7bc9f55815edc9da408910ab1be0b"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00083.npz",
+    "bytes": 6355,
+    "sha256": "9a8ebb326a0e6ddfa40b87dbd745c8d7943e6e04b59884ef5ed62ab2bce13eaf"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00084.npz",
+    "bytes": 19536,
+    "sha256": "5cc92a19522304053b443aec73c54c7f9b64809a0ed55ba61151cb79a8f96aba"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00085.npz",
+    "bytes": 12194,
+    "sha256": "a78c32a6ff7fcba109bdf6d5fcd215a43759b346573e42310498ccc282fa50c4"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00086.npz",
+    "bytes": 12194,
+    "sha256": "291acf61dc28637be11bf8fd16790c8cb8b1d0d0ba4d9f8c0a559816e3710039"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00087.npz",
+    "bytes": 12194,
+    "sha256": "4e04bddba59564fbb58294f226ba0160f31a7357f2686c5176f300b36854a558"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00088.npz",
+    "bytes": 12194,
+    "sha256": "402be977ba723d1993b09bfdb58cb5f293efcb4b17028759cbb6a82a5e313fe6"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00089.npz",
+    "bytes": 12194,
+    "sha256": "6871beaf23c8640a117a1382b78aa083c8aa554a0274e6c8bc76b3c19a5b935f"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00090.npz",
+    "bytes": 12194,
+    "sha256": "43abb6c04bd383c723d7385bb3769ce37c7d2caa74f29b2a71c85f25985c995d"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00091.npz",
+    "bytes": 12194,
+    "sha256": "a7fc2ea7292c4f7f08ef3d5ebaa1f8f501ef368b419ce98645b1f3fe4c9bc0fd"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00092.npz",
+    "bytes": 38501,
+    "sha256": "7b6a87309ab3929b19efa69562606044ad2992ad9272e4f935a7c287281a4270"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00093.npz",
+    "bytes": 6355,
+    "sha256": "819b3c2edeb1e433b3b0c251273f452e88cc4313667c44a1de75a3e85f3d63b6"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00094.npz",
+    "bytes": 19536,
+    "sha256": "f4e86b3cb2a0f6d998b7f880be0becd91e2ab5bde4fb866e55fbcf85e466112b"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00095.npz",
+    "bytes": 12194,
+    "sha256": "0a14099ee41ca64e3e2875a707c928fdbf3f638c8938061df98cf27335c875db"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00096.npz",
+    "bytes": 12194,
+    "sha256": "cf8d2fabb0fdf0d1a161ae220e9cca6156343e2f6810f046175a3ecae6517f76"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00097.npz",
+    "bytes": 12194,
+    "sha256": "ca9843d82e457652e6d556170f79a651974686901040a9d345859c5e28b92532"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00098.npz",
+    "bytes": 12194,
+    "sha256": "4fa4fc25569b635e147052af1cbd9b8ab399c1c0a5c713545a5217047cd00055"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00099.npz",
+    "bytes": 12194,
+    "sha256": "21d7a83dbf148bd115600ab47a206a2376817926a5e90a4a417dc3e38fcfa30e"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00100.npz",
+    "bytes": 12194,
+    "sha256": "a7223bef3d4edf1efaf0b0fb4166b3bd3d68b67c3c79dea33a96911d69d195c1"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00101.npz",
+    "bytes": 12194,
+    "sha256": "4e04bddba59564fbb58294f226ba0160f31a7357f2686c5176f300b36854a558"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00102.npz",
+    "bytes": 38501,
+    "sha256": "a6a7914a1074e47959e61eb686ccf5b31bdd509661c681c4fd0ea3afba591397"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00103.npz",
+    "bytes": 6355,
+    "sha256": "b3d28d6e2348f4a3442ae5eb21a0db3caa25341a45a899b65a7b83541c9ffc68"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00104.npz",
+    "bytes": 19536,
+    "sha256": "17719c50d76013bd0c8ea47e71c07b2c9e188841f5d735c9ffde65bf2c520279"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00105.npz",
+    "bytes": 12194,
+    "sha256": "fb03a6580a5da9bac8ecf288f2007bd4e9d76d317a5ca107f24bf3b647254cb9"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00106.npz",
+    "bytes": 12194,
+    "sha256": "78bfb36e2df1238ac331b041ce47aabb129d685ad8d4a0a49d337beb177c8591"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00107.npz",
+    "bytes": 12194,
+    "sha256": "b8a651b55bbe2ae82b7ea478b2e15601dfe783ca72b5eb9e32487a7091e77189"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00108.npz",
+    "bytes": 12194,
+    "sha256": "8ce9e970558e7d4d47b98d5d29be418ffb64c12356977b674bd99c7fb986f242"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00109.npz",
+    "bytes": 12194,
+    "sha256": "d473d40c60fbf76735c53782d602bc2ff334df6f6dae858e6b5204e356379438"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00110.npz",
+    "bytes": 12194,
+    "sha256": "6959b21a8e5177259446651cafcc0d505e175360b563cbdffee9d6b463ed9ea8"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00111.npz",
+    "bytes": 12194,
+    "sha256": "0a14099ee41ca64e3e2875a707c928fdbf3f638c8938061df98cf27335c875db"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00112.npz",
+    "bytes": 38501,
+    "sha256": "c091d0bc3a77c4cea67350802a41ca1b8c3932b0c39d252c888cc4dc2f80708f"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00113.npz",
+    "bytes": 6355,
+    "sha256": "8e24418fa86d9d078c31c5f4dd939396256b8471bfe124a5c1de2bf5a73ce958"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00114.npz",
+    "bytes": 19536,
+    "sha256": "7437438d26f999f95a41ec4dfc1f1a3cba7899464f688efd46ffc69563f5c9f4"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/event-00115.npz",
+    "bytes": 6612,
+    "sha256": "9ed37998bac32a58f477c1a3c22fb116280ece33df7fe54c4266679d372b14b0"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/events.jsonl",
+    "bytes": 3839,
+    "sha256": "6c5160cc6a5d8a015a175c88e762291e338c4fee3a997e0bf01c31bba9ef9b46"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/first-promotion-directions.json",
+    "bytes": 1229293,
+    "sha256": "69afeab9a9bb46e8a8be3cac8f87ceca076ef8d2ead38867211f88a3906ec2b5"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/first-promotion.log",
+    "bytes": 967,
+    "sha256": "97d2057173cddc903d4cd97578e73f1d137e214d74472c3943e3cd4e169dedbd"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/first-step.json",
+    "bytes": 2743308,
+    "sha256": "c2fbf3410223b524240931e32802525080051e6482c5e64851d3d15185855835"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/instrument-controls.log",
+    "bytes": 564,
+    "sha256": "a20b3bd67fdb051cd5d31d7b9b6ae4ca4b8f514e83fb33b54e17906c7dd45a71"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/instrument-sources.json",
+    "bytes": 27937,
+    "sha256": "361d435913eba5da96d37b25a9801ab418dfe80ae359ebce771968127f41f842"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/jacobians.npz",
+    "bytes": 8237934,
+    "sha256": "dfd675d6e1b0b54c80f98cf481871aca428d29356690bc54fa03dd2f0ab00fea"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/measurement.log",
+    "bytes": 2816,
+    "sha256": "17c6c425ffab806b36634387d5d3c67abe4a9e7bed368195bd6c97bfc19c399b"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/negative-control.log",
+    "bytes": 1127,
+    "sha256": "90eadbee80104a837ebf3bf941033724a722c7ff075acd38a0dab1f7556bfe3c"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/run.sh",
+    "bytes": 1029,
+    "sha256": "e0371ded5fecfb52546b4688f756cabad4734d4bfab3e8672d9f75971d7ef9e4"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/scheduler.log",
+    "bytes": 374,
+    "sha256": "9d7fce66633ba8f103fd0338d5a873d9d530f5c1c29daf02fdf92ff18d69988d"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/seed.png",
+    "bytes": 205177,
+    "sha256": "3f0d2e573830970c06b61c28429807c7800745fd16ad9f0287919360a5d9e46e"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/seed.svg",
+    "bytes": 93850,
+    "sha256": "2ddb70b61f6cdb3c6bd0cfb5c83e27f444814e938e7910ac2be749d107f45752"
+  },
+  {
+    "path": "docs/figures/plasma-cell-read-fidelity/first-step/states.npz",
+    "bytes": 24134,
+    "sha256": "da49e31815be768f9214cb95f96fb7bafe1aa5135d35e4f19a080c7b5cdbf1bc"
+  }
+]

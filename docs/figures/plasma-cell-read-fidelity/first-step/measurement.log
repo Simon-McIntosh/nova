@@ -1,0 +1,65 @@
+revision=474910dcb876839ddad7aea73f791cac282b570e tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-first-step-degenerate-direction command=python benchmarks/plasma_cell_first_step_directions.py --output docs/figures/plasma-cell-read-fidelity/first-step
+NVIDIA H200 NVL
+BUILD production
+SEED {'core_cells': 83.0, 'unscaled_support_current_a': 38009.95261696202, 'lambda': 0.9818308983646898, 'nonfinite_support_count': 0.0, 'nonzero_moment_count': 249.0, 'moment_elements': 396.0}
+SOLVE one native active-set trip
+E0923 11:00:52.182565 1179335 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0923 11:01:33.869262 1174866 slow_operation_alarm.cc:140] The operation took 2m41.686785857s
+
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+EVENT 0 trip
+EVENT 8 ladder
+EVENT 9 _backtracked_promotion
+EVENT 10 promotion
+EVENT 18 ladder
+EVENT 19 _backtracked_promotion
+EVENT 20 promotion
+EVENT 28 ladder
+EVENT 29 _backtracked_promotion
+EVENT 30 promotion
+EVENT 38 ladder
+EVENT 39 _backtracked_promotion
+EVENT 40 promotion
+EVENT 48 ladder
+EVENT 49 _backtracked_promotion
+EVENT 50 promotion
+EVENT 58 ladder
+EVENT 65 _backtracked_promotion
+EVENT 66 promotion
+EVENT 74 ladder
+EVENT 75 _backtracked_promotion
+EVENT 83 _rebuilt_model_promotion
+EVENT 84 promotion
+EVENT 92 ladder
+EVENT 93 _backtracked_promotion
+EVENT 94 promotion
+EVENT 102 ladder
+EVENT 103 _backtracked_promotion
+EVENT 104 promotion
+EVENT 112 ladder
+EVENT 113 _backtracked_promotion
+EVENT 114 promotion
+EVENT 115 trip
+TRIP residual=0.6311505302839682 health={'core_cells': 24.0, 'unscaled_support_current_a': 6072.65796103301, 'lambda': 6.145471416994278, 'nonfinite_support_count': 0.0, 'nonzero_moment_count': 63.0, 'moment_elements': 396.0}
+JACOBIAN seed raw image and current
+JACOBIAN columns 0/717
+JACOBIAN columns 80/717
+JACOBIAN columns 160/717
+JACOBIAN columns 240/717
+JACOBIAN columns 320/717
+JACOBIAN columns 400/717
+JACOBIAN columns 480/717
+JACOBIAN columns 560/717
+JACOBIAN columns 640/717
+SVD normalized_map
+SVD fixed_lambda_map
+SVD normalized_newton_residual
+SVD fixed_lambda_newton_residual
+RENDER own-level panels
+MEASURED {"normalized_map": {"mainly": true, "energy_fraction": 0.9314780529542293}, "fixed_lambda_map": {"mainly": true, "energy_fraction": 0.9318395140629692}, "normalized_newton_residual": {"mainly": false, "energy_fraction": 0.0}, "fixed_lambda_newton_residual": {"mainly": false, "energy_fraction": 0.0}}
+EXIT=0

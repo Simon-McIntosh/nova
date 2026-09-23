@@ -26,10 +26,10 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="186">
+<meta name="plan-version" content="187">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-impl" content="0.91">
 </head>
 <body>
 <main class="plan-doc">
@@ -1482,6 +1482,9 @@ all three gate logs are under
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20260923T004650250547-review-of-cca-exact-support-deficit-per-cell-attribution" data-who="reckon-ship" data-when="2026-09-23T00:58:54.284Z">
     <div class="r-comment-body"><p>review stored</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260923T0820-capacity-repair-landed" data-who="reckon-ship" data-when="2026-09-23T08:20:00+02:00">
+    <div class="r-comment-body">cca-exact-bank-callback-capacity-from-the-mesh merged at 1542d6df6 (review 87): _flux_selected_current_moments raises its callback capacity to at least the call's cell count, so a two-cell quadratic crossing no longer fails closed to nan. The callback test (3 passed, negative control all-nan) and the exact-clip moments (13) and seed (3) tests pass in fresh processes. Still unmeasured: the terminal census, blocked by the census partition probe's sliced state; and two modules that reach the changed branch, including tests/test_moment_path_separatrix_test.py, were not run. Both go to the census-probe node. cca-empty-exact-polygon-per-cell-attribution merged at 4c7b1d4d0 as a partial. The seed-state cells lie wholly outside the support. At the terminal state, cells 2, 75, 126 and 134 are dropped at separatrix_clip.py:1405 or :1409. The per-stage recorder emitted nothing, so that attribution remains open in f-cca-empty-exact-polygon-attribution. The worker's session exhausted its context.</div>
 </div>
 </section>
 

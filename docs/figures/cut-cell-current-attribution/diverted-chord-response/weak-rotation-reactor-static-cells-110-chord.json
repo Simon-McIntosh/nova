@@ -1,0 +1,2301 @@
+{
+  "case": "weak-rotation-reactor-static",
+  "cells": 135,
+  "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-110-chord.npz",
+  "input_sha256": "555018c150193593b12653cdcda5cff3e2ddfac6b0e047a47752ef38b64c0f9a",
+  "map_mismatch": {
+    "sup_relative": 9.540289289876033e-05,
+    "rms_relative": 0.00012270193811792922,
+    "sup_wb": 0.004741413007708251,
+    "rms_wb": 0.002348612332105771,
+    "sup_over_reference_span": 6.839818230467285e-05,
+    "rms_over_reference_span": 3.388036734897699e-05,
+    "reference_sup_wb": 49.698838930804165,
+    "reference_rms_wb": 19.140792461228383,
+    "finite": true
+  },
+  "plasma_response_mismatch": {
+    "sup_relative": 2.4525763616280583e-05,
+    "rms_relative": 1.732926387339651e-05,
+    "sup_wb": 0.004741413007735673,
+    "rms_wb": 0.002348612332104817,
+    "sup_over_reference_span": 3.704386672428246e-05,
+    "rms_over_reference_span": 1.834931529389082e-05,
+    "reference_sup_wb": 193.32376687298125,
+    "reference_rms_wb": 135.5286842686003,
+    "finite": true
+  },
+  "positive_control_relative_tolerance": 1e-09,
+  "reconstruction_relative_sup": 1.6740489292206107e-11,
+  "class_precedence": [
+    "X-point cell",
+    "wall-cut",
+    "exterior",
+    "interior",
+    "separatrix-cut"
+  ],
+  "class_summary": {
+    "interior": {
+      "cells": 78,
+      "projection_share": 1.201494999007204,
+      "squared_error_reduction": -8.149161137271367,
+      "map_sup_relative": 0.0002223299384496816
+    },
+    "separatrix-cut": {
+      "cells": 5,
+      "projection_share": 0.40680620534276296,
+      "squared_error_reduction": 0.15581006238840933,
+      "map_sup_relative": 5.82701556232168e-05
+    },
+    "X-point cell": {
+      "cells": 0,
+      "projection_share": 0.0,
+      "squared_error_reduction": 0.0,
+      "map_sup_relative": 0.0
+    },
+    "wall-cut": {
+      "cells": 52,
+      "projection_share": -0.6083012043497914,
+      "squared_error_reduction": -15.157734300201547,
+      "map_sup_relative": 0.00030755431885048207
+    },
+    "exterior": {
+      "cells": 0,
+      "projection_share": 0.0,
+      "squared_error_reduction": 0.0,
+      "map_sup_relative": 0.0
+    }
+  },
+  "per_cell": [
+    {
+      "cell": 0,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 1,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 2,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.2587711855725138,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 23231.9949376234,
+      "analytic_current_a": 23241.808255911397,
+      "booked_centroid_m": [
+        6.203449611859823,
+        -3.551864737803229
+      ],
+      "analytic_centroid_m": [
+        6.203990909310625,
+        -3.551883854161754
+      ]
+    },
+    {
+      "cell": 3,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.4989880977519321,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 78233.0229344563,
+      "analytic_current_a": 78229.94671303146,
+      "booked_centroid_m": [
+        5.81936755403265,
+        -3.3990958527281556
+      ],
+      "analytic_centroid_m": [
+        5.819572198014033,
+        -3.3991871555218633
+      ]
+    },
+    {
+      "cell": 4,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.45552442789927494,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 68569.44103976346,
+      "analytic_current_a": 68570.2516341816,
+      "booked_centroid_m": [
+        5.416898073629422,
+        -3.1567706330830974
+      ],
+      "analytic_centroid_m": [
+        5.417068810793228,
+        -3.156924031652944
+      ]
+    },
+    {
+      "cell": 5,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.3807894567,
+      "analytic_current_a": 169828.27027007236,
+      "booked_centroid_m": [
+        6.205751625293486,
+        -3.2553152261114033
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        -3.2553152261114033
+      ]
+    },
+    {
+      "cell": 6,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.99869624156,
+      "analytic_current_a": 162918.3809237287,
+      "booked_centroid_m": [
+        5.772009832118516,
+        -3.0049063625643724
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        -3.0049063625643724
+      ]
+    },
+    {
+      "cell": 7,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 156438.4980548034,
+      "analytic_current_a": 156427.34316069432,
+      "booked_centroid_m": [
+        5.338237464434421,
+        -2.7544974990173414
+      ],
+      "analytic_centroid_m": [
+        5.338237464434421,
+        -2.7544974990173414
+      ]
+    },
+    {
+      "cell": 8,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.3807894568,
+      "analytic_current_a": 169828.27027007242,
+      "booked_centroid_m": [
+        6.205751625293486,
+        -2.7544974990173414
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        -2.7544974990173414
+      ]
+    },
+    {
+      "cell": 9,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.9986962414,
+      "analytic_current_a": 162918.38092372857,
+      "booked_centroid_m": [
+        5.772009832118516,
+        -2.50408863547031
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        -2.50408863547031
+      ]
+    },
+    {
+      "cell": 10,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 11,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.20669184523797374,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 22613.40528381234,
+      "analytic_current_a": 22660.630691825198,
+      "booked_centroid_m": [
+        5.059715591638333,
+        -2.879867240584168
+      ],
+      "analytic_centroid_m": [
+        5.059788185433289,
+        -2.880102404804565
+      ]
+    },
+    {
+      "cell": 12,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 13,
+      "class": "separatrix-cut",
+      "analytic_area_fraction": 0.8331718620554014,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 125790.08078783065,
+      "analytic_current_a": 125716.25461532477,
+      "booked_centroid_m": [
+        4.936770512742046,
+        -2.4829977927879128
+      ],
+      "analytic_centroid_m": [
+        4.936856521848757,
+        -2.4829527344751052
+      ]
+    },
+    {
+      "cell": 14,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.3092706643729536,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 38979.519111618865,
+      "analytic_current_a": 39018.78182479184,
+      "booked_centroid_m": [
+        4.617462654485995,
+        -2.1742869773445763
+      ],
+      "analytic_centroid_m": [
+        4.617466933855129,
+        -2.174457624351559
+      ]
+    },
+    {
+      "cell": 15,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.3807894567,
+      "analytic_current_a": 169828.27027007236,
+      "booked_centroid_m": [
+        6.205751625293486,
+        -2.2536797719232795
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        -2.253679771923279
+      ]
+    },
+    {
+      "cell": 16,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 156438.49805480335,
+      "analytic_current_a": 156427.34316069426,
+      "booked_centroid_m": [
+        5.338237464434421,
+        -2.2536797719232795
+      ],
+      "analytic_centroid_m": [
+        5.338237464434421,
+        -2.253679771923279
+      ]
+    },
+    {
+      "cell": 17,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.99869624138,
+      "analytic_current_a": 162918.38092372852,
+      "booked_centroid_m": [
+        5.772009832118516,
+        -2.003270908376248
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        -2.003270908376248
+      ]
+    },
+    {
+      "cell": 18,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.38078945677,
+      "analytic_current_a": 169828.2702700724,
+      "booked_centroid_m": [
+        6.205751625293486,
+        -1.7528620448292174
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        -1.7528620448292174
+      ]
+    },
+    {
+      "cell": 19,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.388642478,
+      "analytic_current_a": 177074.76137302115,
+      "booked_centroid_m": [
+        6.639472490491006,
+        -1.5024531812821862
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        -1.5024531812821862
+      ]
+    },
+    {
+      "cell": 20,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.9986962415,
+      "analytic_current_a": 162918.38092372863,
+      "booked_centroid_m": [
+        5.772009832118516,
+        -1.5024531812821862
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        -1.5024531812821862
+      ]
+    },
+    {
+      "cell": 21,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.38078945669,
+      "analytic_current_a": 169828.27027007233,
+      "booked_centroid_m": [
+        6.205751625293486,
+        -1.2520443177351552
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        -1.252044317735155
+      ]
+    },
+    {
+      "cell": 22,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.388642478,
+      "analytic_current_a": 177074.76137302117,
+      "booked_centroid_m": [
+        6.639472490491006,
+        -1.001635454188124
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        -1.001635454188124
+      ]
+    },
+    {
+      "cell": 23,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.9986962415,
+      "analytic_current_a": 162918.38092372863,
+      "booked_centroid_m": [
+        5.772009832118516,
+        -1.001635454188124
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        -1.001635454188124
+      ]
+    },
+    {
+      "cell": 24,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.38078945654,
+      "analytic_current_a": 169828.27027007216,
+      "booked_centroid_m": [
+        6.205751625293486,
+        -0.751226590641093
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        -0.751226590641093
+      ]
+    },
+    {
+      "cell": 25,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 26,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 150477.33140424328,
+      "analytic_current_a": 150466.60157291335,
+      "booked_centroid_m": [
+        4.9044205034762305,
+        -2.003270908376248
+      ],
+      "analytic_centroid_m": [
+        4.9044205034762305,
+        -2.003270908376248
+      ]
+    },
+    {
+      "cell": 27,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 156438.4980548034,
+      "analytic_current_a": 156427.34316069432,
+      "booked_centroid_m": [
+        5.338237464434421,
+        -1.7528620448292174
+      ],
+      "analytic_centroid_m": [
+        5.338237464434421,
+        -1.7528620448292174
+      ]
+    },
+    {
+      "cell": 28,
+      "class": "separatrix-cut",
+      "analytic_area_fraction": 0.772380405311235,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 112630.27345296508,
+      "analytic_current_a": 112553.2954034441,
+      "booked_centroid_m": [
+        4.518085241998527,
+        -1.732166833323599
+      ],
+      "analytic_centroid_m": [
+        4.518189004851486,
+        -1.73214658686222
+      ]
+    },
+    {
+      "cell": 29,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 150477.33140424336,
+      "analytic_current_a": 150466.60157291347,
+      "booked_centroid_m": [
+        4.9044205034762305,
+        -1.5024531812821862
+      ],
+      "analytic_centroid_m": [
+        4.9044205034762305,
+        -1.5024531812821862
+      ]
+    },
+    {
+      "cell": 30,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 145201.37637501734,
+      "analytic_current_a": 145191.02274724602,
+      "booked_centroid_m": [
+        4.470538402468727,
+        -1.2520443177351552
+      ],
+      "analytic_centroid_m": [
+        4.470538402468727,
+        -1.2520443177351552
+      ]
+    },
+    {
+      "cell": 31,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 156438.4980548034,
+      "analytic_current_a": 156427.3431606943,
+      "booked_centroid_m": [
+        5.338237464434421,
+        -1.2520443177351552
+      ],
+      "analytic_centroid_m": [
+        5.338237464434421,
+        -1.252044317735155
+      ]
+    },
+    {
+      "cell": 32,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 150477.33140424333,
+      "analytic_current_a": 150466.6015729134,
+      "booked_centroid_m": [
+        4.9044205034762305,
+        -1.001635454188124
+      ],
+      "analytic_centroid_m": [
+        4.9044205034762305,
+        -1.001635454188124
+      ]
+    },
+    {
+      "cell": 33,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 156438.49805480335,
+      "analytic_current_a": 156427.3431606943,
+      "booked_centroid_m": [
+        5.338237464434421,
+        -0.751226590641093
+      ],
+      "analytic_centroid_m": [
+        5.338237464434421,
+        -0.7512265906410931
+      ]
+    },
+    {
+      "cell": 34,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 145201.3763750172,
+      "analytic_current_a": 145191.0227472459,
+      "booked_centroid_m": [
+        4.470538402468727,
+        -0.751226590641093
+      ],
+      "analytic_centroid_m": [
+        4.470538402468727,
+        -0.751226590641093
+      ]
+    },
+    {
+      "cell": 35,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.09763202430306722,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 8796.53390742702,
+      "analytic_current_a": 8850.302242514923,
+      "booked_centroid_m": [
+        4.255143709167167,
+        -1.437778715426197
+      ],
+      "analytic_centroid_m": [
+        4.254978518577525,
+        -1.4377433215726398
+      ]
+    },
+    {
+      "cell": 36,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.35030074914986714,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 45379.254052188815,
+      "analytic_current_a": 45424.60727936591,
+      "booked_centroid_m": [
+        4.185940110195445,
+        -0.968563671156385
+      ],
+      "analytic_centroid_m": [
+        4.18588000840912,
+        -0.9686767450908278
+      ]
+    },
+    {
+      "cell": 37,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 38,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.5101573370073322,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 72136.61353276517,
+      "analytic_current_a": 72126.87470015298,
+      "booked_centroid_m": [
+        4.145725854205737,
+        -0.49057442894779807
+      ],
+      "analytic_centroid_m": [
+        4.145736285617233,
+        -0.4906025184480517
+      ]
+    },
+    {
+      "cell": 39,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 150477.33140424333,
+      "analytic_current_a": 150466.6015729134,
+      "booked_centroid_m": [
+        4.9044205034762305,
+        -0.500817727094062
+      ],
+      "analytic_centroid_m": [
+        4.9044205034762305,
+        -0.500817727094062
+      ]
+    },
+    {
+      "cell": 40,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 145201.37637501725,
+      "analytic_current_a": 145191.02274724597,
+      "booked_centroid_m": [
+        4.470538402468727,
+        -0.25040886354703096
+      ],
+      "analytic_centroid_m": [
+        4.470538402468727,
+        -0.25040886354703096
+      ]
+    },
+    {
+      "cell": 41,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 156438.4980548036,
+      "analytic_current_a": 156427.34316069452,
+      "booked_centroid_m": [
+        5.338237464434421,
+        -0.25040886354703096
+      ],
+      "analytic_centroid_m": [
+        5.338237464434421,
+        -0.250408863547031
+      ]
+    },
+    {
+      "cell": 42,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 150477.33140424333,
+      "analytic_current_a": 150466.60157291347,
+      "booked_centroid_m": [
+        4.9044205034762305,
+        4.279524401915769e-17
+      ],
+      "analytic_centroid_m": [
+        4.9044205034762305,
+        8.039394677666653e-18
+      ]
+    },
+    {
+      "cell": 43,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 156438.49805480352,
+      "analytic_current_a": 156427.3431606944,
+      "booked_centroid_m": [
+        5.338237464434421,
+        0.25040886354703107
+      ],
+      "analytic_centroid_m": [
+        5.338237464434421,
+        0.250408863547031
+      ]
+    },
+    {
+      "cell": 44,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 145201.37637501722,
+      "analytic_current_a": 145191.02274724594,
+      "booked_centroid_m": [
+        4.470538402468727,
+        0.2504088635470311
+      ],
+      "analytic_centroid_m": [
+        4.470538402468727,
+        0.25040886354703107
+      ]
+    },
+    {
+      "cell": 45,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 150477.33140424328,
+      "analytic_current_a": 150466.60157291338,
+      "booked_centroid_m": [
+        4.9044205034762305,
+        0.500817727094062
+      ],
+      "analytic_centroid_m": [
+        4.9044205034762305,
+        0.500817727094062
+      ]
+    },
+    {
+      "cell": 46,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 145201.3763750172,
+      "analytic_current_a": 145191.0227472459,
+      "booked_centroid_m": [
+        4.470538402468727,
+        0.751226590641093
+      ],
+      "analytic_centroid_m": [
+        4.470538402468727,
+        0.751226590641093
+      ]
+    },
+    {
+      "cell": 47,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 156438.49805480352,
+      "analytic_current_a": 156427.34316069444,
+      "booked_centroid_m": [
+        5.338237464434421,
+        0.751226590641093
+      ],
+      "analytic_centroid_m": [
+        5.338237464434421,
+        0.751226590641093
+      ]
+    },
+    {
+      "cell": 48,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 150477.3314042433,
+      "analytic_current_a": 150466.6015729134,
+      "booked_centroid_m": [
+        4.9044205034762305,
+        1.0016354541881238
+      ],
+      "analytic_centroid_m": [
+        4.9044205034762305,
+        1.0016354541881238
+      ]
+    },
+    {
+      "cell": 49,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 50,
+      "class": "separatrix-cut",
+      "analytic_area_fraction": 0.5713202407387582,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 80971.10547446944,
+      "analytic_current_a": 80937.0235166972,
+      "booked_centroid_m": [
+        4.1322958202655125,
+        -2.7350337643662614e-16
+      ],
+      "analytic_centroid_m": [
+        4.132340550460437,
+        1.4643996417541034e-15
+      ]
+    },
+    {
+      "cell": 51,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 52,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.5101573370073321,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 72136.61353276526,
+      "analytic_current_a": 72126.87470015326,
+      "booked_centroid_m": [
+        4.145725854205737,
+        0.49057442894779796
+      ],
+      "analytic_centroid_m": [
+        4.145736285617232,
+        0.4906025184480473
+      ]
+    },
+    {
+      "cell": 53,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 54,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.3503007491498667,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 45379.25405218904,
+      "analytic_current_a": 45424.60727935775,
+      "booked_centroid_m": [
+        4.185940110195445,
+        0.9685636711563848
+      ],
+      "analytic_centroid_m": [
+        4.185880008409132,
+        0.9686767450908196
+      ]
+    },
+    {
+      "cell": 55,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.99869624156,
+      "analytic_current_a": 162918.3809237287,
+      "booked_centroid_m": [
+        5.772009832118516,
+        1.001635454188124
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        1.001635454188124
+      ]
+    },
+    {
+      "cell": 56,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.3807894567,
+      "analytic_current_a": 169828.27027007233,
+      "booked_centroid_m": [
+        6.205751625293486,
+        1.2520443177351548
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        1.252044317735155
+      ]
+    },
+    {
+      "cell": 57,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 156438.49805480335,
+      "analytic_current_a": 156427.34316069426,
+      "booked_centroid_m": [
+        5.338237464434421,
+        1.2520443177351548
+      ],
+      "analytic_centroid_m": [
+        5.338237464434421,
+        1.252044317735155
+      ]
+    },
+    {
+      "cell": 58,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.99869624156,
+      "analytic_current_a": 162918.3809237287,
+      "booked_centroid_m": [
+        5.772009832118516,
+        1.502453181282186
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        1.502453181282186
+      ]
+    },
+    {
+      "cell": 59,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.38078945686,
+      "analytic_current_a": 169828.27027007245,
+      "booked_centroid_m": [
+        6.205751625293486,
+        1.752862044829217
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        1.7528620448292171
+      ]
+    },
+    {
+      "cell": 60,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.99869624138,
+      "analytic_current_a": 162918.38092372855,
+      "booked_centroid_m": [
+        5.772009832118516,
+        2.003270908376248
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        2.003270908376248
+      ]
+    },
+    {
+      "cell": 61,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.38864247786,
+      "analytic_current_a": 177074.76137302103,
+      "booked_centroid_m": [
+        6.639472490491006,
+        2.003270908376248
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        2.003270908376248
+      ]
+    },
+    {
+      "cell": 62,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.38078945654,
+      "analytic_current_a": 169828.2702700722,
+      "booked_centroid_m": [
+        6.205751625293486,
+        2.253679771923279
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        2.253679771923279
+      ]
+    },
+    {
+      "cell": 63,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.99869624144,
+      "analytic_current_a": 162918.38092372857,
+      "booked_centroid_m": [
+        5.772009832118516,
+        2.50408863547031
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        2.50408863547031
+      ]
+    },
+    {
+      "cell": 64,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.38864247798,
+      "analytic_current_a": 177074.76137302112,
+      "booked_centroid_m": [
+        6.639472490491006,
+        2.50408863547031
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        2.50408863547031
+      ]
+    },
+    {
+      "cell": 65,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 145201.3763750172,
+      "analytic_current_a": 145191.02274724588,
+      "booked_centroid_m": [
+        4.470538402468727,
+        1.2520443177351548
+      ],
+      "analytic_centroid_m": [
+        4.470538402468727,
+        1.2520443177351548
+      ]
+    },
+    {
+      "cell": 66,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 150477.33140424342,
+      "analytic_current_a": 150466.60157291353,
+      "booked_centroid_m": [
+        4.9044205034762305,
+        1.502453181282186
+      ],
+      "analytic_centroid_m": [
+        4.9044205034762305,
+        1.502453181282186
+      ]
+    },
+    {
+      "cell": 67,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 156438.49805480352,
+      "analytic_current_a": 156427.3431606944,
+      "booked_centroid_m": [
+        5.338237464434421,
+        1.7528620448292171
+      ],
+      "analytic_centroid_m": [
+        5.338237464434421,
+        1.7528620448292171
+      ]
+    },
+    {
+      "cell": 68,
+      "class": "separatrix-cut",
+      "analytic_area_fraction": 0.7723804053112352,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 112630.2734529651,
+      "analytic_current_a": 112553.29540346717,
+      "booked_centroid_m": [
+        4.518085241998527,
+        1.7321668333235989
+      ],
+      "analytic_centroid_m": [
+        4.518189004851456,
+        1.732146586862238
+      ]
+    },
+    {
+      "cell": 69,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 150477.33140424328,
+      "analytic_current_a": 150466.60157291335,
+      "booked_centroid_m": [
+        4.9044205034762305,
+        2.003270908376248
+      ],
+      "analytic_centroid_m": [
+        4.9044205034762305,
+        2.003270908376248
+      ]
+    },
+    {
+      "cell": 70,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 156438.49805480335,
+      "analytic_current_a": 156427.34316069426,
+      "booked_centroid_m": [
+        5.338237464434421,
+        2.253679771923279
+      ],
+      "analytic_centroid_m": [
+        5.338237464434421,
+        2.253679771923279
+      ]
+    },
+    {
+      "cell": 71,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.30927066437295414,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 38979.51911161892,
+      "analytic_current_a": 39018.78182481394,
+      "booked_centroid_m": [
+        4.617462654485995,
+        2.174286977344576
+      ],
+      "analytic_centroid_m": [
+        4.6174669338550824,
+        2.174457624351557
+      ]
+    },
+    {
+      "cell": 72,
+      "class": "separatrix-cut",
+      "analytic_area_fraction": 0.8331718620554011,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 125790.08078783052,
+      "analytic_current_a": 125716.25461531551,
+      "booked_centroid_m": [
+        4.936770512742046,
+        2.4829977927879128
+      ],
+      "analytic_centroid_m": [
+        4.936856521848764,
+        2.4829527344750915
+      ]
+    },
+    {
+      "cell": 73,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 74,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 156438.4980548033,
+      "analytic_current_a": 156427.34316069417,
+      "booked_centroid_m": [
+        5.338237464434421,
+        2.754497499017341
+      ],
+      "analytic_centroid_m": [
+        5.338237464434421,
+        2.754497499017341
+      ]
+    },
+    {
+      "cell": 75,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.6167757212285534,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 76388.02427824047,
+      "analytic_current_a": 76394.28671256626,
+      "booked_centroid_m": [
+        6.578697844991088,
+        -3.393323799574715
+      ],
+      "analytic_centroid_m": [
+        6.578949737617502,
+        -3.393211782935545
+      ]
+    },
+    {
+      "cell": 76,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.6219281386037194,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 43302.429859872485,
+      "analytic_current_a": 43327.28520276179,
+      "booked_centroid_m": [
+        6.935655539228306,
+        -3.1450977508403404
+      ],
+      "analytic_centroid_m": [
+        6.9359066112249375,
+        -3.144869314188543
+      ]
+    },
+    {
+      "cell": 77,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.3886424778,
+      "analytic_current_a": 177074.76137302097,
+      "booked_centroid_m": [
+        6.639472490491006,
+        -3.0049063625643724
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        -3.0049063625643724
+      ]
+    },
+    {
+      "cell": 78,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.9312709959950075,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 162674.78076603767,
+      "analytic_current_a": 162756.70692976506,
+      "booked_centroid_m": [
+        7.04858911413113,
+        -2.7406710874534412
+      ],
+      "analytic_centroid_m": [
+        7.048681647755985,
+        -2.7407431141861944
+      ]
+    },
+    {
+      "cell": 79,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.38864247757,
+      "analytic_current_a": 177074.7613730207,
+      "booked_centroid_m": [
+        6.639472490491006,
+        -2.50408863547031
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        -2.50408863547031
+      ]
+    },
+    {
+      "cell": 80,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.8145870203080601,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 44122.623938397235,
+      "analytic_current_a": 44172.64168405912,
+      "booked_centroid_m": [
+        7.342831585654186,
+        -2.4352029141600644
+      ],
+      "analytic_centroid_m": [
+        7.342959484320752,
+        -2.435087578734262
+      ]
+    },
+    {
+      "cell": 81,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 184608.9872047036,
+      "analytic_current_a": 184595.8236054012,
+      "booked_centroid_m": [
+        7.073179116213964,
+        -2.2536797719232795
+      ],
+      "analytic_centroid_m": [
+        7.073179116213964,
+        -2.253679771923279
+      ]
+    },
+    {
+      "cell": 82,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.38864247766,
+      "analytic_current_a": 177074.76137302082,
+      "booked_centroid_m": [
+        6.639472490491006,
+        -2.003270908376248
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        -2.003270908376248
+      ]
+    },
+    {
+      "cell": 83,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.948455544960695,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 115962.634802087,
+      "analytic_current_a": 116079.01922262946,
+      "booked_centroid_m": [
+        7.42061734777991,
+        -1.9810407893295405
+      ],
+      "analytic_centroid_m": [
+        7.4207622203753685,
+        -1.9810522229705578
+      ]
+    },
+    {
+      "cell": 84,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 184608.98720470336,
+      "analytic_current_a": 184595.82360540098,
+      "booked_centroid_m": [
+        7.073179116213964,
+        -1.7528620448292174
+      ],
+      "analytic_centroid_m": [
+        7.073179116213964,
+        -1.7528620448292174
+      ]
+    },
+    {
+      "cell": 85,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.984028898297131,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 165286.1919814361,
+      "analytic_current_a": 165366.6309105624,
+      "booked_centroid_m": [
+        7.474836147662626,
+        -1.4948936690972365
+      ],
+      "analytic_centroid_m": [
+        7.4749369486168264,
+        -1.4949338770004184
+      ]
+    },
+    {
+      "cell": 86,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 184608.98720470353,
+      "analytic_current_a": 184595.8236054012,
+      "booked_centroid_m": [
+        7.073179116213964,
+        -1.2520443177351552
+      ],
+      "analytic_centroid_m": [
+        7.073179116213964,
+        -1.2520443177351552
+      ]
+    },
+    {
+      "cell": 87,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.9977594920197084,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 188233.43735359045,
+      "analytic_current_a": 188227.93338542065,
+      "booked_centroid_m": [
+        7.501341720018086,
+        -1.0013615575589954
+      ],
+      "analytic_centroid_m": [
+        7.501351666666349,
+        -1.0013638544884804
+      ]
+    },
+    {
+      "cell": 88,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 184608.98720470347,
+      "analytic_current_a": 184595.8236054011,
+      "booked_centroid_m": [
+        7.073179116213964,
+        -0.7512265906410929
+      ],
+      "analytic_centroid_m": [
+        7.073179116213964,
+        -0.751226590641093
+      ]
+    },
+    {
+      "cell": 89,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.8783719288775834,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 6217.534329856659,
+      "analytic_current_a": 6228.280396178046,
+      "booked_centroid_m": [
+        7.693315888643378,
+        -1.2330237839375957
+      ],
+      "analytic_centroid_m": [
+        7.693363164481319,
+        -1.2329505012230473
+      ]
+    },
+    {
+      "cell": 90,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.9814116323662474,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 22625.066266014863,
+      "analytic_current_a": 22664.468024729544,
+      "booked_centroid_m": [
+        7.730833918470434,
+        -0.7312723311400439
+      ],
+      "analytic_centroid_m": [
+        7.730911182635598,
+        -0.7312053485169598
+      ]
+    },
+    {
+      "cell": 91,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.38864247777,
+      "analytic_current_a": 177074.76137302094,
+      "booked_centroid_m": [
+        6.639472490491006,
+        -0.500817727094062
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        -0.500817727094062
+      ]
+    },
+    {
+      "cell": 92,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.99869624135,
+      "analytic_current_a": 162918.38092372852,
+      "booked_centroid_m": [
+        5.772009832118516,
+        -0.5008177270940621
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        -0.5008177270940621
+      ]
+    },
+    {
+      "cell": 93,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.38078945663,
+      "analytic_current_a": 169828.27027007227,
+      "booked_centroid_m": [
+        6.205751625293486,
+        -0.25040886354703096
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        -0.250408863547031
+      ]
+    },
+    {
+      "cell": 94,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.388642478,
+      "analytic_current_a": 177074.76137302117,
+      "booked_centroid_m": [
+        6.639472490491006,
+        7.192868622408526e-17
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        2.82708272207653e-17
+      ]
+    },
+    {
+      "cell": 95,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.99869624127,
+      "analytic_current_a": 162918.3809237284,
+      "booked_centroid_m": [
+        5.772009832118516,
+        -4.218387213242621e-17
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        -8.963527031866946e-17
+      ]
+    },
+    {
+      "cell": 96,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.38078945654,
+      "analytic_current_a": 169828.2702700722,
+      "booked_centroid_m": [
+        6.205751625293486,
+        0.25040886354703107
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        0.250408863547031
+      ]
+    },
+    {
+      "cell": 97,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.38864247792,
+      "analytic_current_a": 177074.7613730211,
+      "booked_centroid_m": [
+        6.639472490491006,
+        0.500817727094062
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        0.500817727094062
+      ]
+    },
+    {
+      "cell": 98,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.99869624144,
+      "analytic_current_a": 162918.3809237286,
+      "booked_centroid_m": [
+        5.772009832118516,
+        0.5008177270940621
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        0.500817727094062
+      ]
+    },
+    {
+      "cell": 99,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.38078945642,
+      "analytic_current_a": 169828.27027007207,
+      "booked_centroid_m": [
+        6.205751625293486,
+        0.7512265906410931
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        0.7512265906410931
+      ]
+    },
+    {
+      "cell": 100,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.3886424776,
+      "analytic_current_a": 177074.76137302077,
+      "booked_centroid_m": [
+        6.6394724904910065,
+        1.0016354541881238
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        1.0016354541881238
+      ]
+    },
+    {
+      "cell": 101,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.9991453321618267,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 33842.10811912469,
+      "analytic_current_a": 33795.341369296606,
+      "booked_centroid_m": [
+        7.747941704452168,
+        -0.24283948213513987
+      ],
+      "analytic_centroid_m": [
+        7.7478712046322045,
+        -0.24306552985467425
+      ]
+    },
+    {
+      "cell": 102,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.9991453321486868,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 33842.10811941053,
+      "analytic_current_a": 33795.34153438318,
+      "booked_centroid_m": [
+        7.74794170445258,
+        0.24283948213519738
+      ],
+      "analytic_centroid_m": [
+        7.74787120488965,
+        0.24306552902201148
+      ]
+    },
+    {
+      "cell": 103,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.9814116323662506,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 22625.066266014936,
+      "analytic_current_a": 22664.46802476108,
+      "booked_centroid_m": [
+        7.730833918470434,
+        0.7312723311400441
+      ],
+      "analytic_centroid_m": [
+        7.730911182635657,
+        0.7312053485169153
+      ]
+    },
+    {
+      "cell": 104,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.9999818087145945,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 192283.6511451083,
+      "analytic_current_a": 192266.36623449653,
+      "booked_centroid_m": [
+        7.50676750153054,
+        -0.5008174254974807
+      ],
+      "analytic_centroid_m": [
+        7.5067622841800015,
+        -0.5008174076447782
+      ]
+    },
+    {
+      "cell": 105,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 184608.9872047037,
+      "analytic_current_a": 184595.82360540133,
+      "booked_centroid_m": [
+        7.073179116213964,
+        -0.25040886354703096
+      ],
+      "analytic_centroid_m": [
+        7.073179116213964,
+        -0.250408863547031
+      ]
+    },
+    {
+      "cell": 106,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 192357.50654446863,
+      "analytic_current_a": 192343.79043466653,
+      "booked_centroid_m": [
+        7.506876170502419,
+        1.5381908871940977e-16
+      ],
+      "analytic_centroid_m": [
+        7.5068761705024185,
+        1.136269673746047e-16
+      ]
+    },
+    {
+      "cell": 107,
+      "class": "interior",
+      "analytic_area_fraction": 0.9999999999999999,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 184608.98720470342,
+      "analytic_current_a": 184595.82360540103,
+      "booked_centroid_m": [
+        7.073179116213964,
+        0.2504088635470313
+      ],
+      "analytic_centroid_m": [
+        7.073179116213964,
+        0.2504088635470313
+      ]
+    },
+    {
+      "cell": 108,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.9999818087145943,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 192283.65114510822,
+      "analytic_current_a": 192266.36623449865,
+      "booked_centroid_m": [
+        7.50676750153054,
+        0.5008174254974807
+      ],
+      "analytic_centroid_m": [
+        7.506762284180004,
+        0.5008174076447784
+      ]
+    },
+    {
+      "cell": 109,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 184608.98720470342,
+      "analytic_current_a": 184595.82360540103,
+      "booked_centroid_m": [
+        7.073179116213964,
+        0.7512265906410932
+      ],
+      "analytic_centroid_m": [
+        7.073179116213964,
+        0.7512265906410932
+      ]
+    },
+    {
+      "cell": 110,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.9977594920197085,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 188233.43735359036,
+      "analytic_current_a": 188227.93338542298,
+      "booked_centroid_m": [
+        7.501341720018086,
+        1.0013615575589956
+      ],
+      "analytic_centroid_m": [
+        7.501351666666353,
+        1.0013638544884798
+      ]
+    },
+    {
+      "cell": 111,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 184608.98720470344,
+      "analytic_current_a": 184595.82360540103,
+      "booked_centroid_m": [
+        7.073179116213964,
+        1.252044317735155
+      ],
+      "analytic_centroid_m": [
+        7.073179116213964,
+        1.252044317735155
+      ]
+    },
+    {
+      "cell": 112,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.38864247795,
+      "analytic_current_a": 177074.76137302112,
+      "booked_centroid_m": [
+        6.639472490491006,
+        1.502453181282186
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        1.5024531812821862
+      ]
+    },
+    {
+      "cell": 113,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.9840288982971315,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 165286.191981436,
+      "analytic_current_a": 165366.63091049736,
+      "booked_centroid_m": [
+        7.474836147662626,
+        1.4948936690972365
+      ],
+      "analytic_centroid_m": [
+        7.474936948616755,
+        1.49493387700039
+      ]
+    },
+    {
+      "cell": 114,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.8783719288775836,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 6217.534329856582,
+      "analytic_current_a": 6228.280396165454,
+      "booked_centroid_m": [
+        7.693315888643378,
+        1.233023783937595
+      ],
+      "analytic_centroid_m": [
+        7.693363164481283,
+        1.2329505012230118
+      ]
+    },
+    {
+      "cell": 115,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 184608.98720470336,
+      "analytic_current_a": 184595.82360540098,
+      "booked_centroid_m": [
+        7.073179116213964,
+        1.7528620448292167
+      ],
+      "analytic_centroid_m": [
+        7.073179116213964,
+        1.752862044829217
+      ]
+    },
+    {
+      "cell": 116,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.948455544960695,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 115962.6348020872,
+      "analytic_current_a": 116079.0192225433,
+      "booked_centroid_m": [
+        7.42061734777991,
+        1.9810407893295408
+      ],
+      "analytic_centroid_m": [
+        7.420762220375266,
+        1.9810522229705574
+      ]
+    },
+    {
+      "cell": 117,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 184608.98720470342,
+      "analytic_current_a": 184595.82360540103,
+      "booked_centroid_m": [
+        7.073179116213964,
+        2.2536797719232786
+      ],
+      "analytic_centroid_m": [
+        7.073179116213964,
+        2.253679771923279
+      ]
+    },
+    {
+      "cell": 118,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.8145870203080604,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 44122.62393839723,
+      "analytic_current_a": 44172.641684043774,
+      "booked_centroid_m": [
+        7.342831585654186,
+        2.4352029141600644
+      ],
+      "analytic_centroid_m": [
+        7.342959484320715,
+        2.4350875787342967
+      ]
+    },
+    {
+      "cell": 119,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.9312709959950078,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 162674.78076603747,
+      "analytic_current_a": 162756.70692976768,
+      "booked_centroid_m": [
+        7.04858911413113,
+        2.7406710874534412
+      ],
+      "analytic_centroid_m": [
+        7.04868164775599,
+        2.7407431141861927
+      ]
+    },
+    {
+      "cell": 120,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.6219281386037194,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 43302.42985987248,
+      "analytic_current_a": 43327.28520272853,
+      "booked_centroid_m": [
+        6.935655539228306,
+        3.14509775084034
+      ],
+      "analytic_centroid_m": [
+        6.93590661122491,
+        3.1448693141884982
+      ]
+    },
+    {
+      "cell": 121,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.38078945654,
+      "analytic_current_a": 169828.2702700722,
+      "booked_centroid_m": [
+        6.205751625293486,
+        2.754497499017341
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        2.754497499017341
+      ]
+    },
+    {
+      "cell": 122,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 177087.38864247783,
+      "analytic_current_a": 177074.76137302097,
+      "booked_centroid_m": [
+        6.639472490491006,
+        3.004906362564372
+      ],
+      "analytic_centroid_m": [
+        6.639472490491006,
+        3.004906362564372
+      ]
+    },
+    {
+      "cell": 123,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 162929.9986962414,
+      "analytic_current_a": 162918.38092372857,
+      "booked_centroid_m": [
+        5.772009832118516,
+        3.004906362564372
+      ],
+      "analytic_centroid_m": [
+        5.772009832118516,
+        3.004906362564372
+      ]
+    },
+    {
+      "cell": 124,
+      "class": "interior",
+      "analytic_area_fraction": 1.0,
+      "wall_cut": false,
+      "x_point_cell": false,
+      "booked_current_a": 169840.38078945654,
+      "analytic_current_a": 169828.2702700722,
+      "booked_centroid_m": [
+        6.205751625293486,
+        3.255315226111403
+      ],
+      "analytic_centroid_m": [
+        6.205751625293486,
+        3.255315226111403
+      ]
+    },
+    {
+      "cell": 125,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.49898809775193254,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 78233.02293445646,
+      "analytic_current_a": 78229.94671302468,
+      "booked_centroid_m": [
+        5.81936755403265,
+        3.3990958527281556
+      ],
+      "analytic_centroid_m": [
+        5.819572198014024,
+        3.3991871555218487
+      ]
+    },
+    {
+      "cell": 126,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.2587711855725152,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 23231.994937623844,
+      "analytic_current_a": 23241.808255937154,
+      "booked_centroid_m": [
+        6.203449611859824,
+        3.5518647378032293
+      ],
+      "analytic_centroid_m": [
+        6.203990909310707,
+        3.551883854161799
+      ]
+    },
+    {
+      "cell": 127,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 128,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.09763202430306772,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 8796.533907427143,
+      "analytic_current_a": 8850.302242516467,
+      "booked_centroid_m": [
+        4.255143709167166,
+        1.4377787154261958
+      ],
+      "analytic_centroid_m": [
+        4.254978518577533,
+        1.4377433215726771
+      ]
+    },
+    {
+      "cell": 129,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 130,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.2066918452379742,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 22613.40528381244,
+      "analytic_current_a": 22660.630691808805,
+      "booked_centroid_m": [
+        5.059715591638333,
+        2.8798672405841677
+      ],
+      "analytic_centroid_m": [
+        5.059788185433327,
+        2.8801024048045587
+      ]
+    },
+    {
+      "cell": 131,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.45552442789927594,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 68569.44103976361,
+      "analytic_current_a": 68570.25163419083,
+      "booked_centroid_m": [
+        5.416898073629422,
+        3.1567706330830974
+      ],
+      "analytic_centroid_m": [
+        5.417068810793229,
+        3.1569240316529625
+      ]
+    },
+    {
+      "cell": 132,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 133,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.0,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_centroid_m": null,
+      "analytic_centroid_m": null
+    },
+    {
+      "cell": 134,
+      "class": "wall-cut",
+      "analytic_area_fraction": 0.6167757212285534,
+      "wall_cut": true,
+      "x_point_cell": false,
+      "booked_current_a": 76388.02427824074,
+      "analytic_current_a": 76394.28671259063,
+      "booked_centroid_m": [
+        6.578697844991088,
+        3.3933237995747145
+      ],
+      "analytic_centroid_m": [
+        6.578949737617457,
+        3.393211782935604
+      ]
+    }
+  ],
+  "x_point_placement_squared_error_reduction": 4.440892098500626e-16,
+  "centroid_control_current_max_change_a": 0.0,
+  "completed": true,
+  "green_common_operator_squared_error_reduction": -4.818692600494501e-08,
+  "green_fixed_exterior_squared_error_reduction": -2.146966839866593e-07,
+  "quadrature_orders": [
+    [
+      4,
+      16
+    ],
+    [
+      6,
+      32
+    ]
+  ],
+  "quadrature_difference_error_relative_norm": 2.3565155641557473e-06,
+  "quadrature_booked_difference_error_relative_norm": 3.3082692182887775e-05,
+  "green_change_error_relative_norm": 1.3407899732811115e-06,
+  "weak_rotation_control_pass": true
+}

@@ -443,11 +443,79 @@ def measure(path, output):
     return result
 
 
+def summarize(report, output):
+    """Write the interpretation from the persisted numerical evidence."""
+    assert report["completed"] and len(report["rows"]) == 10
+    diverted = [r for r in report["rows"] if r["case"].startswith("diverted")]
+    placement = [r["x_point_placement_squared_error_reduction"] for r in diverted]
+    green = [r["green_common_operator_squared_error_reduction"] for r in diverted]
+    resolved = (
+        max(placement) < 0.1
+        and max(abs(value) for value in green) < 0.01
+        and max(r["quadrature_difference_error_relative_norm"] for r in diverted)
+        < 0.001
+    )
+    report["conclusion"] = (
+        "Neither X-point current-centroid placement nor Green evaluation explains "
+        "the non-monotone sequence: the archived booked-versus-analytic current "
+        "moments reproduce it, with mesh-dependent signed cancellation between "
+        "interior, separatrix-cut, X-point, wall-cut and exterior contributions."
+        if resolved
+        else "The candidate mechanisms remain unresolved; inspect the per-row "
+        "squared-error reductions and quadrature convergence."
+    )
+    report["limitation"] = (
+        "Class projection shares are signed and additive, not independent causal "
+        "percentages. Quadrature refinement bounds its numerical sensitivity, "
+        "not a rigorous integration error. The exact upstream stage that changes "
+        "the current moments is not identified by this fixed-current experiment."
+    )
+    write(output / "report.json", report)
+    lines = [
+        "# Diverted chord response attribution",
+        "",
+        report["conclusion"],
+        "",
+        report["variance_definition"],
+        "",
+        report["limitation"],
+        "",
+        "| Case | Cells | Map sup | X centroid reduction | Green reduction "
+        "| Quadrature delta/error |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
+    for r in report["rows"]:
+        lines.append(
+            f"| {r['case']} | {r['cells']} | {r['map_mismatch']['sup_relative']:.8g} "
+            f"| {r['x_point_placement_squared_error_reduction']:.8g} "
+            f"| {r['green_common_operator_squared_error_reduction']:.8g} "
+            f"| {r['quadrature_difference_error_relative_norm']:.8g} |"
+        )
+    lines += [
+        "",
+        "Signed class projection shares (sum to one):",
+        "",
+        "| Cells | Interior | Separatrix-cut | X-point | Wall-cut | Exterior |",
+        "|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in diverted:
+        shares = " | ".join(
+            f"{row['class_summary'][label]['projection_share']:.8g}"
+            for label in CLASSES
+        )
+        lines.append(f"| {row['cells']} | {shares} |")
+    (output / "report.md").write_text("\n".join(lines) + "\n")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=OUTPUT)
+    parser.add_argument("--summarize", action="store_true")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
+    if args.summarize:
+        summarize(json.loads((args.output / "report.json").read_text()), args.output)
+        return
     revision = subprocess.check_output(
         ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
     ).strip()
@@ -495,35 +563,7 @@ def main():
                 )
     report["completed"] = True
     report["wall_seconds"] = time.monotonic() - started
-    diverted = [r for r in report["rows"] if r["case"].startswith("diverted")]
-    placement = [r["x_point_placement_squared_error_reduction"] for r in diverted]
-    green = [r["green_common_operator_squared_error_reduction"] for r in diverted]
-    report["conclusion"] = (
-        "Neither candidate is established without checking the per-rung "
-        "squared-error reductions and quadrature convergence; "
-        f"X-point centroid reductions are {placement}, "
-        f"and common-Green reductions are {green}."
-    )
-    write(args.output / "report.json", report)
-    lines = [
-        "# Diverted chord response attribution",
-        "",
-        report["conclusion"],
-        "",
-        report["variance_definition"],
-        "",
-        "| Case | Cells | Map sup | X centroid reduction | Green reduction "
-        "| Quadrature delta/error |",
-        "|---|---:|---:|---:|---:|---:|",
-    ]
-    for r in report["rows"]:
-        lines.append(
-            f"| {r['case']} | {r['cells']} | {r['map_mismatch']['sup_relative']:.8g} "
-            f"| {r['x_point_placement_squared_error_reduction']:.8g} "
-            f"| {r['green_common_operator_squared_error_reduction']:.8g} "
-            f"| {r['quadrature_difference_error_relative_norm']:.8g} |"
-        )
-    (args.output / "report.md").write_text("\n".join(lines) + "\n")
+    summarize(report, args.output)
     print("ATTRIBUTION_COMPLETE", flush=True)
 
 

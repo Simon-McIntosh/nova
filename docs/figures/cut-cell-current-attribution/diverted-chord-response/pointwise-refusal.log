@@ -1,0 +1,44 @@
+revision=f8c24a819fc821e6549b791892295da30323d2f9 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution command=/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/benchmarks/diverted_chord_response_attribution.py
+name, uuid
+NVIDIA H200 NVL, GPU-492a2dee-88e3-a142-6707-7ade0192889a
+revision=c07565b0d28d6b2698b7eeb68ebd284e905f4b85 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/benchmarks/diverted_chord_response_attribution.py']
+device=[CudaDevice(id=0)] x64=True
+REPRODUCED diverted-single-null-cells-110-chord map=0.0950848225228 plasma=0.00735661869453
+ATTRIBUTED diverted-single-null-cells-110-chord placement=0.0208442 green=-9.66879e-08
+REPRODUCED weak-rotation-reactor-static-cells-110-chord map=9.54028928988e-05 plasma=2.45257636163e-05
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/benchmarks/diverted_chord_response_attribution.py", line 529, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/benchmarks/diverted_chord_response_attribution.py", line 481, in main
+    result = measure(path, args.output)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/benchmarks/diverted_chord_response_attribution.py", line 282, in measure
+    np.testing.assert_allclose(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        reconstructed, error, rtol=1e-9, atol=2e-12 * np.max(abs(error))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/numpy/testing/_private/utils.py", line 1768, in assert_allclose
+    assert_array_compare(compare, actual, desired, err_msg=str(err_msg),
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         verbose=verbose, header=header, equal_nan=equal_nan,
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         strict=strict)
+                         ^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/numpy/testing/_private/utils.py", line 983, in assert_array_compare
+    raise AssertionError(msg)
+AssertionError: 
+Not equal to tolerance rtol=1e-09, atol=9.48283e-15
+
+Mismatched elements: 1 / 772 (0.13%)
+Mismatch at index:
+ [725]: 6.942521677079155e-06 (ACTUAL), 6.942521693531489e-06 (DESIRED)
+Max absolute difference among violations: 1.64523343e-14
+Max relative difference among violations: 2.36979228e-09
+ ACTUAL: array([ 2.588713e-04,  9.022713e-04, -7.917191e-05,  7.121079e-04,
+        1.331706e-03,  3.731735e-04,  1.422270e-03,  2.058367e-03,
+        9.839963e-04,  2.102275e-03,  1.372896e-03,  1.590321e-03,...
+ DESIRED: array([ 2.588713e-04,  9.022713e-04, -7.917191e-05,  7.121079e-04,
+        1.331706e-03,  3.731735e-04,  1.422270e-03,  2.058367e-03,
+        9.839963e-04,  2.102275e-03,  1.372896e-03,  1.590321e-03,...

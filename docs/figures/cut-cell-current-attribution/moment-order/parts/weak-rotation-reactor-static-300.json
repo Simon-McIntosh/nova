@@ -7,88 +7,88 @@
       "clipped_reference_not_translated": {
         "all": {
           "count": 1529,
-          "rms_over_span": 0.0018175162776931876,
-          "sup_over_span": 0.0033404686464051417
+          "rms_over_span": 0.0018175162775241273,
+          "sup_over_span": 0.0033404686462402983
         },
         "grid": {
           "count": 342,
-          "rms_over_span": 0.0020359445374971085,
-          "sup_over_span": 0.003167824174762488
+          "rms_over_span": 0.002035944537216915,
+          "sup_over_span": 0.003167824174176193
         },
         "sample": {
           "count": 1066,
-          "rms_over_span": 0.001830257184267419,
-          "sup_over_span": 0.0033404686464051417
+          "rms_over_span": 0.0018302571840963613,
+          "sup_over_span": 0.0033404686462402983
         },
         "wall": {
           "count": 121,
-          "rms_over_span": 0.0007175534747904113,
-          "sup_over_span": 0.001611176327974337
+          "rms_over_span": 0.0007175534754702273,
+          "sup_over_span": 0.001611176330592178
         }
       },
       "first_order_axes_swapped": {
         "all": {
           "count": 1529,
-          "rms_over_span": 0.0021912323065443433,
-          "sup_over_span": 0.004329064465100542
+          "rms_over_span": 0.0021912323067699237,
+          "sup_over_span": 0.004329064463846729
         },
         "grid": {
           "count": 342,
-          "rms_over_span": 0.0022771349376688632,
-          "sup_over_span": 0.004130347555247815
+          "rms_over_span": 0.0022771349378058006,
+          "sup_over_span": 0.0041303475533195355
         },
         "sample": {
           "count": 1066,
-          "rms_over_span": 0.0022004961399893284,
-          "sup_over_span": 0.004329064465100542
+          "rms_over_span": 0.0022004961402112633,
+          "sup_over_span": 0.004329064463846729
         },
         "wall": {
           "count": 121,
-          "rms_over_span": 0.0018325278587985924,
-          "sup_over_span": 0.0034313389385925565
+          "rms_over_span": 0.0018325278593782936,
+          "sup_over_span": 0.003431338936411262
         }
       },
       "first_order_sign_flipped": {
         "all": {
           "count": 1529,
-          "rms_over_span": 0.004032499609819047,
-          "sup_over_span": 0.007355369795175096
+          "rms_over_span": 0.004032499609547023,
+          "sup_over_span": 0.007355369792372286
         },
         "grid": {
           "count": 342,
-          "rms_over_span": 0.0044230125332210485,
-          "sup_over_span": 0.006861533288626889
+          "rms_over_span": 0.004423012532692019,
+          "sup_over_span": 0.006861533286331546
         },
         "sample": {
           "count": 1066,
-          "rms_over_span": 0.0040708289087585635,
-          "sup_over_span": 0.007355369795175096
+          "rms_over_span": 0.004070828908472085,
+          "sup_over_span": 0.007355369792372286
         },
         "wall": {
           "count": 121,
-          "rms_over_span": 0.002047400663886543,
-          "sup_over_span": 0.0046592734953379835
+          "rms_over_span": 0.0020474006653647464,
+          "sup_over_span": 0.004659273496042399
         }
       }
     },
-    "atomic_vs_clipped_reference_translation_max_abs_a_m": 6.236830496497703e-12,
-    "atomic_vs_clipped_reference_translation_relative_sup": 2.6616315915993355e-13,
-    "committed_vs_full_gram_linear_coefficient_relative_sup": 2.8231799460008174e-14,
-    "full_gram_condition_max": 9737036652.71267,
+    "atomic_vs_clipped_reference_translation_max_abs_a_m": 5.229594535194337e-12,
+    "atomic_vs_clipped_reference_translation_relative_sup": 7.603917495657697e-13,
+    "committed_vs_full_gram_linear_coefficient_relative_sup": 2.823179946885082e-14,
+    "full_gram_condition_max": 9737036652.71372,
     "linear_block_quadrature_checks": {
-      "radial_far_relative_rms": 2.578753476620249e-08,
+      "radial_far_relative_rms": 2.5787534766202482e-08,
       "uniform_far_relative_rms": 5.1215150060635284e-12,
-      "vertical_far_relative_rms": 1.8449934882633526e-08
+      "vertical_far_relative_rms": 1.8449934882633522e-08
     },
     "projection_relative_l2": {
       "cut": {
-        "order_one": 0.1972134934341838,
-        "order_two": 0.1590796330490217,
-        "order_zero": 0.28350216174427045
+        "order_one": 0.19721349333577437,
+        "order_two": 0.15907963296688724,
+        "order_zero": 0.28350216165400843
       },
       "whole": {
         "order_one": 4.8423566822854895e-05,
-        "order_two": 8.227752054343869e-07,
+        "order_two": 8.227752054342629e-07,
         "order_zero": 0.007462906939360146
       }
     }
@@ -101,23 +101,23 @@
   "reference_stability": {
     "all": {
       "count": 1529,
-      "rms_over_span": 6.427059402065436e-06,
-      "sup_over_span": 0.0001019963270938356
+      "rms_over_span": 6.42705931736724e-06,
+      "sup_over_span": 0.00010199632709385222
     },
     "grid": {
       "count": 342,
-      "rms_over_span": 9.89302961253079e-06,
-      "sup_over_span": 9.725699938227585e-05
+      "rms_over_span": 9.893029363056264e-06,
+      "sup_over_span": 9.725699069628815e-05
     },
     "sample": {
       "count": 1066,
-      "rms_over_span": 5.269790977489189e-06,
-      "sup_over_span": 0.0001019963270938356
+      "rms_over_span": 5.269790982270144e-06,
+      "sup_over_span": 0.00010199632709385222
     },
     "wall": {
       "count": 121,
-      "rms_over_span": 8.269511616288616e-07,
-      "sup_over_span": 6.860419206749274e-06
+      "rms_over_span": 8.269510106379282e-07,
+      "sup_over_span": 6.860416654489014e-06
     }
   },
   "requested_cells": -300,
@@ -147,67 +147,67 @@
     "order_one": {
       "all": {
         "count": 1529,
-        "rms_over_span": 0.00011012186669138818,
-        "sup_over_span": 0.0007083580530813793
+        "rms_over_span": 0.00011012186667803506,
+        "sup_over_span": 0.000708358052992249
       },
       "grid": {
         "count": 342,
-        "rms_over_span": 0.00011933617440589328,
-        "sup_over_span": 0.0006699116960399966
+        "rms_over_span": 0.00011933617437453793,
+        "sup_over_span": 0.0006699116956844341
       },
       "sample": {
         "count": 1066,
-        "rms_over_span": 0.00011134608778669209,
-        "sup_over_span": 0.0007083580530813793
+        "rms_over_span": 0.00011134608777927056,
+        "sup_over_span": 0.000708358052992249
       },
       "wall": {
         "count": 121,
-        "rms_over_span": 6.133745395588825e-05,
-        "sup_over_span": 0.0001991497927691771
+        "rms_over_span": 6.133745394406566e-05,
+        "sup_over_span": 0.00019914979273850865
       }
     },
     "order_two": {
       "all": {
         "count": 1529,
-        "rms_over_span": 3.2435384171329714e-05,
-        "sup_over_span": 0.00018290097683110456
+        "rms_over_span": 3.2435384161158664e-05,
+        "sup_over_span": 0.00018290097683134417
       },
       "grid": {
         "count": 342,
-        "rms_over_span": 2.191155445685242e-05,
-        "sup_over_span": 0.00013635743508407265
+        "rms_over_span": 2.191155445419556e-05,
+        "sup_over_span": 0.0001363574351696089
       },
       "sample": {
         "count": 1066,
-        "rms_over_span": 3.629308935986863e-05,
-        "sup_over_span": 0.00018290097683110456
+        "rms_over_span": 3.629308934820533e-05,
+        "sup_over_span": 0.00018290097683134417
       },
       "wall": {
         "count": 121,
-        "rms_over_span": 1.8242688458095985e-05,
-        "sup_over_span": 0.00010927278393462439
+        "rms_over_span": 1.824268844302142e-05,
+        "sup_over_span": 0.00010927278379374111
       }
     },
     "order_zero": {
       "all": {
         "count": 1529,
-        "rms_over_span": 0.0020238280092905103,
-        "sup_over_span": 0.0035810320498905666
+        "rms_over_span": 0.00202382800915127,
+        "sup_over_span": 0.0035810320484975476
       },
       "grid": {
         "count": 342,
-        "rms_over_span": 0.0022195074591138714,
-        "sup_over_span": 0.003375852205615444
+        "rms_over_span": 0.0022195074588414448,
+        "sup_over_span": 0.003375852204466814
       },
       "sample": {
         "count": 1066,
-        "rms_over_span": 0.002043392378355271,
-        "sup_over_span": 0.0035810320498905666
+        "rms_over_span": 0.0020433923782077154,
+        "sup_over_span": 0.0035810320484975476
       },
       "wall": {
         "count": 121,
-        "rms_over_span": 0.0010236984912410053,
-        "sup_over_span": 0.0023341267713038205
+        "rms_over_span": 0.001023698492026788,
+        "sup_over_span": 0.0023341267717504302
       }
     }
   },
@@ -311,18 +311,18 @@
         "far": {
           "all": {
             "count": 587,
-            "rms_over_span": 1.3247832470306995e-05,
-            "sup_over_span": 7.006828124091162e-05
+            "rms_over_span": 1.3247832470421068e-05,
+            "sup_over_span": 7.006828115175144e-05
           },
           "grid": {
             "count": 174,
-            "rms_over_span": 9.78029312376418e-06,
-            "sup_over_span": 3.678692011671226e-05
+            "rms_over_span": 9.780293125673702e-06,
+            "sup_over_span": 3.6786920077627933e-05
           },
           "sample": {
             "count": 413,
-            "rms_over_span": 1.446191073126346e-05,
-            "sup_over_span": 7.006828124091162e-05
+            "rms_over_span": 1.4461910730867918e-05,
+            "sup_over_span": 7.006828115175144e-05
           },
           "wall": {
             "count": 0,
@@ -333,23 +333,23 @@
         "self_and_first_ring": {
           "all": {
             "count": 942,
-            "rms_over_span": 0.00013982694346083185,
-            "sup_over_span": 0.0007083642751974723
+            "rms_over_span": 0.0001398269434437537,
+            "sup_over_span": 0.000708364275108342
           },
           "grid": {
             "count": 168,
-            "rms_over_span": 0.00016970353350341343,
-            "sup_over_span": 0.0006699168850139658
+            "rms_over_span": 0.00016970353345798677,
+            "sup_over_span": 0.000669916884659122
           },
           "sample": {
             "count": 653,
-            "rms_over_span": 0.0001417677306337877,
-            "sup_over_span": 0.0007083642751974723
+            "rms_over_span": 0.0001417677306244176,
+            "sup_over_span": 0.000708364275108342
           },
           "wall": {
             "count": 121,
-            "rms_over_span": 6.13383657669478e-05,
-            "sup_over_span": 0.00019916514784164074
+            "rms_over_span": 6.13383657552351e-05,
+            "sup_over_span": 0.00019916514781318854
           }
         }
       },
@@ -405,18 +405,18 @@
         "far": {
           "all": {
             "count": 587,
-            "rms_over_span": 1.4385570018862784e-06,
-            "sup_over_span": 1.3371667321402997e-05
+            "rms_over_span": 1.4385570021477225e-06,
+            "sup_over_span": 1.3371667320624304e-05
           },
           "grid": {
             "count": 174,
-            "rms_over_span": 6.487590582633097e-07,
-            "sup_over_span": 3.78564544136866e-06
+            "rms_over_span": 6.487590582824148e-07,
+            "sup_over_span": 3.7856454416681567e-06
           },
           "sample": {
             "count": 413,
-            "rms_over_span": 1.6625270158978386e-06,
-            "sup_over_span": 1.3371667321402997e-05
+            "rms_over_span": 1.6625270162162303e-06,
+            "sup_over_span": 1.3371667320624304e-05
           },
           "wall": {
             "count": 0,
@@ -427,23 +427,23 @@
         "self_and_first_ring": {
           "all": {
             "count": 942,
-            "rms_over_span": 4.1017635153381655e-05,
-            "sup_over_span": 0.00018290095042196056
+            "rms_over_span": 4.101763514047073e-05,
+            "sup_over_span": 0.00018290095042249965
           },
           "grid": {
             "count": 168,
-            "rms_over_span": 2.9202269932737562e-05,
-            "sup_over_span": 0.0001363574118450418
+            "rms_over_span": 2.9202269928988557e-05,
+            "sup_over_span": 0.00013635741193063797
           },
           "sample": {
             "count": 653,
-            "rms_over_span": 4.632481428925133e-05,
-            "sup_over_span": 0.00018290095042196056
+            "rms_over_span": 4.6324814274459314e-05,
+            "sup_over_span": 0.00018290095042249965
           },
           "wall": {
             "count": 121,
-            "rms_over_span": 1.8242687554639354e-05,
-            "sup_over_span": 0.00010927279741233742
+            "rms_over_span": 1.8242687539685987e-05,
+            "sup_over_span": 0.00010927279727031607
           }
         }
       },
@@ -451,44 +451,44 @@
         "far": {
           "all": {
             "count": 491,
-            "rms_over_span": 2.700818467870009e-11,
-            "sup_over_span": 1.265431262217022e-10
+            "rms_over_span": 2.700817717560853e-11,
+            "sup_over_span": 1.2654288662430408e-10
           },
           "grid": {
             "count": 46,
-            "rms_over_span": 2.1799086157786916e-11,
-            "sup_over_span": 4.628662335655192e-11
+            "rms_over_span": 2.179908192404954e-11,
+            "sup_over_span": 4.62863837591538e-11
           },
           "sample": {
             "count": 346,
-            "rms_over_span": 2.927567876872224e-11,
-            "sup_over_span": 1.265431262217022e-10
+            "rms_over_span": 2.927566919234159e-11,
+            "sup_over_span": 1.2654288662430408e-10
           },
           "wall": {
             "count": 99,
-            "rms_over_span": 2.0038401798291262e-11,
+            "rms_over_span": 2.0038402680243875e-11,
             "sup_over_span": 4.980798631677784e-11
           }
         },
         "self_and_first_ring": {
           "all": {
             "count": 1038,
-            "rms_over_span": 4.539223159566714e-06,
+            "rms_over_span": 4.5392231595778e-06,
             "sup_over_span": 2.91331553912449e-05
           },
           "grid": {
             "count": 296,
-            "rms_over_span": 8.118220600718429e-06,
+            "rms_over_span": 8.118220600734458e-06,
             "sup_over_span": 1.3109310425428316e-05
           },
           "sample": {
             "count": 720,
-            "rms_over_span": 1.6156740855515391e-06,
+            "rms_over_span": 1.6156740855633283e-06,
             "sup_over_span": 2.91331553912449e-05
           },
           "wall": {
             "count": 22,
-            "rms_over_span": 4.5012318428163415e-11,
+            "rms_over_span": 4.5012323684008875e-11,
             "sup_over_span": 1.0965174925137038e-10
           }
         }
@@ -499,18 +499,18 @@
         "far": {
           "all": {
             "count": 587,
-            "rms_over_span": 0.0022807263060920383,
-            "sup_over_span": 0.003064293021809622
+            "rms_over_span": 0.00228072630568465,
+            "sup_over_span": 0.0030642930210157755
           },
           "grid": {
             "count": 174,
-            "rms_over_span": 0.002308001700467961,
-            "sup_over_span": 0.002963023225859161
+            "rms_over_span": 0.002308001700050365,
+            "sup_over_span": 0.0029630232259071406
           },
           "sample": {
             "count": 413,
-            "rms_over_span": 0.0022691368189082656,
-            "sup_over_span": 0.003064293021809622
+            "rms_over_span": 0.0022691368185052342,
+            "sup_over_span": 0.0030642930210157755
           },
           "wall": {
             "count": 0,
@@ -521,23 +521,23 @@
         "self_and_first_ring": {
           "all": {
             "count": 942,
-            "rms_over_span": 0.001481907715119069,
-            "sup_over_span": 0.0033547667244643795
+            "rms_over_span": 0.0014819077151954942,
+            "sup_over_span": 0.0033547667240196267
           },
           "grid": {
             "count": 168,
-            "rms_over_span": 0.0017489548777516375,
-            "sup_over_span": 0.003171299793870724
+            "rms_over_span": 0.0017489548776748083,
+            "sup_over_span": 0.003171299793285867
           },
           "sample": {
             "count": 653,
-            "rms_over_span": 0.0015093694775661745,
-            "sup_over_span": 0.0033547667244643795
+            "rms_over_span": 0.0015093694776325715,
+            "sup_over_span": 0.0033547667240196267
           },
           "wall": {
             "count": 121,
-            "rms_over_span": 0.0007448543335208942,
-            "sup_over_span": 0.0016608433752372928
+            "rms_over_span": 0.0007448543342289865,
+            "sup_over_span": 0.0016608433767584367
           }
         }
       },

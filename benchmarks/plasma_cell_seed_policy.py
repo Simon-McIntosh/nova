@@ -22,6 +22,11 @@ measures the declared one-trip control, records the seed flux ranges, and
 measures only the cases the receipt lacks, leaving a case's arms as the
 documented comparison state.  A crash in a later part of a measurement
 therefore does not require the earlier arms to be measured again.
+
+The per-case verdict and the receipt-wide verdict field are derived from
+the arms the receipt carries, on every write and on demand, so a row whose
+arms landed before a crash cannot disagree with the answer the receipt
+reports for it.
 """
 
 from __future__ import annotations
@@ -337,16 +342,16 @@ def _production_seed_state(profile, built):
     return np.asarray(seed, dtype=np.float64), branch, route_receipt
 
 
-def _run_control(profile, built, row, reference, pitch, carrier, seeds, negative_log):
-    """Run the declared one-trip control and record the seed flux ranges.
+def _record_seed_flux_ranges(row, built, seeds):
+    """Record every seed's flux range beside the arms, against the analytic range.
 
-    The control is the analytic-seed arm with the active-set budget forced to
-    one trip, alongside the route's own seed under the same budget so the
-    declared residual is measured against the arm it came from.  Each seed's
-    flux range is recorded beside the arms against the analytic range.
+    The route's own seed is built here too, so each case's record answers the
+    same question the first-step node raised: how much larger is the seed the
+    route actually uses than the analytic state it is compared against.
     """
-    operator = built["operator"]
-    production_state, _branch, route_receipt = _production_seed_state(profile, built)
+    production_state, branch, route_receipt = _production_seed_state(
+        built["profile"], built
+    )
     row["seed_flux_ranges"] = _seed_flux_ranges(
         [
             ("analytic", np.asarray(built["analytic"], dtype=np.float64)),
@@ -357,6 +362,28 @@ def _run_control(profile, built, row, reference, pitch, carrier, seeds, negative
             (PRODUCTION_SEED_POLICY, production_state),
         ]
     )
+    return production_state, branch, route_receipt
+
+
+def _run_control(
+    profile,
+    built,
+    row,
+    reference,
+    pitch,
+    carrier,
+    seeds,
+    negative_log,
+    production,
+):
+    """Run the declared one-trip control on each seed under a one-trip budget.
+
+    The control is the analytic-seed arm with the active-set budget forced to
+    one trip, alongside the route's own seed under the same budget so the
+    declared residual is measured against the arm it came from.
+    """
+    operator = built["operator"]
+    production_state, _branch, route_receipt = production
     control_arms = [
         (
             "analytic_seed",
@@ -550,13 +577,39 @@ def _construction(case_name):
     }
 
 
+def _case_verdict(row):
+    """Answer the seed-policy question from the two arms a case carries."""
+    arms = {arm["seed_policy"]: arm for arm in row["arms"]}
+    analytic = arms.get("analytic")
+    disc = arms.get("current_centroid_disc")
+    if analytic is None or disc is None:
+        return None
+    if disc["converged"] and not analytic["converged"]:
+        return "disc_converges_where_analytic_does_not"
+    if analytic["converged"] and not disc["converged"]:
+        return "analytic_converges_where_disc_does_not"
+    if analytic["converged"] and disc["converged"]:
+        return "both_converge"
+    return "both_fail"
+
+
 def _refresh_verdict(receipt):
     """One field answering the seed-policy question at the cases measured.
 
     The answer is carried as that verdict's own name when every case agrees
     and as a case-keyed mapping when they do not, so a reader never has to
-    average two answers into one word.
+    average two answers into one word.  Each case row's verdict is derived
+    from the arms it carries whenever the row does not already state one,
+    so a row whose arms landed before a crash still reports an answer its
+    own arms support.
     """
+    for row in receipt["cases"]:
+        if "seed_policy_verdict" not in row and len(row.get("arms", ())) == len(
+            SEED_POLICIES
+        ):
+            derived = _case_verdict(row)
+            if derived is not None:
+                row["seed_policy_verdict"] = derived
     verdicts = {
         row["case"]: row["seed_policy_verdict"]
         for row in receipt["cases"]
@@ -614,15 +667,7 @@ def _run_case(built, receipt, output, negative_log):
         row["arms"].append(arm)
         states["analytic_seed" if policy == "analytic" else "disc_seed"] = state
         _write_receipt(output, receipt)
-    analytic_arm, disc_arm = row["arms"][0], row["arms"][1]
-    if disc_arm["converged"] and not analytic_arm["converged"]:
-        verdict = "disc_converges_where_analytic_does_not"
-    elif analytic_arm["converged"] and not disc_arm["converged"]:
-        verdict = "analytic_converges_where_disc_does_not"
-    elif analytic_arm["converged"] and disc_arm["converged"]:
-        verdict = "both_converge"
-    else:
-        verdict = "both_fail"
+    verdict = _case_verdict(row)
     row["seed_policy_verdict"] = verdict
     print("VERDICT " + case_name + " " + verdict, flush=True)
     np.savez(
@@ -632,10 +677,19 @@ def _run_case(built, receipt, output, negative_log):
         analytic=built["analytic"],
         **states,
     )
+    production = _record_seed_flux_ranges(row, built, seeds)
     if case_name == CASES[0]:
         receipt["negative_control"].extend(
             _run_control(
-                profile, built, row, reference, pitch, carrier, seeds, negative_log
+                profile,
+                built,
+                row,
+                reference,
+                pitch,
+                carrier,
+                seeds,
+                negative_log,
+                production,
             )
         )
     _write_receipt(output, receipt)
@@ -733,18 +787,21 @@ def complete_receipt(output, negative_log):
                 continue
             seeds = _policy_seeds(built, built["profile"])
             existing["seed_rebuilds"] = _seed_rebuild_records(existing, seeds)
-            receipt["negative_control"].extend(
-                _run_control(
-                    built["profile"],
-                    built,
-                    existing,
-                    existing["reference_nulls"],
-                    float(existing["characteristic_pitch_m"]),
-                    carrier,
-                    seeds,
-                    negative_log,
+            production = _record_seed_flux_ranges(existing, built, seeds)
+            if case_name == CASES[0]:
+                receipt["negative_control"].extend(
+                    _run_control(
+                        built["profile"],
+                        built,
+                        existing,
+                        existing["reference_nulls"],
+                        float(existing["characteristic_pitch_m"]),
+                        carrier,
+                        seeds,
+                        negative_log,
+                        production,
+                    )
                 )
-            )
             _write_receipt(output, receipt)
         render(receipt, output)
         receipt["figure_src"] = FIGURE_URL + "/" + FIGURE_STEM + ".png"
@@ -837,18 +894,44 @@ def measure(output, negative_log):
     print("MEASUREMENT_COMPLETE", flush=True)
 
 
+def derive_verdicts(output):
+    """Re-derive the receipt's seed-policy answers from the arms it carries.
+
+    No measurement and no GPU: the arms are the evidence, and a row written
+    before a crash carries the arms its verdict rests on, so the answer is
+    recomputed here rather than left absent.
+    """
+    receipt_path = output / (FIGURE_STEM + ".json")
+    receipt = json.loads(receipt_path.read_text())
+    _write_receipt(output, receipt)
+    print(
+        "DERIVED " + json.dumps(receipt.get("seed_policy_verdict"), allow_nan=False),
+        flush=True,
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--negative-control-log", type=Path, required=True)
+    parser.add_argument("--negative-control-log", type=Path, required=False)
     parser.add_argument("--render-only", action="store_true")
+    parser.add_argument(
+        "--derive-verdicts",
+        action="store_true",
+        help="refresh the receipt's seed-policy answers from its arms; no GPU",
+    )
     parser.add_argument(
         "--complete-receipt",
         action="store_true",
         help="add the control and any case the existing receipt lacks",
     )
     arguments = parser.parse_args()
-    if not arguments.negative_control_log.parent.is_dir():
+    if arguments.derive_verdicts:
+        derive_verdicts(arguments.output)
+        return
+    if arguments.negative_control_log is None or not (
+        arguments.negative_control_log.parent.is_dir()
+    ):
         parser.error("negative control log directory is absent")
     if arguments.complete_receipt:
         complete_receipt(arguments.output, arguments.negative_control_log)

@@ -249,8 +249,688 @@
           true,
           "vessel"
         ]
+      ],
+      "seed_rebuilds": [
+        {
+          "case": "diverted-single-null",
+          "seed_policy": "analytic",
+          "recorded_digest": "6215c9f34c86f29eeb70f2773966d3c0142f965d621cd3d31c1359a93c354182",
+          "rebuilt_digest": "6215c9f34c86f29eeb70f2773966d3c0142f965d621cd3d31c1359a93c354182",
+          "digest_matches": true,
+          "construction_fields_checked": [],
+          "rebuilt_amplitude_wb": 0.016165283306401903
+        },
+        {
+          "case": "diverted-single-null",
+          "seed_policy": "current_centroid_disc",
+          "recorded_digest": "85c4ce76c65d0eed9ece3ca2b1c15ed2f923a1b2d2f8594d698eb86859404356",
+          "rebuilt_digest": "acedbfa332130a15d60d70e6bdd227cc73880c945e42c655b0caa3b3c6f7b50e",
+          "digest_matches": false,
+          "construction_fields_checked": [
+            "seed_branch_index",
+            "seed_radius_m",
+            "supported_cell_count"
+          ],
+          "rebuilt_amplitude_wb": 0.02403355686380935
+        }
+      ],
+      "seed_flux_ranges": [
+        {
+          "seed_policy": "analytic",
+          "seed_state_digest": "6215c9f34c86f29eeb70f2773966d3c0142f965d621cd3d31c1359a93c354182",
+          "min_wb": -0.010490890294918892,
+          "max_wb": 0.005674393011483011,
+          "amplitude_wb": 0.016165283306401903,
+          "abs_max_wb": 0.010490890294918892,
+          "nonfinite_count": 0,
+          "sample_count": 730,
+          "analytic_amplitude_wb": 0.016165283306401903,
+          "amplitude_ratio_to_analytic": 1.0
+        },
+        {
+          "seed_policy": "current_centroid_disc",
+          "seed_state_digest": "acedbfa332130a15d60d70e6bdd227cc73880c945e42c655b0caa3b3c6f7b50e",
+          "min_wb": -0.0130513870482163,
+          "max_wb": 0.010982169815593051,
+          "amplitude_wb": 0.02403355686380935,
+          "abs_max_wb": 0.0130513870482163,
+          "nonfinite_count": 0,
+          "sample_count": 730,
+          "analytic_amplitude_wb": 0.016165283306401903,
+          "amplitude_ratio_to_analytic": 1.4867389830583044
+        },
+        {
+          "seed_policy": "production_route_seed",
+          "seed_state_digest": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883",
+          "min_wb": -0.06683719786065942,
+          "max_wb": 0.009366664604623438,
+          "amplitude_wb": 0.07620386246528285,
+          "abs_max_wb": 0.06683719786065942,
+          "nonfinite_count": 0,
+          "sample_count": 730,
+          "analytic_amplitude_wb": 0.016165283306401903,
+          "amplitude_ratio_to_analytic": 4.714044351768583
+        }
+      ],
+      "contour_levels_wb": [
+        -7.866768735850362e-07,
+        0.00040739945564092345,
+        0.0008155855881554319,
+        0.0012237717206699404,
+        0.001631957853184449,
+        0.0020401439856989573,
+        0.002448330118213466,
+        0.0028565162507279743,
+        0.003264702383242483,
+        0.0036728885157569914,
+        0.0040810746482714995,
+        0.004489260780786008,
+        0.0048974469133005166,
+        0.005305633045815025,
+        0.005713819178329534
+      ],
+      "panels": [
+        {
+          "caption": "Analytic input\nresidual=n/a; converged=n/a; trips=0",
+          "contour_segments": 18,
+          "reference_markers": {
+            "x_points_drawn": 1,
+            "x_points_dropped_outside_wall": 0,
+            "strike_points_drawn": 0,
+            "other_x_points_drawn": 0
+          },
+          "panel_markers": {
+            "x_points_drawn": 1,
+            "x_points_dropped_outside_wall": 0,
+            "strike_points_drawn": 0,
+            "other_x_points_drawn": 0
+          },
+          "axis_off": true
+        },
+        {
+          "caption": "seed=analytic\nresidual=0.264311; converged=False; trips=2\nseed amplitude=0.0162 Wb (1.00x analytic)",
+          "contour_segments": 21,
+          "reference_markers": {
+            "x_points_drawn": 1,
+            "x_points_dropped_outside_wall": 0,
+            "strike_points_drawn": 0,
+            "other_x_points_drawn": 0
+          },
+          "panel_markers": {
+            "x_points_drawn": 1,
+            "x_points_dropped_outside_wall": 0,
+            "strike_points_drawn": 0,
+            "other_x_points_drawn": 1
+          },
+          "axis_off": true
+        },
+        {
+          "caption": "seed=current_centroid_disc\nresidual=0.415175; converged=False; trips=14\nseed amplitude=0.024 Wb (1.49x analytic)",
+          "contour_segments": 29,
+          "reference_markers": {
+            "x_points_drawn": 1,
+            "x_points_dropped_outside_wall": 0,
+            "strike_points_drawn": 0,
+            "other_x_points_drawn": 0
+          },
+          "panel_markers": {
+            "x_points_drawn": 1,
+            "x_points_dropped_outside_wall": 0,
+            "strike_points_drawn": 0,
+            "other_x_points_drawn": 2
+          },
+          "axis_off": true
+        }
+      ],
+      "seed_policy_verdict": "both_fail"
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "requested_cells": -110,
+      "realised_cells": 135,
+      "characteristic_pitch_m": 0.46606341035820315,
+      "reference_nulls": {
+        "axis_rz_m": [
+          6.194958772632181,
+          0.00013499785829806932
+        ],
+        "x_point_rz_m": null,
+        "qualified_saddles_rz_m": [],
+        "retained_count": [
+          1,
+          0
+        ],
+        "axis_flux_wb": 49.94187078939037,
+        "boundary_flux_wb": 1.1345091532888318e-15
+      },
+      "arms": [
+        {
+          "seed_policy": "analytic",
+          "seed_receipt": {
+            "seed_policy": "analytic",
+            "seed_state_digest": "d2c980a88374751bb6e4af9305ae9ad39bc0f19bb7f954654c08d6fa8862f8f2"
+          },
+          "active_set_budget": 16,
+          "terminal_residual": 0.04707617032680829,
+          "converged": false,
+          "qualified": false,
+          "trip_count": 3,
+          "per_trip_residual_history": [
+            {
+              "trip": 1,
+              "residual": 0.04707896271873737
+            },
+            {
+              "trip": 2,
+              "residual": 0.04707617032680829
+            },
+            {
+              "trip": 3,
+              "residual": 0.04707617032680829
+            }
+          ],
+          "terminal_axis_rz_m": [
+            6.188941539416108,
+            7.497219236929364e-05
+          ],
+          "terminal_x_point_rz_m": null,
+          "reference_x_point_rz_m": null,
+          "x_point_distance_m": null,
+          "certificate_position_bound_m": 0.46606341035820315,
+          "certificate_residual_bound": 1e-12,
+          "jax_platform": "gpu",
+          "terminal_nulls": {
+            "axis_rz_m": [
+              6.188941539416108,
+              7.497219236929364e-05
+            ],
+            "x_point_rz_m": null,
+            "qualified_saddles_rz_m": [],
+            "retained_count": [
+              1,
+              0
+            ],
+            "axis_flux_wb": 49.54589959483202,
+            "boundary_flux_wb": -0.08276602317830808
+          },
+          "termination_reason": 10,
+          "wall_seconds": 441.7556935697794,
+          "compilation_cache_hit": false,
+          "nonfinite_cell_current": 0,
+          "nonfinite_radial_moment": 0,
+          "nonfinite_vertical_moment": 0,
+          "nonfinite_moment_total": 0,
+          "moment_values": 135
+        },
+        {
+          "seed_policy": "current_centroid_disc",
+          "seed_receipt": {
+            "seed_policy": "current_centroid_disc",
+            "seed_state_digest": "cb2b3c7bfde723f7c0ca24a64720a7e93cf311ce68f715ad71d248233cb792c1",
+            "seed_construction": "current_centroid_disc",
+            "seed_branch_index": 0,
+            "seed_radius_m": 1.564079053601776,
+            "supported_cell_count": 36,
+            "stored_flux_samples_used": false
+          },
+          "active_set_budget": 16,
+          "terminal_residual": 0.07500827508718351,
+          "converged": false,
+          "qualified": false,
+          "trip_count": 4,
+          "per_trip_residual_history": [
+            {
+              "trip": 1,
+              "residual": 0.07507047455040809
+            },
+            {
+              "trip": 2,
+              "residual": 0.07500829465673034
+            },
+            {
+              "trip": 3,
+              "residual": 0.07500827508718351
+            },
+            {
+              "trip": 4,
+              "residual": 0.07500827508718351
+            }
+          ],
+          "terminal_axis_rz_m": [
+            6.172837423453632,
+            -0.0008660649938920795
+          ],
+          "terminal_x_point_rz_m": null,
+          "reference_x_point_rz_m": null,
+          "x_point_distance_m": null,
+          "certificate_position_bound_m": 0.46606341035820315,
+          "certificate_residual_bound": 1e-12,
+          "jax_platform": "gpu",
+          "terminal_nulls": {
+            "axis_rz_m": [
+              6.172837423453632,
+              -0.0008660649938920795
+            ],
+            "x_point_rz_m": null,
+            "qualified_saddles_rz_m": [],
+            "retained_count": [
+              1,
+              0
+            ],
+            "axis_flux_wb": 68.21866246079395,
+            "boundary_flux_wb": 9.522315524869772
+          },
+          "termination_reason": 10,
+          "wall_seconds": 233.1486547384411,
+          "compilation_cache_hit": true,
+          "nonfinite_cell_current": 0,
+          "nonfinite_radial_moment": 0,
+          "nonfinite_vertical_moment": 0,
+          "nonfinite_moment_total": 0,
+          "moment_values": 135
+        }
+      ],
+      "state_file": "weak-rotation-reactor-static-seed-policy.npz",
+      "wall_units": [
+        [
+          0,
+          121,
+          true,
+          "vessel"
+        ]
+      ],
+      "seed_policy_verdict": "both_fail",
+      "contour_levels_wb": [
+        1.1345091532888318e-15,
+        3.5672764849564564,
+        7.134552969912911,
+        10.701829454869367,
+        14.269105939825822,
+        17.836382424782276,
+        21.40365890973873,
+        24.970935394695186,
+        28.53821187965164,
+        32.10548836460809,
+        35.67276484956455,
+        39.24004133452101,
+        42.80731781947746,
+        46.37459430443391,
+        49.94187078939037
+      ],
+      "panels": [
+        {
+          "caption": "Analytic input\nresidual=n/a; converged=n/a; trips=0",
+          "contour_segments": 14,
+          "reference_markers": {
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0,
+            "strike_points_drawn": 0,
+            "other_x_points_drawn": 0
+          },
+          "panel_markers": {
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0,
+            "strike_points_drawn": 0,
+            "other_x_points_drawn": 0
+          },
+          "axis_off": true
+        },
+        {
+          "caption": "seed=analytic\nresidual=0.0470762; converged=False; trips=3",
+          "contour_segments": 14,
+          "reference_markers": {
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0,
+            "strike_points_drawn": 0,
+            "other_x_points_drawn": 0
+          },
+          "panel_markers": {
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0,
+            "strike_points_drawn": 0,
+            "other_x_points_drawn": 0
+          },
+          "axis_off": true
+        },
+        {
+          "caption": "seed=current_centroid_disc\nresidual=0.0750083; converged=False; trips=4",
+          "contour_segments": 15,
+          "reference_markers": {
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0,
+            "strike_points_drawn": 0,
+            "other_x_points_drawn": 0
+          },
+          "panel_markers": {
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0,
+            "strike_points_drawn": 0,
+            "other_x_points_drawn": 0
+          },
+          "axis_off": true
+        }
       ]
     }
   ],
-  "negative_control": []
+  "negative_control": [
+    {
+      "case": "diverted-single-null",
+      "control_arm": "analytic_seed",
+      "one_trip_residual": 0.26431131347736286,
+      "declared_control": "run the analytic-seed arm of the diverted case with the active-set budget forced to one trip and observe the receipt read converged false with residual 0.7166 at trip one, reproducing the production arm of the exact-mode construction comparison within one percent",
+      "converged": false,
+      "trip_count": 1,
+      "termination_reason": 8,
+      "refused": true,
+      "reason": "converged assertion refused: analytic residual=0.264311313477 converged=False trips=1",
+      "receipt": {
+        "seed_policy": "analytic",
+        "seed_receipt": {
+          "seed_policy": "analytic",
+          "seed_state_digest": "6215c9f34c86f29eeb70f2773966d3c0142f965d621cd3d31c1359a93c354182"
+        },
+        "active_set_budget": 1,
+        "terminal_residual": 0.26431131347736286,
+        "converged": false,
+        "qualified": false,
+        "trip_count": 1,
+        "per_trip_residual_history": [
+          {
+            "trip": 1,
+            "residual": 0.26431131347736286
+          }
+        ],
+        "terminal_axis_rz_m": [
+          1.7825281341573964,
+          0.043570762701657814
+        ],
+        "terminal_x_point_rz_m": [
+          1.5068412229626094,
+          -1.0059372320458442
+        ],
+        "reference_x_point_rz_m": [
+          1.5107863810710611,
+          -1.0275005315610446
+        ],
+        "x_point_distance_m": 0.021921226208470302,
+        "certificate_position_bound_m": 0.15145387287104764,
+        "certificate_residual_bound": 1e-12,
+        "jax_platform": "gpu",
+        "terminal_nulls": {
+          "axis_rz_m": [
+            1.7825281341573964,
+            0.043570762701657814
+          ],
+          "x_point_rz_m": [
+            1.5068412229626094,
+            -1.0059372320458442
+          ],
+          "qualified_saddles_rz_m": [
+            [
+              1.5068412229626094,
+              -1.0059372320458442
+            ],
+            [
+              1.482496043002222,
+              -0.9773493913347655
+            ]
+          ],
+          "retained_count": [
+            3,
+            2
+          ],
+          "axis_flux_wb": 0.005978510732185578,
+          "boundary_flux_wb": -0.0003655040863703883
+        },
+        "termination_reason": 8,
+        "wall_seconds": 309.9342919019982,
+        "compilation_cache_hit": false,
+        "nonfinite_cell_current": 0,
+        "nonfinite_radial_moment": 0,
+        "nonfinite_vertical_moment": 0,
+        "nonfinite_moment_total": 0,
+        "moment_values": 132
+      },
+      "expected_residual": 0.7166,
+      "expected_source": "declared in the dispatch brief",
+      "relative_difference": 0.6311592053064989,
+      "relative_tolerance": 0.01,
+      "reproduces_expected": false
+    },
+    {
+      "case": "diverted-single-null",
+      "control_arm": "analytic_seed",
+      "one_trip_residual": 0.26431131347736286,
+      "declared_control": "run the analytic-seed arm of the diverted case with the active-set budget forced to one trip and observe the receipt read converged false with residual 0.7166 at trip one, reproducing the production arm of the exact-mode construction comparison within one percent",
+      "converged": false,
+      "trip_count": 1,
+      "termination_reason": 8,
+      "refused": true,
+      "reason": "converged assertion refused: analytic residual=0.264311313477 converged=False trips=1",
+      "receipt": {
+        "seed_policy": "analytic",
+        "seed_receipt": {
+          "seed_policy": "analytic",
+          "seed_state_digest": "6215c9f34c86f29eeb70f2773966d3c0142f965d621cd3d31c1359a93c354182"
+        },
+        "active_set_budget": 1,
+        "terminal_residual": 0.26431131347736286,
+        "converged": false,
+        "qualified": false,
+        "trip_count": 1,
+        "per_trip_residual_history": [
+          {
+            "trip": 1,
+            "residual": 0.26431131347736286
+          }
+        ],
+        "terminal_axis_rz_m": [
+          1.7825281341573964,
+          0.043570762701657814
+        ],
+        "terminal_x_point_rz_m": [
+          1.5068412229626094,
+          -1.0059372320458442
+        ],
+        "reference_x_point_rz_m": [
+          1.5107863810710611,
+          -1.0275005315610446
+        ],
+        "x_point_distance_m": 0.021921226208470302,
+        "certificate_position_bound_m": 0.15145387287104764,
+        "certificate_residual_bound": 1e-12,
+        "jax_platform": "gpu",
+        "terminal_nulls": {
+          "axis_rz_m": [
+            1.7825281341573964,
+            0.043570762701657814
+          ],
+          "x_point_rz_m": [
+            1.5068412229626094,
+            -1.0059372320458442
+          ],
+          "qualified_saddles_rz_m": [
+            [
+              1.5068412229626094,
+              -1.0059372320458442
+            ],
+            [
+              1.482496043002222,
+              -0.9773493913347655
+            ]
+          ],
+          "retained_count": [
+            3,
+            2
+          ],
+          "axis_flux_wb": 0.005978510732185578,
+          "boundary_flux_wb": -0.0003655040863703883
+        },
+        "termination_reason": 8,
+        "wall_seconds": 309.9342919019982,
+        "compilation_cache_hit": false,
+        "nonfinite_cell_current": 0,
+        "nonfinite_radial_moment": 0,
+        "nonfinite_vertical_moment": 0,
+        "nonfinite_moment_total": 0,
+        "moment_values": 132
+      },
+      "expected_residual": 0.2586805230398537,
+      "expected_source": "forced one-trip arm in docs/figures/plasma-cell-read-fidelity/b43714114-diverted-single-null-one-trip.json",
+      "relative_difference": 0.021767353689174485,
+      "relative_tolerance": 0.01,
+      "reproduces_expected": false
+    },
+    {
+      "case": "diverted-single-null",
+      "control_arm": "production_route_seed",
+      "one_trip_residual": 0.4514905343519115,
+      "declared_control": "run the analytic-seed arm of the diverted case with the active-set budget forced to one trip and observe the receipt read converged false with residual 0.7166 at trip one, reproducing the production arm of the exact-mode construction comparison within one percent",
+      "converged": false,
+      "trip_count": 1,
+      "termination_reason": 8,
+      "refused": true,
+      "reason": "converged assertion refused: production_route_seed residual=0.451490534352 converged=False trips=1",
+      "receipt": {
+        "seed_policy": "production_route_seed",
+        "seed_receipt": {
+          "seed_policy": "production_route_seed",
+          "seed_state_digest": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883",
+          "seed_construction": "production_route",
+          "route_seed_receipt": {
+            "factory": "profile.cold_seed_portfolio",
+            "requested_class": "diverted",
+            "branch_index": 1,
+            "construction": "axis_saddle_geometry",
+            "plasma_current_a": 37319.34592471112,
+            "current_centroid_m": [
+              1.7120154725908823,
+              0.030254757713386198
+            ],
+            "seed_radius_m": 0.649709176903539,
+            "supported_cell_count": 58,
+            "anchor_available": true,
+            "anchor_m": [
+              1.5019897592858353,
+              -1.019292805308505
+            ],
+            "declared_axis_m": [
+              1.7870647018106887,
+              0.0467736265648528
+            ],
+            "declared_boundary_m": [
+              1.5025279999999999,
+              -1.01728
+            ],
+            "stored_flux_samples_used": false,
+            "current_target_provenance": {
+              "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+              "declared_current_a": 37319.34592471112,
+              "current_centroid_m": [
+                1.7120154725908823,
+                0.030254757713386198
+              ],
+              "closed_form_flux_samples_used_for_current_support_only": true
+            },
+            "state_sha256_binary64": "2d2b5ea34915792bf34668908b57ac563fe4bc9db7f147a0ec6cdd664588d883"
+          }
+        },
+        "active_set_budget": 1,
+        "terminal_residual": 0.4514905343519115,
+        "converged": false,
+        "qualified": false,
+        "trip_count": 1,
+        "per_trip_residual_history": [
+          {
+            "trip": 1,
+            "residual": 0.4514905343519115
+          }
+        ],
+        "terminal_axis_rz_m": [
+          2.0344922677546764,
+          0.16645386025857803
+        ],
+        "terminal_x_point_rz_m": [
+          1.9981588734919251,
+          -0.0024977197610930313
+        ],
+        "reference_x_point_rz_m": [
+          1.5107863810710611,
+          -1.0275005315610446
+        ],
+        "x_point_distance_m": 1.1349725593891387,
+        "certificate_position_bound_m": 0.15145387287104764,
+        "certificate_residual_bound": 1e-12,
+        "jax_platform": "gpu",
+        "terminal_nulls": {
+          "axis_rz_m": [
+            2.0344922677546764,
+            0.16645386025857803
+          ],
+          "x_point_rz_m": [
+            1.9981588734919251,
+            -0.0024977197610930313
+          ],
+          "qualified_saddles_rz_m": [
+            [
+              1.2077261390778846,
+              -0.7863507535256785
+            ],
+            [
+              1.221203053198001,
+              -0.8655401518924266
+            ],
+            [
+              1.9981588734919251,
+              -0.0024977197610930313
+            ],
+            [
+              1.7439368430238291,
+              0.17872976976909583
+            ],
+            [
+              2.2418115264633935,
+              0.6150101571169726
+            ],
+            [
+              1.7777656031282423,
+              0.45235748769687467
+            ],
+            [
+              1.7611764309036246,
+              0.6106291603776932
+            ],
+            [
+              1.9909363634020862,
+              0.6481708262848098
+            ]
+          ],
+          "retained_count": [
+            10,
+            8
+          ],
+          "axis_flux_wb": 0.18358793984570637,
+          "boundary_flux_wb": 0.11293099541322217
+        },
+        "termination_reason": 8,
+        "wall_seconds": 38.86143609136343,
+        "compilation_cache_hit": true,
+        "nonfinite_cell_current": 0,
+        "nonfinite_radial_moment": 0,
+        "nonfinite_vertical_moment": 0,
+        "nonfinite_moment_total": 0,
+        "moment_values": 132
+      },
+      "expected_residual": 0.7165572322836796,
+      "expected_source": "trip one of the production arm in docs/figures/plasma-cell-read-fidelity/exact-mode-construction-comparison.json",
+      "relative_difference": 0.3699169947486207,
+      "relative_tolerance": 0.01,
+      "reproduces_expected": false
+    }
+  ],
+  "completion_revision": "83f40323a12f128d01a4fd790796fe046d3e94e8",
+  "completion_job_id": "1276643",
+  "completion_slurm_partition": "betelgeuse",
+  "seed_policy_verdict": "both_fail",
+  "figure_src": "/nova/figures/plasma-cell-read-fidelity-seed/seed-policy-at-main.png"
 }

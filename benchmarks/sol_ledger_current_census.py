@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -49,6 +50,10 @@ RENDER_RECEIPT = OUTPUT_DIR / "sol-ledger-render.json"
 #: without the wall: the negative control, never a production path.
 DROP_WALL = os.environ.get("SOL_LEDGER_DROP_WALL") == "1"
 
+#: Set to 1 so the receipt writer omits ``source_revision``: the negative
+#: control the gate must fail against, never a production path.
+DROP_REVISION = os.environ.get("SOL_LEDGER_DROP_REVISION") == "1"
+
 # The mapped-source transport fixtures, used exactly as the tests build them.
 # The pytest fixture decorators refuse direct calls, so the wrapped functions
 # are invoked in the same order and with the same arguments the fixtures use.
@@ -67,6 +72,31 @@ from tests.test_transport_evolved_state import (  # noqa: E402
 from tests.test_transport_evolved_state import (  # noqa: E402
     mapped_equilibrium as _mapped_equilibrium_fixture,
 )
+
+
+def _source_revision() -> str:
+    """Return the git revision of the tree this driver runs from."""
+    result = subprocess.run(
+        ["git", "-C", str(ROOT), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return result.stdout.strip()
+
+
+def stamp_revision(payload: dict) -> dict:
+    """Stamp a receipt payload with the source revision that produced it.
+
+    A receipt is only reproducible if a reader can name the tree the census
+    ran at, so the revision of the running tree is recorded beside the numbers
+    it produced.  ``SOL_LEDGER_DROP_REVISION=1`` omits it, which is the
+    negative control the gate's revision check must fail against.
+    """
+    if not DROP_REVISION:
+        payload["source_revision"] = _source_revision()
+    return payload
+
 
 DOMAIN_NAMES = {
     int(PlasmaDomain.EXCLUDED_MATERIAL): "excluded_material",
@@ -520,6 +550,7 @@ def main() -> int:
     configure_dtypes()
     assert jax.config.jax_enable_x64, "x64 must be enabled"
     payload, (profile, equilibrium, grid_flux) = _measure()
+    stamp_revision(payload)
     payload["verdict"] = _verdict(payload["common_sol_split"])
     receptor, mechanism = _booking_line()
     payload["booking_line"] = {"receptor": receptor, "mechanism": mechanism}

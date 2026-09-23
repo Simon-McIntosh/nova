@@ -258,20 +258,24 @@
           "rebuilt_digest": "6215c9f34c86f29eeb70f2773966d3c0142f965d621cd3d31c1359a93c354182",
           "digest_matches": true,
           "construction_fields_checked": [],
-          "rebuilt_amplitude_wb": 0.016165283306401903
+          "rebuilt_amplitude_wb": 0.016165283306401903,
+          "recorded_amplitude_wb": 0.016165283306401903,
+          "amplitude_relative_difference": 0.0
         },
         {
           "case": "diverted-single-null",
           "seed_policy": "current_centroid_disc",
           "recorded_digest": "85c4ce76c65d0eed9ece3ca2b1c15ed2f923a1b2d2f8594d698eb86859404356",
-          "rebuilt_digest": "acedbfa332130a15d60d70e6bdd227cc73880c945e42c655b0caa3b3c6f7b50e",
+          "rebuilt_digest": "7414ba7c996e03dee7dc0906b3effe428167fd8d1232a7fbc945e6f22d2bd4cf",
           "digest_matches": false,
           "construction_fields_checked": [
             "seed_branch_index",
             "seed_radius_m",
             "supported_cell_count"
           ],
-          "rebuilt_amplitude_wb": 0.02403355686380935
+          "rebuilt_amplitude_wb": 0.02403355686380933,
+          "recorded_amplitude_wb": 0.02403355686380935,
+          "amplitude_relative_difference": 8.881784197001252e-16
         }
       ],
       "seed_flux_ranges": [
@@ -289,15 +293,15 @@
         },
         {
           "seed_policy": "current_centroid_disc",
-          "seed_state_digest": "acedbfa332130a15d60d70e6bdd227cc73880c945e42c655b0caa3b3c6f7b50e",
-          "min_wb": -0.0130513870482163,
+          "seed_state_digest": "7414ba7c996e03dee7dc0906b3effe428167fd8d1232a7fbc945e6f22d2bd4cf",
+          "min_wb": -0.01305138704821628,
           "max_wb": 0.010982169815593051,
-          "amplitude_wb": 0.02403355686380935,
-          "abs_max_wb": 0.0130513870482163,
+          "amplitude_wb": 0.02403355686380933,
+          "abs_max_wb": 0.01305138704821628,
           "nonfinite_count": 0,
           "sample_count": 730,
           "analytic_amplitude_wb": 0.016165283306401903,
-          "amplitude_ratio_to_analytic": 1.4867389830583044
+          "amplitude_ratio_to_analytic": 1.4867389830583033
         },
         {
           "seed_policy": "production_route_seed",
@@ -576,7 +580,7 @@
           "axis_off": true
         },
         {
-          "caption": "seed=analytic\nresidual=0.0470762; converged=False; trips=3",
+          "caption": "seed=analytic\nresidual=0.0470762; converged=False; trips=3\nseed amplitude=69.3 Wb (1.00x analytic)",
           "contour_segments": 14,
           "reference_markers": {
             "x_points_drawn": 0,
@@ -593,7 +597,7 @@
           "axis_off": true
         },
         {
-          "caption": "seed=current_centroid_disc\nresidual=0.0750083; converged=False; trips=4",
+          "caption": "seed=current_centroid_disc\nresidual=0.0750083; converged=False; trips=4\nseed amplitude=180 Wb (2.60x analytic)",
           "contour_segments": 15,
           "reference_markers": {
             "x_points_drawn": 0,
@@ -609,6 +613,68 @@
           },
           "axis_off": true
         }
+      ],
+      "seed_rebuilds": [
+        {
+          "case": "weak-rotation-reactor-static",
+          "seed_policy": "analytic",
+          "recorded_digest": "d2c980a88374751bb6e4af9305ae9ad39bc0f19bb7f954654c08d6fa8862f8f2",
+          "rebuilt_digest": "d2c980a88374751bb6e4af9305ae9ad39bc0f19bb7f954654c08d6fa8862f8f2",
+          "digest_matches": true,
+          "construction_fields_checked": [],
+          "rebuilt_amplitude_wb": 69.3207457851453
+        },
+        {
+          "case": "weak-rotation-reactor-static",
+          "seed_policy": "current_centroid_disc",
+          "recorded_digest": "cb2b3c7bfde723f7c0ca24a64720a7e93cf311ce68f715ad71d248233cb792c1",
+          "rebuilt_digest": "cb2b3c7bfde723f7c0ca24a64720a7e93cf311ce68f715ad71d248233cb792c1",
+          "digest_matches": true,
+          "construction_fields_checked": [
+            "seed_branch_index",
+            "seed_radius_m",
+            "supported_cell_count"
+          ],
+          "rebuilt_amplitude_wb": 179.96880586524455
+        }
+      ],
+      "seed_flux_ranges": [
+        {
+          "seed_policy": "analytic",
+          "seed_state_digest": "d2c980a88374751bb6e4af9305ae9ad39bc0f19bb7f954654c08d6fa8862f8f2",
+          "min_wb": -19.621906854341148,
+          "max_wb": 49.698838930804165,
+          "amplitude_wb": 69.3207457851453,
+          "abs_max_wb": 49.698838930804165,
+          "nonfinite_count": 0,
+          "sample_count": 772,
+          "analytic_amplitude_wb": 69.3207457851453,
+          "amplitude_ratio_to_analytic": 1.0
+        },
+        {
+          "seed_policy": "current_centroid_disc",
+          "seed_state_digest": "cb2b3c7bfde723f7c0ca24a64720a7e93cf311ce68f715ad71d248233cb792c1",
+          "min_wb": -67.02140696239064,
+          "max_wb": 112.9473989028539,
+          "amplitude_wb": 179.96880586524455,
+          "abs_max_wb": 112.9473989028539,
+          "nonfinite_count": 0,
+          "sample_count": 772,
+          "analytic_amplitude_wb": 69.3207457851453,
+          "amplitude_ratio_to_analytic": 2.596175269421437
+        },
+        {
+          "seed_policy": "production_route_seed",
+          "seed_state_digest": "cb2b3c7bfde723f7c0ca24a64720a7e93cf311ce68f715ad71d248233cb792c1",
+          "min_wb": -67.02140696239064,
+          "max_wb": 112.9473989028539,
+          "amplitude_wb": 179.96880586524455,
+          "abs_max_wb": 112.9473989028539,
+          "nonfinite_count": 0,
+          "sample_count": 772,
+          "analytic_amplitude_wb": 69.3207457851453,
+          "amplitude_ratio_to_analytic": 2.596175269421437
+        }
       ]
     }
   ],
@@ -616,13 +682,13 @@
     {
       "case": "diverted-single-null",
       "control_arm": "analytic_seed",
-      "one_trip_residual": 0.26431131347736286,
+      "one_trip_residual": 0.26431137975177044,
       "declared_control": "run the analytic-seed arm of the diverted case with the active-set budget forced to one trip and observe the receipt read converged false with residual 0.7166 at trip one, reproducing the production arm of the exact-mode construction comparison within one percent",
       "converged": false,
       "trip_count": 1,
       "termination_reason": 8,
       "refused": true,
-      "reason": "converged assertion refused: analytic residual=0.264311313477 converged=False trips=1",
+      "reason": "converged assertion refused: analytic residual=0.264311379752 converged=False trips=1",
       "receipt": {
         "seed_policy": "analytic",
         "seed_receipt": {
@@ -630,60 +696,60 @@
           "seed_state_digest": "6215c9f34c86f29eeb70f2773966d3c0142f965d621cd3d31c1359a93c354182"
         },
         "active_set_budget": 1,
-        "terminal_residual": 0.26431131347736286,
+        "terminal_residual": 0.26431137975177044,
         "converged": false,
         "qualified": false,
         "trip_count": 1,
         "per_trip_residual_history": [
           {
             "trip": 1,
-            "residual": 0.26431131347736286
+            "residual": 0.26431137975177044
           }
         ],
         "terminal_axis_rz_m": [
-          1.7825281341573964,
-          0.043570762701657814
+          1.7825280832376738,
+          0.043570903713902286
         ],
         "terminal_x_point_rz_m": [
-          1.5068412229626094,
-          -1.0059372320458442
+          1.5068404919105383,
+          -1.0059370433872934
         ],
         "reference_x_point_rz_m": [
           1.5107863810710611,
           -1.0275005315610446
         ],
-        "x_point_distance_m": 0.021921226208470302,
+        "x_point_distance_m": 0.021921543364613716,
         "certificate_position_bound_m": 0.15145387287104764,
         "certificate_residual_bound": 1e-12,
         "jax_platform": "gpu",
         "terminal_nulls": {
           "axis_rz_m": [
-            1.7825281341573964,
-            0.043570762701657814
+            1.7825280832376738,
+            0.043570903713902286
           ],
           "x_point_rz_m": [
-            1.5068412229626094,
-            -1.0059372320458442
+            1.5068404919105383,
+            -1.0059370433872934
           ],
           "qualified_saddles_rz_m": [
             [
-              1.5068412229626094,
-              -1.0059372320458442
+              1.5068404919105383,
+              -1.0059370433872934
             ],
             [
-              1.482496043002222,
-              -0.9773493913347655
+              1.4824971310692276,
+              -0.9773497586043445
             ]
           ],
           "retained_count": [
             3,
             2
           ],
-          "axis_flux_wb": 0.005978510732185578,
-          "boundary_flux_wb": -0.0003655040863703883
+          "axis_flux_wb": 0.005978512400230272,
+          "boundary_flux_wb": -0.00036549927336101273
         },
         "termination_reason": 8,
-        "wall_seconds": 309.9342919019982,
+        "wall_seconds": 149.01353546325117,
         "compilation_cache_hit": false,
         "nonfinite_cell_current": 0,
         "nonfinite_radial_moment": 0,
@@ -693,20 +759,20 @@
       },
       "expected_residual": 0.7166,
       "expected_source": "declared in the dispatch brief",
-      "relative_difference": 0.6311592053064989,
+      "relative_difference": 0.6311591128219782,
       "relative_tolerance": 0.01,
       "reproduces_expected": false
     },
     {
       "case": "diverted-single-null",
       "control_arm": "analytic_seed",
-      "one_trip_residual": 0.26431131347736286,
+      "one_trip_residual": 0.26431137975177044,
       "declared_control": "run the analytic-seed arm of the diverted case with the active-set budget forced to one trip and observe the receipt read converged false with residual 0.7166 at trip one, reproducing the production arm of the exact-mode construction comparison within one percent",
       "converged": false,
       "trip_count": 1,
       "termination_reason": 8,
       "refused": true,
-      "reason": "converged assertion refused: analytic residual=0.264311313477 converged=False trips=1",
+      "reason": "converged assertion refused: analytic residual=0.264311379752 converged=False trips=1",
       "receipt": {
         "seed_policy": "analytic",
         "seed_receipt": {
@@ -714,60 +780,60 @@
           "seed_state_digest": "6215c9f34c86f29eeb70f2773966d3c0142f965d621cd3d31c1359a93c354182"
         },
         "active_set_budget": 1,
-        "terminal_residual": 0.26431131347736286,
+        "terminal_residual": 0.26431137975177044,
         "converged": false,
         "qualified": false,
         "trip_count": 1,
         "per_trip_residual_history": [
           {
             "trip": 1,
-            "residual": 0.26431131347736286
+            "residual": 0.26431137975177044
           }
         ],
         "terminal_axis_rz_m": [
-          1.7825281341573964,
-          0.043570762701657814
+          1.7825280832376738,
+          0.043570903713902286
         ],
         "terminal_x_point_rz_m": [
-          1.5068412229626094,
-          -1.0059372320458442
+          1.5068404919105383,
+          -1.0059370433872934
         ],
         "reference_x_point_rz_m": [
           1.5107863810710611,
           -1.0275005315610446
         ],
-        "x_point_distance_m": 0.021921226208470302,
+        "x_point_distance_m": 0.021921543364613716,
         "certificate_position_bound_m": 0.15145387287104764,
         "certificate_residual_bound": 1e-12,
         "jax_platform": "gpu",
         "terminal_nulls": {
           "axis_rz_m": [
-            1.7825281341573964,
-            0.043570762701657814
+            1.7825280832376738,
+            0.043570903713902286
           ],
           "x_point_rz_m": [
-            1.5068412229626094,
-            -1.0059372320458442
+            1.5068404919105383,
+            -1.0059370433872934
           ],
           "qualified_saddles_rz_m": [
             [
-              1.5068412229626094,
-              -1.0059372320458442
+              1.5068404919105383,
+              -1.0059370433872934
             ],
             [
-              1.482496043002222,
-              -0.9773493913347655
+              1.4824971310692276,
+              -0.9773497586043445
             ]
           ],
           "retained_count": [
             3,
             2
           ],
-          "axis_flux_wb": 0.005978510732185578,
-          "boundary_flux_wb": -0.0003655040863703883
+          "axis_flux_wb": 0.005978512400230272,
+          "boundary_flux_wb": -0.00036549927336101273
         },
         "termination_reason": 8,
-        "wall_seconds": 309.9342919019982,
+        "wall_seconds": 149.01353546325117,
         "compilation_cache_hit": false,
         "nonfinite_cell_current": 0,
         "nonfinite_radial_moment": 0,
@@ -777,7 +843,7 @@
       },
       "expected_residual": 0.2586805230398537,
       "expected_source": "forced one-trip arm in docs/figures/plasma-cell-read-fidelity/b43714114-diverted-single-null-one-trip.json",
-      "relative_difference": 0.021767353689174485,
+      "relative_difference": 0.021767609890943396,
       "relative_tolerance": 0.01,
       "reproduces_expected": false
     },
@@ -913,7 +979,7 @@
           "boundary_flux_wb": 0.11293099541322217
         },
         "termination_reason": 8,
-        "wall_seconds": 38.86143609136343,
+        "wall_seconds": 38.600123709999025,
         "compilation_cache_hit": true,
         "nonfinite_cell_current": 0,
         "nonfinite_radial_moment": 0,
@@ -928,8 +994,8 @@
       "reproduces_expected": false
     }
   ],
-  "completion_revision": "83f40323a12f128d01a4fd790796fe046d3e94e8",
-  "completion_job_id": "1276643",
+  "completion_revision": "fed676eec74864daa292a2e9ba1ffa3b5b208a8c",
+  "completion_job_id": "1276711",
   "completion_slurm_partition": "betelgeuse",
   "seed_policy_verdict": "both_fail",
   "figure_src": "/nova/figures/plasma-cell-read-fidelity-seed/seed-policy-at-main.png"

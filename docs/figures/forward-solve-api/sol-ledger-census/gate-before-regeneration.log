@@ -1,0 +1,31 @@
+# before-regeneration gate: rev=0a4b51368256f8e9bdb6ab94a4fe7ad514b34d3e tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-sol-ledger-receipt-revision-and-gate cmd=pytest tests/test_sol_ledger_render.py
+07:07:44 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+.F..                                                                     [100%]
+=================================== FAILURES ===================================
+_______________ test_receipt_names_the_revision_it_was_solved_at _______________
+
+    def test_receipt_names_the_revision_it_was_solved_at():
+        """The committed receipt and the writer both carry a 40-hex source revision."""
+        ledger = _import_ledger()
+        payload = json.loads((RECEIPT / "sol-ledger-census.json").read_text())
+>       _assert_receipt_revision(payload)
+
+tests/test_sol_ledger_render.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+payload = {'ledger': {'core': 547979.0199766452, 'common_sol': 1072.7057484194079, 'private_flux': 0.0, 'excluded_material': 0.0... 158, 'domain': 'common_sol', 'current_a': 3.944192761731903, 'centroid_psi_norm': 1.1250551339881065, ...}, ...], ...}
+
+    def _assert_receipt_revision(payload):
+        """Assert the receipt names the 40-hex revision it was solved at."""
+        revision = payload.get("source_revision")
+>       assert isinstance(revision, str), (
+            "the receipt must name the source revision it was solved at"
+        )
+E       AssertionError: the receipt must name the source revision it was solved at
+E       assert False
+E        +  where False = isinstance(None, str)
+
+tests/test_sol_ledger_render.py:64: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_sol_ledger_render.py::test_receipt_names_the_revision_it_was_solved_at
+1 failed, 3 passed in 12.39s

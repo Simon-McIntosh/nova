@@ -1,0 +1,4 @@
+# gate: rev=3d8315dde084cd2af5bbc5e16052b143b411f7ee tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-sol-ledger-receipt-revision-and-gate cmd=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_sol_ledger_render.py
+07:43:10 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+....                                                                     [100%]
+4 passed in 17.22s

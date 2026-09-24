@@ -251,7 +251,9 @@ def cell_trace(
     density = np.asarray(production_density[cell])[live]
     inside = np.asarray(analytic_inside[cell])[live]
     psi_norm = np.asarray(sample_psi_norm[cell])[live]
+    points = np.asarray(sample_points[cell])[live]
     production_inside = psi_norm <= 1.0
+    conditioned_density = np.where(inside, density, 0.0)
     label = PlasmaDomain(int(np.asarray(masks.label)[cell])).name.lower()
     full_area = float(np.asarray(profile_support.full_area)[cell])
     clipped_area = float(np.asarray(confined_support.area)[cell])
@@ -324,12 +326,24 @@ def cell_trace(
             "production_inside_count": int(np.count_nonzero(production_inside)),
         },
         "density_evaluation": {
-            "points_rz_m": np.asarray(sample_points[cell])[live].tolist(),
-            "production_psi_norm": psi_norm.tolist(),
-            "production_density_a_per_m2": density.tolist(),
+            "point_count": int(len(points)),
+            "points_rz_min_m": np.min(points, axis=0).tolist(),
+            "points_rz_max_m": np.max(points, axis=0).tolist(),
+            "production_psi_norm_min": float(np.min(psi_norm)),
+            "production_psi_norm_max": float(np.max(psi_norm)),
+            "production_density_min_a_per_m2": float(np.min(density)),
+            "production_density_max_a_per_m2": float(np.max(density)),
+            "production_density_mean_a_per_m2": float(np.mean(density)),
             "production_nonzero_count": int(np.count_nonzero(density)),
-            "conditioned_density_a_per_m2": np.where(inside, density, 0.0).tolist(),
+            "conditioned_density_min_a_per_m2": float(np.min(conditioned_density)),
+            "conditioned_density_max_a_per_m2": float(np.max(conditioned_density)),
+            "conditioned_density_mean_a_per_m2": float(np.mean(conditioned_density)),
             "conditioned_nonzero_count": int(np.count_nonzero(inside & (density != 0))),
+            "point_density_sha256_binary64": hashlib.sha256(
+                np.column_stack((points, density, conditioned_density))
+                .astype(np.float64)
+                .tobytes()
+            ).hexdigest(),
         },
         "base_booked_current_a": float(base_cell["booked_current_a"]),
         "base_analytic_current_a": float(base_cell["analytic_current_a"]),

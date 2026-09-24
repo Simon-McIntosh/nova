@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="31">
+<meta name="plan-modified" content="2026-09-24">
+<meta name="plan-version" content="32">
 <meta name="plan-blocks" content="millisecond-converged-solve">
-<meta name="plan-impl" content="0.66">
+<meta name="plan-impl" content="0.7">
 </head>
 <body>
   <main class="plan-doc">
@@ -418,6 +418,10 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
+<div class="r-dec" data-key="krylov-slice-2-acceptance" data-choice="hold until vmapped cost is at or below the per-site base; name the diverted-move mechanism first" data-by="lead" data-when="2026-09-24T06:41:39+00:00">
+    <p class="r-dec-q">krylov-slice-2-acceptance</p>
+    <p class="r-dec-rat">Lead decisions 2026-09-23 on slice 2: the exit loop alone left the vmapped width-16 cost at 1.75x, and the non-converged diverted rung moved 0.216. Both had to be explained or fixed before landing. The mechanism step showed the move is main&#x27;s operator change, with the loop differing only by bounded reassociation. The batching rule then reached 0.98x.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -484,14 +488,20 @@
     <div class="r-fu-body">The whole-cell and certificate solves close the mesh, coupling blocks and stencils into the trace as constants (compile-cost census: about 55 MiB captured at 300 cells), so every geometry value change recompiles and the executable carries the literals. The batched-operator-boundary plan already made member data traced arguments on the batched route; passing the mesh as arguments measured 337 s compile against 535 s for the closure at 300 cells. Apply the same boundary to the certificate route, gated on bit-identical terminal states and a one-program-for-two-geometries check.</div>
     <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §2</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-single-site-krylov-vmap-exit" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-single-site-krylov-vmap-exit" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="2026-09-24T06:41:39+00:00" data-resolved-by="nova-cc">
     <h4 class="r-fu-title">Slice 2: make the single-site Krylov stream exit early under vmap</h4>
     <div class="r-fu-body">Under vmap the lax.cond gating each of the 83 slots becomes a select, so every slot applies the operator: the stream is 14.3 times slower than the per-site base at width 16 (1.240 s against 0.086 s). Replace the fixed-capacity cond-gated scan with a while_loop (or a batched exit) that stops when every member is DONE. Gate: vmapped width-16 cost at or below the base's, the unbatched instruction count no higher than slice 1's 284,792, the certificate rows within the re-base bounds, zero added test failures.</div>
     <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    <p class="r-fu-outcome">Merged at 4bd81d199 (run r-20260923T163850406961, claude-opus 5.5, review 89). A while loop ends the stream when every member is done. A custom_vmap rule for _qualified_krylov_step keeps the stream predicate unbatched and writes the basis in place under a member mask. The operator closure is traced with make_jaxpr and passed as explicit arguments. Width-16 vmapped H200 cost is 0.98x and 0.92x the per-site base in the same process (control 1.73x), and the unbatched program is 261,735 instructions. Tests: single-site 5 passed; fixed_point 45 passed; reduced_newton shows the same four base failures. The diverted terminal is 0.06326 on main's operator. Open items go to f-fsri-krylov-slice-2-review-findings.</p>
     </article>
 <article class="r-fu" data-id="f-fsri-ladder-census-counts-every-entry" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Make the recovery-ladder census count all five entries and fail on a renamed rung</h4>
     <div class="r-fu-body"><p>From the review of the recovery-ladder census (72): benchmarks/recovery_ladder_census.py counts two of the five promotion and recovery entries defined in nova/equilibrium/fixed_point.py, so the report's 19.03 percent share is a lower bound. Its instrumented() also skips a counted path absent from the module, so a rename reads as zero executions rather than failing. The report names revision db634db22, one commit behind the tree that carries it. The census module benchmarks/recovery_ladder_telemetry.py was committed outside its fence and is accepted at promotion. Repair: count every entry, raise on a counted path that is absent, stamp the committing revision, and add a test that fails on a renamed rung. This is program-shape measurement, so it is not held by the map-fidelity gate. Benchmarks and tests only.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-krylov-slice-2-review-findings" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the slice-2 review findings: a fail-open identity witness, a plan-labelled symbol, and the missing reverse-mode rule</h4>
+    <div class="r-fu-body"><p>From the review of the slice-2 run (89). (1) The toy-operator identity witness under docs/figures/forward-solver-route-integrity/single-site-krylov only counts mismatches and exits 0, and np.array_equal(equal_nan=True) accepts different signed zeros and NaN representations. The reviewer ran it on 1.0 against 2.0 and it printed identical. Make it fail closed on the bit pattern. (2) The benchmark symbol SLICE1_SOURCE carries a plan-stage label; name it by the capacity-scan mechanism. (3) custom_vmap has no reverse-mode rule, so anything that reverse-differentiates through _qualified_krylov_step needs a custom_vjp. Add a test that fails if a reverse-mode caller appears without one. Local lane after RESUME.</p></div>
     <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
     </article>
 </section>

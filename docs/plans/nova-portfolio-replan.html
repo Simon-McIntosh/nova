@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="nova-portfolio-replan">
+<meta name="reckon-type" content="plan">
+<title>nova-portfolio-replan</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="nova portfolio re-plan for the fleet handoff">
+<meta name="plan-summary" content="Evaluate pending nova plans against the code, name thin-interface refactors, consolidate to one active sprint, and hand off through the plans.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-sprint" content="S18">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-09-24">
+<meta name="plan-effort-hours" content="3.0">
+<meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="0">
+<meta name="plan-tags" content="replan,handoff,infrastructure">
+<meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="moderate">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
+</head>
+<body>
+<main class="plan-doc">
+<header><h1>nova portfolio re-plan for the fleet handoff</h1>
+<p class="lede">On 2026-09-24 the lead retires every current session. New sessions on the SLURM fleet node will take the work entirely through the reckon planning layer, so everything a successor needs must be in plans, followups, evidence and sprints. This plan evaluates the pending nova portfolio against the code, names thin-interface refactors to shared infrastructure, and consolidates to one active sprint.</p>
+</header>
+
+<section id="s1"><h2>§1 Evaluate the pending plans outside S19 against the code</h2>
+<p><strong>Scope.</strong> The fourteen pending plans not coordinated by S19. From S10 to S17: ensemble-forward-seam, forward-profile-validator-set, separatrix-spline-extraction, profile-owned-solve-domain, mast-nonaxisymmetric-physics, diiid-forward-onboarding, machine-description-retirement, diiid-pulse-replay, dual-branch-selection, efit-baseline-demonstration and mast-catalog-gpu-solve. From S18: plasma-cell-read-fidelity and single-grid-solver-cutover. S19's seventeen plans are evaluated by its coordinator.</p>
+<p><strong>Nodes.</strong> Two nodes split the scope. <code>replan-currency-depth-a</code> takes ensemble-forward-seam, forward-profile-validator-set, separatrix-spline-extraction, profile-owned-solve-domain, mast-nonaxisymmetric-physics, plasma-cell-read-fidelity and single-grid-solver-cutover. <code>replan-currency-depth-b</code> takes diiid-forward-onboarding, machine-description-retirement, diiid-pulse-replay, dual-branch-selection, efit-baseline-demonstration and mast-catalog-gpu-solve. For each plan in scope, the report records:</p>
+<ul>
+<li>what landed, with commits and the files that carry it;</li>
+<li>whether the plan's status and impl agree with the code;</li>
+<li>implementation depth: deep (implemented, tested, reached from a real call site, used) or shallow (scaffolding, an uncalled module, docs only), with the call-site and test evidence named;</li>
+<li>the open followups and whether each carries a done-when;</li>
+<li>the next critical node, or a recommendation to close or supersede the plan.</li>
+</ul>
+<p>Read-only against the code: no source changes, no GPU, no SLURM jobs.</p>
+<p><strong>Done when.</strong> <code>docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md</code> and <code>…-b.md</code> each carry one row per assigned plan with every field above, each claim citing a file, line or commit.</p>
+</section>
+
+<section id="s2"><h2>§2 Thin interfaces to shared infrastructure</h2>
+<p><strong>Node <code>replan-thin-interfaces</code>.</strong> Finds where nova reimplements, or couples tightly to, shared machinery:</p>
+<ul>
+<li>the reckon crew and plan layer (scripts, <code>docs/state</code>, receipts);</li>
+<li>the local model lane;</li>
+<li>fleet and SLURM placement (<code>scripts/h200_test_lane</code>, sbatch payloads, partition and reservation literals, <code>--mem</code> handling);</li>
+<li>imas-python data access;</li>
+<li>hard-coded GPFS paths.</li>
+</ul>
+<p>For each coupling, the report names the files and the refactor that reduces it to a thin interface, with a one-line done-when. Read-only: no source changes.</p>
+<p><strong>Done when.</strong> <code>docs/evidence/replan-2026-09-24/thin-interfaces.md</code> lists each coupling with its files and line counts, the refactor, and its done-when. The counts come from a bounded search: named subtrees, no whole-tree walks.</p>
+</section>
+
+<section id="s3"><h2>§3 Re-plan, sprint consolidation and session handoff</h2>
+<p>Coordinator work. §1, §2 and S19's own summary are folded into truthful status and impl on every pending plan, with followups carrying a done-when, relinked dependencies, stale sprints closed, and exactly one active sprint holding the carried-over work. The report to the fleet names, for each new session, its zellij name, working directory, <code>/reckon-ship</code> target, brief and preconditions.</p>
+</section>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-replan-001" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Evaluate, re-plan and hand off the nova portfolio</h4>
+    <div class="r-fu-body">Run §1 and §2 as two local-lane nodes, then fold them with S19's summary into §3.</div>
+    <pre class="r-fu-prompt">/reckon-ship nova-portfolio-replan</pre>
+    </article>
+</section>
+</main>
+</body>
+</html>

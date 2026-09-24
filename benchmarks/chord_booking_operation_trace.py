@@ -133,17 +133,53 @@ def analytic_condition_moments(
     analytic_inside = analytic_signed_level >= 0.0
     conditioned_density = jnp.where(jnp.asarray(analytic_inside), density, 0.0)
     coefficients = _density_coefficients(conditioned_density)
-    raw = _sampled_arc_polynomial_moments(
-        confined_support.support_vertices,
-        confined_support.vertex_count,
-        polynomial_centre,
-        coordinate_scale,
-        coefficients,
-        confined_support.centroids,
+    live = np.asarray(selected) & (np.asarray(confined_support.vertex_count) > 0)
+    live_cells = np.flatnonzero(live)
+    assert live_cells.size, "analytic-condition smoke needs one live support cell"
+
+    def integrate_one(cell_index):
+        start, stop = int(cell_index), int(cell_index) + 1
+        return _sampled_arc_polynomial_moments(
+            confined_support.support_vertices[start:stop],
+            confined_support.vertex_count[start:stop],
+            polynomial_centre[start:stop],
+            coordinate_scale[start:stop],
+            coefficients[start:stop],
+            confined_support.centroids[start:stop],
+        )
+
+    smoke_cell = int(live_cells[0])
+    smoke = integrate_one(smoke_cell)
+    smoke_values = [float(np.asarray(value)[0]) for value in smoke]
+    assert np.all(np.isfinite(smoke_values)), "one-cell booking smoke is nonfinite"
+    print(
+        f"SMOKE cell={smoke_cell} current={smoke_values[0]:.12g} "
+        f"radial={smoke_values[1]:.12g} vertical={smoke_values[2]:.12g}",
+        flush=True,
     )
-    live = jnp.asarray(selected) & (jnp.asarray(confined_support.vertex_count) > 0)
-    moments = type(raw)(*(jnp.where(live, value, 0.0) for value in raw))
-    return moments, points, psi_norm, density, analytic_inside, analytic_signed_level
+
+    values = np.zeros((3, cell_count), dtype=np.float64)
+    for cell_index in live_cells:
+        one = integrate_one(cell_index)
+        values[:, cell_index] = [float(np.asarray(value)[0]) for value in one]
+    moments = type(smoke)(*(jnp.asarray(value) for value in values))
+    smoke_record = {
+        "cell": smoke_cell,
+        "cell_current_a": smoke_values[0],
+        "radial_moment_am": smoke_values[1],
+        "vertical_moment_am": smoke_values[2],
+        "finite": True,
+        "integration_shape": "singleton production helper call",
+    }
+    return (
+        moments,
+        points,
+        psi_norm,
+        density,
+        analytic_inside,
+        analytic_signed_level,
+        smoke_record,
+    )
 
 
 def production_confined_support(profile_support, field, selected):
@@ -346,6 +382,7 @@ def measure(requested: int, output: Path) -> dict[str, object]:
         production_density,
         analytic_inside,
         analytic_signed_level,
+        smoke_record,
     ) = analytic_condition_moments(
         operator, operator.source, exact, field, confined_support, selected
     )
@@ -445,6 +482,7 @@ def measure(requested: int, output: Path) -> dict[str, object]:
         "target_receipt": target_receipt,
         "production_amplitude": float(production_amplitude),
         "counterfactual_amplitude": float(counter_amplitude),
+        "singleton_smoke": smoke_record,
         "positive_control": {
             "relative_tolerance": RELATIVE_TOLERANCE,
             "maximum_nonzero_cell_relative_error": max_relative,
@@ -470,8 +508,7 @@ def measure(requested: int, output: Path) -> dict[str, object]:
 
 def summarize(report: dict[str, object], output: Path) -> None:
     rows = report["rows"]
-    row_550 = next(row for row in rows if row["realised_cells"] == 550)
-    cell_64 = next(trace for trace in row_550["traces"] if trace["cell"] == 64)
+    row_550 = next((row for row in rows if row["realised_cells"] == 550), None)
     report["named_operation"] = (
         "local-quadratic pointwise confinement in _flux_selected_current_moments"
     )
@@ -486,11 +523,13 @@ def summarize(report: dict[str, object], output: Path) -> None:
         "fitted density over that support. The production-local level admits "
         "analytic-exterior cells and under-covers analytic separatrix-cut cells."
     )
-    report["cell_64_booked_current_a"] = cell_64["base_booked_current_a"]
-    report["cell_64_conditioned_current_a"] = cell_64["stages"][-1]["current_a"]
-    report["cell_64_conditioned_fraction"] = row_550[
-        "analytic_condition_exterior_current_fraction"
-    ]["64"]
+    if row_550 is not None:
+        cell_64 = next(trace for trace in row_550["traces"] if trace["cell"] == 64)
+        report["cell_64_booked_current_a"] = cell_64["base_booked_current_a"]
+        report["cell_64_conditioned_current_a"] = cell_64["stages"][-1]["current_a"]
+        report["cell_64_conditioned_fraction"] = row_550[
+            "analytic_condition_exterior_current_fraction"
+        ]["64"]
     report["completed"] = True
     write(output / "report.json", report)
 
@@ -543,18 +582,22 @@ def summarize(report: dict[str, object], output: Path) -> None:
         "",
         "The full 25-point density values, edge-crossing records, support areas, "
         "first moments, and every stage current are retained in `report.json` and "
-        "the three row receipts.",
+        "the row receipts.",
         "",
         "## Declared negative control",
         "",
         NEGATIVE_CONTROL,
-        "",
-        "At 550 cells, cell 64 changes from "
-        f"{report['cell_64_booked_current_a']:.12g} A "
-        f"to {report['cell_64_conditioned_current_a']:.12g} A, a fraction "
-        f"{report['cell_64_conditioned_fraction']:.3e}. The resulting map mismatch "
-        "sup is reported above rather than inferred from the removed current.",
     ]
+    if row_550 is not None:
+        lines += [
+            "",
+            "At 550 cells, cell 64 changes from "
+            f"{report['cell_64_booked_current_a']:.12g} A "
+            f"to {report['cell_64_conditioned_current_a']:.12g} A, a fraction "
+            f"{report['cell_64_conditioned_fraction']:.3e}. The resulting map "
+            "mismatch sup is reported above rather than inferred from the removed "
+            "current.",
+        ]
     (output / "report.md").write_text("\n".join(lines) + "\n")
 
 
@@ -562,6 +605,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=OUTPUT)
     parser.add_argument("--summarize", action="store_true")
+    parser.add_argument("--requested", type=int, choices=REQUESTED, action="append")
+    parser.add_argument("--expected-backend", choices=("cpu", "gpu"), default="gpu")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     if args.summarize:
@@ -572,19 +617,21 @@ def main() -> None:
         ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
     ).strip()
     print(f"revision={revision} tree={ROOT} command={sys.argv!r}", flush=True)
-    assert jax.default_backend() == "gpu"
+    assert jax.default_backend() == args.expected_backend
     print(f"device={jax.devices()} x64={jax.config.jax_enable_x64}", flush=True)
     report = {
         "revision": revision,
         "worktree": str(ROOT),
         "job": os.environ.get("SLURM_JOB_ID"),
+        "backend": jax.default_backend(),
         "negative_control": NEGATIVE_CONTROL,
         "completed": False,
         "rows": [],
     }
     write(args.output / "report.json", report)
     started = time.monotonic()
-    for requested in REQUESTED:
+    requested_rows = REQUESTED if args.requested is None else tuple(args.requested)
+    for requested in requested_rows:
         report["rows"].append(measure(requested, args.output))
         write(args.output / "report.json", report)
     report["wall_seconds"] = time.monotonic() - started

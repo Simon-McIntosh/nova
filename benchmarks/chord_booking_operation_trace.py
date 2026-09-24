@@ -116,7 +116,7 @@ def analytic_condition_moments(
     operator, source, exact, field, confined_support, selected
 ):
     """Replace the production local-level density condition at the same points."""
-    cell_count = len(operator.node)
+    cell_count = confined_support.support_vertices.shape[0]
     cell = jnp.arange(cell_count, dtype=jnp.int32)
     points, psi_norm, _, _, polynomial_centre, coordinate_scale = _density_sample_field(
         field, cell
@@ -323,7 +323,7 @@ def measure(requested: int, output: Path) -> dict[str, object]:
     selected = jnp.asarray(field.active) & (
         jnp.asarray(profile_support.vertex_count) >= 3
     )
-    profile = _FluxSelectedProfile(source.core, source.common_sol)
+    profile = _FluxSelectedProfile(operator.source.core, operator.source.common_sol)
     production_physical = _flux_selected_current_moments(
         profile_support,
         selected,
@@ -347,7 +347,7 @@ def measure(requested: int, output: Path) -> dict[str, object]:
         analytic_inside,
         analytic_signed_level,
     ) = analytic_condition_moments(
-        operator, source, exact, field, confined_support, selected
+        operator, operator.source, exact, field, confined_support, selected
     )
     counter_coupled = operator.coupling_current_moments(counter_physical)
     counter_amplitude = operator.current_normalisation_amplitude(

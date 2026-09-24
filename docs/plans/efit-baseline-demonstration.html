@@ -199,12 +199,12 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ebd-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship efit-baseline-demonstration §2" data-resolved-at="2026-08-26T04:20:00+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-ebd-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-25" data-recommends-skill="/reckon-build efit-baseline-demonstration §2" data-resolved-at="2026-08-26T04:20:00+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Run the scoping and corroboration wave</h4>
     <div class="r-fu-body">Dispatch the four §2 nodes: the capability reuse map, the extraction
         seam map, the independent stall corroboration, and the wall machinery map. Their reports and
         the three open decisions gate the §3 design lock.</div>
-    <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §2</pre>
+    <pre class="r-fu-prompt">/reckon-build efit-baseline-demonstration §2</pre>
     <p class="r-fu-outcome">All four scouts landed with gates passed (commits 4b702960,
         43d03cf6, bbd0f015, c11fe7a2), merged to main, worktrees removed. Two of the three design
         decisions are locked by the lead (profile-owned residual domain; two dedicated plans);
@@ -214,7 +214,7 @@
         exactly the derived-from-achieved-values violation the decision text forbids. The stall
         corroboration's empty-mask qualification was adopted by the S15 session at 5f2b213c.</p>
     </article>
-<article class="r-fu" data-id="f-ebd-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship efit-baseline-demonstration §3" data-resolved-at="2026-08-27T01:28:42+00:00" data-resolved-by="">
+<article class="r-fu" data-id="f-ebd-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-26" data-recommends-skill="/reckon-build efit-baseline-demonstration §3" data-resolved-at="2026-08-27T01:28:42+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Run the demonstration gate once both implementation plans ship</h4>
     <div class="r-fu-body">Prerequisites: separatrix-spline-extraction and
         profile-owned-solve-domain shipped, and the demonstration-thresholds decision locked from
@@ -222,25 +222,25 @@
         precede the bank regeneration it will score — anchoring conservatively on the current
         numbers (class agreement 7/12; agreeing-arm RMS max 0.5413 m, which leg clipping can only
         shrink; worst saddle-to-EFIT-X 38.661 mm) — never follow it.</div>
-    <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §3</pre>
+    <pre class="r-fu-prompt">/reckon-build efit-baseline-demonstration §3</pre>
     <p class="r-fu-outcome">The demonstration gate ran fail-closed on fresh corrected banks: class agreement 9/12 PASS, worst eligible RMS 0.0294 m PASS, worst declared-row saddle 2.612 m FAIL vs 0.04 m; endpoint verdict FAIL. Receipt: docs/figures/efit-baseline-demonstration/demonstration-score/receipt.json; consolidated record: docs/evidence/forward-gs-validation.html. The failure is solver convergence (11/12 MAST arms budget-exhausted, 5/5 DIII-D non-converged), not topology and not preregistration.</p>
     </article>
-<article class="r-fu" data-id="f-ebd-003" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="sprint-review" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship efit-baseline-demonstration §3" data-resolved-at="2026-08-26T12:56:13+00:00" data-resolved-by="Simon McIntosh">
+<article class="r-fu" data-id="f-ebd-003" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="sprint-review" data-written-at="2026-08-26" data-recommends-skill="/reckon-build efit-baseline-demonstration §3" data-resolved-at="2026-08-26T12:56:13+00:00" data-resolved-by="Simon McIntosh">
     <h4 class="r-fu-title">Own the parity-tolerance instrument: lock metric-disagreement-tolerance and repair the registry pin</h4>
     <div class="r-fu-body">Re-homed from the shipped equilibrium-metric-parity plan (f-emp-002), following the f-emp-006 precedent of 2026-08-23: an open owner decision on a shipped plan is hidden work. Two coupled items now owned by this endpoint, whose comparator consumes the tolerances. First, lock the metric-disagreement-tolerance decision - it is load-bearing for the axis and LCFS bound classification that scoring-criteria-derivation (S13, shipped) recorded as merely contained, and register cross-code tolerances if report-only is chosen. Second, repair the production registry pin: <code>nova/imas/parity_tolerances.py</code> still sets REFERENCE_STAMP to the unreachable digest physics-spine-v0-mast-heldout-6-08ae0dee74-98dci4-clu-3141.yaml as evidence for the live magnetic-axis (1.01344e-3 m) and LCFS (3.3047e-4 m) bounds; the S13 repin (3c1874d5) touched benchmarks and receipts only, and the candid receipt's verified semantic identity (sha256:8df7a0a6...) is imported nowhere in the scoring path.</div>
-    <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration §3</pre>
+    <pre class="r-fu-prompt">/reckon-build efit-baseline-demonstration §3</pre>
     <p class="r-fu-outcome">Locked report-only-first-pass remains authoritative. Commit 1027d500 replaced the unreachable registry filename with semantic identity sha256:8df7a0a6... for every former stamp consumer; independent verification passed 17/17 tests with all numeric bounds unchanged and seven explicit provenance-only historical receipt differences.</p>
     </article>
-<article class="r-fu" data-id="f-ebd-shadow-flood-rca" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-d8-s16-veracity-review" data-written-at="2026-08-26T16:40:00+00:00" data-recommends-skill="/reckon-ship efit-baseline-demonstration" data-resolved-at="2026-08-27T01:28:42+00:00" data-resolved-by="">
+<article class="r-fu" data-id="f-ebd-shadow-flood-rca" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-d8-s16-veracity-review" data-written-at="2026-08-26T16:40:00+00:00" data-recommends-skill="/reckon-build efit-baseline-demonstration" data-resolved-at="2026-08-27T01:28:42+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Flood-fill shadow RCA gates all dependent S16 work</h4>
     <div class="r-fu-body">The topology visual gate failed on lead inspection: private-flux shadow cells are flooded inside the LCFS on converged MAST panels, and the 21985/51 panel selects its primary X/O at the top wall notch. Until the RCA identifies the mechanism and the fix lands: no bank regeneration, no comparator scoring, no achieved-class or demonstration-threshold credit, and every S16 result that consumed the hex flood/connectivity material is to be re-evaluated against the fix before further progress. The RCA must decide whether the defect is confined to the evidence generator or lives in the production flood fill.</div>
-    <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration</pre>
+    <pre class="r-fu-prompt">/reckon-build efit-baseline-demonstration</pre>
     <p class="r-fu-outcome">Rerun order completed end to end on the corrected stack: both banks regenerated (MAST 12/12 rows cabb4ed6, DIII-D 5/5 rows c741b4cf), pinned-branch and wall-ladder receipts regenerated, all 17 panels rebuilt and visually verified (zero shadow inside the converged boundary), and the fail-closed endpoint scorer ran. The pause on dependent work lifts into the measured verdict: endpoint FAIL on solver convergence, carried by f-ebd-solver-rate.</p>
     </article>
-<article class="r-fu" data-id="f-ebd-solver-rate" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-d8-s16-landing" data-written-at="2026-08-27T01:30:00+00:00" data-recommends-skill="/reckon-ship efit-baseline-demonstration" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ebd-solver-rate" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-d8-s16-landing" data-written-at="2026-08-27T01:30:00+00:00" data-recommends-skill="/reckon-build efit-baseline-demonstration" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Clear the demonstration gate by fixing solver rate, not thresholds</h4>
     <div class="r-fu-body">The measured stall verdict (crew/reports/s16-landing-20260826/residual-stall-characterization.md): the corrected solver converges monotonically with tail contraction q~0.970 per promotion, needing ~425 further promotions to 1e-8 — a rate-and-budget problem, not a stationary floor. Remediation order per the ranked verdict: land the locked profile-owned residual-domain cutover (profile-owned-solve-domain), repeat the exact trace and a matched mesh ladder, then continuation/globalization or preconditioning if the tail rate stands. The locked thresholds are not to be relaxed; the H200 batched receipt's convergence shortfall (230/600, 140/600) is the same finding at scale.</div>
-    <pre class="r-fu-prompt">/reckon-ship efit-baseline-demonstration</pre>
+    <pre class="r-fu-prompt">/reckon-build efit-baseline-demonstration</pre>
     </article>
 </section>
 

@@ -109,10 +109,10 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-nrd-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship mast-catalog-gpu-solve" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-nrd-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-build mast-catalog-gpu-solve" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Declare the GPU extra where the H200 lane installs from</h4>
     <div class="r-fu-body"><p>The gpu extra now exists but nothing yet selects it: the H200 lane and any CUDA-enabled worker environment still install through whatever composition they used before, so a device run can silently land on the CPU jaxlib — which is exactly what made three of this sprint's speedup figures CPU-only. Point the GPU install path at --extra gpu and record the resolved jaxlib variant, so a device claim is verifiable from the environment rather than assumed. Owned by the catalog plan because that is where the device lane is defined.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship mast-catalog-gpu-solve</pre>
+    <pre class="r-fu-prompt">/reckon-build mast-catalog-gpu-solve</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

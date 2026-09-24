@@ -225,7 +225,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ser-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship solovev-exact-recovery" data-resolved-at="2026-08-21T10:43:35+00:00" data-resolved-by="">
+<article class="r-fu" data-id="f-ser-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-build solovev-exact-recovery" data-resolved-at="2026-08-21T10:43:35+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Execute the recovery: defaults, wiring conviction, gates, ladder</h4>
     <div class="r-fu-body"><p>All four framing decisions are owner-locked at creation. §2
         (exact defaults + hex enforcement) and §3 (wiring audit + forcing decomposition) are
@@ -233,13 +233,13 @@
         §3's conviction evidence; §5 benchmarks the ladder on the repaired defaults. The
         boundary-ring merge (main 3b3122fa) is the substrate; the serialized terminal roots and
         the variant machinery from the decomposition ladder are the measurement inputs.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship solovev-exact-recovery</pre>
+    <pre class="r-fu-prompt">/reckon-build solovev-exact-recovery</pre>
     <p class="r-fu-outcome">done - the recovery executed end to end: exact kernel defaults and hexagon enforcement (10642e61), the wiring conviction closed on the normalization constant with the true closed-form oracle standing (map exact at the analytic state to 4.6e-15 Wb), the faithful moment route adopted by pre-registered rule (82f1a29a), gates locked at round-off floors, ladder benchmarked.</p>
     </article>
-<article class="r-fu" data-id="f-ser-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship solovev-exact-recovery §4" data-resolved-at="2026-08-21T10:43:35+00:00" data-resolved-by="">
+<article class="r-fu" data-id="f-ser-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-build solovev-exact-recovery §4" data-resolved-at="2026-08-21T10:43:35+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Package the locked gates and record the operating point</h4>
     <div class="r-fu-body"><p>All bounds are owner-locked (recovery-gate-bounds). One node remains: commit the locked bounds into tests/test_solovev_recovery_gates.py, author the reduced seconds-class closed-form fixture pin for the always-on lane (same construction, ~100-150 cells, forcing at round-off by construction), keep the full warm-cached fixtures in the slow lane, and record the section-5 operating point (faithful moment route at the measured ladder costs) in the plan. The plan ships when this lands.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship solovev-exact-recovery §4</pre>
+    <pre class="r-fu-prompt">/reckon-build solovev-exact-recovery §4</pre>
     <p class="r-fu-outcome">done - recovery-gate-packaging landed (9fffa5ba, merged 36fb4b58): two-tier harness green (2 passed default lane 45.44 s on the reduced 136-cell oracle, 6 passed slow lane pinning all 14 locked bounds byte-for-value), operating point recorded (faithful moment route; 1 ms via iteration economy times batching). Continuation: efit-forward-parity and dual-basin-solve (S8) consume the locked gates; no followup owed by this plan.</p>
     </article>
 </section>

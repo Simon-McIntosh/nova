@@ -126,13 +126,13 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-csc-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship coupling-surface-contract" data-resolved-at="2026-08-23T08:41:31+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-csc-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-22" data-recommends-skill="/reckon-build coupling-surface-contract" data-resolved-at="2026-08-23T08:41:31+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Land the contract, the window refactor, and the three consumer bindings</h4>
     <div class="r-fu-body"><p>§2 first (the type and the window refactor, gated on the banked
     gentle receipt reproducing), then §3's three bindings. The boundary round-trip binding is the
     load-bearing one — it is the property the ensemble-forward and time-parallel work will build
     on without re-deriving.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship coupling-surface-contract</pre>
+    <pre class="r-fu-prompt">/reckon-build coupling-surface-contract</pre>
     <p class="r-fu-outcome">done — no followup: this plan's chain closes here. The contract, the window refactor and all three consumer bindings are landed and merged (commits 64abe618, 6a64ba6c; both node gates passed). §2: frozen CouplingState/CouplingFieldSpec carried by solve_window with exact-key versioned fail-closed serialization, the banked gentle receipt reproduced exactly (4 iterations, contraction 0.23619506584727215, flux closure 0.0), and the 60-field schema exported at contract 1.0.0. §3: the load-bearing boundary extract/restore round-trip is EXACT (max gating-trace difference 0, bitwise-equal waveforms under a changed next-window drive), and schema read-back is pinned field-for-field by test. The consumer work is not this plan's continuation — it is owned by ensemble-forward-seam, whose own open followup f-efs-001 already carries it (§2 batch evaluator unblocked by this contract; §3 kernels landed), and the time-parallel and filter consumers bind the same surface when their plans activate.</p>
     </article>
 </section>

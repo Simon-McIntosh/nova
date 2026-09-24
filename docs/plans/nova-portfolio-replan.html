@@ -69,22 +69,22 @@
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-replan-001" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-replan-001" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Evaluate, re-plan and hand off the nova portfolio</h4>
     <div class="r-fu-body">Run §1 and §2 as two local-lane nodes, then fold them with S19's summary into §3.</div>
-    <pre class="r-fu-prompt">/reckon-ship nova-portfolio-replan</pre>
+    <pre class="r-fu-prompt">/reckon-build nova-portfolio-replan</pre>
     </article>
-<article class="r-fu" data-id="f-replan-002" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-replan-002" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Evaluate the fourteen non-S19 pending plans against the code</h4>
     <div class="r-fu-body">The nodes in §1 were not run before the handoff: the local lane took over an hour per node on 2026-09-23 and the deadline was under an hour away. Run replan-currency-depth-a and replan-currency-depth-b as two local-lane investigate nodes, read-only with no source changes, writing docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md and -b.md. Then set each plan's status and impl to what the code supports: close a plan whose scope landed, supersede one whose scope moved, and give each live plan a followup with a done-when. Done when: both reports carry one row per assigned plan with commit, file and line evidence, and each of the fourteen plans has a status, impl and followup matching its row.</div>
-    <pre class="r-fu-prompt">/reckon-ship nova-portfolio-replan</pre>
+    <pre class="r-fu-prompt">/reckon-build nova-portfolio-replan</pre>
     </article>
-<article class="r-fu" data-id="f-replan-003" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-replan-003" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Close the stale sprints S10-S19</h4>
     <div class="r-fu-body">S21 is the one active sprint; S10, S11, S12, S15, S16, S17, S18 and S19 remain open with pending members, and S20 is an unrelated planned sprint with no items (forward-solve seam). After f-replan-002 decides each member: move live members into S21, or into S20 if the forward-solve seam work is taken up. Record closed or superseded members, then set each stale sprint to done. Completed plans stay closed and are never reopened. Done when: roadmap lists S21 active, no stale sprint open, every pending plan in S21 or S20, and no error-level wiring finding.</div>
-    <pre class="r-fu-prompt">/reckon-ship nova-portfolio-replan</pre>
+    <pre class="r-fu-prompt">/reckon-build nova-portfolio-replan</pre>
     </article>
-<article class="r-fu" data-id="f-replan-004" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-replan-004" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Thin interfaces to shared infrastructure</h4>
     <div class="r-fu-body">Node replan-thin-interfaces (§2) writes docs/evidence/replan-2026-09-24/thin-interfaces.md. Refactors already named at the handoff, each owned by a plan followup:
 (1) Clip mode becomes an explicit solve-request and receipt field instead of the module global _SUPPORT_CLIP_MODE (forward-solve-api, f-fsapi-clip-mode-is-a-request-field). Exact mode then gets a production caller, and this must precede any cutover.
@@ -93,7 +93,7 @@
 (4) Four reckon crew defects are reported upstream: supervisors that outlive their worker, codex review manifests being rejected, a review sweep that ignores the pause, and orphaned followers holding the lock. A worker's plan write can also resolve to the main checkout instead of its worktree: the seed-policy record landed on main at edbd943f7.
 (5) imas-python and the local lane have no nova-specific coupling found.
 Done when: the report lists each coupling with files, line counts, refactor and done-when, and each refactor is owned by a live plan followup.</div>
-    <pre class="r-fu-prompt">/reckon-ship nova-portfolio-replan</pre>
+    <pre class="r-fu-prompt">/reckon-build nova-portfolio-replan</pre>
     </article>
 </section>
 </main>

@@ -43,10 +43,10 @@
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sdw-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s19" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship solve-default-wiring" data-resolved-at="2026-09-04T17:33:49+00:00" data-resolved-by="coordinator">
+<article class="r-fu" data-id="f-sdw-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship-s19" data-written-at="2026-09-02" data-recommends-skill="/reckon-build solve-default-wiring" data-resolved-at="2026-09-04T17:33:49+00:00" data-resolved-by="coordinator">
     <h4 class="r-fu-title">Wire the six defaults, then pin them</h4>
     <div class="r-fu-body">Six one-line wiring nodes on the existing routes (§1), then the default-wiring test and the audit rerun (§2). Dispatchable now; no prerequisite.</div>
-    <pre class="r-fu-prompt">/reckon-ship solve-default-wiring</pre>
+    <pre class="r-fu-prompt">/reckon-build solve-default-wiring</pre>
     <p class="r-fu-outcome">done — no followup on this plan. Landed across four merges: the oracle rebaseline and topology visual routes moved onto the public solve (e0846d0b), the public solve resolves every omitted option through the one version-keyed table (563e8b59), the benchmark producers build typed requests (2e0b3251), and the fail-closed default-wiring test pins all 63 production cells (d3669921). Wiring audit 48 of 63 before, 63 of 63 after. The remaining route migrations (imas-ambix consumer, EFIT-match evidence regeneration) are forward-solve-api §2 work and are tracked there.</p>
     </article>
 </section>

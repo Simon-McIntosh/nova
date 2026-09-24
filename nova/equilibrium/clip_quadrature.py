@@ -516,7 +516,8 @@ def clipped_support_field_integrals(
     count = jnp.asarray(support.vertex_count)
     centroids = jnp.asarray(support.centroids)
     selected = jnp.asarray(selection, dtype=bool)
-    boundary = selected & jnp.asarray(support.boundary, dtype=bool)
+    sampled_boundary = count > _WHOLE_CELL_VERTEX_CAPACITY
+    boundary = selected & (jnp.asarray(support.boundary, dtype=bool) | sampled_boundary)
     whole = selected & jnp.asarray(support.included, dtype=bool) & ~boundary
 
     whole_vertices = vertices[:, :_WHOLE_CELL_VERTEX_CAPACITY]
@@ -730,7 +731,8 @@ def clipped_support_current_moments(
     count = jnp.asarray(support.vertex_count)
     centroids = jnp.asarray(support.centroids)
     selected = jnp.asarray(selection, dtype=bool)
-    boundary = selected & jnp.asarray(support.boundary, dtype=bool)
+    sampled_boundary = count > _WHOLE_CELL_VERTEX_CAPACITY
+    boundary = selected & (jnp.asarray(support.boundary, dtype=bool) | sampled_boundary)
     whole = selected & jnp.asarray(support.included, dtype=bool) & ~boundary
 
     whole_points, whole_weights = _quadrature_from_arrays(

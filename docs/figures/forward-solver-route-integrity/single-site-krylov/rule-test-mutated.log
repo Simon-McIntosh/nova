@@ -1,0 +1,61 @@
+restore the per-slot select of the whole carry under vmap
+revision=6204bfd6feb7227dd66c2594dd2433248072e4a1 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit command=.venv/bin/python mutated_rule_test.py (login node, CPU, seconds)
+MUTATION_APPLIED restore the per-slot select of the whole carry under vmap
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 08:04:37 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 5 items
+
+tests/test_single_site_krylov.py::test_the_qualified_step_applies_its_operator_at_one_site PASSED [ 20%]
+tests/test_single_site_krylov.py::test_the_single_site_step_still_solves_a_full_dimension_system PASSED [ 40%]
+tests/test_single_site_krylov.py::test_the_vmapped_stream_stops_when_every_member_is_done PASSED [ 60%]
+tests/test_single_site_krylov.py::test_the_vmapped_stream_projects_once_per_cycle_outside_its_slot_loop FAILED [ 80%]
+tests/test_single_site_krylov.py::test_the_batching_rule_matches_each_members_own_step PASSED [100%]
+
+=================================== FAILURES ===================================
+____ test_the_vmapped_stream_projects_once_per_cycle_outside_its_slot_loop _____
+
+    def test_the_vmapped_stream_projects_once_per_cycle_outside_its_slot_loop():
+        """Under vmap the stream's own batching rule serves the batch.
+    
+        Members sit on an explicit axis and the slot loop exits on scalar
+        predicates, so the carry is never selected against a per-member exit.
+        The restart's least-squares projection runs in an enclosing cycle loop
+        once some member ends its Arnoldi cycle, not on every slot.
+        """
+        matrix = jnp.asarray(
+            np.eye(12) + 0.2 * np.random.default_rng(3).standard_normal((12, 12))
+        )
+        rhs = jnp.asarray(np.random.default_rng(4).standard_normal((2, 12)))
+    
+        def member(b):
+            def operator(vector):
+                with jax.named_scope(OPERATOR_SCOPE):
+                    return matrix @ vector
+    
+            return fixed_point._qualified_krylov_step(
+                operator,
+                b,
+                jnp.asarray(0.1),
+                gmres_iterations=8,
+                condition_ratio_limit=10.0,
+                preceding_condition_baseline=jnp.asarray(2.0),
+            ).step
+    
+        paths = list(_operator_loops(jax.make_jaxpr(jax.vmap(member))(rhs).jaxpr))
+        assert paths
+        innermost = max(paths, key=len)
+        projects_per_slot = _uses(innermost[-1], "cholesky")
+        projects_per_cycle = len(innermost) >= 2 and _uses(innermost[-2], "cholesky")
+>       assert not projects_per_slot
+E       assert not True
+
+tests/test_single_site_krylov.py:189: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_single_site_krylov.py::test_the_vmapped_stream_projects_once_per_cycle_outside_its_slot_loop - assert not True
+========================= 1 failed, 4 passed in 8.86s ==========================
+EXIT=1

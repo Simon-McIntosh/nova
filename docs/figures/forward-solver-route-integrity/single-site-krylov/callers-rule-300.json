@@ -1,0 +1,419 @@
+[
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
+    "instructions": 13873,
+    "shared_body": false,
+    "kinds": {
+      "jvp": 6071,
+      "primal": 7802
+    },
+    "callers": [
+      [
+        [
+          "run_operator_requests.<locals>.serve:1030",
+          "_newton_krylov_inner.<locals>.newton_body.<locals>.attempt_step.<locals>.promoted_state.<locals>.promotion_attempt.<locals>.<lambda>:3905"
+        ],
+        816
+      ],
+      [
+        [
+          "_smooth_relative_sup_merit:1070",
+          "_smooth_relative_sup_merit:1065"
+        ],
+        42
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
+    "instructions": 13782,
+    "shared_body": false,
+    "kinds": {
+      "jvp": 4007,
+      "transpose": 2474,
+      "primal": 7301
+    },
+    "callers": [
+      [
+        [
+          "_rebuilt_model_promotion.<locals>.damping_trial:1608",
+          "_rebuilt_model_promotion.<locals>.damping_trial:1596"
+        ],
+        32
+      ],
+      [
+        [
+          "_smooth_relative_sup_merit:1070",
+          "_smooth_relative_sup_merit:1065"
+        ],
+        29
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun",
+    "instructions": 12724,
+    "shared_body": false,
+    "kinds": {
+      "jvp": 10520,
+      "transpose": 2204
+    },
+    "callers": [
+      [
+        [
+          "_steepest_descent_promotion:1709",
+          "_steepest_descent_promotion:1679"
+        ],
+        17
+      ],
+      [
+        [
+          "_steepest_descent_promotion:1681",
+          "_steepest_descent_promotion:1679"
+        ],
+        14
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun",
+    "instructions": 12618,
+    "shared_body": false,
+    "kinds": {
+      "primal": 9582,
+      "jvp": 271,
+      "transpose": 2765
+    },
+    "callers": [
+      [
+        [
+          "_smooth_relative_sup_merit:1070",
+          "_smooth_relative_sup_merit:1065"
+        ],
+        16
+      ],
+      [
+        [
+          "_smooth_relative_sup_merit:1072",
+          "_smooth_relative_sup_merit:1065"
+        ],
+        13
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body",
+    "instructions": 11993,
+    "shared_body": false,
+    "kinds": {
+      "jvp": 11993
+    },
+    "callers": [
+      [
+        [
+          "run_operator_requests:1032"
+        ],
+        153
+      ],
+      [
+        [
+          "_newton_krylov_inner.<locals>.newton_body:4176",
+          "_newton_krylov_inner.<locals>.newton_body:3754"
+        ],
+        48
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/jit(evaluate)",
+    "instructions": 7815,
+    "shared_body": true,
+    "kinds": {
+      "jvp": 7815
+    },
+    "callers": [
+      [
+        [
+          "_smooth_relative_sup_merit:1070",
+          "_smooth_relative_sup_merit:1065"
+        ],
+        7
+      ],
+      [
+        [
+          "_smooth_relative_sup_merit:1072",
+          "_smooth_relative_sup_merit:1065"
+        ],
+        7
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/closed_call/jit(evaluate)",
+    "instructions": 7348,
+    "shared_body": true,
+    "kinds": {
+      "jvp": 7348
+    },
+    "callers": [
+      [
+        [
+          "operator_request_body.<locals>.evaluate:986",
+          "operator_request_body.<locals>.evaluate:1005"
+        ],
+        9
+      ],
+      [
+        [
+          "operator_request_body.<locals>.evaluate:994",
+          "operator_request_body.<locals>.evaluate:1005"
+        ],
+        5
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/jit(evaluate)",
+    "instructions": 7344,
+    "shared_body": true,
+    "kinds": {
+      "jvp": 7344
+    },
+    "callers": [
+      [
+        [
+          "_smooth_relative_sup_merit:1070",
+          "_smooth_relative_sup_merit:1065"
+        ],
+        7
+      ],
+      [
+        [
+          "_smooth_relative_sup_merit:1072",
+          "_smooth_relative_sup_merit:1065"
+        ],
+        7
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body/while/body",
+    "instructions": 4662,
+    "shared_body": false,
+    "kinds": {
+      "jvp": 2140,
+      "transpose": 2522
+    },
+    "callers": [
+      [
+        [
+          "_rebuilt_model_promotion.<locals>.damping_trial:1582",
+          "_rebuilt_model_promotion.<locals>.damping_trial:1596"
+        ],
+        112
+      ],
+      [
+        [
+          "_rebuilt_model_promotion.<locals>.damping_trial.<locals>.damped_normal_action:1580",
+          "_newton_krylov_inner.<locals>.newton_body:3754"
+        ],
+        5
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body",
+    "instructions": 4596,
+    "shared_body": false,
+    "kinds": {
+      "jvp": 2074,
+      "transpose": 2522
+    },
+    "callers": [
+      [
+        [
+          "_rebuilt_model_promotion.<locals>.damping_trial:1582",
+          "_rebuilt_model_promotion.<locals>.damping_trial:1596"
+        ],
+        30
+      ],
+      [
+        [
+          "_rebuilt_model_promotion.<locals>.linear_action:1566"
+        ],
+        4
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)",
+    "instructions": 2357,
+    "shared_body": false,
+    "kinds": {
+      "primal": 2357
+    },
+    "callers": [
+      [
+        [
+          "_active_set_newton_krylov:4796"
+        ],
+        49
+      ],
+      [
+        [
+          "_active_set_newton_krylov:4830",
+          "_active_set_newton_krylov:4351"
+        ],
+        2
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/closed_call/jit(evaluate)/cond/branch_1_fun",
+    "instructions": 2266,
+    "shared_body": true,
+    "kinds": {
+      "primal": 2266
+    },
+    "callers": []
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/jit(evaluate)/jvp()/cond/branch_0_fun",
+    "instructions": 2260,
+    "shared_body": true,
+    "kinds": {
+      "primal": 2260
+    },
+    "callers": []
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_0_fun",
+    "instructions": 2260,
+    "shared_body": false,
+    "kinds": {
+      "primal": 2260
+    },
+    "callers": []
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_0_fun",
+    "instructions": 2260,
+    "shared_body": false,
+    "kinds": {
+      "primal": 2260
+    },
+    "callers": []
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/branch_0_fun",
+    "instructions": 2260,
+    "shared_body": false,
+    "kinds": {
+      "primal": 2260
+    },
+    "callers": []
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/jit(evaluate)/jvp()/cond/branch_0_fun",
+    "instructions": 2260,
+    "shared_body": true,
+    "kinds": {
+      "primal": 2260
+    },
+    "callers": []
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body",
+    "instructions": 2030,
+    "shared_body": false,
+    "kinds": {
+      "jvp": 2030
+    },
+    "callers": [
+      [
+        [
+          "_record_merit:1083",
+          "_record_merit:1082"
+        ],
+        39
+      ],
+      [
+        [
+          "_newton_krylov_inner.<locals>.newton_body.<locals>.attempt_step.<locals>.promoted_state.<locals>.promotion_attempt:3902",
+          "_newton_krylov_inner.<locals>.newton_body.<locals>.attempt_step.<locals>.promoted_state.<locals>.promotion_attempt:3880"
+        ],
+        17
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body",
+    "instructions": 2028,
+    "shared_body": false,
+    "kinds": {
+      "jvp": 2028
+    },
+    "callers": [
+      [
+        [
+          "_serve_krylov_stream.<locals>.serve:2396",
+          "_serve_krylov_stream.<locals>.serve:2394"
+        ],
+        25
+      ],
+      [
+        [
+          "_serve_krylov_stream.<locals>.serve:2394"
+        ],
+        4
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun",
+    "instructions": 2010,
+    "shared_body": false,
+    "kinds": {
+      "jvp": 2010
+    },
+    "callers": [
+      [
+        [
+          "_backtracking_scores:1283",
+          "_backtracking_scores:1276"
+        ],
+        17
+      ],
+      [
+        [
+          "_backtracking_scores:1284",
+          "_backtracking_scores:1276"
+        ],
+        14
+      ]
+    ]
+  },
+  {
+    "site": "jit(solve)/while/body/closed_call/cond/branch_1_fun",
+    "instructions": 1880,
+    "shared_body": false,
+    "kinds": {
+      "primal": 1880
+    },
+    "callers": [
+      [
+        [
+          "_newton_krylov_inner:4178"
+        ],
+        44
+      ],
+      [
+        [
+          "_active_set_newton_krylov.<locals>.reconcile:4544",
+          "_active_set_newton_krylov.<locals>.reconcile:4444"
+        ],
+        40
+      ]
+    ]
+  }
+]

@@ -2,10 +2,12 @@
 
 Every operator application of the step (the finite-action probe, the
 condition Arnoldi columns, the restarted GMRES and the achieved-residual
-check) is served from one slot of a scan, so the traced program carries the
+check) is served from one slot of a loop, so the traced program carries the
 operator once however many applications the solve needs. The operator is
 traced under a named scope and its contraction is counted through every
-nested jaxpr.
+nested jaxpr. The loop exits when the stream is done, and under ``vmap`` when
+every member is, so a batch applies the operator no more often than its
+slowest member needs.
 """
 
 import jax
@@ -73,3 +75,156 @@ def test_the_single_site_step_still_solves_a_full_dimension_system():
         np.asarray(matrix @ result.unconditioned_step), np.asarray(rhs), atol=1e-10
     )
     assert float(result.achieved_reduction) < 1e-10
+
+
+def _counted_member_step(iterations=3, size=6):
+    """A vmappable step whose operator reports each application to the host."""
+    rng = np.random.default_rng(3)
+    coupling = jnp.asarray(rng.standard_normal((size, size)))
+    applications = []
+
+    def step(scale, rhs):
+        def operator(vector):
+            jax.debug.callback(lambda _: applications.append(1), vector)
+            return vector + scale * (coupling @ vector)
+
+        return fixed_point._qualified_krylov_step(
+            operator,
+            rhs,
+            jnp.asarray(0.1),
+            gmres_iterations=iterations,
+            condition_ratio_limit=10.0,
+            preceding_condition_baseline=jnp.asarray(2.0),
+        ).step
+
+    return step, applications, rng.standard_normal((2, size))
+
+
+def test_the_vmapped_stream_stops_when_every_member_is_done():
+    iterations = 3
+    capacity = 1 + iterations + 1 + iterations * (iterations + 1) + 1
+    step, applications, rhs = _counted_member_step(iterations)
+    # an identity member resolves in its first restart, a weakly coupled one
+    # needs two; neither reaches the stream's worst-case slot count
+    scales = jnp.asarray([0.0, 0.02])
+    rhs = jnp.asarray(rhs)
+    single = []
+    for scale, member_rhs in zip(scales, rhs, strict=True):
+        applications.clear()
+        jax.jit(step)(scale, member_rhs).block_until_ready()
+        single.append(len(applications))
+    assert single[0] < single[1] < capacity
+    applications.clear()
+    batched = jax.jit(jax.vmap(step))(scales, rhs).block_until_ready()
+    assert len(applications) == len(scales) * max(single)
+    # a finished member's carry is held while the other runs on; batched and
+    # unbatched arithmetic round differently, so the match is to rounding
+    for index, scale in enumerate(scales):
+        np.testing.assert_allclose(
+            np.asarray(batched[index]),
+            np.asarray(jax.jit(step)(scale, rhs[index])),
+            rtol=1e-12,
+            atol=1e-15,
+        )
+
+
+def _subjaxprs(equation):
+    for parameter in equation.params.values():
+        for value in parameter if isinstance(parameter, tuple | list) else (parameter,):
+            inner = getattr(value, "jaxpr", value)
+            if hasattr(inner, "eqns"):
+                yield inner
+
+
+def _uses(jaxpr, primitive) -> bool:
+    return any(
+        equation.primitive.name == primitive
+        or any(_uses(inner, primitive) for inner in _subjaxprs(equation))
+        for equation in jaxpr.eqns
+    )
+
+
+def _operator_loops(jaxpr, enclosing=()):
+    """Every while body that applies the operator, innermost last, per path."""
+    for equation in jaxpr.eqns:
+        for inner in _subjaxprs(equation):
+            path = enclosing + ((inner,) if equation.primitive.name == "while" else ())
+            if equation.primitive.name == "while" and _operator_sites(inner):
+                yield path
+            yield from _operator_loops(inner, path)
+
+
+def test_the_vmapped_stream_projects_once_per_cycle_outside_its_slot_loop():
+    """Under vmap the stream's own batching rule serves the batch.
+
+    Members sit on an explicit axis and the slot loop exits on scalar
+    predicates, so the carry is never selected against a per-member exit.
+    The restart's least-squares projection runs in an enclosing cycle loop
+    once some member ends its Arnoldi cycle, not on every slot.
+    """
+    matrix = jnp.asarray(
+        np.eye(12) + 0.2 * np.random.default_rng(3).standard_normal((12, 12))
+    )
+    rhs = jnp.asarray(np.random.default_rng(4).standard_normal((2, 12)))
+
+    def member(b):
+        def operator(vector):
+            with jax.named_scope(OPERATOR_SCOPE):
+                return matrix @ vector
+
+        return fixed_point._qualified_krylov_step(
+            operator,
+            b,
+            jnp.asarray(0.1),
+            gmres_iterations=8,
+            condition_ratio_limit=10.0,
+            preceding_condition_baseline=jnp.asarray(2.0),
+        ).step
+
+    paths = list(_operator_loops(jax.make_jaxpr(jax.vmap(member))(rhs).jaxpr))
+    assert paths
+    innermost = max(paths, key=len)
+    projects_per_slot = _uses(innermost[-1], "cholesky")
+    projects_per_cycle = len(innermost) >= 2 and _uses(innermost[-2], "cholesky")
+    assert not projects_per_slot
+    assert projects_per_cycle
+
+
+def test_the_batching_rule_matches_each_members_own_step():
+    """Mixed members agree with their unbatched steps to rounding.
+
+    The batch mixes a member resolved in its first restart, members needing
+    several, and an identity member whose Arnoldi cycle breaks down at once,
+    so members leave the shared phase and the masked writes, the per-cycle
+    projection and the breakdown exit are all exercised.
+    """
+    size, iterations = 10, 4
+    rng = np.random.default_rng(7)
+    coupling = jnp.asarray(rng.standard_normal((size, size)))
+    scales = jnp.asarray([0.0, 0.05, 0.3, 0.8, 1.5])
+    rhs = jnp.asarray(rng.standard_normal((len(scales), size)))
+
+    def member(scale, b):
+        result = fixed_point._qualified_krylov_step(
+            lambda v: v + scale * (coupling @ v),
+            b,
+            jnp.asarray(0.1),
+            gmres_iterations=iterations,
+            condition_ratio_limit=10.0,
+            preceding_condition_baseline=jnp.asarray(2.0),
+        )
+        return (
+            result.step,
+            result.unconditioned_step,
+            result.achieved_reduction,
+            result.projected_condition,
+            result.qualification,
+        )
+
+    batched = jax.jit(jax.vmap(member))(scales, rhs)
+    for index in range(len(scales)):
+        single = jax.jit(member)(scales[index], rhs[index])
+        for got, want in zip(batched, single, strict=True):
+            np.testing.assert_allclose(
+                np.asarray(got[index]), np.asarray(want), rtol=1e-10, atol=1e-13
+            )

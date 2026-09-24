@@ -323,6 +323,71 @@
     carries the counts, the control and the reduced-Newton run.
     This entry changes neither section state nor its followup.</p>
 
+    <h3 id="s3-single-site-krylov-vmap-exit">The Krylov request stream exits when every member is done</h3>
+    <p><code>_single_site_krylov</code> now serves its slots from a
+    <code>lax.while_loop</code> that exits at <code>DONE</code>, in place of the
+    83-slot scan with a cond around the operator. Under <code>vmap</code> the loop
+    runs until the last member finishes; unbatched, the slots and their order are unchanged. The
+    300-cell certificate program falls from 284,792 to <strong>261,735
+    instructions</strong>, with one qualified-step site (2,028).
+    <code>tests/test_single_site_krylov.py</code> counts applications through a host
+    callback: a width-2 batch whose members need 8 and 14 applies 28, and with the scan
+    restored it applies 36, so the test fails.</p>
+    <p><strong>The vmapped cost gate is not met.</strong> On one H200 job the width-16
+    dense step costs 0.01435 s against the per-site base's 0.00818 s (1.75&times;). The
+    restored scan costs 0.01656 s (1.99&times;), against slice 1's CPU reading of 1.240 s
+    and 0.086 s. On CPU, the exit loop is 1.58&times; and the restored scan 16.6&times;. In
+    that case every member needs all 83 applications, so the exit cannot shorten the loop.
+    The remaining excess comes from the while-loop batching rule: once the predicate is
+    per member, every slot selects the whole carry. A probe measures 74 ms with a batched
+    predicate against 41 ms with an unbatched one over 83 slots at width 16. Gating each
+    consumer behind an at-most-once loop made the H200 worse (2.26&times;) and was
+    withdrawn. Closing the gap needs the stream to keep an unbatched predicate under
+    <code>vmap</code>. The operator-boundary reading also fails its bound: the non-converged diverted rung's
+    terminal residual moves from 0.279485232201572 to 0.06325730373091486, although the
+    step is bitwise equal to the scan on 8 of 8 toy operators; the mechanism is not
+    yet named. <code>tests/test_fixed_point.py</code> passes 45 of 45 and
+    <code>tests/test_reduced_newton.py</code> shows the base's four failures. The
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#single-site-krylov-vmap-exit">detailed record</a>
+    carries the arms, the control and the tests. This entry changes neither section state
+    nor its followup.</p>
+    <p>Correction to the reading above: the 0.216 move is not caused by the exit loop.
+    The diverted rung was run side by side under both Krylov bodies, on this tree's
+    operator and on the operator modules of <code>8d02dd0f</code>, where slice 1 was
+    measured. On each operator the two bodies terminate at most 3.07e-12 apart
+    (1.82e-12 on the merged operator, 3.07e-12 on the pre-merge one). On each body the
+    two operators terminate 0.216 apart (0.0633 against 0.2795). The move comes from
+    the operator modules merged from main at <code>e62c8110e</code>, and the exit-loop
+    gate was the first run to measure this rung on them. The Krylov-body difference
+    is floating-point reassociation:
+    the first operator application has an identical input and an output differing by
+    at most 3.3e-16. The Krylov calls (41), the applications per call (64), the
+    qualifications and the trip counts are all equal, and the gap stays near 1e-12
+    through every trip. The
+    <a href="/nova/figures/forward-solver-route-integrity/single-site-krylov/diverted-move-mechanism.md">mechanism record</a>
+    carries both runs' per-trip traces. This entry changes neither section state nor its
+    followup.</p>
+
+    <h3 id="s3-single-site-krylov-batch-rule">The Krylov stream batches through its own vmap rule</h3>
+    <p>The vmapped width-16 cost now meets its gate. On the H200 the step costs
+    <strong>0.00822 s against the per-site base's 0.00835 s</strong>, measured in the same process
+    (0.98&times;). A second allocation reads 0.00821 s against 0.00889 s (0.92&times;). The stream
+    is a <code>custom_vmap</code> function. Unbatched it is the exit loop, unchanged: 261,735
+    instructions at 300 cells, toy operators bitwise equal on 8 of 8, and the diverted rung's terminal
+    bitwise the exit-loop head's (<code>0.06325730373091486</code>). Under <code>vmap</code> its rule
+    runs the members on an explicit axis in two nested loops with scalar predicates. The inner
+    loop serves slots until some member owes a restart projection, and the outer loop projects the
+    owing members. Every consumer's arithmetic is evaluated for every member and written in place
+    only where that member's phase selects it. Restoring the loop's default batching (a per-slot
+    select of the whole carry) returns the cost to 1.73&ndash;1.75&times;. The operator's closure is
+    traced once, and its closed-over values reach the rule as explicit arguments, for
+    <code>_qualified_krylov_step</code> only. <code>tests/test_single_site_krylov.py</code> passes 5,
+    <code>tests/test_fixed_point.py</code> 45, and <code>tests/test_reduced_newton.py</code> shows the
+    base's four failures. The
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#single-site-krylov-batch-rule">detailed record</a>
+    carries the design ladder and the compiled-program counts. This entry changes neither section
+    state nor its followup.</p>
+
     <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>
     <p>Measured 2026-09-18: the pre-warm covers 3292 keys the lane never requests and none of the 1285 keys it
     does, so the lane's 1341 hits all came from that target's own earlier run on the same directory; a lane

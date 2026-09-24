@@ -46,6 +46,7 @@ from pathlib import Path
 from typing import Any, Literal, NamedTuple
 
 import jax
+import jax.extend.core
 import jax.numpy as jnp
 import numpy as np
 
@@ -824,12 +825,13 @@ def _arnoldi_condition_start(
     return basis, hessenberg, basis_valid
 
 
-def _arnoldi_column_update(
+def _arnoldi_column_values(
     column: jax.Array,
     carry: tuple[jax.Array, jax.Array, jax.Array],
     action: jax.Array,
-) -> tuple[jax.Array, jax.Array, jax.Array]:
-    """Orthogonalise one applied basis column twice and append its successor."""
+) -> tuple[jax.Array, jax.Array, jax.Array, jax.Array]:
+    """Values one applied column writes: its Hessenberg column, subdiagonal,
+    successor basis vector and successor validity."""
     basis, hessenberg, basis_valid = carry
     basis_index = jnp.arange(basis.shape[0])
     breakdown_floor = 64.0 * jnp.finfo(basis.dtype).eps
@@ -849,12 +851,26 @@ def _arnoldi_column_update(
         action / jnp.maximum(next_norm, 1.0e-300),
         jnp.zeros_like(action),
     )
-    hessenberg = hessenberg.at[:, column].set(
-        jnp.where(column_valid, coefficients, 0.0)
+    return (
+        jnp.where(column_valid, coefficients, 0.0),
+        jnp.where(column_valid, next_norm, 0.0),
+        next_vector,
+        next_valid,
     )
-    hessenberg = hessenberg.at[column + 1, column].set(
-        jnp.where(column_valid, next_norm, 0.0)
+
+
+def _arnoldi_column_update(
+    column: jax.Array,
+    carry: tuple[jax.Array, jax.Array, jax.Array],
+    action: jax.Array,
+) -> tuple[jax.Array, jax.Array, jax.Array]:
+    """Orthogonalise one applied basis column twice and append its successor."""
+    basis, hessenberg, basis_valid = carry
+    column_entries, subdiagonal, next_vector, next_valid = _arnoldi_column_values(
+        column, carry, action
     )
+    hessenberg = hessenberg.at[:, column].set(column_entries)
+    hessenberg = hessenberg.at[column + 1, column].set(subdiagonal)
     basis = basis.at[column + 1].set(next_vector)
     basis_valid = basis_valid.at[column + 1].set(next_valid)
     return basis, hessenberg, basis_valid
@@ -2131,6 +2147,25 @@ def _gmres_classical_gram_schmidt(
     return vector, overlaps
 
 
+def _gmres_single_pass_gram_schmidt(
+    basis: jax.Array, vector: jax.Array, vector_norm: jax.Array
+) -> tuple[jax.Array, jax.Array]:
+    """:func:`_gmres_classical_gram_schmidt` as straight-line arithmetic.
+
+    With at most two iterations the loop form's repeat test (``iteration <
+    1`` after the first pass) never admits a second pass, so it computes
+    exactly one projection. This form computes that projection in the same
+    operation order without the loops, whose predicates a batch would
+    otherwise evaluate on every Arnoldi slot.
+    """
+    del vector_norm
+    overlaps = jnp.zeros(basis.shape[-1], dtype=basis.dtype)
+    projection = jnp.einsum(
+        "...n,...->n", basis, vector, precision=jax.lax.Precision.HIGHEST
+    )
+    return vector - _gmres_dot(basis, projection), overlaps + projection
+
+
 def _gmres_lstsq(matrix: jax.Array, rhs: jax.Array) -> jax.Array:
     """Least-squares coefficients through the positive normal equations."""
     return jax.scipy.linalg.solve(
@@ -2145,34 +2180,44 @@ def _gmres_restart_start(unit_residual: jax.Array, restart: int):
     return basis, hessenberg
 
 
-def _single_site_krylov(
-    linear_action: Callable[[jax.Array], jax.Array],
+class _KrylovMachine(NamedTuple):
+    """One member's Krylov request stream: its start, requests and consumers.
+
+    ``requests[phase]`` names the vector the slot applies the operator to and
+    ``consumers[phase]`` folds the action into the carry. The Arnoldi
+    consumer's arithmetic is also available apart from its writes:
+    ``arnoldi_values`` gives the orthonormal successor, the Hessenberg row and
+    the breakdown flag, and ``arnoldi_candidate`` the restart's least-squares
+    projection, so a batch can write masked in place and project only when
+    some member ends its cycle.
+    """
+
+    initial: _KrylovStream
+    requests: tuple[Callable, ...]
+    consumers: tuple[Callable, ...]
+    arnoldi_values: Callable
+    arnoldi_candidate: Callable
+
+
+def _krylov_tolerance(residual_vector: jax.Array) -> jax.Array:
+    """Absolute GMRES tolerance of one member's right-hand side."""
+    return jnp.maximum(_GMRES_RELATIVE_TOLERANCE * _gmres_norm(residual_vector), 0.0)
+
+
+def _krylov_machine(
     residual_vector: jax.Array,
     probe: jax.Array,
+    atol: jax.Array,
     *,
     gmres_iterations: int,
-) -> tuple[
-    jax.Array, tuple[jax.Array, jax.Array, jax.Array], jax.Array, jax.Array, jax.Array
-]:
-    """Serve every operator application of one qualified step from one scan.
-
-    The stream reproduces, slot for slot, the finite-action probe, the
-    projected-condition Arnoldi columns, the batched restarted GMRES of
-    ``jax.scipy.sparse.linalg.gmres`` (``restart = maxiter = gmres_iterations``,
-    zero initial guess, identity preconditioner) and the achieved-residual
-    check. Each slot applies ``linear_action`` at the single call site in the
-    scan body; a phase switch routes the result to its consumer, so the
-    lowered program carries one inlined operator body however many
-    applications the solve needs. Slots after the machine reaches ``DONE``
-    apply nothing.
-    """
+    orthogonalise: Callable = _gmres_classical_gram_schmidt,
+) -> _KrylovMachine:
+    """Build one member's request stream (see :func:`_single_site_krylov`)."""
     size = residual_vector.size
     restart = min(gmres_iterations, size)
     maxiter = gmres_iterations
-    capacity = 1 + gmres_iterations + 1 + maxiter * (restart + 1) + 1
     dtype = residual_vector.dtype
     eps = jnp.finfo(dtype).eps
-    atol = jnp.maximum(_GMRES_RELATIVE_TOLERANCE * _gmres_norm(residual_vector), 0.0)
     zeros = jnp.zeros_like(residual_vector)
     basis, hessenberg = _gmres_restart_start(zeros, restart)
     initial = _KrylovStream(
@@ -2234,42 +2279,52 @@ def _single_site_krylov(
     def gmres_start_slot(stream, action):
         return restarted(stream, residual_vector - action)
 
-    def arnoldi_slot(stream, action):
+    def arnoldi_values(stream, action):
         index = stream.arnoldi_index
         _, norm_before = _gmres_safe_normalize(action)
-        orthogonal, overlaps = _gmres_classical_gram_schmidt(
-            stream.basis, action, norm_before
-        )
+        orthogonal, overlaps = orthogonalise(stream.basis, action, norm_before)
         unit_vector, norm_after = _gmres_safe_normalize(
             orthogonal, thresh=eps * norm_before
         )
-        basis = stream.basis.at[..., index + 1].set(unit_vector)
         overlaps = overlaps.at[index + 1].set(norm_after.astype(dtype))
+        return unit_vector, overlaps, norm_after == 0.0
+
+    def arnoldi_advance(stream, action):
+        index = stream.arnoldi_index
+        unit_vector, overlaps, breakdown = arnoldi_values(stream, action)
+        basis = stream.basis.at[..., index + 1].set(unit_vector)
         hessenberg = stream.hessenberg.at[index, :].set(overlaps)
-        breakdown = norm_after == 0.0
         index = index + 1
         proceed = (index < restart) & ~breakdown
-
-        def project(_):
-            beta = (
-                jnp.zeros_like(hessenberg, shape=(restart + 1,))
-                .at[0]
-                .set(stream.residual_norm.astype(dtype))
-            )
-            coefficients = _gmres_lstsq(hessenberg.T, beta)
-            return stream.solution + _gmres_dot(basis[..., :-1], coefficients)
-
-        candidate = jax.lax.cond(proceed, lambda _: stream.candidate, project, None)
-        return stream._replace(
+        advanced = stream._replace(
             phase=jnp.where(
                 proceed, _KrylovPhase.ARNOLDI, _KrylovPhase.RESTART_RESIDUAL
             ).astype(jnp.int32),
-            candidate=candidate,
             basis=basis,
             hessenberg=hessenberg,
             arnoldi_index=index,
             breakdown=breakdown,
         )
+        return advanced, proceed
+
+    def arnoldi_candidate(stream):
+        beta = (
+            jnp.zeros_like(stream.hessenberg, shape=(restart + 1,))
+            .at[0]
+            .set(stream.residual_norm.astype(dtype))
+        )
+        coefficients = _gmres_lstsq(stream.hessenberg.T, beta)
+        return stream.solution + _gmres_dot(stream.basis[..., :-1], coefficients)
+
+    def arnoldi_slot(stream, action):
+        advanced, proceed = arnoldi_advance(stream, action)
+        candidate = jax.lax.cond(
+            proceed,
+            lambda _: stream.candidate,
+            lambda _: arnoldi_candidate(advanced),
+            None,
+        )
+        return advanced._replace(candidate=candidate)
 
     def restart_residual_slot(stream, action):
         stream = stream._replace(
@@ -2283,9 +2338,6 @@ def _single_site_krylov(
             achieved_action=action,
         )
 
-    def done_slot(stream, _action):
-        return stream
-
     consumers = (
         probe_slot,
         condition_slot,
@@ -2293,7 +2345,6 @@ def _single_site_krylov(
         arnoldi_slot,
         restart_residual_slot,
         achieved_slot,
-        done_slot,
     )
     requests = (
         lambda stream: probe,
@@ -2302,24 +2353,14 @@ def _single_site_krylov(
         lambda stream: stream.basis[..., stream.arnoldi_index],
         lambda stream: stream.candidate,
         lambda stream: stream.solution,
-        lambda stream: zeros,
+    )
+    return _KrylovMachine(
+        initial, requests, consumers, arnoldi_values, arnoldi_candidate
     )
 
-    def serve(stream, _):
-        vector = jax.lax.switch(stream.phase, requests, stream)
-        # The barrier keeps the operator's arithmetic out of its consumers'
-        # fusions, so each application rounds as a standalone evaluation.
-        action = jax.lax.optimization_barrier(
-            jax.lax.cond(
-                stream.phase == _KrylovPhase.DONE,
-                jnp.zeros_like,
-                linear_action,
-                jax.lax.optimization_barrier(vector),
-            )
-        )
-        return jax.lax.switch(stream.phase, consumers, stream, action), None
 
-    stream, _ = jax.lax.scan(serve, initial, None, length=capacity)
+def _krylov_outputs(stream: _KrylovStream):
+    """The probe action, condition carry, step, status and achieved action."""
     info = jnp.where(jnp.isnan(_gmres_norm(stream.solution)), -1, 0)
     return (
         stream.probe_action,
@@ -2328,6 +2369,316 @@ def _single_site_krylov(
         info,
         stream.achieved_action,
     )
+
+
+def _fenced(linear_action: Callable, vector: jax.Array) -> jax.Array:
+    """Apply the operator between optimisation barriers.
+
+    The barriers keep the operator's arithmetic out of its consumers'
+    fusions, so each application rounds as a standalone evaluation.
+    """
+    return jax.lax.optimization_barrier(
+        linear_action(jax.lax.optimization_barrier(vector))
+    )
+
+
+def _serve_krylov_stream(
+    linear_action: Callable[[jax.Array], jax.Array], machine: _KrylovMachine
+) -> _KrylovStream:
+    """Run one member's stream to ``DONE``, one operator application a slot."""
+
+    def pending(stream):
+        return stream.phase != _KrylovPhase.DONE
+
+    def serve(stream):
+        vector = jax.lax.switch(stream.phase, machine.requests, stream)
+        action = _fenced(linear_action, vector)
+        return jax.lax.switch(stream.phase, machine.consumers, stream, action)
+
+    return jax.lax.while_loop(pending, serve, machine.initial)
+
+
+def _serve_krylov_batch(
+    batched_action: Callable[[jax.Array], jax.Array],
+    residual_vectors: jax.Array,
+    probes: jax.Array,
+    *,
+    gmres_iterations: int,
+) -> _KrylovStream:
+    """Run a batch of streams, members on the leading axis, to ``DONE``.
+
+    Two nested loops replace the single loop's per-member exit. The inner
+    loop serves slots while any member is pending and no member owes a
+    restart projection; the outer loop projects the owing members and
+    resumes. Both predicates are scalars, so the carry is never selected
+    against a per-member exit, and the projection runs once per cycle end
+    rather than on every Arnoldi slot.
+
+    Each slot applies the operator to every member's request at the single
+    batched site, then evaluates every consumer's arithmetic for every member
+    and writes each result only where the member's phase selects it: the
+    vectors by elementwise select, the Krylov bases by a masked scatter of one
+    column or row, so no slot branches on phase and no basis is copied to be
+    selected. The arithmetic per member is the stream's own, with the
+    Arnoldi orthogonalisation in its single-pass form.
+    """
+    size = residual_vectors.shape[-1]
+    restart = min(gmres_iterations, size)
+    dtype = residual_vectors.dtype
+    members = jnp.arange(residual_vectors.shape[0])
+    atol = jax.vmap(_krylov_tolerance)(residual_vectors)
+
+    def machine(residual_vector, probe, member_atol):
+        return _krylov_machine(
+            residual_vector,
+            probe,
+            member_atol,
+            gmres_iterations=gmres_iterations,
+            orthogonalise=_gmres_single_pass_gram_schmidt,
+        )
+
+    inputs = (residual_vectors, probes, atol)
+    initial = jax.vmap(lambda *m: machine(*m).initial)(*inputs)
+    fresh_hessenberg = jnp.eye(restart, restart + 1, dtype=dtype)
+
+    def request(stream, *member):
+        return jax.lax.switch(stream.phase, machine(*member).requests, stream)
+
+    def masked(where, update, current):
+        return jnp.where(
+            where.reshape(where.shape + (1,) * (current.ndim - 1)), update, current
+        )
+
+    def fold(stream, actions):
+        phase = stream.phase
+        probing = phase == _KrylovPhase.PROBE
+        conditioning = phase == _KrylovPhase.CONDITION
+        starting = phase == _KrylovPhase.GMRES_START
+        extending = phase == _KrylovPhase.ARNOLDI
+        restarting = phase == _KrylovPhase.RESTART_RESIDUAL
+        achieving = phase == _KrylovPhase.ACHIEVED
+
+        # condition: one applied column of the projected-condition Arnoldi
+        column = stream.column
+        row = column + 1
+        entries, subdiagonal, successor, successor_valid = jax.vmap(
+            _arnoldi_column_values
+        )(column, stream.condition, actions)
+        condition_basis, condition_hessenberg, condition_valid = stream.condition
+        condition_basis = condition_basis.at[members, row].set(
+            mode="drop",
+            values=masked(
+                conditioning,
+                successor,
+                condition_basis.at[members, row].get(mode="clip"),
+            ),
+        )
+        condition_hessenberg = condition_hessenberg.at[members, :, column].set(
+            mode="drop",
+            values=masked(
+                conditioning,
+                entries,
+                condition_hessenberg.at[members, :, column].get(mode="clip"),
+            ),
+        )
+        condition_hessenberg = condition_hessenberg.at[members, row, column].set(
+            mode="drop",
+            values=masked(
+                conditioning,
+                subdiagonal,
+                condition_hessenberg.at[members, row, column].get(mode="clip"),
+            ),
+        )
+        condition_valid = condition_valid.at[members, row].set(
+            mode="drop",
+            values=masked(
+                conditioning,
+                successor_valid,
+                condition_valid.at[members, row].get(mode="clip"),
+            ),
+        )
+
+        # Arnoldi: extend the GMRES basis by the orthonormal successor
+        index = stream.arnoldi_index
+        unit_vector, overlaps, broke_down = jax.vmap(
+            lambda s, a, *m: machine(*m).arnoldi_values(s, a)
+        )(stream, actions, *inputs)
+        basis = stream.basis.at[members, :, index + 1].set(
+            mode="drop",
+            values=masked(
+                extending,
+                unit_vector,
+                stream.basis.at[members, :, index + 1].get(mode="clip"),
+            ),
+        )
+        hessenberg = stream.hessenberg.at[members, index, :].set(
+            mode="drop",
+            values=masked(
+                extending,
+                overlaps,
+                stream.hessenberg.at[members, index, :].get(mode="clip"),
+            ),
+        )
+        extended = index + 1
+        proceed = (extended < restart) & ~broke_down
+
+        # restart: the GMRES start, or a restart from the owed projection
+        resetting = starting | restarting
+        solution = masked(restarting, stream.candidate, stream.solution)
+        restarts = jnp.where(restarting, stream.restarts + 1, stream.restarts)
+        unit_residual, residual_norm = jax.vmap(_gmres_safe_normalize)(
+            residual_vectors - actions
+        )
+        begin = (restarts < gmres_iterations) & (residual_norm > atol)
+        basis = masked(
+            resetting,
+            jax.vmap(lambda unit: _gmres_restart_start(unit, restart)[0])(
+                unit_residual
+            ),
+            basis,
+        )
+        hessenberg = masked(resetting, fresh_hessenberg, hessenberg)
+
+        next_phase = jnp.select(
+            [probing, conditioning, resetting, extending, achieving],
+            [
+                jnp.full_like(
+                    phase,
+                    _KrylovPhase.CONDITION
+                    if gmres_iterations > 0
+                    else _KrylovPhase.GMRES_START,
+                ),
+                jnp.where(
+                    column + 1 < gmres_iterations,
+                    _KrylovPhase.CONDITION,
+                    _KrylovPhase.GMRES_START,
+                ),
+                jnp.where(begin, _KrylovPhase.ARNOLDI, _KrylovPhase.ACHIEVED),
+                jnp.where(proceed, _KrylovPhase.ARNOLDI, _KrylovPhase.RESTART_RESIDUAL),
+                jnp.full_like(phase, _KrylovPhase.DONE),
+            ],
+            phase,
+        ).astype(jnp.int32)
+        stream = stream._replace(
+            phase=next_phase,
+            column=jnp.where(conditioning, row, column),
+            condition=(condition_basis, condition_hessenberg, condition_valid),
+            probe_action=masked(probing, actions, stream.probe_action),
+            solution=solution,
+            basis=basis,
+            hessenberg=hessenberg,
+            arnoldi_index=jnp.where(
+                extending, extended, jnp.where(resetting, 0, index)
+            ).astype(jnp.int32),
+            breakdown=jnp.where(
+                extending, broke_down, jnp.where(resetting, False, stream.breakdown)
+            ),
+            restarts=restarts,
+            unit_residual=masked(resetting, unit_residual, stream.unit_residual),
+            residual_norm=jnp.where(resetting, residual_norm, stream.residual_norm),
+            achieved_action=masked(achieving, actions, stream.achieved_action),
+        )
+        return stream, extending & ~proceed
+
+    def pending(stream):
+        return jnp.any(stream.phase != _KrylovPhase.DONE)
+
+    def serving(carry):
+        stream, owed = carry
+        return pending(stream) & ~jnp.any(owed)
+
+    def serve(carry):
+        stream, _ = carry
+        vectors = jax.vmap(request)(stream, *inputs)
+        return fold(stream, _fenced(batched_action, vectors))
+
+    def cycle(carry):
+        stream, owed = jax.lax.while_loop(serving, serve, carry)
+        candidates = jax.vmap(lambda s, *m: machine(*m).arnoldi_candidate(s))(
+            stream, *inputs
+        )
+        candidate = masked(owed, candidates, stream.candidate)
+        return stream._replace(candidate=candidate), jnp.zeros_like(owed)
+
+    owed = jnp.zeros(residual_vectors.shape[0], dtype=bool)
+    stream, _ = jax.lax.while_loop(
+        lambda carry: pending(carry[0]), cycle, (initial, owed)
+    )
+    return stream
+
+
+def _single_site_krylov(
+    linear_action: Callable[[jax.Array], jax.Array],
+    residual_vector: jax.Array,
+    probe: jax.Array,
+    *,
+    gmres_iterations: int,
+) -> tuple[
+    jax.Array, tuple[jax.Array, jax.Array, jax.Array], jax.Array, jax.Array, jax.Array
+]:
+    """Serve every operator application of one qualified step from one loop.
+
+    The stream reproduces, slot for slot, the finite-action probe, the
+    projected-condition Arnoldi columns, the batched restarted GMRES of
+    ``jax.scipy.sparse.linalg.gmres`` (``restart = maxiter = gmres_iterations``,
+    zero initial guess, identity preconditioner) and the achieved-residual
+    check. Each slot applies ``linear_action`` at the single call site in the
+    loop body; a phase switch routes the result to its consumer, so the
+    lowered program carries one inlined operator body however many
+    applications the solve needs. The loop exits when the machine reaches
+    ``DONE``.
+
+    Under ``vmap`` the stream runs through its own batching rule
+    (:func:`_serve_krylov_batch`) rather than the loop's default one, which
+    would select the whole carry against every member's exit on every slot.
+    The operator's closed-over values are therefore passed to the rule as
+    explicit arguments, so an operator whose closure is itself batched maps
+    member by member.
+    """
+    traced = jax.make_jaxpr(linear_action)(residual_vector)
+
+    def operator(vector, consts):
+        closed = jax.extend.core.ClosedJaxpr(traced.jaxpr, consts)
+        return jax.extend.core.jaxpr_as_fun(closed)(vector)[0]
+
+    @jax.custom_batching.custom_vmap
+    def stream(residual_vector, probe, consts):
+        machine = _krylov_machine(
+            residual_vector,
+            probe,
+            _krylov_tolerance(residual_vector),
+            gmres_iterations=gmres_iterations,
+        )
+        return _krylov_outputs(
+            _serve_krylov_stream(lambda vector: operator(vector, consts), machine)
+        )
+
+    @stream.def_vmap
+    def stream_batch(axis_size, in_batched, residual_vector, probe, consts):
+        vector_batched, probe_batched, consts_batched = in_batched
+        if not vector_batched:
+            residual_vector = jnp.broadcast_to(
+                residual_vector, (axis_size, *residual_vector.shape)
+            )
+        if not probe_batched:
+            probe = jnp.broadcast_to(probe, (axis_size, *probe.shape))
+        const_axes = [0 if batched else None for batched in consts_batched]
+        batched_action = jax.vmap(operator, in_axes=(0, const_axes))
+        served = _serve_krylov_batch(
+            lambda vectors: batched_action(vectors, consts),
+            residual_vector,
+            probe,
+            gmres_iterations=gmres_iterations,
+        )
+        outputs = _krylov_outputs_batched(served)
+        return outputs, jax.tree_util.tree_map(lambda _: True, outputs)
+
+    return stream(residual_vector, probe, list(traced.consts))
+
+
+def _krylov_outputs_batched(stream: _KrylovStream):
+    """:func:`_krylov_outputs` of a batch, members on the leading axis."""
+    return jax.vmap(_krylov_outputs)(stream)
 
 
 def _qualified_krylov_step(

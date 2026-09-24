@@ -2921,6 +2921,83 @@ misses 0) are committed beside the receipt. A stray truncated file left under th
 figures tree was removed, and a worker plan-version meta bump was reverted so the plans meta lines are not advanced by a worker edit. Nothing under
 <code>nova/</code> changed.</p>
 </section>
+
+<section id="diverted-chord-response-attribution">
+<h2>Diverted chord response: neither centroid placement nor Green evaluation explains the sequence</h2>
+<p><strong>2026-09-24 worker evidence; section and driving followup remain open.</strong>
+Neither X-point current-centroid placement nor Green evaluation explains the non-monotone sequence: the archived booked-versus-analytic current moments reproduce it, with mesh-dependent signed cancellation between interior, separatrix-cut, X-point, wall-cut and exterior contributions. The total-map relative sup sequence is 0.0950848, 0.0229100,
+0.0338673, 0.0126760 and 0.00409184 at 132, 340, 550, 1074 and 2616 cells.
+The plasma-relative metric has a different denominator; both are retained below.</p>
+<table><thead><tr><th>Cells</th><th>Map relative sup</th><th>Plasma relative sup</th>
+<th>X-centroid error reduction</th><th>Common-Green error reduction</th>
+<th>Quadrature refinement / error norm</th></tr></thead><tbody><tr><td>132</td><td>0.0950848225</td><td>0.00735661869</td><td>+0.02084425</td><td>-9.668793e-08</td><td>1.547e-05</td></tr>
+<tr><td>340</td><td>0.022909979</td><td>0.00166760952</td><td>-0.003749064</td><td>+2.715819e-09</td><td>2.683e-07</td></tr>
+<tr><td>550</td><td>0.0338673254</td><td>0.00223852433</td><td>-0.001983738</td><td>+7.744344e-09</td><td>2.189e-06</td></tr>
+<tr><td>1074</td><td>0.0126759888</td><td>0.000810786361</td><td>+0.0003397976</td><td>+3.177626e-09</td><td>7.249e-07</td></tr>
+<tr><td>2616</td><td>0.00409184462</td><td>0.000243153753</td><td>-0.005087571</td><td>+2.097466e-09</td><td>1.447e-07</td></tr></tbody></table>
+<p>Reductions are fractions, computed as <code>1 − ||e − correction||² / ||e||²</code>
+on the uncentered plasma error over every state node; there are no fitted coefficients.
+Negative values mean the substitution worsens the error. X-point substitution preserves
+that cell's booked current and changes only its physical first moments to the analytic
+current centroid of the same cell. It removes at most 2.084425 percent. Refined Green
+integration uses the same full-cell affine currents with source-area Gauss orders 4 then 6,
+and target-centred near-cell orders 16 then 32. Both booked and analytic images use the
+refined operator in the common-Green comparison; the separate fixed-exterior comparison
+is retained in the JSON. The tiny signed Green reductions are below quadrature sensitivity
+and carry no meaningful sign; their scale excludes Green evaluation as the explanation.</p>
+<table><thead><tr><th>Cells</th><th>Interior</th><th>Separatrix-cut</th><th>X-point</th>
+<th>Wall-cut</th><th>Exterior</th></tr></thead><tbody><tr><td>132</td><td>+0.4759836</td><td>+0.1035065</td><td>-0.1980989</td><td>+0.6186087</td><td>+0</td></tr>
+<tr><td>340</td><td>+0.6189286</td><td>+0.4590057</td><td>+0.1424258</td><td>-0.2203601</td><td>+0</td></tr>
+<tr><td>550</td><td>+0.01844452</td><td>+0.6533847</td><td>-0.01949351</td><td>+0.05145909</td><td>+0.2962052</td></tr>
+<tr><td>1074</td><td>+0.7274022</td><td>+0.2306458</td><td>+0.0006076784</td><td>+0.01052446</td><td>+0.03081987</td></tr>
+<tr><td>2616</td><td>+0.9702382</td><td>+0.3360425</td><td>+0.06070106</td><td>-0.02345678</td><td>-0.343525</td></tr></tbody></table>
+<p>These are signed projection shares <code>dot(e, e_class) / dot(e, e)</code>, which
+sum to one. They are not independent causal percentages. The exclusive geometry classes
+place an X-point cell first, then wall-cut cells, then exterior, interior and separatrix-cut
+cells; each row also retains overlapping wall and saddle flags and every per-cell current
+and centroid. The 340-to-550-cell reversal coincides with a nonzero exterior contribution:
+at 550 cells, exterior cell 64 books <strong>43.153398 A against zero analytic current</strong>;
+the exterior image reaches 0.0409806 relative sup before cancellation, whereas the net map
+mismatch is 0.0338673. At 340 cells the exterior error image is zero. At 132 cells, wall-cut
+cell 2 books 236.205099 A against zero analytic current, while X-point cell 9 books
+41.582791 A against 149.217336 A. Moving only its centroid leaves that current deficit
+in place. The current-moment difference reconstructs the field, but this experiment does
+not identify the upstream operation that creates those differences.</p>
+<figure><img src="/nova/figures/cut-cell-current-attribution/diverted-chord-response/mismatch-field.png" alt="Diverted 132-cell mismatch line contours, unit-faithful vessel and analytic and booked-map nulls">
+<figcaption>Mapped minus analytic field at 132 cells, 17 stated levels from
+−0.000997524442 to +0.000997524442 Wb. Blue nulls belong to the analytic state and
+red nulls to the booked map. Map relative sup 0.0950848; no solve was performed,
+so convergence is not applicable. Rendered with the Nova media painters on the H200
+allocation, with no axes, grid or filled scalar map.</figcaption></figure>
+<p><strong>Verification.</strong> One complete H200 measurement, job <code>1277044</code>,
+ran all ten rows in its allocation and exited 0:0 in 91 seconds; measured driver wall
+was 78.0292 seconds. It ran on <code>98dci4-gpu-0003</code>, NVIDIA H200 NVL,
+JAX CUDA and x64, betelgeuse / gpu_0003_grpA / grpa, one GPU, eight cores and 64 GB,
+with TMPDIR=/tmp in submit and payload and the shared interpreter used directly.
+Every recomputed plasma relative sup and RMS agrees with its reviewed archive within
+1e-9 relative. Maximum field reconstruction discrepancy across all ten rows is
+4.072491e-11 relative to the error peak. All five weak-rotation total-map sup controls
+are at or below 9.5968111e-5, within the 1e-4 bound. The weak case has no X-point cell;
+that zero is checked beside one detected X-point cell at every diverted rung.</p>
+<p><strong>Retained instrument refusal.</strong> First attempt <code>1277043</code>
+reproduced the 132-cell row and stopped on an additional pointwise weak-row assertion:
+<code>6.942521677079155e-06</code> versus <code>6.942521693531489e-06 Wb</code>, a
+1.64523343e-14 Wb subtraction difference. Commit <code>6315abefa8a3d7cf38037aa0a3848fe891403e88</code>
+scales field closure to the full error amplitude; the required receipt-norm tolerance
+remains 1e-9. The failed log remains alongside the successful job log. Its launcher header
+preceded the initial commit; its Python header records the actual driver revision
+<code>c07565b0d28d6b2698b7eeb68ebd284e905f4b85</code>. The successful measurement
+ran entirely at <code>6315abefa8a3d7cf38037aa0a3848fe891403e88</code>.</p>
+<p>Read the <a href="/nova/figures/cut-cell-current-attribution/diverted-chord-response/report.md">report</a>,
+<a href="/nova/figures/cut-cell-current-attribution/diverted-chord-response/report.json">full per-cell receipt</a>,
+<a href="/nova/figures/cut-cell-current-attribution/diverted-chord-response/job.log">successful job log</a>,
+<a href="/nova/figures/cut-cell-current-attribution/diverted-chord-response/pointwise-refusal.log">retained refusal</a>,
+<a href="/nova/figures/cut-cell-current-attribution/diverted-chord-response/negative-control.log">weak-rotation controls</a>, and
+<a href="/nova/figures/cut-cell-current-attribution/diverted-chord-response/audit.log">independent serialized-array audit</a>.
+No production source under <code>nova/</code> changed. These measurements do not
+release the exact-support default or close this section.</p>
+</section>
+
 </main>
 </body>
 </html>

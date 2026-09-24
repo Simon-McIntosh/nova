@@ -13,12 +13,12 @@
 <meta name="plan-summary" content="Replace the one-trip hex-cell terminal-state figure with the converged state, and read the wall-node private shadow from the node itself.">
 <meta name="plan-status" content="active">
 <meta name="plan-roi" content="high">
-<meta name="plan-sprint" content="S18">
+<meta name="plan-sprint" content="S21">
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-modified" content="2026-09-24">
 <meta name="plan-effort-hours" content="10.0">
-<meta name="plan-impl" content="0.88">
-<meta name="plan-version" content="52">
+<meta name="plan-impl" content="0.85">
+<meta name="plan-version" content="53">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -264,6 +264,16 @@
     <div class="r-fu-body">Local-lane work, no GPU: migrate tests/test_plasma_cell_shadow_telemetry.py from the retired label-owned wall rule to the node-flux rule and put it in a lane (it is a green oracle for a retired rule today); own the retirement of the nearest-in-material diagnostic column in benchmarks/topology_parity_harness.py after one release; rename the polish receipt field spline_authored in nova/equilibrium/flux_surface_connectivity.py to what it carries (convergence) or make it carry authorship; fix the analytic panel of benchmarks/plasma_cell_terminal_state.py so the small panel-state markers do not overpaint the large reference markers; note in the terminal-state node record the python step CANCELLED 0:15 at 32 min in its scheduler log; replace the stale 55 s wall figure in the re-pin record with sacct's 10 s; and add a source-revision field to every production-route receipt (S19 owns the certificate side).</div>
     <pre class="r-fu-prompt">/reckon-ship plasma-cell-read-fidelity</pre>
     </article>
+<article class="r-fu" data-id="f-pcrf-004" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship plasma-cell-read-fidelity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Decide the vertical constraint from the map re-measure, then run it on a passing footing</h4>
+    <div class="r-fu-body">Gated on S21's map-fidelity re-measure after the exact repair 427f05e10 (cut-cell-current-attribution, f-cca-chord-membership-finish-option-one), which records per row the exact support current centroid minus the analytic centroid. If the 35 mm vertical displacement seen at 110 cells before the repair is gone and exact passes, retire node pcrf-vertical-constraint-on-the-certificate-route and record that the missing vertical constraint was not the cause. If a vertical displacement persists on a map that passes, run that node on a passing footing: CurrentCentroidConstraint(centroid_z) compensated by BoundedExteriorFieldUnknown's radial-field column, in the ConstraintElimination form driving the correction to zero, both seeds, one H200 job, with a pinned revision. Reverse-mode differentiation through the solve needs a custom_vjp since Krylov slice 2 (4bd81d199). Done when: the node is retired with the re-measure cited, or its receipt states per arm the residual, trips, X-point distance, per-trip axis height, core cells and correction field, and whether the constrained arms converge where the unconstrained ones do not.</div>
+    <pre class="r-fu-prompt">/reckon-ship plasma-cell-read-fidelity</pre>
+    </article>
+<article class="r-fu" data-id="f-pcrf-005" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship plasma-cell-read-fidelity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the certificate gate a live test and stop pinning failed states</h4>
+    <div class="r-fu-body">Node pcrf-certificate-gate-is-a-live-test. An H200-lane test solves the certificate production route at a rung where map fidelity passes, and asserts in order: map fidelity at the analytic state below 1e-2; convergence under the certificate default policy; the terminal X-point inside the position bound. tests/test_certificate_pin.py is rewritten so an unqualified row fails rather than being pinned; the receipt's facts stay as data. The test must refuse a row that benchmarks/solovev_certificate._measure re-rendered from a persisted PART_ROOT row, by requiring a fresh job id and revision per row. It must also require the map-fidelity audit's displacement control to have fired, which the committed audit.py does not. Negative control: the map evaluated at a one-pitch vertically shifted analytic state fails the first assertion. Done when: the test runs green on the H200 lane at the passing rung, red under the negative control, and the rewritten pin fails on an unqualified row, with all three logs recorded.</div>
+    <pre class="r-fu-prompt">/reckon-ship plasma-cell-read-fidelity</pre>
+    </article>
 </section>
 
 
@@ -382,6 +392,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260924-map-fidelity-owners" data-who="reckon-ship" data-when="2026-09-24T05:10:00+00:00">
     <div class="r-comment-body">Owners of the map-fidelity failures, all in S19's cut-cell-current-attribution. Exact mode: the open followup f-cca-exact-support-floor-at-the-analytic-state. Its attribution node, reviewed and pending, places the deficit in the moment integration path on simple separatrix-cut cells, not in the support geometry or self-intersection: at 110 cells, 1,011,493 A of the 1,011,498 A missing on the weak-rotation case is integration error. It reproduces the gate's exact fraction of 0.9542 to 1e-9, and the stage attribution and repair follow on the codex lane. Diverted chord mismatch at low rungs: node cca-chord-booking-exterior-current-source (run r-20260923T235314622364), after cca-diverted-chord-response-mismatch-attribution merged at f25016cf6; both are recorded in the cut-cell-current-attribution section 6 comment at a43295545. This plan's held nodes (the vertical constraint and the live certificate test) wait on a map that passes at the footing they test; the lead's choice of footing for the vertical constraint is open.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260924-handoff" data-who="reckon-ship" data-when="2026-09-24T13:50:00+00:00">
+    <div class="r-comment-body">Fleet handoff. The 2026-09-23 day's nodes are all merged and promoted: trip panels, first step, seed policy, ladder, map-fidelity gate, markers fix and telemetry test. There are no live runs. impl is set to 0.85: §2 and §3 are done, and §1 and §4 are open behind the map. The next work is f-pcrf-004 (vertical constraint, gated on the S21 map re-measure) and f-pcrf-005 (live certificate test). f-pcrf-001 and f-pcrf-002 are superseded by the map-fidelity finding and by those two followups. The single-grid cutover remains blocked until map fidelity passes at its footing. The plan moves to sprint S21.</div>
 </div>
 </section>
 </main>

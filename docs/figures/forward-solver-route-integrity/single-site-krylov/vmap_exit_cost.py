@@ -2,8 +2,10 @@
 
 The operator is a dense 1529-square matrix, the certificate state size at 300
 cells, with eight GMRES iterations, as in ``vmap_cost.py``. The first argument
-is the output receipt; a second argument ``scan`` rebinds the fixed-capacity
-cond-gated scan stream first, the negative control. Each member's unbatched
+is the output receipt; a second argument names the arm: the tree's own
+stream (``exit`` or ``rule``), ``scan`` to rebind the fixed-capacity
+cond-gated scan stream, or ``selected`` to rebind the exit loop whose default
+batching selects the whole carry per slot. Each member's unbatched
 application count is recorded, so a batch whose members all need the full
 83 slots is distinguishable from one that exits early.
 """
@@ -24,12 +26,15 @@ assert jax.config.jax_enable_x64 is True
 sys.path.insert(0, "docs/figures/forward-solver-route-integrity/single-site-krylov")
 import per_site
 import scan_stream
+import selected_carry_stream
 
 from nova.equilibrium import fixed_point
 
 arm = sys.argv[2] if len(sys.argv) > 2 else "exit"
 if arm == "scan":
     scan_stream.install()
+elif arm == "selected":
+    selected_carry_stream.install()
 size, width, iterations = 1529, 16, 8
 rng = np.random.default_rng(11)
 matrix = jnp.asarray(np.eye(size) + 0.05 * rng.standard_normal((size, size)))

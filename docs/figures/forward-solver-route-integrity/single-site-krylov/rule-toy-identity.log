@@ -1,0 +1,12 @@
+revision=5367126f0ed7a301309f111c0d7376da657a95ed+worktree tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit command=.venv/bin/python rule_toy_identity.py (login node, CPU, seconds)
+MUTATION_APPLIED restore the per-slot select of the whole carry under vmap
+(0, 12, 0.2) bitwise
+(0, 40, 0.1) bitwise
+(1, 12, 0.2) bitwise
+(1, 40, 0.1) bitwise
+(2, 12, 0.2) bitwise
+(2, 40, 0.1) bitwise
+(3, 12, 0.2) bitwise
+(3, 40, 0.1) bitwise
+RULE_TOY_IDENTITY 8/8
+EXIT=0

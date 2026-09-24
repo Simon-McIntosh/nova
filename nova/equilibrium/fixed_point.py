@@ -46,6 +46,7 @@ from pathlib import Path
 from typing import Any, Literal, NamedTuple
 
 import jax
+import jax.extend.core
 import jax.numpy as jnp
 import numpy as np
 
@@ -2145,35 +2146,42 @@ def _gmres_restart_start(unit_residual: jax.Array, restart: int):
     return basis, hessenberg
 
 
-def _single_site_krylov(
-    linear_action: Callable[[jax.Array], jax.Array],
+class _KrylovMachine(NamedTuple):
+    """One member's Krylov request stream: its start, requests and consumers.
+
+    ``requests[phase]`` names the vector the slot applies the operator to and
+    ``consumers[phase]`` folds the action into the carry. The Arnoldi consumer
+    is also available as its two halves, ``arnoldi_advance`` (the basis
+    extension, returning whether the cycle proceeds) and
+    ``arnoldi_candidate`` (the restart's least-squares projection), so a
+    batch can run the projection only when some member ends its cycle.
+    """
+
+    initial: _KrylovStream
+    requests: tuple[Callable, ...]
+    consumers: tuple[Callable, ...]
+    arnoldi_advance: Callable
+    arnoldi_candidate: Callable
+
+
+def _krylov_tolerance(residual_vector: jax.Array) -> jax.Array:
+    """Absolute GMRES tolerance of one member's right-hand side."""
+    return jnp.maximum(_GMRES_RELATIVE_TOLERANCE * _gmres_norm(residual_vector), 0.0)
+
+
+def _krylov_machine(
     residual_vector: jax.Array,
     probe: jax.Array,
+    atol: jax.Array,
     *,
     gmres_iterations: int,
-) -> tuple[
-    jax.Array, tuple[jax.Array, jax.Array, jax.Array], jax.Array, jax.Array, jax.Array
-]:
-    """Serve every operator application of one qualified step from one loop.
-
-    The stream reproduces, slot for slot, the finite-action probe, the
-    projected-condition Arnoldi columns, the batched restarted GMRES of
-    ``jax.scipy.sparse.linalg.gmres`` (``restart = maxiter = gmres_iterations``,
-    zero initial guess, identity preconditioner) and the achieved-residual
-    check. Each slot applies ``linear_action`` at the single call site in the
-    loop body; a phase switch routes the result to its consumer, so the
-    lowered program carries one inlined operator body however many
-    applications the solve needs. The loop exits when the machine reaches
-    ``DONE``, and under ``vmap`` when every member has, so no slot applies
-    the operator after the last member finishes; a finished member's carry is
-    held by the loop's batched select while the others run on.
-    """
+) -> _KrylovMachine:
+    """Build one member's request stream (see :func:`_single_site_krylov`)."""
     size = residual_vector.size
     restart = min(gmres_iterations, size)
     maxiter = gmres_iterations
     dtype = residual_vector.dtype
     eps = jnp.finfo(dtype).eps
-    atol = jnp.maximum(_GMRES_RELATIVE_TOLERANCE * _gmres_norm(residual_vector), 0.0)
     zeros = jnp.zeros_like(residual_vector)
     basis, hessenberg = _gmres_restart_start(zeros, restart)
     initial = _KrylovStream(
@@ -2235,7 +2243,7 @@ def _single_site_krylov(
     def gmres_start_slot(stream, action):
         return restarted(stream, residual_vector - action)
 
-    def arnoldi_slot(stream, action):
+    def arnoldi_advance(stream, action):
         index = stream.arnoldi_index
         _, norm_before = _gmres_safe_normalize(action)
         orthogonal, overlaps = _gmres_classical_gram_schmidt(
@@ -2250,27 +2258,35 @@ def _single_site_krylov(
         breakdown = norm_after == 0.0
         index = index + 1
         proceed = (index < restart) & ~breakdown
-
-        def project(_):
-            beta = (
-                jnp.zeros_like(hessenberg, shape=(restart + 1,))
-                .at[0]
-                .set(stream.residual_norm.astype(dtype))
-            )
-            coefficients = _gmres_lstsq(hessenberg.T, beta)
-            return stream.solution + _gmres_dot(basis[..., :-1], coefficients)
-
-        candidate = jax.lax.cond(proceed, lambda _: stream.candidate, project, None)
-        return stream._replace(
+        advanced = stream._replace(
             phase=jnp.where(
                 proceed, _KrylovPhase.ARNOLDI, _KrylovPhase.RESTART_RESIDUAL
             ).astype(jnp.int32),
-            candidate=candidate,
             basis=basis,
             hessenberg=hessenberg,
             arnoldi_index=index,
             breakdown=breakdown,
         )
+        return advanced, proceed
+
+    def arnoldi_candidate(stream):
+        beta = (
+            jnp.zeros_like(stream.hessenberg, shape=(restart + 1,))
+            .at[0]
+            .set(stream.residual_norm.astype(dtype))
+        )
+        coefficients = _gmres_lstsq(stream.hessenberg.T, beta)
+        return stream.solution + _gmres_dot(stream.basis[..., :-1], coefficients)
+
+    def arnoldi_slot(stream, action):
+        advanced, proceed = arnoldi_advance(stream, action)
+        candidate = jax.lax.cond(
+            proceed,
+            lambda _: stream.candidate,
+            lambda _: arnoldi_candidate(advanced),
+            None,
+        )
+        return advanced._replace(candidate=candidate)
 
     def restart_residual_slot(stream, action):
         stream = stream._replace(
@@ -2300,20 +2316,13 @@ def _single_site_krylov(
         lambda stream: stream.candidate,
         lambda stream: stream.solution,
     )
+    return _KrylovMachine(
+        initial, requests, consumers, arnoldi_advance, arnoldi_candidate
+    )
 
-    def pending(stream):
-        return stream.phase != _KrylovPhase.DONE
 
-    def serve(stream):
-        vector = jax.lax.switch(stream.phase, requests, stream)
-        # The barrier keeps the operator's arithmetic out of its consumers'
-        # fusions, so each application rounds as a standalone evaluation.
-        action = jax.lax.optimization_barrier(
-            linear_action(jax.lax.optimization_barrier(vector))
-        )
-        return jax.lax.switch(stream.phase, consumers, stream, action)
-
-    stream = jax.lax.while_loop(pending, serve, initial)
+def _krylov_outputs(stream: _KrylovStream):
+    """The probe action, condition carry, step, status and achieved action."""
     info = jnp.where(jnp.isnan(_gmres_norm(stream.solution)), -1, 0)
     return (
         stream.probe_action,
@@ -2322,6 +2331,189 @@ def _single_site_krylov(
         info,
         stream.achieved_action,
     )
+
+
+def _fenced(linear_action: Callable, vector: jax.Array) -> jax.Array:
+    """Apply the operator between optimisation barriers.
+
+    The barriers keep the operator's arithmetic out of its consumers'
+    fusions, so each application rounds as a standalone evaluation.
+    """
+    return jax.lax.optimization_barrier(
+        linear_action(jax.lax.optimization_barrier(vector))
+    )
+
+
+def _serve_krylov_stream(
+    linear_action: Callable[[jax.Array], jax.Array], machine: _KrylovMachine
+) -> _KrylovStream:
+    """Run one member's stream to ``DONE``, one operator application a slot."""
+
+    def pending(stream):
+        return stream.phase != _KrylovPhase.DONE
+
+    def serve(stream):
+        vector = jax.lax.switch(stream.phase, machine.requests, stream)
+        action = _fenced(linear_action, vector)
+        return jax.lax.switch(stream.phase, machine.consumers, stream, action)
+
+    return jax.lax.while_loop(pending, serve, machine.initial)
+
+
+def _serve_krylov_batch(
+    batched_action: Callable[[jax.Array], jax.Array],
+    residual_vectors: jax.Array,
+    probes: jax.Array,
+    *,
+    gmres_iterations: int,
+) -> _KrylovStream:
+    """Run a batch of streams, members on the leading axis, to ``DONE``.
+
+    The loop continues while any member is pending, so its predicate is one
+    scalar and the carry is never selected against a per-member exit. Each
+    slot applies the operator to every member's request at the single batched
+    site. When every member stands in the same phase, which is how a batch
+    runs until its members' restart counts diverge, one conditional on that
+    shared phase runs only its consumer; otherwise each member selects its
+    own consumer and a finished member passes through unchanged. In the
+    shared Arnoldi phase the restart projection runs only when some member
+    ends its cycle.
+    """
+    atol = jax.vmap(_krylov_tolerance)(residual_vectors)
+
+    def machine(residual_vector, probe, member_atol):
+        return _krylov_machine(
+            residual_vector, probe, member_atol, gmres_iterations=gmres_iterations
+        )
+
+    members = (residual_vectors, probes, atol)
+    initial = jax.vmap(lambda *m: machine(*m).initial)(*members)
+
+    def request(stream, *member):
+        return jax.lax.switch(stream.phase, machine(*member).requests, stream)
+
+    def consumer(index):
+        def consume(stream, action):
+            return jax.vmap(lambda s, a, *m: machine(*m).consumers[index](s, a))(
+                stream, action, *members
+            )
+
+        return consume
+
+    def arnoldi(stream, action):
+        advanced, proceed = jax.vmap(
+            lambda s, a, *m: machine(*m).arnoldi_advance(s, a)
+        )(stream, action, *members)
+
+        def project(advanced):
+            candidates = jax.vmap(lambda s, *m: machine(*m).arnoldi_candidate(s))(
+                advanced, *members
+            )
+            return jnp.where(proceed[:, None], stream.candidate, candidates)
+
+        candidate = jax.lax.cond(
+            jnp.any(~proceed), project, lambda _: stream.candidate, advanced
+        )
+        return advanced._replace(candidate=candidate)
+
+    def per_member(stream, action):
+        def consume(s, a, *m):
+            consumers = (*machine(*m).consumers, lambda s, a: s)
+            return jax.lax.switch(s.phase, consumers, s, a)
+
+        return jax.vmap(consume)(stream, action, *members)
+
+    branches = tuple(
+        arnoldi if index == _KrylovPhase.ARNOLDI else consumer(index)
+        for index in range(_KrylovPhase.DONE)
+    ) + (lambda stream, action: stream, per_member)
+    mixed = len(branches) - 1
+
+    def pending(stream):
+        return jnp.any(stream.phase != _KrylovPhase.DONE)
+
+    def serve(stream):
+        vectors = jax.vmap(request)(stream, *members)
+        actions = _fenced(batched_action, vectors)
+        shared = jnp.all(stream.phase == stream.phase[0])
+        branch = jnp.where(shared, stream.phase[0], mixed)
+        return jax.lax.switch(branch, branches, stream, actions)
+
+    return jax.lax.while_loop(pending, serve, initial)
+
+
+def _single_site_krylov(
+    linear_action: Callable[[jax.Array], jax.Array],
+    residual_vector: jax.Array,
+    probe: jax.Array,
+    *,
+    gmres_iterations: int,
+) -> tuple[
+    jax.Array, tuple[jax.Array, jax.Array, jax.Array], jax.Array, jax.Array, jax.Array
+]:
+    """Serve every operator application of one qualified step from one loop.
+
+    The stream reproduces, slot for slot, the finite-action probe, the
+    projected-condition Arnoldi columns, the batched restarted GMRES of
+    ``jax.scipy.sparse.linalg.gmres`` (``restart = maxiter = gmres_iterations``,
+    zero initial guess, identity preconditioner) and the achieved-residual
+    check. Each slot applies ``linear_action`` at the single call site in the
+    loop body; a phase switch routes the result to its consumer, so the
+    lowered program carries one inlined operator body however many
+    applications the solve needs. The loop exits when the machine reaches
+    ``DONE``.
+
+    Under ``vmap`` the stream runs through its own batching rule
+    (:func:`_serve_krylov_batch`) rather than the loop's default one, which
+    would select the whole carry against every member's exit on every slot.
+    The operator's closed-over values are therefore passed to the rule as
+    explicit arguments, so an operator whose closure is itself batched maps
+    member by member.
+    """
+    traced = jax.make_jaxpr(linear_action)(residual_vector)
+
+    def operator(vector, consts):
+        closed = jax.extend.core.ClosedJaxpr(traced.jaxpr, consts)
+        return jax.extend.core.jaxpr_as_fun(closed)(vector)[0]
+
+    @jax.custom_batching.custom_vmap
+    def stream(residual_vector, probe, consts):
+        machine = _krylov_machine(
+            residual_vector,
+            probe,
+            _krylov_tolerance(residual_vector),
+            gmres_iterations=gmres_iterations,
+        )
+        return _krylov_outputs(
+            _serve_krylov_stream(lambda vector: operator(vector, consts), machine)
+        )
+
+    @stream.def_vmap
+    def stream_batch(axis_size, in_batched, residual_vector, probe, consts):
+        vector_batched, probe_batched, consts_batched = in_batched
+        if not vector_batched:
+            residual_vector = jnp.broadcast_to(
+                residual_vector, (axis_size, *residual_vector.shape)
+            )
+        if not probe_batched:
+            probe = jnp.broadcast_to(probe, (axis_size, *probe.shape))
+        const_axes = [0 if batched else None for batched in consts_batched]
+        batched_action = jax.vmap(operator, in_axes=(0, const_axes))
+        served = _serve_krylov_batch(
+            lambda vectors: batched_action(vectors, consts),
+            residual_vector,
+            probe,
+            gmres_iterations=gmres_iterations,
+        )
+        outputs = _krylov_outputs_batched(served)
+        return outputs, jax.tree_util.tree_map(lambda _: True, outputs)
+
+    return stream(residual_vector, probe, list(traced.consts))
+
+
+def _krylov_outputs_batched(stream: _KrylovStream):
+    """:func:`_krylov_outputs` of a batch, members on the leading axis."""
+    return jax.vmap(_krylov_outputs)(stream)
 
 
 def _qualified_krylov_step(

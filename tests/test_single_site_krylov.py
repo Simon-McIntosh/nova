@@ -126,3 +126,62 @@ def test_the_vmapped_stream_stops_when_every_member_is_done():
             rtol=1e-12,
             atol=1e-15,
         )
+
+
+def _loop_holding_operator(jaxpr):
+    """The innermost while loop whose body applies the operator under test."""
+    for equation in jaxpr.eqns:
+        for parameter in equation.params.values():
+            for value in (
+                parameter if isinstance(parameter, tuple | list) else (parameter,)
+            ):
+                inner = getattr(value, "jaxpr", value)
+                if not hasattr(inner, "eqns"):
+                    continue
+                nested = _loop_holding_operator(inner)
+                if nested is not None:
+                    return nested
+                if equation.primitive.name == "while" and _operator_sites(inner):
+                    return inner
+    return None
+
+
+def test_the_vmapped_stream_runs_one_consumer_per_shared_phase():
+    """Under vmap the stream's own batching rule serves the batch.
+
+    Members sit on an explicit axis, the loop exits on a scalar any-pending
+    predicate, and each slot dispatches through one conditional over the
+    member-shared phase (one branch per consumer, one pass-through, one
+    per-member fallback), rather than the loop's default rule selecting the
+    whole carry against every member's exit.
+    """
+    step, _, rhs = _qualified_step_program()
+    rhs = jnp.stack([rhs, 2.0 * rhs])
+    matrix = jnp.asarray(
+        np.eye(12) + 0.2 * np.random.default_rng(3).standard_normal((12, 12))
+    )
+
+    def member(b):
+        def operator(vector):
+            with jax.named_scope(OPERATOR_SCOPE):
+                return matrix @ vector
+
+        return fixed_point._qualified_krylov_step(
+            operator,
+            b,
+            jnp.asarray(0.1),
+            gmres_iterations=8,
+            condition_ratio_limit=10.0,
+            preceding_condition_baseline=jnp.asarray(2.0),
+        ).step
+
+    body = _loop_holding_operator(jax.make_jaxpr(jax.vmap(member))(rhs).jaxpr)
+    assert body is not None
+    dispatch = [
+        equation
+        for equation in body.eqns
+        if equation.primitive.name == "cond"
+        and len(equation.params["branches"]) == len(fixed_point._KrylovPhase) + 1
+    ]
+    assert len(dispatch) == 1
+    assert dispatch[0].invars[0].aval.shape == ()

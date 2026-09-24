@@ -1638,6 +1638,30 @@ operator's program. The mechanism is not yet named. That rung is not converged
 (the test's recorded value is 2.248), so a rounding-level change can plausibly
 be amplified along its trajectory, but that has not been measured. The
 certificate rows' convergence and null positions were not re-measured.</p>
+<p id="single-site-krylov-vmap-exit-mechanism"><strong>Correction: the 0.216 move
+on the diverted rung is an operator change, not the exit loop.</strong>
+<code>diverted_trace.py</code> ran the rung through the same
+<code>_measure</code> call the test makes, in four arms: the capacity scan and the
+exit loop, each on this tree's operator and on the ten <code>nova</code> modules of
+<code>8d02dd0f</code>, served through an import hook (CPU jobs 1277103 and 1277109).</p>
+<table><thead><tr><th>Krylov body</th><th>Merged operator (this tree)</th><th>Pre-merge operator (<code>8d02dd0f</code>)</th></tr></thead><tbody>
+<tr><td>Capacity scan</td><td>0.06325730373273203</td><td>0.279485232201572 (the recorded slice-1 reading, reproduced bitwise)</td></tr>
+<tr><td>Exit loop</td><td>0.06325730373091486</td><td>0.27948523220464483 (bitwise the <code>f803b640</code> base reading)</td></tr>
+<tr><td>Difference</td><td>1.82e-12</td><td>3.07e-12</td></tr>
+</tbody></table>
+<p>An instrumented pair logs every Krylov call and every operator application on the
+host. Both runs make 41 calls of 64 applications each, with equal
+qualifications and 9 trips. The first differing event is the first operator
+application. Its input is bitwise identical, and 1,148 of its 1,547 outputs differ by
+at most 3.3e-16. The operator body is compiled inside a <code>cond</code> branch of a
+<code>scan</code> in one program and inside a <code>while</code> body in the other, so its
+reductions round differently. That is reassociation: bounded, and not amplified
+past about 1e-12 in any trip. The 0.216 is the change in forward operator merged from main
+at <code>e62c8110e</code>, which moves this non-converged rung's stagnation point
+from 0.2795 to 0.0633 from the first trip onward.
+<img src="/nova/figures/forward-solver-route-integrity/single-site-krylov/diverted-move-trips.png" alt="Per-trip live relative residual of the diverted rung for the four arms: the two Krylov bodies overlap on each operator, and the two operators sit 0.216 apart">
+Records: <code>diverted-move-mechanism.json</code> and <code>.md</code>, with
+<code>diverted_compare.py</code> and <code>diverted-trace-*.log</code>.</p>
 <p>Receipts: <code>/nova/figures/forward-solver-route-integrity/single-site-krylov/vmap-exit.json</code>,
 <code>vmap-exit-cost-*.json</code>, <code>vmap-exit-negative-control-*.json</code>,
 <code>program-exit-300.json</code>, <code>callers-exit-300.json</code> and their logs.</p>

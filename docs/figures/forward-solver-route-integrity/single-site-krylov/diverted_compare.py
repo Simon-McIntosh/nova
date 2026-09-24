@@ -91,6 +91,11 @@ if i is not None and i < min(len(n1), len(n2)):
 else:
     receipt["first_differing_inner_iteration"] = i
 
+receipt["inner_iteration_records_note"] = (
+    "the receipt keeps the terminal trip's globalisation records only, so the "
+    "first differing inner iteration above does not place the first difference "
+    "in time; the instrumented event sequence does"
+)
 traced = {}
 for arm in ("slice1", "exit"):
     path = ROOT / f"{arm}-instrument"
@@ -213,3 +218,32 @@ print(
         default=str,
     )[:6000]
 )
+
+# the operator modules of the revision slice one was measured at, under each
+# Krylov body: splits the recorded move between the operator and the stream
+premerge = {}
+for arm in ("premerge-slice1", "premerge-exit"):
+    path = ROOT / f"{arm}-plain/solver.json"
+    if path.exists():
+        premerge[arm] = json.loads(path.read_text())
+if premerge:
+    receipt["premerge_terminal"] = {
+        a: s["terminal_fixed_point_residual"] for a, s in premerge.items()
+    }
+    receipt["premerge_per_trip_live_relative_residual"] = {
+        a: [t["live_relative_residual"] for t in trips(s)] for a, s in premerge.items()
+    }
+    if len(premerge) == 2:
+        p1, p2 = (trips(premerge[a]) for a in ("premerge-slice1", "premerge-exit"))
+        j = first_mismatch(p1, p2)
+        receipt["premerge_first_differing_trip"] = None if j is None else j + 1
+        receipt["premerge_terminal_difference"] = abs(
+            premerge["premerge-slice1"]["terminal_fixed_point_residual"]
+            - premerge["premerge-exit"]["terminal_fixed_point_residual"]
+        )
+    OUT.write_text(json.dumps(receipt, indent=2, default=str) + "\n")
+    print(
+        json.dumps(
+            {k: v for k, v in receipt.items() if k.startswith("premerge")}, indent=1
+        )
+    )

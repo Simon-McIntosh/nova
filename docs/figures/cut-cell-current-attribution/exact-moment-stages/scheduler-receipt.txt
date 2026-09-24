@@ -1,0 +1,9 @@
+job_id|state|exit_code|elapsed|allocation
+1277054|FAILED|1:0|00:00:54|billing=8,cpu=8,gres/gpu=1,mem=64G,node=1
+1277055|FAILED|1:0|00:00:40|billing=8,cpu=8,gres/gpu=1,mem=64G,node=1
+
+Both jobs ran on 98dci4-gpu-0003 under betelgeuse reservation gpu_0003_grpA
+with account grpa. The first failed before measurement on a host/device field
+conversion in the evaluation instrument. The second completed weak rotation at
+110 requested cells, then refused the newly non-simple secondary reclip at weak
+rotation 300. Exact tracebacks and exit sentinels are in the adjacent job logs.

@@ -332,6 +332,8 @@ def measure(requested: int, output: Path) -> dict[str, object]:
     base_path = INPUT / f"{CASE}-cells-{requested}-chord.json"
     base = json.loads(base_path.read_text())
     archive_path = MAP_INPUT / f"{CASE}-cells-{requested}-chord.npz"
+    map_receipt_path = MAP_INPUT / f"{CASE}-cells-{requested}-chord.json"
+    map_receipt = json.loads(map_receipt_path.read_text())
     with np.load(archive_path) as archive:
         archived = dict(archive)
 
@@ -396,7 +398,7 @@ def measure(requested: int, output: Path) -> dict[str, object]:
     counter_booked_array = np.asarray(counter_booked)
     production_physical_array = np.asarray(production_physical)
     counter_physical_array = np.asarray(counter_physical)
-    archived_booked = float(base["lambda"]) * np.asarray(archived["moments"])
+    archived_booked = float(map_receipt["lambda"]) * np.asarray(archived["moments"])
     nonzero = archived_booked[0] != 0.0
     relative = np.abs(
         (production_booked_array[0, nonzero] - archived_booked[0, nonzero])
@@ -476,6 +478,7 @@ def measure(requested: int, output: Path) -> dict[str, object]:
         "realised_cells": int(base["cells"]),
         "base_report": str(base_path.relative_to(ROOT)),
         "base_archive": str(archive_path.relative_to(ROOT)),
+        "map_fidelity_receipt": str(map_receipt_path.relative_to(ROOT)),
         "base_archive_sha256": hashlib.sha256(archive_path.read_bytes()).hexdigest(),
         "fixture_cache": cache,
         "current_target_a": float(target),

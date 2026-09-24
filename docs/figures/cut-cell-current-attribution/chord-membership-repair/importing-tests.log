@@ -1,0 +1,9 @@
+revision=a59529f206cd71d024734c05d27e49eb5555d294 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-membership-from-the-global-separatrix command=srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=64G --chdir=<tree> run_importing_tests.sh
+TEST file=tests/test_clipped_support_quadrature.py exit=0 log=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-membership-from-the-global-separatrix/docs/figures/cut-cell-current-attribution/chord-membership-repair/importing-tests/test_clipped_support_quadrature.log
+TEST file=tests/test_continuous_confined_moments.py exit=1 log=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-membership-from-the-global-separatrix/docs/figures/cut-cell-current-attribution/chord-membership-repair/importing-tests/test_continuous_confined_moments.log
+TEST file=tests/test_exact_bank_callback_capacity.py exit=0 log=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-membership-from-the-global-separatrix/docs/figures/cut-cell-current-attribution/chord-membership-repair/importing-tests/test_exact_bank_callback_capacity.log
+TEST file=tests/test_exact_clip_closed_form_budget.py exit=0 log=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-membership-from-the-global-separatrix/docs/figures/cut-cell-current-attribution/chord-membership-repair/importing-tests/test_exact_clip_closed_form_budget.log
+slurmstepd: error: *** STEP 1277185.0 ON 98dci4-clu-3141 CANCELLED AT 2026-09-24T09:21:51 ***
+srun: error: 98dci4-clu-3141: task 0: Terminated
+srun: Force Terminated StepId=1277185.0
+EXIT=143

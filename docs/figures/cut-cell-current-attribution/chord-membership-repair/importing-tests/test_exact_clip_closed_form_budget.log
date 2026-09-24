@@ -1,0 +1,17 @@
+revision=a59529f206cd71d024734c05d27e49eb5555d294 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-membership-from-the-global-separatrix command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_exact_clip_closed_form_budget.py -vv
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-membership-from-the-global-separatrix
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 5 items
+
+tests/test_exact_clip_closed_form_budget.py::test_coupling_budget_is_one_tenth_of_the_row_terms PASSED [ 20%]
+tests/test_exact_clip_closed_form_budget.py::test_fallback_budget_is_one_tenth_of_the_fan_floors PASSED [ 40%]
+tests/test_exact_clip_closed_form_budget.py::test_row_budget_gives_every_coupling_row_the_tenth_and_the_rest_the_triple PASSED [ 60%]
+tests/test_exact_clip_closed_form_budget.py::test_production_boundary_reduction_has_no_gauss_evaluations PASSED [ 80%]
+tests/test_exact_clip_closed_form_budget.py::test_production_boundary_lowering_uses_endpoint_recurrence PASSED [100%]
+
+============================== 5 passed in 7.61s ===============================
+EXIT=0

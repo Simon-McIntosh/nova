@@ -1,9 +1,20 @@
 job_id|state|exit_code|elapsed|allocation
 1277054|FAILED|1:0|00:00:54|billing=8,cpu=8,gres/gpu=1,mem=64G,node=1
 1277055|FAILED|1:0|00:00:40|billing=8,cpu=8,gres/gpu=1,mem=64G,node=1
+1277106|COMPLETED|0:0|00:01:00|billing=8,cpu=8,gres/gpu=1,mem=64G,node=1
+1277107|COMPLETED|0:0|00:00:56|billing=8,cpu=8,gres/gpu=1,mem=64G,node=1
 
-Both jobs ran on 98dci4-gpu-0003 under betelgeuse reservation gpu_0003_grpA
+All jobs ran on 98dci4-gpu-0003 under betelgeuse reservation gpu_0003_grpA
 with account grpa. The first failed before measurement on a host/device field
 conversion in the evaluation instrument. The second completed weak rotation at
 110 requested cells, then refused the newly non-simple secondary reclip at weak
 rotation 300. Exact tracebacks and exit sentinels are in the adjacent job logs.
+
+After the coordinator selected dual signed-winding and nonzero-winding lobe-union
+semantics, job 1277106 completed all three rows. Its 1.145 A diverted order-doubling
+delta exposed that the independent reference had reintroduced the composite
+pointwise selector after production had already reclipped and passed the smooth
+confined closure. Job 1277107 ran the corrected reference over all three rows;
+every closure, interior control, order-doubling control and moment-reduction
+substitution passed. Its job.log is the accepted gate receipt; job-1277106.log
+preserves the rejected instrument reading.

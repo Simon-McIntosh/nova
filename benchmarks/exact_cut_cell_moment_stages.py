@@ -634,7 +634,12 @@ def render(rows, output):
     axis.set_xticks(x, labels)
     axis.set_ylabel("signed share of base simple-cut error")
     axis.set_title("Exact moment path attribution at the analytic state")
-    axis.legend(frameon=False, ncols=2, loc="upper center")
+    axis.legend(
+        frameon=False,
+        ncols=2,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.16),
+    )
     axis.spines[["top", "right"]].set_visible(False)
     path = output / "stage-attribution.svg"
     figure.savefig(path)

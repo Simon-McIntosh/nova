@@ -3057,48 +3057,63 @@ Further mechanism work belongs inside the simple cut-cell moment path and the
 non-simple booked-minus-formula remainder; this node makes no repair.</p>
 </section>
 <section id="exact-moment-stage-attribution">
-<h2>Exact moment stage attribution: one row closes; secondary reclip semantics block the remaining rows</h2>
-<p><strong>2026-09-24 partial evaluation; no production repair.</strong>
-The evaluation driver in commits <code>7d56fa9b4</code> and
-<code>74489a363</code> separates the simple separatrix-cut current error into
-secondary quadratic-reclip geometry, density evaluation, and the final
-polynomial moment reduction. Both attempts used one real H200 each on
-betelgeuse with reservation <code>gpu_0003_grpA</code>, account
-<code>grpa</code>, one card, eight cores and 64 GiB. Job
-<code>1277054</code> refused before measurement because the instrument had
-converted a device field to NumPy ahead of a jitted indexed read. That defect
-was repaired and its failed receipt retained. Job <code>1277055</code> then
-completed the weak-rotation 110-cell row before reaching the semantic refusal
-below.</p>
+<h2>Exact moment stage attribution: polynomial moment reduction carries the simple-cut loss</h2>
+<p><strong>2026-09-24 completed evaluation; no production repair.</strong>
+Commits <code>7d56fa9b4</code>, <code>74489a363</code>,
+<code>b6768d0db</code> and <code>2b803b2ff</code> separate the base simple
+separatrix-cut current error into secondary quadratic-reclip geometry, direct
+density evaluation, signed-winding versus nonzero-winding self-intersection
+loss, and the final production polynomial moment reduction. Accepted H200 job
+<code>1277107</code> ran all three rows in 56 seconds on betelgeuse under
+reservation <code>gpu_0003_grpA</code>, account <code>grpa</code>, with one
+card, eight cores and 64 GiB. JAX selected the H200 with x64 enabled; the root
+interpreter ran directly and no <code>uv</code> ran on the compute node.</p>
 <table>
-<thead><tr><th>Row</th><th>Simple cuts</th><th>Geometry A</th><th>Density A</th><th>Moment reduction A</th><th>Named stage</th><th>Share</th><th>Closure</th><th>Reference-substituted fraction</th></tr></thead>
-<tbody><tr><td>weak rotation, 110 requested</td><td>41</td><td>−1,871.55758</td><td>6.42e-10</td><td>−1,009,496.07</td><td>moment reduction</td><td>0.998149478</td><td>2.30e-16 relative</td><td>0.999864704</td></tr></tbody>
+<thead><tr><th>Row</th><th>Simple cuts</th><th>Secondary geometry A</th><th>Density A</th><th>Reclip self-intersection A</th><th>Moment reduction A</th><th>Reduction share</th><th>Closure relative</th><th>Reduction-substituted exact fraction</th></tr></thead>
+<tbody>
+<tr><td>weak rotation, 110 requested</td><td>41</td><td>−1,871.55758</td><td>−1.05e-10</td><td>0</td><td>−1,009,496.07237</td><td>0.998149478</td><td>5.79e-14</td><td>0.999864704</td></tr>
+<tr><td>weak rotation, 300 requested</td><td>72</td><td>−7,006.59964</td><td>−1.37e-10</td><td>+2.18e-11</td><td>−296,458.03414</td><td>0.976911314</td><td>1.15e-15</td><td>0.999538490</td></tr>
+<tr><td>diverted single null, 110 requested</td><td>35</td><td>−23.7449975</td><td>+3.27e-13</td><td>+1.14e-13</td><td>−1,892.936637</td><td>0.987611402</td><td>8.30e-16</td><td>1.004899883</td></tr>
+</tbody>
 </table>
-<p>The row therefore names the production polynomial moment reduction, not
-secondary geometry or density evaluation, as carrying 99.8149 percent of the
-base report's simple-cut integration error. Replacing that stage by the
-independent order-doubled reference removes the weak-row deficit to the locked
-threshold. The order-8 to order-16 production-density reference changes the
-simple-cut current by only <code>7.51e-10 A</code>. Every interior-cell stage
-term is below <code>4.01e-16</code> of that cell's current, so the positive
-control passes. Thirty-four of the 41 simple cut cells do change vertex set
-under the secondary reclip, with a maximum symmetric nearest-vertex distance of
-<code>0.06110 m</code>, but that geometry accounts for only 0.185 percent of
-the signed base error.</p>
-<p>The remaining gate is refused rather than inferred. On weak rotation at 300
-requested cells, the production secondary quadratic reclip turns seven incoming
-simple supports into self-intersecting effective chains: cells
-<code>5, 13, 23, 24, 172, 173, 272</code>. The independent reference currently
-requires a simple effective polygon, so job <code>1277055</code> exits 1 at
-that point and diverted 110 is unmeasured. A third attempt is prohibited by the
-node's two-failure fence. The next action is to decide and encode the reference
-semantics for those effective chains—signed production winding or nonzero-winding
-lobe union—then rerun all three rows in one H200 allocation. Until that decision,
-the 110-cell result is evidence for one row only and the driving followup and
-section remain open.</p>
-<p><a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/report.md">Partial report</a> ·
-<a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/job.log">second-attempt refusal log</a> ·
-<a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/job-1277054.log">first-attempt instrument refusal</a>.</p>
+<p>Moment reduction carries between <strong>97.69 and 99.81 percent</strong> of
+the signed base error on every row. Substituting its order-doubled independent
+signed-winding reference raises both weak rows above the required
+<code>0.999</code> exact support fraction; the diverted row moves slightly
+above unity, which is retained rather than clipped. Direct production confined
+density and analytic Solov'ev density agree to sub-nanoampere totals. The signed
+order-8 to order-16 current changes are <code>5.99e-10</code>,
+<code>4.45e-10</code> and <code>1.86e-12 A</code>. Every interior-cell stage
+term is below <code>4.76e-16</code> of that cell's current.</p>
+<p>The secondary reclip makes seven weak-300 chains self-intersecting—cells
+<code>5, 13, 23, 24, 172, 173, 272</code>—and two diverted-110 chains,
+cells <code>69, 75</code>. Both meanings requested by the coordinator are
+retained per cell. Every polygonized face has winding <code>+1</code>; therefore
+the production signed-winding moment and the nonzero-winding lobe-union moment
+agree to roundoff, and their aggregate current difference is only
+<code>2.18e-11 A</code> weak and <code>1.14e-13 A</code> diverted. These
+self-intersections do not carry the missing current. The bow-tie positive
+control independently returns zero signed area, lobe-union area
+<code>2.0 m²</code>, and windings <code>−1,+1</code>, proving the instrument
+would expose cancellation if present.</p>
+<figure>
+<img src="/nova/figures/cut-cell-current-attribution/exact-moment-stages/stage-attribution.svg" alt="Signed shares of the simple cut-cell current error assigned to secondary geometry, density, reclip self-intersection and moment reduction for all three rows" style="max-width:100%">
+<figcaption>The production polynomial moment reduction dominates every row; the
+four terms close to the base simple-cut error and the reclip self-intersection
+term is visible rather than absorbed.</figcaption>
+</figure>
+<p>The first resumed run, job <code>1277106</code>, was rejected despite exiting
+zero: its <code>1.145 A</code> diverted order-doubling delta showed that the
+instrument had reapplied the composite pointwise selector after production had
+already reclipped and passed the smooth confined closure. Commit
+<code>2b803b2ff</code> aligned the reference with that production path; job
+<code>1277107</code> is the accepted receipt. No equilibrium solve or file under
+<code>nova/</code> changed, and the worker leaves section and followup closure to
+the coordinator.</p>
+<p><a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/report.md">Complete report</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/job.log">accepted H200 log</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/job-1277106.log">rejected composite-selector receipt</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/scheduler-receipt.txt">scheduler receipt</a>.</p>
 </section>
 </main>
 </body>

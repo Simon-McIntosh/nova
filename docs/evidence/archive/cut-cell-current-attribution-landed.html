@@ -2998,6 +2998,141 @@ No production source under <code>nova/</code> changed. These measurements do not
 release the exact-support default or close this section.</p>
 </section>
 
+<section id="exact-support-polygon-refusal">
+<h2>Exact support at the analytic state: attribution blocked on a non-simple polygon</h2>
+<p><strong>2026-09-23; incomplete measurement, no production repair.</strong>
+The benchmark at <code>918f4edb457a28e466be7be79c7570efb4a9eaec</code>
+uses physical moments before coupling-basis conversion, an independent
+signed-triangle quadrature over each support, and an analytic core-region
+integral. The intended identity is true minus booked = support-geometry error
+minus moment-integration error. It retains the archived target separately:
+the diverted fixture target is an integral on traced supports, not an
+independent integral of the true plasma region.</p>
+<p>The second H200 job <code>1276896</code> (one GPU, eight cores, 64 GB,
+double precision) matched coordinates, analytic state, finite moments, and
+coupling and physical moments from the reviewed archive. Its support fraction
+matched <code>0.9541772190883415</code> within relative tolerance
+<code>1e-9</code>. It then stopped with
+<code>AssertionError: invalid exact polygons: [9]</code> on diverted 110.
+A repaired region and signed-winding integration of the returned chain need not
+agree. No choice was made implicitly, and no integration-versus-geometry
+attribution is claimed.</p>
+<p><strong>Preserved preflight.</strong> Job <code>1276895</code> stopped
+before support evaluation because the production analytic separatrix sampler
+at 11,521 points reported <code>zero-flux lobe is not star-shaped at angle
+4.450549</code>. Benchmark-local normal projection now refines the established
+2,881-point contour, preserving the saddle endpoint. The second job passed the
+analytic flux residual bound <code>1e-12 Wb</code> and the current-refinement
+bound <code>1e-5</code> relative L1. The production sampler is unchanged.
+Scheduler elapsed times were 16 and 28 seconds, both exit <code>1:0</code>.</p>
+<p><strong>Unmet measures.</strong> The failed process did not persist the
+invalid polygon's vertices or intermediate integrals. The explicit 35.4 mm
+centroid positive control, chord control, per-class decomposition, remaining
+nine case/rung rows, and 300-cell panels are absent. A missing panel is not a
+passing numerical result. Next capture the refused vertices and atomic cell,
+inspect the intersection, and settle support semantics before resuming.</p>
+<p>The archived diverted chord 110 fraction is
+<code>1.003530216161609</code>, a 0.353% excess. It passes a signed missing-current
+criterion but fails absolute agreement within <code>1e-3</code>. That distinction
+must survive the resumed gate. Concave-polygon and hole-subtraction instrument
+controls and scoped Ruff checks passed. Driver commits:
+<code>b2fd0f22e98b51c68b56f157289b83369b6ee4ec</code> and
+<code>918f4edb457a28e466be7be79c7570efb4a9eaec</code>;
+preflight log commit <code>d91a9c7e11d4bf6cbe231f440e76fe4e4cee50a7</code>.</p>
+<p><a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/report.json">Machine-readable blocker record</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/report.md">Detailed report</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/job.log">Exact-polygon refusal log</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/boundary-preflight.log">Boundary-sampling refusal log</a>.</p>
+</section>
+<section id="exact-support-floor-attribution">
+<h2>Analytic-state support attribution: the main loss is simple cut-cell moment evaluation</h2>
+<p><strong>2026-09-23 completed evaluation, no production repair.</strong>
+Both certificate cases at 110, 300, 500, 1000 and 2500 requested cells were
+measured in exact and chord modes in one H200 row loop, job <code>1276905</code>,
+265 seconds, exit 0, one GPU, eight cores and 64 GB. Source revision
+<code>150a1398c478e2b11d7a25de5195e280838dd856</code>; banked receipts
+<code>9b0784d4266ade86d067e58d7e7ae6c69edd2f8f</code>. Render-only job
+<code>1276907</code> ran on all_debug for 14 seconds at
+<code>5ed1c449579c3eca17a476f019bab4d12b02fb2b</code>, consuming the stored rows.
+No forward solve or file change under <code>nova/</code> occurred.</p>
+<p><strong>Measured attribution.</strong> Moment evaluation on simple
+separatrix-cut cells carries the main deficit at every measured rung. Non-simple
+support is confined to one diverted 110 cell and seven diverted 300 cells,
+carrying 0.0291382% and 3.37576% of the true analytic current respectively.
+Their signed self-intersection terms are −0.110578 A and +3.1033e-8 A.
+At 500 cells and above the diverted exact support is simple but its deficit
+persists; every weak-rotation exact support is simple, including the coarse
+row missing 1.0115 MA. Non-simple support therefore does not explain the main
+current shortfall.</p>
+<p><strong>Signs and closure.</strong> S is production formula on analytic
+density minus the geometric lobe-union integral; M is booked minus the same
+polygon's analytic integral on simple cells only; G is geometric-region current
+minus true-plasma-region current. The requested S + M + G does not exhaust
+booked minus true on the two non-simple rows. R, booked minus the analytic-density
+formula on non-simple cells, is +78.597290 A at diverted 110 and −76.512758 A
+at 300. It is retained independently: <code>booked − true = S + M + G + R</code>.
+No residual was silently reassigned. The missing-current column is the negative
+of that sum. This localizes error downstream of the emitted polygon; it does
+not isolate subsequent confinement/reclipping, density evaluation and
+quadrature from one another within the moment path.</p>
+<table><thead><tr><th>Case</th><th>Requested</th><th>Realised</th><th>Non-simple</th><th>Analytic share %</th><th>S / A</th><th>M / A</th><th>G / A</th><th>R / A</th><th>True missing / A</th><th>Exact target deficit fraction</th><th>Chord target deficit fraction</th></tr></thead><tbody>
+<tr><td>diverted-single-null</td><td>110</td><td>132</td><td>1</td><td>0.0291382</td><td>-0.110578257</td><td>-2086.08351</td><td>442.215873</td><td>78.5972904</td><td>1565.38092</td><td>0.0458227809</td><td>-0.00353021616</td></tr>
+<tr><td>diverted-single-null</td><td>300</td><td>340</td><td>7</td><td>3.37576</td><td>3.10333235e-08</td><td>-1156.78508</td><td>444.398344</td><td>-76.5127576</td><td>788.899496</td><td>0.0247305648</td><td>0.000812233836</td></tr>
+<tr><td>diverted-single-null</td><td>500</td><td>550</td><td>0</td><td>0</td><td>0</td><td>-620.788372</td><td>216.604222</td><td>0</td><td>404.184149</td><td>0.0107659066</td><td>-2.83585794e-05</td></tr>
+<tr><td>diverted-single-null</td><td>1000</td><td>1074</td><td>0</td><td>0</td><td>0</td><td>-860.685457</td><td>165.263117</td><td>0</td><td>695.42234</td><td>0.0186969505</td><td>-0.000446006667</td></tr>
+<tr><td>diverted-single-null</td><td>2500</td><td>2616</td><td>0</td><td>0</td><td>0</td><td>-590.552355</td><td>116.80198</td><td>0</td><td>473.750375</td><td>0.0129149321</td><td>-0.000107886745</td></tr>
+<tr><td>weak-rotation-reactor-static</td><td>110</td><td>135</td><td>0</td><td>0</td><td>0</td><td>-1011492.87</td><td>-4.97813133</td><td>0</td><td>1011497.84</td><td>0.0620114898</td><td>7.13053005e-05</td></tr>
+<tr><td>weak-rotation-reactor-static</td><td>300</td><td>342</td><td>0</td><td>0</td><td>0</td><td>-303780.14</td><td>-1.76503777</td><td>0</td><td>303781.905</td><td>0.01863265</td><td>2.14451341e-05</td></tr>
+<tr><td>weak-rotation-reactor-static</td><td>500</td><td>555</td><td>0</td><td>0</td><td>0</td><td>-157839.439</td><td>-0.919313883</td><td>0</td><td>157840.358</td><td>0.00968728843</td><td>1.93554027e-05</td></tr>
+<tr><td>weak-rotation-reactor-static</td><td>1000</td><td>1072</td><td>0</td><td>0</td><td>0</td><td>-230208.485</td><td>-97.7977462</td><td>0</td><td>230306.283</td><td>0.0141230534</td><td>1.43123543e-05</td></tr>
+<tr><td>weak-rotation-reactor-static</td><td>2500</td><td>2608</td><td>0</td><td>0</td><td>0</td><td>-175249.299</td><td>-0.0179108981</td><td>0</td><td>175249.317</td><td>0.0107543557</td><td>1.29758828e-05</td></tr>
+</tbody></table>
+<p><strong>Cell 9, diverted 110.</strong> Production signed-edge formula on
+analytic density: 35.655323 A; independent signed integral: 35.655324 A;
+nonzero-winding lobe union: 35.765901 A; true plasma region: 10.832038 A;
+actual booked current: 114.252613 A. The comparison region unions noded faces
+with nonzero winding of either sign. It is not fed back into the solver.
+Every non-simple chain, source atomic cell, authored cell and branch piece is
+persisted with case, rung and cell identity. A bow-tie positive control reads
+0 signed current and 2 geometric current, showing that the instrument detects
+cancellation rather than merely counting invalid polygons.</p>
+<p><strong>Controls and accuracy.</strong> Every mode reproduces its archived
+support fraction within relative tolerance 1e-9 and its moment arrays within
+the stated receipt bounds. The coarse diverted centroid reads −35.062133 mm,
+0.337867 mm from the reviewed −35.4 mm. All ten chord controls pass the revised
+criterion: absolute chord deficit below one tenth of exact; the largest ratio
+is 0.0770406. The independent receipt audit checks all cell and class sums,
+four-term closure and panels, and deliberately refuses both an omitted rung
+and a false control verdict. Maximum analytic-formula versus independent
+signed-integral L1 disagreement is 2.154e-9 of target; quadrature-order doubling
+changes the geometric integrals by at most 1.09e-16 of target.</p>
+<p><strong>Boundary and reference limits.</strong> The highest passing member
+of the authored sampling ladder is 5,761 points for diverted; 23,041 and 11,521
+fail, with their errors preserved. Weak rotation accepts 23,041 requested
+points, yielding 23,040 vertices. No radial-scan repair or normal projection
+is used. Comparison against the next lower passing resolution changes the
+per-cell analytic current by at most 7.73e-7 relative L1. The diverted archived
+target is itself a traced-support integral: at 110 the target deficit is
+1,710.076212 A while the independent true-region deficit is 1,565.380923 A.
+Both are retained, not conflated.</p>
+<figure><img src="/nova/figures/cut-cell-current-attribution/exact-support-floor/diverted-single-null-cells-300.png" alt="Diverted analytic and exact mapped flux with both null sets, beside current integration, geometry and total error contours at 300 requested cells"><figcaption>Diverted, 300 requested cells. The first panel overlays analytic and archived exact-map flux on shared Wb levels. Large blue nulls are analytic; small markers are the exact map. The remaining panels show per-cell current deficits on one shared nonzero level array, expressed as percent of target current, with peak magnitudes stated. Wall units are drawn faithfully. Evaluation only, no solve or terminal residual.</figcaption></figure>
+<figure><img src="/nova/figures/cut-cell-current-attribution/exact-support-floor/weak-rotation-reactor-static-cells-300.png" alt="Weak-rotation flux overlay and current error contours at 300 cells, showing negligible geometric error beside the integration deficit"><figcaption>Weak rotation, 300 requested cells; same current-error levels as the diverted figure. The geometric error is below the first nonzero contour, with its measured maximum stated. Zero contours are omitted to prevent roundoff from appearing as spatial structure. All maps use line contours, both null sets, and the first wall.</figcaption></figure>
+<p><strong>Correction to the preceding blocked checkpoint.</strong> The initial
+polygon refusal remains in <a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/polygon-preflight.log">polygon-preflight.log</a>;
+<code>job.log</code>, <code>report.json</code> and <code>report.md</code> now carry
+the completed measurement. The first resumed adapter refusal is retained in
+<a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/formula-preflight.log">formula-preflight.log</a>.
+The benchmark then adopted the production formula's singleton calling shape;
+the formula itself was not changed.</p>
+<p><a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/report.json">Complete per-cell receipt</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/report.md">Tables and interpretation</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/job.log">H200 evaluation log</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/negative-control.log">Paired chord controls</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-support-floor/audit.log">Receipt audit and refusal controls</a>.</p>
+<p>The driving followup and section remain open for coordinator adjudication.
+Further mechanism work belongs inside the simple cut-cell moment path and the
+non-simple booked-minus-formula remainder; this node makes no repair.</p>
+</section>
 </main>
 </body>
 </html>

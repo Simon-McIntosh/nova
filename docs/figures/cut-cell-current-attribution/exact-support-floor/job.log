@@ -1,0 +1,53 @@
+revision=150a1398c478e2b11d7a25de5195e280838dd856 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py']
+devices=[CudaDevice(id=0)] x64=True
+BUILD diverted-single-null-cells-110
+EVALUATE diverted-single-null-cells-110 exact
+REPRODUCED diverted-single-null-cells-110 exact fraction=0.954177219088 centroid_dz_mm=-35.0621334 integration_deficit_A=2007.5968 geometry_deficit_A=-442.215873
+EVALUATE diverted-single-null-cells-110 chord
+REPRODUCED diverted-single-null-cells-110 chord fraction=1.00353021616 centroid_dz_mm=-4.19800805 integration_deficit_A=24136.0748 geometry_deficit_A=-24412.5154
+BUILD diverted-single-null-cells-300
+EVALUATE diverted-single-null-cells-300 exact
+REPRODUCED diverted-single-null-cells-300 exact fraction=0.975269435182 centroid_dz_mm=-21.412188 integration_deficit_A=1233.29784 geometry_deficit_A=-444.398344
+EVALUATE diverted-single-null-cells-300 chord
+REPRODUCED diverted-single-null-cells-300 chord fraction=0.999187766164 centroid_dz_mm=0.672541408 integration_deficit_A=24123.1429 geometry_deficit_A=-24226.5983
+BUILD diverted-single-null-cells-500
+EVALUATE diverted-single-null-cells-500 exact
+REPRODUCED diverted-single-null-cells-500 exact fraction=0.989234093417 centroid_dz_mm=-3.59201156 integration_deficit_A=620.788372 geometry_deficit_A=-216.604222
+EVALUATE diverted-single-null-cells-500 chord
+REPRODUCED diverted-single-null-cells-500 chord fraction=1.00002835858 centroid_dz_mm=-1.3810957 integration_deficit_A=24203.3564 geometry_deficit_A=-24200.4021
+BUILD diverted-single-null-cells-1000
+EVALUATE diverted-single-null-cells-1000 exact
+REPRODUCED diverted-single-null-cells-1000 exact fraction=0.981303049476 centroid_dz_mm=-8.70746485 integration_deficit_A=860.685457 geometry_deficit_A=-165.263117
+EVALUATE diverted-single-null-cells-1000 chord
+REPRODUCED diverted-single-null-cells-1000 chord fraction=1.00044600667 centroid_dz_mm=-0.636666356 integration_deficit_A=24125.9921 geometry_deficit_A=-24142.1953
+BUILD diverted-single-null-cells-2500
+EVALUATE diverted-single-null-cells-2500 exact
+REPRODUCED diverted-single-null-cells-2500 exact fraction=0.987085067901 centroid_dz_mm=-4.72007825 integration_deficit_A=590.552355 geometry_deficit_A=-116.80198
+EVALUATE diverted-single-null-cells-2500 chord
+REPRODUCED diverted-single-null-cells-2500 chord fraction=1.00010788674 centroid_dz_mm=-0.132856194 integration_deficit_A=24135.8159 geometry_deficit_A=-24146.2681
+BUILD weak-rotation-reactor-static-cells-110
+EVALUATE weak-rotation-reactor-static-cells-110 exact
+REPRODUCED weak-rotation-reactor-static-cells-110 exact fraction=0.937988510241 centroid_dz_mm=0.00054502046 integration_deficit_A=1011492.87 geometry_deficit_A=4.97813133
+EVALUATE weak-rotation-reactor-static-cells-110 chord
+REPRODUCED weak-rotation-reactor-static-cells-110 chord fraction=0.9999286947 centroid_dz_mm=-7.17780266e-10 integration_deficit_A=1877886.94 geometry_deficit_A=-1876929.16
+BUILD weak-rotation-reactor-static-cells-300
+EVALUATE weak-rotation-reactor-static-cells-300 exact
+REPRODUCED weak-rotation-reactor-static-cells-300 exact fraction=0.98136735001 centroid_dz_mm=2.51813787 integration_deficit_A=303780.14 geometry_deficit_A=1.76503777
+EVALUATE weak-rotation-reactor-static-cells-300 chord
+REPRODUCED weak-rotation-reactor-static-cells-300 chord fraction=0.999978554866 centroid_dz_mm=-0.007268067 integration_deficit_A=1877073.45 geometry_deficit_A=-1876929.13
+BUILD weak-rotation-reactor-static-cells-500
+EVALUATE weak-rotation-reactor-static-cells-500 exact
+REPRODUCED weak-rotation-reactor-static-cells-500 exact fraction=0.990312711572 centroid_dz_mm=1.82152305e-05 integration_deficit_A=157839.439 geometry_deficit_A=0.919313883
+EVALUATE weak-rotation-reactor-static-cells-500 chord
+REPRODUCED weak-rotation-reactor-static-cells-500 chord fraction=0.999980644597 centroid_dz_mm=1.91368992e-12 integration_deficit_A=1877039.34 geometry_deficit_A=-1876929.12
+BUILD weak-rotation-reactor-static-cells-1000
+EVALUATE weak-rotation-reactor-static-cells-1000 exact
+REPRODUCED weak-rotation-reactor-static-cells-1000 exact fraction=0.985876946623 centroid_dz_mm=10.2442154 integration_deficit_A=230208.485 geometry_deficit_A=97.7977462
+EVALUATE weak-rotation-reactor-static-cells-1000 chord
+REPRODUCED weak-rotation-reactor-static-cells-1000 chord fraction=0.999985687646 centroid_dz_mm=0.000124668999 integration_deficit_A=1876957.05 geometry_deficit_A=-1876831.68
+BUILD weak-rotation-reactor-static-cells-2500
+EVALUATE weak-rotation-reactor-static-cells-2500 exact
+REPRODUCED weak-rotation-reactor-static-cells-2500 exact fraction=0.989245644348 centroid_dz_mm=3.32000284e-06 integration_deficit_A=175249.299 geometry_deficit_A=0.0179108981
+EVALUATE weak-rotation-reactor-static-cells-2500 chord
+REPRODUCED weak-rotation-reactor-static-cells-2500 chord fraction=0.999987024117 centroid_dz_mm=1.90925256e-12 integration_deficit_A=1876935.24 geometry_deficit_A=-1876929.1
+ATTRIBUTION_COMPLETE: all rows, reproductions, numerical controls and panels persisted

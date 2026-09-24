@@ -1,0 +1,1670 @@
+{
+  "requested_cells": 500,
+  "realised_cells": 550,
+  "base_report": "docs/figures/cut-cell-current-attribution/diverted-chord-response/diverted-single-null-cells-500-chord.json",
+  "base_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-500-chord.npz",
+  "map_fidelity_receipt": "docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-500-chord.json",
+  "base_archive_sha256": "552bbded401f73eb6edf91aed6c0fee6fe40a1546aa7abfa491710ad78ee7998",
+  "fixture_cache": {
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
+    "semantic_key": "e57b046871491e17",
+    "hit": true,
+    "lock_wait_seconds": 9.0012326836586e-06,
+    "build_seconds": 0.0
+  },
+  "current_target_a": 37170.642147815015,
+  "target_receipt": {
+    "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+    "declared_current_a": 37170.642147815015,
+    "current_centroid_m": [
+      1.7129729329076127,
+      0.034493158263529396
+    ],
+    "closed_form_flux_samples_used_for_current_support_only": true
+  },
+  "production_amplitude": 0.9999716422248104,
+  "counterfactual_amplitude": 1.0012957886080533,
+  "singleton_smoke": {
+    "cell": 3,
+    "cell_current_a": 0.0,
+    "radial_moment_am": 0.0,
+    "vertical_moment_am": 0.0,
+    "finite": true,
+    "integration_shape": "singleton production helper call"
+  },
+  "positive_control": {
+    "relative_tolerance": 1e-09,
+    "maximum_nonzero_cell_relative_error": 2.552209255091291e-15,
+    "maximum_archived_zero_cell_absolute_error_a": 0.0,
+    "passed": true
+  },
+  "base_map_mismatch": {
+    "sup_relative": 0.033867325392280156,
+    "rms_relative": 0.017880476893632744,
+    "sup_wb": 0.00030308628968959007,
+    "rms_wb": 5.805540715317317e-05,
+    "sup_over_reference_span": 0.020679938883241773,
+    "rms_over_reference_span": 0.00396118964338153,
+    "reference_sup_wb": 0.008949224250187666,
+    "reference_rms_wb": 0.003246860108851278,
+    "finite": true
+  },
+  "analytic_condition_map_mismatch": {
+    "sup_relative": 0.007046062864364674,
+    "rms_relative": 0.008169592903932042,
+    "sup_wb": 6.305679665411911e-05,
+    "rms_wb": 2.6525525305331417e-05,
+    "sup_over_reference_span": 0.004302440411658699,
+    "rms_over_reference_span": 0.0018098682151605665,
+    "reference_sup_wb": 0.008949224250187666,
+    "reference_rms_wb": 0.003246860108851278,
+    "finite": true
+  },
+  "false_positive_cells": [
+    3,
+    7,
+    64
+  ],
+  "largest_deficit_cells": [
+    80,
+    18,
+    21,
+    85,
+    86,
+    522,
+    529,
+    432,
+    25,
+    528
+  ],
+  "analytic_condition_exterior_current_fraction": {
+    "3": 0.0,
+    "7": 0.0,
+    "64": 0.0
+  },
+  "required_exterior_control_cells": [
+    7,
+    64
+  ],
+  "traces": [
+    {
+      "cell": 3,
+      "trace_kind": "booked-current-with-zero-analytic-current",
+      "base_class": "wall-cut",
+      "carrier": {
+        "domain_label": "common_sol",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 9
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          1.1351188586083343,
+          1.047529565191154,
+          0.9733175666347464,
+          0.9622880518747461,
+          1.0524694026256614,
+          1.0524694028046555,
+          1.0524694029799098,
+          1.0524694031501267,
+          1.1391111557779874
+        ],
+        "inside_positive_level": [
+          -0.13511885860833428,
+          -0.04752956519115403,
+          0.026682433365253555,
+          0.037711948125253913,
+          -0.052469402625661354,
+          -0.05246940280465551,
+          -0.05246940297990976,
+          -0.052469403150126714,
+          -0.13911115577798738
+        ],
+        "crossings": [
+          {
+            "edge": [
+              1,
+              2
+            ],
+            "linear_fraction": 0.640456612349921
+          },
+          {
+            "edge": [
+              3,
+              4
+            ],
+            "linear_fraction": 0.4181790116386249
+          }
+        ],
+        "clipped_vertex_count": 515,
+        "full_area_m2": 0.00232051662669838,
+        "clipped_area_m2": 0.00043920284731872644,
+        "clipped_area_fraction": 0.18926942486235152
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 0,
+        "point_count": 32832,
+        "signed_level_min_wb": 6.118285511769279e-06,
+        "signed_level_max_wb": 0.00022149942771322324,
+        "production_inside_count": 32832
+      },
+      "density_evaluation": {
+        "point_count": 32832,
+        "points_rz_min_m": [
+          1.3870460019895812,
+          -1.1760309434353464
+        ],
+        "points_rz_max_m": [
+          1.4130193120446217,
+          -1.1404458089046468
+        ],
+        "production_psi_norm_min": 0.9625283600281092,
+        "production_psi_norm_max": 0.9999999999285625,
+        "production_density_min_a_per_m2": 19396.090258601882,
+        "production_density_max_a_per_m2": 19941.017207139088,
+        "production_density_mean_a_per_m2": 19643.409114733142,
+        "production_nonzero_count": 32832,
+        "conditioned_density_min_a_per_m2": 0.0,
+        "conditioned_density_max_a_per_m2": 0.0,
+        "conditioned_density_mean_a_per_m2": 0.0,
+        "conditioned_nonzero_count": 0,
+        "point_density_sha256_binary64": "48740a1a29239c04528f68392578bd618d71236007a84cde5aa4f4c6638522c6"
+      },
+      "base_booked_current_a": 8.648570304996754,
+      "base_analytic_current_a": 0.0,
+      "base_deficit_a": -8.648570304996754,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 0.0,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 8.648815566164243,
+          "radial_moment_am": 0.1663354742887084,
+          "vertical_moment_am": -0.16849890754869715,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 8.648570304996761,
+          "radial_moment_am": 0.16633075738472247,
+          "vertical_moment_am": -0.16849412929455718,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 8.648570304996761,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 0.0,
+          "unscaled_current_a": 0.0,
+          "moment_written": true
+        }
+      ]
+    },
+    {
+      "cell": 7,
+      "trace_kind": "booked-current-with-zero-analytic-current",
+      "base_class": "exterior",
+      "carrier": {
+        "domain_label": "common_sol",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 6
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          0.9986785550007709,
+          1.040100817491598,
+          1.0835162706946466,
+          1.055426323160756,
+          1.0155188555406929,
+          1.0021865405837564
+        ],
+        "inside_positive_level": [
+          0.0013214449992291488,
+          -0.040100817491597995,
+          -0.08351627069464662,
+          -0.05542632316075591,
+          -0.015518855540692877,
+          -0.0021865405837564467
+        ],
+        "crossings": [
+          {
+            "edge": [
+              0,
+              1
+            ],
+            "linear_fraction": 0.0319018064144077
+          },
+          {
+            "edge": [
+              5,
+              0
+            ],
+            "linear_fraction": 0.623303754257597
+          }
+        ],
+        "clipped_vertex_count": 514,
+        "full_area_m2": 0.005046420633680689,
+        "clipped_area_m2": 1.0465907525093352e-05,
+        "clipped_area_fraction": 0.0020739269047930857
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 0,
+        "point_count": 32768,
+        "signed_level_min_wb": 5.334366531456189e-06,
+        "signed_level_max_wb": 1.4304142788254894e-05,
+        "production_inside_count": 32768
+      },
+      "density_evaluation": {
+        "point_count": 32768,
+        "points_rz_min_m": [
+          1.455506321752129,
+          -1.0770162347879202
+        ],
+        "points_rz_max_m": [
+          1.4634100897111635,
+          -1.0667866750576074
+        ],
+        "production_psi_norm_min": 0.9987325731354906,
+        "production_psi_norm_max": 0.999999999994908,
+        "production_density_min_a_per_m2": 20825.479905172582,
+        "production_density_max_a_per_m2": 20989.115739047273,
+        "production_density_mean_a_per_m2": 20927.313450695132,
+        "production_nonzero_count": 32768,
+        "conditioned_density_min_a_per_m2": 0.0,
+        "conditioned_density_max_a_per_m2": 0.0,
+        "conditioned_density_mean_a_per_m2": 0.0,
+        "conditioned_nonzero_count": 0,
+        "point_density_sha256_binary64": "a4305ea1ab7111531e106934e01e09d25938a809cfe449e02a764aefe29d4bcc"
+      },
+      "base_booked_current_a": 0.21866774983250672,
+      "base_analytic_current_a": 0.0,
+      "base_deficit_a": -0.21866774983250672,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 0.0,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 0.2186739509392471,
+          "radial_moment_am": 0.005105660533489421,
+          "vertical_moment_am": -0.007593379882407362,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 0.21866774983250653,
+          "radial_moment_am": 0.005105515748315819,
+          "vertical_moment_am": -0.007593164551047728,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 0.21866774983250653,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 0.0,
+          "unscaled_current_a": 0.0,
+          "moment_written": true
+        }
+      ]
+    },
+    {
+      "cell": 64,
+      "trace_kind": "booked-current-with-zero-analytic-current",
+      "base_class": "exterior",
+      "carrier": {
+        "domain_label": "common_sol",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 6
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          1.0164899536158254,
+          0.9468806523322009,
+          0.9682088953649773,
+          1.0071412978445964,
+          1.0621957331042506,
+          1.0928726319082562
+        ],
+        "inside_positive_level": [
+          -0.016489953615825392,
+          0.05311934766779913,
+          0.03179110463502266,
+          -0.007141297844596384,
+          -0.06219573310425064,
+          -0.09287263190825623
+        ],
+        "crossings": [
+          {
+            "edge": [
+              0,
+              1
+            ],
+            "linear_fraction": 0.23689296274698604
+          },
+          {
+            "edge": [
+              2,
+              3
+            ],
+            "linear_fraction": 0.8165718684241275
+          }
+        ],
+        "clipped_vertex_count": 515,
+        "full_area_m2": 0.005046420633680689,
+        "clipped_area_m2": 0.0018969122376940666,
+        "clipped_area_fraction": 0.37589261288164216
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 0,
+        "point_count": 32832,
+        "signed_level_min_wb": 5.734236126454889e-06,
+        "signed_level_max_wb": 0.00030180135173049454,
+        "production_inside_count": 32832
+      },
+      "density_evaluation": {
+        "point_count": 32832,
+        "points_rz_min_m": [
+          1.5240619603133367,
+          -1.153347843674057
+        ],
+        "points_rz_max_m": [
+          1.5811753299417364,
+          -1.0852883665066988
+        ],
+        "production_psi_norm_min": 0.9480814377305065,
+        "production_psi_norm_max": 0.9999999999213702,
+        "production_density_min_a_per_m2": 22236.122486099142,
+        "production_density_max_a_per_m2": 23397.422017771903,
+        "production_density_mean_a_per_m2": 23093.459861449417,
+        "production_nonzero_count": 32832,
+        "conditioned_density_min_a_per_m2": 0.0,
+        "conditioned_density_max_a_per_m2": 0.0,
+        "conditioned_density_mean_a_per_m2": 0.0,
+        "conditioned_nonzero_count": 0,
+        "point_density_sha256_binary64": "459bbdc567677a035ca11f16ded260dc6ececaeb3f85c14da01e950ac9f8b732"
+      },
+      "base_booked_current_a": 43.153397908988666,
+      "base_analytic_current_a": 0.0,
+      "base_deficit_a": -43.153397908988666,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 0.0,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 43.154621678048606,
+          "radial_moment_am": -0.7889102110855619,
+          "vertical_moment_am": -0.4711768223799725,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 43.153397908988666,
+          "radial_moment_am": -0.7888878393471512,
+          "vertical_moment_am": -0.4711634608535688,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 43.153397908988666,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 0.0,
+          "unscaled_current_a": 0.0,
+          "moment_written": true
+        }
+      ]
+    },
+    {
+      "cell": 80,
+      "trace_kind": "largest-separatrix-cut-deficit",
+      "base_class": "separatrix-cut",
+      "carrier": {
+        "domain_label": "common_sol",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 6
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          1.0531127527334905,
+          1.0120295424004284,
+          0.9915812512194988,
+          0.9766826029956645,
+          1.0045237502393343,
+          1.0605056087962308
+        ],
+        "inside_positive_level": [
+          -0.053112752733490476,
+          -0.012029542400428417,
+          0.008418748780501195,
+          0.02331739700433555,
+          -0.004523750239334268,
+          -0.06050560879623079
+        ],
+        "crossings": [
+          {
+            "edge": [
+              1,
+              2
+            ],
+            "linear_fraction": 0.5882908402462182
+          },
+          {
+            "edge": [
+              3,
+              4
+            ],
+            "linear_fraction": 0.837515667018254
+          }
+        ],
+        "clipped_vertex_count": 515,
+        "full_area_m2": 0.005046420633680681,
+        "clipped_area_m2": 0.0014329374065505719,
+        "clipped_area_fraction": 0.28395124199257205
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 32832,
+        "point_count": 32832,
+        "signed_level_min_wb": 4.230719609934228e-06,
+        "signed_level_max_wb": 0.0001367712412383854,
+        "production_inside_count": 124
+      },
+      "density_evaluation": {
+        "point_count": 32832,
+        "points_rz_min_m": [
+          1.524238026104383,
+          -0.9794274799953657
+        ],
+        "points_rz_max_m": [
+          1.5846202736806416,
+          -0.9243710368456761
+        ],
+        "production_psi_norm_min": 0.9770621578314731,
+        "production_psi_norm_max": 1.0002665119528837,
+        "production_density_min_a_per_m2": 22239.721011851925,
+        "production_density_max_a_per_m2": 23467.09776525269,
+        "production_density_mean_a_per_m2": 22816.134507020164,
+        "production_nonzero_count": 32832,
+        "conditioned_density_min_a_per_m2": 22239.721011851925,
+        "conditioned_density_max_a_per_m2": 23467.09776525269,
+        "conditioned_density_mean_a_per_m2": 22816.134507020164,
+        "conditioned_nonzero_count": 32832,
+        "point_density_sha256_binary64": "d76242a8a3de4997faeda4cb5f8e57ef235437cff6b63e3c73055c8e65cb4975"
+      },
+      "base_booked_current_a": 32.59795831201808,
+      "base_analytic_current_a": 35.039856363073476,
+      "base_deficit_a": 2.4418980510553965,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 35.039856363073476,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 32.598882743806364,
+          "radial_moment_am": -0.5954039595998278,
+          "vertical_moment_am": 0.5459738241458808,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 32.59795831201808,
+          "radial_moment_am": -0.5953870752681946,
+          "vertical_moment_am": 0.5459583415429162,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 32.59795831201808,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 33.40113819228103,
+          "unscaled_current_a": 33.35791338812427,
+          "moment_written": true
+        }
+      ]
+    },
+    {
+      "cell": 18,
+      "trace_kind": "largest-separatrix-cut-deficit",
+      "base_class": "separatrix-cut",
+      "carrier": {
+        "domain_label": "common_sol",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 6
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          1.0154924043365678,
+          1.0554527743648814,
+          1.0767802482223816,
+          1.0336907916781417,
+          0.9933664261153261,
+          0.9964955126312525
+        ],
+        "inside_positive_level": [
+          -0.015492404336567844,
+          -0.055452774364881385,
+          -0.07678024822238161,
+          -0.03369079167814171,
+          0.006633573884673893,
+          0.003504487368747533
+        ],
+        "crossings": [
+          {
+            "edge": [
+              3,
+              4
+            ],
+            "linear_fraction": 0.8354946496469885
+          },
+          {
+            "edge": [
+              5,
+              0
+            ],
+            "linear_fraction": 0.18447688301381265
+          }
+        ],
+        "clipped_vertex_count": 515,
+        "full_area_m2": 0.005046420633680685,
+        "clipped_area_m2": 0.00034006731300794703,
+        "clipped_area_fraction": 0.0673878254892743
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 32832,
+        "point_count": 32832,
+        "signed_level_min_wb": 4.7101541215949535e-06,
+        "signed_level_max_wb": 4.370259030511036e-05,
+        "production_inside_count": 117
+      },
+      "density_evaluation": {
+        "point_count": 32832,
+        "points_rz_min_m": [
+          1.448280436554448,
+          -0.9690729529994059
+        ],
+        "points_rz_max_m": [
+          1.4790969502311884,
+          -0.9243543962732017
+        ],
+        "production_psi_norm_min": 0.9935696049009294,
+        "production_psi_norm_max": 1.000271471127816,
+        "production_density_min_a_per_m2": 20675.637901338345,
+        "production_density_max_a_per_m2": 21313.091111286583,
+        "production_density_mean_a_per_m2": 20893.004847881148,
+        "production_nonzero_count": 32832,
+        "conditioned_density_min_a_per_m2": 20675.637901338345,
+        "conditioned_density_max_a_per_m2": 21313.091111286583,
+        "conditioned_density_mean_a_per_m2": 20893.004847881148,
+        "conditioned_nonzero_count": 32832,
+        "point_density_sha256_binary64": "0abdd5d7363bfe5bcdb195dcfb7116772b6ff465a3025561497b5003096b540d"
+      },
+      "base_booked_current_a": 7.147903952804005,
+      "base_analytic_current_a": 8.92277762275458,
+      "base_deficit_a": 1.7748736699505754,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 8.92277762275458,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 7.148106657205605,
+          "radial_moment_am": 0.21074367657939813,
+          "vertical_moment_am": 0.12860561167882043,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 7.147903952803988,
+          "radial_moment_am": 0.21073770035759506,
+          "vertical_moment_am": 0.12860196470979632,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 7.147903952803988,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 7.724323875006595,
+          "unscaled_current_a": 7.714327737006193,
+          "moment_written": true
+        }
+      ]
+    },
+    {
+      "cell": 21,
+      "trace_kind": "largest-separatrix-cut-deficit",
+      "base_class": "separatrix-cut",
+      "carrier": {
+        "domain_label": "core",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 6
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          0.9933423291106707,
+          1.0337148886827952,
+          1.0402598312817255,
+          0.9866046676026119,
+          0.9443526248297527,
+          0.9576352289367418
+        ],
+        "inside_positive_level": [
+          0.006657670889329337,
+          -0.03371488868279515,
+          -0.0402598312817255,
+          0.013395332397388104,
+          0.055647375170247315,
+          0.0423647710632582
+        ],
+        "crossings": [
+          {
+            "edge": [
+              0,
+              1
+            ],
+            "linear_fraction": 0.16490584099419278
+          },
+          {
+            "edge": [
+              2,
+              3
+            ],
+            "linear_fraction": 0.7503440213601935
+          }
+        ],
+        "clipped_vertex_count": 517,
+        "full_area_m2": 0.005046420633680682,
+        "clipped_area_m2": 0.0032491517584129137,
+        "clipped_area_fraction": 0.6438527412335615
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 32960,
+        "point_count": 32960,
+        "signed_level_min_wb": 5.788535513652892e-06,
+        "signed_level_max_wb": 0.0003203081177455933,
+        "production_inside_count": 32960
+      },
+      "density_evaluation": {
+        "point_count": 32960,
+        "points_rz_min_m": [
+          1.4079939689618952,
+          -0.9243229425931382
+        ],
+        "points_rz_max_m": [
+          1.4790810678252309,
+          -0.8480175616512676
+        ],
+        "production_psi_norm_min": 0.9450187267330894,
+        "production_psi_norm_max": 0.999999999937941,
+        "production_density_min_a_per_m2": 19835.843300131226,
+        "production_density_max_a_per_m2": 21312.76362546381,
+        "production_density_mean_a_per_m2": 20155.712363390703,
+        "production_nonzero_count": 32960,
+        "conditioned_density_min_a_per_m2": 19835.843300131226,
+        "conditioned_density_max_a_per_m2": 21312.76362546381,
+        "conditioned_density_mean_a_per_m2": 20155.712363390703,
+        "conditioned_nonzero_count": 32960,
+        "point_density_sha256_binary64": "58a180a83368cdf1c6659988718759b9257e6ac8eea38d23299e023f0f6f63d8"
+      },
+      "base_booked_current_a": 67.01480594326618,
+      "base_analytic_current_a": 68.49520640367857,
+      "base_deficit_a": 1.4804004604123833,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 68.49520640367857,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 67.01670638795984,
+          "radial_moment_am": 0.7164372345234647,
+          "vertical_moment_am": 0.41653049177952645,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 67.01480594326614,
+          "radial_moment_am": 0.7164169179574307,
+          "vertical_moment_am": 0.416518679901481,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 67.01480594326614,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 67.10354588213355,
+          "unscaled_current_a": 67.01670639743449,
+          "moment_written": true
+        }
+      ]
+    },
+    {
+      "cell": 85,
+      "trace_kind": "largest-separatrix-cut-deficit",
+      "base_class": "separatrix-cut",
+      "carrier": {
+        "domain_label": "core",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 6
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          1.046993803578692,
+          0.989093902076891,
+          0.9289388868497529,
+          0.8967678106611658,
+          0.9373806785816243,
+          1.0274516562720128
+        ],
+        "inside_positive_level": [
+          -0.046993803578692095,
+          0.010906097923109037,
+          0.0710611131502471,
+          0.10323218933883416,
+          0.06261932141837567,
+          -0.027451656272012848
+        ],
+        "crossings": [
+          {
+            "edge": [
+              0,
+              1
+            ],
+            "linear_fraction": 0.8116387482495152
+          },
+          {
+            "edge": [
+              4,
+              5
+            ],
+            "linear_fraction": 0.6952219574392139
+          }
+        ],
+        "clipped_vertex_count": 517,
+        "full_area_m2": 0.005046420633680681,
+        "clipped_area_m2": 0.003951438262622533,
+        "clipped_area_fraction": 0.7830180140454311
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 32960,
+        "point_count": 32960,
+        "signed_level_min_wb": 5.144141858033545e-06,
+        "signed_level_max_wb": 0.000590915220414141,
+        "production_inside_count": 256
+      },
+      "density_evaluation": {
+        "point_count": 32960,
+        "points_rz_min_m": [
+          1.5901602937847108,
+          -0.886175882107821
+        ],
+        "points_rz_max_m": [
+          1.6713043421795366,
+          -0.809876203113634
+        ],
+        "production_psi_norm_min": 0.8974978596489639,
+        "production_psi_norm_max": 1.0001973725819058,
+        "production_density_min_a_per_m2": 23579.06263837853,
+        "production_density_max_a_per_m2": 25207.65411826147,
+        "production_density_mean_a_per_m2": 24584.69449670574,
+        "production_nonzero_count": 32960,
+        "conditioned_density_min_a_per_m2": 23579.06263837853,
+        "conditioned_density_max_a_per_m2": 25207.65411826147,
+        "conditioned_density_mean_a_per_m2": 24584.69449670574,
+        "conditioned_nonzero_count": 32960,
+        "point_density_sha256_binary64": "5b34c960c157d444876be198a8c9ed1f25f56e938cebd0dfafb689b38a8a1cc2"
+      },
+      "base_booked_current_a": 96.19683495000626,
+      "base_analytic_current_a": 97.467487960211,
+      "base_deficit_a": 1.2706530102047395,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 97.467487960211,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 96.19956295558592,
+          "radial_moment_am": -0.5072611161396801,
+          "vertical_moment_am": 0.5099919530178112,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 96.19683495000629,
+          "radial_moment_am": -0.5072467313429861,
+          "vertical_moment_am": 0.509977490780659,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 96.19683495000629,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 96.56583107283635,
+          "unscaled_current_a": 96.44086409978502,
+          "moment_written": true
+        }
+      ]
+    },
+    {
+      "cell": 86,
+      "trace_kind": "largest-separatrix-cut-deficit",
+      "base_class": "separatrix-cut",
+      "carrier": {
+        "domain_label": "common_sol",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 6
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          1.1125798626381167,
+          1.0275065893892072,
+          0.9373257454644301,
+          0.9026070995375053,
+          0.9665401685305546,
+          1.086332087706389
+        ],
+        "inside_positive_level": [
+          -0.1125798626381167,
+          -0.027506589389207248,
+          0.06267425453556985,
+          0.09739290046249471,
+          0.03345983146944542,
+          -0.0863320877063889
+        ],
+        "crossings": [
+          {
+            "edge": [
+              1,
+              2
+            ],
+            "linear_fraction": 0.30501587911676037
+          },
+          {
+            "edge": [
+              4,
+              5
+            ],
+            "linear_fraction": 0.27931626523431885
+          }
+        ],
+        "clipped_vertex_count": 516,
+        "full_area_m2": 0.005046420633680682,
+        "clipped_area_m2": 0.0025184534585997397,
+        "clipped_area_fraction": 0.49905737975767356
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 32896,
+        "point_count": 32896,
+        "signed_level_min_wb": 3.1970724988797282e-06,
+        "signed_level_max_wb": 0.0005576286322124767,
+        "production_inside_count": 187
+      },
+      "density_evaluation": {
+        "point_count": 32896,
+        "points_rz_min_m": [
+          1.6565700176987637,
+          -0.8369983358057413
+        ],
+        "points_rz_max_m": [
+          1.728235499640757,
+          -0.7717041259136891
+        ],
+        "production_psi_norm_min": 0.9033857559032197,
+        "production_psi_norm_max": 1.0004897302125046,
+        "production_density_min_a_per_m2": 24913.440432372347,
+        "production_density_max_a_per_m2": 26338.65832878969,
+        "production_density_mean_a_per_m2": 25635.31926930709,
+        "production_nonzero_count": 32896,
+        "conditioned_density_min_a_per_m2": 24913.440432372347,
+        "conditioned_density_max_a_per_m2": 26338.65832878969,
+        "conditioned_density_mean_a_per_m2": 25635.31926930709,
+        "conditioned_nonzero_count": 32896,
+        "point_density_sha256_binary64": "700d93db91f39333e8c1f1479e426b83089822900efe1c6fda54ef5f66f7916f"
+      },
+      "base_booked_current_a": 64.3414367583739,
+      "base_analytic_current_a": 65.48571840390038,
+      "base_deficit_a": 1.1442816455264762,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 65.48571840390038,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 64.34326139011534,
+          "radial_moment_am": -0.7233556069528844,
+          "vertical_moment_am": 0.8254941143733457,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 64.34143675837387,
+          "radial_moment_am": -0.7233350941972003,
+          "vertical_moment_am": 0.8254707051968301,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 64.34143675837387,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 64.97038046982861,
+          "unscaled_current_a": 64.88630153947504,
+          "moment_written": true
+        }
+      ]
+    },
+    {
+      "cell": 522,
+      "trace_kind": "largest-separatrix-cut-deficit",
+      "base_class": "separatrix-cut",
+      "carrier": {
+        "domain_label": "core",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 6
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          0.908039057653807,
+          0.920341506272706,
+          0.9866001270019473,
+          1.0396508739526855,
+          1.037778059912995,
+          0.972424864343358
+        ],
+        "inside_positive_level": [
+          0.09196094234619301,
+          0.07965849372729406,
+          0.013399872998052675,
+          -0.03965087395268552,
+          -0.0377780599129951,
+          0.027575135656642047
+        ],
+        "crossings": [
+          {
+            "edge": [
+              2,
+              3
+            ],
+            "linear_fraction": 0.25258594399237233
+          },
+          {
+            "edge": [
+              4,
+              5
+            ],
+            "linear_fraction": 0.5780598727225306
+          }
+        ],
+        "clipped_vertex_count": 517,
+        "full_area_m2": 0.005046420633680658,
+        "clipped_area_m2": 0.0037126303263659904,
+        "clipped_area_fraction": 0.7356957724822368
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 32960,
+        "point_count": 32960,
+        "signed_level_min_wb": 5.641892421688313e-06,
+        "signed_level_max_wb": 0.0005239238263430532,
+        "production_inside_count": 32960
+      },
+      "density_evaluation": {
+        "point_count": 32960,
+        "points_rz_min_m": [
+          1.4579618943314263,
+          0.8695557079519902
+        ],
+        "points_rz_max_m": [
+          1.5450283915291483,
+          0.9241581312009691
+        ],
+        "production_psi_norm_min": 0.9092304786599338,
+        "production_psi_norm_max": 0.9999999989217547,
+        "production_density_min_a_per_m2": 20876.348169403944,
+        "production_density_max_a_per_m2": 22663.820524365074,
+        "production_density_mean_a_per_m2": 21923.615898720065,
+        "production_nonzero_count": 32960,
+        "conditioned_density_min_a_per_m2": 20876.348169403944,
+        "conditioned_density_max_a_per_m2": 22663.820524365074,
+        "conditioned_density_mean_a_per_m2": 21923.615898720065,
+        "conditioned_nonzero_count": 32960,
+        "point_density_sha256_binary64": "a380e29f8e04f1ba6bb896e41dec7b0b49a671530b5d45f602815d0630be79a3"
+      },
+      "base_booked_current_a": 80.88538667688455,
+      "base_analytic_current_a": 81.8886099295219,
+      "base_deficit_a": 1.0032232526373548,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 81.8886099295219,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 80.88768047154292,
+          "radial_moment_am": 0.08283554170963005,
+          "vertical_moment_am": -0.742349250107272,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 80.8853866768845,
+          "radial_moment_am": 0.08283319267796053,
+          "vertical_moment_am": -0.7423281987341254,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 80.8853866768845,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 80.99249380658007,
+          "unscaled_current_a": 80.88768047169299,
+          "moment_written": true
+        }
+      ]
+    },
+    {
+      "cell": 529,
+      "trace_kind": "largest-separatrix-cut-deficit",
+      "base_class": "separatrix-cut",
+      "carrier": {
+        "domain_label": "common_sol",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 6
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          0.9420041054218814,
+          0.9177593185248832,
+          0.98298791585773,
+          1.0711702781184322,
+          1.1087276856831592,
+          1.0447901103194552
+        ],
+        "inside_positive_level": [
+          0.0579958945781186,
+          0.08224068147511676,
+          0.017012084142269956,
+          -0.07117027811843224,
+          -0.10872768568315916,
+          -0.044790110319455234
+        ],
+        "crossings": [
+          {
+            "edge": [
+              2,
+              3
+            ],
+            "linear_fraction": 0.1929193515135766
+          },
+          {
+            "edge": [
+              5,
+              0
+            ],
+            "linear_fraction": 0.43576078634526694
+          }
+        ],
+        "clipped_vertex_count": 516,
+        "full_area_m2": 0.005046420633680667,
+        "clipped_area_m2": 0.0022431201647369775,
+        "clipped_area_fraction": 0.444497264014421
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 32896,
+        "point_count": 32896,
+        "signed_level_min_wb": 5.594014032646539e-06,
+        "signed_level_max_wb": 0.0004730463519939349,
+        "production_inside_count": 32896
+      },
+      "density_evaluation": {
+        "point_count": 32896,
+        "points_rz_min_m": [
+          1.5901788217150001,
+          0.8695430440073677
+        ],
+        "points_rz_max_m": [
+          1.6685915217646934,
+          0.9154802560285309
+        ],
+        "production_psi_norm_min": 0.9181208192765022,
+        "production_psi_norm_max": 0.9999999991287453,
+        "production_density_min_a_per_m2": 23579.43691682716,
+        "production_density_max_a_per_m2": 25153.532712759505,
+        "production_density_mean_a_per_m2": 24597.292442119786,
+        "production_nonzero_count": 32896,
+        "conditioned_density_min_a_per_m2": 23579.43691682716,
+        "conditioned_density_max_a_per_m2": 25153.532712759505,
+        "conditioned_density_mean_a_per_m2": 24597.292442119786,
+        "conditioned_nonzero_count": 32896,
+        "point_density_sha256_binary64": "172a2ca3c6ceaa1056da0084c86cab0efb8364be70fa622fc4a357f4327d16f9"
+      },
+      "base_booked_current_a": 54.576003562088445,
+      "base_analytic_current_a": 55.493407672059966,
+      "base_deficit_a": 0.9174041099715211,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 55.493407672059966,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 54.57755126001751,
+          "radial_moment_am": -0.3259258631694547,
+          "vertical_moment_am": -0.9831605648818084,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 54.576003562088474,
+          "radial_moment_am": -0.3259166206370985,
+          "vertical_moment_am": -0.9831326846355343,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 54.576003562088474,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 54.64827222587474,
+          "unscaled_current_a": 54.57755125670086,
+          "moment_written": true
+        }
+      ]
+    },
+    {
+      "cell": 432,
+      "trace_kind": "largest-separatrix-cut-deficit",
+      "base_class": "separatrix-cut",
+      "carrier": {
+        "domain_label": "core",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 6
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          0.917513318625998,
+          0.9768944430087619,
+          1.0394797707503773,
+          1.0450676895937956,
+          0.9933536131491205,
+          0.9283845699229385
+        ],
+        "inside_positive_level": [
+          0.08248668137400195,
+          0.023105556991238063,
+          -0.03947977075037734,
+          -0.04506768959379559,
+          0.006646386850879482,
+          0.0716154300770615
+        ],
+        "crossings": [
+          {
+            "edge": [
+              1,
+              2
+            ],
+            "linear_fraction": 0.3691848844609355
+          },
+          {
+            "edge": [
+              3,
+              4
+            ],
+            "linear_fraction": 0.8714781872206508
+          }
+        ],
+        "clipped_vertex_count": 517,
+        "full_area_m2": 0.005046420633680689,
+        "clipped_area_m2": 0.003428191444985045,
+        "clipped_area_fraction": 0.6793312911937421
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 32960,
+        "point_count": 32960,
+        "signed_level_min_wb": 5.7824413902928594e-06,
+        "signed_level_max_wb": 0.00047577215373894476,
+        "production_inside_count": 32960
+      },
+      "density_evaluation": {
+        "point_count": 32960,
+        "points_rz_min_m": [
+          1.2731866449976545,
+          0.755061204688374
+        ],
+        "points_rz_max_m": [
+          1.3468813378240583,
+          0.831359985993796
+        ],
+        "production_psi_norm_min": 0.9176862081409592,
+        "production_psi_norm_max": 0.9999999990338052,
+        "production_density_min_a_per_m2": 16963.95053123235,
+        "production_density_max_a_per_m2": 18546.589419921434,
+        "production_density_mean_a_per_m2": 17571.19878652577,
+        "production_nonzero_count": 32960,
+        "conditioned_density_min_a_per_m2": 16963.95053123235,
+        "conditioned_density_max_a_per_m2": 18546.589419921434,
+        "conditioned_density_mean_a_per_m2": 17571.19878652577,
+        "conditioned_nonzero_count": 32960,
+        "point_density_sha256_binary64": "94f67921f353c3be932eb116a063ee871b3448e70fe5c054d1c6729f147505bd"
+      },
+      "base_booked_current_a": 61.034836090887005,
+      "base_analytic_current_a": 61.928476102425506,
+      "base_deficit_a": 0.8936400115385013,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 61.928476102425506,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 61.03656695213097,
+          "radial_moment_am": 0.5643203605787301,
+          "vertical_moment_am": -0.3900510986885743,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 61.03483609088699,
+          "radial_moment_am": 0.5643043577088099,
+          "vertical_moment_am": -0.39004003770720524,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 61.03483609088699,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 61.11565745689506,
+          "unscaled_current_a": 61.03656696874228,
+          "moment_written": true
+        }
+      ]
+    },
+    {
+      "cell": 25,
+      "trace_kind": "largest-separatrix-cut-deficit",
+      "base_class": "separatrix-cut",
+      "carrier": {
+        "domain_label": "core",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 6
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          0.9843406880415062,
+          1.0488154080509666,
+          1.0527464995939475,
+          0.9818995890018587,
+          0.9172364886916821,
+          0.9236086792743106
+        ],
+        "inside_positive_level": [
+          0.015659311958493793,
+          -0.048815408050966624,
+          -0.052746499593947505,
+          0.018100410998141303,
+          0.08276351130831794,
+          0.07639132072568944
+        ],
+        "crossings": [
+          {
+            "edge": [
+              0,
+              1
+            ],
+            "linear_fraction": 0.24287522235375497
+          },
+          {
+            "edge": [
+              2,
+              3
+            ],
+            "linear_fraction": 0.7445137572426128
+          }
+        ],
+        "clipped_vertex_count": 517,
+        "full_area_m2": 0.005046420633680689,
+        "clipped_area_m2": 0.0033496075226727476,
+        "clipped_area_fraction": 0.6637590811033239
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 32960,
+        "point_count": 32960,
+        "signed_level_min_wb": 5.808462407674559e-06,
+        "signed_level_max_wb": 0.00047210599330248763,
+        "production_inside_count": 32960
+      },
+      "density_evaluation": {
+        "point_count": 32960,
+        "points_rz_min_m": [
+          1.34166479080517,
+          -0.8098198817983138
+        ],
+        "points_rz_max_m": [
+          1.4129725210495967,
+          -0.733514500856443
+        ],
+        "production_psi_norm_min": 0.9184166077168991,
+        "production_psi_norm_max": 0.9999999998807736,
+        "production_density_min_a_per_m2": 18435.61552506394,
+        "production_density_max_a_per_m2": 19940.038495249846,
+        "production_density_mean_a_per_m2": 18742.04273985335,
+        "production_nonzero_count": 32960,
+        "conditioned_density_min_a_per_m2": 18435.61552506394,
+        "conditioned_density_max_a_per_m2": 19940.038495249846,
+        "conditioned_density_mean_a_per_m2": 18742.04273985335,
+        "conditioned_nonzero_count": 32960,
+        "point_density_sha256_binary64": "7af2498ae39f19bf47e152becc927446c1b5c28cb0ba4f0c0e95ab3280896013"
+      },
+      "base_booked_current_a": 64.42483970692625,
+      "base_analytic_current_a": 65.30741032843586,
+      "base_deficit_a": 0.8825706215096147,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 65.30741032843586,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 64.42666670385688,
+          "radial_moment_am": 0.6634047465669665,
+          "vertical_moment_am": 0.36356524759807396,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 64.42483970692628,
+          "radial_moment_am": 0.6633859338843037,
+          "vertical_moment_am": 0.3635549376965158,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 64.42483970692628,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 64.510150057194,
+          "unscaled_current_a": 64.42666671640802,
+          "moment_written": true
+        }
+      ]
+    },
+    {
+      "cell": 528,
+      "trace_kind": "largest-separatrix-cut-deficit",
+      "base_class": "separatrix-cut",
+      "carrier": {
+        "domain_label": "core",
+        "profile_participation": true,
+        "support_included": true,
+        "support_boundary": false,
+        "support_vertex_count": 6
+      },
+      "production_level": {
+        "cell_vertex_psi_norm": [
+          0.9166880767632125,
+          0.8774446043793639,
+          0.9419862920681578,
+          1.0448079236731782,
+          1.0980348021053412,
+          1.034456642884169
+        ],
+        "inside_positive_level": [
+          0.08331192323678749,
+          0.12255539562063611,
+          0.05801370793184224,
+          -0.04480792367317821,
+          -0.09803480210534121,
+          -0.03445664288416905
+        ],
+        "crossings": [
+          {
+            "edge": [
+              2,
+              3
+            ],
+            "linear_fraction": 0.5642169553844117
+          },
+          {
+            "edge": [
+              5,
+              0
+            ],
+            "linear_fraction": 0.2925792851105929
+          }
+        ],
+        "clipped_vertex_count": 516,
+        "full_area_m2": 0.005046420633680689,
+        "clipped_area_m2": 0.0030824186902224174,
+        "clipped_area_fraction": 0.6108128739110289
+      },
+      "analytic_level_at_quadrature_points": {
+        "inside_count": 32896,
+        "point_count": 32896,
+        "signed_level_min_wb": 5.63912864122032e-06,
+        "signed_level_max_wb": 0.0007013920962947081,
+        "production_inside_count": 32896
+      },
+      "density_evaluation": {
+        "point_count": 32896,
+        "points_rz_min_m": [
+          1.6562884983594568,
+          0.831377414411005
+        ],
+        "points_rz_max_m": [
+          1.7377870618276734,
+          0.8916477344922632
+        ],
+        "production_psi_norm_min": 0.878102437954136,
+        "production_psi_norm_max": 0.9999999993084843,
+        "production_density_min_a_per_m2": 24907.81281732259,
+        "production_density_max_a_per_m2": 26527.55195912619,
+        "production_density_mean_a_per_m2": 26014.93641795985,
+        "production_nonzero_count": 32896,
+        "conditioned_density_min_a_per_m2": 24907.81281732259,
+        "conditioned_density_max_a_per_m2": 26527.55195912619,
+        "conditioned_density_mean_a_per_m2": 26014.93641795985,
+        "conditioned_nonzero_count": 32896,
+        "point_density_sha256_binary64": "e6531ae6072a985d470ecedcd2cd4eeac00f7c988f000adaa30dfff709cb27c6"
+      },
+      "base_booked_current_a": 79.09355574237526,
+      "base_analytic_current_a": 79.92131805836796,
+      "base_deficit_a": 0.8277623159927003,
+      "first_nonzero_production_stage": "local_quadratic_pointwise_confinement",
+      "deficit_first_visible_stage": "local_quadratic_pointwise_confinement",
+      "stages": [
+        {
+          "stage": "analytic_reference",
+          "current_a": 79.92131805836796,
+          "moment_written": true
+        },
+        {
+          "stage": "whole_cell_profile_carrier",
+          "current_a": null,
+          "moment_written": false
+        },
+        {
+          "stage": "local_quadratic_pointwise_confinement",
+          "current_a": 79.09579872325382,
+          "radial_moment_am": -0.4393188931143598,
+          "vertical_moment_am": -0.9567384831574617,
+          "moment_written": true
+        },
+        {
+          "stage": "declared_current_normalisation",
+          "current_a": 79.09355574237519,
+          "radial_moment_am": -0.43930643500795236,
+          "vertical_moment_am": -0.956711352182641,
+          "moment_written": true
+        },
+        {
+          "stage": "frozen_coupling_basis_conversion",
+          "current_a": 79.09355574237519,
+          "moment_written": true
+        },
+        {
+          "stage": "analytic_in_plasma_condition_counterfactual",
+          "current_a": 79.19829015520848,
+          "unscaled_current_a": 79.09579872028186,
+          "moment_written": true
+        }
+      ]
+    }
+  ]
+}

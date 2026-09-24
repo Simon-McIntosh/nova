@@ -3243,6 +3243,76 @@ checks the governed current component.</p>
 <p>The worker leaves section closure and the driving followup to the
 coordinator.</p>
 </section>
+<section id="chord-booking-operation-trace">
+<h2>Chord booking source: local quadratic support integration writes the current</h2>
+<p><strong>Measured 2026-09-24; the plan section and driving followup remain open.</strong>
+The operation named by this evaluation is
+<code>_flux_selected_current_moments</code> at
+<code>nova/equilibrium/clip_quadrature.py:885</code>. The route called
+<code>chord</code> hands that operation a whole-cell carrier. It does not admit cells
+through a straight chord. The operation then intersects the carrier with the
+cell-local quadratic <code>psi_N = 1</code> support, samples the profile density from
+that local polynomial, integrates current and first moments, and hands those moments
+to the unchanged normalisation and frozen coupling conversion. This local-quadratic
+pointwise-confinement integration is both the first stage at which an analytic-exterior
+cell acquires current and the stage at which the separatrix-cut deficit first appears.</p>
+
+<figure>
+  <img src="/nova/figures/cut-cell-current-attribution/chord-booking-trace/booking-stage-trace.svg" alt="Production booking sequence from whole-cell carrier through local quadratic support, density evaluation, moment integration and normalization, with the analytic-core counterfactual applied at the quadrature points">
+  <figcaption>The production sequence traced cell by cell. The emphasized operation is
+  the first current-writing stage. The counterfactual changes only its point-admission
+  condition to analytic-core membership; the carrier, quadrature helper, density law,
+  normalisation and coupling conversion remain on the production path.</figcaption>
+</figure>
+
+<table><thead><tr><th>Realised cells</th><th>Booked-current max relative error</th>
+<th>False-positive cells</th><th>Largest-deficit traces</th><th>Base map sup</th>
+<th>Analytic-condition map sup</th></tr></thead><tbody>
+<tr><td>132</td><td>2.27416898e-14</td><td>2</td><td>10</td><td>0.0950848225</td><td>0.0611907983</td></tr>
+<tr><td>340</td><td>4.63638398e-16</td><td>1, 12</td><td>10</td><td>0.0229099790</td><td>0.0764944851</td></tr>
+<tr><td>550</td><td>2.55220926e-15</td><td>3, 7, 64</td><td>10</td><td>0.0338673254</td><td>0.00704606286</td></tr>
+</tbody></table>
+
+<p><strong>Positive control.</strong> The trace calls the production moment helper and
+reconstructs the archived booked currents before interpreting any difference. Every
+nonzero cell is within the required <code>1e-9</code> relative tolerance; the worst
+observed error is <code>2.27416898e-14</code>, and archived-zero cells have exactly
+<code>0 A</code> absolute error. Each row begins with a singleton helper call before
+the loop, so a shape or attribute mismatch fails before the full census.</p>
+
+<p><strong>Declared negative control.</strong> The benchmark applies membership in the
+same analytic separatrix polygon used by the reference fixture at every live point
+returned by the production support-quadrature helper. It performs that integration one
+cell at a time. At 550 cells, exterior cell 7 has 32,768 production-admitted points and
+zero analytic-core points; exterior cell 64 has 32,832 production-admitted points and
+zero analytic-core points. Their conditioned current fractions are both exactly zero.
+Cell 64 changes from <code>43.153397908988666 A</code> to <code>0 A</code>, and the
+counterfactual map-mismatch relative sup is <code>0.007046062864364674</code>.</p>
+
+<p><strong>Execution receipt.</strong> H200 job <code>1277148</code> ran all three rows
+inside one allocation on <code>98dci4-gpu-0003</code> with betelgeuse,
+<code>gpu_0003_grpA</code>, account <code>grpa</code>, one GPU, eight cores and 64 GB.
+It used <code>TMPDIR=/tmp</code> in submit and payload, the shared interpreter directly,
+CUDA x64, and revision <code>b4589e1e428504928a4394dd64ac06faaffcb1e5</code>.
+Scheduler state is COMPLETED with exit <code>0:0</code>, elapsed 00:02:48; benchmark wall
+was 153.0519 s. The required preceding 132-cell CPU run was all_debug job
+<code>1277144</code>, COMPLETE <code>0:0</code>, with a row receipt at
+<code>4.72882756e-14</code> positive-control error. CPU job <code>1277145</code> then
+made the guarded 550-cell exterior refusal happen before the final GPU allocation.
+The instrument and durable receipts span commits
+<code>30ff976f8bbc34f5fe06ce163faae8d1801fc32d</code> through
+<code>67e0a1c96e6d82b77648d30f94c896cb160e9fac</code>.</p>
+
+<p>Read the <a href="/nova/figures/cut-cell-current-attribution/chord-booking-trace/report.md">report</a>,
+<a href="/nova/figures/cut-cell-current-attribution/chord-booking-trace/report.json">full trace receipt</a>,
+<a href="/nova/figures/cut-cell-current-attribution/chord-booking-trace/row-132.json">132-cell row</a>,
+<a href="/nova/figures/cut-cell-current-attribution/chord-booking-trace/row-340.json">340-cell row</a>,
+<a href="/nova/figures/cut-cell-current-attribution/chord-booking-trace/row-550.json">550-cell row</a>, and
+<a href="/nova/figures/cut-cell-current-attribution/chord-booking-trace/job.log">successful job log</a>.
+No production source under <code>nova/</code> changed. These measurements identify the
+booking operation; they do not release the exact-support default or close the section.</p>
+</section>
+
 </main>
 </body>
 </html>

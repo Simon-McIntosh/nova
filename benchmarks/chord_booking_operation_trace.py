@@ -33,12 +33,11 @@ from benchmarks import solovev_certificate as certificate
 from benchmarks.diverted_chord_response_attribution import physical_moments
 from benchmarks.plasma_cell_map_fidelity import norms
 from nova.equilibrium.clip_quadrature import (
-    _density_coefficients,
-    _density_sample_field,
+    ClippedCurrentMoments,
+    _flux_selected_current_moments,
     _quadratic_support,
     _quadratic_support_vertices,
-    _sampled_arc_polynomial_moments,
-    _flux_selected_current_moments,
+    clipped_support_quadrature,
 )
 from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.forward_operator import (
@@ -117,39 +116,52 @@ def analytic_condition_moments(
 ):
     """Replace the production local-level density condition at the same points."""
     cell_count = confined_support.support_vertices.shape[0]
-    cell = jnp.arange(cell_count, dtype=jnp.int32)
-    points, psi_norm, _, _, polynomial_centre, coordinate_scale = _density_sample_field(
-        field, cell
-    )
-    density = source.core.current_density(points[..., 0], psi_norm)
-    host_points = np.asarray(points)
     boundary_flux = float(exact.flux(np.asarray(exact.x_point)[None, :])[0])
     axis_flux = float(exact.axis_flux)
     polarity = np.sign(axis_flux - boundary_flux)
-    analytic_signed_level = polarity * (
-        exact.flux(host_points.reshape(-1, 2)).reshape(host_points.shape[:-1])
-        - boundary_flux
-    )
-    analytic_inside = analytic_signed_level >= 0.0
-    conditioned_density = jnp.where(jnp.asarray(analytic_inside), density, 0.0)
-    coefficients = _density_coefficients(conditioned_density)
     live = np.asarray(selected) & (np.asarray(confined_support.vertex_count) > 0)
     live_cells = np.flatnonzero(live)
     assert live_cells.size, "analytic-condition smoke needs one live support cell"
 
     def integrate_one(cell_index):
         start, stop = int(cell_index), int(cell_index) + 1
-        return _sampled_arc_polynomial_moments(
-            confined_support.support_vertices[start:stop],
-            confined_support.vertex_count[start:stop],
-            polynomial_centre[start:stop],
-            coordinate_scale[start:stop],
-            coefficients[start:stop],
-            confined_support.centroids[start:stop],
+        support = jax.tree.map(
+            lambda value: (
+                value[start:stop]
+                if jnp.ndim(value) and value.shape[0] == cell_count
+                else value
+            ),
+            confined_support,
+        )
+        points, weights = clipped_support_quadrature(support, jnp.ones(1, dtype=bool))
+        psi_norm = field.sample(points, jnp.asarray([cell_index], dtype=jnp.int32))[0]
+        density = source.core.current_density(points[..., 0], psi_norm)
+        host_points = np.asarray(points)
+        signed_level = polarity * (
+            exact.flux(host_points.reshape(-1, 2)).reshape(host_points.shape[:-1])
+            - boundary_flux
+        )
+        point_live = np.asarray(weights) > 0.0
+        analytic_inside = signed_level >= 0.0
+        conditioned = jnp.where(jnp.asarray(point_live & analytic_inside), density, 0.0)
+        weighted = conditioned * weights
+        offset = points - support.centroids[:, None, :]
+        first = jnp.sum(weighted[..., None] * offset, axis=1)
+        moments = ClippedCurrentMoments(
+            jnp.sum(weighted, axis=1), first[:, 0], first[:, 1]
+        )
+        return (
+            moments,
+            np.asarray(points)[0],
+            np.asarray(psi_norm)[0],
+            np.asarray(density)[0],
+            analytic_inside[0],
+            signed_level[0],
+            point_live[0],
         )
 
     smoke_cell = int(live_cells[0])
-    smoke = integrate_one(smoke_cell)
+    smoke, *smoke_trace = integrate_one(smoke_cell)
     smoke_values = [float(np.asarray(value)[0]) for value in smoke]
     assert np.all(np.isfinite(smoke_values)), "one-cell booking smoke is nonfinite"
     print(
@@ -159,10 +171,16 @@ def analytic_condition_moments(
     )
 
     values = np.zeros((3, cell_count), dtype=np.float64)
+    trace_arrays = [
+        np.zeros((cell_count,) + value.shape, dtype=value.dtype)
+        for value in smoke_trace
+    ]
     for cell_index in live_cells:
-        one = integrate_one(cell_index)
+        one, *trace = integrate_one(cell_index)
         values[:, cell_index] = [float(np.asarray(value)[0]) for value in one]
-    moments = type(smoke)(*(jnp.asarray(value) for value in values))
+        for output, value in zip(trace_arrays, trace, strict=True):
+            output[cell_index] = value
+    moments = ClippedCurrentMoments(*(jnp.asarray(value) for value in values))
     smoke_record = {
         "cell": smoke_cell,
         "cell_current_a": smoke_values[0],
@@ -173,11 +191,7 @@ def analytic_condition_moments(
     }
     return (
         moments,
-        points,
-        psi_norm,
-        density,
-        analytic_inside,
-        analytic_signed_level,
+        *trace_arrays,
         smoke_record,
     )
 
@@ -220,6 +234,7 @@ def cell_trace(
     production_density,
     analytic_inside,
     analytic_signed_level,
+    quadrature_live,
     unscaled_physical,
     booked_physical,
     counter_unscaled,
@@ -231,10 +246,12 @@ def cell_trace(
         field.sample(jnp.asarray(polygon)[None, ...], cell_index)[0][0]
     )
     production_signed = 1.0 - vertex_value
-    exact = np.asarray(analytic_signed_level[cell])
-    density = np.asarray(production_density[cell])
-    inside = np.asarray(analytic_inside[cell])
-    production_inside = np.asarray(sample_psi_norm[cell]) <= 1.0
+    live = np.asarray(quadrature_live[cell])
+    exact = np.asarray(analytic_signed_level[cell])[live]
+    density = np.asarray(production_density[cell])[live]
+    inside = np.asarray(analytic_inside[cell])[live]
+    psi_norm = np.asarray(sample_psi_norm[cell])[live]
+    production_inside = psi_norm <= 1.0
     label = PlasmaDomain(int(np.asarray(masks.label)[cell])).name.lower()
     full_area = float(np.asarray(profile_support.full_area)[cell])
     clipped_area = float(np.asarray(confined_support.area)[cell])
@@ -299,7 +316,7 @@ def cell_trace(
             "clipped_area_m2": clipped_area,
             "clipped_area_fraction": clipped_area / full_area,
         },
-        "analytic_level_at_density_points": {
+        "analytic_level_at_quadrature_points": {
             "inside_count": int(np.count_nonzero(inside)),
             "point_count": int(inside.size),
             "signed_level_min_wb": float(np.min(exact)),
@@ -307,8 +324,8 @@ def cell_trace(
             "production_inside_count": int(np.count_nonzero(production_inside)),
         },
         "density_evaluation": {
-            "points_rz_m": np.asarray(sample_points[cell]).tolist(),
-            "production_psi_norm": np.asarray(sample_psi_norm[cell]).tolist(),
+            "points_rz_m": np.asarray(sample_points[cell])[live].tolist(),
+            "production_psi_norm": psi_norm.tolist(),
             "production_density_a_per_m2": density.tolist(),
             "production_nonzero_count": int(np.count_nonzero(density)),
             "conditioned_density_a_per_m2": np.where(inside, density, 0.0).tolist(),
@@ -384,6 +401,7 @@ def measure(requested: int, output: Path) -> dict[str, object]:
         production_density,
         analytic_inside,
         analytic_signed_level,
+        quadrature_live,
         smoke_record,
     ) = analytic_condition_moments(
         operator, operator.source, exact, field, confined_support, selected
@@ -452,6 +470,7 @@ def measure(requested: int, output: Path) -> dict[str, object]:
                     production_density,
                     analytic_inside,
                     analytic_signed_level,
+                    quadrature_live,
                     production_physical_array,
                     physical_moments(
                         production_booked_array,
@@ -477,14 +496,17 @@ def measure(requested: int, output: Path) -> dict[str, object]:
     if base["cells"] == 550:
         assert 64 in required_exterior_cells
         for cell in required_exterior_cells:
+            live_points = quadrature_live[cell]
+            analytic_count = np.count_nonzero(analytic_inside[cell] & live_points)
+            production_count = np.count_nonzero(
+                (np.asarray(density_psi_norm[cell]) <= 1.0) & live_points
+            )
+            point_count = np.count_nonzero(live_points)
             print(
                 f"EXTERIOR_CONTROL cell={cell} "
                 f"fraction={exterior_ratios[str(cell)]:.12g} "
-                f"analytic_inside={np.count_nonzero(analytic_inside[cell])}/"
-                f"{analytic_inside[cell].size} "
-                f"production_inside="
-                f"{np.count_nonzero(np.asarray(density_psi_norm[cell]) <= 1.0)}/"
-                f"{np.asarray(density_psi_norm[cell]).size}",
+                f"analytic_inside={analytic_count}/{point_count} "
+                f"production_inside={production_count}/{point_count}",
                 flush=True,
             )
             assert exterior_ratios[str(cell)] < EXTERIOR_REMOVAL_FRACTION
@@ -586,7 +608,7 @@ def summarize(report: dict[str, object], output: Path) -> None:
     ]
     for row in rows:
         for trace in row["traces"]:
-            density_points = trace["analytic_level_at_density_points"]
+            density_points = trace["analytic_level_at_quadrature_points"]
             lines.append(
                 f"| {row['realised_cells']} | {trace['cell']} | {trace['trace_kind']} "
                 f"| {trace['carrier']['domain_label']} "

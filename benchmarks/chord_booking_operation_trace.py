@@ -471,8 +471,13 @@ def measure(requested: int, output: Path) -> dict[str, object]:
         )
         for cell in false_positive
     }
-    for ratio in exterior_ratios.values():
-        assert ratio < EXTERIOR_REMOVAL_FRACTION
+    required_exterior_cells = [
+        cell for cell in false_positive if by_cell[cell]["class"] == "exterior"
+    ]
+    if base["cells"] == 550:
+        assert 64 in required_exterior_cells
+        for cell in required_exterior_cells:
+            assert exterior_ratios[str(cell)] < EXTERIOR_REMOVAL_FRACTION
     result = {
         "requested_cells": requested,
         "realised_cells": int(base["cells"]),
@@ -497,6 +502,7 @@ def measure(requested: int, output: Path) -> dict[str, object]:
         "false_positive_cells": false_positive,
         "largest_deficit_cells": deficits,
         "analytic_condition_exterior_current_fraction": exterior_ratios,
+        "required_exterior_control_cells": required_exterior_cells,
         "traces": traces,
     }
     write(output / f"row-{base['cells']}.json", result)

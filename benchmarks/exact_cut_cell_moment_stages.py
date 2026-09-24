@@ -116,6 +116,7 @@ def _profile_reference(field, profile, vertices, count, centres, cells, order):
     import jax
     import jax.numpy as jnp
 
+    field = jax.tree.map(jnp.asarray, field)
     points, weights = _duffy_rule(vertices, count, centres, order)
 
     @jax.jit

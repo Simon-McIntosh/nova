@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-24">
-<meta name="plan-version" content="203">
+<meta name="plan-version" content="204">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
 <meta name="plan-impl" content="0.93">
@@ -1102,6 +1102,11 @@ See <a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#exa
     <div class="r-fu-body"><p>Dispatch once the stage attribution (r-20260923T224329719265) confirms moment reduction on weak 300 and diverted 110 and its substitution control restores the support fraction. Repair the moment-reduction stage in the nova exact moment path. Gate: the map-fidelity evaluation at the analytic state, exact mode, on every certificate rung of both cases, inside the 1e-2 pass bound; the exact support fraction at or above 0.999 on weak rotation; interior cells unchanged to 1e-11; chord rows bit-identical; the exact-clip tests pass with no failure added. One H200 job, looping over the rows in one allocation. Codex lane, under the lead authorisation of 2026-09-24. Lifting g-cca-exact-default-waits-on-map-fidelity follows from this gate.</p></div>
     <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §6</pre>
     </article>
+<article class="r-fu" data-id="f-cca-chord-support-membership-from-the-global-separatrix" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship cut-cell-current-attribution §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Decide chord cut-cell membership from the global separatrix, not the cell-local quadratic psi_N=1 support</h4>
+    <div class="r-fu-body"><p>_flux_selected_current_moments (nova/equilibrium/clip_quadrature.py:885) decides whether a chord cell and its sub-cell region sit inside the plasma from a cell-local quadratic psi_N=1 test. At the analytic diverted state that admits exterior cells and under-books cut cells, which gives the non-monotone chord map mismatch (0.095, 0.023, 0.034, 0.013, 0.0041). Repair: take membership from the global separatrix representation the production route already carries (the global spline at the admitted saddle), not from the local fit. Gate: the map-fidelity evaluation at the analytic state in chord mode passes 1e-2 at every certificate rung of the diverted case; weak-rotation chord stays at about 1e-4; exterior cells carry zero current at the analytic state; the limited rows are bit-identical where no cell is cut. Sequence it after f-cca-exact-moment-reduction-repair lands, because both edit clip_quadrature.py. Codex lane, one H200 job with a CPU preflight.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §6</pre>
+    </article>
 </section>
 
 <section data-reckon="questions" id="questions" class="r-questions">
@@ -1565,6 +1570,9 @@ See <a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#exa
     <div class="r-comment-body"></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260924T045143504477" data-who="" data-when="">
+    <div class="r-comment-body"></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260924T055353075419" data-who="" data-when="">
     <div class="r-comment-body"></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle" data-who="s19c-cca-saddle-c" data-when="2026-09-20T02:10:00Z">

@@ -45,7 +45,6 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 import jax
-import jax.numpy as jnp
 import numpy as np
 
 assert jax.config.jax_enable_x64 is True
@@ -122,7 +121,12 @@ from benchmarks import solovev_certificate
 
 scratch = output / "scratch"
 solovev_certificate.PART_ROOT = scratch / "parts"
-solovev_certificate.FIGURE_ROOT = scratch / "figures"
+# the figure receipt resolves its served source under the tree's docs root
+solovev_certificate.FIGURE_ROOT = (
+    solovev_certificate.ROOT
+    / "docs/figures/forward-solver-route-integrity/single-site-krylov/diverted-trace"
+    / f"{arm}-{'instrument' if instrument else 'plain'}"
+)
 solovev_certificate.DIAGNOSTIC_ROOT = scratch / "diagnostics"
 started = time.perf_counter()
 row = solovev_certificate._measure("diverted-single-null", -300)

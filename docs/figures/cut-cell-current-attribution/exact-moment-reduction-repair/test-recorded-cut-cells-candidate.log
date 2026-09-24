@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 4 items
+
+tests/test_exact_moment_reduction_cut_cells.py::test_sampled_arc_moments_match_order_doubled_reference[weak-rotation-reactor-static-110-108] PASSED [ 25%]
+tests/test_exact_moment_reduction_cut_cells.py::test_sampled_arc_moments_match_order_doubled_reference[weak-rotation-reactor-static-300-187] PASSED [ 50%]
+tests/test_exact_moment_reduction_cut_cells.py::test_sampled_arc_moments_match_order_doubled_reference[diverted-single-null-110-110] PASSED [ 75%]
+tests/test_exact_moment_reduction_cut_cells.py::test_recorded_cells_are_distinct_rows PASSED [100%]
+
+========================= 4 passed in 83.03s (0:01:23) =========================

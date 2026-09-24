@@ -3115,6 +3115,57 @@ the coordinator.</p>
 <a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/job-1277106.log">rejected composite-selector receipt</a> ·
 <a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/scheduler-receipt.txt">scheduler receipt</a>.</p>
 </section>
+<section id="exact-moment-reduction-repair">
+<h2>Exact moment reduction: sampled-arc supports retain their complete polygon</h2>
+<p><strong>2026-09-24 production repair, commit <code>38b441dad</code>.</strong>
+The defect reproduced on the current base before repair: weak rotation at 110
+requested cells assigned <code>−1,009,496.072370 A</code>, or
+<code>0.998149478461</code> of the base simple-cut error, to the production
+moment-reduction term. Cell 108 made the failure concrete: production booked
+<code>0.000733024 A</code> while both fixed Duffy quadrature and the independent
+order-16 integral returned <code>192,266.366234 A</code>.</p>
+<p>The density projection and polynomial contraction were already correct.
+The secondary quadratic reclip retained the complete 134-vertex sampled-arc
+polygon, but reported no <em>additional</em> boundary crossing. The compact
+reducer therefore treated it as a whole cell and truncated it to the first 24
+arc vertices. The repair classifies every retained polygon wider than the
+whole-cell capacity as a cut support, independently of whether a second clip
+observes another crossing. The same classification protects the symmetric
+field-integral reduction.</p>
+<table>
+<thead><tr><th>Row</th><th>Moment reduction A</th><th>Reduction / base</th><th>Exact support fraction</th><th>Interior current</th><th>Chord current</th></tr></thead>
+<tbody>
+<tr><td>weak rotation, 110 requested / 135 realised</td><td>+0.00895143</td><td>8.85082e-9</td><td>0.999864704</td><td>bit-identical</td><td>bit-identical</td></tr>
+<tr><td>weak rotation, 300 requested / 342 realised</td><td>+0.000668088</td><td>2.20154e-9</td><td>0.999556899</td><td>bit-identical</td><td>bit-identical</td></tr>
+<tr><td>diverted single null, 110 requested / 132 realised</td><td>−0.0000624079</td><td>3.25604e-8</td><td>1.009306139</td><td>bit-identical</td><td>bit-identical</td></tr>
+</tbody>
+</table>
+<p>Accepted H200 job <code>1277161</code> ran the three rows sequentially in one
+allocation on <code>98dci4-gpu-0003</code> with one H200, eight cores, 64 GiB,
+x64 enabled, the shared interpreter, and no compute-node <code>uv</code>. The
+signed order-8 to order-16 current deltas were at most
+<code>6.31e-10 A</code>. Every moment-reduction term is below the required
+<code>1e-3</code> fraction of its base term, both weak rows exceed
+<code>0.999</code>, and all interior-cell currents and all chord-mode moment
+arrays are bit-identical to the recorded base.</p>
+<p>The matched <code>all_debug</code> baseline and after gates pass every focused
+test that reaches the changed module in one fresh process per file; the after
+gate also passes the new three-recorded-cell order-doubled reference test. The
+declared mutation, “restore the original moment reduction”, fails all three
+recorded cells and leaves only the census test green (<code>3 failed, 1
+passed</code>). The first H200 receipt is retained as an instrument refusal: it
+divided near-zero first moments and reported an implausible relative change of
+3.0 even though interior <em>currents</em> were unchanged; the accepted receipt
+checks the governed current component.</p>
+<p><a href="/nova/figures/cut-cell-current-attribution/exact-moment-reduction-repair/h200-report.json">accepted H200 report</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-reduction-repair/h200.log">accepted H200 log</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-reduction-repair/negative-control.log">declared negative control</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-reduction-repair/cpu-baseline-summary.log">CPU baseline</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-reduction-repair/cpu-after-summary.log">CPU after gate</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-reduction-repair/h200-instrument-refusal.log">instrument refusal</a>.</p>
+<p>The worker leaves section closure and the driving followup to the
+coordinator.</p>
+</section>
 </main>
 </body>
 </html>

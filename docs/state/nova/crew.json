@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-24T07:20:31",
+  "updated": "2026-09-24T08:06:11",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6535,6 +6535,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-23"
+      },
+      {
+        "id": "s19c-rv-mrepair",
+        "harness": "codex-astra",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-24"
       },
       {
         "id": "s19c-scout-l",
@@ -301470,6 +301479,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3344
+    "_version": 3345
   }
 }

@@ -33,6 +33,7 @@ ROWS = (
 TERMS = (
     "secondary_geometry",
     "density_evaluation",
+    "reclip_self_intersection_loss",
     "moment_reduction",
 )
 
@@ -71,13 +72,11 @@ def _vertex_distance(left: np.ndarray, right: np.ndarray) -> float:
     return float(max(distance.min(axis=0).max(), distance.min(axis=1).max()))
 
 
-def _duffy_rule(vertices, count, centres, order):
-    """Return a padded per-cell triangle-fan rule of the requested order."""
+def _ring_rule(vertices, order, *, positive_orientation):
+    """Return a signed triangle-fan rule for one closed polygonal chain."""
     vertices = np.asarray(vertices)
-    count = np.asarray(count, dtype=np.int32)
-    centres = np.asarray(centres)
-    capacity = max(int(count.max(initial=0)), 3)
-    vertices = vertices[:, :capacity]
+    if len(vertices) < 3:
+        return np.empty((0, 2)), np.empty(0)
     nodes, weights = np.polynomial.legendre.leggauss(order)
     nodes, weights = (nodes + 1.0) / 2.0, weights / 2.0
     u, v = np.meshgrid(nodes, nodes, indexing="ij")
@@ -85,39 +84,93 @@ def _duffy_rule(vertices, count, centres, order):
     u = u.reshape(-1)
     v = v.reshape(-1)
     rule_weight = (wu * wv).reshape(-1)
-    triangle = np.arange(1, capacity - 1)
-    first = np.broadcast_to(vertices[:, :1], (len(vertices), capacity - 2, 2))
-    second = vertices[:, triangle]
-    third = vertices[:, triangle + 1]
+    triangle = np.arange(1, len(vertices) - 1)
+    first = np.broadcast_to(vertices[:1], (len(vertices) - 2, 2))
+    second = vertices[triangle]
+    third = vertices[triangle + 1]
     edge_first = second - first
     edge_second = third - first
     points = (
-        first[:, :, None, :]
-        + u[None, None, :, None] * edge_first[:, :, None, :]
-        + (1.0 - u)[None, None, :, None]
-        * v[None, None, :, None]
-        * edge_second[:, :, None, :]
+        first[:, None, :]
+        + u[None, :, None] * edge_first[:, None, :]
+        + (1.0 - u)[None, :, None] * v[None, :, None] * edge_second[:, None, :]
     )
-    cross = np.abs(
+    cross = (
         edge_first[..., 0] * edge_second[..., 1]
         - edge_first[..., 1] * edge_second[..., 0]
     )
-    live = triangle[None, :] + 1 < count[:, None]
-    rule = cross[:, :, None] * (1.0 - u)[None, None, :] * rule_weight[None, None, :]
-    rule = np.where(live[:, :, None], rule, 0.0)
-    points = points.reshape(len(vertices), -1, 2)
-    rule = rule.reshape(len(vertices), -1)
-    points = np.where((rule > 0.0)[..., None], points, centres[:, None, :])
-    return points, rule
+    if positive_orientation and cross.sum() < 0.0:
+        cross *= -1.0
+    rule = cross[:, None] * (1.0 - u)[None, :] * rule_weight[None, :]
+    return points.reshape(-1, 2), rule.reshape(-1)
 
 
-def _profile_reference(field, profile, vertices, count, centres, cells, order):
-    """Numerically integrate the production profile on fixed polygons."""
+def _geometry_rings(geometry):
+    """Return positively oriented exteriors and negatively oriented holes."""
+    from shapely.geometry.polygon import orient
+
+    if geometry.is_empty:
+        return []
+    if geometry.geom_type in ("MultiPolygon", "GeometryCollection"):
+        return [ring for part in geometry.geoms for ring in _geometry_rings(part)]
+    if geometry.geom_type != "Polygon":
+        return []
+    polygon = orient(geometry, sign=1.0)
+    return [
+        np.asarray(polygon.exterior.coords)[:-1],
+        *(np.asarray(ring.coords)[:-1] for ring in polygon.interiors),
+    ]
+
+
+def _padded_rule(rings_by_cell, centres, order, *, positive_orientation):
+    """Pad independent signed ring rules to one batch without changing weights."""
+    rules = []
+    for rings in rings_by_cell:
+        parts = [
+            _ring_rule(ring, order, positive_orientation=positive_orientation)
+            for ring in rings
+        ]
+        points = [part[0] for part in parts if len(part[0])]
+        weights = [part[1] for part in parts if len(part[1])]
+        rules.append(
+            (
+                np.concatenate(points) if points else np.empty((0, 2)),
+                np.concatenate(weights) if weights else np.empty(0),
+            )
+        )
+    width = max((len(weight) for _point, weight in rules), default=0)
+    width = max(width, 1)
+    padded_points = np.broadcast_to(
+        np.asarray(centres)[:, None, :], (len(rules), width, 2)
+    ).copy()
+    padded_weights = np.zeros((len(rules), width))
+    for index, (points, weights) in enumerate(rules):
+        padded_points[index, : len(points)] = points
+        padded_weights[index, : len(weights)] = weights
+    return padded_points, padded_weights
+
+
+def _profile_reference(
+    field,
+    profile,
+    rings_by_cell,
+    centres,
+    cells,
+    order,
+    *,
+    positive_orientation,
+):
+    """Numerically integrate the production profile on signed polygon rings."""
     import jax
     import jax.numpy as jnp
 
     field = jax.tree.map(jnp.asarray, field)
-    points, weights = _duffy_rule(vertices, count, centres, order)
+    points, weights = _padded_rule(
+        rings_by_cell,
+        centres,
+        order,
+        positive_orientation=positive_orientation,
+    )
 
     @jax.jit
     def integrate(point, weight, cell, centre):
@@ -146,6 +199,27 @@ def _analytic_reference(polygons, density, centres, order=16):
             for polygon, centre in zip(polygons, centres, strict=True)
         ]
     )
+
+
+def _instrument_controls():
+    """Prove the reference distinguishes signed cancellation from lobe area."""
+    bow = np.asarray(((1.0, 0.0), (3.0, 2.0), (1.0, 2.0), (3.0, 0.0)))
+    region, faces = base.lobe_region(bow)
+    _points, signed_weight = _ring_rule(bow, 16, positive_orientation=True)
+    union_rules = [
+        _ring_rule(ring, 16, positive_orientation=False)
+        for ring in _geometry_rings(region)
+    ]
+    signed_area = float(signed_weight.sum())
+    union_area = float(sum(weight.sum() for _point, weight in union_rules))
+    np.testing.assert_allclose(signed_area, 0.0, atol=1e-13)
+    np.testing.assert_allclose(union_area, 2.0, rtol=1e-13)
+    assert sorted(face["winding"] for face in faces) == [-1, 1]
+    return {
+        "bow_tie_signed_winding_area_m2": signed_area,
+        "bow_tie_nonzero_winding_union_area_m2": union_area,
+        "winding_census": sorted(face["winding"] for face in faces),
+    }
 
 
 def _evaluate_path(operator, state):
@@ -209,46 +283,81 @@ def _stage_census(
         _polygon(vertices, count)
         for vertices, count in zip(incoming_vertices, incoming_count, strict=True)
     ]
-    effective_polygons = [
+    effective_chains = [
         _polygon(vertices, count)
         for vertices, count in zip(effective_vertices, effective_count, strict=True)
     ]
-    invalid = [
-        int(cell)
-        for cell, polygon in zip(cells, effective_polygons, strict=True)
-        if not polygon.is_valid
-    ]
-    if invalid:
-        raise ValueError(f"secondary reclip made non-simple polygons: {invalid}")
+    effective_regions = []
+    lobe_faces = []
+    self_intersection = []
+    for vertices, count, chain in zip(
+        effective_vertices, effective_count, effective_chains, strict=True
+    ):
+        if chain.is_valid:
+            effective_regions.append(chain)
+            lobe_faces.append([])
+            self_intersection.append(False)
+        else:
+            region, faces = base.lobe_region(np.asarray(vertices)[: int(count)])
+            effective_regions.append(region)
+            lobe_faces.append(faces)
+            self_intersection.append(True)
+    self_intersection = np.asarray(self_intersection, dtype=bool)
     analytic_incoming = _analytic_reference(
         incoming_polygons, density, selected_centres
     )
     analytic_effective = _analytic_reference(
-        effective_polygons, density, selected_centres
+        effective_regions, density, selected_centres
     )
-    profile_order_8 = _profile_reference(
+    signed_rings = [
+        [np.asarray(vertices)[: int(count)]]
+        for vertices, count in zip(effective_vertices, effective_count, strict=True)
+    ]
+    union_rings = [_geometry_rings(region) for region in effective_regions]
+    signed_profile_order_8 = _profile_reference(
         field,
         profile,
-        effective_vertices,
-        effective_count,
+        signed_rings,
         selected_centres,
         cells,
         8,
+        positive_orientation=True,
     )
-    profile_order_16 = _profile_reference(
+    signed_profile_order_16 = _profile_reference(
         field,
         profile,
-        effective_vertices,
-        effective_count,
+        signed_rings,
         selected_centres,
         cells,
         16,
+        positive_orientation=True,
+    )
+    union_profile_order_8 = _profile_reference(
+        field,
+        profile,
+        union_rings,
+        selected_centres,
+        cells,
+        8,
+        positive_orientation=False,
+    )
+    union_profile_order_16 = _profile_reference(
+        field,
+        profile,
+        union_rings,
+        selected_centres,
+        cells,
+        16,
+        positive_orientation=False,
     )
     booked = production[cells]
     terms = {
         "secondary_geometry": analytic_effective - analytic_incoming,
-        "density_evaluation": profile_order_16 - analytic_effective,
-        "moment_reduction": booked - profile_order_16,
+        "density_evaluation": union_profile_order_16 - analytic_effective,
+        "reclip_self_intersection_loss": (
+            signed_profile_order_16 - union_profile_order_16
+        ),
+        "moment_reduction": booked - signed_profile_order_16,
     }
     closure = sum(terms.values())
     np.testing.assert_allclose(
@@ -261,24 +370,45 @@ def _stage_census(
     for position, cell in enumerate(cells):
         left = incoming_vertices[position, : incoming_count[position]]
         right = effective_vertices[position, : effective_count[position]]
+        chain_area = 0.5 * abs(
+            np.sum(
+                right[:, 0] * np.roll(right[:, 1], -1)
+                - right[:, 1] * np.roll(right[:, 0], -1)
+            )
+        )
         details.append(
             {
                 "cell": int(cell),
                 "incoming_vertex_count": int(incoming_count[position]),
                 "effective_vertex_count": int(effective_count[position]),
                 "incoming_area_m2": incoming_polygons[position].area,
-                "effective_area_m2": effective_polygons[position].area,
+                "effective_chain_signed_area_m2": chain_area,
+                "effective_lobe_union_area_m2": effective_regions[position].area,
                 "effective_minus_incoming_area_m2": (
-                    effective_polygons[position].area - incoming_polygons[position].area
+                    effective_regions[position].area - incoming_polygons[position].area
                 ),
+                "effective_chain_is_self_intersecting": bool(
+                    self_intersection[position]
+                ),
+                "nonzero_winding_faces": lobe_faces[position],
                 "symmetric_vertex_distance_m": _vertex_distance(left, right),
                 "incoming_vertices_rz_m": left,
                 "effective_vertices_rz_m": right,
                 "booked_moments": booked[position],
                 "analytic_incoming_moments": analytic_incoming[position],
-                "analytic_effective_moments": analytic_effective[position],
-                "profile_order_8_moments": profile_order_8[position],
-                "profile_order_16_moments": profile_order_16[position],
+                "analytic_lobe_union_moments": analytic_effective[position],
+                "production_signed_winding_order_8_moments": (
+                    signed_profile_order_8[position]
+                ),
+                "production_signed_winding_order_16_moments": (
+                    signed_profile_order_16[position]
+                ),
+                "nonzero_winding_lobe_union_order_8_moments": (
+                    union_profile_order_8[position]
+                ),
+                "nonzero_winding_lobe_union_order_16_moments": (
+                    union_profile_order_16[position]
+                ),
                 "terms": {key: value[position] for key, value in terms.items()},
                 "closure_moments": closure[position],
             }
@@ -288,13 +418,24 @@ def _stage_census(
         "cell_count": len(cells),
         "booked_moments": booked.sum(axis=0),
         "analytic_incoming_moments": analytic_incoming.sum(axis=0),
-        "analytic_effective_moments": analytic_effective.sum(axis=0),
-        "profile_order_8_moments": profile_order_8.sum(axis=0),
-        "profile_order_16_moments": profile_order_16.sum(axis=0),
-        "terms": {key: value.sum(axis=0) for key, value in terms.items()},
-        "order_doubling_l1_current_a": float(
-            np.abs(profile_order_8[:, 0] - profile_order_16[:, 0]).sum()
+        "analytic_lobe_union_moments": analytic_effective.sum(axis=0),
+        "production_signed_winding_order_8_moments": signed_profile_order_8.sum(axis=0),
+        "production_signed_winding_order_16_moments": signed_profile_order_16.sum(
+            axis=0
         ),
+        "nonzero_winding_lobe_union_order_8_moments": union_profile_order_8.sum(axis=0),
+        "nonzero_winding_lobe_union_order_16_moments": union_profile_order_16.sum(
+            axis=0
+        ),
+        "terms": {key: value.sum(axis=0) for key, value in terms.items()},
+        "signed_winding_order_doubling_l1_current_a": float(
+            np.abs(signed_profile_order_8[:, 0] - signed_profile_order_16[:, 0]).sum()
+        ),
+        "lobe_union_order_doubling_l1_current_a": float(
+            np.abs(union_profile_order_8[:, 0] - union_profile_order_16[:, 0]).sum()
+        ),
+        "self_intersection_count": int(self_intersection.sum()),
+        "self_intersection_cells": cells[self_intersection],
         "max_vertex_distance_m": max(
             (item["symmetric_vertex_distance_m"] for item in details), default=0.0
         ),
@@ -380,8 +521,16 @@ def measure(case_name, requested_cells, output):
         raise AssertionError(
             f"{label} no stage carries 90 percent: {dominant}={dominant_share}"
         )
-    corrected_booked = base_exact["booked_current_a"] - dominant_value
+    reduction_value = float(simple_result["terms"]["moment_reduction"][0])
+    corrected_booked = base_exact["booked_current_a"] - reduction_value
     corrected_fraction = corrected_booked / base_exact["archived_target_current_a"]
+    if case_name == "weak-rotation-reactor-static" and requested_cells == 110:
+        np.testing.assert_allclose(
+            reduction_value,
+            -1009496.0723696492,
+            rtol=1e-10,
+            atol=1e-5,
+        )
     if case_name == "weak-rotation-reactor-static" and corrected_fraction < 0.999:
         raise AssertionError(
             f"{label} reference substitution reaches only {corrected_fraction}"
@@ -424,7 +573,8 @@ def measure(case_name, requested_cells, output):
                 "substitute the independent reference at the named stage and show "
                 "the deficit removed"
             ),
-            "substituted_stage": dominant,
+            "substituted_stage": "moment_reduction",
+            "substituted_term_a": reduction_value,
             "original_exact_support_fraction": base_exact[
                 "support_fraction_of_archived_target"
             ],
@@ -468,16 +618,20 @@ def render(rows, output):
     figure, axis = plt.subplots(figsize=(8.5, 4.6), constrained_layout=True)
     x = np.arange(len(rows))
     width = 0.24
-    colours = ("steelblue", "indianred", "seagreen")
+    colours = ("steelblue", "indianred", "goldenrod", "seagreen")
     for offset, (name, colour) in enumerate(zip(TERMS, colours, strict=True)):
         axis.bar(
-            x + (offset - 1) * width, values[name], width, label=name, color=colour
+            x + (offset - (len(TERMS) - 1) / 2) * width,
+            values[name],
+            width,
+            label=name,
+            color=colour,
         )
     axis.axhline(1.0, color="black", linewidth=1.0, linestyle="--")
     axis.set_xticks(x, labels)
     axis.set_ylabel("signed share of base simple-cut error")
     axis.set_title("Exact moment path attribution at the analytic state")
-    axis.legend(frameon=False, ncols=3, loc="upper center")
+    axis.legend(frameon=False, ncols=2, loc="upper center")
     axis.spines[["top", "right"]].set_visible(False)
     path = output / "stage-attribution.svg"
     figure.savefig(path)
@@ -499,12 +653,13 @@ def summarize(rows, output):
         "rows_requested": ROWS,
         "sign_convention": (
             "booked minus incoming-polygon analytic = secondary_geometry + "
-            "density_evaluation + moment_reduction"
+            "density_evaluation + reclip_self_intersection_loss + moment_reduction"
         ),
         "reference_rule": (
             "production density is integrated independently with Duffy order 16; "
             "order 8 is retained as the doubled-order convergence control"
         ),
+        "instrument_controls": _instrument_controls(),
         "figure": figure,
         "rows": rows,
     }
@@ -518,9 +673,11 @@ def summarize(rows, output):
         "the production quadratic normalized-flux reclip. Density evaluation is "
         "then separated from the polynomial moment reduction on that same polygon.",
         "",
-        "| Case | Cells | Simple cuts | Geometry A | Density A | Moment reduction A "
-        "| Named stage | Share | Closure relative | Corrected exact fraction |",
-        "|---|---:|---:|---:|---:|---:|---|---:|---:|---:|",
+        "| Case | Cells | Simple cuts | Geometry A | Density A "
+        "| Reclip self-intersection A "
+        "| Moment reduction A | Named stage | Share | Closure relative "
+        "| Corrected exact fraction |",
+        "|---|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|",
     ]
     for row in rows:
         terms = row["simple_separatrix_cut"]["terms"]
@@ -529,6 +686,7 @@ def summarize(rows, output):
             f"| {row['simple_separatrix_cut']['cell_count']} "
             f"| {terms['secondary_geometry'][0]:.9g} "
             f"| {terms['density_evaluation'][0]:.9g} "
+            f"| {terms['reclip_self_intersection_loss'][0]:.9g} "
             f"| {terms['moment_reduction'][0]:.9g} "
             f"| {row['dominant_stage']} | {row['dominant_stage_share']:.9f} "
             f"| {row['closure_relative']:.3g} "
@@ -544,10 +702,12 @@ def summarize(rows, output):
         "",
         "## Controls",
         "",
-        "| Case | Cells | Changed simple-cut vertex sets | Max vertex distance m "
-        "| Order 8 to 16 L1 A | Interior max geometry/current "
-        "| Interior max density/current | Interior max reduction/current |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| Case | Cells | Self-intersections | Changed vertex sets "
+        "| Max vertex distance m | Signed order 8 to 16 L1 A "
+        "| Union order 8 to 16 L1 A | Interior max geometry/current "
+        "| Interior max density/current | Interior max self-intersection/current "
+        "| Interior max reduction/current |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:
         cut = row["simple_separatrix_cut"]
@@ -556,16 +716,20 @@ def summarize(rows, output):
         ]
         lines.append(
             f"| {row['case']} | {row['requested_cells']} "
+            f"| {cut['self_intersection_count']} "
             f"| {cut['changed_vertex_set_count']} | {cut['max_vertex_distance_m']:.9g} "
-            f"| {cut['order_doubling_l1_current_a']:.9g} "
+            f"| {cut['signed_winding_order_doubling_l1_current_a']:.9g} "
+            f"| {cut['lobe_union_order_doubling_l1_current_a']:.9g} "
             f"| {interior['secondary_geometry']:.3g} "
             f"| {interior['density_evaluation']:.3g} "
+            f"| {interior['reclip_self_intersection_loss']:.3g} "
             f"| {interior['moment_reduction']:.3g} |"
         )
     lines += [
         "",
-        "The declared negative control replaces the named stage term with its "
-        "independent reference. Both weak-rotation rows must then reach an exact "
+        "The declared negative control replaces the moment-reduction term with its "
+        "signed-winding independent reference. Both weak-rotation rows must then "
+        "reach an exact "
         "support fraction of at least 0.999. Every cell's incoming and effective "
         "vertices, area, three physical moments, stage terms, and closure are "
         "retained in report.json. No solve and no production source change ran.",

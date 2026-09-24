@@ -477,6 +477,16 @@ def measure(requested: int, output: Path) -> dict[str, object]:
     if base["cells"] == 550:
         assert 64 in required_exterior_cells
         for cell in required_exterior_cells:
+            print(
+                f"EXTERIOR_CONTROL cell={cell} "
+                f"fraction={exterior_ratios[str(cell)]:.12g} "
+                f"analytic_inside={np.count_nonzero(analytic_inside[cell])}/"
+                f"{analytic_inside[cell].size} "
+                f"production_inside="
+                f"{np.count_nonzero(np.asarray(density_psi_norm[cell]) <= 1.0)}/"
+                f"{np.asarray(density_psi_norm[cell]).size}",
+                flush=True,
+            )
             assert exterior_ratios[str(cell)] < EXTERIOR_REMOVAL_FRACTION
     result = {
         "requested_cells": requested,

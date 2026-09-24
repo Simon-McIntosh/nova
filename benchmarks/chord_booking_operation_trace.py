@@ -307,15 +307,12 @@ def measure(requested: int, output: Path) -> dict[str, object]:
     analytic = certificate._exact_state(CASE, exact, coordinates)
     np.testing.assert_array_equal(analytic, archived["analytic"])
     empty = fixture.forward_operator(source, machine)
-    _, fixture_external, cache = fixture.cached_fixture_exterior(
+    physical, fixture_external, cache = fixture.cached_fixture_exterior(
         source, exact, machine, empty, analytic
     )
     operator = fixture.forward_operator(source, machine, fixture_external)
     target, _, target_receipt = certificate._closed_form_current_target(
-        CASE,
-        source,
-        operator,
-        fixture.exact_current_moments(exact, operator, analytic, analytic=exact),
+        CASE, source, operator, physical
     )
     set_support_clip_mode("chord")
     partition = operator._support_partition(jnp.asarray(analytic), None)
@@ -513,8 +510,9 @@ def summarize(report: dict[str, object], output: Path) -> None:
         "|---:|---|---:|---:|---:|",
     ]
     for row in rows:
+        false_positive = ", ".join(map(str, row["false_positive_cells"]))
         lines.append(
-            f"| {row['realised_cells']} | {', '.join(map(str, row['false_positive_cells']))} "
+            f"| {row['realised_cells']} | {false_positive} "
             f"| {row['positive_control']['maximum_nonzero_cell_relative_error']:.3e} "
             f"| {row['base_map_mismatch']['sup_relative']:.9g} "
             f"| {row['analytic_condition_map_mismatch']['sup_relative']:.9g} |"
@@ -530,12 +528,13 @@ def summarize(report: dict[str, object], output: Path) -> None:
     ]
     for row in rows:
         for trace in row["traces"]:
+            density_points = trace["analytic_level_at_density_points"]
             lines.append(
                 f"| {row['realised_cells']} | {trace['cell']} | {trace['trace_kind']} "
                 f"| {trace['carrier']['domain_label']} "
                 f"| {len(trace['production_level']['crossings'])} "
-                f"| {trace['analytic_level_at_density_points']['production_inside_count']} "
-                f"| {trace['analytic_level_at_density_points']['inside_count']} "
+                f"| {density_points['production_inside_count']} "
+                f"| {density_points['inside_count']} "
                 f"| {trace['base_analytic_current_a']:.9g} "
                 f"| {trace['base_booked_current_a']:.9g} "
                 f"| {trace['stages'][-1]['current_a']:.9g} |"
@@ -550,7 +549,8 @@ def summarize(report: dict[str, object], output: Path) -> None:
         "",
         NEGATIVE_CONTROL,
         "",
-        f"At 550 cells, cell 64 changes from {report['cell_64_booked_current_a']:.12g} A "
+        "At 550 cells, cell 64 changes from "
+        f"{report['cell_64_booked_current_a']:.12g} A "
         f"to {report['cell_64_conditioned_current_a']:.12g} A, a fraction "
         f"{report['cell_64_conditioned_fraction']:.3e}. The resulting map mismatch "
         "sup is reported above rather than inferred from the removed current.",

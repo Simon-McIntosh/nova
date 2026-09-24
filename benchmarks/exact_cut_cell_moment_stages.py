@@ -314,9 +314,12 @@ def _stage_census(
         for vertices, count in zip(effective_vertices, effective_count, strict=True)
     ]
     union_rings = [_geometry_rings(region) for region in effective_regions]
+    if profile.open_field_line is not None:
+        raise ValueError("the stage attribution requires an undeclared open closure")
+    confined_profile = profile.confined
     signed_profile_order_8 = _profile_reference(
         field,
-        profile,
+        confined_profile,
         signed_rings,
         selected_centres,
         cells,
@@ -325,7 +328,7 @@ def _stage_census(
     )
     signed_profile_order_16 = _profile_reference(
         field,
-        profile,
+        confined_profile,
         signed_rings,
         selected_centres,
         cells,
@@ -334,7 +337,7 @@ def _stage_census(
     )
     union_profile_order_8 = _profile_reference(
         field,
-        profile,
+        confined_profile,
         union_rings,
         selected_centres,
         cells,
@@ -343,7 +346,7 @@ def _stage_census(
     )
     union_profile_order_16 = _profile_reference(
         field,
-        profile,
+        confined_profile,
         union_rings,
         selected_centres,
         cells,
@@ -656,8 +659,9 @@ def summarize(rows, output):
             "density_evaluation + reclip_self_intersection_loss + moment_reduction"
         ),
         "reference_rule": (
-            "production density is integrated independently with Duffy order 16; "
-            "order 8 is retained as the doubled-order convergence control"
+            "the production confined closure is integrated independently after "
+            "the secondary reclip with Duffy order 16; order 8 is retained as "
+            "the doubled-order convergence control"
         ),
         "instrument_controls": _instrument_controls(),
         "figure": figure,

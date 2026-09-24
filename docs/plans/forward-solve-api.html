@@ -24,8 +24,8 @@
 <meta name="plan-impl" content="0.985">
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="104">
+<meta name="plan-modified" content="2026-09-24">
+<meta name="plan-version" content="105">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -178,6 +178,11 @@
     <h4 class="r-fu-title">Finish the net-current census at a passing rung: the exact rows on the H200, one booking convention, and the terminal flux panels</h4>
     <div class="r-fu-body"><p>From the census review (75): the four exact-clip rows did not run, because each hit the one-hour all_debug limit. The reconciliation compares a chord-clip lambda against a whole-cell banked value. The record carries no poloidal flux contour panel for any terminal state, which the plotting rules require. Held behind the map-fidelity gate and the S18 validity rule: re-run only on a case and rung where the map passes (weak-rotation chord at any rung, diverted chord at 2616 cells), on one H200 job with the rows looped inside the allocation, booking both the seed and the banked value under one stated convention, and rendering the terminal panels with the nova.media painters.</p></div>
     <pre class="r-fu-prompt">/reckon-ship forward-solve-api §1</pre>
+    </article>
+<article class="r-fu" data-id="f-fsapi-clip-mode-is-a-request-field" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship forward-solve-api" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the support clip mode a field of the forward-solve request and receipt, not the module global _SUPPORT_CLIP_MODE</h4>
+    <div class="r-fu-body"><p>nova/equilibrium/forward_operator.py holds the clip mode in the module global _SUPPORT_CLIP_MODE (default "chord"), and set_support_clip_mode flips it for the whole process. Seven benchmarks flip it (plasma_cell_map_fidelity, plasma_cell_production_ladder, solovev_certificate, centroid_constrained_fixture_receipt, coupling_moment_order_evaluation, zero_residual_check and xpoint_cell_allocation_rca), so the repaired exact path has no production caller, and two measurements in one process can silently share a mode. Refactor: carry clip_mode on ForwardSolveRequest (with its policy default), thread it to the operator build as an explicit argument, record it in ForwardSolveReceipt, migrate the seven benchmarks to pass it, and delete the global and its setter. Gate: the receipt records the mode, chord rows are bit-identical to before, and a test asserts that two solves with different modes in one process each keep their own. This comes before any cutover of the clip default.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solve-api</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

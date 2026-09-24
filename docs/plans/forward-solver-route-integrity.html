@@ -26,9 +26,9 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-24">
-<meta name="plan-version" content="34">
+<meta name="plan-version" content="35">
 <meta name="plan-blocks" content="millisecond-converged-solve">
-<meta name="plan-impl" content="0.7">
+<meta name="plan-impl" content="0.65">
 </head>
 <body>
   <main class="plan-doc">
@@ -504,6 +504,16 @@
     <div class="r-fu-body"><p>From the review of the slice-2 run (89). (1) The toy-operator identity witness under docs/figures/forward-solver-route-integrity/single-site-krylov only counts mismatches and exits 0, and np.array_equal(equal_nan=True) accepts different signed zeros and NaN representations. The reviewer ran it on 1.0 against 2.0 and it printed identical. Make it fail closed on the bit pattern. (2) The benchmark symbol SLICE1_SOURCE carries a plan-stage label; name it by the capacity-scan mechanism. (3) custom_vmap has no reverse-mode rule, so anything that reverse-differentiates through _qualified_krylov_step needs a custom_vjp. Add a test that fails if a reverse-mode caller appears without one. Local lane after RESUME.</p></div>
     <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
     </article>
+<article class="r-fu" data-id="f-fsri-prewarm-pin-land-or-drop" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land the pre-warm compile-row refusal from 89fe2174d, or drop it, and decide whether a revision-keyed pin is worth keeping</h4>
+    <div class="r-fu-body"><p>The fsri-prewarm-pin-covers-the-lane-programs worktree at 89fe2174d carries a real fix: a compile row that asked the cache for no program now exits PREWARM_ROW_NO_PROGRAMS rather than passing (958f5722b, with a test in tests/test_h200_cache_guard.py). It also carries landing records showing the pin missed 679 programs after a revision change. Review the three post-review commits, then merge them. Decide in the plan whether the pin should be rebuilt on each solve-touching commit or retired in favour of the operator-geometry-as-operands work, which cuts compile cost at the source.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-one-nova-lane-launcher" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship forward-solver-route-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">One nova lane launcher for SLURM placement, so briefs stop hand-writing H200, titan and all_debug recipes</h4>
+    <div class="r-fu-body"><p>Every heavy node brief restates a ~300-character recipe: the betelgeuse reservation and account, TMPDIR in both the submit and the payload, no uv on the compute node, the shared interpreter plus PYTHONPATH, submitting for real rather than trusting --test-only, the titan fallback, all_debug under an hour, and one allocation per measurement. Workers still get it wrong (the census exact rows ran out their CPU hour instead of going to the H200). Generalise scripts/h200_test_lane/run.sh into one launcher: script or pytest target, rung preference (h200 then titan then cpu), cores, memory and log path. It applies the rules, records the rung actually used and the revision in the log header, and refuses a --test-only admission decision. Briefs then cite the launcher.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-fsri-nk-attempt-fence" data-who="coordinator" data-when="2026-09-19T13:55:00Z">
@@ -534,6 +544,9 @@
     <div class="r-comment-body">Objective re-stated by the lead 2026-09-22 (decision production-clip-is-moment-preserving-and-coupling-frozen on cut-cell-current-attribution): the program-size ceiling this plan holds exists to admit the moment-preserving, Biot-interaction-frozen cell clips into the hot path. Every rung so far (597 to 146 to 126 to 88 MB) was measured in chord mode; the clipped mode's executable at HEAD is unmeasured since the swept support capacity was retired (3840 to 158 at 110 cells) and is the first node of the route-A path on the cut-cell plan (f-cca-measure-the-exact-mode-executable-at-head). If it sits over 100,000,000 bytes, the remedy is on the clip side first (exact-clip-moment-quadrature section 4: lower the clip and moment order, vmap the per-cell clip kernels so the lowered program carries one kernel body) and only then on this plan's section 3 (one traced evaluator body). Section 3 work touches fixed_point.py and reduced_newton.py and may run beside the census and the clip-side reduction, never beside the mode change in forward_operator.py and source.py.</div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260923T142626281818" data-who="" data-when="">
+    <div class="r-comment-body"></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260924T123622035161" data-who="" data-when="">
     <div class="r-comment-body"></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-coord-20260922-s3-third-attempt-refused" data-who="reckon-ship" data-when="2026-09-22T12:10:00Z">

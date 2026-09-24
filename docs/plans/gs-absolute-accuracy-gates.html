@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-24">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="55">
 <meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html,benchmarks/solovev_certificate.py,docs/figures/gs-absolute-accuracy/solovev-certificate.json,docs/figures/gs-absolute-accuracy/solovev/,benchmarks/efit_reproduction_gate.py,docs/figures/gs-absolute-accuracy/efit-reproduction.json,docs/figures/gs-absolute-accuracy/efit/,docs/figures/gs-absolute-accuracy/oracle-fixture-assembly.json,tests/test_polygon_analytic_batched_moments.py">
 <meta name="plan-commits" content="3dc4bb57,bf6dcdf9,9b0be0c8,6480a228,69a96bdf,873cfba6,6cecf64e,1f6f3e2c,ebb56768,ae9c0ed6,eca38a8e,5bb6850f,a3ae6bd4,f76e9142,adfff6dc,466b9d02,faec6877,d0a01760,7573d3e7,77a2cd32,6d03967f,dcc671db,b93f9b10,f7d9557b">
 <meta name="plan-impl" content="0.96">
@@ -175,6 +175,11 @@
     <div class="r-fu-body"><p>Found by the net-current scaling census (run r-20260923T101830553419, review 75): benchmarks/solovev_certificate.py _production_solver_receipt (line 706) builds per-trip arrays that fall out of step on the reduced_newton route and raise IndexError. The census worked around it by reading history.converged and history.termination_reason directly; the defect was reported, not fixed. Repair node: reproduce it on one reduced-Newton certificate row, make the receipt read every per-trip array from one trip index, and add a test that runs the receipt on a reduced-Newton history whose arrays differ in length. benchmarks/solovev_certificate.py and one test file. The certificate side belongs to S19.</p></div>
     <pre class="r-fu-prompt">/reckon-ship gs-absolute-accuracy-gates</pre>
     <p class="r-fu-outcome">Merged at ab5276ff1 (run r-20260923T205045006945, codex-astra, review 99). _production_solver_receipt aligns every per-trip array to one trip index, or refuses by name. The IndexError was reproduced (all_debug job 1277027), and the repaired row produces a receipt with an identical residual (job 1277030; 342 cells, residual 0.0547, not converged). tests/test_production_solver_receipt_trip_alignment.py passes 9 of 9; reverting the repair fails 8. The row's non-convergence is unchanged and not this node's to fix.</p>
+    </article>
+<article class="r-fu" data-id="f-gsag-pins-of-failed-states" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship gs-absolute-accuracy-gates" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Retire certificate tests that pin a failed state&#x27;s numbers as expected values</h4>
+    <div class="r-fu-body"><p>tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback pins 2.248351582217136 on a non-converged diverted rung, which reads 0.0633 on main's operator, so the pin is stale on both trees. tests/test_outboard_hole_census_gate.py pins non-converged booked totals (f-cca-booking-gate-pins-a-non-converged-state). Both belong to the blind spot S18 found in test_certificate_pin.py. For each, assert the analytic or converged value with a stated tolerance where a passing rung exists (see the map-fidelity validity rule), or mark the row xfail(strict=True) with its reason, so that a converging row turns the test red. Test-only; CPU all_debug.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship gs-absolute-accuracy-gates</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

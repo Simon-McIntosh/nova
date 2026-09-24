@@ -8,23 +8,23 @@ Despite the route name, `chord` supplies a whole-cell carrier. The traced admiss
 
 | Realised cells | False-positive cells | Max booked-current reproduction error | Base map sup | Analytic-condition map sup |
 |---:|---|---:|---:|---:|
-| 132 | 2 | 4.729e-14 | 0.0950848225 | 0.103972106 |
+| 132 | 2 | 4.729e-14 | 0.0950848225 | 0.0611907983 |
 
 ## Traced moments
 
 | Cells | Cell | Selection | Carrier | Production crossings | Production density points inside | Analytic points inside | Analytic A | Booked A | Conditioned A |
 |---:|---:|---|---|---:|---:|---:|---:|---:|---:|
-| 132 | 2 | booked-current-with-zero-analytic-current | common_sol | 2 | 20530 | 19578 | 0 | 236.205099 | 235.894657 |
-| 132 | 97 | largest-separatrix-cut-deficit | core | 2 | 32960 | 32960 | 658.342494 | 655.521254 | 655.171208 |
-| 132 | 73 | largest-separatrix-cut-deficit | core | 2 | 32960 | 25747 | 667.207262 | 664.490631 | 664.038947 |
-| 132 | 21 | largest-separatrix-cut-deficit | core | 2 | 32960 | 32960 | 545.03171 | 542.414024 | 542.124377 |
-| 132 | 109 | largest-separatrix-cut-deficit | core | 2 | 32960 | 32522 | 581.132306 | 578.703667 | 578.37932 |
-| 132 | 110 | largest-separatrix-cut-deficit | core | 2 | 33024 | 1462 | 652.141664 | 649.89559 | 649.508181 |
-| 132 | 4 | largest-separatrix-cut-deficit | core | 2 | 166 | 4379 | 293.869993 | 291.762578 | 289.319606 |
-| 132 | 122 | largest-separatrix-cut-deficit | core | 2 | 32960 | 29022 | 504.620535 | 502.697811 | 502.385647 |
-| 132 | 19 | largest-separatrix-cut-deficit | core | 2 | 33024 | 5875 | 586.300012 | 584.460985 | 583.952393 |
-| 132 | 69 | largest-separatrix-cut-deficit | core | 2 | 32896 | 28695 | 410.091148 | 408.508359 | 408.210879 |
-| 132 | 11 | largest-separatrix-cut-deficit | core | 2 | 32960 | 12141 | 266.09183 | 264.689612 | 263.943024 |
+| 132 | 2 | booked-current-with-zero-analytic-current | common_sol | 2 | 20530 | 0 | 0 | 236.205099 | 0 |
+| 132 | 97 | largest-separatrix-cut-deficit | core | 2 | 32960 | 32960 | 658.342494 | 655.521254 | 660.12911 |
+| 132 | 73 | largest-separatrix-cut-deficit | core | 2 | 32960 | 25741 | 667.207262 | 664.490631 | 669.063806 |
+| 132 | 21 | largest-separatrix-cut-deficit | core | 2 | 32960 | 32960 | 545.03171 | 542.414024 | 546.226815 |
+| 132 | 109 | largest-separatrix-cut-deficit | core | 2 | 32960 | 32518 | 581.132306 | 578.703667 | 582.755779 |
+| 132 | 110 | largest-separatrix-cut-deficit | core | 2 | 33024 | 1445 | 652.141664 | 649.89559 | 654.423138 |
+| 132 | 4 | largest-separatrix-cut-deficit | core | 2 | 166 | 4380 | 293.869993 | 291.762578 | 291.510403 |
+| 132 | 122 | largest-separatrix-cut-deficit | core | 2 | 32960 | 28983 | 504.620535 | 502.697811 | 506.1863 |
+| 132 | 19 | largest-separatrix-cut-deficit | core | 2 | 33024 | 5883 | 586.300012 | 584.460985 | 588.371363 |
+| 132 | 69 | largest-separatrix-cut-deficit | core | 2 | 32896 | 28691 | 410.091148 | 408.508359 | 411.299917 |
+| 132 | 11 | largest-separatrix-cut-deficit | core | 2 | 32960 | 12141 | 266.09183 | 264.689612 | 265.94037 |
 
 The full 25-point density values, edge-crossing records, support areas, first moments, and every stage current are retained in `report.json` and the row receipts.
 

@@ -640,9 +640,9 @@ def summarize(report: dict[str, object], output: Path) -> None:
             )
     lines += [
         "",
-        "The full 25-point density values, edge-crossing records, support areas, "
-        "first moments, and every stage current are retained in `report.json` and "
-        "the row receipts.",
+        "Compact quadrature-density summaries, edge-crossing records, support "
+        "areas, first moments, and every stage current are retained in "
+        "`report.json` and the row receipts.",
         "",
         "## Declared negative control",
         "",

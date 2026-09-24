@@ -1,7 +1,7 @@
 {
-  "revision": "a7e334ca05dcaa4808cbe5dbc2ba437ec30cf3fa",
+  "revision": "bae287a8be1177aabfc40cf9c6533ea848aa87ce",
   "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source",
-  "job": "1277131",
+  "job": "1277144",
   "backend": "cpu",
   "negative_control": "apply the analytic in-plasma condition at the named stage and show the exterior current removed",
   "completed": true,
@@ -17,7 +17,7 @@
         "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
         "semantic_key": "833a17bde1b7b150",
         "hit": true,
-        "lock_wait_seconds": 7.936730980873108e-06,
+        "lock_wait_seconds": 7.275491952896118e-06,
         "build_seconds": 0.0
       },
       "current_target_a": 37319.34592471112,
@@ -31,12 +31,12 @@
         "closed_form_flux_samples_used_for_current_support_only": true
       },
       "production_amplitude": 0.9964822024242458,
-      "counterfactual_amplitude": 0.9959500842551391,
+      "counterfactual_amplitude": 1.003486775536206,
       "singleton_smoke": {
         "cell": 2,
-        "cell_current_a": 236.8538957421547,
-        "radial_moment_am": -7.7655661215878435,
-        "vertical_moment_am": -4.748839092933436,
+        "cell_current_a": 0.0,
+        "radial_moment_am": 0.0,
+        "vertical_moment_am": 0.0,
         "finite": true,
         "integration_shape": "singleton production helper call"
       },
@@ -58,12 +58,12 @@
         "finite": true
       },
       "analytic_condition_map_mismatch": {
-        "sup_relative": 0.10397210583235124,
-        "rms_relative": 0.07437713935791086,
-        "sup_wb": 0.0010907599560188936,
-        "rms_wb": 0.0002589749595728297,
-        "sup_over_reference_span": 0.06747546178710782,
-        "rms_over_reference_span": 0.016020440512185048,
+        "sup_relative": 0.061190798265806944,
+        "rms_relative": 0.05662118146553887,
+        "sup_wb": 0.0006419459516650938,
+        "rms_wb": 0.00019715020378024468,
+        "sup_over_reference_span": 0.03971139506171632,
+        "rms_over_reference_span": 0.012195901552938928,
         "reference_sup_wb": 0.010490890294918892,
         "reference_rms_wb": 0.003481916107671392,
         "finite": true
@@ -84,7 +84,7 @@
         11
       ],
       "analytic_condition_exterior_current_fraction": {
-        "2": 0.9986857134810565
+        "2": 0.0
       },
       "required_exterior_control_cells": [],
       "traces": [
@@ -148,7 +148,7 @@
             "clipped_area_fraction": 0.4668272142260095
           },
           "analytic_level_at_quadrature_points": {
-            "inside_count": 19578,
+            "inside_count": 0,
             "point_count": 33216,
             "signed_level_min_wb": -2.3901907302040356e-05,
             "signed_level_max_wb": 0.000731555096817678,
@@ -171,10 +171,10 @@
             "production_density_mean_a_per_m2": 23061.21316970117,
             "production_nonzero_count": 33216,
             "conditioned_density_min_a_per_m2": 0.0,
-            "conditioned_density_max_a_per_m2": 23729.03176257435,
-            "conditioned_density_mean_a_per_m2": 13791.332366118577,
-            "conditioned_nonzero_count": 19578,
-            "point_density_sha256_binary64": "79add4fbdb69ab87fffafd94329b70105bcc9e01a8279a74fa1fab488df32bf2"
+            "conditioned_density_max_a_per_m2": 0.0,
+            "conditioned_density_mean_a_per_m2": 0.0,
+            "conditioned_nonzero_count": 0,
+            "point_density_sha256_binary64": "d8169a23332a2fc9b91ae8f804e5cfb037f7b91bfcab9e7fd3836bcbaab3fcb5"
           },
           "base_booked_current_a": 236.2050985973491,
           "base_analytic_current_a": 0.0,
@@ -213,8 +213,8 @@
             },
             {
               "stage": "analytic_in_plasma_condition_counterfactual",
-              "current_a": 235.89465742055688,
-              "unscaled_current_a": 236.8538957421547,
+              "current_a": 0.0,
+              "unscaled_current_a": 0.0,
               "moment_written": true
             }
           ]
@@ -334,7 +334,7 @@
             },
             {
               "stage": "analytic_in_plasma_condition_counterfactual",
-              "current_a": 655.1712080952625,
+              "current_a": 660.1291103131739,
               "unscaled_current_a": 657.8353859824796,
               "moment_written": true
             }
@@ -390,7 +390,7 @@
             "clipped_area_fraction": 0.8601509713290298
           },
           "analytic_level_at_quadrature_points": {
-            "inside_count": 25747,
+            "inside_count": 25741,
             "point_count": 32960,
             "signed_level_min_wb": -4.856267009298455e-06,
             "signed_level_max_wb": 0.002814355188205014,
@@ -414,9 +414,9 @@
             "production_nonzero_count": 32960,
             "conditioned_density_min_a_per_m2": 0.0,
             "conditioned_density_max_a_per_m2": 35389.699779058785,
-            "conditioned_density_mean_a_per_m2": 27176.324865676896,
-            "conditioned_nonzero_count": 25747,
-            "point_density_sha256_binary64": "ebd1ec576ca5c2791d11c6079daea5063338b81f121298efe0289695b9bee908"
+            "conditioned_density_mean_a_per_m2": 27170.022756448616,
+            "conditioned_nonzero_count": 25741,
+            "point_density_sha256_binary64": "e4cb259d6a6838955cd392e62a8cf331bc2821d941760aa30528c5497c262969"
           },
           "base_booked_current_a": 664.490631100437,
           "base_analytic_current_a": 667.2072621767145,
@@ -455,8 +455,8 @@
             },
             {
               "stage": "analytic_in_plasma_condition_counterfactual",
-              "current_a": 664.0389474239432,
-              "unscaled_current_a": 666.7391849467749,
+              "current_a": 669.0638057192202,
+              "unscaled_current_a": 666.7390363582128,
               "moment_written": true
             }
           ]
@@ -576,7 +576,7 @@
             },
             {
               "stage": "analytic_in_plasma_condition_counterfactual",
-              "current_a": 542.1243765563084,
+              "current_a": 546.2268151490032,
               "unscaled_current_a": 544.328862587283,
               "moment_written": true
             }
@@ -632,7 +632,7 @@
             "clipped_area_fraction": 0.8148477698963843
           },
           "analytic_level_at_quadrature_points": {
-            "inside_count": 32522,
+            "inside_count": 32518,
             "point_count": 32960,
             "signed_level_min_wb": -1.0214640333255194e-06,
             "signed_level_max_wb": 0.002550133400482061,
@@ -656,9 +656,9 @@
             "production_nonzero_count": 32960,
             "conditioned_density_min_a_per_m2": 0.0,
             "conditioned_density_max_a_per_m2": 32792.87664546936,
-            "conditioned_density_mean_a_per_m2": 31724.756425221894,
-            "conditioned_nonzero_count": 32522,
-            "point_density_sha256_binary64": "58b812c3f3102234be262151601ddec8941ec1bd27a1e3e6cec8008389ff5fda"
+            "conditioned_density_mean_a_per_m2": 31720.975766033105,
+            "conditioned_nonzero_count": 32518,
+            "point_density_sha256_binary64": "d504c6a76139b6163bc861a27840f3c7646df961ed7158c9c70db93049bd640e"
           },
           "base_booked_current_a": 578.7036666261434,
           "base_analytic_current_a": 581.1323061892685,
@@ -697,8 +697,8 @@
             },
             {
               "stage": "analytic_in_plasma_condition_counterfactual",
-              "current_a": 578.3793195079822,
-              "unscaled_current_a": 580.731232068268,
+              "current_a": 582.7557785717835,
+              "unscaled_current_a": 580.7309002755836,
               "moment_written": true
             }
           ]
@@ -753,7 +753,7 @@
             "clipped_area_fraction": 0.9960293088665788
           },
           "analytic_level_at_quadrature_points": {
-            "inside_count": 1462,
+            "inside_count": 1445,
             "point_count": 33024,
             "signed_level_min_wb": -1.3403221683296356e-06,
             "signed_level_max_wb": 0.0027740256459985843,
@@ -777,9 +777,9 @@
             "production_nonzero_count": 33024,
             "conditioned_density_min_a_per_m2": 0.0,
             "conditioned_density_max_a_per_m2": 30344.202705491272,
-            "conditioned_density_mean_a_per_m2": 1295.9645118585645,
-            "conditioned_nonzero_count": 1462,
-            "point_density_sha256_binary64": "31168ac5ef465a38697d9d3bd1eefda2717c14e9a1d62c9e735283a03dc4e9b9"
+            "conditioned_density_mean_a_per_m2": 1280.7946896986025,
+            "conditioned_nonzero_count": 1445,
+            "point_density_sha256_binary64": "944e48913e901345cd6b7ab27599cfaddcb88149086e6c667ec35f14812dfe2d"
           },
           "base_booked_current_a": 649.8955900646597,
           "base_analytic_current_a": 652.1416638111941,
@@ -818,8 +818,8 @@
             },
             {
               "stage": "analytic_in_plasma_condition_counterfactual",
-              "current_a": 649.5081813548343,
-              "unscaled_current_a": 652.1493311992587,
+              "current_a": 654.4231380338449,
+              "unscaled_current_a": 652.1492400177955,
               "moment_written": true
             }
           ]
@@ -874,7 +874,7 @@
             "clipped_area_fraction": 0.5680860682893099
           },
           "analytic_level_at_quadrature_points": {
-            "inside_count": 4379,
+            "inside_count": 4380,
             "point_count": 32896,
             "signed_level_min_wb": -3.090371483044471e-05,
             "signed_level_max_wb": 0.0004255071881069505,
@@ -898,9 +898,9 @@
             "production_nonzero_count": 32896,
             "conditioned_density_min_a_per_m2": 0.0,
             "conditioned_density_max_a_per_m2": 24191.138843844106,
-            "conditioned_density_mean_a_per_m2": 3150.8095013617394,
-            "conditioned_nonzero_count": 4379,
-            "point_density_sha256_binary64": "5ee0ab9bf2767fde9c5c8128345218e6116560088dddc6b01f58f9a8de219a7f"
+            "conditioned_density_mean_a_per_m2": 3151.5374713631304,
+            "conditioned_nonzero_count": 4380,
+            "point_density_sha256_binary64": "1fe94c4585d5c5794fcfbf012241b23fa4ef5967ce371cce3587132388be8be8"
           },
           "base_booked_current_a": 291.7625778104962,
           "base_analytic_current_a": 293.8699930201438,
@@ -939,8 +939,8 @@
             },
             {
               "stage": "analytic_in_plasma_condition_counterfactual",
-              "current_a": 289.3196063613019,
-              "unscaled_current_a": 290.49609105428317,
+              "current_a": 291.5104032468958,
+              "unscaled_current_a": 290.49750365781284,
               "moment_written": true
             }
           ]
@@ -995,7 +995,7 @@
             "clipped_area_fraction": 0.9590607509203113
           },
           "analytic_level_at_quadrature_points": {
-            "inside_count": 29022,
+            "inside_count": 28983,
             "point_count": 32960,
             "signed_level_min_wb": -2.0492342581736284e-06,
             "signed_level_max_wb": 0.0015307876175507014,
@@ -1019,9 +1019,9 @@
             "production_nonzero_count": 32960,
             "conditioned_density_min_a_per_m2": 0.0,
             "conditioned_density_max_a_per_m2": 24807.93900164698,
-            "conditioned_density_mean_a_per_m2": 20466.95894231321,
-            "conditioned_nonzero_count": 29022,
-            "point_density_sha256_binary64": "b6665e74d9975e188725410f5157c9d12fd0f92a6e1dc155a7be0c41941690af"
+            "conditioned_density_mean_a_per_m2": 20439.065207500964,
+            "conditioned_nonzero_count": 28983,
+            "point_density_sha256_binary64": "2d3594cbd8cc6660c4b597e857bbd1dcd1ae9e04e7d77cf097dbaf0e6cd19e4e"
           },
           "base_booked_current_a": 502.69781103359946,
           "base_analytic_current_a": 504.62053467004927,
@@ -1060,8 +1060,8 @@
             },
             {
               "stage": "analytic_in_plasma_condition_counterfactual",
-              "current_a": 502.3856468161276,
-              "unscaled_current_a": 504.428539902034,
+              "current_a": 506.186300079619,
+              "unscaled_current_a": 504.4274747010412,
               "moment_written": true
             }
           ]
@@ -1116,7 +1116,7 @@
             "clipped_area_fraction": 0.9923400587051234
           },
           "analytic_level_at_quadrature_points": {
-            "inside_count": 5875,
+            "inside_count": 5883,
             "point_count": 33024,
             "signed_level_min_wb": -7.572849494500069e-06,
             "signed_level_max_wb": 0.0020996772573958775,
@@ -1140,9 +1140,9 @@
             "production_nonzero_count": 33024,
             "conditioned_density_min_a_per_m2": 0.0,
             "conditioned_density_max_a_per_m2": 27613.44982021375,
-            "conditioned_density_mean_a_per_m2": 4702.9395871573,
-            "conditioned_nonzero_count": 5875,
-            "point_density_sha256_binary64": "95e468e37e6b78418a9a138c8c06b909e08b9434b14c55ae495939ae95e00e37"
+            "conditioned_density_mean_a_per_m2": 4709.356843219169,
+            "conditioned_nonzero_count": 5883,
+            "point_density_sha256_binary64": "09dfda9fb23200e6b21df434935bdb4783b84997f5c15f2b16ef929d530601c8"
           },
           "base_booked_current_a": 584.4609848620254,
           "base_analytic_current_a": 586.3000121191653,
@@ -1181,8 +1181,8 @@
             },
             {
               "stage": "analytic_in_plasma_condition_counterfactual",
-              "current_a": 583.9523929943907,
-              "unscaled_current_a": 586.3269678129731,
+              "current_a": 588.3713627757619,
+              "unscaled_current_a": 586.326972232763,
               "moment_written": true
             }
           ]
@@ -1237,7 +1237,7 @@
             "clipped_area_fraction": 0.5788305387433161
           },
           "analytic_level_at_quadrature_points": {
-            "inside_count": 28695,
+            "inside_count": 28691,
             "point_count": 32896,
             "signed_level_min_wb": -1.497664672000733e-06,
             "signed_level_max_wb": 0.002103886348457357,
@@ -1261,9 +1261,9 @@
             "production_nonzero_count": 32896,
             "conditioned_density_min_a_per_m2": 0.0,
             "conditioned_density_max_a_per_m2": 32519.24845186566,
-            "conditioned_density_mean_a_per_m2": 27152.943418056257,
-            "conditioned_nonzero_count": 28695,
-            "point_density_sha256_binary64": "84193a214508b3de265f848546ddfa3ee33f6015d950ca2c9d858b38f62d2676"
+            "conditioned_density_mean_a_per_m2": 27149.161823979182,
+            "conditioned_nonzero_count": 28691,
+            "point_density_sha256_binary64": "be67a713a0d87957195bf2e1e020aa5977f48c05413a193f5155061cac93d772"
           },
           "base_booked_current_a": 408.5083594273871,
           "base_analytic_current_a": 410.0911484352722,
@@ -1302,8 +1302,8 @@
             },
             {
               "stage": "analytic_in_plasma_condition_counterfactual",
-              "current_a": 408.21087886186007,
-              "unscaled_current_a": 409.87082115380997,
+              "current_a": 411.29991692704255,
+              "unscaled_current_a": 409.8707894852599,
               "moment_written": true
             }
           ]
@@ -1423,7 +1423,7 @@
             },
             {
               "stage": "analytic_in_plasma_condition_counterfactual",
-              "current_a": 263.9430237109699,
+              "current_a": 265.9403698801694,
               "unscaled_current_a": 265.0163174677275,
               "moment_written": true
             }
@@ -1432,7 +1432,7 @@
       ]
     }
   ],
-  "wall_seconds": 42.114749643951654,
+  "wall_seconds": 42.809790816158056,
   "named_operation": "local-quadratic pointwise confinement in _flux_selected_current_moments",
   "first_current_stage": "local_quadratic_pointwise_confinement",
   "deficit_stage": "local_quadratic_pointwise_confinement",

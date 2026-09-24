@@ -1,5 +1,5 @@
-revision=a7e334ca05dcaa4808cbe5dbc2ba437ec30cf3fa tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py', '--expected-backend', 'cpu', '--requested', '110', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/docs/figures/cut-cell-current-attribution/chord-booking-trace/cpu-preflight']
+revision=bae287a8be1177aabfc40cf9c6533ea848aa87ce tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py', '--expected-backend', 'cpu', '--requested', '110', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/docs/figures/cut-cell-current-attribution/chord-booking-trace/cpu-preflight']
 device=[CpuDevice(id=0)] x64=True
-SMOKE cell=2 current=236.853895742 radial=-7.76556612159 vertical=-4.74883909293
-ROW cells=132 positive=4.729e-14 base_map=0.0950848225228 conditioned_map=0.103972105832
+SMOKE cell=2 current=0 radial=0 vertical=0
+ROW cells=132 positive=4.729e-14 base_map=0.0950848225228 conditioned_map=0.0611907982658
 BOOKING_TRACE_COMPLETE

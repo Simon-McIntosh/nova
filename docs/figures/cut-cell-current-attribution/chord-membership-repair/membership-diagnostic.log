@@ -1,0 +1,5 @@
+revision=3ba7f6b00e43966dd3dd93f381f6d442c95267e1+working-tree tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-membership-from-the-global-separatrix command=srun --partition=all_debug --time=00:30:00 --cpus-per-task=4 --mem=64G --chdir=<tree> python docs/figures/cut-cell-current-attribution/chord-membership-repair/diagnose_membership.py
+CARRIED active=550 value_sup=2.22044604925e-15 centre_sup=0
+CELL cell=7 carried_positive=0/25 direct_positive=0/25 exact_positive=0/25 connected_positive=0/25 carried_range=-0.0544356879925,-0.00812752925693 direct_range=-0.0544356879925,-0.00812752925689
+CELL cell=64 carried_positive=9/25 direct_positive=9/25 exact_positive=9/25 connected_positive=0/25 carried_range=-0.0542582745694,0.0298139696928 direct_range=-0.0542582745695,0.0298139696927
+EXIT=0

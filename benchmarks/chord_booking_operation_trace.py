@@ -28,6 +28,8 @@ configure_dtypes()
 assert jax.config.jax_enable_x64
 import jax.numpy as jnp
 import numpy as np
+from shapely import intersects_xy
+from shapely.geometry import Polygon
 
 from benchmarks import solovev_certificate as certificate
 from benchmarks.diverted_chord_response_attribution import physical_moments
@@ -116,6 +118,7 @@ def analytic_condition_moments(
 ):
     """Replace the production local-level density condition at the same points."""
     cell_count = confined_support.support_vertices.shape[0]
+    analytic_core = Polygon(fixture._analytic_separatrix(exact))
     boundary_flux = float(exact.flux(np.asarray(exact.x_point)[None, :])[0])
     axis_flux = float(exact.axis_flux)
     polarity = np.sign(axis_flux - boundary_flux)
@@ -142,7 +145,9 @@ def analytic_condition_moments(
             - boundary_flux
         )
         point_live = np.asarray(weights) > 0.0
-        analytic_inside = signed_level >= 0.0
+        analytic_inside = intersects_xy(
+            analytic_core, host_points[..., 0], host_points[..., 1]
+        )
         conditioned = jnp.where(jnp.asarray(point_live & analytic_inside), density, 0.0)
         weighted = conditioned * weights
         offset = points - support.centroids[:, None, :]

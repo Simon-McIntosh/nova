@@ -1,0 +1,13 @@
+revision=283a2bc9a651060f82635763a62702eb78465011 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/docs/figures/cut-cell-current-attribution/chord-booking-trace']
+device=[CudaDevice(id=0)] x64=True
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py", line 596, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py", line 588, in main
+    report["rows"].append(measure(requested, args.output))
+                          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py", line 326, in measure
+    profile = _FluxSelectedProfile(source.core, source.common_sol)
+                                   ^^^^^^^^^^^
+AttributeError: 'RotatingEquilibrium' object has no attribute 'core'

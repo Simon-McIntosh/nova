@@ -29,17 +29,40 @@ SLICE1_SOURCE = Path(
 )
 
 
-class _SliceOneFixedPoint(importlib.abc.MetaPathFinder):
+# the nova modules that differ between the revision slice one was measured
+# at (8d02dd0f) and this tree, exported under the run directory
+PREMERGE_ROOT = SLICE1_SOURCE.parent / "premerge"
+PREMERGE = {
+    ".".join(path.relative_to(PREMERGE_ROOT).with_suffix("").parts): path
+    for path in PREMERGE_ROOT.rglob("*.py")
+}
+
+
+class _ServedModules(importlib.abc.MetaPathFinder):
+    """Serve the named modules from alternate source files."""
+
+    def __init__(self, sources):
+        self.sources = sources
+
     def find_spec(self, name, path, target=None):
-        if name == "nova.equilibrium.fixed_point":
-            return importlib.util.spec_from_file_location(name, SLICE1_SOURCE)
+        if name in self.sources:
+            return importlib.util.spec_from_file_location(name, self.sources[name])
         return None
 
 
-if arm == "slice1":
-    sys.meta_path.insert(0, _SliceOneFixedPoint())
-elif arm != "exit":
+served = {
+    "slice1": {"nova.equilibrium.fixed_point": SLICE1_SOURCE},
+    "exit": {},
+    "premerge-slice1": PREMERGE,
+    "premerge-exit": {
+        k: v for k, v in PREMERGE.items() if k != "nova.equilibrium.fixed_point"
+    },
+}
+if arm not in served:
     raise SystemExit(f"unknown arm {arm}")
+if served[arm]:
+    sys.meta_path.insert(0, _ServedModules(served[arm]))
+print(f"SERVED {sorted(served[arm])}", flush=True)
 
 from nova.jax.config import configure_dtypes
 
@@ -53,7 +76,11 @@ from nova.equilibrium import fixed_point
 print(
     f"ARM {arm} fixed_point={fixed_point.__file__} instrument={instrument}", flush=True
 )
+import nova.equilibrium.forward_operator as forward_operator
+
 assert ("e62c8110e" in fixed_point.__file__) == (arm == "slice1")
+assert ("premerge" in fixed_point.__file__) == (arm == "premerge-slice1")
+assert ("premerge" in forward_operator.__file__) == arm.startswith("premerge")
 
 events = []
 

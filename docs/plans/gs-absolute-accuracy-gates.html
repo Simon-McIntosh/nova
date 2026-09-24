@@ -23,11 +23,11 @@
 <title>GS absolute accuracy gates | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="51">
+<meta name="plan-modified" content="2026-09-24">
+<meta name="plan-version" content="52">
 <meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html,benchmarks/solovev_certificate.py,docs/figures/gs-absolute-accuracy/solovev-certificate.json,docs/figures/gs-absolute-accuracy/solovev/,benchmarks/efit_reproduction_gate.py,docs/figures/gs-absolute-accuracy/efit-reproduction.json,docs/figures/gs-absolute-accuracy/efit/,docs/figures/gs-absolute-accuracy/oracle-fixture-assembly.json,tests/test_polygon_analytic_batched_moments.py">
 <meta name="plan-commits" content="3dc4bb57,bf6dcdf9,9b0be0c8,6480a228,69a96bdf,873cfba6,6cecf64e,1f6f3e2c,ebb56768,ae9c0ed6,eca38a8e,5bb6850f,a3ae6bd4,f76e9142,adfff6dc,466b9d02,faec6877,d0a01760,7573d3e7,77a2cd32,6d03967f,dcc671db,b93f9b10,f7d9557b">
-<meta name="plan-impl" content="0.95">
+<meta name="plan-impl" content="0.96">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="solver-convergence-regression,diiid-vertical-force-balance,uniform-cell-clip-and-coupling,millisecond-converged-solve">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -170,10 +170,11 @@
     <div class="r-fu-body"><p>Audit anchor: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figures-gs-accuracy</code>; reviewer node <code>fsa-audit-figures-gs-accuracy</code>, review lane claude-opus.</p><p>The twelve static production-route figures render their gradient and Hessian error panels as a single small contour cluster on an otherwise blank panel, while the certificate captions report axis errors from 1.846 mm to 64.316 mm and the part receipts record whole-domain gradient levels up to 1.37e+02 and Hessian levels up to 1.34e+03. <code>weak-rotation-reactor-static-production-route-cells-500</code> is the clearest case: essentially blank panels beside a 55.654 mm axis error. An unexplained cluster of small closed ochre contours also appears mid-right on the flux comparison panel of all twelve. Repair: choose the level array from the field's own quantiles rather than a linear span anchored on the extreme, so the structure carrying the error is visible, and either explain or remove the mid-right contour cluster.</p></div>
     <pre class="r-fu-prompt">/reckon-ship gs-absolute-accuracy-gates</pre>
     </article>
-<article class="r-fu" data-id="f-gsag-production-solver-receipt-desyncs-on-reduced-newton" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship gs-absolute-accuracy-gates" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-gsag-production-solver-receipt-desyncs-on-reduced-newton" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship gs-absolute-accuracy-gates" data-resolved-at="2026-09-24T01:30:19+00:00" data-resolved-by="nova-cc">
     <h4 class="r-fu-title">The certificate&#x27;s production-solver receipt desyncs its per-trip arrays on the reduced-Newton route</h4>
     <div class="r-fu-body"><p>Found by the net-current scaling census (run r-20260923T101830553419, review 75): benchmarks/solovev_certificate.py _production_solver_receipt (line 706) builds per-trip arrays that fall out of step on the reduced_newton route and raise IndexError. The census worked around it by reading history.converged and history.termination_reason directly; the defect was reported, not fixed. Repair node: reproduce it on one reduced-Newton certificate row, make the receipt read every per-trip array from one trip index, and add a test that runs the receipt on a reduced-Newton history whose arrays differ in length. benchmarks/solovev_certificate.py and one test file. The certificate side belongs to S19.</p></div>
     <pre class="r-fu-prompt">/reckon-ship gs-absolute-accuracy-gates</pre>
+    <p class="r-fu-outcome">Merged at ab5276ff1 (run r-20260923T205045006945, codex-astra, review 99). _production_solver_receipt aligns every per-trip array to one trip index, or refuses by name. The IndexError was reproduced (all_debug job 1277027), and the repaired row produces a receipt with an identical residual (job 1277030; 342 cells, residual 0.0547, not converged). tests/test_production_solver_receipt_trip_alignment.py passes 9 of 9; reverting the repair fails 8. The row's non-convergence is unchanged and not this node's to fix.</p>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

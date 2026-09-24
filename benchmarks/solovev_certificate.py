@@ -703,22 +703,65 @@ def _enum_name(enum_type: Any, value: Any) -> str:
     return enum_type(int(value)).name.lower()
 
 
+class ProductionSolverReceiptAlignmentError(ValueError):
+    """Per-trip telemetry cannot describe the declared executed trips."""
+
+
+def _receipt_trip_arrays(history: Any, trip_count: int) -> dict[str, np.ndarray]:
+    """Align executed trip prefixes and preserve absent damping telemetry.
+
+    FixedPointResult uses scalar -1 for unavailable cycle-damping telemetry.
+    It carries no observation for any trip, so expand only that sentinel;
+    shorter arrays and other scalars cannot establish trip identity.
+    """
+
+    error = "production_solver_receipt_trip_alignment"
+    if trip_count < 0:
+        raise ProductionSolverReceiptAlignmentError(
+            f"{error}: active_set_iterations={trip_count} must be nonnegative"
+        )
+    arrays = {}
+    for name, dtype in (
+        ("active_set_residuals", np.float64),
+        ("active_set_mask_differences", np.int64),
+        ("active_set_cycle_damping_activations", np.int64),
+    ):
+        values = np.asarray(getattr(history, name), dtype=dtype)
+        if trip_count == 0:
+            arrays[name] = np.empty(0, dtype=dtype)
+            continue
+        if (
+            name == "active_set_cycle_damping_activations"
+            and values.ndim == 0
+            and values == -1
+        ):
+            values = np.full(trip_count, -1, dtype=dtype)
+        if values.ndim != 1 or len(values) < trip_count:
+            raise ProductionSolverReceiptAlignmentError(
+                f"{error}: {name} shape={values.shape} cannot cover "
+                f"{trip_count} executed trips"
+            )
+        arrays[name] = values[:trip_count]
+    return arrays
+
+
 def _production_solver_receipt(equilibrium: Any) -> dict[str, Any]:
     """Expose all globalisation telemetry retained by the public solve result."""
 
     history = equilibrium.fixed_point
     trip_count = int(history.active_set_iterations)
-    active_residuals = np.asarray(history.active_set_residuals, dtype=np.float64)
-    mask_differences = np.asarray(history.active_set_mask_differences, dtype=np.int64)
-    cycle_damping = np.asarray(
-        history.active_set_cycle_damping_activations, dtype=np.int64
-    )
+    trip_arrays = _receipt_trip_arrays(history, trip_count)
+    active_residuals = trip_arrays["active_set_residuals"]
+    mask_differences = trip_arrays["active_set_mask_differences"]
+    cycle_damping = trip_arrays["active_set_cycle_damping_activations"]
     trips = [
         {
             "trip": index + 1,
             "live_relative_residual": float(active_residuals[index]),
             "mask_difference_cells": int(mask_differences[index]),
-            "cycle_damping_activated": bool(cycle_damping[index]),
+            "cycle_damping_activated": (
+                None if cycle_damping[index] == -1 else bool(cycle_damping[index])
+            ),
         }
         for index in range(trip_count)
     ]
@@ -809,7 +852,7 @@ def _production_solver_receipt(equilibrium: Any) -> dict[str, Any]:
         "telemetry_scope": (
             "active-set residuals cover every production trip; detailed inner "
             "globalisation arrays describe the terminal frozen-mask trip exposed "
-            "by FixedPointResult"
+            "by FixedPointResult; null cycle damping means telemetry unavailable"
         ),
         "trip_count": trip_count,
         "per_trip_residual_history": trips,

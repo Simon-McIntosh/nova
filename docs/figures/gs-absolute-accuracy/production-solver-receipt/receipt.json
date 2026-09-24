@@ -1,0 +1,128 @@
+{
+  "case": "weak-rotation-reactor-static",
+  "clip_mode": "chord",
+  "converged": false,
+  "elapsed_seconds": 125.70560318417847,
+  "history_shapes": {
+    "accepted_newton_promotions": [],
+    "active_set_cycle_damping_activations": [],
+    "active_set_iterations": [],
+    "active_set_mask_differences": [
+      1
+    ],
+    "active_set_residuals": [
+      1
+    ],
+    "advance_lengths": [],
+    "amplification_observation": [],
+    "attempted_newton_promotions": [],
+    "converged": [],
+    "corrector_lengths": [],
+    "inner_iteration_accepted": [],
+    "inner_iteration_applied_factors": [],
+    "inner_iteration_decisions": [],
+    "inner_iteration_krylov_qualifications": [],
+    "inner_iteration_krylov_reductions": [],
+    "inner_iteration_krylov_tolerances": [],
+    "inner_iteration_model_error_fractions": [],
+    "inner_iteration_proposed_step_norms": [],
+    "inner_iteration_residuals_after": [],
+    "inner_iteration_residuals_before": [],
+    "inner_iteration_step_cap_activations": [],
+    "inner_iteration_step_cap_factors": [],
+    "krylov_action_qualification": [],
+    "krylov_conditioning_count": [],
+    "manifold_admissibility": [],
+    "manifold_advance_qualification": [],
+    "maximum_projected_krylov_condition": [],
+    "newton_step_equivalents": [],
+    "newton_step_lengths": [],
+    "predictor_lengths": [],
+    "promotion_backtrack_counts": [],
+    "promotion_descent_activations": [],
+    "promotion_descent_scales": [],
+    "promotion_model_rebuild_activations": [],
+    "promotion_model_rebuild_damping": [],
+    "promotion_recovery_activations": [],
+    "promotion_recovery_outcomes": [],
+    "promotion_recovery_radii": [],
+    "residual": [],
+    "row_jvp_projections": [
+      0
+    ],
+    "shadow_mask_changes": [
+      1
+    ],
+    "state": [
+      1529
+    ],
+    "termination_reason": [],
+    "trace": [
+      1
+    ],
+    "trajectory_residual": [],
+    "trajectory_state": []
+  },
+  "job_id": "1277030",
+  "platform": "cpu",
+  "production_solver": {
+    "accepted_newton_promotions": 0,
+    "attempted_newton_promotions": 0,
+    "configured_controls": {
+      "continue_globalization_state": "production default enabled",
+      "continue_newton_trajectory": "production default enabled",
+      "own_mask_acceptance": "production default enabled",
+      "retain_outer_best_iterate": "production default enabled",
+      "stop_on_active_set_stagnation": "production default enabled",
+      "strict_active_set_settlement": "production default enabled"
+    },
+    "converged": false,
+    "exposed_terminal_trip_promotions": 0,
+    "finite_residual_trace": [
+      0.05474333838145354
+    ],
+    "finite_trace_indices": [
+      0
+    ],
+    "globalisation_decisions": [],
+    "krylov_action_qualification": "not_applicable",
+    "per_trip_residual_history": [
+      {
+        "cycle_damping_activated": null,
+        "live_relative_residual": 0.05474333838145354,
+        "mask_difference_cells": 0,
+        "trip": 1
+      }
+    ],
+    "promotion_globalisation": [],
+    "source_continuation": {
+      "common_sol": {
+        "active": false,
+        "continuity": "undeclared",
+        "decay_width": null,
+        "domain": "undeclared",
+        "form": "undeclared",
+        "support": 0.0,
+        "truncated_fraction": 0.0
+      },
+      "private_flux": {
+        "active": false,
+        "continuity": "undeclared",
+        "decay_width": null,
+        "domain": "undeclared",
+        "form": "undeclared",
+        "support": 0.0,
+        "truncated_fraction": 0.0
+      }
+    },
+    "telemetry_scope": "active-set residuals cover every production trip; detailed inner globalisation arrays describe the terminal frozen-mask trip exposed by FixedPointResult; null cycle damping means telemetry unavailable",
+    "termination": "active_set_settled",
+    "trip_count": 1
+  },
+  "realised_cells": 342,
+  "requested_cells": 300,
+  "residual": 0.05474333838145354,
+  "revision": "8977ecd3b76367e334bf24b33d5b9e3a27640c32",
+  "route": "reduced_newton",
+  "x64": true
+}

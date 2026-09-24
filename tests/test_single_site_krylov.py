@@ -128,38 +128,44 @@ def test_the_vmapped_stream_stops_when_every_member_is_done():
         )
 
 
-def _loop_holding_operator(jaxpr):
-    """The innermost while loop whose body applies the operator under test."""
+def _subjaxprs(equation):
+    for parameter in equation.params.values():
+        for value in parameter if isinstance(parameter, tuple | list) else (parameter,):
+            inner = getattr(value, "jaxpr", value)
+            if hasattr(inner, "eqns"):
+                yield inner
+
+
+def _uses(jaxpr, primitive) -> bool:
+    return any(
+        equation.primitive.name == primitive
+        or any(_uses(inner, primitive) for inner in _subjaxprs(equation))
+        for equation in jaxpr.eqns
+    )
+
+
+def _operator_loops(jaxpr, enclosing=()):
+    """Every while body that applies the operator, innermost last, per path."""
     for equation in jaxpr.eqns:
-        for parameter in equation.params.values():
-            for value in (
-                parameter if isinstance(parameter, tuple | list) else (parameter,)
-            ):
-                inner = getattr(value, "jaxpr", value)
-                if not hasattr(inner, "eqns"):
-                    continue
-                nested = _loop_holding_operator(inner)
-                if nested is not None:
-                    return nested
-                if equation.primitive.name == "while" and _operator_sites(inner):
-                    return inner
-    return None
+        for inner in _subjaxprs(equation):
+            path = enclosing + ((inner,) if equation.primitive.name == "while" else ())
+            if equation.primitive.name == "while" and _operator_sites(inner):
+                yield path
+            yield from _operator_loops(inner, path)
 
 
-def test_the_vmapped_stream_runs_one_consumer_per_shared_phase():
+def test_the_vmapped_stream_projects_once_per_cycle_outside_its_slot_loop():
     """Under vmap the stream's own batching rule serves the batch.
 
-    Members sit on an explicit axis, the loop exits on a scalar any-pending
-    predicate, and each slot dispatches through one conditional over the
-    member-shared phase (one branch per consumer, one pass-through, one
-    per-member fallback), rather than the loop's default rule selecting the
-    whole carry against every member's exit.
+    Members sit on an explicit axis and the slot loop exits on scalar
+    predicates, so the carry is never selected against a per-member exit.
+    The restart's least-squares projection runs in an enclosing cycle loop
+    once some member ends its Arnoldi cycle, not on every slot.
     """
-    step, _, rhs = _qualified_step_program()
-    rhs = jnp.stack([rhs, 2.0 * rhs])
     matrix = jnp.asarray(
         np.eye(12) + 0.2 * np.random.default_rng(3).standard_normal((12, 12))
     )
+    rhs = jnp.asarray(np.random.default_rng(4).standard_normal((2, 12)))
 
     def member(b):
         def operator(vector):
@@ -175,13 +181,10 @@ def test_the_vmapped_stream_runs_one_consumer_per_shared_phase():
             preceding_condition_baseline=jnp.asarray(2.0),
         ).step
 
-    body = _loop_holding_operator(jax.make_jaxpr(jax.vmap(member))(rhs).jaxpr)
-    assert body is not None
-    dispatch = [
-        equation
-        for equation in body.eqns
-        if equation.primitive.name == "cond"
-        and len(equation.params["branches"]) == len(fixed_point._KrylovPhase) + 1
-    ]
-    assert len(dispatch) == 1
-    assert dispatch[0].invars[0].aval.shape == ()
+    paths = list(_operator_loops(jax.make_jaxpr(jax.vmap(member))(rhs).jaxpr))
+    assert paths
+    innermost = max(paths, key=len)
+    projects_per_slot = _uses(innermost[-1], "cholesky")
+    projects_per_cycle = len(innermost) >= 2 and _uses(innermost[-2], "cholesky")
+    assert not projects_per_slot
+    assert projects_per_cycle

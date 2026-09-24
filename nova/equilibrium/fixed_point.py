@@ -2132,6 +2132,25 @@ def _gmres_classical_gram_schmidt(
     return vector, overlaps
 
 
+def _gmres_single_pass_gram_schmidt(
+    basis: jax.Array, vector: jax.Array, vector_norm: jax.Array
+) -> tuple[jax.Array, jax.Array]:
+    """:func:`_gmres_classical_gram_schmidt` as straight-line arithmetic.
+
+    With at most two iterations the loop form's repeat test (``iteration <
+    1`` after the first pass) never admits a second pass, so it computes
+    exactly one projection. This form computes that projection in the same
+    operation order without the loops, whose predicates a batch would
+    otherwise evaluate on every Arnoldi slot.
+    """
+    del vector_norm
+    overlaps = jnp.zeros(basis.shape[-1], dtype=basis.dtype)
+    projection = jnp.einsum(
+        "...n,...->n", basis, vector, precision=jax.lax.Precision.HIGHEST
+    )
+    return vector - _gmres_dot(basis, projection), overlaps + projection
+
+
 def _gmres_lstsq(matrix: jax.Array, rhs: jax.Array) -> jax.Array:
     """Least-squares coefficients through the positive normal equations."""
     return jax.scipy.linalg.solve(
@@ -2175,6 +2194,7 @@ def _krylov_machine(
     atol: jax.Array,
     *,
     gmres_iterations: int,
+    orthogonalise: Callable = _gmres_classical_gram_schmidt,
 ) -> _KrylovMachine:
     """Build one member's request stream (see :func:`_single_site_krylov`)."""
     size = residual_vector.size
@@ -2246,9 +2266,7 @@ def _krylov_machine(
     def arnoldi_advance(stream, action):
         index = stream.arnoldi_index
         _, norm_before = _gmres_safe_normalize(action)
-        orthogonal, overlaps = _gmres_classical_gram_schmidt(
-            stream.basis, action, norm_before
-        )
+        orthogonal, overlaps = orthogonalise(stream.basis, action, norm_before)
         unit_vector, norm_after = _gmres_safe_normalize(
             orthogonal, thresh=eps * norm_before
         )
@@ -2369,21 +2387,27 @@ def _serve_krylov_batch(
 ) -> _KrylovStream:
     """Run a batch of streams, members on the leading axis, to ``DONE``.
 
-    The loop continues while any member is pending, so its predicate is one
-    scalar and the carry is never selected against a per-member exit. Each
-    slot applies the operator to every member's request at the single batched
-    site. When every member stands in the same phase, which is how a batch
-    runs until its members' restart counts diverge, one conditional on that
-    shared phase runs only its consumer; otherwise each member selects its
-    own consumer and a finished member passes through unchanged. In the
-    shared Arnoldi phase the restart projection runs only when some member
-    ends its cycle.
+    Two nested loops replace the single loop's per-member exit. The inner
+    loop serves slots while any member is pending and no member owes a
+    restart projection: each slot applies the operator to every member's
+    request at the single batched site, and every member folds the action
+    through the consumer its own phase selects, a finished member passing
+    through unchanged. A member whose Arnoldi cycle ends in that slot owes its
+    least-squares projection, which ends the inner loop; the outer loop then
+    projects the owing members and resumes. Both predicates are scalars, so
+    the carry is never selected against a per-member exit, the projection runs
+    once per cycle end rather than on every Arnoldi slot, and no slot branches
+    on the members' phases.
     """
     atol = jax.vmap(_krylov_tolerance)(residual_vectors)
 
     def machine(residual_vector, probe, member_atol):
         return _krylov_machine(
-            residual_vector, probe, member_atol, gmres_iterations=gmres_iterations
+            residual_vector,
+            probe,
+            member_atol,
+            gmres_iterations=gmres_iterations,
+            orthogonalise=_gmres_single_pass_gram_schmidt,
         )
 
     members = (residual_vectors, probes, atol)
@@ -2392,54 +2416,42 @@ def _serve_krylov_batch(
     def request(stream, *member):
         return jax.lax.switch(stream.phase, machine(*member).requests, stream)
 
-    def consumer(index):
-        def consume(stream, action):
-            return jax.vmap(lambda s, a, *m: machine(*m).consumers[index](s, a))(
-                stream, action, *members
-            )
-
-        return consume
-
-    def arnoldi(stream, action):
-        advanced, proceed = jax.vmap(
-            lambda s, a, *m: machine(*m).arnoldi_advance(s, a)
-        )(stream, action, *members)
-
-        def project(advanced):
-            candidates = jax.vmap(lambda s, *m: machine(*m).arnoldi_candidate(s))(
-                advanced, *members
-            )
-            return jnp.where(proceed[:, None], stream.candidate, candidates)
-
-        candidate = jax.lax.cond(
-            jnp.any(~proceed), project, lambda _: stream.candidate, advanced
-        )
-        return advanced._replace(candidate=candidate)
-
-    def per_member(stream, action):
-        def consume(s, a, *m):
-            consumers = (*machine(*m).consumers, lambda s, a: s)
-            return jax.lax.switch(s.phase, consumers, s, a)
-
-        return jax.vmap(consume)(stream, action, *members)
-
-    branches = tuple(
-        arnoldi if index == _KrylovPhase.ARNOLDI else consumer(index)
-        for index in range(_KrylovPhase.DONE)
-    ) + (lambda stream, action: stream, per_member)
-    mixed = len(branches) - 1
+    def consume(stream, action, *member):
+        built = machine(*member)
+        consumers = list(built.consumers)
+        consumers[_KrylovPhase.ARNOLDI] = lambda s, a: built.arnoldi_advance(s, a)[0]
+        consumers.append(lambda s, a: s)
+        return jax.lax.switch(stream.phase, consumers, stream, action)
 
     def pending(stream):
         return jnp.any(stream.phase != _KrylovPhase.DONE)
 
-    def serve(stream):
+    def serving(carry):
+        stream, owed = carry
+        return pending(stream) & ~jnp.any(owed)
+
+    def serve(carry):
+        stream, _ = carry
         vectors = jax.vmap(request)(stream, *members)
         actions = _fenced(batched_action, vectors)
-        shared = jnp.all(stream.phase == stream.phase[0])
-        branch = jnp.where(shared, stream.phase[0], mixed)
-        return jax.lax.switch(branch, branches, stream, actions)
+        in_arnoldi = stream.phase == _KrylovPhase.ARNOLDI
+        stream = jax.vmap(consume)(stream, actions, *members)
+        owed = in_arnoldi & (stream.phase == _KrylovPhase.RESTART_RESIDUAL)
+        return stream, owed
 
-    return jax.lax.while_loop(pending, serve, initial)
+    def cycle(carry):
+        stream, owed = jax.lax.while_loop(serving, serve, carry)
+        candidates = jax.vmap(lambda s, *m: machine(*m).arnoldi_candidate(s))(
+            stream, *members
+        )
+        candidate = jnp.where(owed[:, None], candidates, stream.candidate)
+        return stream._replace(candidate=candidate), jnp.zeros_like(owed)
+
+    owed = jnp.zeros(residual_vectors.shape[0], dtype=bool)
+    stream, _ = jax.lax.while_loop(
+        lambda carry: pending(carry[0]), cycle, (initial, owed)
+    )
+    return stream
 
 
 def _single_site_krylov(

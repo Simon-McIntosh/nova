@@ -26,10 +26,10 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-24">
-<meta name="plan-version" content="207">
+<meta name="plan-version" content="208">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
-<meta name="plan-impl" content="0.95">
+<meta name="plan-impl" content="0.8">
 </head>
 <body>
 <main class="plan-doc">
@@ -1144,10 +1144,11 @@ fails all three recorded cells. See the
     <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §6</pre>
     <p class="r-fu-outcome">Merged at 427f05e10 (run r-20260924T051104708441, codex sol, review 92). Root cause: a cut-cell support polygon kept after the secondary clip carried more vertices than the whole-cell path holds (134 against 24 on the recorded rows), so it was integrated as a whole cell and truncated. Supports above _WHOLE_CELL_VERTEX_CAPACITY now take the boundary integration, in both clipped_support_field_integrals and clipped_support_current_moments. On H200 job 1277161 the moment-reduction term falls below 1e-3 of base on weak 110, weak 300 and diverted 110, and exact support reaches at least 0.999 on both weak rows. The density projection agrees with the order-16 value to 2e-6 A in 192,266 A. The review's gaps are carried as f-cca-exact-repair-evidence-gaps. The map-fidelity re-measure that can lift g-cca-exact-default-waits-on-map-fidelity runs inside the chord membership repair's gate.</p>
     </article>
-<article class="r-fu" data-id="f-cca-chord-support-membership-from-the-global-separatrix" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship cut-cell-current-attribution §6" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cca-chord-support-membership-from-the-global-separatrix" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship cut-cell-current-attribution §6" data-resolved-at="2026-09-24T12:33:48+00:00" data-resolved-by="nova-cc">
     <h4 class="r-fu-title">Decide chord cut-cell membership from the global separatrix, not the cell-local quadratic psi_N=1 support</h4>
     <div class="r-fu-body"><p>_flux_selected_current_moments (nova/equilibrium/clip_quadrature.py:885) decides whether a chord cell and its sub-cell region sit inside the plasma from a cell-local quadratic psi_N=1 test. At the analytic diverted state that admits exterior cells and under-books cut cells, which gives the non-monotone chord map mismatch (0.095, 0.023, 0.034, 0.013, 0.0041). Repair: take membership from the global separatrix representation the production route already carries (the global spline at the admitted saddle), not from the local fit. Gate: the map-fidelity evaluation at the analytic state in chord mode passes 1e-2 at every certificate rung of the diverted case; weak-rotation chord stays at about 1e-4; exterior cells carry zero current at the analytic state; the limited rows are bit-identical where no cell is cut. Sequence it after f-cca-exact-moment-reduction-repair lands, because both edit clip_quadrature.py. Codex lane, one H200 job with a CPU preflight.</p></div>
     <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §6</pre>
+    <p class="r-fu-outcome">Superseded by f-cca-chord-membership-finish-option-one. The attempt (r-20260924T062550523968) established that membership must be axis-connected, since cell 64's private-flux samples sit below the saddle level. Its fix and exterior test are committed on its worktree, and its fallback double-masking needs the applied-flag option recorded in the successor followup.</p>
     </article>
 <article class="r-fu" data-id="f-cca-exact-repair-evidence-gaps" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship cut-cell-current-attribution §6" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Close the exact moment-reduction repair&#x27;s three evidence gaps from its review</h4>
@@ -1157,6 +1158,11 @@ fails all three recorded cells. See the
 <article class="r-fu" data-id="f-cca-slim-committed-attribution-receipts" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship cut-cell-current-attribution §6" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Slim the committed attribution receipts: a 71 MB report.json and 360k-line row dumps</h4>
     <div class="r-fu-body"><p>docs/figures/cut-cell-current-attribution/exact-support-floor/report.json is 71.5 MB, over GitHub's 50 MB recommended limit (it warned on push), and exact-moment-stages carries report.json and per-row JSON of 100k to 360k lines. Keep per-row summaries plus one compressed npz for the per-cell arrays, rewrite the audits to read the npz, and state in each report which arrays moved. The history is not rewritten; this only stops further growth. Local lane after RESUME.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §6</pre>
+    </article>
+<article class="r-fu" data-id="f-cca-chord-membership-finish-option-one" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship cut-cell-current-attribution §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Finish the axis-connected chord membership repair with the applied-flag fallback, then re-measure the map in both clip modes</h4>
+    <div class="r-fu-body"><p>Continue from commit c8260b44c on the cca-chord-membership-from-the-global-separatrix worktree. That tip carries a59529f20 (connected separatrix membership in _flux_selected_current_moments, nova/equilibrium/clip_quadrature.py near 885) and the exterior test 3ba7f6b00. Implement option 1: the global membership returns an applied flag, and the point predicate acts only when the global fit executed. Gate, in order: (1) the 550-cell exterior regression stays green, with cells 7 and 64 at zero; (2) tests/test_continuous_confined_moments.py returns to its base, with both synthetic identities passing; (3) every file importing clip_quadrature passes in fresh all_debug processes with no failure added; (4) benchmarks/plasma_cell_map_fidelity.py at the analytic Solovev state on every certificate rung of diverted-single-null and weak-rotation-reactor-static, in both chord and exact modes. Each row records its mismatch sup beside the reviewed receipt under docs/figures/plasma-cell-read-fidelity/map-fidelity, plus the booked minus analytic support-current centroid (radial and vertical, mm), which settles the 35 mm vertical offset at 110 cells. Pass: diverted chord inside 1e-2 at every rung; weak chord no worse than its receipt. Run one CPU preflight of the 132-cell diverted row, then one H200 allocation with rows looped inside. Negative control: restore the local quadratic test, and cell 64 books 43.15 A again. The exact-mode rows from this run decide g-cca-exact-default-waits-on-map-fidelity.</p></div>
     <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §6</pre>
     </article>
 </section>
@@ -1625,6 +1631,9 @@ fails all three recorded cells. See the
     <div class="r-comment-body"></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260924T055353075419" data-who="" data-when="">
+    <div class="r-comment-body"></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260924T123348104664" data-who="" data-when="">
     <div class="r-comment-body"></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle" data-who="s19c-cca-saddle-c" data-when="2026-09-20T02:10:00Z">

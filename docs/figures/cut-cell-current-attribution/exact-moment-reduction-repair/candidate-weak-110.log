@@ -1,0 +1,33 @@
+revision=a28a3e880dd4430fb13077c5f8954dce30cf1f02 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/docs/figures/cut-cell-current-attribution/exact-moment-reduction-repair/run_weak_row.py', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/docs/figures/cut-cell-current-attribution/exact-moment-reduction-repair/candidate-weak-110']
+BUILD weak-rotation-reactor-static-cells-110
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/docs/figures/cut-cell-current-attribution/exact-moment-reduction-repair/run_weak_row.py", line 27, in <module>
+    row = measure("weak-rotation-reactor-static", 110, output)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/benchmarks/exact_cut_cell_moment_stages.py", line 531, in measure
+    np.testing.assert_allclose(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        reduction_value,
+        ^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        atol=1e-5,
+        ^^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/numpy/testing/_private/utils.py", line 1768, in assert_allclose
+    assert_array_compare(compare, actual, desired, err_msg=str(err_msg),
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         verbose=verbose, header=header, equal_nan=equal_nan,
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         strict=strict)
+                         ^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/numpy/testing/_private/utils.py", line 983, in assert_array_compare
+    raise AssertionError(msg)
+AssertionError: 
+Not equal to tolerance rtol=1e-10, atol=1e-05
+
+Mismatched elements: 1 / 1 (100%)
+Max absolute difference among violations: 0.00529173
+Max relative difference among violations: 5.24195082e-09
+ ACTUAL: array(-1009496.077661)
+ DESIRED: array(-1009496.07237)
+srun: error: 98dci4-clu-3141: task 0: Exited with exit code 1

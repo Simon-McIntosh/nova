@@ -3133,6 +3133,116 @@ the formula itself was not changed.</p>
 Further mechanism work belongs inside the simple cut-cell moment path and the
 non-simple booked-minus-formula remainder; this node makes no repair.</p>
 </section>
+<section id="exact-moment-stage-attribution">
+<h2>Exact moment stage attribution: polynomial moment reduction carries the simple-cut loss</h2>
+<p><strong>2026-09-24 completed evaluation; no production repair.</strong>
+Commits <code>7d56fa9b4</code>, <code>74489a363</code>,
+<code>b6768d0db</code> and <code>2b803b2ff</code> separate the base simple
+separatrix-cut current error into secondary quadratic-reclip geometry, direct
+density evaluation, signed-winding versus nonzero-winding self-intersection
+loss, and the final production polynomial moment reduction. Accepted H200 job
+<code>1277107</code> ran all three rows in 56 seconds on betelgeuse under
+reservation <code>gpu_0003_grpA</code>, account <code>grpa</code>, with one
+card, eight cores and 64 GiB. JAX selected the H200 with x64 enabled; the root
+interpreter ran directly and no <code>uv</code> ran on the compute node.</p>
+<table>
+<thead><tr><th>Row</th><th>Simple cuts</th><th>Secondary geometry A</th><th>Density A</th><th>Reclip self-intersection A</th><th>Moment reduction A</th><th>Reduction share</th><th>Closure relative</th><th>Reduction-substituted exact fraction</th></tr></thead>
+<tbody>
+<tr><td>weak rotation, 110 requested</td><td>41</td><td>−1,871.55758</td><td>−1.05e-10</td><td>0</td><td>−1,009,496.07237</td><td>0.998149478</td><td>5.79e-14</td><td>0.999864704</td></tr>
+<tr><td>weak rotation, 300 requested</td><td>72</td><td>−7,006.59964</td><td>−1.37e-10</td><td>+2.18e-11</td><td>−296,458.03414</td><td>0.976911314</td><td>1.15e-15</td><td>0.999538490</td></tr>
+<tr><td>diverted single null, 110 requested</td><td>35</td><td>−23.7449975</td><td>+3.27e-13</td><td>+1.14e-13</td><td>−1,892.936637</td><td>0.987611402</td><td>8.30e-16</td><td>1.004899883</td></tr>
+</tbody>
+</table>
+<p>Moment reduction carries between <strong>97.69 and 99.81 percent</strong> of
+the signed base error on every row. Substituting its order-doubled independent
+signed-winding reference raises both weak rows above the required
+<code>0.999</code> exact support fraction; the diverted row moves slightly
+above unity, which is retained rather than clipped. Direct production confined
+density and analytic Solov'ev density agree to sub-nanoampere totals. The signed
+order-8 to order-16 current changes are <code>5.99e-10</code>,
+<code>4.45e-10</code> and <code>1.86e-12 A</code>. Every interior-cell stage
+term is below <code>4.76e-16</code> of that cell's current.</p>
+<p>The secondary reclip makes seven weak-300 chains self-intersecting—cells
+<code>5, 13, 23, 24, 172, 173, 272</code>—and two diverted-110 chains,
+cells <code>69, 75</code>. Both meanings requested by the coordinator are
+retained per cell. Every polygonized face has winding <code>+1</code>; therefore
+the production signed-winding moment and the nonzero-winding lobe-union moment
+agree to roundoff, and their aggregate current difference is only
+<code>2.18e-11 A</code> weak and <code>1.14e-13 A</code> diverted. These
+self-intersections do not carry the missing current. The bow-tie positive
+control independently returns zero signed area, lobe-union area
+<code>2.0 m²</code>, and windings <code>−1,+1</code>, proving the instrument
+would expose cancellation if present.</p>
+<figure>
+<img src="/nova/figures/cut-cell-current-attribution/exact-moment-stages/stage-attribution.svg" alt="Signed shares of the simple cut-cell current error assigned to secondary geometry, density, reclip self-intersection and moment reduction for all three rows" style="max-width:100%">
+<figcaption>The production polynomial moment reduction dominates every row; the
+four terms close to the base simple-cut error and the reclip self-intersection
+term is visible rather than absorbed.</figcaption>
+</figure>
+<p>The first resumed run, job <code>1277106</code>, was rejected despite exiting
+zero: its <code>1.145 A</code> diverted order-doubling delta showed that the
+instrument had reapplied the composite pointwise selector after production had
+already reclipped and passed the smooth confined closure. Commit
+<code>2b803b2ff</code> aligned the reference with that production path; job
+<code>1277107</code> is the accepted receipt. No equilibrium solve or file under
+<code>nova/</code> changed, and the worker leaves section and followup closure to
+the coordinator.</p>
+<p><a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/report.md">Complete report</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/job.log">accepted H200 log</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/job-1277106.log">rejected composite-selector receipt</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-stages/scheduler-receipt.txt">scheduler receipt</a>.</p>
+</section>
+<section id="exact-moment-reduction-repair">
+<h2>Exact moment reduction: sampled-arc supports retain their complete polygon</h2>
+<p><strong>2026-09-24 production repair, commit <code>38b441dad</code>.</strong>
+The defect reproduced on the current base before repair: weak rotation at 110
+requested cells assigned <code>−1,009,496.072370 A</code>, or
+<code>0.998149478461</code> of the base simple-cut error, to the production
+moment-reduction term. Cell 108 made the failure concrete: production booked
+<code>0.000733024 A</code> while both fixed Duffy quadrature and the independent
+order-16 integral returned <code>192,266.366234 A</code>.</p>
+<p>The density projection and polynomial contraction were already correct.
+The secondary quadratic reclip retained the complete 134-vertex sampled-arc
+polygon, but reported no <em>additional</em> boundary crossing. The compact
+reducer therefore treated it as a whole cell and truncated it to the first 24
+arc vertices. The repair classifies every retained polygon wider than the
+whole-cell capacity as a cut support, independently of whether a second clip
+observes another crossing. The same classification protects the symmetric
+field-integral reduction.</p>
+<table>
+<thead><tr><th>Row</th><th>Moment reduction A</th><th>Reduction / base</th><th>Exact support fraction</th><th>Interior current</th><th>Chord current</th></tr></thead>
+<tbody>
+<tr><td>weak rotation, 110 requested / 135 realised</td><td>+0.00895143</td><td>8.85082e-9</td><td>0.999864704</td><td>bit-identical</td><td>bit-identical</td></tr>
+<tr><td>weak rotation, 300 requested / 342 realised</td><td>+0.000668088</td><td>2.20154e-9</td><td>0.999556899</td><td>bit-identical</td><td>bit-identical</td></tr>
+<tr><td>diverted single null, 110 requested / 132 realised</td><td>−0.0000624079</td><td>3.25604e-8</td><td>1.009306139</td><td>bit-identical</td><td>bit-identical</td></tr>
+</tbody>
+</table>
+<p>Accepted H200 job <code>1277161</code> ran the three rows sequentially in one
+allocation on <code>98dci4-gpu-0003</code> with one H200, eight cores, 64 GiB,
+x64 enabled, the shared interpreter, and no compute-node <code>uv</code>. The
+signed order-8 to order-16 current deltas were at most
+<code>6.31e-10 A</code>. Every moment-reduction term is below the required
+<code>1e-3</code> fraction of its base term, both weak rows exceed
+<code>0.999</code>, and all interior-cell currents and all chord-mode moment
+arrays are bit-identical to the recorded base.</p>
+<p>The matched <code>all_debug</code> baseline and after gates pass every focused
+test that reaches the changed module in one fresh process per file; the after
+gate also passes the new three-recorded-cell order-doubled reference test. The
+declared mutation, “restore the original moment reduction”, fails all three
+recorded cells and leaves only the census test green (<code>3 failed, 1
+passed</code>). The first H200 receipt is retained as an instrument refusal: it
+divided near-zero first moments and reported an implausible relative change of
+3.0 even though interior <em>currents</em> were unchanged; the accepted receipt
+checks the governed current component.</p>
+<p><a href="/nova/figures/cut-cell-current-attribution/exact-moment-reduction-repair/h200-report.json">accepted H200 report</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-reduction-repair/h200.log">accepted H200 log</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-reduction-repair/negative-control.log">declared negative control</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-reduction-repair/cpu-baseline-summary.log">CPU baseline</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-reduction-repair/cpu-after-summary.log">CPU after gate</a> ·
+<a href="/nova/figures/cut-cell-current-attribution/exact-moment-reduction-repair/h200-instrument-refusal.log">instrument refusal</a>.</p>
+<p>The worker leaves section closure and the driving followup to the
+coordinator.</p>
+</section>
 </main>
 </body>
 </html>

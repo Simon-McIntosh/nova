@@ -526,6 +526,47 @@ inside the moment path on simple cut cells and the non-simple integration
 remainder. The driving followup remains open for coordinator adjudication.
 See <a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#exact-support-floor-attribution">the complete attribution, controls and panels</a>.</p>
 
+<h3 id="s6-exact-moment-stage-attribution">Exact-moment stage attribution: polynomial moment reduction carries the simple-cut loss</h3>
+<p><strong>2026-09-24 completed measurement; coordinator closure pending.</strong>
+Accepted H200 job <code>1277107</code> evaluates weak rotation at 110 and 300
+requested cells and diverted single null at 110. Moment reduction carries
+<code>99.8149478%</code>, <code>97.6911314%</code> and
+<code>98.7611402%</code> of the respective base simple separatrix-cut errors;
+the four-term identities close within <code>5.79e-14</code> relative or better.
+Replacing moment reduction by its independent signed-winding reference raises
+the exact support fractions to <code>0.999864704</code>,
+<code>0.999538490</code> and <code>1.004899883</code>. Both weak rows therefore
+pass the locked <code>0.999</code> substitution control.</p>
+<p>The secondary reclip produces seven self-intersecting weak-300 chains and
+two diverted-110 chains. Production signed-winding and nonzero-winding
+lobe-union currents are retained separately for every chain; all faces have
+winding <code>+1</code>, so their aggregate differences are only
+<code>2.18e-11 A</code> and <code>1.14e-13 A</code>. Reclip
+self-intersection is not the loss. Density evaluation is also negligible, and
+every interior-cell stage term is below <code>4.76e-16</code> of its current.
+The production polynomial moment reduction is the named stage. No production
+source or solve changed, and the worker does not resolve its own followup. See
+the <a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#exact-moment-stage-attribution">complete four-term attribution, controls, figure and H200 receipts</a>.</p>
+
+<h3 id="s6-exact-moment-reduction-repair">Exact-moment reduction repair: sampled arcs are no longer truncated as whole cells</h3>
+<p><strong>2026-09-24 worker outcome; section and driving followup remain open.</strong>
+Commit <code>38b441dad</code> routes every retained polygon wider than the
+24-vertex whole-cell capacity through the cut-cell polynomial reduction even
+when the secondary reclip observes no additional crossing. Before repair,
+weak-110 cell 108 retained 134 vertices but booked <code>0.000733 A</code>
+against an independently integrated <code>192,266.366234 A</code>; the reducer
+had silently kept only the first 24 arc vertices.</p>
+<p>Accepted H200 job <code>1277161</code> reduces the moment-reduction term to
+<code>8.85e-9</code>, <code>2.20e-9</code> and <code>3.26e-8</code> of the base
+term on weak 110, weak 300 and diverted 110. Exact support fractions are
+<code>0.999864704</code>, <code>0.999556899</code> and
+<code>1.009306139</code>; both weak rows clear <code>0.999</code>. Interior-cell
+currents and chord-mode moments are bit-identical on all three rows. The
+three-cell order-doubled regression passes, the focused importing-file suite
+adds zero failures against its baseline, and restoring the original reduction
+fails all three recorded cells. See the
+<a href="/nova/evidence/archive/cut-cell-current-attribution-landed.html#exact-moment-reduction-repair">repair, controls and receipts</a>.</p>
+
 <h2 id="s7">§7 — Wire the typed census saddle into the production spline-chain clip and re-solve the diverted certificate rows</h2>
 <p>The wedge split landed on the oracle (core-side current within 1e-13 relative of the analytic wedge integral at 110, 300 and 500 cells) but the production spline route discards it because the operator passes no saddle vertex, and the oracle compares the carrier against its own emitted polygons. Pass the typed census saddle as the clip's saddle vertex, consume the four region-owned moment profiles in the plasma partition and the null read, and make the oracle independent of the carrier by integrating the analytic current over the region bounded by the separatrix branches and the cell edges. Gate: the independent oracle at 110, 300 and 500 cells on all_debug, then one H200 job re-solving the four diverted certificate rows with the four limited rows as the bit-identical negative control.</p>
 

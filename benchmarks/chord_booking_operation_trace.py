@@ -300,7 +300,7 @@ def measure(requested: int, output: Path) -> dict[str, object]:
         archived = dict(archive)
 
     carrier, source, exact = certificate._case(CASE)
-    machine = certificate._case_machine(CASE, carrier, exact, base["requested_cells"])
+    machine = certificate._case_machine(CASE, carrier, exact, -requested)
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )

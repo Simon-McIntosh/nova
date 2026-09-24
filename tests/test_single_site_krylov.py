@@ -188,3 +188,43 @@ def test_the_vmapped_stream_projects_once_per_cycle_outside_its_slot_loop():
     projects_per_cycle = len(innermost) >= 2 and _uses(innermost[-2], "cholesky")
     assert not projects_per_slot
     assert projects_per_cycle
+
+
+def test_the_batching_rule_matches_each_members_own_step():
+    """Mixed members agree with their unbatched steps to rounding.
+
+    The batch mixes a member resolved in its first restart, members needing
+    several, and an identity member whose Arnoldi cycle breaks down at once,
+    so members leave the shared phase and the masked writes, the per-cycle
+    projection and the breakdown exit are all exercised.
+    """
+    size, iterations = 10, 4
+    rng = np.random.default_rng(7)
+    coupling = jnp.asarray(rng.standard_normal((size, size)))
+    scales = jnp.asarray([0.0, 0.05, 0.3, 0.8, 1.5])
+    rhs = jnp.asarray(rng.standard_normal((len(scales), size)))
+
+    def member(scale, b):
+        result = fixed_point._qualified_krylov_step(
+            lambda v: v + scale * (coupling @ v),
+            b,
+            jnp.asarray(0.1),
+            gmres_iterations=iterations,
+            condition_ratio_limit=10.0,
+            preceding_condition_baseline=jnp.asarray(2.0),
+        )
+        return (
+            result.step,
+            result.unconditioned_step,
+            result.achieved_reduction,
+            result.projected_condition,
+            result.qualification,
+        )
+
+    batched = jax.jit(jax.vmap(member))(scales, rhs)
+    for index in range(len(scales)):
+        single = jax.jit(member)(scales[index], rhs[index])
+        for got, want in zip(batched, single, strict=True):
+            np.testing.assert_allclose(
+                np.asarray(got[index]), np.asarray(want), rtol=1e-10, atol=1e-13
+            )

@@ -1,0 +1,13 @@
+{
+  "backend": "gpu",
+  "devices": [
+    "cuda:0"
+  ],
+  "base": 0.008210448548197746,
+  "rule": 0.012983731925487518,
+  "no_barrier": 0.013025912456214428,
+  "no_shared_dispatch": 0.015676827169954777,
+  "projection_always": 0.014192473143339157,
+  "floor_any_pending": 0.002886771224439144,
+  "floor_counter": 0.0019253231585025787
+}

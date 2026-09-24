@@ -368,6 +368,26 @@
     carries both runs' per-trip traces. This entry changes neither section state nor its
     followup.</p>
 
+    <h3 id="s3-single-site-krylov-batch-rule">The Krylov stream batches through its own vmap rule</h3>
+    <p>The vmapped width-16 cost now meets its gate. On the H200 the step costs
+    <strong>0.00822 s against the per-site base's 0.00835 s</strong>, measured in the same process
+    (0.98&times;). A second allocation reads 0.00821 s against 0.00889 s (0.92&times;). The stream
+    is a <code>custom_vmap</code> function. Unbatched it is the exit loop, unchanged: 261,735
+    instructions at 300 cells, toy operators bitwise equal on 8 of 8, and the diverted rung's terminal
+    bitwise the exit-loop head's (<code>0.06325730373091486</code>). Under <code>vmap</code> its rule
+    runs the members on an explicit axis in two nested loops with scalar predicates. The inner
+    loop serves slots until some member owes a restart projection, and the outer loop projects the
+    owing members. Every consumer's arithmetic is evaluated for every member and written in place
+    only where that member's phase selects it. Restoring the loop's default batching (a per-slot
+    select of the whole carry) returns the cost to 1.73&ndash;1.75&times;. The operator's closure is
+    traced once, and its closed-over values reach the rule as explicit arguments, for
+    <code>_qualified_krylov_step</code> only. <code>tests/test_single_site_krylov.py</code> passes 5,
+    <code>tests/test_fixed_point.py</code> 45, and <code>tests/test_reduced_newton.py</code> shows the
+    base's four failures. The
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#single-site-krylov-batch-rule">detailed record</a>
+    carries the design ladder and the compiled-program counts. This entry changes neither section
+    state nor its followup.</p>
+
     <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>
     <p>Measured 2026-09-18: the pre-warm covers 3292 keys the lane never requests and none of the 1285 keys it
     does, so the lane's 1341 hits all came from that target's own earlier run on the same directory; a lane

@@ -1,5 +1,5 @@
 restore the per-slot select of the whole carry under vmap
-revision=5367126f0ed7a301309f111c0d7376da657a95ed+worktree tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit command=.venv/bin/python mutated_rule_test.py (login node, CPU, seconds)
+revision=6204bfd6feb7227dd66c2594dd2433248072e4a1 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit command=.venv/bin/python mutated_rule_test.py (login node, CPU, seconds)
 MUTATION_APPLIED restore the per-slot select of the whole carry under vmap
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit/.venv/bin/python
@@ -7,31 +7,30 @@ rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-2
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
-collecting ... 07:26:10 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
-collected 4 items
+collecting ... 08:04:37 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 5 items
 
-tests/test_single_site_krylov.py::test_the_qualified_step_applies_its_operator_at_one_site PASSED [ 25%]
-tests/test_single_site_krylov.py::test_the_single_site_step_still_solves_a_full_dimension_system PASSED [ 50%]
-tests/test_single_site_krylov.py::test_the_vmapped_stream_stops_when_every_member_is_done PASSED [ 75%]
-tests/test_single_site_krylov.py::test_the_vmapped_stream_runs_one_consumer_per_shared_phase FAILED [100%]
+tests/test_single_site_krylov.py::test_the_qualified_step_applies_its_operator_at_one_site PASSED [ 20%]
+tests/test_single_site_krylov.py::test_the_single_site_step_still_solves_a_full_dimension_system PASSED [ 40%]
+tests/test_single_site_krylov.py::test_the_vmapped_stream_stops_when_every_member_is_done PASSED [ 60%]
+tests/test_single_site_krylov.py::test_the_vmapped_stream_projects_once_per_cycle_outside_its_slot_loop FAILED [ 80%]
+tests/test_single_site_krylov.py::test_the_batching_rule_matches_each_members_own_step PASSED [100%]
 
 =================================== FAILURES ===================================
-__________ test_the_vmapped_stream_runs_one_consumer_per_shared_phase __________
+____ test_the_vmapped_stream_projects_once_per_cycle_outside_its_slot_loop _____
 
-    def test_the_vmapped_stream_runs_one_consumer_per_shared_phase():
+    def test_the_vmapped_stream_projects_once_per_cycle_outside_its_slot_loop():
         """Under vmap the stream's own batching rule serves the batch.
     
-        Members sit on an explicit axis, the loop exits on a scalar any-pending
-        predicate, and each slot dispatches through one conditional over the
-        member-shared phase (one branch per consumer, one pass-through, one
-        per-member fallback), rather than the loop's default rule selecting the
-        whole carry against every member's exit.
+        Members sit on an explicit axis and the slot loop exits on scalar
+        predicates, so the carry is never selected against a per-member exit.
+        The restart's least-squares projection runs in an enclosing cycle loop
+        once some member ends its Arnoldi cycle, not on every slot.
         """
-        step, _, rhs = _qualified_step_program()
-        rhs = jnp.stack([rhs, 2.0 * rhs])
         matrix = jnp.asarray(
             np.eye(12) + 0.2 * np.random.default_rng(3).standard_normal((12, 12))
         )
+        rhs = jnp.asarray(np.random.default_rng(4).standard_normal((2, 12)))
     
         def member(b):
             def operator(vector):
@@ -47,21 +46,16 @@ __________ test_the_vmapped_stream_runs_one_consumer_per_shared_phase __________
                 preceding_condition_baseline=jnp.asarray(2.0),
             ).step
     
-        body = _loop_holding_operator(jax.make_jaxpr(jax.vmap(member))(rhs).jaxpr)
-        assert body is not None
-        dispatch = [
-            equation
-            for equation in body.eqns
-            if equation.primitive.name == "cond"
-            and len(equation.params["branches"]) == len(fixed_point._KrylovPhase) + 1
-        ]
->       assert len(dispatch) == 1
-E       assert 0 == 1
-E        +  where 0 = len([])
+        paths = list(_operator_loops(jax.make_jaxpr(jax.vmap(member))(rhs).jaxpr))
+        assert paths
+        innermost = max(paths, key=len)
+        projects_per_slot = _uses(innermost[-1], "cholesky")
+        projects_per_cycle = len(innermost) >= 2 and _uses(innermost[-2], "cholesky")
+>       assert not projects_per_slot
+E       assert not True
 
-tests/test_single_site_krylov.py:186: AssertionError
+tests/test_single_site_krylov.py:189: AssertionError
 =========================== short test summary info ============================
-FAILED tests/test_single_site_krylov.py::test_the_vmapped_stream_runs_one_consumer_per_shared_phase - assert 0 == 1
- +  where 0 = len([])
-========================= 1 failed, 3 passed in 8.09s ==========================
+FAILED tests/test_single_site_krylov.py::test_the_vmapped_stream_projects_once_per_cycle_outside_its_slot_loop - assert not True
+========================= 1 failed, 4 passed in 8.86s ==========================
 EXIT=1

@@ -15,10 +15,10 @@
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S21">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-09-24">
+<meta name="plan-modified" content="2026-09-26">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
 <meta name="plan-capability-version" content="1.0">
@@ -63,6 +63,18 @@
 
 <section id="s3"><h2>§3 Re-plan, sprint consolidation and session handoff</h2>
 <p>Coordinator work. §1, §2 and S19's own summary are folded into truthful status and impl on every pending plan, with followups carrying a done-when, relinked dependencies, stale sprints closed, and exactly one active sprint holding the carried-over work. The report to the fleet names, for each new session, its zellij name, working directory, <code>/reckon-ship</code> target, brief and preconditions.</p>
+</section>
+
+<section id="s4"><h2>§4 Consolidate before extending: shared algebra, hot modules and evidence integrity</h2>
+<p><strong>Why.</strong> reckon's review of the crew dispatch pattern (<a href="/reckon/research/orchestrator-crew-pattern-review#s8">crew pattern review §8</a>) measured nova's primary branch from 2026-08-15 to 2026-09-26. It found no broad rise in flapping: mature source churn was 9.27% before 12 September and 9.39% after, while the local lane's share of code landings rose from 7.7% to 65.1%, and the five worst reversals were mostly metered-lane. What did change is where effort went and what the evidence says. In the week beginning 19 September, 95 of 872 first-parent commits touched <code>nova/</code> or <code>tests/</code>. nova has the highest attempts per landed node of the five projects (2.23). The figure-and-solver audit found 103 of 348 fleet-made figures misrepresenting their physics. And a structural census of <code>nova/</code> found repeated algebra where one implementation should exist (<a href="/reckon/research/orchestrator-crew-pattern-review#s7">§7</a>). Four modules changed in every one of the six weeks: <code>nova/equilibrium/fixed_point.py</code>, <code>forward.py</code>, <code>forward_operator.py</code> and <code>topology.py</code>.</p>
+<p><strong>Nodes.</strong> Each is independent unless stated.</p>
+<ul>
+<li><code>replan-constraint-algebra</code>: the seven identical <code>residual</code> methods and five identical <code>dual_flux_image</code> methods in <code>nova/equilibrium/constraint.py</code> share one tested implementation. Each constraint keeps its observed quantity, payload and registration, and JAX tracing and array axes are preserved. Done when the census's identical-body groups for those methods report one implementation and the fast lane shows no added failure against its base revision.</li>
+<li><code>replan-small-primitives</code>: one uniform-axis validator (<code>map_extraction.py</code>, <code>diiid_efit.py</code>, <code>mast_efit.py</code>) with each caller's tolerance policy passed explicitly; one owned read-only array constructor; one atomic receipt writer for <code>calibrate/sweep.py</code>, <code>catalog/mast_geometry.py</code> and <code>imas/mast_parity_gate.py</code>; one trimmed-string check beside <code>require_string</code>; one canonical digest beside <code>canonical_json</code>. Done when each group reports one implementation, with the census's candidate list in the reckon data directory <code>docs/research/data/crew-pattern-review/code-depth/</code> as the checklist.</li>
+<li><code>replan-hot-module-contracts</code>: each of the four modules that changed every week gets a short contract, as a module docstring naming its public entry points and invariants and one contract test that fails if an invariant moves. Any later node that writes one of these files cites the contract in its brief. Done when the four docstrings and tests exist and the fast lane is green at the merged head.</li>
+<li><code>replan-figure-repairs</code>: schedule and drain the repair followups the figure-and-solver audit filed on their owning plans, starting with the 103 figures that misrepresent their physics. A figure of a state that did not converge carries its residual and converged flag, or is retracted. Done when every repair followup the audit filed is resolved, with its figure re-scored or retracted.</li>
+</ul>
+<p><strong>Done when.</strong> The four nodes above land, and nova's fast test lane at the merged head has no added failure against the readiness snapshot of 2026-09-26 that the review recorded.</p>
 </section>
 
 

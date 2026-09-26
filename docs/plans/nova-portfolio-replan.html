@@ -18,7 +18,7 @@
 <meta name="plan-modified" content="2026-09-26">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="4">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
 <meta name="plan-capability-version" content="1.0">
@@ -73,8 +73,9 @@
 <li><code>replan-small-primitives</code>: one uniform-axis validator (<code>map_extraction.py</code>, <code>diiid_efit.py</code>, <code>mast_efit.py</code>) with each caller's tolerance policy passed explicitly; one owned read-only array constructor; one atomic receipt writer for <code>calibrate/sweep.py</code>, <code>catalog/mast_geometry.py</code> and <code>imas/mast_parity_gate.py</code>; one trimmed-string check beside <code>require_string</code>; one canonical digest beside <code>canonical_json</code>. Done when each group reports one implementation, with the census's candidate list in the reckon data directory <code>docs/research/data/crew-pattern-review/code-depth/</code> as the checklist.</li>
 <li><code>replan-hot-module-contracts</code>: each of the four modules that changed every week gets a short contract, as a module docstring naming its public entry points and invariants and one contract test that fails if an invariant moves. Any later node that writes one of these files cites the contract in its brief. Done when the four docstrings and tests exist and the fast lane is green at the merged head.</li>
 <li><code>replan-figure-repairs</code>: schedule and drain the repair followups the figure-and-solver audit filed on their owning plans, starting with the 103 figures that misrepresent their physics. A figure of a state that did not converge carries its residual and converged flag, or is retracted. Done when every repair followup the audit filed is resolved, with its figure re-scored or retracted.</li>
+<li><code>replan-fast-lane-restored</code>: the default fast lane is a gate a node can run. The review's readiness census (<a href="/reckon/research/orchestrator-crew-pattern-review#s8">§8</a>) found that from 2026-08-29 to at least 2026-09-19 the default <code>pytest</code> collection failed on 10 errors — five modules importing <code>_separatrix</code> from a benchmark that no longer exported it — so the repository's own default test command ran no test for four weeks while nodes promoted on targeted gates; the break is repaired at head. At head, the lane selects 7,273 tests and had observed 1,204 passes and 14 failures after 25 minutes, 16.7% of the way through. Done when a complete run of the default selection at head records its passed, failed, errored and skipped totals and its wall time, each of the 14 observed failures is fixed or carries a named owner, and the lane (or a declared quick subset of it) completes within a budget a node can afford — with that budget stated.</li>
 </ul>
-<p><strong>Done when.</strong> The four nodes above land, and nova's fast test lane at the merged head has no added failure against the readiness snapshot of 2026-09-26 that the review recorded.</p>
+<p><strong>Done when.</strong> The five nodes above land, and nova's default fast lane at the merged head has no added failure against the complete head run that <code>replan-fast-lane-restored</code> records.</p>
 </section>
 
 

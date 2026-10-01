@@ -26,6 +26,8 @@
   <title>Contour-tree topology authority | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -280,26 +282,31 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="field-representation-on-hex-cells" data-sections="s3,s4" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which smooth field representation locates and values the tree's critical points, and traces the saddle level sets, on the hex carrier?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="three-direction-box-spline">a global C² quartic box spline on the three-direction mesh of hex centres: global and smooth like the tensor spline, and native to the hex lattice</button>
-          <button class="r-opt" data-value="own-node-quadratic">the per-cell own-node quadratic already used by the clip: measured 9/9 saddles and 15/15 axes on hex carriers, but only C⁰ across cells, and refuted twice for separatrix shape</button>
-          <button class="r-opt" data-value="tensor-spline-on-raster">the existing global tensor spline on the solve raster: proven, but it keeps a raster in the topology read, against the ruling</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="field-representation-on-hex-cells" data-choice="" data-by="" data-when="" data-sections="s3,s4">
+    <p class="r-dec-q">Which smooth field representation locates and values the tree&#x27;s critical points, and traces the saddle level sets, on the hex carrier?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="three-direction-box-spline">a global C² quartic box spline on the three-direction mesh of hex centres: global and smooth like the tensor spline, and native to the hex lattice</button>
+      <button class="r-opt" data-value="own-node-quadratic">the per-cell own-node quadratic already used by the clip: measured 9/9 saddles and 15/15 axes on hex carriers, but only C⁰ across cells, and refuted twice for separatrix shape</button>
+      <button class="r-opt" data-value="tensor-spline-on-raster">the existing global tensor spline on the solve raster: proven, but it keeps a raster in the topology read, against the ruling</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-ctta-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-fd" data-written-at="2026-10-01">
-        <h4 class="r-fu-title">Land §1 and §2, then lock the field representation before §3</h4>
-        <div class="r-fu-body"><p>§1 and §2 need no smooth field and can run first. §2's brute-force check is the positive control for the tree. Lock <code>field-representation-on-hex-cells</code> from §2's fixtures before §3 is dispatched, because §3 and §4's saddle level sets depend on it.</p></div>
-        <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority §1</pre>
-      </article>
-    </section>
-  </main>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ctta-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land §1 and §2, then lock the field representation before §3</h4>
+    <div class="r-fu-body"><p>§1 and §2 need no smooth field and can run first. §2's brute-force check is the positive control for the tree. Lock <code>field-representation-on-hex-cells</code> from §2's fixtures before §3 is dispatched, because §3 and §4's saddle level sets depend on it.</p></div>
+    <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority §1</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T205214115813-review-of-contour-tree-topology-authority" data-who="reckon-build" data-when="2026-10-01T21:32:29.777Z">
+    <div class="r-comment-body"><p>Restated nova:contour-tree-topology-authority (revision 5bc144e47, body digest sha256:22fde66196d8b6c61858f4a62c41d461393592ccef31c4bb595557f44247a6f1) in report.md: intent in the reviewer&#x27;s own words, the one open decision field-representation-on-hex-cells with all three options, and all five done-whens; no plan file edited.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

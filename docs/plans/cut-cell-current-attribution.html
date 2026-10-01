@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="218">
+<meta name="plan-version" content="219">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
 <meta name="plan-impl" content="0.8">
@@ -1782,6 +1782,9 @@ fails all three recorded cells. See the
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261001T191318631939-cca-map-fidelity-centroid-columns" data-who="reckon-build" data-when="2026-10-01T22:07:18.057Z">
     <div class="r-comment-body"><p>Each map-fidelity row carries support_current_centroid_offset_mm (dR, dZ in millimetres) from the lambda-normalised booked support current minus the analytic current over the same support, both current-weighted means of (R, Z); a committed guard test recovers a known centroid to 1e-12 m through the benchmark coupling inverse, and the CPU preflight is gated behind --cpu-preflight; weak-rotation chord 110 reproduces its committed mismatch sup to 5.99e-12 relative and reads dR = -0.06981943764028387 mm, dZ = -7.178572898759781e-10 mm.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261001T220152536723-review-of-cca-chord-membership-applied-flag" data-who="reckon-build" data-when="2026-10-01T22:54:46.549Z">
+    <div class="r-comment-body"><p>review of run r-20261001T191207055972-cca-chord-membership-applied-flag (nova:cut-cell-current-attribution §6): verdict pass, total 82 (goal_fidelity 18, evidence 13, fit 18, durability 14, scope_discipline 19); the fix is correct and independently reproduced, but its headline exterior-regression evidence is non-discriminating (passes at base too) and its negative control is a mutation rather than a revert whose magnitude is anomalous.</p></div>
 </div>
 </section>
 

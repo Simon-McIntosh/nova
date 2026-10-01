@@ -203,17 +203,20 @@ _CONSTRAINABLE: tuple[str, ...] = ("newton_krylov", *_REDUCED)
 
 
 def _shared_shadowed_map(shadowed_map: Callable) -> Callable:
-    """Keep topology and domain reads live while retaining residual shadows.
-
-    Newton freezes the supplied residual-shadow mask inside each local model.
-    The topology landmarks and profile-domain labels remain state-dependent
-    parts of the shared forward map, so this wrapper deliberately omits the
-    optional frozen-partition hooks carried by the underlying callable.
-    """
+    """Retain the map and its optional warmed-partition protocol together."""
 
     def mapped(*arguments):
         return shadowed_map(*arguments)
 
+    for name in (
+        "_read_frozen_partition",
+        "_map_frozen_partition",
+        "_frozen_partition_shadow",
+        "_frozen_partition_usable",
+    ):
+        value = getattr(shadowed_map, name, None)
+        if value is not None:
+            setattr(mapped, name, value)
     return mapped
 
 

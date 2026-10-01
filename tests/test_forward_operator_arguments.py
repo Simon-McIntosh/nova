@@ -134,8 +134,8 @@ def test_the_bound_frozen_partition_hooks_take_the_map_operand_order() -> None:
     assert mapped.shape == initial.shape
 
 
-def test_the_shared_shadowed_map_refuses_the_frozen_partition_protocol() -> None:
-    """The Newton route keeps map arithmetic but omits stale partition hooks."""
+def test_the_shared_shadowed_map_retains_the_warmed_partition_protocol() -> None:
+    """The Newton route carries its warmed partition hooks with its map."""
     configure_dtypes()
     operator = _operator()
     external = operator.external()
@@ -148,6 +148,16 @@ def test_the_shared_shadowed_map_refuses_the_frozen_partition_protocol() -> None
         np.asarray(shared(initial, shadow, external, operator)),
         np.asarray(shadowed(initial, shadow, external, operator)),
     )
-    assert not hasattr(shared, "_read_frozen_partition")
-    assert not hasattr(shared, "_map_frozen_partition")
-    assert not hasattr(shared, "_frozen_partition_shadow")
+    partition = shared._read_frozen_partition(initial, None, external, operator)
+    np.testing.assert_array_equal(
+        np.asarray(
+            shared._map_frozen_partition(initial, partition, external, operator)
+        ),
+        np.asarray(
+            shadowed._map_frozen_partition(initial, partition, external, operator)
+        ),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(shared._frozen_partition_shadow(partition)),
+        np.asarray(shadowed._frozen_partition_shadow(partition)),
+    )

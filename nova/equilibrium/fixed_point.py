@@ -4339,6 +4339,22 @@ def _active_set_newton_krylov(
             return jnp.asarray(True)
         return jnp.asarray(partition_usable(partition))
 
+    if freeze_topology and warmup:
+        warmup_result = _newton_krylov_inner(
+            shadowed_map_fn,
+            initial,
+            newton_steps=0,
+            warmup=warmup,
+            relaxation=relaxation,
+            convergence_tolerance=convergence_tolerance,
+            shadow_mask_fn=shadow_mask_fn,
+            promoted_shadow_mask_fn=promoted_shadow_mask_fn,
+            shadowed_map_fn=shadowed_map_fn,
+            precision=precision,
+        )
+        initial = warmup_result.state
+        warmup = 0
+
     if freeze_topology:
         initial_partition = partition_read(initial, None)
         initial_carried = usable_partition(initial_partition)
@@ -4350,7 +4366,8 @@ def _active_set_newton_krylov(
     else:
         initial_mask = jnp.ravel(jnp.asarray(shadow_mask_fn(initial), dtype=bool))
         initial_partition = initial_mask
-    history = jnp.zeros((active_set_steps + 1, initial_mask.size), dtype=bool)
+    trip_limit = 1 if freeze_topology else active_set_steps
+    history = jnp.zeros((trip_limit + 1, initial_mask.size), dtype=bool)
     history = history.at[0].set(initial_mask)
 
     def solve_frozen(
@@ -4618,7 +4635,7 @@ def _active_set_newton_krylov(
             jnp.where(record_mask, selected_mask, mask_history[history_count])
         )
         history_count = history_count + record_mask.astype(jnp.int32)
-        active = can_continue & ((index + 1) < active_set_steps)
+        active = can_continue & ((index + 1) < trip_limit)
         return (
             selected_state,
             selected_mask,
@@ -4670,9 +4687,9 @@ def _active_set_newton_krylov(
         globalization_state=empty_globalization,
         continue_globalization=jnp.asarray(False),
         live_residual=jnp.asarray(jnp.nan, dtype=initial.dtype),
-        residuals=jnp.full(active_set_steps, jnp.nan, dtype=initial.dtype),
-        mask_differences=jnp.full(active_set_steps, -1, dtype=jnp.int32),
-        cycle_damping_activations=jnp.full(active_set_steps, -1, dtype=jnp.int32),
+        residuals=jnp.full(trip_limit, jnp.nan, dtype=initial.dtype),
+        mask_differences=jnp.full(trip_limit, -1, dtype=jnp.int32),
+        cycle_damping_activations=jnp.full(trip_limit, -1, dtype=jnp.int32),
         iterations=jnp.asarray(0, dtype=jnp.int32),
         attempted_promotions=jnp.asarray(0, dtype=jnp.int32),
         accepted_promotions=jnp.asarray(0, dtype=jnp.int32),
@@ -4796,7 +4813,7 @@ def _active_set_newton_krylov(
     outer, _ = jax.lax.scan(
         lambda carry, index: (outer_body(index, carry), ()),
         outer,
-        jnp.arange(active_set_steps),
+        jnp.arange(trip_limit),
     )
     reason = jnp.where(
         outer.converged,

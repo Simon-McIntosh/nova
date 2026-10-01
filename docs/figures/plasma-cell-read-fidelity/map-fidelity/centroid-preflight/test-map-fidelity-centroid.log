@@ -1,0 +1,8 @@
+revision=02a196e94d3b9d0cd133e78972ec3134a58da0f3 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-centroid-columns
+command=TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-centroid-columns /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_map_fidelity_centroid.py
+module.__file__=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-centroid-columns/tests/test_map_fidelity_centroid.py
+cwd=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-centroid-columns
+23:53:31 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+..                                                                       [100%]
+2 passed in 8.88s
+EXIT=0

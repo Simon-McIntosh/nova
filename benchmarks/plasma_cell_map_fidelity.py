@@ -25,6 +25,7 @@ CASES = ("diverted-single-null", "weak-rotation-reactor-static")
 MODES = ("exact", "chord")
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "docs/figures/plasma-cell-read-fidelity/map-fidelity"
+PREFLIGHT_OUTPUT = DEFAULT_OUTPUT / "centroid-preflight"
 
 
 def write(path, value):
@@ -55,6 +56,106 @@ def norms(value, reference):
         "reference_sup_wb": ref_sup,
         "reference_rms_wb": ref_rms,
         "finite": True,
+    }
+
+
+def current_centroid(centres, current, radial_moment, vertical_moment):
+    """Current-weighted centroid ``(R, Z)`` of a cell-banked distribution [m].
+
+    Reuses the discrete centroid idiom of the certificate's closed-form current
+    target (:func:`benchmarks.solovev_certificate._closed_form_current_target`):
+    each cell contributes its current at the cell centroid plus the first moment
+    integrated about that centroid, so a within-cell gradient is retained.
+    ``ReconstructMoment.fit`` in ``nova/equilibrium/moment.py`` is the same
+    current-weighted mean with the first moments taken as zero.
+    """
+
+    import numpy as np
+
+    total = float(np.sum(current))
+    if total == 0.0:
+        return None, None
+    return (
+        float(np.sum(current * centres[:, 0] + radial_moment) / total),
+        float(np.sum(current * centres[:, 1] + vertical_moment) / total),
+    )
+
+
+def recover_physical_first_moments(second, coupled_radial, coupled_vertical):
+    """Invert the coupling transform to physical first moments about each cell.
+
+    ``second`` is the per-cell ``(n, 3)`` second-moment matrix stored as
+    ``[radial, vertical, cross]``.  The forward transform
+    (:meth:`ForwardFluxOperator.coupling_current_moments`) divides by it; this
+    is the inverse, multiplying by the second-moment matrix, which restores the
+    radial and vertical first moments about the cell centroid.
+    """
+
+    import numpy as np
+
+    second = np.asarray(second, dtype=np.float64)
+    radial = np.asarray(coupled_radial, dtype=np.float64)
+    vertical = np.asarray(coupled_vertical, dtype=np.float64)
+    return (
+        second[:, 0] * radial + second[:, 2] * vertical,
+        second[:, 2] * radial + second[:, 1] * vertical,
+    )
+
+
+def support_current_centroid_offset_mm(operator, moments, amplitude, physical_array):
+    """Booked-minus-analytic support-current centroid, in millimetres.
+
+    The booked distribution is the lambda-normalised map's current over its own
+    support; the analytic distribution is the analytic Solov'ev current over the
+    same support.  Both are current-weighted means of ``(R, Z)``; the common
+    amplitude cancels in the ratio, but it is applied for a literal reading of
+    "lambda-normalised".  ``moments`` carries first moments in the coupling
+    basis, so the physical first moments about the cell centroid are recovered
+    by the inverse of :meth:`ForwardFluxOperator.coupling_current_moments` --
+    multiplying by the second-moment matrix.
+    """
+
+    import numpy as np
+
+    amplitude = float(amplitude)
+    second = np.asarray(operator.moment_geometry.second_moment, dtype=np.float64)
+    coupled_radial = np.asarray(moments.radial_moment, dtype=np.float64)
+    coupled_vertical = np.asarray(moments.vertical_moment, dtype=np.float64)
+    booked_radial, booked_vertical = recover_physical_first_moments(
+        second, coupled_radial, coupled_vertical
+    )
+    booked_radial = amplitude * booked_radial
+    booked_vertical = amplitude * booked_vertical
+    booked_current = amplitude * np.asarray(moments.cell_current, dtype=np.float64)
+    centres = np.asarray(
+        operator.moment_geometry.atomic_mesh.centroids, dtype=np.float64
+    )
+    support = booked_current != 0.0
+    booked_r, booked_z = current_centroid(
+        centres[support],
+        booked_current[support],
+        booked_radial[support],
+        booked_vertical[support],
+    )
+    analytic_r, analytic_z = current_centroid(
+        centres[support],
+        physical_array[0][support],
+        physical_array[1][support],
+        physical_array[2][support],
+    )
+    if booked_r is None or analytic_r is None:
+        return {
+            "dR": None,
+            "dZ": None,
+            "support_cell_count": int(np.count_nonzero(support)),
+        }
+    return {
+        "dR": 1000.0 * (booked_r - analytic_r),
+        "dZ": 1000.0 * (booked_z - analytic_z),
+        "booked_centroid_m": [booked_r, booked_z],
+        "analytic_centroid_m": [analytic_r, analytic_z],
+        "support_cell_count": int(np.count_nonzero(support)),
+        "amplitude_lambda": amplitude,
     }
 
 
@@ -100,10 +201,41 @@ def nulls(operator, state):
         }
 
 
-def measure_pair(case_name, requested, output):
+def _admit_backend(cpu_preflight):
+    """Admit the CPU preflight lane only behind the explicit preflight flag.
+
+    A receipt row is a physical measurement and the certificate pins it to a
+    GPU; the analytic-state preflight may run on the CPU witness, but only when
+    the caller says so.  Keeping the plain assert for every other call, the
+    physical gate cannot silently become a CPU measurement.
+    """
+
+    import jax
+
+    backend = jax.default_backend()
+    if cpu_preflight:
+        assert backend in ("gpu", "cpu"), f"unsupported backend {backend!r}"
+    else:
+        assert backend == "gpu", "physical gate requires a GPU"
+
+
+def _preflight_output(output):
+    """Return the resolved preflight output root, refusing a wider target."""
+    resolved = Path(output).resolve()
+    root = PREFLIGHT_OUTPUT.resolve()
+    assert resolved == root, (
+        f"CPU preflight rows are written only under {root}, got {resolved}"
+    )
+    return resolved
+
+
+def measure_pair(case_name, requested, output, cpu_preflight=False):
     import jax
     from nova.jax.config import configure_dtypes
 
+    _admit_backend(cpu_preflight)
+    if cpu_preflight:
+        _preflight_output(output)
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
     import jax.numpy as jnp
@@ -113,7 +245,14 @@ def measure_pair(case_name, requested, output):
     from nova.equilibrium.forward_operator import set_support_clip_mode
     from scripts.analytic_oracle_fixtures import measure as fixture
 
-    assert jax.default_backend() == "gpu", "physical gate requires a GPU"
+    if cpu_preflight:
+        print(
+            f"revision={certificate._source_revision()} tree={ROOT} "
+            f"command={sys.argv!r}",
+            flush=True,
+        )
+        print(f"module.__file__={Path(__file__).resolve()}", flush=True)
+        print(f"cwd={Path.cwd()} backend={jax.default_backend()}", flush=True)
     carrier, source, exact = certificate._case(case_name)
     print(f"BUILD case={case_name} requested={requested}", flush=True)
     machine = certificate._case_machine(case_name, carrier, exact, requested)
@@ -220,9 +359,13 @@ def measure_pair(case_name, requested, output):
         external_error = norms(external - analytic_external, analytic_external)
         plasma_error = norms(plasma - analytic_plasma, analytic_plasma)
         support_cells = np.asarray(area) > 0
+        centroid_offset = support_current_centroid_offset_mm(
+            operator, moments, amplitude, physical_array
+        )
         label = f"{case_name}-cells-{abs(requested)}-{mode}"
         row = {
             "status": "measured",
+            "preflight": bool(cpu_preflight),
             "case": case_name,
             "requested_cells": requested,
             "clip_mode": mode,
@@ -248,6 +391,7 @@ def measure_pair(case_name, requested, output):
             "unscaled_over_analytic_current": float(
                 np.sum(moments.cell_current) / target
             ),
+            "support_current_centroid_offset_mm": centroid_offset,
             "lambda": float(amplitude),
             "current_target_provenance": current_receipt,
             "nonfinite_support_moments": int(
@@ -328,7 +472,11 @@ def measure_pair(case_name, requested, output):
             area=area,
         )
         write(output / (label + ".json"), row)
-        print(f"ROW {label} mismatch={mismatch} control={delta}", flush=True)
+        print(
+            f"ROW {label} mismatch={mismatch} control={delta} "
+            f"centroid_offset_mm={centroid_offset}",
+            flush=True,
+        )
 
 
 def render(row, output):
@@ -531,14 +679,31 @@ def run(output):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--case", choices=CASES)
     parser.add_argument("--cells", type=int)
+    parser.add_argument(
+        "--cpu-preflight",
+        action="store_true",
+        help=(
+            "admit the CPU witness for a single analytic-state row; rows are "
+            "written only under the preflight directory and marked preflight"
+        ),
+    )
     args = parser.parse_args()
+    if args.cpu_preflight:
+        if not args.case:
+            parser.error("--cpu-preflight requires --case and --cells")
+        output = args.output or PREFLIGHT_OUTPUT
+        measure_pair(
+            args.case, args.cells, _preflight_output(output), cpu_preflight=True
+        )
+        return
+    output = args.output or DEFAULT_OUTPUT
     if args.case:
-        measure_pair(args.case, args.cells, args.output)
+        measure_pair(args.case, args.cells, output)
     else:
-        run(args.output)
+        run(output)
 
 
 if __name__ == "__main__":

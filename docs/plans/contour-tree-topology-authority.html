@@ -38,7 +38,8 @@
     step, no normalised flux in any topology decision, and the plasma-current sign carried
     explicitly in every definition. The ruling answered the open decision
     <code>shadowed-contact-withdraws-the-wall-or-only-the-candidate</code> on
-    null-identification-authority. That decision asked which of two pinned tests' verdicts to keep:
+    null-identification-authority. That decision asked which of two pinned tests' verdicts
+    to keep, with the other test's assertion rewritten to match:
     the 9×9 grid fixture in <code>tests/test_forward_operator_axes.py</code>, which needs
     a finite class margin of −0.319, and the MAST row-10 fixture in
     <code>tests/test_limiter_spline_minimum.py</code>, which needs the wall operand
@@ -80,7 +81,8 @@
     <code>critical_type</code> (0 minimum, 1 saddle, 2 maximum), <code>r</code>,
     <code>z</code>, <code>psi</code> and the saddle <code>levelset</code>, plus
     <code>edges</code> as pairs of node indices. The authority writes its tree into that
-    structure, against DD 4.1.0, beside the other DD fields listed in §1.</p>
+    structure against DD 4.1.0 exactly (the structure itself dates from 4.0.0), beside the
+    other DD fields listed in §1.</p>
 
     <p>plasma-cell-topology-authority (shipped, S18) already moved the saddle-aware flood,
     the sign-change census and the private mask onto the plasma cells. This plan replaces
@@ -102,8 +104,8 @@
     </table>
 
     <h2 id="s1">§1 — Conventions and definitions</h2>
-    <p>A module docstring and one typed result carry the contract every later section
-    implements. They state:</p>
+    <p>A module docstring and one result type (a dataclass returned by the read) carry
+    the contract every later section implements. They state:</p>
     <ul>
       <li><strong>Sign.</strong> σ is computed from the state's declared COCOS sign tuple and
       the sign of the plasma current through <code>nova.io.cocos</code>, never hard-coded,
@@ -118,8 +120,8 @@
       containment over the multi-unit wall, never by a bounding box. The wall polyline is
       the domain boundary, and its vertices belong to the domain as boundary
       vertices.</li>
-      <li><strong>Carrier.</strong> The hex plasma cells. Nothing in the read resamples
-      onto a raster.</li>
+      <li><strong>Carrier.</strong> The hex plasma cells, with the flux valued at their
+      centres. Nothing in the read resamples onto a raster.</li>
       <li><strong>Output.</strong> A mapping onto DD 4.1.0, written under COCOS 17 as that
       version declares:
         <ul>
@@ -147,8 +149,8 @@
     <p>The tree is built combinatorially, so its topology cannot depend on a tolerance:</p>
     <ul>
       <li><strong>Mesh.</strong> Hex cell centres form a triangular lattice. Triangulate
-      the adjacent centres (the three-direction mesh), clipped to the vessel polygon, and
-      add wall vertices on the polyline. Each wall vertex's flux is interpolated linearly
+      the adjacent centres (the three-direction mesh), clip that triangulation to the
+      vessel polygon, and add wall vertices on the polyline. Each wall vertex's flux is interpolated linearly
       on the triangle that contains it, from the same piecewise-linear field the tree is
       built on, so §2 needs no smooth field. §3's smooth representation refines node
       positions and values; it never changes the tree's topology.</li>
@@ -203,15 +205,18 @@
     <ul>
       <li><strong>Primary O-point:</strong> among all in-vessel local maxima of σψ (not
       necessarily the global maximum), the one whose tree branch holds the largest share
-      of the plasma current, summed over the hex cells of that branch down to its first
-      join. A tie is a refusal.</li>
+      of the plasma current. The current is summed over the hex cells of that branch down
+      to its first event, which is the higher of its first interior saddle and its first
+      join with the outside node. A tie raises the same named error as §1's convention
+      check.</li>
       <li><strong>Plasma region:</strong> the axis component of the superlevel set of σψ,
       followed down the tree from the primary O-point.</li>
       <li><strong>The first event</strong> is read only along the primary O-point's own
       path down the join tree. "First" always means the highest σψ level, the first one
       met as the level descends from the axis. It is the larger of two levels:
         <ul>
-          <li>the first interior join saddle on that path (the primary X-point);</li>
+          <li>the highest in-vessel join saddle on that path (the primary X-point),
+          whether it lies above or below the wall contact;</li>
           <li>the first join of that path with the outside node, i.e. a wall contact
           reached without passing through any saddle (the limiter).</li>
         </ul>
@@ -225,9 +230,13 @@
       <code>σψ_lim</code> is the highest σψ over the wall vertices that do not lie in a
       private region of the primary X-point. For a limited state this is the limiter
       level itself. For a diverted state it is the level at which the plasma would first
-      touch the wall outside the divertor's private flux. The margin is positive for
-      diverted states and negative for limited ones, finite on both sides, and
-      independent of the solve box.</li>
+      touch the wall outside the divertor's private flux. <code>σψ_x</code> is the
+      primary X-point's level as defined above, so a limited state with an in-vessel
+      saddle on its path still has one. The margin is positive for diverted states and
+      negative for limited ones, finite on both sides, and independent of the solve box.
+      A state whose path carries no in-vessel saddle at all is limited and has no
+      margin: the receipt records <code>margin: none (no in-vessel saddle)</code>
+      instead of an infinity.</li>
     </ul>
     <p><strong>Done when:</strong></p>
     <ul>
@@ -238,9 +247,12 @@
       pitch (the centre spacing at the contact) of the wall, and the boundary flux equal
       to the field sampled at the contact point;</li>
       <li>every Solov'ev certificate row reads its analytic class;</li>
+      <li>a limited state whose path carries no in-vessel saddle records
+      <code>margin: none (no in-vessel saddle)</code> rather than a number or an
+      infinity;</li>
       <li>one reversed-current MAST shot from the 22475–22626 block gives the same tree and
-      class as the same state mirrored synthetically (ψ negated, plasma current
-      flipped);</li>
+      class as its own state mirrored synthetically (ψ negated, plasma current flipped),
+      a self-consistency check on that one state;</li>
       <li>each fixture writes the DD 4 fields of §1 and survives an IDS round trip through
       <code>validate()</code>.</li>
     </ul>

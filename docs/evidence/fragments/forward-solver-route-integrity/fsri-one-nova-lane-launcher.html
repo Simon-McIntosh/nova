@@ -1,0 +1,52 @@
+<!-- fragment: fsri-one-nova-lane-launcher -->
+<section id="fsri-one-nova-lane-launcher">
+<h3>One nova lane launcher for SLURM placement</h3>
+
+<p><strong>Landed.</strong> <code>scripts/nova_lane/run.sh</code> takes a pytest
+target or a script, a rung preference (default <code>h200,titan,cpu</code>),
+cores, memory and an absolute log path; it applies the repository's SLURM rules
+and records the rung used, the job id and the git revision in the log header.
+<code>scripts/h200_test_lane/run.sh</code> is now a thin caller of it, carrying
+the reserved-H200 pre-warm cache contract in a payload prelude.</p>
+
+<ul>
+  <li><strong>Rungs.</strong> H200 &rarr; <code>--partition=betelgeuse
+    --reservation=gpu_0003_grpA --gres=gpu:1</code>; titan &rarr;
+    <code>--partition=titan --gres=gpu:1</code>; CPU &rarr;
+    <code>--partition=all_debug</code> with <code>JAX_PLATFORMS=cpu</code>.</li>
+  <li><strong>Explicit memory.</strong> <code>--mem=0</code> is refused before
+    it can reach sbatch; the job would otherwise pend on
+    <em>Resources</em> while blocking the queue.</li>
+  <li><strong>Environment.</strong> <code>TMPDIR=/tmp</code> exported at submit
+    and in the payload; <code>UV_NO_SYNC</code> and
+    <code>UV_RUN_RECURSION_DEPTH</code> unset; no <code>uv</code> on the compute
+    node (the shared interpreter runs directly with <code>PYTHONPATH</code>).</li>
+  <li><strong>Admission.</strong> a rung is tried only after a real submission is
+    shown still <em>PENDING</em> on a resource or configuration reason after a
+    bounded wait; the decision is never taken from an
+    <code>sbatch --test-only</code> estimate. A session already inside an
+    allocation runs in place (<code>--force-submit</code> overrides).</li>
+</ul>
+
+<p>Evidence logs, all at the orientation revision
+<code>48a40fab</code>:</p>
+
+<table>
+  <thead><tr><th>measure</th><th>log</th><th>result</th></tr></thead>
+  <tr><th scope="row">syntax / lint</th>
+    <td><code>docs/figures/forward-solver-route-integrity/lane-launcher/shell-syntax.log</code></td>
+    <td><code>bash -n: OK</code> (<code>shellcheck</code> not installed on this host)</td></tr>
+  <tr><th scope="row">dry-run, each rung</th>
+    <td><code>docs/figures/forward-solver-route-integrity/lane-launcher/dry-run-mem-refusal.log</code></td>
+    <td>three <code>RUNG=…</code> sbatch lines; <code>--mem=0</code> refused, <code>EXIT=2</code></td></tr>
+  <tr><th scope="row">real CPU-rung run</th>
+    <td><code>docs/figures/forward-solver-route-integrity/lane-launcher/cpu-rung-run.log</code></td>
+    <td>5 s target wall, <code>EXIT_STATUS=0</code>, header names rung + job + revision</td></tr>
+  <tr><th scope="row">launcher tests</th>
+    <td><code>docs/figures/forward-solver-route-integrity/lane-launcher/pytest-lane-launcher.log</code></td>
+    <td><code>2 passed</code>, <code>EXIT=0</code></td></tr>
+  <tr><th scope="row">negative control</th>
+    <td><code>docs/figures/forward-solver-route-integrity/lane-launcher/negative-control.log</code></td>
+    <td><code>1 failed, 1 passed</code>, <code>EXIT=1</code> with the <code>--mem=0</code> refusal dropped</td></tr>
+</table>
+</section>

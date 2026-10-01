@@ -1,5 +1,6 @@
 {
   "status": "measured",
+  "preflight": true,
   "case": "weak-rotation-reactor-static",
   "requested_cells": -110,
   "clip_mode": "chord",
@@ -170,13 +171,13 @@
     "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr",
     "semantic_key": "0eb458e6edb500a7",
     "hit": true,
-    "lock_wait_seconds": 9.338371455669403e-06,
+    "lock_wait_seconds": 1.0327436029911041e-05,
     "build_seconds": 0.0
   },
   "jax_backend": "cpu",
   "device": "cpu:0",
   "x64": true,
-  "source_revision": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
-  "wall_seconds": 22.126165932044387,
+  "source_revision": "02a196e94d3b9d0cd133e78972ec3134a58da0f3",
+  "wall_seconds": 22.087456529028714,
   "state_archive": "weak-rotation-reactor-static-cells-110-chord.npz"
 }

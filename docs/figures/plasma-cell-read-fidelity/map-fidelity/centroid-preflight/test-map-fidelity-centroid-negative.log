@@ -1,0 +1,23 @@
+revision=02a196e94d3b9d0cd133e78972ec3134a58da0f3 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-centroid-columns
+command=TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-centroid-columns /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_map_fidelity_centroid.py  (NOVA_CENTROID_INVERSE_PERTURB=0.01)
+module.__file__=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-centroid-columns/tests/test_map_fidelity_centroid.py
+cwd=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-centroid-columns
+23:53:51 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+_______________ test_centroid_round_trip_recovers_exact_centroid _______________
+
+    def test_centroid_round_trip_recovers_exact_centroid():
+        """The coupling inverse recovers the exact rectangle centroid to 1e-12 m."""
+        _, _, _, _, exact = _rectangle_distribution()
+        perturb = float(os.environ.get("NOVA_CENTROID_INVERSE_PERTURB", "0.0"))
+        centroid_r, centroid_z = _recovered_centroid(perturb)
+>       assert abs(centroid_r - exact[0]) < TOLERANCE
+E       assert np.float64(8.87311446273742e-06) < 1e-12
+E        +  where np.float64(8.87311446273742e-06) = abs((6.043487133984029 - np.float64(6.043478260869566)))
+
+tests/test_map_fidelity_centroid.py:118: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_map_fidelity_centroid.py::test_centroid_round_trip_recovers_exact_centroid
+1 failed, 1 passed in 13.44s
+EXIT=1

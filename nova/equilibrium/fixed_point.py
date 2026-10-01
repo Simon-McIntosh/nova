@@ -3583,6 +3583,12 @@ def _newton_krylov_inner(
     stride = 2 + gmres_iterations
     trace_length = warmup + newton_steps * stride
     change_length = warmup + newton_steps
+    # A zero-length measured axis cannot be indexed by the traced promotion
+    # accumulator: JAX raises when the scatter target has size zero even
+    # though the branch is never taken at run time. A warm-up-only call
+    # passes newton_steps=0, so the per-step receipt arrays keep one slot
+    # while the loop's own budget, read from newton_steps, stays zero.
+    step_slots = max(newton_steps, 1)
     observe_shadows = shadow_mask_fn is not None
     carry_shadows = promoted_shadow_mask_fn is not None
     if carry_shadows != (shadowed_map_fn is not None):
@@ -4207,25 +4213,25 @@ def _newton_krylov_inner(
             jnp.asarray(False),
             current_shadow,
             shadow_changes,
-            jnp.full(newton_steps, -1, dtype=jnp.int32),
-            jnp.full(newton_steps, -1, dtype=jnp.int32),
+            jnp.full(step_slots, -1, dtype=jnp.int32),
+            jnp.full(step_slots, -1, dtype=jnp.int32),
             jnp.where(
                 resume_globalization,
                 globalization_state.recovery_radius,
                 jnp.asarray(_RECOVERY_RADIUS_INITIAL, dtype=initial.dtype),
             ),
-            jnp.full((newton_steps, 2), jnp.nan, dtype=initial.dtype),
-            jnp.full(newton_steps, -1, dtype=jnp.int32),
+            jnp.full((step_slots, 2), jnp.nan, dtype=initial.dtype),
+            jnp.full(step_slots, -1, dtype=jnp.int32),
             jnp.where(
                 resume_globalization,
                 globalization_state.model_rebuild_damping,
                 jnp.asarray(_MODEL_REBUILD_DAMPING_INITIAL, dtype=initial.dtype),
             ),
-            jnp.full(newton_steps, -1, dtype=jnp.int32),
-            jnp.full(newton_steps, jnp.nan, dtype=initial.dtype),
-            jnp.full(newton_steps, -1, dtype=jnp.int32),
-            jnp.full(newton_steps, jnp.nan, dtype=initial.dtype),
-            _empty_inner_trace(newton_steps, initial.dtype),
+            jnp.full(step_slots, -1, dtype=jnp.int32),
+            jnp.full(step_slots, jnp.nan, dtype=initial.dtype),
+            jnp.full(step_slots, -1, dtype=jnp.int32),
+            jnp.full(step_slots, jnp.nan, dtype=initial.dtype),
+            _empty_inner_trace(step_slots, initial.dtype),
             jnp.where(
                 resume_globalization,
                 globalization_state.model_rebuild_required,

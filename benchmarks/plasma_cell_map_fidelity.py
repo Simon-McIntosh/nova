@@ -25,6 +25,7 @@ CASES = ("diverted-single-null", "weak-rotation-reactor-static")
 MODES = ("exact", "chord")
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "docs/figures/plasma-cell-read-fidelity/map-fidelity"
+PREFLIGHT_OUTPUT = DEFAULT_OUTPUT / "centroid-preflight"
 
 
 def write(path, value):
@@ -80,6 +81,27 @@ def current_centroid(centres, current, radial_moment, vertical_moment):
     )
 
 
+def recover_physical_first_moments(second, coupled_radial, coupled_vertical):
+    """Invert the coupling transform to physical first moments about each cell.
+
+    ``second`` is the per-cell ``(n, 3)`` second-moment matrix stored as
+    ``[radial, vertical, cross]``.  The forward transform
+    (:meth:`ForwardFluxOperator.coupling_current_moments`) divides by it; this
+    is the inverse, multiplying by the second-moment matrix, which restores the
+    radial and vertical first moments about the cell centroid.
+    """
+
+    import numpy as np
+
+    second = np.asarray(second, dtype=np.float64)
+    radial = np.asarray(coupled_radial, dtype=np.float64)
+    vertical = np.asarray(coupled_vertical, dtype=np.float64)
+    return (
+        second[:, 0] * radial + second[:, 2] * vertical,
+        second[:, 2] * radial + second[:, 1] * vertical,
+    )
+
+
 def support_current_centroid_offset_mm(operator, moments, amplitude, physical_array):
     """Booked-minus-analytic support-current centroid, in millimetres.
 
@@ -99,12 +121,11 @@ def support_current_centroid_offset_mm(operator, moments, amplitude, physical_ar
     second = np.asarray(operator.moment_geometry.second_moment, dtype=np.float64)
     coupled_radial = np.asarray(moments.radial_moment, dtype=np.float64)
     coupled_vertical = np.asarray(moments.vertical_moment, dtype=np.float64)
-    booked_radial = amplitude * (
-        second[:, 0] * coupled_radial + second[:, 2] * coupled_vertical
+    booked_radial, booked_vertical = recover_physical_first_moments(
+        second, coupled_radial, coupled_vertical
     )
-    booked_vertical = amplitude * (
-        second[:, 2] * coupled_radial + second[:, 1] * coupled_vertical
-    )
+    booked_radial = amplitude * booked_radial
+    booked_vertical = amplitude * booked_vertical
     booked_current = amplitude * np.asarray(moments.cell_current, dtype=np.float64)
     centres = np.asarray(
         operator.moment_geometry.atomic_mesh.centroids, dtype=np.float64
@@ -180,10 +201,41 @@ def nulls(operator, state):
         }
 
 
-def measure_pair(case_name, requested, output):
+def _admit_backend(cpu_preflight):
+    """Admit the CPU preflight lane only behind the explicit preflight flag.
+
+    A receipt row is a physical measurement and the certificate pins it to a
+    GPU; the analytic-state preflight may run on the CPU witness, but only when
+    the caller says so.  Keeping the plain assert for every other call, the
+    physical gate cannot silently become a CPU measurement.
+    """
+
+    import jax
+
+    backend = jax.default_backend()
+    if cpu_preflight:
+        assert backend in ("gpu", "cpu"), f"unsupported backend {backend!r}"
+    else:
+        assert backend == "gpu", "physical gate requires a GPU"
+
+
+def _preflight_output(output):
+    """Return the resolved preflight output root, refusing a wider target."""
+    resolved = Path(output).resolve()
+    root = PREFLIGHT_OUTPUT.resolve()
+    assert resolved == root, (
+        f"CPU preflight rows are written only under {root}, got {resolved}"
+    )
+    return resolved
+
+
+def measure_pair(case_name, requested, output, cpu_preflight=False):
     import jax
     from nova.jax.config import configure_dtypes
 
+    _admit_backend(cpu_preflight)
+    if cpu_preflight:
+        _preflight_output(output)
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
     import jax.numpy as jnp
@@ -193,9 +245,14 @@ def measure_pair(case_name, requested, output):
     from nova.equilibrium.forward_operator import set_support_clip_mode
     from scripts.analytic_oracle_fixtures import measure as fixture
 
-    assert jax.default_backend() in ("gpu", "cpu"), (
-        f"unsupported backend {jax.default_backend()!r}"
-    )
+    if cpu_preflight:
+        print(
+            f"revision={certificate._source_revision()} tree={ROOT} "
+            f"command={sys.argv!r}",
+            flush=True,
+        )
+        print(f"module.__file__={Path(__file__).resolve()}", flush=True)
+        print(f"cwd={Path.cwd()} backend={jax.default_backend()}", flush=True)
     carrier, source, exact = certificate._case(case_name)
     print(f"BUILD case={case_name} requested={requested}", flush=True)
     machine = certificate._case_machine(case_name, carrier, exact, requested)
@@ -308,6 +365,7 @@ def measure_pair(case_name, requested, output):
         label = f"{case_name}-cells-{abs(requested)}-{mode}"
         row = {
             "status": "measured",
+            "preflight": bool(cpu_preflight),
             "case": case_name,
             "requested_cells": requested,
             "clip_mode": mode,
@@ -621,14 +679,31 @@ def run(output):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--case", choices=CASES)
     parser.add_argument("--cells", type=int)
+    parser.add_argument(
+        "--cpu-preflight",
+        action="store_true",
+        help=(
+            "admit the CPU witness for a single analytic-state row; rows are "
+            "written only under the preflight directory and marked preflight"
+        ),
+    )
     args = parser.parse_args()
+    if args.cpu_preflight:
+        if not args.case:
+            parser.error("--cpu-preflight requires --case and --cells")
+        output = args.output or PREFLIGHT_OUTPUT
+        measure_pair(
+            args.case, args.cells, _preflight_output(output), cpu_preflight=True
+        )
+        return
+    output = args.output or DEFAULT_OUTPUT
     if args.case:
-        measure_pair(args.case, args.cells, args.output)
+        measure_pair(args.case, args.cells, output)
     else:
-        run(args.output)
+        run(output)
 
 
 if __name__ == "__main__":

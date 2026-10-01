@@ -150,7 +150,7 @@ def _sweep_tree(
             overflow,
             wall_seen,
         ) = state
-        vertex = order[rank]
+        vertex = order[rank].astype(jnp.int32)
         usable = vertex_valid[vertex]
         roots = _roots(parents)
         first = edges[:, 0]

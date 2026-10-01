@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="contour-tree-topology-authority-landed">
+  <meta name="plan-title" content="Contour-tree topology authority — one tree of the signed flux on hex cells decides axis, X-point, wall contact and class — landed record">
+  <meta name="plan-summary" content="Closure synthesis for Contour-tree topology authority — one tree of the signed flux on hex cells decides axis, X-point, wall contact and class: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="contour-tree-topology-authority">
+  <meta name="plan-verdict" content="qualified">
+  <title>Contour-tree topology authority — one tree of the signed flux on hex cells decides axis, X-point, wall contact and class — landed record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>Contour-tree topology authority — one tree of the signed flux on hex cells decides axis, X-point, wall contact and class — landed record</h1>
+  <p>Closure synthesis for Contour-tree topology authority — one tree of the signed flux on hex cells decides axis, X-point, wall contact and class: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="conventions-contract">
+    <h2>§1 — the conventions contract</h2>
+    <p>Run <code>r-20261001T210753112544-ctta-conventions-contract</code> (codex-terra; status correction and sign-test repair on the local lane), merged at <code>d22c2a2d1</code> from <code>e403c009f</code> to <code>fb98795f0</code>. <code>nova/equilibrium/contour_tree.py</code> states the five §1 conventions and carries <code>ContourTreeResult</code> (capacities 256 nodes and 255 edges, with the DD 4.1.0 fields) and <code>sigma_for_state</code>, which takes the sign from <code>nova.io.cocos</code> and the sign of Ip. <code>tests/test_contour_tree_conventions.py</code> anchors sigma independently: on analytic Solov'ev states in COCOS 11 and 17 at both Ip signs, the axis is a local maximum of sigma*psi. Flipping sigma fails all four cases, and a state whose Ip flips without psi is refused with a named error. The first review found the original sigma test circular; the re-review scored 19/18/20/17/19 with no added failure. Open follow-ons: the Ip-sign parametrisations cancel inside sigma*psi, so they add no independent physics coverage, and tests/test_mastcocos.py offers a corpus-backed anchor that §2 to §5 can reuse.</p>
+  </section>
+
+</main>
+</body>
+</html>

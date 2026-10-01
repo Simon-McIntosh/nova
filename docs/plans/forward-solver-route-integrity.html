@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="42">
+<meta name="plan-version" content="43">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -620,6 +620,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261001T211450582325-fsri-one-nova-lane-launcher" data-who="reckon-build" data-when="2026-10-01T22:58:21.398Z">
     <div class="r-comment-body"><p>scripts/nova_lane/run.sh generalises the reserved-H200 lane into one launcher and scripts/h200_test_lane/run.sh is a thin caller; the H200 payload keeps the cache-guard header, the PINNED_REVISION mismatch diagnostic and the concurrent GPU utilisation sampling (10/30/60 s), the dry-run prints the resolved payload steps per rung, and the pending-reason match now covers Resources/Configuration/ReqNode*/NodeDown; tests 4 passed.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261001T230009703978-review-of-fsri-one-nova-lane-launcher" data-who="reckon-build" data-when="2026-10-01T23:19:19.076Z">
+    <div class="r-comment-body"><p>independent review of run r-20261001T211450582325-fsri-one-nova-lane-launcher at head 99282e743 stored parsed with scores goal_fidelity 19, evidence 16, scope_discipline 19, durability 17, fit 19 (total 90); the resume closes the two follow-ons recorded at 737dfc022 (the reserved-H200 thin caller again carries the pin-revision diagnostic and the concurrent GPU sampler; the rung fallback&#x27;s reason match now covers ReqNode*/NodeDown with a stubbed test) and the remaining two findings are follow-ons rather than repairs.</p></div>
 </div>
 </section>
 </main>

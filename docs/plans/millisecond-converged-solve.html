@@ -22,14 +22,14 @@
 <title>Millisecond converged solve | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-21">
+<meta name="plan-modified" content="2026-10-01">
 <meta name="plan-impl" content="1.0">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd,273ff747,7aef0963">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="135">
+<meta name="plan-version" content="136">
 </head>
 <body>
 <main class="plan-doc">
@@ -313,6 +313,11 @@
 <article class="r-fu" data-id="f-mcs-alive-graph-count-across-many-programs" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="s19-codex-20260916" data-written-at="2026-09-21" data-recommends-skill="/reckon-build millisecond-converged-solve" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Establish whether the alive CUDA graph count is per-executable or process-cumulative, on a run that compiles many programs</h4>
     <div class="r-fu-body">The twenty-edit sweep at grid_points=65 died at edit 17 on a P100 with RESOURCE_EXHAUSTED instantiating a command buffer at 1669 alive graphs in the process (traceback excerpt cuda-graph-leak.log under sweep-full-axis); twenty identical assemblies of one program show one compile and flat device memory, so repeated assembly at a fixed shape is not the accumulation. Instrument a run that compiles MANY programs (the sweep itself, resumed from edit 18, or a synthetic ladder of distinct shapes) and read the alive-graph count as the runtime exposes it (the failure string is the only surface today, so the instrument may need XLA_FLAGS=--xla_gpu_enable_command_buffer= as the control arm and a count taken from the runtime log or a deliberate exhaustion probe), establishing whether graphs accumulate per compiled executable and are released when an executable is dropped, or accumulate for the process. The gate is a measured series of the count against programs compiled, on titan, with the control arm beside it; the repair follows from which of the two it is (release executables the sweep no longer needs, or bound command-buffer use per program) and is not written until the series exists.</div>
+    <pre class="r-fu-prompt">/reckon-build millisecond-converged-solve</pre>
+    </article>
+<article class="r-fu" data-id="f-msc-fused-route-enforces-axis-qualification" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build millisecond-converged-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Enforce host axis qualification on the fused linear read</h4>
+    <div class="r-fu-body"><p>Decision <code>fused-route-axis-qualification</code> is locked to <code>fused-route-enforces</code>. Make the fused route through <code>current_moments_and_observation</code> enforce the same axis qualification as the two-request route it replaces, without a host round trip on the hot path where the traced qualification flag suffices.</p><p><strong>Done when:</strong> the divergence test that found the gap shows both routes refusing the same intermediate states from identical inputs; removing the enforcement turns that test red (negative control); and no failure is added in the test modules that import the fused read, in fresh processes against a stated base.</p></div>
     <pre class="r-fu-prompt">/reckon-build millisecond-converged-solve</pre>
     </article>
 </section>
@@ -730,15 +735,15 @@
     <p class="r-dec-q">compile-cost-levers</p>
     <p class="r-dec-rat">Lead 2026-09-17: compile time must fall and compiled programs must persist; an hour of CPU-only compile before an H200 job does any GPU work is not acceptable, and GPU use should be visible within seconds of allocation. Four levers taken together, in this order of urgency: (1) canonical program shapes, bucketing mesh and support capacities into a small set so every identity compiles to one of a few programs and the persistent cache hits across identities, rows and test modules (the drift campaign paid ten compiles for ten arms, 7551 s); (2) a pre-warm job that compiles the canonical program set into a shared, non-pruned cache location on the H200 after each merge to main, with test lanes and workers pointed at it, so compile is a once-per-merge cost off the critical path; (3) the single-evaluator restructure continues (stages two to five) to shrink the program itself; (4) a cache-hit guard on every H200 and debug lane: compile seconds and cache hits per program in the log header, and a lane that refuses to report a wall-clock result when misses exceed a budget. Measured baselines to beat: 337 to 1050 s per solve compile, 345 to 409 s for the 300-cell census program, 848 and 965 s for the exact-clip solve at 110 and 300 cells, executables of 590 MB and 903 MB.</p>
     </div>
-<div class="r-dec" data-key="fused-route-axis-qualification" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="fused-route-axis-qualification" data-choice="fused-route-enforces" data-by="Simon McIntosh" data-when="2026-10-01T20:41:17+00:00">
     <p class="r-dec-q">Should the fused linear read enforce host axis qualification, as the two-request route it replaces does?</p>
     <p class="r-dec-ctx">Found 2026-09-20 by the node that put the fused same-state read under test, and recorded rather than repaired because it is a semantic question the node&#x27;s specification did not settle. The fused linear route through current_moments_and_observation does not enforce host axis qualification; the read it replaces does. A solve therefore proceeds through unqualified intermediate states on the fused route and raises on the two-request route, from the same inputs. One of the two is describing the solver&#x27;s intent and the other is not, and which one cannot be read off the code: enforcing qualification on every intermediate state refuses trajectories that pass through an unqualified state on the way to a qualified fixed point, while not enforcing it lets a solve run on a state whose axis read is not trustworthy and only discover that at the end. The node&#x27;s own gate is green either way, because no test exercised the divergence until this one did.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="fused-route-enforces">the fused route enforces qualification too, so both routes refuse the same states</button>
+      <button class="r-opt chosen" data-value="fused-route-enforces">the fused route enforces qualification too, so both routes refuse the same states</button>
       <button class="r-opt" data-value="fused-route-does-not-and-the-other-route-stops">neither route enforces it on an intermediate state, and the two-request route stops raising</button>
       <button class="r-opt" data-value="qualification-is-a-terminal-property-only">qualification is judged only at the terminal state, and neither route reads it on the way</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-10-01. The fused linear read replaces the two-request route, so it inherits that route&#x27;s semantics: both refuse the same intermediate states from the same inputs. The certificates were measured under those semantics, so enforcing them keeps every banked result valid. Judging qualification only at the terminal state could admit trajectories that pass through unqualified states to a qualified fixed point, but it changes which solves succeed. That needs its own measurement, not a silent difference between two routes. Dropping the check on both routes lets a solve finish on an untrustworthy axis read. Accepted cost: some trajectories that might reach a qualified fixed point are refused on the way.</p>
     </div>
 </section>
 </main>

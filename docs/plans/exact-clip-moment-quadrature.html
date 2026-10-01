@@ -23,12 +23,12 @@
   <title>Exact-clip moment quadrature | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-22">
+<meta name="plan-modified" content="2026-10-01">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.99">
-<meta name="plan-version" content="53">
+<meta name="plan-version" content="54">
 </head>
 <body>
   <main class="plan-doc">
@@ -180,25 +180,25 @@ matrix. Record: <a href="/nova/evidence/archive/exact-clip-moment-quadrature-lan
     <p class="r-dec-q">moment-integration</p>
     <p class="r-dec-rat">Lead 2026-09-17, superseding the per-edge Gauss rule of decision arc-representation (1c) after the order study: the source flux is a quadratic fit on seven nodes and the destination is a second-order current distribution, so a sixth-order quadrature exact to 1e-12 pays for precision the interpolant cannot support. The density is a known quadratic in local coordinates, so its area, first and second moments over a polygon with straight edges are exact closed forms per edge (Green&#x27;s theorem), with no quadrature order to argue about; the only approximation is the polyline arc, whose vertex count is sized to the quadratic fit&#x27;s own O(h^3) error rather than fixed at 128, gated per row by the locked budget rule (one tenth of the smallest other error term on that row). Consequences: the per-edge Gauss order constant and the 500-evaluation ceiling are retired; the fixed-shape condition of 1c stands (arc vertex capacity a compile-time constant, exact-zero padding); memory and trace cost are first-class measures of the landing beside the moment agreement.</p>
     </div>
-<div class="r-dec" data-key="fallback-fence-norm" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="fallback-fence-norm" data-choice="moment-relative-l2" data-by="Simon McIntosh" data-when="2026-10-01T20:41:15+00:00">
     <p class="r-dec-q">What fences the five rows whose other error term sits at the fan&#x27;s refinement floor?</p>
     <p class="r-dec-ctx">Measured by the fallback-floor node 2026-09-19. Three candidates were exercised. One tenth of the fan&#x27;s own refinement floor lands at 2.9e-17 to 5.1e-16, below any polyline&#x27;s round-off floor of 1.5e-15 to 2.5e-15 at 128 vertices, so no arc count can meet it. The closed form&#x27;s own round-off envelope, now measured at 2.038e-16 current, 2.060e-15 radial and 4.789e-16 vertical, is a real floor but the five rows are still unmet against it. The node&#x27;s own follow-on argues the fence should instead be the retained fan&#x27;s refinement floor expressed in the moment relative L2 norm, which is the norm the rows are judged in, rather than either of the two above.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="moment-relative-l2">the retained fan&#x27;s own refinement floor re-expressed in the moment relative L2 norm the rows are judged in</button>
+      <button class="r-opt chosen" data-value="moment-relative-l2">the retained fan&#x27;s own refinement floor re-expressed in the moment relative L2 norm the rows are judged in</button>
       <button class="r-opt" data-value="closed-form-envelope">keep the measured closed-form round-off envelope and accept that the five rows are unmet</button>
       <button class="r-opt" data-value="fan-floor-tenth">keep one tenth of the fan floor and record that no arc count can ever meet it</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-10-01, following the fallback-floor node&#x27;s own recommendation. The five rows are judged in the moment relative L2 norm, so their fence belongs in that norm. One tenth of the fan floor (2.9e-17 to 5.1e-16) sits below every polyline&#x27;s round-off floor (1.5e-15 to 2.5e-15 at 128 vertices), so no arc count can meet it. The closed-form round-off envelope (2.038e-16 current, 2.060e-15 radial, 4.789e-16 vertical) is a real floor, but it is stated in a different norm and leaves the rows unmet for a reason unrelated to their accuracy. Accepted cost: the fence is only as tight as the retained fan&#x27;s own refinement floor.</p>
     </div>
-<div class="r-dec" data-key="traced-vertex-capacity-for-multi-run-cells" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="traced-vertex-capacity-for-multi-run-cells" data-choice="per-layout-derivation" data-by="Simon McIntosh" data-when="2026-10-01T20:41:15+00:00">
     <p class="r-dec-q">How is the traced polygon vertex capacity set for a cell whose level set enters twice?</p>
     <p class="r-dec-ctx">Measured by the capacity record-repair node 2026-09-19 on the diverted single-null row at 110 cells. The derived bound is a one-arc bound, 128 arc samples plus the straight chain, giving 162 for that row. Cell 9 realises two traced level runs and needs 260, decomposing as 256 interior level-arc samples plus 4 on the cell boundary, so the bound refuses it and the row reports one refused cell with vertex count 0 and area 0.0. Raising the capacity to 4096 for a diagnostic run admits the cell at area 0.00708. A multi-run cell is a real geometric case on a diverted layout, not a pathology, so the bound has to account for it one way or another.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="per-layout-derivation">derive the capacity per layout from the number of level runs the layout can present, so a diverted row carries its own bound</button>
+      <button class="r-opt chosen" data-value="per-layout-derivation">derive the capacity per layout from the number of level runs the layout can present, so a diverted row carries its own bound</button>
       <button class="r-opt" data-value="widen-to-two-runs">widen traced_polygon_vertex_capacity globally to admit two runs plus the straight chain</button>
       <button class="r-opt" data-value="keep-and-report">keep the one-arc bound and let a multi-run cell be refused and reported</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-10-01. A multi-run cell is a real geometric case on a diverted layout, not a pathology. Cell 9 of the diverted single-null row at 110 cells realises two traced level runs and needs 260 vertices against the one-arc bound of 162; at a diagnostic capacity of 4096 it is admitted with area 0.00708. A silent capacity truncation is what broke exact map fidelity before 427f05e10 (134-vertex arcs cut to 24), so keeping the one-arc bound and refusing repeats that failure. Widening the bound globally charges every row, limited ones included, for a case only diverted layouts present. Deriving the bound per layout from its level-run count charges only the rows that need it. Accepted cost: the bound becomes a function of layout topology and must be stated on the clip receipt.</p>
     </div>
 </section>
 
@@ -265,6 +265,16 @@ matrix. Record: <a href="/nova/evidence/archive/exact-clip-moment-quadrature-lan
 <article class="r-fu" data-id="f-ecq-density-promotion-record" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="solver clip-and-quadrature review (codex terra)" data-written-at="2026-09-21" data-recommends-skill="/reckon-build exact-clip-moment-quadrature" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Correct the failed exact-density promotion record</h4>
     <div class="r-fu-body"><p>From review <code>solver clip-and-quadrature review (codex terra)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-clip-and-quadrature</code>.</p><p>Commit e916b3f99d21555613402fa12ac9c7f81f30df62 was carried by a ledger row whose gate is failed: the memory baseline timed out and its boundary evaluation count was 8192 to 8448 per cut cell against an under-200 done-when. Preserve the negative result in the evidence record, remove any landed wording that implies the route cleared its gate, and wire downstream planning to the sampled-arc replacement rather than this failed route.</p></div>
+    <pre class="r-fu-prompt">/reckon-build exact-clip-moment-quadrature</pre>
+    </article>
+<article class="r-fu" data-id="f-ecq-per-layout-vertex-capacity" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build exact-clip-moment-quadrature" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Derive the traced polygon vertex capacity per layout from its level-run count</h4>
+    <div class="r-fu-body"><p>Decision <code>traced-vertex-capacity-for-multi-run-cells</code> is locked to <code>per-layout-derivation</code>. Derive <code>traced_polygon_vertex_capacity</code> from the number of level runs the layout can present: 128 arc samples per run plus the straight chain. Write the derived bound and the refused-cell count on the clip receipt, which also discharges the observable-refusal part of <code>f-ecq-overflow-refusal-consumption</code>. S21's exact-mode executable measurement on cut-cell-current-attribution consumes this, so it runs first.</p><p><strong>Done when:</strong> on the diverted single-null row at 110 cells, cell 9 is admitted (260 vertices, area 0.00708 as in the 4096-capacity diagnostic) with zero refused cells; every limited row keeps its one-arc bound and a bit-identical clip; a presented two-run layout above the derived bound is refused visibly on the receipt rather than dropped; and no failure is added in the modules importing <code>separatrix_clip</code> in fresh all_debug processes. Negative control: forcing the one-arc bound on the diverted row refuses cell 9 again.</p></div>
+    <pre class="r-fu-prompt">/reckon-build exact-clip-moment-quadrature</pre>
+    </article>
+<article class="r-fu" data-id="f-ecq-fence-in-moment-l2" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build exact-clip-moment-quadrature" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Re-judge the five fallback rows against the fan floor in the moment relative L2 norm</h4>
+    <div class="r-fu-body"><p>Decision <code>fallback-fence-norm</code> is locked to <code>moment-relative-l2</code>. Re-express the retained fan's refinement floor in the moment relative L2 norm and judge each of the five fallback rows against it.</p><p><strong>Done when:</strong> the receipt states, per row, its error and the fence in that one norm, with a pass or fail verdict; the evidence record replaces the two superseded fences with this one; and the module test passes in one fresh all_debug process with the default route bit-identical to base.</p></div>
     <pre class="r-fu-prompt">/reckon-build exact-clip-moment-quadrature</pre>
     </article>
 </section>

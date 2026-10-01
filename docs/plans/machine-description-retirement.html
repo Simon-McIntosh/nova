@@ -20,8 +20,8 @@
   <title>Retire the Bespoke Machine-Description Layer | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-version" content="3">
 <meta name="plan-effort-hours" content="12.0">
 </head>
 <body>
@@ -136,14 +136,14 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="removal-style" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="removal-style" data-choice="clean-deletion" data-by="Simon McIntosh" data-when="2026-10-01T20:41:50+00:00">
     <p class="r-dec-q">Clean deletion in one beat, or a deprecation window where both the
           registry and the producer serve descriptions?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="clean-deletion">clean deletion once equivalence is demonstrated</button>
+      <button class="r-opt chosen" data-value="clean-deletion">clean deletion once equivalence is demonstrated</button>
       <button class="r-opt" data-value="deprecation-window">deprecation window with both paths live</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-10-01. Delete the bespoke registry in one step once f-mdr-001 shows the ambix producer yields the same description: all 44 described loop positions unique, the solve-input join at 43 of 46, and identical conductor geometry. nova carries no backward-compatibility constraint. A deprecation window keeps two sources of one description live, which is exactly the duplication the retirement removes. The demonstrated equivalence is what makes a clean deletion safe. Accepted cost: any consumer missed by the §3 inventory breaks at deletion rather than during a window.</p>
     </div>
 </section>
 

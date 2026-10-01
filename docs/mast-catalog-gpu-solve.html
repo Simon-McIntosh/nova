@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S16">
-<meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="67">
+<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-version" content="69">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -98,7 +98,12 @@
       <li><strong>Label:</strong> nova's JAX topology/connectivity stack (nulls, LCFS, masks,
       flux-surface bins) — already batched and pinned batched==per-slice.</li>
       <li><strong>Persist:</strong> ψ grids (optionally decimated), profiles, boundary, labels,
-      convergence diagnostics → zarr label store via nova.io, standard-name keyed.</li>
+      convergence diagnostics → zarr label store via nova.io, standard-name keyed. The store is
+      the run's output, read by imas-ambix for training, and every array in it is signed and
+      labelled by Data Dictionary 4.1.0 conventions: COCOS 17, the DD's own path names and
+      units, and topology as <code>equilibrium.time_slice.contour_tree</code> nodes and edges.
+      Equilibrium IDSs are produced on demand through the nova.io egress, and the
+      zarr → IDS → <code>validate()</code> → zarr round trip is the conformance gate.</li>
     </ol>
     <ul>
       <li><strong>Sharding:</strong> single-process <code>jax.sharding</code> over 8 devices
@@ -247,7 +252,7 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
-<div class="r-dec" data-key="output-store" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="output-store" data-choice="zarr-plus-ids-egress" data-by="Simon McIntosh" data-when="2026-10-01T20:42:26+00:00">
     <p class="r-dec-q">Output format for the labeled catalog: standard-name-keyed zarr label
         store (nova.io native, streams well, feeds ambix training directly) vs equilibrium IDSs
         per shot (IMAS-interoperable, heavier) vs both (zarr primary + IDS egress on demand via
@@ -255,9 +260,9 @@
     <p class="r-dec-opts">
       <button class="r-opt" data-value="zarr-primary">zarr label store primary</button>
       <button class="r-opt" data-value="ids-per-shot">equilibrium IDS per shot</button>
-      <button class="r-opt" data-value="zarr-plus-ids-egress">zarr primary + IDS egress on demand</button>
+      <button class="r-opt chosen" data-value="zarr-plus-ids-egress">zarr primary + IDS egress on demand</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-10-01. The label store is the catalog run&#x27;s persisted output: nova writes it through nova.io and imas-ambix reads it for training. It is a write format, not a new nova-side schema. Zarr streams well and feeds ambix directly. Equilibrium IDSs per shot are heavier to write and slower to stream, so they are produced on demand through the existing nova.io egress. The lead added a binding condition: every array is signed and labelled by Data Dictionary 4 conventions (COCOS 17 as DD 4.1.0 declares, the DD&#x27;s own path names and units, standard-name keys), and the zarr to IDS to validate() to zarr round trip is the conformance gate that stops the store drifting into a private schema. Accepted cost: the store&#x27;s keys and signs follow the DD 4 contract, not convenience names.</p>
     </div>
 <div class="r-dec" data-key="convergence-policy" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Fixed-iteration-budget policy for the batched Picard/Newton loop: one
@@ -338,6 +343,11 @@ Done-when
     <div class="r-fu-body">Re-registered 2026-08-26 from broken-ownership followups f-ncp-003 (nova-calibrate-package) and f-ntlh-006 (nova-test-lane-health), both of which pointed at mast-corrected-read-layer after it had shipped - no active plan carried the work. The defect is live: tests/test_mast_solve_inputs.py test_each_probe_channel_reads_the_sensor_it_is_mapped_to carries two enabled probe-axis failures at [15000] and [13500] with no xfail or skip marker, so every full-lane run inherits them. This catalog plan consumes the corrected read layer and the solve-input join, so it owns the adjudication: either the probe-axis mapping is wrong (fix the read layer), or the test's expectation is wrong (fix the test with the mechanism stated) - never mark-and-forget.</div>
     <pre class="r-fu-prompt">/reckon-ship mast-catalog-gpu-solve</pre>
     <p class="r-fu-outcome">Resolved by preserving reconstruction probe angles in their measured counter-clockwise convention and applying the sign inversion only at the clockwise DDv4 boundary. Independent verification passed both real-shot probe cases, the shape-mismatch refusal, and both sensor-door guards (5/5); shape-mismatched fl_cc10 remains present-but-unusable and never enters solve samples. Worker commits 3472495b and ea5d17e8 are integrated through merge e745c347. The non-failing SQLite ResourceWarning remains a visible follow-on.</p>
+    </article>
+<article class="r-fu" data-id="f-mcgs-label-store-follows-dd4" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build mast-catalog-gpu-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Write the label store under DD 4.1.0 conventions and gate it on the IDS round trip</h4>
+    <div class="r-fu-body"><p>Decision <code>output-store</code> is locked to <code>zarr-plus-ids-egress</code>, with the condition that every stored quantity is signed and labelled by Data Dictionary 4 conventions. DD 4.1.0 declares COCOS 17. Its <code>equilibrium</code> IDS lists 151 COCOS-dependent fields by transformation type (<code>psi_like</code> 45, <code>ip_like</code> 30, <code>b0_like</code> 24, <code>dodpsi_like</code> 12, <code>q_like</code> 12); each stored array carries its DD path, transformation type, units and COCOS as attributes, and signs are converted through <code>nova.io.cocos</code> from the solver's declared convention, never assumed.</p><ul><li>Axis flux: <code>global_quantities.psi_magnetic_axis</code> (added in 4.1.0), not the obsolescent <code>psi_axis</code>.</li><li>Boundary flux: <code>boundary.psi</code>, not the obsolescent <code>global_quantities.psi_boundary</code>. <code>boundary_separatrix</code> was removed in 4.0.0.</li><li>Class: <code>boundary.type</code>, 0 limiter and 1 diverted.</li><li>Wall clearance: <code>boundary.closest_wall_point</code> (r, z, distance).</li><li>Topology: <code>contour_tree.node(:)</code> with <code>critical_type</code> (0 minimum, 1 saddle, 2 maximum, on raw ψ), <code>r</code>, <code>z</code>, <code>psi</code> and the saddle <code>levelset</code>, plus <code>contour_tree.edges</code>. This field is alpha in DD 4, so the store records the DD version it was written against. Topology labels come from contour-tree-topology-authority.</li><li>Plasma current: <code>global_quantities.ip</code> (<code>ip_like</code>; positive is anticlockwise viewed from above).</li><li>2D flux: <code>profiles_2d.psi</code>, using the DD 4 definition of the integration surface.</li></ul><p><strong>Done when:</strong> one MAST shot and one DIII-D frame round-trip zarr to IDS to <code>validate()</code> to zarr with every array bit-identical; every stored key resolves to a DD 4.1.0 path or a standard name; a reversed-current MAST shot (the 22475 to 22626 block) stores <code>ip</code> and <code>psi</code> with signs consistent under COCOS 17; and a deliberately mis-signed <code>psi</code> fails the convention check (negative control).</p></div>
+    <pre class="r-fu-prompt">/reckon-build mast-catalog-gpu-solve</pre>
     </article>
 </section>
 

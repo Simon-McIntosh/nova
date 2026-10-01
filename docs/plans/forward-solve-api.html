@@ -24,8 +24,8 @@
 <meta name="plan-impl" content="0.985">
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-24">
-<meta name="plan-version" content="105">
+<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-version" content="106">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -60,6 +60,16 @@
     <p class="r-dec-q">Does the declared-defaults table carry its own interface version, or is it keyed by Nova&#x27;s version?</p>
     <p class="r-dec-ctx">A separate api_version would let banked receipts be compared by interface generation independently of the package; the receipt&#x27;s resolved-defaults block already records what ran.</p>
     <p class="r-dec-rat">Lead decision 2026-09-02: no separate API version. The defaults table is keyed by Nova&#x27;s own package version and every receipt records that version beside the resolved defaults; comparability across banks comes from the resolved-defaults block, and a change of default is a Nova release note, not an interface bump.</p>
+    </div>
+<div class="r-dec" data-key="core-dependency-surface" data-choice="promote-jax-assess-pandas" data-by="Simon McIntosh" data-when="2026-10-01T20:42:55+00:00">
+    <p class="r-dec-q">Which packages does a default nova install carry?</p>
+    <p class="r-dec-ctx">The optional-extra import census found that a default install cannot import the solver: jax has 100 module-level imports in 52 modules (extras gpu, jax), pandas 33 in 32 modules (extra interchange), matplotlib and its toolkits 45 in about 30, and vedo, pyvista, meshio and trimesh 11.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="promote-jax-assess-pandas">jax becomes core; pandas is assessed for removal and kept only where it adds real value; plotting and viz packages become lazy imports</button>
+      <button class="r-opt" data-value="promote-jax-and-pandas">jax and pandas both become core; plotting and viz packages become lazy imports</button>
+      <button class="r-opt" data-value="all-extras-guarded">everything stays an extra and every module-level import is guarded</button>
+      </p>
+    <p class="r-dec-rat">Lead decision 2026-10-01. The solver is JAX, so a default install that cannot import jax cannot solve: jax becomes a core dependency. pandas has already been taken out of the core path, so promoting it would put back a dependency the solve does not use. It is assessed for removal instead, and kept, as an extra, only where a use brings real value. Plotting and visualisation packages become lazy imports, following the vedo fix. Guarding every import (about 190 module-level sites) costs a guard per module to keep a dependency the core path needs anyway. Accepted cost: jax and its wheel set are always installed.</p>
     </div>
 </section>
 
@@ -169,10 +179,11 @@
     <pre class="r-fu-prompt">/reckon-build forward-solve-api</pre>
     <p class="r-fu-outcome">Merged at c160c62be (run r-20260923T045912073859, review 97). The SOL ledger census stamps its receipt with its source revision, the receipt is regenerated with the stamp, the gate and negative-control logs are committed, and tests/test_sol_ledger_render.py asserts the stamp; dropping it reddens the gate. The review's two durability notes stay with the record: the render metrics name artifacts by absolute worktree paths, and the title-split assertion compares the title against the mapping it was composed from.</p>
     </article>
-<article class="r-fu" data-id="f-fsapi-core-dependency-surface" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solve-api" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsapi-core-dependency-surface" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solve-api" data-resolved-at="2026-10-01T20:42:55+00:00" data-resolved-by="Simon McIntosh">
     <h4 class="r-fu-title">Decide nova&#x27;s core dependency surface: jax and pandas are imported by core modules but declared only as extras</h4>
     <div class="r-fu-body">Lead decision. The census (docs/figures/forward-solve-api/optional-extra-imports/report.md in its worktree) finds a default install cannot import the solver: jax 100 module-level imports in 52 modules (extras gpu, jax), pandas 33 in 32 (extra interchange), matplotlib and its toolkits 45 in about 30 modules, and vedo, pyvista, meshio and trimesh 11. Options: promote jax and pandas to core dependencies and make the plotting and viz packages lazy imports like the vedo fix; or keep all of them as extras and guard every import.</div>
     <pre class="r-fu-prompt">/reckon-build forward-solve-api</pre>
+    <p class="r-fu-outcome">Locked as decision <code>core-dependency-surface</code> = <code>promote-jax-assess-pandas</code> (2026-10-01). Implementation is carried by <code>f-fsapi-promote-jax-assess-pandas</code>.</p>
     </article>
 <article class="r-fu" data-id="f-fsapi-net-current-census-exact-rows-and-panels" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solve-api §1" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Finish the net-current census at a passing rung: the exact rows on the H200, one booking convention, and the terminal flux panels</h4>
@@ -182,6 +193,11 @@
 <article class="r-fu" data-id="f-fsapi-clip-mode-is-a-request-field" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-build forward-solve-api" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Make the support clip mode a field of the forward-solve request and receipt, not the module global _SUPPORT_CLIP_MODE</h4>
     <div class="r-fu-body"><p>nova/equilibrium/forward_operator.py holds the clip mode in the module global _SUPPORT_CLIP_MODE (default "chord"), and set_support_clip_mode flips it for the whole process. Seven benchmarks flip it (plasma_cell_map_fidelity, plasma_cell_production_ladder, solovev_certificate, centroid_constrained_fixture_receipt, coupling_moment_order_evaluation, zero_residual_check and xpoint_cell_allocation_rca), so the repaired exact path has no production caller, and two measurements in one process can silently share a mode. Refactor: carry clip_mode on ForwardSolveRequest (with its policy default), thread it to the operator build as an explicit argument, record it in ForwardSolveReceipt, migrate the seven benchmarks to pass it, and delete the global and its setter. Gate: the receipt records the mode, chord rows are bit-identical to before, and a test asserts that two solves with different modes in one process each keep their own. This comes before any cutover of the clip default.</p></div>
+    <pre class="r-fu-prompt">/reckon-build forward-solve-api</pre>
+    </article>
+<article class="r-fu" data-id="f-fsapi-promote-jax-assess-pandas" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build forward-solve-api" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Promote jax to a core dependency, make plotting lazy, and decide pandas use by use</h4>
+    <div class="r-fu-body"><p>Decision <code>core-dependency-surface</code> is locked to <code>promote-jax-assess-pandas</code>. Move jax into <code>[project.dependencies]</code> with <code>uv add</code> so <code>pyproject.toml</code> and <code>uv.lock</code> both carry it. Turn the module-level matplotlib, vedo, pyvista, meshio and trimesh imports on the solver path into lazy imports. For pandas, write a census of every use under <code>nova/</code> (34 modules import it today; the <code>interchange</code> extra declares it): name each use's module and purpose, and say whether a numpy or xarray equivalent serves it. Remove each use that one does, and keep pandas, as an extra, only for uses named and justified in the report.</p><p><strong>Done when:</strong> the optional-extra import census, re-run at head, reports zero module-level imports of non-core packages in modules reachable from the forward-solve entry points; jax is a core dependency in both <code>pyproject.toml</code> and <code>uv.lock</code>; the pandas report lists every remaining use with its justification, and pandas is gone from the dependency set if none remain; and no failure is added in the test modules that import the touched files, in fresh processes against a stated base. The dependency change runs without <code>--no-sync</code> deliberately, in one coordinator-serialised node, and the shared environment is repaired with <code>uv sync --inexact --all-extras</code> from the main checkout afterwards.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solve-api</pre>
     </article>
 </section>

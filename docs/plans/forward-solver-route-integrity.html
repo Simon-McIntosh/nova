@@ -25,8 +25,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-modified" content="2026-09-24">
-<meta name="plan-version" content="38">
+<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-version" content="39">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -408,15 +408,15 @@
       </p>
     <p class="r-dec-rat">The interim that moved the single-null 500 row by 2.2e-3 and produced a non-finite residual is the measured cost of a tolerance; the certificate is the exact pin and stays the gate.</p>
     </div>
-<div class="r-dec" data-key="newton-krylov-third-repair" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="newton-krylov-third-repair" data-choice="live-warmup-frozen-newton" data-by="Simon McIntosh" data-when="2026-10-01T20:40:50+00:00">
     <p class="r-dec-q">Which design does the third Newton-Krylov route repair implement?</p>
     <p class="r-dec-ctx">The codex node r-20260919T090428129698 stopped at the two-attempt fence. Attempt one (label-aware partition promotion with label identity) reached NoQualifiedAxisError in job 1273977. Attempt two (every topology and domain read kept live, committed as bed0155b) passed its focused refusal test but the exact route test timed out at 59:25 in job 1273996 on all_debug, so the live-map route is correct where measured and too slow to gate. Six commits (1b54057a, 4992bcc3, bff52fa8, bebd067e, bed0155b, 8e0f3bbc) sit unmerged in the run worktree; the run stays blocked so its session remains resumable. Coordinator recommendation: live-warmup-frozen-newton, because the route before dd7d8286 warmed on the live map and froze the partition for Newton, which is the behaviour the regression lost, and it costs one partition read per solve where the live route re-reads every step (the 5.9x cost the support re-read showed on the bank); a widened fence accepts a slower solver on a millisecond plan. Lead to confirm before the codex reset at 2026-09-21T05:57Z.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="live-warmup-frozen-newton">live topology reads through the picard warmup, then a frozen Newton partition taken from the warmed state</button>
+      <button class="r-opt chosen" data-value="live-warmup-frozen-newton">live topology reads through the picard warmup, then a frozen Newton partition taken from the warmed state</button>
       <button class="r-opt" data-value="admission-aware-rollback">keep every read live and add admission-aware outer rollback and damping so the Newton steps that lose the equilibrium are refused</button>
       <button class="r-opt" data-value="widened-fence">keep the live-map route as committed and widen the performance fence for the route test</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-10-01. The regression since dd7d8286 is the loss of exactly this behaviour: the route warmed on the live map, then froze the partition for Newton. Restoring it costs one partition read per solve. Attempt two (every read live, bed0155b) was correct where measured, but the exact route test timed out at 59:25 in job 1273996: it re-reads the partition on every step, the 5.9x cost the support re-read showed on the bank. Admission-aware rollback adds machinery to a route that is already too slow. Widening the fence accepts a slower solver on a millisecond plan. Accepted cost: a Newton step cannot react to a topology change within one solve; the frozen partition must be re-qualified at the terminal state.</p>
     </div>
 <div class="r-dec" data-key="krylov-slice-2-acceptance" data-choice="hold until vmapped cost is at or below the per-site base; name the diverted-move mechanism first" data-by="lead" data-when="2026-09-24T06:41:39+00:00">
     <p class="r-dec-q">krylov-slice-2-acceptance</p>
@@ -512,6 +512,11 @@
 <article class="r-fu" data-id="f-fsri-one-nova-lane-launcher" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">One nova lane launcher for SLURM placement, so briefs stop hand-writing H200, titan and all_debug recipes</h4>
     <div class="r-fu-body"><p>Every heavy node brief restates a ~300-character recipe: the betelgeuse reservation and account, TMPDIR in both the submit and the payload, no uv on the compute node, the shared interpreter plus PYTHONPATH, submitting for real rather than trusting --test-only, the titan fallback, all_debug under an hour, and one allocation per measurement. Workers still get it wrong (the census exact rows ran out their CPU hour instead of going to the H200). Generalise scripts/h200_test_lane/run.sh into one launcher: script or pytest target, rung preference (h200 then titan then cpu), cores, memory and log path. It applies the rules, records the rung actually used and the revision in the log header, and refuses a --test-only admission decision. Briefs then cite the launcher.</p></div>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-implement-live-warmup-frozen-newton" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Implement the locked third repair: live topology reads through the warmup, then a frozen Newton partition</h4>
+    <div class="r-fu-body"><p>Decision <code>newton-krylov-third-repair</code> is locked to <code>live-warmup-frozen-newton</code>. Start from the six unmerged commits on the run worktree <code>msc-newton-krylov-route-regression</code> at <code>8e0f3bbc</code> (attempt two, every read live). Keep the live reads only through the Picard warmup. Take the Newton partition once, from the warmed state, and hold it fixed for every Newton step. Re-qualify it at the terminal state.</p><p><strong>Done when:</strong> the exact route test completes inside its existing performance fence in one all_debug job (attempt two timed out at 59:25 in job 1273996); the focused refusal test passes; the NoQualifiedAxisError of attempt one (job 1273977) does not recur; the receipt records partition reads per solve (one during Newton); and no failure is added in tests/test_fixed_point.py or tests/test_reduced_newton.py in fresh processes against a stated base. Negative control: re-reading the partition on every Newton step brings the timeout back.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity</pre>
     </article>
 </section>

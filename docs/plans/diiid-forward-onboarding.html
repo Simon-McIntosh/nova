@@ -23,8 +23,8 @@
   <title>DIII-D Forward Onboarding | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="77">
+<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-version" content="78">
 <meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959,26a06b78,4ae27c42,52e4ad17,d1aaa089,a6f8bdf4,86f6f38a,10b5c850,e2ffa796,10049a7a,db55fe58,a3d7e947,7af48b66,29d0fcd2,cf2bd3c6,a06b7072,3f654bc9,97a35d9f,fd4637ec,0dfda59a,1df19c16,b14ec670,a672cece,0b54d0bf,5686eb1b,213cc9a4,c3092ace,2d6f9b37,04cc6df2,ddb152e3,99e148ad,4bb375b7,b69a0831,92b68e9d,a9d771d6,6166a404,7c013864,b59e32a7,75a6ff83,05896c67,573a0292,b1807397,7978702b,6b9ff964,8c77ee35,e3e9bc15,0b10e948">
 <meta name="plan-impl" content="0.8">
 <meta name="plan-artifacts" content="docs/evidence/diiid-forward-onboarding-state.html,docs/figures/diiid-forward-onboarding/state-of-play/machine_state.png,docs/figures/diiid-forward-onboarding/state-of-play/given_versus_extracted_topology.png,docs/figures/diiid-forward-onboarding/state-of-play/tared_flux.png,docs/figures/diiid-forward-onboarding/state-of-play/current_density_patches.png,docs/figures/diiid-forward-onboarding/state-of-play/state_of_play_receipt.json,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/exact-tare/exact_clipped_tare_receipt.json,docs/figures/diiid-forward-onboarding/exact-tare/exact_clipped_tare.png,docs/figures/diiid-forward-onboarding/unclaimed-origin/unclaimed_current_origin_receipt.json,docs/figures/diiid-forward-onboarding/unclaimed-current/unclaimed_current_patches_receipt.json,docs/figures/diiid-forward-onboarding/vessel-mesh/diiid_vessel_self_interaction.npz,docs/figures/diiid-forward-onboarding/vessel-mesh/diiid_vessel_hex_mesh.png,docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_audit_receipt.json,docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_census.png,docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_fixed_boundary_illustration.png,docs/figures/diiid-forward-onboarding/negative-tail/negative_tail_attribution_receipt.json,docs/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling_receipt.json,docs/figures/diiid-forward-onboarding/cocos-ip-sign/receipt.json,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.csv,docs/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_receipt.json,docs/figures/diiid-forward-onboarding/machine-description/machine_description_receipt.json,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_plasma_subtraction_gate.json">
@@ -390,13 +390,13 @@
         into the forward solve and break the seam authority; the receipt gives the consumer the
         conditioning information a hook would have hidden.</p>
     </div>
-<div class="r-dec" data-key="passive-model-order" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="passive-model-order" data-choice="minimal-two-four" data-by="Simon McIntosh" data-when="2026-10-01T20:41:49+00:00">
     <p class="r-dec-q">How many vessel eigenmodes per machine does vertical placement and ramp fidelity require?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="minimal-two-four">2–4 modes, order chosen by the labeled-ramp-frame study</button>
+      <button class="r-opt chosen" data-value="minimal-two-four">2–4 modes, order chosen by the labeled-ramp-frame study</button>
       <button class="r-opt" data-value="extended-ladder">Extended mode ladder with per-era refinement</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-10-01. Use two to four vessel eigenmodes per machine, with the order chosen by the labeled-ramp-frame study. A bounded order keeps the calibration surface small: each extra mode is another input to fit and keep consistent across eras. An extended ladder refined per era buys fidelity no current gate asks for, at the cost of more calibration work. Accepted cost: an era whose ramp fidelity needs more than four modes shows up as a study failure and reopens this decision with that evidence.</p>
     </div>
 <div class="r-dec" data-key="vacuum-gate-measure" data-choice="plasma-subtraction-differencing" data-by="Simon McIntosh" data-when="2026-08-17T20:38:51+00:00">
     <p class="r-dec-q">What replaces the inapplicable starter-kit bar as the section-2 kill gate?</p>

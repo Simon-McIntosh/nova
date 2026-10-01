@@ -24,8 +24,8 @@
   <title>Topology read containment and rebank | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="5">
+<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-version" content="6">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-impl" content="0.14">
 </head>
@@ -147,6 +147,11 @@
     <h4 class="r-fu-title">Land §1 on the persisted row 16 fixture, then §3 and §4 on CPU while the H200 reservation is held</h4>
     <div class="r-fu-body"><p>§1 needs no solve. §3 and §4 run on all_debug. §2 and §5 wait for H200 headroom and, for §2, the cut-cell rung A evidence.</p></div>
     <pre class="r-fu-prompt">/reckon-build topology-read-containment-and-rebank §1</pre>
+    </article>
+<article class="r-fu" data-id="f-trcr-rescope-against-contour-tree" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="standard" data-capability-risk="low" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-edit topology-read-containment-and-rebank" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Re-scope §1 and §3 against contour-tree-topology-authority before dispatch</h4>
+    <div class="r-fu-body"><p>On 2026-10-01 the lead ruled that topology is rebuilt as one contour-tree authority on the hex cells (plan contour-tree-topology-authority). This plan's §1 (containment on the class-free read) and §3 (the centroid-free saddle detector) overlap that plan's §3 and §4. Before either is dispatched, re-scope it: keep only what the tree does not provide, or close it as superseded, naming the section of the new plan that carries the work. §2 (rebank on main), §4 (certificate drift) and §5 (joint qualification) are unaffected, except that any bank regenerated before the tree lands is regenerated again after it.</p><p><strong>Done when:</strong> §1 and §3 each carry a revised done-when that does not duplicate the tree plan, or are collapsed as superseded with a pointer to the new plan.</p></div>
+    <pre class="r-fu-prompt">/reckon-build topology-read-containment-and-rebank</pre>
     </article>
 </section>
   <section data-reckon="gates" id="gates" class="r-gates">

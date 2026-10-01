@@ -1,0 +1,8 @@
+revision=ecf7090ba80a454e03c57c00b83c5f237dec24ed tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_forward_operator_arguments.py::test_the_shared_shadowed_map_retains_the_warmed_partition_protocol -q
+module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton/nova/equilibrium/forward.py
+cwd=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton
+23:17:45 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+.                                                                        [100%]
+1 passed in 26.74s
+EXIT=0
+[H[2J[3J

@@ -257,6 +257,32 @@
   "plan": "contour-tree-topology-authority",
   "plan_link": null,
   "promoted_revision": "71c7b3a98fad52ee649e73b58c16172101401e36",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5034,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261001T233317235818-review-of-ctta-join-split-contour-tree",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-ctta-join-split-contour-tree"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "full",

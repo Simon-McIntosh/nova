@@ -1,0 +1,39 @@
+<section id="cca-map-fidelity-centroid-columns">
+  <h3>Map fidelity: booked-minus-analytic support-current centroid per row</h3>
+  <p><strong>2026-10-01 worker landing.</strong> Each row written by
+  <code>benchmarks/plasma_cell_map_fidelity.py</code> now carries
+  <code>support_current_centroid_offset_mm</code> with keys <code>dR</code> and
+  <code>dZ</code> in millimetres, alongside the two centroids and the support
+  cell count. The quantity is the centroid of the support current booked by the
+  lambda-normalised map at the analytic Solov'ev state minus the centroid of the
+  analytic Solov'ev current over the same support, both current-weighted means of
+  <code>(R, Z)</code>. Cell currents are carried at the cell centroid plus the
+  first moment integrated about it, reusing the discrete centroid idiom of
+  <code>benchmarks/solovev_certificate.py:_closed_form_current_target</code>
+  (the <code>ReconstructMoment.fit</code> centroid in
+  <code>nova/equilibrium/moment.py</code> is the same weighted mean with the
+  first moments taken as zero). The booked first moments are recovered from the
+  coupling basis by the inverse of
+  <code>ForwardFluxOperator.coupling_current_moments</code> — multiplying by the
+  cell second-moment matrix — so booked and analytic are computed under one
+  convention.</p>
+  <p>Evidence: one CPU run of the weak-rotation-reactor-static row at its
+  smallest certificate rung (110 requested, 135 realised cells) in chord mode, in
+  place on the fleet allocation (<code>SLURM_JOB_ID=1277272</code>,
+  <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>,
+  <code>configure_dtypes</code> before any array). The row's mismatch
+  <code>sup_relative</code> is <code>9.540289289933222e-05</code> against the
+  committed receipt's <code>9.540289289876033e-05</code>, a relative deviation of
+  <code>5.994467500463213e-12</code>, within the required <code>1e-9</code>: the
+  added column changes no existing number. The column reads
+  <code>dR = -0.06981943764028387 mm</code>, <code>dZ =
+  -7.178572898759781e-10 mm</code> over 121 support cells
+  (<code>lambda = 1.0000713103852796</code>); <code>dZ</code> is consistent with
+  the up-down symmetry of the case. Log:
+  <a href="/nova/figures/plasma-cell-read-fidelity/map-fidelity/centroid-preflight/weak-chord-smallest.log">centroid-preflight/weak-chord-smallest.log</a>.
+  No committed receipt was regenerated or overwritten.</p>
+  <p>Scope: the backend guard admits the CPU preflight lane; the row still
+  records its <code>jax_backend</code> and device. This gate measures only this
+  node's own additive change; verifying the merged result belongs to a
+  separately dispatched test node.</p>
+</section>

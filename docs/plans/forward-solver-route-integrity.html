@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="31">
+<meta name="plan-modified" content="2026-09-24">
+<meta name="plan-version" content="38">
 <meta name="plan-blocks" content="millisecond-converged-solve">
-<meta name="plan-impl" content="0.66">
+<meta name="plan-impl" content="0.65">
 </head>
 <body>
   <main class="plan-doc">
@@ -323,6 +323,71 @@
     carries the counts, the control and the reduced-Newton run.
     This entry changes neither section state nor its followup.</p>
 
+    <h3 id="s3-single-site-krylov-vmap-exit">The Krylov request stream exits when every member is done</h3>
+    <p><code>_single_site_krylov</code> now serves its slots from a
+    <code>lax.while_loop</code> that exits at <code>DONE</code>, in place of the
+    83-slot scan with a cond around the operator. Under <code>vmap</code> the loop
+    runs until the last member finishes; unbatched, the slots and their order are unchanged. The
+    300-cell certificate program falls from 284,792 to <strong>261,735
+    instructions</strong>, with one qualified-step site (2,028).
+    <code>tests/test_single_site_krylov.py</code> counts applications through a host
+    callback: a width-2 batch whose members need 8 and 14 applies 28, and with the scan
+    restored it applies 36, so the test fails.</p>
+    <p><strong>The vmapped cost gate is not met.</strong> On one H200 job the width-16
+    dense step costs 0.01435 s against the per-site base's 0.00818 s (1.75&times;). The
+    restored scan costs 0.01656 s (1.99&times;), against slice 1's CPU reading of 1.240 s
+    and 0.086 s. On CPU, the exit loop is 1.58&times; and the restored scan 16.6&times;. In
+    that case every member needs all 83 applications, so the exit cannot shorten the loop.
+    The remaining excess comes from the while-loop batching rule: once the predicate is
+    per member, every slot selects the whole carry. A probe measures 74 ms with a batched
+    predicate against 41 ms with an unbatched one over 83 slots at width 16. Gating each
+    consumer behind an at-most-once loop made the H200 worse (2.26&times;) and was
+    withdrawn. Closing the gap needs the stream to keep an unbatched predicate under
+    <code>vmap</code>. The operator-boundary reading also fails its bound: the non-converged diverted rung's
+    terminal residual moves from 0.279485232201572 to 0.06325730373091486, although the
+    step is bitwise equal to the scan on 8 of 8 toy operators; the mechanism is not
+    yet named. <code>tests/test_fixed_point.py</code> passes 45 of 45 and
+    <code>tests/test_reduced_newton.py</code> shows the base's four failures. The
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#single-site-krylov-vmap-exit">detailed record</a>
+    carries the arms, the control and the tests. This entry changes neither section state
+    nor its followup.</p>
+    <p>Correction to the reading above: the 0.216 move is not caused by the exit loop.
+    The diverted rung was run side by side under both Krylov bodies, on this tree's
+    operator and on the operator modules of <code>8d02dd0f</code>, where slice 1 was
+    measured. On each operator the two bodies terminate at most 3.07e-12 apart
+    (1.82e-12 on the merged operator, 3.07e-12 on the pre-merge one). On each body the
+    two operators terminate 0.216 apart (0.0633 against 0.2795). The move comes from
+    the operator modules merged from main at <code>e62c8110e</code>, and the exit-loop
+    gate was the first run to measure this rung on them. The Krylov-body difference
+    is floating-point reassociation:
+    the first operator application has an identical input and an output differing by
+    at most 3.3e-16. The Krylov calls (41), the applications per call (64), the
+    qualifications and the trip counts are all equal, and the gap stays near 1e-12
+    through every trip. The
+    <a href="/nova/figures/forward-solver-route-integrity/single-site-krylov/diverted-move-mechanism.md">mechanism record</a>
+    carries both runs' per-trip traces. This entry changes neither section state nor its
+    followup.</p>
+
+    <h3 id="s3-single-site-krylov-batch-rule">The Krylov stream batches through its own vmap rule</h3>
+    <p>The vmapped width-16 cost now meets its gate. On the H200 the step costs
+    <strong>0.00822 s against the per-site base's 0.00835 s</strong>, measured in the same process
+    (0.98&times;). A second allocation reads 0.00821 s against 0.00889 s (0.92&times;). The stream
+    is a <code>custom_vmap</code> function. Unbatched it is the exit loop, unchanged: 261,735
+    instructions at 300 cells, toy operators bitwise equal on 8 of 8, and the diverted rung's terminal
+    bitwise the exit-loop head's (<code>0.06325730373091486</code>). Under <code>vmap</code> its rule
+    runs the members on an explicit axis in two nested loops with scalar predicates. The inner
+    loop serves slots until some member owes a restart projection, and the outer loop projects the
+    owing members. Every consumer's arithmetic is evaluated for every member and written in place
+    only where that member's phase selects it. Restoring the loop's default batching (a per-slot
+    select of the whole carry) returns the cost to 1.73&ndash;1.75&times;. The operator's closure is
+    traced once, and its closed-over values reach the rule as explicit arguments, for
+    <code>_qualified_krylov_step</code> only. <code>tests/test_single_site_krylov.py</code> passes 5,
+    <code>tests/test_fixed_point.py</code> 45, and <code>tests/test_reduced_newton.py</code> shows the
+    base's four failures. The
+    <a href="/nova/evidence/archive/forward-solver-route-integrity-landed.html#single-site-krylov-batch-rule">detailed record</a>
+    carries the design ladder and the compiled-program counts. This entry changes neither section
+    state nor its followup.</p>
+
     <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>
     <p>Measured 2026-09-18: the pre-warm covers 3292 keys the lane never requests and none of the 1285 keys it
     does, so the lane's 1341 hits all came from that target's own earlier run on the same directory; a lane
@@ -353,81 +418,101 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
+<div class="r-dec" data-key="krylov-slice-2-acceptance" data-choice="hold until vmapped cost is at or below the per-site base; name the diverted-move mechanism first" data-by="lead" data-when="2026-09-24T06:41:39+00:00">
+    <p class="r-dec-q">krylov-slice-2-acceptance</p>
+    <p class="r-dec-rat">Lead decisions 2026-09-23 on slice 2: the exit loop alone left the vmapped width-16 cost at 1.75x, and the non-converged diverted rung moved 0.216. Both had to be explained or fixed before landing. The mechanism step showed the move is main&#x27;s operator change, with the loop differing only by bounded reassociation. The batching rule then reached 0.98x.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-fsri-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship forward-solver-route-integrity §1" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-build forward-solver-route-integrity §1" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Land §1 through the live codex node, then §4, §2 and §3 in that order</h4>
     <div class="r-fu-body"><p>§1 is in flight on the codex lane (run r-20260919T090428129698, dispatched from the parent plan; its landing is recorded here). §4 is small and unblocks honest lane timing for §2 and §3. §3 is the critical-risk section and takes the strongest capability class available.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §1</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §1</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-002-section-2-first" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="lead" data-written-at="2026-09-20" data-recommends-skill="/reckon-ship forward-solver-route-integrity section 2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-002-section-2-first" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="lead" data-written-at="2026-09-20" data-recommends-skill="/reckon-build forward-solver-route-integrity section 2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Section 2 first: the solve never loops, and compiles to under 50 MB</h4>
     <div class="r-fu-body"><p>Supersedes the ordering in the earlier followup. Deliver section 2 ahead of everything else on this plan, on the strongest lane available, under the lead's constraint that the solve never loops and is designed as efficient maps. The first node takes the trips: trips and Newton steps as scan or while_loop with fixed telemetry slots and the read evaluated once per trip, proven by the serialized executable bytes of the 300-cell weak certificate row before and after, and by a bit-identical terminal state on that row. The executable-size gate beside the memory gate lands in a follow-on node once the certificate driver file is free, because an interim node on the compile-abort plan holds it.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity section 2</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity section 2</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-audit-land-scan-pin" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="solver test-pins review (codex sol)" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship forward-solver-route-integrity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-audit-land-scan-pin" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="solver test-pins review (codex sol)" data-written-at="2026-09-21" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Update the loop inventory for the scan route</h4>
     <div class="r-fu-body"><p>From review <code>solver test-pins review (codex sol)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-test-pins</code>.</p><p>Commits <code>d8bbc0491e72df29ddaabc1e6d76f704c4c8dc2d</code>, <code>a999eff40521e428d4c09a3b0d3adea5724a17b2</code>, and <code>8dc6be23ae6d0c3f76b6bd20e9821733200f23db</code>, <code>tests/test_solve_trips_are_a_scan.py</code> lines 48-61 and <code>benchmarks/program_scope_census.py</code> line 1054: the integrated scan gate passes 146 tests and the archived base implementation correctly produces two lowered trip bodies, but the loop inventory still searches for the removed <code>jax.lax.fori_loop(1, active_set_steps</code> source marker. Both certificate gates that include <code>tests/test_solve_program_size.py</code> now fail there. Repair: inventory the <code>lax.scan</code> form by mechanism, add that test to the route gate, and require the certificate gates to return green at the integrated head.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-003-third-rung-single-read-body-under-100-mb" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="coordinator" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship forward-solver-route-integrity section 2" data-resolved-at="2026-09-21T15:09:03+00:00" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-003-third-rung-single-read-body-under-100-mb" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="coordinator" data-written-at="2026-09-21" data-recommends-skill="/reckon-build forward-solver-route-integrity section 2" data-resolved-at="2026-09-21T15:09:03+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Third rung: one lowered operator-read body per trip and the executable under 100 MB</h4>
     <div class="r-fu-body"><p>The second rung (524e20dc, merged d8e3ca70c) shared the live maps across the shadow-selection branches and took the weak-rotation 300-cell executable from 146,456,085 to 126,313,707 bytes with the current-base terminal state d730c294 bit-identical; a qualification-batching variant measured worse (127,989,777) and was removed with its evidence kept. What remains, in the second rung's own words: share the remaining live evaluator bodies across residual, linearization, recovery and reconciliation so the full lowered program carries one operator-read body per trip (73 read-entry markers remain) and the executable falls under 100,000,000 bytes, preserving the d730c294 state and the trip budget. The strongest lane; the row's own non-convergence is the cut-cell plan's matter.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity section 2</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity section 2</pre>
     <p class="r-fu-outcome">Landed 2026-09-21 (commits bafd2a8a0, 26b4af642, faf2a7e01, 5f854ac81, ba2f3ff04; merged on main): sharing the initial and retried promotion bodies in _newton_krylov_inner took the weak-rotation 300-cell certificate executable from 126,313,582 to 88,289,094 bytes, under the 100 MB ceiling, with the d730c294 terminal state bit-identical across all 1529 values, the CPU compile witness exiting 0 and the focused suites at 157 passed; the control reddens both duplication guards. The global one-primal, one-linearized read-body proof is not claimed: the optimized-HLO counting positive control failed, and the instrument repair is the manifest follow-on. Section 2 ceiling met; the row's non-convergence remains the cut-cell plan's matter.</p>
     </article>
-<article class="r-fu" data-id="f-fsri-clipped-mode-executable-under-the-ceiling" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="s19-codex-20260916" data-written-at="2026-09-22" data-recommends-skill="/reckon-ship forward-solver-route-integrity §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-clipped-mode-executable-under-the-ceiling" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="s19-codex-20260916" data-written-at="2026-09-22" data-recommends-skill="/reckon-build forward-solver-route-integrity §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">The certificate executable in the clipped production mode sits under the ceiling</h4>
     <div class="r-fu-body">Section 2's ceiling applies to the mode the certificate will run in, which by the lead decision of 2026-09-22 is the clipped mode. The chord-mode executable is 88,289,094 bytes at 300 realised cells; the clipped-mode figure at HEAD is owed by the census on cut-cell-current-attribution (f-cca-measure-the-exact-mode-executable-at-head, CPU witness plus titan arm, 110, 300 and 1000 cells). If it is over 100,000,000 bytes, land the clip-side reduction first (exact-clip-moment-quadrature: closed-form polygon moments at the coupling's order, the per-cell clip as one vmapped kernel body so the lowered program does not unroll per cell) and re-measure; this plan's own levers (one read body per trip, one traced evaluator) apply after. Acceptance: serialized bytes under the ceiling at 300 cells in the clipped mode, CPU compile witness exit 0, terminal digest recorded, mapping count beside the chord-mode figure.</div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §2</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §2</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-s3-decide-after-three-attempts" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-09-22" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="2026-09-22T20:22:00+00:00" data-resolved-by="lead">
+<article class="r-fu" data-id="f-fsri-s3-decide-after-three-attempts" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-09-22" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="2026-09-22T20:22:00+00:00" data-resolved-by="lead">
     <h4 class="r-fu-title">Decide §3 after three refused attempts: whole-solve request scheduling, or re-base the ceiling on the measured baseline</h4>
     <div class="r-fu-body"><p>Lead decision. Three attempts on astra leave the traced operator state machine at 302,553 and 304,913 optimised instructions (300 and 1000 cells) against the ceiling 203,078 and 204,531, a 12 percent reduction from the measured baseline 342,055 and 344,858; the interim frozen-topology numbers the ceiling was taken from are not a semantics-preserving route (they moved four certificate terminal states). Options: (a) a fourth node scoped only to whole-solve request scheduling on the committed design state (worktree fsri-one-traced-operator-state-machine, tip 8dbc6cbb), with the reduced-Newton exit-134 abort attributed first; (b) re-base the §3 ceiling on the measured baseline with the 12 percent reduction accepted and the four-row GPU bit identity as the gate; (c) close §3 as a recorded negative and carry the program-size target on §2 alone. Recommendation: (a) once, because the mechanism is confirmed by the 532,366-instruction control and the remainder is named.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
     <p class="r-fu-outcome">Decided by the lead 2026-09-22: option (a), one more attempt, routed to the claude-opus lane at claude-opus-5-5, whose flight config was updated and probed the same evening. The attempt is split into two nodes. First, attribute the reduced-Newton exit-134 abort and the suite-only failure of test_ladder_scoring_evaluates_one_map_per_accepted_step on the committed design state at 8dbc6cbb. This node also confirms that the lane serves through the crew surface. Second, whole-solve request scheduling on that design state against the unchanged ceilings 203,078 and 204,531. The parked run r-20260922T103934949557 keeps its worktree as the base.</p>
     </article>
-<article class="r-fu" data-id="f-fsri-s3-fourth-attempt-on-opus" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-22" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-s3-fourth-attempt-on-opus" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-22" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Fourth §3 attempt on claude-opus 5.5: attribute the exit-134 abort, then whole-solve request scheduling</h4>
     <div class="r-fu-body">Lead decision 2026-09-22 on f-fsri-s3-decide-after-three-attempts. Base: the committed design state at 8dbc6cbb (worktree fsri-one-traced-operator-state-machine). Node 1 (investigate): attribute the SIGABRT exit 134 in tests/test_reduced_newton.py at test_threshold_one_reproduces_the_refusal_only_policy, which appears at base and candidate alike, and the candidate-only in-suite failure of test_ladder_scoring_evaluates_one_map_per_accepted_step, which passes alone. Node 2 (implement): whole-solve explicit request scheduling so that distinct caller streams share one operator body, gated by the existing refusals, 300 cells at or under 203,078 instructions and 1000 cells at or under 204,531, with zero added failures in tests/test_fixed_point.py and tests/test_reduced_newton.py in fresh processes, and the 532,366-instruction per-request control as the negative control. Both nodes run on the claude-opus backend.</div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-clear-jax-caches-between-reduced-newton-tests" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-clear-jax-caches-between-reduced-newton-tests" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Clear JAX caches after each reduced-Newton test so one process never reaches the map-count ceiling</h4>
     <div class="r-fu-body">From fsri-attribute-the-reduced-newton-abort (claude-opus 5.5, merged 62959ec6b, review 97): tests/test_reduced_newton.py aborts at exit 134 because the process's memory-map count reaches vm.max_map_count 65,530 about 20 tests in. With jax.clear_caches() and gc.collect() after every test, the whole file ran to EXIT=1 with no abort and exactly the four pre-existing failures. Add that as an autouse fixture scoped to the file. Gate: the whole file in one all_debug process with no abort, the same four failures and no others; the negative control (remove the fixture) reproduces the abort or a map-count peak above 60,000.</div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-four-reduced-newton-failures-at-head" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-four-reduced-newton-failures-at-head" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Repair the four tests/test_reduced_newton.py failures present at main HEAD</h4>
     <div class="r-fu-body">The abort attribution's cache-cleared arm ran every test at f5af729a9. Four fail independently of the abort: test 1 test_diverted_normalised_certificate_rung_retains_finite_fallback (assert 2.340823366528062 == 2.248351582217136), test 5 (assert False), and tests 18 and 19 (AssertionError: assert False). Attribute and repair each, one node per test.</div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-single-site-krylov" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-single-site-krylov" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Single-site Krylov: every GMRES and promotion loop applies the operator at one site served from a scan</h4>
     <div class="r-fu-body">The transpose-kind slice (r-20260923T042057247197, program 302,553 to 339,490) showed that the shared request body inlines once per GMRES call site, so sharing pays only once each Krylov loop applies its operator at a single site. Restructure _qualified_krylov_step, _rebuilt_model_promotion (damped normal-equation GMRES and linear transpose) and _steepest_descent_promotion so that the operator (residual, JVP and transpose requests) is applied at exactly one call site per program, served from a lax.scan request stream. Gate: optimised instructions at 300 and 1000 cells below 302,553 and 304,913 (the design state), with the per-caller attribution in callers.json; terminal arrays bit-identical on the operator-boundary check; tests/test_fixed_point.py and tests/test_reduced_newton.py in fresh all_debug processes with no failure beyond the four recorded at 52bfefc0. Proceed site by site, one commit and one census per site.</div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-recovery-ladders-as-separate-programs" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-recovery-ladders-as-separate-programs" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Measure, then compile the rarely-taken recovery ladders as separate programs</h4>
     <div class="r-fu-body">The unshared stream at 52bfefc0 is dominated by recovery paths taken only after a refused Newton step: _rebuilt_model_promotion (40,237 instructions) and _steepest_descent_promotion (17,352). Step 1 (report only): over the certificate rows, count how often each recovery path executes per solve, and attribute its instruction share. Step 2 (after the single-site Krylov redesign lands): compile each recovery ladder as its own program, entered only when a step is refused, so that the always-compiled program shrinks; gate on instruction count, bit-identical terminal arrays, and zero added test failures.</div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-operator-geometry-as-operands" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-operator-geometry-as-operands" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solver-route-integrity §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Pass the certificate route&#x27;s operator geometry as traced operands, not closure constants</h4>
     <div class="r-fu-body">The whole-cell and certificate solves close the mesh, coupling blocks and stencils into the trace as constants (compile-cost census: about 55 MiB captured at 300 cells), so every geometry value change recompiles and the executable carries the literals. The batched-operator-boundary plan already made member data traced arguments on the batched route; passing the mesh as arguments measured 337 s compile against 535 s for the closure at 300 cells. Apply the same boundary to the certificate route, gated on bit-identical terminal states and a one-program-for-two-geometries check.</div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §2</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §2</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-single-site-krylov-vmap-exit" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-single-site-krylov-vmap-exit" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="2026-09-24T06:41:39+00:00" data-resolved-by="nova-cc">
     <h4 class="r-fu-title">Slice 2: make the single-site Krylov stream exit early under vmap</h4>
     <div class="r-fu-body">Under vmap the lax.cond gating each of the 83 slots becomes a select, so every slot applies the operator: the stream is 14.3 times slower than the per-site base at width 16 (1.240 s against 0.086 s). Replace the fixed-capacity cond-gated scan with a while_loop (or a batched exit) that stops when every member is DONE. Gate: vmapped width-16 cost at or below the base's, the unbatched instruction count no higher than slice 1's 284,792, the certificate rows within the re-base bounds, zero added test failures.</div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
+    <p class="r-fu-outcome">Merged at 4bd81d199 (run r-20260923T163850406961, claude-opus 5.5, review 89). A while loop ends the stream when every member is done. A custom_vmap rule for _qualified_krylov_step keeps the stream predicate unbatched and writes the basis in place under a member mask. The operator closure is traced with make_jaxpr and passed as explicit arguments. Width-16 vmapped H200 cost is 0.98x and 0.92x the per-site base in the same process (control 1.73x), and the unbatched program is 261,735 instructions. Tests: single-site 5 passed; fixed_point 45 passed; reduced_newton shows the same four base failures. The diverted terminal is 0.06326 on main's operator. Open items go to f-fsri-krylov-slice-2-review-findings.</p>
     </article>
-<article class="r-fu" data-id="f-fsri-ladder-census-counts-every-entry" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-23" data-recommends-skill="/reckon-ship forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-ladder-census-counts-every-entry" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Make the recovery-ladder census count all five entries and fail on a renamed rung</h4>
     <div class="r-fu-body"><p>From the review of the recovery-ladder census (72): benchmarks/recovery_ladder_census.py counts two of the five promotion and recovery entries defined in nova/equilibrium/fixed_point.py, so the report's 19.03 percent share is a lower bound. Its instrumented() also skips a counted path absent from the module, so a rename reads as zero executions rather than failing. The report names revision db634db22, one commit behind the tree that carries it. The census module benchmarks/recovery_ladder_telemetry.py was committed outside its fence and is accepted at promotion. Repair: count every entry, raise on a counted path that is absent, stamp the committing revision, and add a test that fails on a renamed rung. This is program-shape measurement, so it is not held by the map-fidelity gate. Benchmarks and tests only.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §3</pre>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-krylov-slice-2-review-findings" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the slice-2 review findings: a fail-open identity witness, a plan-labelled symbol, and the missing reverse-mode rule</h4>
+    <div class="r-fu-body"><p>From the review of the slice-2 run (89). (1) The toy-operator identity witness under docs/figures/forward-solver-route-integrity/single-site-krylov only counts mismatches and exits 0, and np.array_equal(equal_nan=True) accepts different signed zeros and NaN representations. The reviewer ran it on 1.0 against 2.0 and it printed identical. Make it fail closed on the bit pattern. (2) The benchmark symbol SLICE1_SOURCE carries a plan-stage label; name it by the capacity-scan mechanism. (3) custom_vmap has no reverse-mode rule, so anything that reverse-differentiates through _qualified_krylov_step needs a custom_vjp. Add a test that fails if a reverse-mode caller appears without one. Local lane after RESUME.</p></div>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-prewarm-pin-land-or-drop" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land the pre-warm compile-row refusal from 89fe2174d, or drop it, and decide whether a revision-keyed pin is worth keeping</h4>
+    <div class="r-fu-body"><p>The fsri-prewarm-pin-covers-the-lane-programs worktree at 89fe2174d carries a real fix: a compile row that asked the cache for no program now exits PREWARM_ROW_NO_PROGRAMS rather than passing (958f5722b, with a test in tests/test_h200_cache_guard.py). It also carries landing records showing the pin missed 679 programs after a revision change. Review the three post-review commits, then merge them. Decide in the plan whether the pin should be rebuilt on each solve-touching commit or retired in favour of the operator-geometry-as-operands work, which cuts compile cost at the source.</p></div>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-one-nova-lane-launcher" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">One nova lane launcher for SLURM placement, so briefs stop hand-writing H200, titan and all_debug recipes</h4>
+    <div class="r-fu-body"><p>Every heavy node brief restates a ~300-character recipe: the betelgeuse reservation and account, TMPDIR in both the submit and the payload, no uv on the compute node, the shared interpreter plus PYTHONPATH, submitting for real rather than trusting --test-only, the titan fallback, all_debug under an hour, and one allocation per measurement. Workers still get it wrong (the census exact rows ran out their CPU hour instead of going to the H200). Generalise scripts/h200_test_lane/run.sh into one launcher: script or pytest target, rung preference (h200 then titan then cpu), cores, memory and log path. It applies the rules, records the rung actually used and the revision in the log header, and refuses a --test-only admission decision. Briefs then cite the launcher.</p></div>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -459,6 +544,9 @@
     <div class="r-comment-body">Objective re-stated by the lead 2026-09-22 (decision production-clip-is-moment-preserving-and-coupling-frozen on cut-cell-current-attribution): the program-size ceiling this plan holds exists to admit the moment-preserving, Biot-interaction-frozen cell clips into the hot path. Every rung so far (597 to 146 to 126 to 88 MB) was measured in chord mode; the clipped mode's executable at HEAD is unmeasured since the swept support capacity was retired (3840 to 158 at 110 cells) and is the first node of the route-A path on the cut-cell plan (f-cca-measure-the-exact-mode-executable-at-head). If it sits over 100,000,000 bytes, the remedy is on the clip side first (exact-clip-moment-quadrature section 4: lower the clip and moment order, vmap the per-cell clip kernels so the lowered program carries one kernel body) and only then on this plan's section 3 (one traced evaluator body). Section 3 work touches fixed_point.py and reduced_newton.py and may run beside the census and the clip-side reduction, never beside the mode change in forward_operator.py and source.py.</div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260923T142626281818" data-who="" data-when="">
+    <div class="r-comment-body"></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260924T123622035161" data-who="" data-when="">
     <div class="r-comment-body"></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-coord-20260922-s3-third-attempt-refused" data-who="reckon-ship" data-when="2026-09-22T12:10:00Z">
@@ -502,6 +590,21 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260923T121347063124-review-of-fsri-recovery-ladder-execution-and-size-census" data-who="reckon-ship" data-when="2026-09-23T14:44:49.545Z">
     <div class="r-comment-body"><p>review 72</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260923T163850406961-fsri-single-site-krylov-vmap-exit" data-who="reckon-ship" data-when="2026-09-24T06:06:38.003Z">
+    <div class="r-comment-body"><p>custom_vmap batching rule: width-16 vmapped cost 0.98x and 0.92x per-site base (control 1.73x); 261,735 instructions; reduced_newton keeps its four base failures; diverted move is main operator change, loop vs scan bounded reassociation; review 89, findings in f-fsri-krylov-slice-2-review-findings</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260924T063109866779-review-of-fsri-single-site-krylov-vmap-exit" data-who="reckon-ship" data-when="2026-09-24T06:42:36Z">
+    <div class="r-comment-body"><p>review 89</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260923T154118152991-review-2-of-fsri-prewarm-pin" data-who="reckon-ship" data-when="2026-09-23T16:37:11.661Z">
+    <div class="r-comment-body"><p>no record: the local worker went silent during the 2026-09-23 storage stall</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260923T054725981050-fsri-prewarm-pin-covers-the-lane-programs" data-who="reckon-ship" data-when="2026-09-23T10:56:04.745Z">
+    <div class="r-comment-body"><p>compile-row refusal fix (958f5722b) and pin census on the worktree, not merged; lane submission missed the pin (hits 1158, misses 679, compile 458 s) because the pin is revision-keyed; land-or-drop in f-fsri-prewarm-pin-land-or-drop</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260923T080516058638-review-of-fsri-prewarm-pin-covers-the-lane-programs" data-who="reckon-ship" data-when="2026-09-23T09:16:51.063Z">
+    <div class="r-comment-body"><p>review record stored</p></div>
 </div>
 </section>
 </main>

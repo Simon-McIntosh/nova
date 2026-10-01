@@ -1,0 +1,11 @@
+revision=b4589e1e428504928a4394dd64ac06faaffcb1e5 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/docs/figures/cut-cell-current-attribution/chord-booking-trace']
+device=[CudaDevice(id=0)] x64=True
+SMOKE cell=2 current=0 radial=0 vertical=0
+ROW cells=132 positive=2.274e-14 base_map=0.0950848225228 conditioned_map=0.0611907982658
+SMOKE cell=1 current=0 radial=0 vertical=0
+ROW cells=340 positive=4.636e-16 base_map=0.022909979027 conditioned_map=0.0764944850781
+SMOKE cell=3 current=0 radial=0 vertical=0
+EXTERIOR_CONTROL cell=7 fraction=0 analytic_inside=0/32768 production_inside=32768/32768
+EXTERIOR_CONTROL cell=64 fraction=0 analytic_inside=0/32832 production_inside=32832/32832
+ROW cells=550 positive=2.552e-15 base_map=0.0338673253923 conditioned_map=0.00704606286436
+BOOKING_TRACE_COMPLETE

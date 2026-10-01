@@ -1,0 +1,18 @@
+revision=1922127618d3c891fa6f79331db930739d57d669 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/docs/figures/cut-cell-current-attribution/chord-booking-trace']
+device=[CudaDevice(id=0)] x64=True
+SMOKE cell=2 current=78.1282180121 radial=-7.91215589609 vertical=5.79146899704
+ROW cells=132 positive=4.572e-15 base_map=0.0950848225228 conditioned_map=0.274363229914
+SMOKE cell=1 current=10.5258354694 radial=-0.152400759572 vertical=-0.102585232295
+ROW cells=340 positive=4.876e-14 base_map=0.022909979027 conditioned_map=0.21135137393
+SMOKE cell=3 current=9.75410755886 radial=0.193285850835 vertical=-0.212332286446
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py", line 652, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py", line 644, in main
+    report["rows"].append(measure(requested, args.output))
+                          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py", line 480, in measure
+    assert exterior_ratios[str(cell)] < EXTERIOR_REMOVAL_FRACTION
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

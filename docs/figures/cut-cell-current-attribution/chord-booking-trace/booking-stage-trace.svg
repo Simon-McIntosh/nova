@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="360" viewBox="0 0 1180 360" role="img" aria-labelledby="title desc">
+  <title id="title">Production chord booking stage trace</title>
+  <desc id="desc">A left-to-right sequence shows the whole-cell carrier entering local quadratic support clipping, density evaluation, current and first-moment integration, and normalization. An analytic-core membership counterfactual replaces only the point-admission condition.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#263238"/>
+    </marker>
+  </defs>
+  <rect width="1180" height="360" fill="#ffffff"/>
+  <g font-family="system-ui, sans-serif" fill="#172126">
+    <text x="590" y="32" text-anchor="middle" font-size="22" font-weight="700">Current first appears in the local quadratic support integration</text>
+    <g font-size="16" text-anchor="middle">
+      <rect x="28" y="92" width="190" height="92" rx="8" fill="#eef4f5" stroke="#263238"/>
+      <text x="123" y="125" font-weight="700">Whole-cell carrier</text>
+      <text x="123" y="151">supplied by chord route</text>
+
+      <rect x="260" y="78" width="250" height="120" rx="8" fill="#fff2dd" stroke="#b45100" stroke-width="3"/>
+      <text x="385" y="111" font-weight="700">Local quadratic ψₙ=1</text>
+      <text x="385" y="138">support and quadrature</text>
+      <text x="385" y="165" font-size="14">first current-writing operation</text>
+
+      <rect x="552" y="92" width="190" height="92" rx="8" fill="#eef4f5" stroke="#263238"/>
+      <text x="647" y="125" font-weight="700">Profile density</text>
+      <text x="647" y="151">at local-field points</text>
+
+      <rect x="784" y="92" width="190" height="92" rx="8" fill="#eef4f5" stroke="#263238"/>
+      <text x="879" y="125" font-weight="700">Current + first</text>
+      <text x="879" y="151">moments integrated</text>
+
+      <rect x="1016" y="92" width="136" height="92" rx="8" fill="#eef4f5" stroke="#263238"/>
+      <text x="1084" y="125" font-weight="700">Normalize</text>
+      <text x="1084" y="151">and couple</text>
+    </g>
+    <g stroke="#263238" stroke-width="2" marker-end="url(#arrow)">
+      <line x1="218" y1="138" x2="252" y2="138"/>
+      <line x1="510" y1="138" x2="544" y2="138"/>
+      <line x1="742" y1="138" x2="776" y2="138"/>
+      <line x1="974" y1="138" x2="1008" y2="138"/>
+    </g>
+    <path d="M385 260 L385 206" stroke="#1b6e69" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="246" y="264" width="278" height="66" rx="8" fill="#e7f5f3" stroke="#1b6e69" stroke-width="2"/>
+    <text x="385" y="291" text-anchor="middle" font-size="16" font-weight="700">Counterfactual point admission</text>
+    <text x="385" y="316" text-anchor="middle" font-size="15">analytic separatrix-polygon membership</text>
+    <text x="647" y="238" text-anchor="middle" font-size="14" fill="#455a64">density law, normalization and frozen coupling unchanged</text>
+    <text x="590" y="350" text-anchor="middle" font-size="13" fill="#455a64">Production source: nova/equilibrium/clip_quadrature.py:885</text>
+  </g>
+</svg>

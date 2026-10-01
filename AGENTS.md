@@ -277,7 +277,7 @@ tmpfs — slurmstepd then cancels the job in zero seconds with an empty log.
 
 ## Coupled Repositories
 
-Prior-art scouts (reckon-ship §1b) search these repos in both directions
+Prior-art scouts (reckon-build §1b) search these repos in both directions
 before authoring new machinery here, and their sessions search nova likewise:
 
 - **imas-ambix** (`~/Code/imas-ambix`) — the flux-function seam, challenge

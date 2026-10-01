@@ -1,0 +1,16 @@
+revision=21bc6d9ac41c42ca22f96f44ddef1f6fff12a73b tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py', '--expected-backend', 'cpu', '--requested', '500', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/docs/figures/cut-cell-current-attribution/chord-booking-trace/cpu-control-550']
+device=[CpuDevice(id=0)] x64=True
+SMOKE cell=3 current=9.75410755886 radial=0.193285850835 vertical=-0.212332286446
+EXTERIOR_CONTROL cell=7 fraction=0 analytic_inside=0/25 production_inside=0/25
+EXTERIOR_CONTROL cell=64 fraction=2.17438255049 analytic_inside=9/25 production_inside=9/25
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py", line 662, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py", line 654, in main
+    report["rows"].append(measure(requested, args.output))
+                          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py", line 490, in measure
+    assert exterior_ratios[str(cell)] < EXTERIOR_REMOVAL_FRACTION
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

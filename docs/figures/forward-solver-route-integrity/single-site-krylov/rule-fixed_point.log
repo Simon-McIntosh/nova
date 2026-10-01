@@ -1,0 +1,58 @@
+revision=6204bfd6feb7227dd66c2594dd2433248072e4a1 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_fixed_point.py -vv --tb=short job=1277150
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 07:43:42 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 45 items
+
+tests/test_fixed_point.py::test_picard_converges_to_the_fixed_point PASSED [  2%]
+tests/test_fixed_point.py::test_newton_krylov_solves_an_affine_map_in_one_step PASSED [  4%]
+tests/test_fixed_point.py::test_newton_stops_without_a_promotion_at_a_converged_initial_state PASSED [  6%]
+tests/test_fixed_point.py::test_manifold_newton_stops_without_an_attempt_at_a_converged_state PASSED [  8%]
+tests/test_fixed_point.py::test_newton_stops_at_the_first_passing_promotion_and_pads_diagnostics PASSED [ 11%]
+tests/test_fixed_point.py::test_newton_reports_iteration_budget_exhaustion_after_uncapped_first_step PASSED [ 13%]
+tests/test_fixed_point.py::test_newton_backtracks_residual_excursions_and_keeps_contracting_steps[promotion-26] PASSED [ 15%]
+tests/test_fixed_point.py::test_newton_backtracks_residual_excursions_and_keeps_contracting_steps[promotion-260] PASSED [ 17%]
+tests/test_fixed_point.py::test_newton_continues_with_damped_operator_recovery_after_ladder_exhaustion PASSED [ 20%]
+tests/test_fixed_point.py::test_newton_refuses_when_backtracking_and_continuation_are_exhausted PASSED [ 22%]
+tests/test_fixed_point.py::test_newton_reconciles_the_frozen_solve_with_its_live_active_set PASSED [ 24%]
+tests/test_fixed_point.py::test_active_set_aggregates_conditioning_receipts_across_frozen_solves PASSED [ 26%]
+tests/test_fixed_point.py::test_newton_refuses_equal_own_mask_residual_and_keeps_settled_mask PASSED [ 28%]
+tests/test_fixed_point.py::test_default_presettlement_scoring_accepts_strict_decrease_and_keeps_best PASSED [ 31%]
+tests/test_fixed_point.py::test_newton_reports_active_set_exhaustion_with_live_receipts PASSED [ 33%]
+tests/test_fixed_point.py::test_newton_with_a_constant_active_set_preserves_the_smooth_solve PASSED [ 35%]
+tests/test_fixed_point.py::test_newton_carries_a_smaller_recovery_radius_after_exhaustion PASSED [ 37%]
+tests/test_fixed_point.py::test_newton_rebuilds_the_model_after_recovery_radius_collapse PASSED [ 40%]
+tests/test_fixed_point.py::test_smooth_merit_brackets_relative_sup_for_distributed_residuals PASSED [ 42%]
+tests/test_fixed_point.py::test_newton_selects_relative_sup_descent_after_recovery_exhaustion PASSED [ 44%]
+tests/test_fixed_point.py::test_newton_returns_the_best_observed_relative_sup_iterate PASSED [ 46%]
+tests/test_fixed_point.py::test_newton_compares_barriers_with_the_recent_merit_maximum[0.5-True] PASSED [ 48%]
+tests/test_fixed_point.py::test_newton_compares_barriers_with_the_recent_merit_maximum[0.7-False] PASSED [ 51%]
+tests/test_fixed_point.py::test_newton_does_not_try_descent_while_its_full_step_is_sufficient PASSED [ 53%]
+tests/test_fixed_point.py::test_newton_reports_a_nonfinite_initial_residual_without_attempting PASSED [ 55%]
+tests/test_fixed_point.py::test_newton_reports_a_refused_linear_action PASSED [ 57%]
+tests/test_fixed_point.py::test_newton_stopping_is_jittable_and_does_not_require_picard_contraction PASSED [ 60%]
+tests/test_fixed_point.py::test_vmap_stopping_runs_to_the_slowest_lane_with_per_lane_receipts PASSED [ 62%]
+tests/test_fixed_point.py::test_kink_aware_route_options_converge_across_a_piecewise_tangent[clarke] PASSED [ 64%]
+tests/test_fixed_point.py::test_kink_aware_route_options_converge_across_a_piecewise_tangent[nonmonotone] PASSED [ 66%]
+tests/test_fixed_point.py::test_kink_aware_route_options_converge_across_a_piecewise_tangent[surface_restricted] PASSED [ 68%]
+tests/test_fixed_point.py::test_kink_aware_route_options_converge_across_a_piecewise_tangent[damped_hybrid] PASSED [ 71%]
+tests/test_fixed_point.py::test_kink_aware_routes_do_not_change_existing_newton_krylov_results PASSED [ 73%]
+tests/test_fixed_point.py::test_damped_hybrid_can_release_damping_as_the_residual_falls PASSED [ 75%]
+tests/test_fixed_point.py::test_anderson_accelerates_relaxed_picard_at_a_shared_budget PASSED [ 77%]
+tests/test_fixed_point.py::test_all_schemes_share_one_nonlinear_fixed_point PASSED [ 80%]
+tests/test_fixed_point.py::test_newton_first_step_is_uncapped_on_an_exact_near_singular_model PASSED [ 82%]
+tests/test_fixed_point.py::test_vmap_batch_matches_per_slice_solves PASSED [ 84%]
+tests/test_fixed_point.py::test_trace_layout_shares_one_evaluation_axis PASSED [ 86%]
+tests/test_fixed_point.py::test_explicit_double_state_keeps_double_solver_scratch PASSED [ 88%]
+tests/test_fixed_point.py::test_runtime_precision_selects_fixed_point_state_dtype PASSED [ 91%]
+tests/test_fixed_point.py::test_nested_jit_calls_inline_each_operator_request PASSED [ 93%]
+tests/test_fixed_point.py::test_operator_request_stream_preserves_live_reads_and_local_tangents PASSED [ 95%]
+tests/test_fixed_point.py::test_krylov_solve_composes_requests_without_entering_the_operator_body PASSED [ 97%]
+tests/test_fixed_point.py::test_real_operator_request_calls_inline_unless_they_share_a_scan PASSED [100%]
+
+======================== 45 passed in 150.48s (0:02:30) ========================
+EXIT=0

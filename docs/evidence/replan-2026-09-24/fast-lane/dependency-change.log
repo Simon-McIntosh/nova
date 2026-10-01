@@ -1,0 +1,19 @@
+revision: a71934910d2a0835dd9f6ab35576eef5c2f44754  tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/replan-pytest-timeout-and-xdist
+command: uv add --dev --no-sync pytest-timeout pytest-xdist ; then uv lock --check
+
+=== git diff --stat ===
+ pyproject.toml |  4 ++++
+ uv.lock        | 38 ++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 42 insertions(+)
+
+=== git status --short ===
+ M pyproject.toml
+ M uv.lock
+
+=== uv lock --check ===
+Resolved 287 packages in 3ms
+LOCK_CHECK_EXIT=0
+
+=== landed
+commit: 56ee52a8de48066198ec4f6556e8a2021c0b013f
+head at write: 56ee52a8de48066198ec4f6556e8a2021c0b013f

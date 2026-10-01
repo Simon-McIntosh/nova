@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S16">
-<meta name="plan-modified" content="2026-10-01">
-<meta name="plan-version" content="69">
+<meta name="plan-modified" content="2026-10-02">
+<meta name="plan-version" content="70">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -28,7 +28,7 @@
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-commits" content="c0eb0e65bcdfaaa7c6e01161b9771d314fa7dbf6,e00ec926015521b3ee15d1f2edcd750245010bea,93ed6a328b15c22f3eb964c40b6a9a53db870529,c710c3f1b2d44a6ffdbc9f5872bb00290cb4c5ba,3472495bf7f2df56516439a5233cc8916bfb78fd,ea5d17e809eb6fcc6d4f61b683adaa16b23e9210,6574bfde4bb629841cfa924b39e74ef6bf8d0ed4,9fe3d4c2340f782c9afab602bc1ab8464a5f2849">
 <meta name="plan-artifacts" content="docs/figures/mast-catalog-gpu-solve/slice-census.json,scripts/mast_slice_census/census.py,scripts/mast_slice_census/report.md,docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json,benchmarks/jitted_eager_parity_gate.py,docs/evidence/archive/mast-catalog-gpu-solve-landed.html,benchmarks/mast_catalog_input_manifest.py,docs/figures/mast-catalog-gpu-solve/mast-catalog-throughput-inputs.json">
-<meta name="plan-impl" content="0.3">
+<meta name="plan-impl" content="0.2">
 <meta name="plan-effort-hours" content="24.0">
 </head>
 <body>
@@ -347,6 +347,11 @@ Done-when
 <article class="r-fu" data-id="f-mcgs-label-store-follows-dd4" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build mast-catalog-gpu-solve" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Write the label store under DD 4.1.0 conventions and gate it on the IDS round trip</h4>
     <div class="r-fu-body"><p>Decision <code>output-store</code> is locked to <code>zarr-plus-ids-egress</code>, with the condition that every stored quantity is signed and labelled by Data Dictionary 4 conventions. DD 4.1.0 declares COCOS 17. Its <code>equilibrium</code> IDS lists 151 COCOS-dependent fields by transformation type (<code>psi_like</code> 45, <code>ip_like</code> 30, <code>b0_like</code> 24, <code>dodpsi_like</code> 12, <code>q_like</code> 12); each stored array carries its DD path, transformation type, units and COCOS as attributes, and signs are converted through <code>nova.io.cocos</code> from the solver's declared convention, never assumed.</p><ul><li>Axis flux: <code>global_quantities.psi_magnetic_axis</code> (added in 4.1.0), not the obsolescent <code>psi_axis</code>.</li><li>Boundary flux: <code>boundary.psi</code>, not the obsolescent <code>global_quantities.psi_boundary</code>. <code>boundary_separatrix</code> was removed in 4.0.0.</li><li>Class: <code>boundary.type</code>, 0 limiter and 1 diverted.</li><li>Wall clearance: <code>boundary.closest_wall_point</code> (r, z, distance).</li><li>Topology: <code>contour_tree.node(:)</code> with <code>critical_type</code> (0 minimum, 1 saddle, 2 maximum, on raw ψ), <code>r</code>, <code>z</code>, <code>psi</code> and the saddle <code>levelset</code>, plus <code>contour_tree.edges</code>. This field is alpha in DD 4, so the store records the DD version it was written against. Topology labels come from contour-tree-topology-authority.</li><li>Plasma current: <code>global_quantities.ip</code> (<code>ip_like</code>; positive is anticlockwise viewed from above).</li><li>2D flux: <code>profiles_2d.psi</code>, using the DD 4 definition of the integration surface.</li></ul><p><strong>Done when:</strong> one MAST shot and one DIII-D frame round-trip zarr to IDS to <code>validate()</code> to zarr with every array bit-identical; every stored key resolves to a DD 4.1.0 path or a standard name; a reversed-current MAST shot (the 22475 to 22626 block) stores <code>ip</code> and <code>psi</code> with signs consistent under COCOS 17; and a deliberately mis-signed <code>psi</code> fails the convention check (negative control).</p></div>
+    <pre class="r-fu-prompt">/reckon-build mast-catalog-gpu-solve</pre>
+    </article>
+<article class="r-fu" data-id="f-mcgs-currency-2026-10-01" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build mast-catalog-gpu-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Restate L1 before dispatch; the ladder stays shut until a route converges</h4>
+    <div class="r-fu-body">Currency audit 2026-10-01 (plan-currency-and-depth-b.md, mast-catalog-gpu-solve row): impl restated from 0.3 to the plan's own 2026-08-26 recalibration of 0.2. One rung of five (the L0 census) is complete, and L1 to L3 are unrun. output-store is locked to zarr-plus-ids-egress; sharding and convergence-policy wait on L1 evidence. Sharpens f-mcg-02. Done when: L1 is restated with separate build, compile and execute terms (46.577604167 slices/s/device is the figure to re-derive), the plan-level edge through efit-baseline-demonstration is cleared, and then the L1 rung runs once on the H200 with its receipt committed.</div>
     <pre class="r-fu-prompt">/reckon-build mast-catalog-gpu-solve</pre>
     </article>
 </section>

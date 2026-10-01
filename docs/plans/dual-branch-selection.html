@@ -24,8 +24,8 @@
   <title>Dual-Branch Selection | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-01">
-<meta name="plan-version" content="13">
+<meta name="plan-modified" content="2026-10-02">
+<meta name="plan-version" content="14">
 <meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8,a9ea090c">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
 <meta name="plan-impl" content="0.7">
@@ -599,6 +599,11 @@
 <article class="r-fu" data-id="f-dbs-margin-in-signed-webers" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build dual-branch-selection" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Re-express the selection margin and the smooth weight&#x27;s temperature in signed webers</h4>
     <div class="r-fu-body"><p>Under contour-tree-topology-authority the class margin is a signed flux difference in webers, oriented by the plasma-current sign, not a difference of normalised flux. The current normalisation divides by the extreme flux at the grid edge, so the margin depends on the size of the solve box. Once that plan's §4 lands, re-express <code>class_margin</code> here in webers, restate the smooth weight's temperature (today 0.01 in normalised units) in webers, and re-run the traced-selection receipt.</p><p><strong>Done when:</strong> the receipt shows exact-class agreement and continuous rails on the webers margin over the same 53 cases, with the temperature stated in Wb and its choice justified against the rail's step; and no normalised-flux quantity remains in the selection path.</p></div>
+    <pre class="r-fu-prompt">/reckon-build dual-branch-selection</pre>
+    </article>
+<article class="r-fu" data-id="f-dbs-currency-2026-10-01" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build dual-branch-selection" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Reconcile impl 0.7 against the last recorded 0.25, then close f-dbs-001&#x27;s two islands</h4>
+    <div class="r-fu-body">Currency audit 2026-10-01 (plan-currency-and-depth-b.md, dual-branch-selection row): the code supports the seam having landed and being reached, but the meta impl of 0.7 has no recalibration note behind it; the plan's last recorded figure is 0.25 (2026-08-25 drain, docs/plans/dual-branch-selection.html:603). selection-observable is locked (both-explicit-roles); unqualified-branch-semantics stays open behind S16's stall outcome; f-dbs-margin-in-signed-webers is open. Done when: impl is restated from section outcomes with the reasoning recorded in a comment, and f-dbs-001's two remaining islands land (the plan prices them at about 3.6 h).</div>
     <pre class="r-fu-prompt">/reckon-build dual-branch-selection</pre>
     </article>
 </section>

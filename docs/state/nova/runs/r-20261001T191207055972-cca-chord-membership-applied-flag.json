@@ -305,6 +305,32 @@
   "plan_impl_at_dispatch": 0.8,
   "plan_link": null,
   "promoted_revision": "cd8454dc83900f4ff9dd8d82d65ac1c19b3dc411",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 1666866065,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261001T191207055972-cca-chord-membership-applied-flag",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [

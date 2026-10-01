@@ -1,0 +1,141 @@
+revision=fc47056cf9cc170e2f479a8d69b3fe7cab59af43 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-conventions-contract command= -m pytest -p no:cacheprovider /tests/test_contour_tree_conventions.py -q
+mutation=flip the sign sigma_for_state returns: the axis is no longer a maximum of sigma*psi and the four orientation assertions fail
+FFFF..                                                                   [100%]
+=================================== FAILURES ===================================
+____________ test_sigma_orients_axis_as_signed_flux_maximum[11-3.0] ____________
+
+cocos = 11, plasma_current = 3.0
+
+    @pytest.mark.parametrize(
+        ("cocos", "plasma_current"),
+        [(11, 3.0), (11, -3.0), (17, 3.0), (17, -3.0)],
+    )
+    def test_sigma_orients_axis_as_signed_flux_maximum(cocos, plasma_current):
+        """The axis is a local maximum of sigma*psi on the physical carrier."""
+    
+        configure_dtypes()
+        radius, height = _solovev_carrier()
+        psi = _raw_flux_on_carrier(cocos, plasma_current, radius, height)
+    
+        axis = np.unravel_index(np.argmax(_solovev_flux(radius, height)), psi.shape)
+        state = SimpleNamespace(
+            cocos=cocos,
+            plasma_current=plasma_current,
+            psi_magnetic_axis=float(psi[axis]),
+            boundary_psi=float(psi[0, 0]),
+        )
+    
+        sigma = sigma_for_state(state)
+        signed_axis = sigma * float(psi[axis])
+        for step in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            neighbour = (axis[0] + step[0], axis[1] + step[1])
+>           assert signed_axis > sigma * float(psi[neighbour])
+E           assert 0.0 > (1 * 5.6250000000000934e-05)
+E            +  where 5.6250000000000934e-05 = float(np.float64(5.6250000000000934e-05))
+
+tests/test_contour_tree_conventions.py:93: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+00:11:31 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+___________ test_sigma_orients_axis_as_signed_flux_maximum[11--3.0] ____________
+
+cocos = 11, plasma_current = -3.0
+
+    @pytest.mark.parametrize(
+        ("cocos", "plasma_current"),
+        [(11, 3.0), (11, -3.0), (17, 3.0), (17, -3.0)],
+    )
+    def test_sigma_orients_axis_as_signed_flux_maximum(cocos, plasma_current):
+        """The axis is a local maximum of sigma*psi on the physical carrier."""
+    
+        configure_dtypes()
+        radius, height = _solovev_carrier()
+        psi = _raw_flux_on_carrier(cocos, plasma_current, radius, height)
+    
+        axis = np.unravel_index(np.argmax(_solovev_flux(radius, height)), psi.shape)
+        state = SimpleNamespace(
+            cocos=cocos,
+            plasma_current=plasma_current,
+            psi_magnetic_axis=float(psi[axis]),
+            boundary_psi=float(psi[0, 0]),
+        )
+    
+        sigma = sigma_for_state(state)
+        signed_axis = sigma * float(psi[axis])
+        for step in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            neighbour = (axis[0] + step[0], axis[1] + step[1])
+>           assert signed_axis > sigma * float(psi[neighbour])
+E           assert 0.0 > (-1 * -5.6250000000000934e-05)
+E            +  where -5.6250000000000934e-05 = float(np.float64(-5.6250000000000934e-05))
+
+tests/test_contour_tree_conventions.py:93: AssertionError
+____________ test_sigma_orients_axis_as_signed_flux_maximum[17-3.0] ____________
+
+cocos = 17, plasma_current = 3.0
+
+    @pytest.mark.parametrize(
+        ("cocos", "plasma_current"),
+        [(11, 3.0), (11, -3.0), (17, 3.0), (17, -3.0)],
+    )
+    def test_sigma_orients_axis_as_signed_flux_maximum(cocos, plasma_current):
+        """The axis is a local maximum of sigma*psi on the physical carrier."""
+    
+        configure_dtypes()
+        radius, height = _solovev_carrier()
+        psi = _raw_flux_on_carrier(cocos, plasma_current, radius, height)
+    
+        axis = np.unravel_index(np.argmax(_solovev_flux(radius, height)), psi.shape)
+        state = SimpleNamespace(
+            cocos=cocos,
+            plasma_current=plasma_current,
+            psi_magnetic_axis=float(psi[axis]),
+            boundary_psi=float(psi[0, 0]),
+        )
+    
+        sigma = sigma_for_state(state)
+        signed_axis = sigma * float(psi[axis])
+        for step in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            neighbour = (axis[0] + step[0], axis[1] + step[1])
+>           assert signed_axis > sigma * float(psi[neighbour])
+E           assert 0.0 > (-1 * -5.6250000000000934e-05)
+E            +  where -5.6250000000000934e-05 = float(np.float64(-5.6250000000000934e-05))
+
+tests/test_contour_tree_conventions.py:93: AssertionError
+___________ test_sigma_orients_axis_as_signed_flux_maximum[17--3.0] ____________
+
+cocos = 17, plasma_current = -3.0
+
+    @pytest.mark.parametrize(
+        ("cocos", "plasma_current"),
+        [(11, 3.0), (11, -3.0), (17, 3.0), (17, -3.0)],
+    )
+    def test_sigma_orients_axis_as_signed_flux_maximum(cocos, plasma_current):
+        """The axis is a local maximum of sigma*psi on the physical carrier."""
+    
+        configure_dtypes()
+        radius, height = _solovev_carrier()
+        psi = _raw_flux_on_carrier(cocos, plasma_current, radius, height)
+    
+        axis = np.unravel_index(np.argmax(_solovev_flux(radius, height)), psi.shape)
+        state = SimpleNamespace(
+            cocos=cocos,
+            plasma_current=plasma_current,
+            psi_magnetic_axis=float(psi[axis]),
+            boundary_psi=float(psi[0, 0]),
+        )
+    
+        sigma = sigma_for_state(state)
+        signed_axis = sigma * float(psi[axis])
+        for step in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            neighbour = (axis[0] + step[0], axis[1] + step[1])
+>           assert signed_axis > sigma * float(psi[neighbour])
+E           assert 0.0 > (1 * 5.6250000000000934e-05)
+E            +  where 5.6250000000000934e-05 = float(np.float64(5.6250000000000934e-05))
+
+tests/test_contour_tree_conventions.py:93: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_conventions.py::test_sigma_orients_axis_as_signed_flux_maximum[11-3.0]
+FAILED tests/test_contour_tree_conventions.py::test_sigma_orients_axis_as_signed_flux_maximum[11--3.0]
+FAILED tests/test_contour_tree_conventions.py::test_sigma_orients_axis_as_signed_flux_maximum[17-3.0]
+FAILED tests/test_contour_tree_conventions.py::test_sigma_orients_axis_as_signed_flux_maximum[17--3.0]
+4 failed, 2 passed in 15.16s
+EXIT=1

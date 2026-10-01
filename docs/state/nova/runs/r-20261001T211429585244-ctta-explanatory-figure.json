@@ -1,0 +1,390 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "48a40fab18be098a17ea5df6d631c1b153a027f2",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 16291831,
+      "input_tokens_cumulative": 16291831,
+      "output_tokens": 43147,
+      "output_tokens_cumulative": 43147,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 7412,
+    "files": 6,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 530,
+        "name": "main",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 573
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 530,
+        "name": "main",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 573
+    },
+    {
+      "existing_function": {
+        "line": 606,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 530,
+        "name": "main",
+        "path": "benchmarks/contour_tree_explanatory_figure.py"
+      },
+      "window_line": 573
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "b23118dcd749977b77a987444d3cbc3c5f1808d4",
+    "c36d828f225ebb5fc127a4d4b8af9f1a10a39f00"
+  ],
+  "completed_at": "2026-10-01T23:08:23.429Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-01T21:14:45Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    ".venv/lib/python3.14/site-packages/_editable_impl_nova_stella.pth",
+    "/home/ITER/mcintos/Code/nova;"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/contour_tree_explanatory_figure.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T211429585244-ctta-explanatory-figure/docs/figures/contour-tree-topology-authority/explanatory/render.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "contour-tree-topology-authority",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-01T22:14:30.952686+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-01T21:14:30Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 18,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 15,
+    "headroom": -3,
+    "mean_context": 138667,
+    "observed_at": "2026-10-01T21:14:12Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-01T23:08:23.429Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T211429585244-ctta-explanatory-figure/manifest.md",
+  "member": "s19n-imp-6",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "ctta-explanatory-figure",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1641,
+          "cached_input_tokens": 452052,
+          "input_tokens": 453695,
+          "output_tokens": 2532,
+          "reasoning_output_tokens": 433,
+          "total_tokens": 456227,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "benchmarks/contour_tree_explanatory_figure.py renders, from the diverted-single-null Solov'ev certificate fixture (reuse benchmarks/solovev_certificate.py and the nova.media painters: draw_wall over the wall units, draw_nulls with its full vocabulary, line contours on stated raw-psi levels in webers, axis off), one poloidal panel with the analytic contour tree overlaid: nodes at the magnetic axis (maximum of sigma*psi), the X-point (saddle) and the virtual outside node attached at the first wall contact, and edges as the regions between them, each node labelled directly with its critical type and its psi in Wb. Outputs docs/figures/contour-tree-topology-authority/explanatory/contour-tree-single-null.png and .svg (git add -f; *.png is gitignored), plus a JSON receipt beside them listing every node (type, R, Z, psi) and edge. The receipt shows node count minus edge count equal to 1. Rendered in place on the fleet allocation (TMPDIR=/tmp, JAX_PLATFORMS=cpu, configure_dtypes before any array), with the run log force-added. Follows the repository plotting rules: no gridlines, no axes, line contours only, a caption-ready receipt.",
+    "estimated_hours": 1.0,
+    "goal": "The contour-tree plan's explanatory figure: one single-null Solov'ev state with line contours, both null sets, the wall, and its contour tree overlaid",
+    "id": "ctta-explanatory-figure",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-01T21:14:30Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 18,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 15,
+      "headroom": -3,
+      "mean_context": 138667,
+      "observed_at": "2026-10-01T21:14:12Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T211429585244-ctta-explanatory-figure/manifest.md",
+    "negative_control": "",
+    "plan": "contour-tree-topology-authority",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§1",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/contour_tree_explanatory_figure.py",
+      "docs/figures/contour-tree-topology-authority/explanatory",
+      "docs/evidence/fragments/contour-tree-topology-authority/ctta-explanatory-figure.html",
+      "docs/figures/contour-tree-topology-authority/ctta-explanatory-figure"
+    ]
+  },
+  "orientation_input_tokens": 4783118.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "ctta-explanatory-figure",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-01T21:14:32.840732+00:00",
+    "score": 0.8125,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "contour-tree-topology-authority",
+  "plan_link": null,
+  "promoted_revision": "c36d828f225ebb5fc127a4d4b8af9f1a10a39f00",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "48a40fab18be098a17ea5df6d631c1b153a027f2",
+    "reviewed_head_sha": "c36d828f225ebb5fc127a4d4b8af9f1a10a39f00",
+    "scores": {
+      "durability": 12,
+      "evidence": 14,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 84
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261001T211429585244-ctta-explanatory-figure",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "66d2ec40-de29-4f1f-8415-45142e87b168",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 45700941,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 1356.577,
+    "generated_tokens": 146775,
+    "generation_seconds": 1220.244,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 65.0,
+    "machine_seconds": 136.333,
+    "peak_input_tokens": 311803,
+    "tokens_per_second": 120.28,
+    "wall_tokens_per_second": 108.2
+  },
+  "time_budget": "60m",
+  "tool_steps": 154.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 6818,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-01T23:08:24Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-01T22:45:41Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261001T211429585244-ctta-explanatory-figure",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 26254,
+    "worker_pid": 146217
+  },
+  "worker_seconds": 6758,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

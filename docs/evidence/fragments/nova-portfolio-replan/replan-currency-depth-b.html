@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="artifact-kind" content="evidence">
+  <meta name="plan-evidence-for" content="nova:nova-portfolio-replan">
+  <meta name="plan-verifies" content="nova:nova-portfolio-replan#s1">
+  <meta name="evidence-verdict" content="pass">
+  <meta name="evidence-date" content="2026-10-01">
+  <meta name="evidence-commit" content="a71934910d2a0835dd9f6ab35576eef5c2f44754">
+  <title>Plan currency and depth, report B | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<section id="replan-currency-depth-b">
+  <h2>Plan currency and depth, report B — the six plans assigned to this node</h2>
+  <p>Read-only audit at revision <code>a71934910d2a0835dd9f6ab35576eef5c2f44754</code>
+  (2026-10-01). The full six-row table — what landed with commits and files, whether status and
+  impl agree with the code, implementation depth with its call site and test evidence, each open
+  followup's done-when status, and the next critical node — is carried by
+  <a href="/nova/evidence/replan-2026-09-24/plan-currency-and-depth-b.md">plan-currency-and-depth-b.md</a>,
+  which is the artifact this section anchors. No source was changed; no GPU or SLURM job was run.</p>
+
+  <table class="outcomes">
+    <thead>
+      <tr><th scope="col">Plan</th><th scope="col">Depth verdict</th><th scope="col">Next critical node</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>diiid-forward-onboarding (active, impl 0.8)</td>
+        <td>Deep substrate; the end-to-end forward claim is <strong>unproven</strong> — the §5 production-route kill gate FAILED 0/5 and is held by owner decision <code>forward-gate-disposition</code>.</td>
+        <td>Owner tolerance lock on an independent discretisation-error estimate, then the gate re-run unchanged except its registered bound.</td>
+      </tr>
+      <tr>
+        <td>machine-description-retirement (draft, no impl)</td>
+        <td><strong>Shallow</strong> — docs only; every removal target still exists at head.</td>
+        <td>Run the producer-equivalence demonstration (44 unique loop positions, 43-of-46 join) before deletion; the ambix consumer must move in the same beat.</td>
+      </tr>
+      <tr>
+        <td>diiid-pulse-replay (pending, impl 0.0)</td>
+        <td><strong>Shallow</strong> — plan only; no replay code exists.</td>
+        <td>Blocked behind the DIII-D forward-gate re-evaluation; extraction/differencing machinery it needs is landed.</td>
+      </tr>
+      <tr>
+        <td>dual-branch-selection (active, impl 0.7)</td>
+        <td><strong>Deep</strong> — the traced selector is reached from the coupled transport path (<code>nova/transport/coupled_window.py:1655</code>).</td>
+        <td>Close f-dbs-001's two remaining host islands; two lead decisions (selection observable, unqualified-branch semantics) remain open.</td>
+      </tr>
+      <tr>
+        <td>efit-baseline-demonstration (active, impl 0.6667)</td>
+        <td>Instrument implemented and <strong>run with a measured FAIL</strong> (class 9/12 PASS, RMS PASS, worst saddle 2.6217 m vs the 0.04 m bound).</td>
+        <td>Land the profile-owned residual-domain cutover, then retrace the stall and a matched mesh ladder; thresholds are not to be relaxed.</td>
+      </tr>
+      <tr>
+        <td>mast-catalog-gpu-solve (pending, impl 0.3)</td>
+        <td><strong>Shallow</strong> relative to its deliverable — L0 census landed; no catalog solve exists.</td>
+        <td>Restate L1 against the measured 46.577604167 slices/s/device and clear the convergence edge before dispatch.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Cross-cutting.</strong> None of the nine open followups across these six plans
+  carries a done-when clause. Three plan-impl metas disagree with the plans' own recorded
+  recalibrations (efit-baseline-demonstration, mast-catalog-gpu-solve) or with the last in-plan
+  figure (dual-branch-selection). One live defect is recorded for the re-run node: the DIII-D
+  gate benchmark hard-codes <code>GATE_RESIDUAL_TOLERANCE = 1.0e-6</code>
+  (<code>benchmarks/diiid_forward_gs_match.py:189</code>), one decade inside the gate's
+  registered 1e-5 bound.</p>
+</section>
+</main>
+</body>
+</html>

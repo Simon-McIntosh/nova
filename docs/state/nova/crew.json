@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-01T20:31:00",
+  "updated": "2026-10-01T22:42:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -307984,8 +307984,22 @@
         "reason": "utilisation 96% with burn multiple 2.3x and projected exhaustion 2026-09-26T00:06:03Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-09-24T05:20:30Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-terra-20261001204202",
+        "backend": "codex-terra",
+        "purpose": "resume",
+        "opened_at": "2026-10-01T20:42:02Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-10-31T19:10:50Z",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100% with burn multiple 473.7x; projected exhaustion withheld because burn evidence is quantised too coarsely: 0.21% elapsed is below the 5% floor is at or above the 100.0% ceiling for a resume; the account surface was read at 2026-10-01T20:42:01Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
+        "closed_by_purpose": null,
+        "resumption_fired": false
       }
     ],
-    "_version": 3363
+    "_version": 3364
   }
 }

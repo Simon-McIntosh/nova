@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="cpu-compile-abort-landed">
+  <meta name="plan-evidence-for" content="cpu-compile-abort">
+  <title>The mapping count runs to within 259 of the limit | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+<h2 id="what-ran">What ran</h2>
+<p>One <code>all_debug</code> CPU allocation, job <code>1274144</code>, node
+<code>98dci4-clu-3141</code>, <code>--cpus-per-task=8 --mem=64G --time=00:59:00</code>,
+<code>TMPDIR=/tmp</code> exported in the submit environment and again in the payload,
+<code>JAX_PLATFORMS=cpu</code>, <code>uv</code> never invoked on the compute node, the shared root
+interpreter <code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code> run directly. The
+persistent compilation cache root was <code>/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm</code>,
+the same one job <code>1274080</code> used, so the compile behaviour is comparable.</p>
+
+<p>The sampler is <code>benchmarks/compile_abort_probe.py</code>. It starts the driver as a
+shell-free child and polls that child's own <code>/proc/&lt;pid&gt;/maps</code> line count once per
+second, reading <code>VmRSS</code>, <code>VmSize</code> and <code>VmPeak</code> from
+<code>/proc/&lt;pid&gt;/status</code> at the same instant, and writing each sample to disk as it is
+taken. The sampler runs outside the driver, so it keeps sampling while the driver holds the GIL
+through a long compile. The limit was read from <code>/proc/sys/vm/max_map_count</code> at start:
+<strong>65530</strong>.</p>
+
+<h3>Which driver, and why it is the smallest of the four</h3>
+<p>The four aborts are job <code>1274003</code> and <code>1274028</code> (the centroid positive arm,
+<code>benchmarks/centroid_constrained_fixture_receipt.py</code>), <code>1274080</code> (the
+certificate, <code>benchmarks/solve_program_size_gate.py</code>) and <code>1274099</code> (the
+coil-edit regeneration, <code>benchmarks/coil_edit_latency.py</code>). <code>sacct</code> elapsed
+times for those jobs are <code>38:47</code>, <code>38:28</code>, <code>20:28</code> and
+<code>53:13</code>, with recorded peak resident memory of <code>28.7</code>, <code>30.1</code>,
+<code>16.9</code> and <code>11.3 GB</code> against a 64 G request. <strong>Job
+<code>1274080</code> is the smallest</strong>: it is the only one of the four that both reaches the
+abort fastest (20:28 against 38:28–53:13) and does so at the lowest reported resident memory
+(16.9 GB), so it is the cheapest faithful reproduction. It aborted on the third of its four
+certificate rows, <code>strong-rotation-compact-static</code> at 300 cells, immediately after
+<code>CERTIFICATE_START</code> for that row.</p>
+
+<h2 id="series">The mapping count through the run</h2>
+<figure>
+<svg viewBox="0 0 760 220" width="760" height="220" role="img"
+     aria-label="Process mapping count over 1042 seconds, rising in steps to a plateau at 65271 against a limit of 65530.">
+  <rect x="52" y="14" width="694" height="180" fill="none" stroke="#666" stroke-width="1"/>
+  <line x1="52" y1="17.5" x2="746" y2="17.5" stroke="#b00" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="748" y="14" font-size="11" fill="#b00" text-anchor="end">limit 65530</text>
+  <polyline fill="none" stroke="#123" stroke-width="1.6" points="52.0,193.8 54.7,189.9 57.3,187.4 60.0,179.5 62.7,179.3 65.3,179.3 68.0,179.3 70.7,179.3 73.4,179.3 76.0,179.3 78.7,131.9 81.4,131.9 84.1,131.9 86.7,131.9 89.4,131.9 92.1,131.9 94.8,131.9 97.5,131.9 100.1,131.9 102.8,131.9 105.5,131.9 108.2,131.9 110.9,131.9 113.5,128.1 116.2,124.1 118.9,124.1 121.6,124.1 124.3,124.1 126.9,124.1 129.6,76.7 132.3,76.7 135.0,76.7 137.7,76.7 140.4,76.7 143.1,76.7 145.8,76.7 148.4,76.7 151.1,76.7 153.8,76.7 156.5,76.7 159.2,76.7 161.9,76.7 164.6,76.7 167.3,69.1 170.0,116.5 172.6,116.5 175.3,116.5 178.0,116.5 180.7,116.5 183.4,116.5 186.1,116.5 188.7,116.5 191.4,116.5 194.1,116.5 196.8,116.5 199.5,116.5 202.1,116.5 204.8,116.5 207.5,116.5 210.2,116.5 212.9,116.5 215.6,116.5 218.2,116.5 220.9,116.5 223.6,116.5 226.3,116.5 229.0,116.5 231.7,116.5 234.3,116.5 237.0,116.5 239.7,116.5 242.4,116.5 245.1,116.5 247.7,116.5 250.4,116.5 253.1,116.5 255.8,116.5 258.5,116.5 261.2,116.5 263.8,116.5 266.5,116.5 269.2,116.5 271.9,116.5 274.6,116.5 277.2,116.5 279.9,116.5 282.6,116.5 285.3,116.4 288.0,116.4 290.7,116.4 293.3,116.4 296.0,116.4 298.7,116.4 301.4,116.4 304.1,116.4 306.8,116.4 309.4,116.4 312.1,116.4 314.8,116.4 317.5,116.4 320.2,116.4 322.8,116.4 325.5,116.4 328.2,116.4 330.9,116.4 333.6,116.4 336.3,116.4 338.9,116.4 341.6,116.4 344.3,116.4 347.0,116.4 349.7,116.4 352.3,116.4 355.0,116.4 357.7,116.4 360.4,116.4 363.1,116.4 365.8,116.4 368.4,116.4 371.1,116.4 373.8,116.4 376.5,116.4 379.2,116.4 381.8,116.4 384.5,116.4 387.2,116.4 389.9,116.4 392.6,106.6 395.3,89.2 398.0,72.1 400.7,69.0 403.4,69.0 406.1,21.5 408.8,21.5 411.5,69.0 414.1,68.9 416.8,68.7 419.5,68.7 422.2,64.8 424.9,61.2 427.6,108.7 430.3,108.7 433.0,108.7 435.7,108.7 438.3,108.7 441.0,108.7 443.7,108.7 446.4,108.7 449.1,108.7 451.8,108.7 454.4,108.7 457.1,108.7 459.8,108.7 462.5,108.7 465.2,108.7 467.9,108.7 470.5,108.7 473.2,108.7 475.9,108.7 478.6,108.7 481.3,108.7 484.0,108.7 486.6,108.7 489.3,108.7 492.0,108.7 494.7,108.7 497.4,108.7 500.1,108.7 502.8,108.7 505.4,108.7 508.1,108.7 510.8,108.7 513.5,108.7 516.2,108.7 518.9,108.7 521.5,108.7 524.2,108.7 526.9,108.7 529.6,108.7 532.3,108.7 535.0,108.7 537.6,108.7 540.3,108.7 543.0,108.7 545.7,108.7 548.4,108.7 551.1,108.7 553.8,108.7 556.4,108.7 559.1,108.7 561.8,108.7 564.5,108.7 567.2,108.7 569.9,108.7 572.5,108.7 575.2,108.7 577.9,108.7 580.6,108.7 583.3,108.7 586.0,108.7 588.6,108.7 591.3,108.7 594.0,108.7 596.7,108.7 599.4,108.7 602.1,108.7 604.7,108.7 607.4,108.7 610.1,108.7 612.8,108.7 615.5,108.7 618.2,108.7 620.9,108.7 623.5,108.7 626.2,108.7 628.9,108.7 631.6,108.7 634.3,108.7 637.0,108.7 639.6,108.7 642.3,108.7 645.0,108.7 647.7,108.7 650.4,108.7 653.1,108.7 655.7,108.7 658.4,102.8 661.1,87.9 663.8,72.6 666.5,63.5 669.2,63.5 671.9,18.2 674.6,18.2 677.3,63.5 680.0,63.5 682.7,63.5 685.4,63.5 688.1,63.5 690.8,63.5 693.5,63.5 696.2,63.5 698.9,63.5 701.6,63.5 704.3,63.5 707.0,63.5 709.6,63.5 712.3,63.5 715.0,63.5 717.7,63.5 720.4,63.5 723.1,63.5 725.8,63.5 728.5,63.5 731.2,63.5 733.9,63.5 736.6,63.5 739.3,63.6 742.0,96.0 744.7,141.9 746.0,187.1"/>
+  <line x1="671.9" y1="14" x2="671.9" y2="194" stroke="#090" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="668" y="30" font-size="11" fill="#090" text-anchor="end">peak 65271 at t=930 s</text>
+  <text x="52" y="212" font-size="11" fill="#333">0 s</text>
+  <text x="746" y="212" font-size="11" fill="#333" text-anchor="end">1042 s</text>
+  <text x="18" y="20" font-size="11" fill="#333">65530</text>
+  <text x="18" y="194" font-size="11" fill="#333">0</text>
+  <text x="399" y="212" font-size="11" fill="#333" text-anchor="middle">seconds from process start</text>
+</svg>
+<figcaption>The certificate driver under the sampler, job <code>1274144</code>: the process mapping
+count against time, one sample per second, drawn from 1036 samples. The red dashed rule is
+<code>vm.max_map_count</code> = 65530, read from the node. The green rule marks the peak, 65271 at
+t = 930 s. The count steps up as each certificate row compiles and is not returned to the kernel
+between rows; resident memory is not drawn here because it lives on a different scale and is given
+in the table below.</figcaption>
+</figure>
+
+<h2 id="instants">Peak, last sample, and resident memory at those instants</h2>
+<table>
+  <tr><th>Instant</th><th>Mapping count</th><th>Resident <code>VmRSS</code></th><th><code>VmSize</code></th></tr>
+  <tr><td>first sample, t = 0.0 s</td><td>56</td><td>3.4 MB</td><td>31.6 MB</td></tr>
+  <tr><td><strong>peak, t = 930.0 s</strong> (held flat 930–936 s)</td><td><strong>65271</strong></td><td><strong>16.6 GB</strong></td><td>24.5 GB</td></tr>
+  <tr><td>last live sample, t = 1042.3 s</td><td>2545</td><td>16.5 GB</td><td>24.1 GB</td></tr>
+  <tr><td>limit</td><td>65530</td><td>64 GB requested</td><td>—</td></tr>
+</table>
+<p>Margin at the peak: <strong>259 mappings</strong>, which is <strong>0.4%</strong> of the limit;
+the peak is <strong>99.6%</strong> of it. Resident memory at the peak was <strong>16.6 GB against a
+64 GB request</strong>, and the peak <code>VmPeak</code> over the run was 25.2 GB. The peak held flat
+for six consecutive one-second samples, so it is a plateau rather than a single reading.</p>
+
+<h2 id="verdict">Verdict</h2>
+<p><strong>The mapping count did not reach the limit on this run — the peak was 65271 against 65530,
+259 short — but the mapping count is the only quantity the sampler saw approach a bound, rising from
+56 to within 0.4% of <code>vm.max_map_count</code> while resident memory stayed at 16.6 GB of the
+64 GB requested.</strong></p>
+
+<h2 id="what-this-does-not-settle">What this run does not settle</h2>
+<p>This run <strong>completed all four certificate rows and never aborted</strong>; it exited 1 on
+<code>CERTIFICATE_IDENTITY_GATE=FAIL</code>, a bit-identity verdict that is not this node's subject.
+So the abort itself was <strong>not reproduced</strong>, and the mapping hypothesis is neither
+confirmed nor retired by this measurement: the honest reading is a near-miss that leaves the
+hypothesis live and narrows it to a small margin.</p>
+<p>Two concrete reasons the aborting job got further than this one, both stated as measurements
+rather than as inference:</p>
+<ul>
+  <li>Job <code>1274080</code> ran with <code>--certificate-panel-dir</code> set, so it rendered a
+  poloidal flux panel for each completed row; this run omitted the flag because the driver refuses
+  a panel directory outside the checkout's <code>docs/</code> tree. Rendering panels compiles
+  further programs inside the same process, and nothing in this run returns mappings to the kernel
+  between rows, so the omitted panels are the most likely source of the extra margin.</li>
+  <li>A first attempt at this measurement, job <code>1274141</code>, ran <em>with</em> the panel
+  directory and died after 100 s on a path-validation error in the panel writer, not in a compile,
+  having already reached <strong>24718</strong> mappings in 100 s. That is 38% of the limit in the
+  first eighth of the run, which is consistent with the step pattern in the figure.</li>
+</ul>
+<p>The direct continuation is one allocation of the same driver <em>with</em> a panel directory
+under the checkout's <code>docs/</code> tree, which is the configuration that aborted, and which
+this node's write fence did not include.</p>
+
+<h2 id="artifacts">Artifacts</h2>
+<ul>
+  <li>Sampler: <code>benchmarks/compile_abort_probe.py</code> (commit <code>17bd21d58</code>).</li>
+  <li>Launcher: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153324775149-cca-sample-the-mapping-count-through-the-abort/mapping-count.sbatch</code>.</li>
+  <li>Job log: <code>.../mapping-count.log</code> — <code>CCA_JOB_START job=1274144</code>, four
+  <code>CERTIFICATE_START</code>/<code>CERTIFICATE_DONE</code> pairs, <code>PROBE_SUMMARY exit=1
+  peak_maps=65271 limit=65530 samples=1036 wall=1044.287s</code>.</li>
+  <li>Sample series: <code>.../maps.jsonl</code> (1036 JSON lines, one per second); summary
+  <code>.../summary.json</code>; the first attempt's series preserved as
+  <code>.../maps-first-attempt.jsonl</code>.</li>
+  <li>Smoke control for the sampler itself: <code>.../smoke-summary.json</code> and
+  <code>.../smoke-maps.jsonl</code> — five samples over a known 2.5 s child, exit 0 recorded,
+  <code>max_map_count</code> 65530 read, so the instrument is shown seeing a process known to be
+  present before any absence is reported.</li>
+</ul>
+<p>Committed with the landing record; a coordinator reading this over the peer channel should treat
+the mapping hypothesis as <strong>live and narrow</strong>, not settled.</p>
+
+<h2 id="the-configuration-that-aborts">The configuration that aborts, sampled</h2>
+<p>The section above measured a run that did <em>not</em> abort, because its write fence excluded
+the panel directory. This section runs the configuration that <em>does</em> abort — the same driver
+with <code>--certificate-panel-dir</code> pointing under the checkout's served figure tree — under
+the same sampler, twice.</p>
+<table>
+  <tr><th></th><th>run 1, job <code>1274173</code></th><th>run 2, job <code>1274181</code></th></tr>
+  <tr><td>node / partition</td><td><code>98dci4-clu-3142</code> / <code>all_debug</code></td><td><code>98dci4-clu-3142</code> / <code>all_debug</code></td></tr>
+  <tr><td>request</td><td><code>--cpus-per-task=8 --mem=64G --time=00:59:00</code>, <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code></td><td>identical</td></tr>
+  <tr><td>sampler tick</td><td>1.0 s</td><td>0.2 s</td></tr>
+  <tr><td>panel directory</td><td><code>docs/figures/millisecond-converged-solve/program-size/compile-abort/panels</code></td><td>identical</td></tr>
+  <tr><td>outcome</td><td><strong>died at t ≈ 295 s, exit <code>-11</code> (SIGSEGV)</strong>, inside the fourth row <code>diverted-single-null</code></td><td>all four rows completed, exit 1 on <code>CERTIFICATE_IDENTITY_GATE=FAIL</code></td></tr>
+  <tr><td>peak mapping count</td><td><strong>54147</strong> at <strong>t = 294.205 s</strong> — 11383 short of 65530</td><td><strong>52744</strong> at t = 254.225 s — 12786 short</td></tr>
+  <tr><td>resident at the peak / peak over the run</td><td><strong>12.25 GB</strong> <code>VmRSS</code>, 20.68 GB <code>VmSize</code>, <code>VmHWM</code> 13.08 GB</td><td>12.48 GB <code>VmRSS</code> max, 20.08 GB <code>VmSize</code> max</td></tr>
+  <tr><td>samples</td><td>293 over 295 s</td><td>2047 live over 426 s</td></tr>
+</table>
+
+<figure>
+  <img src="/nova/figures/millisecond-converged-solve/program-size/compile-abort/mapping-count-through-the-abort.png"
+       alt="Two panels of process mapping count against time: run 1 rising in 17600-mapping steps to 54147 before dying, and run 2 performing the same four steps but returning 16178 mappings before the fourth load.">
+  <figcaption>The two sampled series against <code>vm.max_map_count</code> = 65530, read from the node
+  in both jobs. Upper panel: both runs, showing that run 1 stood one program-load ahead of run 2 when
+  the fourth load began, because run 2 had returned 16178 mappings to the kernel and run 1 had not.
+  Lower panel: run 2 at a 0.2 s tick, resolving the step that the 1.0 s tick could only see as a
+  jump — the whole 17618-mapping rise lands inside a single sample interval.</figcaption>
+</figure>
+
+<h3>What the sampler saw move</h3>
+<p>Only the mapping count approaches a bound. Resident memory never left the request — <code>VmRSS</code>
+peaked at 12.48 GB and <code>VmSize</code> at 20.08 GB against 64 GB requested — and the failure is
+<em>not</em> explained by an address-space rlimit or by strict overcommit: run 2 read
+<code>vm.overcommit_memory</code> = 0, <code>vm.overcommit_ratio</code> = 50 and <code>ulimit -v</code>
+= unlimited on the same node.</p>
+<p>The quantity the sampler saw move decisively is the <strong>size of a single step</strong>. Loading
+one certificate program adds <strong>16789–17620</strong> mappings to this process, and run 2 at a
+0.2 s tick shows the whole step landing inside one sample interval:</p>
+<table>
+  <tr><th>Run 2 step</th><th>t (s)</th><th>Rise</th><th>Count after</th></tr>
+  <tr><td>first program load</td><td>37.602</td><td>+17618</td><td>23072</td></tr>
+  <tr><td>second program load</td><td>115.315</td><td>+17619</td><td>45233</td></tr>
+  <tr><td>third program load</td><td>194.510</td><td>+17618</td><td>49640</td></tr>
+  <tr><td>mappings returned at the row boundary</td><td>256.516</td><td><strong>−16178</strong></td><td>36446</td></tr>
+  <tr><td>fourth program load</td><td>280.522</td><td>+16789</td><td>35632</td></tr>
+</table>
+
+<h3>Verdict</h3>
+<p><strong>The limit was reached in run 1.</strong> The last sample stood 11383 mappings short of
+65530, but the fourth program load — a step this process performed three times, each adding
+16789–17620 mappings — cannot complete from there without the count crossing the cap:
+54147 + 16789 = <strong>70936</strong>, 5406 mappings above it, and the process died inside exactly
+that step with LLVM refusing memory; run 2 completed the same four loads only because it returned
+<strong>16178</strong> mappings to the kernel before the fourth, which run 1 did not, so its fourth
+load began 35250 lower.</p>
+<p>The crossing itself is <strong>inferred, not observed</strong>, and the inference is quantitative
+rather than a reading off the same series: run 1's last sample fell <strong>0.78 s</strong> before the
+refusal and its next tick never came, while run 2 measured a <strong>17618-mapping rise inside one
+0.2 s interval</strong>, so the 11383-mapping gap is traversable in about <strong>0.13 s</strong> — a
+fifth of the interval that missed it. The 1.0 s tick was coarser than the process's own allocation
+burst, so a series at that tick <em>cannot</em> decide this question in either direction; the second
+run exists because of that, and its role is to supply the step size and its duration.</p>
+
+<h3>What this run does not settle</h3>
+<ul>
+  <li><strong>The terminal signal differs from the original abort.</strong> Job <code>1274080</code>
+  carried <code>allocateMappedMemory failed with error: Cannot allocate memory</code>,
+  <code>Failed to satisfy suballocation request for 69</code> and
+  <code>LLVM ERROR: Unable to allocate section memory!</code> before SIGABRT (exit 134). Run 1 carries
+  the shared first line, <code>execution_engine.cc:54] LLVM compilation error: Cannot allocate memory</code>,
+  <strong>192 times inside 9 ms</strong>, then SIGSEGV (<code>-11</code>) — no section-manager line and
+  no <code>Aborted</code> line. The refusal path is shared; the terminal signal is not, so the crash
+  mode is not yet reproduced faithfully even though the configuration is.</li>
+  <li><strong>The node's free memory at the instant of refusal was not captured</strong> in either
+  run, so a node-level pressure explanation of the <code>ENOMEM</code> is not formally excluded. What
+  is captured is that the same node ran the same configuration 40 minutes later to completion with the
+  same resident footprint.</li>
+  <li><strong>Run 2's series ends with an instrument artifact</strong>: its last sample (n = 2049,
+  t = 425.819 s) records <code>maps = 0</code>, which is the probe reading an exited-but-unreaped
+  child's empty <code>/proc/&nbsp;&lt;pid&gt;/maps</code>. The live series is 2047 samples, not 2049, and
+  the zero is not a measurement of the process.</li>
+</ul>
+
+<h2 id="abort-artifacts">Artifacts for the abort configuration</h2>
+<ul>
+  <li>Launchers: <code>.../r-20260920T160614302471-cca-reproduce-the-abort-under-the-sampler/abort-reproduction.sbatch</code>
+  (run 1) and <code>abort-reproduction-r2.sbatch</code> (run 2).</li>
+  <li>Logs: <code>abort-reproduction.log</code> (<code>CCA_JOB_START job=1274173 … max_map_count=65530</code>,
+  three <code>CERTIFICATE_START</code>/<code>CERTIFICATE_DONE</code> pairs, 192 LLVM lines,
+  <code>PROBE_SUMMARY exit=-11 peak_maps=54147 limit=65530 samples=293 wall=295.206s</code>) and
+  <code>abort-reproduction-r2.log</code> (<code>PROBE_SUMMARY exit=1 peak_maps=52744 limit=65530
+  samples=2049 wall=426.02s</code>, four <code>CERTIFICATE_DONE</code> pairs).</li>
+  <li>Series: <code>maps-run1.jsonl</code>, <code>maps-r2.jsonl</code>; summaries
+  <code>summary-run1.json</code>, <code>summary-r2.json</code>.</li>
+  <li>Partial receipt from run 1 (<code>pending_rows = [["diverted-single-null", -500]]</code>, three
+  rows landed) in <code>scratch/receipt.json</code>.</li>
+  <li>Certificate panels from run 1, one per completed row, in
+  <code>docs/figures/millisecond-converged-solve/program-size/compile-abort/panels</code>
+  (<code>weak-</code>, <code>moderate-</code>, <code>strong-rotation-compact-static-cells-300-across-revisions</code>,
+  each as PNG beside SVG).</li>
+</ul>
+
+<h2 id="sampler-exit-status">The sampler now exits with the status of the child it sampled</h2>
+
+<p>The probe records the sampled child's exit status in its summary. Until commit
+<code>c1af3a06d</code> it then returned zero from <code>main()</code> unconditionally, so a caller
+gating on the wrapper's status could not distinguish a driver that completed from one that died
+inside the compiler — the distinction the probe exists to preserve. This is a status-propagation
+change with a before-and-after table rather than a spatial relationship, so no figure accompanies
+it.</p>
+
+<table>
+  <thead>
+    <tr><th>Invocation</th><th>Summary <code>exit_code</code></th><th>Wrapper exit status</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>… -- /bin/sh -c "exit 7"</code>, before the repair</td>
+      <td><code>7</code></td>
+      <td><strong><code>0</code></strong> — the failure was discarded</td>
+    </tr>
+    <tr>
+      <td><code>… -- /bin/sh -c "exit 7"</code>, after the repair</td>
+      <td><code>7</code></td>
+      <td><strong><code>7</code></strong></td>
+    </tr>
+    <tr>
+      <td><code>… -- /bin/sh -c "exit 0"</code>, after the repair</td>
+      <td><code>0</code></td>
+      <td><code>0</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The change is one token: <code>main()</code> returns the recorded status instead of
+<code>0</code>. The accompanying <code>tests/test_compile_abort_probe.py</code> runs the wrapper as
+a subprocess around a trivial shell child so the case costs a scheduling slice rather than a
+compile, and asserts both directions. Against the unfixed wrapper the file reddens on
+<code>test_failed_child_fails_the_wrapper</code> with <code>assert 0 == 7</code> while the zero-exit
+case passes; restoring <code>return 0</code>
+over the repair reproduces that same red, so the guard is shown to fire rather than assumed to.</p>
+
+<p>Gate: <code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q
+tests/test_compile_abort_probe.py</code>, exit <code>0</code>, <code>2 passed</code> on the login
+node. This measures the node's own change; the merged result belongs to a separately dispatched
+test node.</p>
+
+<p><strong>The guard is covered without the repair</strong> (commit <code>7f0207965</code>,
+2026-09-22). A re-dispatch of this followup confirmed before editing that the defect no longer
+reproduces: at base <code>edcba74f0</code>, with <code>benchmarks/compile_abort_probe.py</code>
+byte-identical to its committed state, the wrapper around <code>/bin/sh -c "exit 7"</code> recorded
+<code>exit_code: 7</code> in its summary and exited <strong>7</strong>. Because the behaviour was
+already correct, the node added coverage rather than re-implementing the repair:
+<code>tests/test_compile_abort_probe_exit.py</code> pins the contract in both directions plus an
+arbitrary non-zero status (<code>exit 3</code>) so a wrapper that special-cased one well-known code
+would still be caught. The declared negative control — restore the unconditional
+<code>return 0</code> at the end of the probe main — reddens
+<code>test_failed_child_fails_the_wrapper</code> at <code>assert 0 == 7</code> and
+<code>test_the_wrapper_carries_an_arbitrary_child_status</code> at <code>assert 0 == 3</code> while
+the zero-exit case passes (<code>2 failed, 1 passed</code>, exit <code>1</code>), and was reverted.
+Gate on the repaired tree: <code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p
+no:cacheprovider -q tests/test_compile_abort_probe_exit.py</code>, exit <code>0</code>,
+<code>3 passed</code> at <code>7f0207965</code>.</p>
+
+
+<p><strong>The duplicate coverage is folded into one module</strong> (commit
+<code>ab32b8e63</code>, 2026-09-22). The coverage added above introduced a second test module
+repeating the same probe-sampling helper and two of the three cases verbatim, leaving two places to
+keep in step. Only <code>test_the_wrapper_carries_an_arbitrary_child_status</code> was novel, so it
+now lives in <code>tests/test_compile_abort_probe.py</code> — the single home of the contract — and
+<code>tests/test_compile_abort_probe_exit.py</code> is deleted. <code>grep -rc 'def
+_sample_a_child' tests/</code> returns exactly one definition. Gate on the folded tree:
+<code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q
+tests/test_compile_abort_probe.py</code>, exit <code>0</code>, <code>3 passed</code> at
+<code>ab32b8e63</code>. The declared negative control — make the probe main return 0
+unconditionally — reddens <code>test_failed_child_fails_the_wrapper</code> at <code>assert 0 ==
+7</code> and the moved <code>test_the_wrapper_carries_an_arbitrary_child_status</code> at
+<code>assert 0 == 3</code> while the zero-exit case passes (<code>2 failed, 1 passed</code>, exit
+<code>1</code>)
+and was reverted; the probe is byte-identical to its committed state and the mutation was never
+committed.</p>
+
+<h2 id="one-row-per-process">One certificate row per child process</h2>
+
+<p><strong>What ran.</strong> One <code>all_debug</code> allocation, job <code>1274197</code>, node
+<code>98dci4-clu-3141</code>, <code>--cpus-per-task=8 --mem=64G --time=00:59:00</code>, with
+<code>TMPDIR=/tmp</code> exported in the submit environment and again inside the payload,
+<code>JAX_PLATFORMS=cpu</code>, and the shared root interpreter
+(<code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code>) invoked directly — <code>uv</code> was
+never called on the compute node. The four certificate rows ran as four sequential children of that
+one job, never as a job array, and each child was wrapped in
+<code>benchmarks/compile_abort_probe.py</code> at a 0.2 s tick, so every count below is sampled from
+the child's own <code>/proc/&lt;pid&gt;/maps</code> rather than inferred.</p>
+
+<p><strong>Why the shape is the remedy.</strong> One certificate program load adds
+<strong>16789-17620</strong> mappings measured five times across two earlier runs, against a kernel
+limit of <strong>65530</strong>. That is room for three loads and no more, and the certificate asks
+for four; the run that completed did so only because it happened to return sixteen thousand mappings
+to the kernel before its fourth load. One process per row makes that release unconditional.</p>
+
+<table>
+  <tr><th>row</th><th>cells</th><th>child pid</th><th>child exit</th><th>peak mappings</th><th>of 65530</th><th>one load (16789-17620)</th><th>wall (s)</th></tr>
+        <tr><td><code>weak-rotation-reactor-static</code></td><td>-300</td><td>766515</td><td>1</td><td><strong>24,750</strong></td><td>yes</td><td>False</td><td>2.430e-15</td></tr>
+        <tr><td><code>moderate-rotation-conventional-static</code></td><td>-300</td><td>767153</td><td>1</td><td><strong>40,756</strong></td><td>NO</td><td>False</td><td>1.175e-15</td></tr>
+        <tr><td><code>strong-rotation-compact-static</code></td><td>-300</td><td>768530</td><td>1</td><td><strong>40,752</strong></td><td>NO</td><td>False</td><td>1.457e-15</td></tr>
+        <tr><td><code>diverted-single-null</code></td><td>-500</td><td>769870</td><td>1</td><td><strong>39,095</strong></td><td>NO</td><td>False</td><td>2.092e-01</td></tr>
+</table>
+
+<p><strong>What the four children show, and what they do not.</strong> The largest sampled peak is
+<strong>40,756</strong> of the kernel's <strong>65,530</strong> — <strong>62% of the cap</strong> — and the
+smallest is 24,750; the mean is 36,338. Every child finished with tens of thousands of mappings of
+room left, and the aborting job's failure mode is unavailable to them by construction: it died inside
+a fourth load from 54147 mappings because one process had already loaded three rows' programs, and a
+child here starts from an empty address space rather than inheriting its predecessors' load.</p>
+
+<p><strong>The evidence does not say each child loads one program, and the receipt records that
+plainly.</strong> A row's own solve, state write and panel render loads more than one program for the
+larger rows: the peak of a child minus its own starting count is roughly one load for the smallest row
+and roughly two for the largest. The receipt's <code>within_one_program_load</code> flag tests a peak
+against <strong>2 × 16789 = 33578</strong> — twice the cost of one load — and reads
+<strong>false</strong> for <code>moderate-rotation-conventional-static</code>, <code>strong-rotation-compact-static</code>, <code>diverted-single-null</code> and true for the rest, so the per-child series are reported
+against the one-load figure honestly rather than as a claim that no child crossed it. "Run each row in
+its own process" is a bound on what a process accumulates, not on what a row costs; a reader who takes
+the flag as the remedy's claim will read it wrong, which is why the flag and the caveat travel
+together.</p>
+
+<p>The two rows the aborting job never reached — <code>strong-rotation-compact-static</code> and <code>diverted-single-null</code> — completed here, each in its own
+process, each writing its own terminal state.</p>
+
+<figure>
+  <img src="/nova/figures/millisecond-converged-solve/program-size/process-per-row/one-load-per-row.png"
+       alt="Per-child mapping count for the four certificate rows against the kernel cap and the two-load ceiling">
+  <figcaption>The four children of job <code>1274197</code> sampled at a 0.2 s tick. Upper panel: each
+  child's mapping count for the life of its load, with <code>vm.max_map_count</code> = 65530 in red,
+  the two-load line at 33578 dotted, and each peak circled. Lower panel: the four peaks as bars
+  against the one-load band measured previously (16789-17620, shaded) and the same two lines. The
+  point of the figure is vertical distance: every child ends far below the cap, because no child ever
+  loaded a second row's program.</figcaption>
+</figure>
+
+<p><strong>The receipt the gate reads.</strong> Each child wrote its own row receipt as it landed,
+and the parent merged the four into the single receipt at
+<code>docs/figures/millisecond-converged-solve/program-size/process-per-row/certificate.json</code>,
+carrying <code>execution_mode = one-process-per-row</code>, the parent's process id, and one entry per
+row naming the child's process id, exit code and sampled peak. Every row carries both revision keys
+(<code>baseline_revision = 4e82bafb3</code>, <code>candidate_revision = 2710b2ea1</code>), the
+baseline state digest, the bit-identity verdict and its terminal residual, which is the same receipt
+shape the single-process path mints. The merge refuses a receipt whose rows were solved by the
+receipt's own process, by fewer distinct processes than there are rows, or by a row that wrote no
+receipt, so a single-process run cannot present itself as four.</p>
+
+<table>
+  <tr><th>row</th><th>bit-identical</th><th>baseline arm</th><th>terminal residual</th></tr>
+        <tr><td><code>weak-rotation-reactor-static</code></td><td>False</td><td>digest</td><td>2.430e-15</td></tr>
+        <tr><td><code>moderate-rotation-conventional-static</code></td><td>False</td><td>digest</td><td>1.175e-15</td></tr>
+        <tr><td><code>strong-rotation-compact-static</code></td><td>False</td><td>digest</td><td>1.457e-15</td></tr>
+        <tr><td><code>diverted-single-null</code></td><td>False</td><td>digest</td><td>2.092e-01</td></tr>
+</table>
+
+<p><strong>The identity verdict is FAIL on all four rows and that is not this node's finding.</strong>
+The committed baseline arm for every row is a <em>digest</em>, not a terminal state array, so the
+cross-revision difference is reported as unmeasured rather than as zero — the same verdict the
+in-process run returned at job <code>1274144</code>, and the reason that run exited 1 as well. The
+rows themselves complete, which is what this node set out to establish; measuring the difference
+belongs to a comparison at a revision that records its array, and the failing identity gate is
+reported here rather than triaged, because it lies outside this node's declared scope.</p>
+
+<h3>Artifacts</h3>
+<ul>
+  <li>Launcher: <code>.../r-20260920T180231259880-cca-one-certificate-row-per-process/lane.sh</code>,
+  driving one <code>srun</code> into <code>all_debug</code>; log <code>lane.log</code> beside it,
+  carrying <code>LANE_REVISION</code>, the node, one <code>CERTIFICATE_START</code> /
+  <code>CERTIFICATE_DONE</code> pair per row, a <code>PROBE_SUMMARY</code> line per child and one
+  <code>CERTIFICATE_ROW_PROCESS</code> line per row.</li>
+  <li>Merged receipt: <code>docs/figures/millisecond-converged-solve/program-size/process-per-row/certificate.json</code>;
+  per-row receipts, sampled series and probe summaries in the <code>rows/</code> directory beside it.</li>
+  <li>Certificate panels, one per row, in <code>.../process-per-row/panels/</code> as PNG beside SVG.</li>
+  <li>Figure: <code>/nova/figures/millisecond-converged-solve/program-size/process-per-row/one-load-per-row.png</code>
+  (<code>.svg</code> beside it), rendered from the four probe series.</li>
+</ul>
+<h2 id="certificate-row-receipt-hygiene">The per-row receipt now states what it measured</h2>
+
+<p><strong>Landed 2026-09-22, commit <code>a6b251732</code>.</strong> The one-row-per-process receipt
+above was read as announcing things it did not measure. Four field identities were repaired in
+<code>benchmarks/solve_program_size_gate.py</code>, and the committed receipt was left as measured
+with a note rather than re-minted.</p>
+
+<table>
+  <tr><th>field</th><th>what it held before</th><th>what it holds now</th></tr>
+  <tr><td><code>exit_code</code></td>
+      <td>the probe wrapper's status; the child that solved the row sat elsewhere under
+      <code>probe_exit_code</code></td>
+      <td>the child's status; the wrapper's status is its own field,
+      <code>probe_wrapper_exit</code>, printed beside it</td></tr>
+  <tr><td>one-load flag</td>
+      <td><code>within_one_program_load</code> tested the peak against twice the
+      <strong>16789-17620</strong> a single load costs — the two-load comparison under the one-load
+      name</td>
+      <td><code>within_one_program_load</code> tests against one program load; the two-load ceiling
+      keeps its own field <code>within_two_program_loads</code>; both printed per row</td></tr>
+  <tr><td><code>candidate_state_array_path</code></td>
+      <td>absolute to the worktree that minted it, naming a tree a later reader would not
+      have</td>
+      <td>the array's name within the states directory, resolved beside the receipt first and
+      inside the receipt's recorded <code>state_directory</code> second</td></tr>
+</table>
+
+<p>The defect is visible in the committed receipt itself, which is why it was annotated rather than
+rewritten. Every one of its four <code>exit_code</code> values is <strong>0</strong> while the
+child that solved the row recorded <strong>1</strong> under <code>probe_exit_code</code>: on this
+run the wrapper completed even where its child did not, so a reader of <code>lane.log</code> and a
+reader of the receipt disagreed about whether the rows finished.
+<code>candidate_state_array_path</code> begins
+<code>/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/&#8230;</code>, naming the
+worktree <code>cca-one-certificate-row-per-process</code>. And
+<code>within_one_program_load</code> reads <strong>true</strong> for
+<code>weak-rotation-reactor-static</code> at a peak of <strong>24,750</strong> and
+<strong>false</strong> for <code>moderate-rotation-conventional-static</code> at
+<strong>40,756</strong> — but so does a genuine one-load test, which is exactly what made the
+looser bound hard to notice. Three rows show <strong>NO</strong> in the table above under a bound
+that was never one load.</p>
+
+<p><strong>The committed receipt keeps its values.</strong> Rather than re-running the certificate,
+<code>docs/figures/millisecond-converged-solve/program-size/process-per-row/certificate.json</code>
+gains a <code>field_semantics_note</code> naming the revision it was measured at
+(<code>2710b2ea1</code>) and the two fields that read against the names they now carry. The four
+peaks and their terminal states are the evidence the section above rests on; re-minting them to
+match a renamed field would have destroyed the measurement in order to describe the instrument.</p>
+
+<p><strong>The command builder now has a test that runs it.</strong>
+<code>certificate_row_command</code> is covered by a case that parses the argv it builds through the
+driver's own argument parser and asserts the row it names, and there is a case per renamed or
+re-semanticised field: the exit field in both directions, the no-probe case where the wrapper's
+status is the child's, the one-load boundary including the two-load ceiling and the
+<strong>40,756</strong> peak recorded above, and the relative state path round-tripping back
+through <code>load_certificate_baseline</code>. Row counts: <strong>23 passed</strong> at
+<code>a6b251732</code> against <code>17 passed</code> at the base, zero added failures. The
+declared negative control — put the two-load comparison back under the one-load name — reddens
+<code>test_one_load_flag_compares_against_one_program_load</code> at
+<code>1 failed in 5.29s</code>, EXIT=1, and was reverted.</p>
+
+<p><strong>No row was re-measured and no solver code changed.</strong> This landing repairs the
+receipt's vocabulary and adds coverage; the certificate identity comparison, including the failing
+<code>diverted-single-null</code> row this record already reports, is untouched. The followup that
+drove the work — make per-row receipts relocatable and status-faithful — remains open for the
+coordinator to resolve against this anchor.</p>
+</main>
+</body>
+</html>

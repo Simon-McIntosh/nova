@@ -1,0 +1,9 @@
+revision=7c74bf18b72f1b15d57f006f3eb6462cc6acba7b plus explicit request body; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine; command=python operator-boundary.py
+one {"operator_boundaries": 0, "compile_seconds": 7.847619656473398, "instructions": 13677}
+nested {"operator_boundaries": 0, "compile_seconds": 11.390187535434961, "instructions": 36669}
+streamed {"operator_boundaries": 0, "compile_seconds": 7.1343641728162766, "instructions": 15899}
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/operator-boundary.py", line 76, in <module>
+    assert receipt["programs"]["one"]["operator_boundaries"] == 1
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

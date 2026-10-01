@@ -1,12 +1,9 @@
 {
  "schema": "nova.program-shape-census",
- "captured_at": "2026-09-18T00:52:36+0200",
- "bank_cache": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-canonical-program-shapes-census/logs/exact-operand-cache.npz",
+ "captured_at": "2026-09-19T16:13:23+0200",
+ "bank_cache": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-delete-observation-shim/logs/exact-operand-cache.npz",
  "compiled_program_key": "nova/equilibrium/reduced_newton.py:2055 _compiled_program_key",
  "certificate_source": "benchmarks/solovev_certificate._certificate_compile_problem dimensions",
- "framework_compat_shims": [
-  "clip_quadrature._UNIT_NODE is published as observation._UNIT_NODE for the duration of the certificate call: solovev_certificate.py reads it from the module that does not define it"
- ],
  "requested_cells": -300,
  "bank": {
   "label": "bank",
@@ -108,8 +105,8 @@
   "padding_waste": {
    "arc_capacity": {
     "observed": [
-     3072,
-     3328
+     152,
+     154
     ],
     "floors": [
      256,
@@ -118,8 +115,8 @@
      2048
     ],
     "padding_ratio": {
-     "3072": 1.3333,
-     "3328": 1.2308
+     "152": 1.6842,
+     "154": 1.6623
     }
    },
    "mesh_axis_nodes": {
@@ -217,21 +214,21 @@
    }
   },
   "today": {
-   "{\"arc_capacity\": 3072, \"mesh_axis_nodes\": 342, \"mesh_cell_capacity\": 342, \"sample_node_capacity\": 1066, \"state_size\": 1529, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
+   "{\"arc_capacity\": 152, \"mesh_axis_nodes\": 342, \"mesh_cell_capacity\": 342, \"sample_node_capacity\": 1066, \"state_size\": 1529, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
     "weak-rotation-reactor-static"
    ],
-   "{\"arc_capacity\": 3072, \"mesh_axis_nodes\": 341, \"mesh_cell_capacity\": 341, \"sample_node_capacity\": 1073, \"state_size\": 1535, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
+   "{\"arc_capacity\": 152, \"mesh_axis_nodes\": 341, \"mesh_cell_capacity\": 341, \"sample_node_capacity\": 1073, \"state_size\": 1535, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
     "moderate-rotation-conventional-static"
    ],
-   "{\"arc_capacity\": 3072, \"mesh_axis_nodes\": 341, \"mesh_cell_capacity\": 341, \"sample_node_capacity\": 1063, \"state_size\": 1525, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
+   "{\"arc_capacity\": 152, \"mesh_axis_nodes\": 341, \"mesh_cell_capacity\": 341, \"sample_node_capacity\": 1063, \"state_size\": 1525, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
     "strong-rotation-compact-static"
    ],
-   "{\"arc_capacity\": 3328, \"mesh_axis_nodes\": 340, \"mesh_cell_capacity\": 340, \"sample_node_capacity\": 1086, \"state_size\": 1547, \"support_capacity\": 26, \"wall_node_capacity\": 121}": [
+   "{\"arc_capacity\": 154, \"mesh_axis_nodes\": 340, \"mesh_cell_capacity\": 340, \"sample_node_capacity\": 1086, \"state_size\": 1547, \"support_capacity\": 26, \"wall_node_capacity\": 121}": [
     "diverted-single-null"
    ]
   },
   "bucketed": {
-   "{\"arc_capacity\": 4096, \"mesh_axis_nodes\": 900, \"mesh_cell_capacity\": 1000, \"sample_node_capacity\": 2048, \"state_size\": 2048, \"support_capacity\": 256, \"wall_node_capacity\": 128}": [
+   "{\"arc_capacity\": 256, \"mesh_axis_nodes\": 900, \"mesh_cell_capacity\": 1000, \"sample_node_capacity\": 2048, \"state_size\": 2048, \"support_capacity\": 256, \"wall_node_capacity\": 128}": [
     "diverted-single-null",
     "moderate-rotation-conventional-static",
     "strong-rotation-compact-static",
@@ -247,8 +244,8 @@
   "padding_waste": {
    "arc_capacity": {
     "observed": [
-     3072,
-     3328
+     152,
+     154
     ],
     "floors": [
      256,
@@ -257,8 +254,8 @@
      2048
     ],
     "padding_ratio": {
-     "3072": 1.3333,
-     "3328": 1.2308
+     "152": 1.6842,
+     "154": 1.6623
     }
    },
    "mesh_axis_nodes": {
@@ -376,16 +373,16 @@
     "22086/43/mixed",
     "22086/43/pure"
    ],
-   "{\"arc_capacity\": 3072, \"mesh_axis_nodes\": 342, \"mesh_cell_capacity\": 342, \"sample_node_capacity\": 1066, \"state_size\": 1529, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
+   "{\"arc_capacity\": 152, \"mesh_axis_nodes\": 342, \"mesh_cell_capacity\": 342, \"sample_node_capacity\": 1066, \"state_size\": 1529, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
     "weak-rotation-reactor-static"
    ],
-   "{\"arc_capacity\": 3072, \"mesh_axis_nodes\": 341, \"mesh_cell_capacity\": 341, \"sample_node_capacity\": 1073, \"state_size\": 1535, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
+   "{\"arc_capacity\": 152, \"mesh_axis_nodes\": 341, \"mesh_cell_capacity\": 341, \"sample_node_capacity\": 1073, \"state_size\": 1535, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
     "moderate-rotation-conventional-static"
    ],
-   "{\"arc_capacity\": 3072, \"mesh_axis_nodes\": 341, \"mesh_cell_capacity\": 341, \"sample_node_capacity\": 1063, \"state_size\": 1525, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
+   "{\"arc_capacity\": 152, \"mesh_axis_nodes\": 341, \"mesh_cell_capacity\": 341, \"sample_node_capacity\": 1063, \"state_size\": 1525, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
     "strong-rotation-compact-static"
    ],
-   "{\"arc_capacity\": 3328, \"mesh_axis_nodes\": 340, \"mesh_cell_capacity\": 340, \"sample_node_capacity\": 1086, \"state_size\": 1547, \"support_capacity\": 26, \"wall_node_capacity\": 121}": [
+   "{\"arc_capacity\": 154, \"mesh_axis_nodes\": 340, \"mesh_cell_capacity\": 340, \"sample_node_capacity\": 1086, \"state_size\": 1547, \"support_capacity\": 26, \"wall_node_capacity\": 121}": [
     "diverted-single-null"
    ]
   },
@@ -404,7 +401,7 @@
     "22086/43/mixed",
     "22086/43/pure"
    ],
-   "{\"arc_capacity\": 4096, \"mesh_axis_nodes\": 900, \"mesh_cell_capacity\": 1000, \"sample_node_capacity\": 2048, \"state_size\": 2048, \"support_capacity\": 256, \"wall_node_capacity\": 128}": [
+   "{\"arc_capacity\": 256, \"mesh_axis_nodes\": 900, \"mesh_cell_capacity\": 1000, \"sample_node_capacity\": 2048, \"state_size\": 2048, \"support_capacity\": 256, \"wall_node_capacity\": 128}": [
     "diverted-single-null",
     "moderate-rotation-conventional-static",
     "strong-rotation-compact-static",
@@ -538,9 +535,9 @@
    },
    {
     "name": "runtime-ea5c55820be3d80549fe",
-    "entries": 2139,
-    "bytes": 5933039909,
-    "gib": 5.526,
+    "entries": 2170,
+    "bytes": 5988178057,
+    "gib": 5.577,
     "max_entry_bytes": 705173042
    },
    {
@@ -558,15 +555,15 @@
     "max_entry_bytes": 425482922
    }
   ],
-  "total_entries": 3958,
-  "total_bytes": 20038219057,
-  "total_gib": 18.662,
+  "total_entries": 3989,
+  "total_bytes": 20093357205,
+  "total_gib": 18.713,
   "age_days": {
-   "min": 0.06,
-   "median": 2.25,
-   "q90": 9.62,
-   "max": 15.68,
-   "older_than_10_days": 360,
+   "min": 0.1,
+   "median": 3.88,
+   "q90": 11.25,
+   "max": 17.32,
+   "older_than_10_days": 514,
    "older_than_20_days": 0
   }
  },
@@ -1790,7 +1787,7 @@
     "case": "weak-rotation-reactor-static",
     "name": "weak-rotation-reactor-static",
     "requested_cells": -300,
-    "seconds": 28.889,
+    "seconds": 13.315,
     "capacities": {
      "mesh_cell_capacity": 342,
      "mesh_axis_nodes": 342,
@@ -1798,7 +1795,7 @@
      "sample_node_capacity": 1066,
      "state_size": 1529,
      "support_capacity": 24,
-     "arc_capacity": 3072
+     "arc_capacity": 152
     },
     "dimensions": {
      "realised_cells": 342,
@@ -1808,10 +1805,10 @@
      "solve_state_size": 1529,
      "atomic_support_capacity": 24,
      "spline_chain_samples_per_chord": 128,
-     "exact_support_capacity": 3072,
+     "exact_support_capacity": 152,
      "quadrature_nodes_per_axis": 8,
      "quadrature_nodes_per_triangle": 64,
-     "exact_quadrature_points_per_cell": 196480,
+     "exact_quadrature_points_per_cell": 9600,
      "whole_cell_quadrature_points_per_cell": 1408,
      "cell_polynomial_terms": 6,
      "newton_steps": 10,
@@ -1824,7 +1821,7 @@
     "case": "moderate-rotation-conventional-static",
     "name": "moderate-rotation-conventional-static",
     "requested_cells": -300,
-    "seconds": 20.337,
+    "seconds": 10.956,
     "capacities": {
      "mesh_cell_capacity": 341,
      "mesh_axis_nodes": 341,
@@ -1832,7 +1829,7 @@
      "sample_node_capacity": 1073,
      "state_size": 1535,
      "support_capacity": 24,
-     "arc_capacity": 3072
+     "arc_capacity": 152
     },
     "dimensions": {
      "realised_cells": 341,
@@ -1842,10 +1839,10 @@
      "solve_state_size": 1535,
      "atomic_support_capacity": 24,
      "spline_chain_samples_per_chord": 128,
-     "exact_support_capacity": 3072,
+     "exact_support_capacity": 152,
      "quadrature_nodes_per_axis": 8,
      "quadrature_nodes_per_triangle": 64,
-     "exact_quadrature_points_per_cell": 196480,
+     "exact_quadrature_points_per_cell": 9600,
      "whole_cell_quadrature_points_per_cell": 1408,
      "cell_polynomial_terms": 6,
      "newton_steps": 10,
@@ -1858,7 +1855,7 @@
     "case": "strong-rotation-compact-static",
     "name": "strong-rotation-compact-static",
     "requested_cells": -300,
-    "seconds": 20.801,
+    "seconds": 10.671,
     "capacities": {
      "mesh_cell_capacity": 341,
      "mesh_axis_nodes": 341,
@@ -1866,7 +1863,7 @@
      "sample_node_capacity": 1063,
      "state_size": 1525,
      "support_capacity": 24,
-     "arc_capacity": 3072
+     "arc_capacity": 152
     },
     "dimensions": {
      "realised_cells": 341,
@@ -1876,10 +1873,10 @@
      "solve_state_size": 1525,
      "atomic_support_capacity": 24,
      "spline_chain_samples_per_chord": 128,
-     "exact_support_capacity": 3072,
+     "exact_support_capacity": 152,
      "quadrature_nodes_per_axis": 8,
      "quadrature_nodes_per_triangle": 64,
-     "exact_quadrature_points_per_cell": 196480,
+     "exact_quadrature_points_per_cell": 9600,
      "whole_cell_quadrature_points_per_cell": 1408,
      "cell_polynomial_terms": 6,
      "newton_steps": 10,
@@ -1892,7 +1889,7 @@
     "case": "diverted-single-null",
     "name": "diverted-single-null",
     "requested_cells": -300,
-    "seconds": 26.204,
+    "seconds": 13.363,
     "capacities": {
      "mesh_cell_capacity": 340,
      "mesh_axis_nodes": 340,
@@ -1900,7 +1897,7 @@
      "sample_node_capacity": 1086,
      "state_size": 1547,
      "support_capacity": 26,
-     "arc_capacity": 3328
+     "arc_capacity": 154
     },
     "dimensions": {
      "realised_cells": 340,
@@ -1910,10 +1907,10 @@
      "solve_state_size": 1547,
      "atomic_support_capacity": 26,
      "spline_chain_samples_per_chord": 128,
-     "exact_support_capacity": 3328,
+     "exact_support_capacity": 154,
      "quadrature_nodes_per_axis": 8,
      "quadrature_nodes_per_triangle": 64,
-     "exact_quadrature_points_per_cell": 212864,
+     "exact_quadrature_points_per_cell": 9728,
      "whole_cell_quadrature_points_per_cell": 1536,
      "cell_polynomial_terms": 6,
      "newton_steps": 10,

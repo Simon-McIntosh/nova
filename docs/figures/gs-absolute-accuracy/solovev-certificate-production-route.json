@@ -9,7 +9,7 @@
     "partition": "all_debug",
     "precision": "float64",
     "reservation": null,
-    "slurm_job_id": "1268256"
+    "slurm_job_id": "1274019"
   },
   "cases": {
     "diverted-single-null": {
@@ -484,8 +484,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-reduced.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-reduced.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "ec9e1faf522c8b2b08ab114de20ae6cdc0681c226f7e18add0409223837cef17"
+            "render_source": "persisted_part_receipt",
+            "sha256": "2e33815d570222ce32ae0ddac2318d5817ae7f6e068d585a7cc42e1341371db5",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-reduced.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-reduced.svg",
+            "vector_sha256": "274b1174b2a77fec62e94a7dcfc7c1eba8c7afef7e5cfd3ff9c92b0a289fb9de"
           },
           "geometry": {
             "boundary_flux_error_wb": 1.9081958235744878e-17,
@@ -10402,7 +10405,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.8541494067758322,
             "case_and_machine": 0.7146573159843683,
-            "figure_render": 0.28196141961961985,
+            "figure_render": 0.5261596255004406,
             "operator_and_seed": 20.583787873387337,
             "production_solve": 107.13601647689939
           }
@@ -10485,8 +10488,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "0378b351a30b94ecf3d09fb25998f0c5539ceec31965095dbeede23605609c0e"
+            "render_source": "persisted_part_receipt",
+            "sha256": "48093d505dd61c490446f1d5f27c37507413e82884667b5cbc8512011491172e",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.svg",
+            "vector_sha256": "a0f5c9dee6e1512884791ea99817bbe5fa78fe45914f00adacc8ecae502db2e4"
           },
           "geometry": {
             "boundary_flux_error_wb": 3.230922474006803e-17,
@@ -28555,7 +28561,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.9269098863005638,
             "case_and_machine": 0.7052360102534294,
-            "figure_render": 0.3208747049793601,
+            "figure_render": 0.5803228784352541,
             "operator_and_seed": 20.92670864611864,
             "production_solve": 109.25919994991273
           }
@@ -28641,8 +28647,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-500.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-500.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "ab6ac9f8dd4f73f2d85a912b67586ec3d16449ff3844f1c55364c77bb3887075"
+            "render_source": "persisted_part_receipt",
+            "sha256": "897e56ecb1f82b0823d42ced9dda7bfa12699458476dd94dd926938b3235e8a9",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-500.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-500.svg",
+            "vector_sha256": "e87f6ae1e41636210647ecfd4d5efdbcf16667f763847876b7a2526276bdefce"
           },
           "geometry": {
             "boundary_flux_error_wb": 2.490276864927643e-19,
@@ -54583,7 +54592,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 1.001639312133193,
             "case_and_machine": 0.7084136549383402,
-            "figure_render": 0.3388707898557186,
+            "figure_render": 0.6050319410860538,
             "operator_and_seed": 23.14641678519547,
             "production_solve": 119.68642721138895
           }
@@ -54669,8 +54678,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-1000.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-1000.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "71c07201b1869e330573dbbd29e843bbf70917d551a1b431226ff2ee4454e51f"
+            "render_source": "persisted_part_receipt",
+            "sha256": "73d67e45587f71e28df43d27b29c4c72b64421d305fe033a31071cb033a4295f",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-1000.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-1000.svg",
+            "vector_sha256": "88c033d39a922acdddc13635df94d60e358fa1beffe86aaa640c86b522f93fe1"
           },
           "geometry": {
             "boundary_flux_error_wb": 0.0006441994299933154,
@@ -100863,7 +100875,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 1.3067265804857016,
             "case_and_machine": 0.7832670379430056,
-            "figure_render": 0.32679036911576986,
+            "figure_render": 0.6419463846832514,
             "operator_and_seed": 25.546359879896045,
             "production_solve": 140.30549389496446
           }
@@ -101424,8 +101436,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-reduced.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-reduced.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "253be8ef8446921faed53bd662649e3c5db7b52ac933c5bcb40fed749cad19bc"
+            "render_source": "persisted_part_receipt",
+            "sha256": "aad01917ff395118d6f16253a37004ecd1edcbd99fbae8f3427461a8e6897346",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-reduced.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-reduced.svg",
+            "vector_sha256": "d91b61c4365a4260a119895cf4cfec49e301143d24d91cd372b63be865cdb58e"
           },
           "geometry": {
             "boundary_flux_error_wb": 0.0770090736249861,
@@ -114688,7 +114703,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.7273963997140527,
             "case_and_machine": 0.1746481889858842,
-            "figure_render": 0.2938548559322953,
+            "figure_render": 0.559975553303957,
             "operator_and_seed": 22.260121814906597,
             "production_solve": 111.46049260627478
           }
@@ -114767,7 +114782,10 @@
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.png",
             "render_source": "persisted_part_receipt",
-            "sha256": "aee39e616e0b65c9687422ea2b5474813825056b4045d6991f480a54e0d0356c"
+            "sha256": "5912f3828cca242d76c1788803232b00d5f41673fff9e316b53d15fa3e981368",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.svg",
+            "vector_sha256": "58ab16fd674f007f9e6fb1a5b4957efdaf4e4e184fbe5971ce881ea751963dfc"
           },
           "geometry": {
             "boundary_flux_error_wb": 0.21957371415736196,
@@ -136035,7 +136053,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.7917921040207148,
             "case_and_machine": 0.19006321672350168,
-            "figure_render": 0.46788148768246174,
+            "figure_render": 0.5848080944269896,
             "operator_and_seed": 22.09374748170376,
             "production_solve": 116.92100436706096
           }
@@ -136113,8 +136131,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-500.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-500.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "1130ec6bca586fca1779c46dcd04c03c738d84b911901d030d02e56d0e0c3a1e"
+            "render_source": "persisted_part_receipt",
+            "sha256": "599f5511278b714dd4b59b3b9dc62c420f5ff404de4a6444d254ac1cd861e496",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-500.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-500.svg",
+            "vector_sha256": "64172609ff6f3c2de65411e776f92af23895e6cd6173e2002215dc9a974eb76e"
           },
           "geometry": {
             "boundary_flux_error_wb": 0.28480790350808527,
@@ -165185,7 +165206,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.9197847070172429,
             "case_and_machine": 0.2251357715576887,
-            "figure_render": 0.36182054691016674,
+            "figure_render": 0.6076667346060276,
             "operator_and_seed": 24.08868556190282,
             "production_solve": 120.68957759719342
           }
@@ -165263,8 +165284,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-1000.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-1000.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "2a586674641bdc2b89595ec804f80b07403f47b266e890c5664a7dc51570679c"
+            "render_source": "persisted_part_receipt",
+            "sha256": "3c3685190c13c650a92279f3f11b9d9e8ce11da8cec98c78b666f894ed99fc33",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-1000.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-1000.svg",
+            "vector_sha256": "a175db015cde0adda3e097bf60245338070affe27fc5d3abea3f8950d0c530dd"
           },
           "geometry": {
             "boundary_flux_error_wb": 0.3679066761704839,
@@ -214123,7 +214147,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 1.1337453769519925,
             "case_and_machine": 0.283293423242867,
-            "figure_render": 0.41475254110991955,
+            "figure_render": 0.7466868553310633,
             "operator_and_seed": 25.996140277013183,
             "production_solve": 140.4980199886486
           }
@@ -214684,8 +214708,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-reduced.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-reduced.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "39b9954199a41a85c3e8a1550eec462a0cc384f54a53b753791737d73d43aed3"
+            "render_source": "persisted_part_receipt",
+            "sha256": "9a8f4cb11638e88cbf5f9a3ec9eff783b7e856a523034432cea93edfce0e1ad2",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-reduced.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-reduced.svg",
+            "vector_sha256": "fdd028f675ab0a94abebeeadf0e21e0a2b1c4834664c232463ad779e4f3097ee"
           },
           "geometry": {
             "boundary_flux_error_wb": 0.001905623840901083,
@@ -227905,7 +227932,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.5932732932269573,
             "case_and_machine": 0.1974347084760666,
-            "figure_render": 0.2929003145545721,
+            "figure_render": 0.5596885699778795,
             "operator_and_seed": 21.39486690890044,
             "production_solve": 111.5569063341245
           }
@@ -227984,7 +228011,10 @@
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.png",
             "render_source": "persisted_part_receipt",
-            "sha256": "e0c30d970be5a09aa72f8a81b9a59df98d62e83485bc860a644acda828f63b6f"
+            "sha256": "816f712329ced0bd4cfd1f63c02211785229246a3797638833b13a92c85173ad",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.svg",
+            "vector_sha256": "ef4e41c319e7f98ccc920c3848804c9e25a53a852798ca4701f16b456332959d"
           },
           "geometry": {
             "boundary_flux_error_wb": 0.022291083444660645,
@@ -249186,7 +249216,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.7303165048360825,
             "case_and_machine": 0.17999512422829866,
-            "figure_render": 0.4706684239208698,
+            "figure_render": 0.5932525396347046,
             "operator_and_seed": 21.75265246629715,
             "production_solve": 121.72067821305245
           }
@@ -249264,8 +249294,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-500.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-500.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "520e25c43d7c75288039c6ff4eb664d557fd15d62ce8c2f46d9bf9a6e43890d0"
+            "render_source": "persisted_part_receipt",
+            "sha256": "7191e5476defb1a1d1afaa4466d571503facdf15cdc5453e2e6391f770b75761",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-500.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-500.svg",
+            "vector_sha256": "c141e6d015436871e813f950c8ebc7d36ad9d5dbda8223e1a22a472be52ff916"
           },
           "geometry": {
             "boundary_flux_error_wb": 0.03301955800929176,
@@ -278435,7 +278468,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.8264618059620261,
             "case_and_machine": 0.18718672823160887,
-            "figure_render": 0.36138203646987677,
+            "figure_render": 0.607163654640317,
             "operator_and_seed": 23.0028639966622,
             "production_solve": 124.92308394238353
           }
@@ -278513,8 +278546,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-1000.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-1000.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "6f06bfaaa3e39b6b80dc5647efd6e4a1790e7ba817513808b4305b6026b5147c"
+            "render_source": "persisted_part_receipt",
+            "sha256": "be846b21225df57157aac3b9a80482a5427e94e01839dd37a07cc1572b6d6bf8",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-1000.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-1000.svg",
+            "vector_sha256": "f16aee60834b855a4b87dd1a026d1922713ecbd753a208e4b9d54ebc6741d0e4"
           },
           "geometry": {
             "boundary_flux_error_wb": 0.0383365707611137,
@@ -327324,7 +327360,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 1.1745989518240094,
             "case_and_machine": 0.28037896752357483,
-            "figure_render": 0.4099957970902324,
+            "figure_render": 0.6664130128920078,
             "operator_and_seed": 25.53521347977221,
             "production_solve": 127.76849105302244
           }
@@ -327885,8 +327921,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "1624f12aa9fee4ade39a5d0dc0f2aeff34af676a69eb2014ee2f8e920b5fd3f1"
+            "render_source": "persisted_part_receipt",
+            "sha256": "6653eede1db0bbb38c9f8b282f2c363526dd661b51a4a62cb8150253a554534b",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.svg",
+            "vector_sha256": "272de1da640891589e2c9767509b8ea2f34fead902e6e961fbbacac758f09c01"
           },
           "geometry": {
             "boundary_flux_error_wb": 10.39513184789983,
@@ -341136,7 +341175,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.6080394852906466,
             "case_and_machine": 0.17405063193291426,
-            "figure_render": 0.2346762828528881,
+            "figure_render": 0.5439850967377424,
             "operator_and_seed": 22.026600944809616,
             "production_solve": 115.22047305293381
           }
@@ -341215,7 +341254,10 @@
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.png",
             "render_source": "persisted_part_receipt",
-            "sha256": "89fc10af919811f0ec06aedad069c31beff5399d465cca73e64c5f04f771ee5f"
+            "sha256": "61e31a2baf4cb87bdaddcaf0f1ba9fd8df174f2cfbbcbd64679c6b810a479a36",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.svg",
+            "vector_sha256": "a19e8034498ad9e167a2dd30edcff40b094b2501968ceccbdfb8ca996adb4bcb"
           },
           "geometry": {
             "boundary_flux_error_wb": 7.5705133066844486,
@@ -362454,7 +362496,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.7689140569418669,
             "case_and_machine": 0.18413529638200998,
-            "figure_render": 0.6648602411150932,
+            "figure_render": 0.5593711026012897,
             "operator_and_seed": 21.845613386482,
             "production_solve": 114.32706860173494
           }
@@ -362532,8 +362574,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-500.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-500.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "fe44671786d36d2345cc624ecdc36a942b719108d56e4cb6f2785e247956d250"
+            "render_source": "persisted_part_receipt",
+            "sha256": "505c7b8696c60dfa4e9a0faff6ac29c65886a8ab426eb476a36bb00eb0e1cf32",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-500.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-500.svg",
+            "vector_sha256": "31357446e70d3db3a6598aaf06438164092ac01648e8e02e0dc3e6853e3733cd"
           },
           "geometry": {
             "boundary_flux_error_wb": 12.47110557906573,
@@ -391881,7 +391926,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.7807342819869518,
             "case_and_machine": 0.18412642739713192,
-            "figure_render": 0.32002549432218075,
+            "figure_render": 0.5793276522308588,
             "operator_and_seed": 24.12362245284021,
             "production_solve": 119.51245792768896
           }
@@ -391959,8 +392004,11 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-1000.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-1000.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "6b0a38974ee8b43cd660cea8b694a6e1ae236c817a7987195b958f421294a87a"
+            "render_source": "persisted_part_receipt",
+            "sha256": "ef467c654a11b57748b9ade0daa455c2360c2f8224c7bc8d8f6be914009627c4",
+            "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-1000.svg",
+            "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-1000.svg",
+            "vector_sha256": "f099bfa9eb93da486e329fcbb9d1ac4798f825dd5b3f50d795d6145a3b507623"
           },
           "geometry": {
             "boundary_flux_error_wb": 13.708196777092933,
@@ -440905,7 +440953,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 1.0832970403134823,
             "case_and_machine": 0.2563659679144621,
-            "figure_render": 0.39175028167665005,
+            "figure_render": 0.6403475124388933,
             "operator_and_seed": 26.13869083020836,
             "production_solve": 138.22633518930525
           }
@@ -440957,7 +441005,7 @@
     "seed_factory": "profile.cold_seed_portfolio",
     "solver_route": "profile.solve(seed, route='newton_krylov', target_current=Ip_closed_form)",
     "solver_source_modified": false,
-    "source_revision": "b4cb7f8889ff3a4636f91b73496c32a6b2b5d76e",
+    "source_revision": "1f9fe3cfa3d8d409089d1e0dfac07dec77ca2e72",
     "terminal_residual_bound": 1e-12,
     "theoretical_discrete_operator_order": 2.0
   },
@@ -440992,7 +441040,7 @@
   "reduced_oracle_registry_reproduction": {
     "all_bounds_reproduced": true,
     "construction": "closed-form field, profiles, density, and exact exterior",
-    "directly_measured_entries_within_bound": true,
+    "directly_measured_entries_within_bound": false,
     "entries": {
       "axis_position_m": {
         "banked_measured_floor": 0.07483887226620761,
@@ -441031,8 +441079,8 @@
         "banked_registry_bound": 1e-12,
         "bound_reproduced": true,
         "locked_bound": 1e-12,
-        "reduced_measurement": 3.060088622829243e-15,
-        "reduced_measurement_within_bound": true
+        "reduced_measurement": 0.22486918929899416,
+        "reduced_measurement_within_bound": false
       },
       "flux_rms_fraction_of_span": {
         "banked_measured_floor": 0.2718489700074329,
@@ -441087,8 +441135,8 @@
         "banked_registry_bound": 1e-13,
         "bound_reproduced": true,
         "locked_bound": 1e-13,
-        "reduced_measurement": 4.218847493575595e-15,
-        "reduced_measurement_within_bound": true
+        "reduced_measurement": 0.31002004601399924,
+        "reduced_measurement_within_bound": false
       },
       "topology_class": {
         "banked_measured_floor": {
@@ -441162,7 +441210,7 @@
     "realised_cells": 136,
     "registry_entry_count": 14,
     "requested_cells": -110,
-    "wall_seconds": 46.652572598308325
+    "wall_seconds": 73.84620194882154
   },
   "schema": {
     "$id": "nova.solovev-production-route-absolute-accuracy-certificate",

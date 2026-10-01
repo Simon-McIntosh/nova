@@ -4,7 +4,7 @@
  "question": "do the twelve bank members need twelve compiled programs, or do their program-shape axes agree?",
  "instrument": "benchmarks/program_shape_census.py --skip-certificate (reads array shapes from logs/exact-operand-cache.npz; nothing is compiled and no MAST profile is rebuilt)",
  "source": {
-  "operand_cache": "logs/exact-operand-cache.npz (89486 bytes, allow_pickle=False)",
+  "operand_cache": "logs/exact-operand-cache.npz (180876 bytes, allow_pickle=False)",
   "metadata_guard": "metadata.arm_count == 12, asserted before any row is read",
   "rows": 12,
   "identities": "six MAST shot/slice pairs (21978/35, 21983/35, 21985/51, 21986/46, 21989/55, 22086/43), each at two arms (pure, mixed)"

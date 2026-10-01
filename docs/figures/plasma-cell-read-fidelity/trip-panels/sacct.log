@@ -1,0 +1,5 @@
+JobID|State|ExitCode|Elapsed|Partition|NodeList
+1276423|COMPLETED|0:0|00:30:09|betelgeuse|98dci4-gpu-0003
+1276423.batch|COMPLETED|0:0|00:30:09||98dci4-gpu-0003
+1276423.extern|COMPLETED|0:0|00:30:09||98dci4-gpu-0003
+1276423.0|CANCELLED|0:15|00:30:09||98dci4-gpu-0003

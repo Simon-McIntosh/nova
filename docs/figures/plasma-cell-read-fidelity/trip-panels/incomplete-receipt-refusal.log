@@ -1,0 +1,6 @@
+revision=13074594c9ccaaddb3a768aa8f598d4b6b1731d2 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels command=python /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/validate-receipt.py
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/validate-receipt.py", line 12, in <module>
+    assert r['status'] == 'complete', 'physical measurement is incomplete'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: physical measurement is incomplete

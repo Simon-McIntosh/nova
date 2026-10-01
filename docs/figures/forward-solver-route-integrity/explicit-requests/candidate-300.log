@@ -1,0 +1,8 @@
+revision=364f92c3663f16f817ca873c573db1d4aa0aef91 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/program-gate.py', '300', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/candidate-300.json', 'candidate']
+lower_seconds=18.339190704748034
+{"source_digest": "e5fa1479a94cb6f52e549ea2ae5c77bae3e19143dc82cf1f31f3168d8ce7c695", "mode": "candidate", "hlo_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T103934949557-fsri-one-traced-operator-state-machine/optimized-hlo/candidate-300.hlo.txt", "revision": "364f92c3663f16f817ca873c573db1d4aa0aef91", "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine", "cells": 300, "optimized_instructions": 302553, "compile_seconds": 160.18312050774693, "job_id": "1275701", "platform": "cpu"}
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/program-gate.py", line 98, in <module>
+    assert count <= ceiling, f"operator state-machine ceiling refused: {cells} cells has {count} instructions > {ceiling}"
+           ^^^^^^^^^^^^^^^^
+AssertionError: operator state-machine ceiling refused: 300 cells has 302553 instructions > 203078

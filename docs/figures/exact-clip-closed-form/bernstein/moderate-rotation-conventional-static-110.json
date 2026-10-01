@@ -1,0 +1,69 @@
+{
+  "source_sha256": {
+    "nova/linalg/interpolant.py": "c122821a0bf48626566ad1526e3a4b0a606d60927b200e2a9afb7cf787667e6d",
+    "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+  },
+  "case": "moderate-rotation-conventional-static",
+  "requested_cells": 110,
+  "revision": "219c01732d177b14878f691e61c580d0fc258bbc",
+  "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+  "job": "1275837",
+  "comparisons": {
+    "vertices": {
+      "array_equal": false,
+      "relative_l2": 4.3335322586506094e-13,
+      "max_absolute": 6.9586292962339515e-12
+    },
+    "crossings": {
+      "array_equal": false,
+      "relative_l2": 6.747549448025336e-13,
+      "max_absolute": 6.9586292962339515e-12
+    },
+    "current": {
+      "array_equal": false,
+      "relative_l2": 3.036791877574677e-13,
+      "max_absolute": 2.3772372514940798e-08
+    },
+    "radial_moment": {
+      "array_equal": false,
+      "relative_l2": 2.6520473920209353e-12,
+      "max_absolute": 8.209184443330741e-10
+    },
+    "vertical_moment": {
+      "array_equal": false,
+      "relative_l2": 2.0364253041329015e-12,
+      "max_absolute": 5.986962037241028e-10
+    },
+    "area": {
+      "array_equal": false,
+      "relative_l2": 2.8013302167960657e-13,
+      "max_absolute": 2.2534057952938724e-14
+    },
+    "first_area_moment": {
+      "array_equal": false,
+      "relative_l2": 2.0412841891135143e-12,
+      "max_absolute": 7.579928438389283e-16
+    },
+    "second_area_moment": {
+      "array_equal": false,
+      "relative_l2": 3.0247213659210576e-13,
+      "max_absolute": 3.088620938868081e-17
+    },
+    "counts": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    },
+    "live": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    },
+    "refused": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    }
+  },
+  "passed": false
+}

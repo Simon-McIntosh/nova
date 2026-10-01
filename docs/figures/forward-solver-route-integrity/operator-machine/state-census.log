@@ -1,0 +1,2 @@
+revision=d8d858ff09a39851885a738c2293544785df32be plus uncommitted measurement prototype; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine; command=python state-census.py
+{"blocks": 255, "registers": 880, "operators": 8, "entry": 254, "branch_register_product": 224400}

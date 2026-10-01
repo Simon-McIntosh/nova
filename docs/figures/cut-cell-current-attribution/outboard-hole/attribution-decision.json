@@ -1,0 +1,108 @@
+{
+  "decision": "candidacy change not needed",
+  "reason": "All 135 labels permit current in both modes; setting every label to CORE changes no per-cell current. Remaining deficits are in the pointwise normalized-flux density support and the exact clipped polygons on the persisted nonconverged terminal field.",
+  "candidacy_source_changed": false,
+  "production_source_changed": false,
+  "test_source_changed": false,
+  "gate_assertions": [
+    {
+      "name": "test_booked_totals_reproduce_the_committed_state",
+      "passed": true
+    },
+    {
+      "name": "test_outboard_cells_book_the_committed_current",
+      "passed": true
+    },
+    {
+      "name": "test_outboard_cells_book_nonzero_in_both_clip_modes",
+      "passed": true
+    }
+  ],
+  "mode_differences_above_microamp": 41,
+  "successful_allocation": {
+    "job_id": "1274982",
+    "partition": "all_debug",
+    "exit_status": 0,
+    "elapsed_seconds": 285,
+    "total_cpu_seconds": 350.379,
+    "max_rss_kib": 2501348,
+    "tasks": {
+      "census": 0,
+      "controls": 0,
+      "render": 0
+    }
+  },
+  "failed_instrument_allocation": {
+    "job_id": "1274978",
+    "exit_status": 1,
+    "elapsed_seconds": 154,
+    "total_cpu_seconds": 183.826,
+    "reason": "JAX topology arrays were not converted before JSON serialization; corrected and repeated measurement retained."
+  },
+  "figure_only_rerender": {
+    "exit_status": 0,
+    "partition": "all_debug",
+    "reason": "Override default dot markers with required solid triangles; no physics rerun."
+  },
+  "baseline_source_revision": "61f7d79d558ec6219f39272bded5ab6933c666d1",
+  "loaded_fixture_and_gate_revision": "120d6136bfc2347a8f9764e200c11bf6bf32038c",
+  "production_paths": [
+    "nova/equilibrium/domain.py",
+    "nova/equilibrium/forward_operator.py",
+    "nova/equilibrium/source.py"
+  ],
+  "loaded_inputs": [
+    {
+      "path": "scripts/analytic_oracle_fixtures/measure.py",
+      "revision": "120d6136bfc2347a8f9764e200c11bf6bf32038c",
+      "blob": "da64fda02ce227a808d6bbc36190dae1aa61e520",
+      "sha256": "813b7df34f52825c5b0456a9135fed79f8b77127aa473be90e0976a8b52e2ee3"
+    },
+    {
+      "path": "tests/test_outboard_hole_census_gate.py",
+      "revision": "120d6136bfc2347a8f9764e200c11bf6bf32038c",
+      "blob": "23cb4b789aebba2319c22d7468a774e548805e7b",
+      "sha256": "b680f065c3eb79ba1e6f66e43bfe1cd5653a491ab2af775d8748b1fce33be30e"
+    }
+  ],
+  "negative_control": "none: no candidacy or test change is warranted under the coordinator conditional; label-neutralization and a known-cell exclusion were measured instead.",
+  "artifacts": {
+    "terminal-attribution.json": {
+      "sha256": "6a183d534d203da310805e1f258095063f163be525926ad9252a6756c091d733",
+      "bytes": 238325
+    },
+    "booked-census.json": {
+      "sha256": "3f8806b69a8516eddca9fdd0d19e692423958bdfd28ac52e23dee8d4bc89769b",
+      "bytes": 85399
+    },
+    "label-controls.json": {
+      "sha256": "368fec6c795f461fc9e796f1ee5830544d024f61c8621829184eabf0beb09ecd",
+      "bytes": 24319
+    },
+    "booked-versus-analytic.png": {
+      "sha256": "f92d4e9697d981417bde51e31f8285b3e04396f05a63cadd40ce2b6f83aa31c3",
+      "bytes": 1629979
+    },
+    "booked-versus-analytic.svg": {
+      "sha256": "f11adad9884d7f4b636f5de13a7d40fba2671d87a90550b7cd5ad724896beca0",
+      "bytes": 1155698
+    },
+    "terminal-census.log": {
+      "sha256": "8e10845a9d8dfc0e68364c74972d53e782991c21010ac5f4c3927bbdbf95499e",
+      "bytes": 7498
+    },
+    "terminal-controls.log": {
+      "sha256": "c701161b8d8985ec23cefe8bdc8d301ac6bfabb934ebc4491b22e947c5985e9f",
+      "bytes": 737
+    },
+    "terminal-allocation.log": {
+      "sha256": "12c9d0d7978f0f1ccb37fb2ad90311ccf8e80d9da801fd6d151e25e561b21424",
+      "bytes": 44
+    },
+    "figure-render.log": {
+      "sha256": "1e19d2c06cb2362d50a8362ce17b384677e50e5f9251adc9fed94d85ed19db5a",
+      "bytes": 442
+    }
+  },
+  "production_matches_fetched_main": true
+}

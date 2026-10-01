@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="360" viewBox="0 0 1120 360" role="img" aria-labelledby="title desc">
+<title id="title">One mapped clip body with shared saddle arc loops</title>
+<desc id="desc">Fixed-capacity cell rows enter one mapped body. Edge roots and polygon packing precede a gap scan and a nested saddle-region and half-arc scan. Each scan returns to one root-polish body. Cell moments are reduced across cells only after mapping.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#516270"/></marker></defs>
+<rect width="1120" height="360" fill="white"/>
+<g font-family="sans-serif" fill="#263746" font-size="15">
+<text x="32" y="35" font-size="22">One cell program; fixed-capacity scans share the arc work</text>
+<rect x="225" y="66" width="658" height="235" rx="8" fill="#f4f8fa" stroke="#6b9aad"/>
+<text x="245" y="92" font-weight="bold">vmap over atomic cells</text>
+<g fill="white" stroke="#6b9aad">
+<rect x="28" y="145" width="165" height="70" rx="5"/>
+<rect x="247" y="133" width="157" height="91" rx="5"/>
+<rect x="452" y="113" width="191" height="56" rx="5"/>
+<rect x="452" y="199" width="191" height="72" rx="5"/>
+<rect x="693" y="151" width="164" height="64" rx="5"/>
+<rect x="925" y="145" width="166" height="70" rx="5"/>
+</g>
+<text x="45" y="174">Cell vertices, flux,</text><text x="45" y="198">local evaluator row</text>
+<text x="264" y="159">Edge crossings</text><text x="264" y="184">Compact and rotate</text><text x="264" y="209">the polygon</text>
+<text x="467" y="136">Scan polygon gaps</text><text x="467" y="158">one arc-polish body</text>
+<text x="467" y="222">Scan saddle regions</text><text x="467" y="244">↳ scan both half-arcs</text><text x="467" y="264" font-size="13">one half-arc polish body</text>
+<text x="709" y="175">Pack fixed slots</text><text x="709" y="198">Compute moments</text>
+<text x="941" y="173">Sum cell measures</text><text x="941" y="197">Count refusals</text>
+<g fill="none" stroke="#516270" stroke-width="1.4" marker-end="url(#arrow)">
+<path d="M193 180H245"/><path d="M404 162H428V141H450"/><path d="M404 199H428V232H450"/>
+<path d="M643 141H668V170H691"/><path d="M643 232H668V195H691"/><path d="M857 181H923"/>
+</g>
+<text x="245" y="335" font-size="14">Root iterations, arc samples, vertex capacities, and moment formulas retain their existing values.</text>
+</g></svg>

@@ -11,16 +11,70 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+from nova.equilibrium.connectivity_boundary import _points_inside_polygon
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 
 
 ROOT = Path(__file__).resolve().parent
+DETACHED_COLOR = "#c4c4c4"
+DETACHED_LINEWIDTH = 0.5
 
 
 def _load(name: str) -> dict[str, np.ndarray]:
     with np.load(ROOT / name) as source:
         return {key: np.asarray(source[key]) for key in source.files}
+
+
+def _split_axis_enclosing(segments, axis):
+    """Partition a level's segments into the axis-enclosing one and the rest."""
+    enclosing, detached = [], []
+    for segment in segments:
+        points = np.asarray(segment, dtype=float)
+        if points.shape[0] < 3:
+            detached.append(points)
+            continue
+        inside = _points_inside_polygon(
+            np.asarray([axis[0]]),
+            np.asarray([axis[1]]),
+            points[:, 0],
+            points[:, 1],
+        )
+        (enclosing if bool(np.asarray(inside)[0]) else detached).append(points)
+    return enclosing, detached
+
+
+def _draw_boundary_components(axes, radius, height, flux, level, axis):
+    """Draw one level: the axis-enclosing component in boundary style.
+
+    A level of a diverted map also carries components that do not enclose the
+    axis. Drawing the whole level set in boundary style paints those as the
+    boundary, which is how a detached divertor lobe came to read as the
+    published contact. They are faint here instead.
+    """
+    drawn = poloidal.draw_flux_contours(axes, radius, height, flux, [level])
+    segments = [np.asarray(segment) for segment in drawn.allsegs[0]]
+    drawn.remove()
+    enclosing, detached = _split_axis_enclosing(segments, axis)
+    for segment in detached:
+        axes.plot(
+            segment[:, 0],
+            segment[:, 1],
+            color=DETACHED_COLOR,
+            linewidth=DETACHED_LINEWIDTH,
+            solid_capstyle="round",
+            zorder=DEFAULT_INK.zorder_flux,
+        )
+    for segment in enclosing:
+        axes.plot(
+            segment[:, 0],
+            segment[:, 1],
+            color=DEFAULT_INK.separatrix_color,
+            linewidth=DEFAULT_INK.separatrix_linewidth,
+            solid_capstyle="round",
+            zorder=DEFAULT_INK.zorder_separatrix,
+        )
+    return enclosing, detached
 
 
 def _hollow_lines(axes, first: int) -> None:
@@ -73,14 +127,13 @@ def main() -> int:
             state["raster"],
             shared_levels,
         )
-        poloidal.draw_flux_contours(
+        _enclosing, detached = _draw_boundary_components(
             axes,
             radius,
             height,
             state["raster"],
-            [row["boundary_flux_wb"]],
-            color=DEFAULT_INK.separatrix_color,
-            linewidth=DEFAULT_INK.separatrix_linewidth,
+            row["boundary_flux_wb"],
+            np.asarray(row["axis_position_m"], dtype=float),
         )
         poloidal.draw_wall(axes, wall[:, 0], wall[:, 1])
         counterpart = rows[1 - index]
@@ -110,13 +163,26 @@ def main() -> int:
             linestyle="none",
             zorder=DEFAULT_INK.zorder_markers,
         )
+        if detached:
+            largest = max(detached, key=lambda segment: len(segment))
+            axes.text(
+                float(np.mean(largest[:, 0])),
+                float(np.mean(largest[:, 1])),
+                "detached",
+                fontsize=7.0,
+                fontstyle="italic",
+                color=DETACHED_COLOR,
+                horizontalalignment="center",
+                verticalalignment="center",
+                zorder=DEFAULT_INK.zorder_label,
+            )
         axes.set_title(title, fontsize=9.0)
         axes.text(
             0.02,
             0.02,
             (
                 f"boundary {row['boundary_flux_wb']:.6f} Wb\n"
-                f"wall gap {row['contour_min_wall_distance_m']:.6f} m"
+                f"contact gap {row['contour_min_wall_distance_m']:.6f} m"
             ),
             transform=axes.transAxes,
             fontsize=7.5,
@@ -132,9 +198,10 @@ def main() -> int:
         axes.set_ylim(float(wall[:, 1].min()) - pad, float(wall[:, 1].max()) + pad)
     figure.suptitle(
         "MAST 27079 · 35 ms · converged limited read\n"
-        "shared contour levels; solid triangle: this read's axis; "
+        "shared contour levels; boundary style marks only the axis-enclosing "
+        "component, faint marks detached lobes; solid triangle: this read's axis; "
         "hollow triangle: counterpart axis; circle: published wall contact",
-        fontsize=9.0,
+        fontsize=8.0,
     )
     figure.savefig(ROOT / "row-16-before-after.png", dpi=180)
     figure.savefig(ROOT / "row-16-before-after.svg")

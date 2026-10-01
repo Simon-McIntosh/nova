@@ -1,0 +1,135 @@
+{
+  "figures": [
+    {
+      "case": "weak-rotation-reactor-static",
+      "displayed_cell_count": 110,
+      "figure": "weak-rotation-reactor-static-110.svg",
+      "null_glyph_counts": {},
+      "panels": [
+        {
+          "state": "analytic",
+          "title": "exact (quadrature stability)"
+        },
+        {
+          "state": "analytic",
+          "title": "order zero"
+        },
+        {
+          "state": "analytic",
+          "title": "order one"
+        },
+        {
+          "state": "analytic",
+          "title": "order two"
+        }
+      ],
+      "requested_cells": -110,
+      "title_lines": [
+        "weak-rotation-reactor-static, 110 cells \u2014 frozen atomic blocks",
+        "exact (quadrature stability)",
+        "order zero",
+        "order one",
+        "order two"
+      ]
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "displayed_cell_count": 300,
+      "figure": "weak-rotation-reactor-static-300.svg",
+      "null_glyph_counts": {},
+      "panels": [
+        {
+          "state": "analytic",
+          "title": "exact (quadrature stability)"
+        },
+        {
+          "state": "analytic",
+          "title": "order zero"
+        },
+        {
+          "state": "analytic",
+          "title": "order one"
+        },
+        {
+          "state": "analytic",
+          "title": "order two"
+        }
+      ],
+      "requested_cells": -300,
+      "title_lines": [
+        "weak-rotation-reactor-static, 300 cells \u2014 frozen atomic blocks",
+        "exact (quadrature stability)",
+        "order zero",
+        "order one",
+        "order two"
+      ]
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "displayed_cell_count": 110,
+      "figure": "moderate-rotation-conventional-static-110.svg",
+      "null_glyph_counts": {},
+      "panels": [
+        {
+          "state": "analytic",
+          "title": "exact (quadrature stability)"
+        },
+        {
+          "state": "analytic",
+          "title": "order zero"
+        },
+        {
+          "state": "analytic",
+          "title": "order one"
+        },
+        {
+          "state": "analytic",
+          "title": "order two"
+        }
+      ],
+      "requested_cells": -110,
+      "title_lines": [
+        "moderate-rotation-conventional-static, 110 cells \u2014 frozen atomic blocks",
+        "exact (quadrature stability)",
+        "order zero",
+        "order one",
+        "order two"
+      ]
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "displayed_cell_count": 300,
+      "figure": "moderate-rotation-conventional-static-300.svg",
+      "null_glyph_counts": {},
+      "panels": [
+        {
+          "state": "analytic",
+          "title": "exact (quadrature stability)"
+        },
+        {
+          "state": "analytic",
+          "title": "order zero"
+        },
+        {
+          "state": "analytic",
+          "title": "order one"
+        },
+        {
+          "state": "analytic",
+          "title": "order two"
+        }
+      ],
+      "requested_cells": -300,
+      "title_lines": [
+        "moderate-rotation-conventional-static, 300 cells \u2014 frozen atomic blocks",
+        "exact (quadrature stability)",
+        "order zero",
+        "order one",
+        "order two"
+      ]
+    }
+  ],
+  "generated_utc": "2026-09-22T19:04:27.459247+00:00",
+  "schema": "nova.coupling-moment-order-render-receipt.v1",
+  "source_revision": "e6a49e81d3862e094e4f086e1e1e6a5835337826"
+}

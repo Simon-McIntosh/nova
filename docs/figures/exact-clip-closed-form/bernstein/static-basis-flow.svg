@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="290" viewBox="0 0 1000 290" role="img" aria-labelledby="title desc">
+<title id="title">Static Bernstein basis and mapped cell correction</title>
+<desc id="desc">Host-frozen binomial coefficients and fixed-width term evaluation feed one cell clip body, mapped over cells. Crossings, moments and validity masks retain fixed shapes.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="#64748b"/></marker></defs>
+<rect width="1000" height="290" fill="#f8fafc"/>
+<g font-family="sans-serif" fill="#172554"><text x="28" y="32" font-size="21">Host constants → static polynomial evaluation → mapped cells</text>
+<g fill="white" stroke="#94a3b8"><rect x="28" y="72" width="215" height="130" rx="10"/><rect x="306" y="72" width="340" height="130" rx="10"/><rect x="712" y="72" width="260" height="130" rx="10"/></g>
+<g font-size="18"><text x="46" y="103">Trace-time constants</text><text x="326" y="103">One cell body, mapped with vmap</text><text x="730" y="103">Fixed-shape cell results</text></g>
+<g font-size="16" fill="#475569"><text x="46" y="136">Frozen coefficient table</text><text x="46" y="165">Fixed-width term loop</text><text x="326" y="136">Edge roots and monotone arcs</text><text x="326" y="165">Derivatives and moment corrections</text><text x="730" y="136">Crossings and moments</text><text x="730" y="165">Validity masks retained</text></g>
+<g stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"><path d="M243 137 H295"/><path d="M646 137 H701"/></g>
+<text x="28" y="248" font-size="16" fill="#475569">Device evaluation carries polynomial arithmetic; binomial special functions are evaluated nowhere in the clip.</text>
+</g></svg>

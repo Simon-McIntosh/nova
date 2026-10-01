@@ -1,0 +1,4 @@
+revision=23a8522b6b0ab27216c46db7d150e2b96433f347 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=numpy npz array-header inspection
+before_refused_cell_count: shape=() dtype=int32
+after_refused_cell_count: shape=() dtype=int64
+Value equality did not check dtype.

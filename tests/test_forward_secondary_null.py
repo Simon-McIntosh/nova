@@ -107,6 +107,7 @@ def _operator_shell(topology, grid_nodes):
     return SimpleNamespace(
         operator=SimpleNamespace(
             physical_node_number=grid_nodes,
+            null_flux_pool=lambda flux: jnp.asarray(flux)[:grid_nodes],
             polarity=1,
             _x_qualification_distance=jnp.asarray(QUALIFICATION_DISTANCE),
             topology=topology,

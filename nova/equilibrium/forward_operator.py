@@ -29,7 +29,6 @@ direct pre-clip sample nodes.
 from __future__ import annotations
 
 from collections.abc import Callable
-from enum import IntEnum
 from dataclasses import InitVar, dataclass, field, fields, is_dataclass
 from functools import cached_property
 import hashlib
@@ -40,7 +39,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.biot.null import Null2D
+from nova.biot.null import Null2D, inside_or_near_source_cell
 from nova.biot.target import FluxTarget
 from nova.equilibrium.clip_quadrature import (
     ClippedCurrentMoments,
@@ -51,6 +50,7 @@ from nova.equilibrium.clip_quadrature import (
 )
 from nova.equilibrium.cell_partition import cell_partition_geometry
 from nova.equilibrium.connectivity_boundary import (
+    _points_inside_wall_units,
     traced_boundary_read,
     wall_height_shadow_mask,
 )
@@ -87,6 +87,7 @@ from nova.equilibrium.stencil_mesh import (
 from nova.equilibrium.topology import (
     Topology,
     TopologyState,
+    private_wall_node_read,
     require_qualified_axis,
 )
 from nova.linalg.split_spline import fit_split_spline
@@ -511,6 +512,14 @@ class _ExactClipLevel(NamedTuple):
     centre: jax.Array
     scale: jax.Array
 
+    def for_cell(self, index):
+        """Bind one local fallback row while sharing the global spline patch."""
+        return self._replace(
+            local_coefficient=jnp.asarray(self.local_coefficient)[index][None, :],
+            centre=jnp.asarray(self.centre)[index][None, :],
+            scale=jnp.asarray(self.scale)[index][None, :],
+        )
+
     def __call__(self, points):
         spline_level = -self.surface._patch_evaluation(
             self.surface.level_set_coefficients,
@@ -823,102 +832,6 @@ class _FrozenTopologyPartition(NamedTuple):
     residual_shadow: jax.Array
 
 
-class FluxReadRequest(IntEnum):
-    """The read requests one machine invocation serves.
-
-    Every kind below is a post-processing of the *same* read: a residual, a
-    merit scalar, an acceptance decision, a recovery start and a
-    reconciliation reading all consume the discrete topology state and the
-    current moments that one qualification pass produces.  Carrying them as
-    elements of a request list rather than as one call site each is what keeps
-    the read body to a single traced instance; the Jacobian-vector request is
-    not such a post-processing, so it is deliberately absent and rides the
-    machine at the transform level instead.
-    """
-
-    RESIDUAL = 0
-    MERIT = 1
-    ACCEPTANCE = 2
-    RECOVERY = 3
-    RECONCILIATION = 4
-
-
-class FluxReadAnswer(NamedTuple):
-    """One read's outputs, every one of them already computed.
-
-    The request tag chooses which combination of these forms the value a
-    caller receives; it never chooses the arithmetic, because the arithmetic
-    is shared.
-    """
-
-    residual: jax.Array
-    merit: jax.Array
-    acceptance: jax.Array
-    recovery: jax.Array
-    reconciliation: jax.Array
-    mask: jax.Array
-
-
-def dispatch_read_requests(read, states, tags, node_number: int):
-    """Serve one read request per row in a single traced loop body.
-
-    ``states`` carries one trial flux map per request and ``tags`` is a traced
-    integer vector naming the request kind each row is served with.  The tag
-    travels as loop state and selects its value inside the body, so ``read`` is
-    reached from exactly one call site however many request kinds a caller
-    holds.
-
-    The selection is a dynamic gather over the reading's pooled outputs rather
-    than a ``lax.switch``: a control-flow switch whose branches select a field
-    of a value computed in the same loop body gives the optimiser a reason to
-    clone the whole body once per trip, which multiplies the read in the
-    compiled program by the request count.  A gather has no branch to clone,
-    so the body stays one instance.  Measured on a three-trip loop: three
-    branches and five branches both leave three bodies behind a switch, and
-    one body behind the gather.
-
-    ``read`` takes one state and returns a :class:`FluxReadAnswer`.  The
-    returned pair is the selected scalar per row and the read mask per row;
-    rows whose kind selects a scalar carry the mask they were read from, so a
-    caller that needs the discrete partition reads it beside its answer
-    instead of qualifying the state a second time.
-    """
-    count = tags.shape[0]
-    answers = jnp.zeros(count, dtype=jnp.float64)
-    masks = jnp.zeros((count, node_number), dtype=bool)
-
-    def condition(carry):
-        index, _answers, _masks = carry
-
-        return index < count
-
-    def body(carry):
-        index, selected_answers, selected_masks = carry
-        reading = read(states[index])
-        pooled = jnp.stack(
-            (
-                reading.residual,
-                reading.merit,
-                reading.acceptance,
-                reading.recovery,
-                reading.reconciliation,
-            )
-        )
-        selected = pooled[tags[index]]
-        return (
-            index + 1,
-            selected_answers.at[index].set(selected),
-            selected_masks.at[index].set(reading.mask),
-        )
-
-    if count == 0:
-        return answers, masks
-    _index, answers, masks = jax.lax.while_loop(
-        condition, body, (jnp.asarray(0, dtype=jnp.int32), answers, masks)
-    )
-    return answers, masks
-
-
 def _structured_grid_axes(coordinate) -> tuple[np.ndarray, np.ndarray]:
     """Recover the tensor-product axes carried by a forward grid."""
     points = np.asarray(coordinate, dtype=np.float64)
@@ -935,16 +848,21 @@ def _structured_grid_axes(coordinate) -> tuple[np.ndarray, np.ndarray]:
     return radius, height
 
 
+# Local quadratic roots carry an admitted positional error of one tenth of
+# their source-cell pitch.
+_NULL_MERGE_PITCH_FRACTION = 0.10
+
+
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class _FixedDesignNull2D:
-    """Locate grid nulls from one complete-map tensor spline.
+    """Generate typed local roots, then polish contained representatives.
 
-    Strict-interior ring geometry is immutable.  One tensor spline supplies the
-    centre-relative cyclic sign count, the stationary-point polish, the value,
-    the gradient, and the Hessian type.  Non-tensor carriers use their authored
-    nodal values for the same containment count and use a local quadratic only
-    to place the seed within an admitted ring.
+    A quadratic on each cell's own centroid and authored sampling vertices
+    supplies its stationary point. Carriers without direct sampling vertices
+    use their centroid ring. The cyclic crossing count is diagnostic only.
+    The complete-map tensor spline polishes admitted roots on raster carriers;
+    unsupported carriers retain the typed local roots with explicit receipts.
     """
 
     locator: Null2D
@@ -954,15 +872,148 @@ class _FixedDesignNull2D:
     spline_shape: tuple[int, int]
     structured: bool
     extremum_polarity: int | None
+    fit_locator: Null2D
+    source_edge_start: jax.Array = field(repr=False)
+    source_edge_end: jax.Array = field(repr=False)
+    source_edge_valid: jax.Array = field(repr=False)
+    source_pitch: jax.Array = field(repr=False)
+    source_wall_interior: jax.Array = field(repr=False)
+    wall_coordinate: jax.Array = field(repr=False)
+    wall_offsets: jax.Array = field(repr=False)
+    wall_closed: jax.Array = field(repr=False)
+    wall_vessel: jax.Array = field(repr=False)
+    direct_sample_count: int
 
     @classmethod
     def from_locator(
-        cls, locator: Null2D, extremum_polarity: int | None = None
+        cls,
+        locator: Null2D,
+        extremum_polarity: int | None = None,
+        *,
+        sample_coordinate=None,
+        cell_sample_nodes=None,
+        cell_polygons=None,
+        cell_area=None,
+        wall_coordinate=None,
+        wall_offsets=None,
+        wall_closed=None,
+        wall_vessel=None,
     ) -> _FixedDesignNull2D:
-        """Precompute immutable ring geometry and compatibility fit weights."""
+        """Precompute own-node quadratic weights and source containment geometry."""
         if extremum_polarity not in (-1, 1, None):
             raise ValueError("extremum polarity must be either -1 or 1")
-        local = np.asarray(locator.local_coordinate_stencil, dtype=np.float64)
+        fit_locator = locator
+        direct_sample_count = 0
+        if sample_coordinate is not None and cell_sample_nodes is not None:
+            sample_nodes = np.asarray(cell_sample_nodes, dtype=np.intp)
+            if sample_nodes.shape[1] == 6 and np.all(sample_nodes >= 0):
+                coordinate = np.vstack((locator.coordinate, sample_coordinate))
+                stencil = np.column_stack(
+                    (
+                        np.arange(locator.node_number),
+                        locator.node_number + sample_nodes,
+                    )
+                )
+                fit_locator = Null2D.from_coordinates(
+                    coordinate,
+                    stencil,
+                    maxsize=locator.maxsize,
+                    precision=locator.precision,
+                )
+                direct_sample_count = len(sample_coordinate)
+        source = np.asarray(fit_locator.stencil[:, 0], dtype=np.intp)
+        if cell_polygons is None:
+            polygons = [
+                np.asarray(fit_locator.coordinate)[row[1:]]
+                for row in np.asarray(fit_locator.stencil)
+            ]
+        else:
+            polygons = [np.asarray(cell_polygons[index]) for index in source]
+        width = max(6, max(len(polygon) for polygon in polygons))
+        edge_start = np.zeros((len(source), width, 2), dtype=np.float64)
+        edge_end = np.zeros_like(edge_start)
+        edge_valid = np.zeros((len(source), width), dtype=bool)
+        for index, polygon in enumerate(polygons):
+            count = len(polygon)
+            edge_start[index, :count] = polygon
+            edge_end[index, :count] = np.roll(polygon, -1, axis=0)
+            edge_valid[index, :count] = True
+        if cell_area is None:
+            pitch = np.max(
+                np.linalg.norm(
+                    np.asarray(fit_locator.coordinate)[
+                        np.asarray(fit_locator.stencil)[:, 1:]
+                    ]
+                    - np.asarray(fit_locator.physical_origin)[:, None, :],
+                    axis=-1,
+                ),
+                axis=1,
+            )
+        else:
+            pitch = np.full(len(source), np.sqrt(np.median(np.asarray(cell_area))))
+        wall = (
+            np.empty((0, 2)) if wall_coordinate is None else np.asarray(wall_coordinate)
+        )
+        offsets = (
+            np.asarray((0, len(wall)))
+            if wall_offsets is None
+            else np.asarray(wall_offsets)
+        )
+        closed = (
+            np.ones(len(offsets) - 1, dtype=bool)
+            if wall_closed is None
+            else np.asarray(wall_closed)
+        )
+        vessel = (
+            np.ones(len(offsets) - 1, dtype=bool)
+            if wall_vessel is None
+            else np.asarray(wall_vessel)
+        )
+        # A source polygon plus its proximity band fits inside this origin ball.
+        # If the ball cannot touch any wall segment, containment is invariant.
+        origin = np.asarray(fit_locator.physical_origin)
+        radius = (
+            np.asarray(
+                [
+                    np.max(np.linalg.norm(polygon - centre, axis=1))
+                    for polygon, centre in zip(polygons, origin, strict=True)
+                ]
+            )
+            + 0.25 * pitch
+        )
+        wall_interior = np.zeros(len(source), dtype=bool)
+        if len(wall):
+            from shapely.geometry import LineString, Point, Polygon
+
+            vessel_regions = [
+                Polygon(wall[offsets[i] : offsets[i + 1]])
+                for i in range(len(closed))
+                if closed[i] and vessel[i]
+            ]
+            material_regions = [
+                Polygon(wall[offsets[i] : offsets[i + 1]])
+                for i in range(len(closed))
+                if closed[i] and not vessel[i]
+            ]
+            boundaries = [
+                LineString(np.vstack((unit, unit[:1])) if closed[i] else unit)
+                for i in range(len(closed))
+                if len(unit := wall[offsets[i] : offsets[i + 1]]) >= 2
+            ]
+            tolerance = max(
+                1.0e-12, 16 * np.finfo(np.float64).eps * max(1.0, np.max(np.abs(wall)))
+            )
+            for index, centre in enumerate(origin):
+                point = Point(centre)
+                wall_interior[index] = (
+                    any(region.contains(point) for region in vessel_regions)
+                    and not any(region.covers(point) for region in material_regions)
+                    and all(
+                        boundary.distance(point) > radius[index] + tolerance
+                        for boundary in boundaries
+                    )
+                )
+        local = np.asarray(fit_locator.local_coordinate_stencil, dtype=np.float64)
         radial = local[..., 0]
         vertical = local[..., 1]
         design = np.stack(
@@ -995,6 +1046,17 @@ class _FixedDesignNull2D:
             spline_shape=spline_shape,
             structured=structured,
             extremum_polarity=extremum_polarity,
+            fit_locator=fit_locator,
+            source_edge_start=jnp.asarray(edge_start),
+            source_edge_end=jnp.asarray(edge_end),
+            source_edge_valid=jnp.asarray(edge_valid),
+            source_pitch=jnp.asarray(pitch),
+            source_wall_interior=jnp.asarray(wall_interior),
+            wall_coordinate=jnp.asarray(wall),
+            wall_offsets=jnp.asarray(offsets, dtype=jnp.int32),
+            wall_closed=jnp.asarray(closed),
+            wall_vessel=jnp.asarray(vessel),
+            direct_sample_count=direct_sample_count,
         )
 
     @property
@@ -1013,22 +1075,27 @@ class _FixedDesignNull2D:
         return self.locator.fit_dtype
 
     def _local_fit_census(self, psi):
-        """Fit local quadratic seeds without deciding which rings contain nulls."""
-        sampled = jnp.asarray(psi, dtype=self.fit_dtype)[self.locator.stencil]
-        coefficient = jnp.einsum("...ij,...j->...i", self.fit_weight, sampled)
-        determinant = (
-            4.0 * coefficient[..., 0] * coefficient[..., 1] - coefficient[..., 4] ** 2
+        """Fit finite typed roots inside or near their own source cells."""
+        sampled = jnp.asarray(psi, dtype=self.fit_dtype)[self.fit_locator.stencil]
+        # Keep the sample reduction identical for scalar and vmapped fields.
+        coefficient = jnp.sum(self.fit_weight * sampled[:, None, :], axis=-1)
+        # Conditioning is relative to curvature, independent of flux amplitude.
+        curvature_scale = jnp.max(jnp.abs(coefficient[..., (0, 1, 4)]), axis=-1)
+        scaled = (
+            coefficient
+            / jnp.where(curvature_scale > 0.0, curvature_scale, 1.0)[..., None]
         )
-        determinant_floor = jnp.asarray(1.0e-12, coefficient.dtype)
-        nonsingular = jnp.abs(determinant) >= determinant_floor
+        determinant = 4.0 * scaled[..., 0] * scaled[..., 1] - scaled[..., 4] ** 2
+        determinant_floor = 64.0 * jnp.finfo(coefficient.dtype).eps
+        nonsingular = (curvature_scale > 0.0) & (
+            jnp.abs(determinant) > determinant_floor
+        )
         safe_determinant = jnp.where(nonsingular, determinant, 1.0)
         local_radial = (
-            coefficient[..., 4] * coefficient[..., 3]
-            - 2.0 * coefficient[..., 1] * coefficient[..., 2]
+            scaled[..., 4] * scaled[..., 3] - 2.0 * scaled[..., 1] * scaled[..., 2]
         ) / safe_determinant
         local_vertical = (
-            coefficient[..., 4] * coefficient[..., 2]
-            - 2.0 * coefficient[..., 0] * coefficient[..., 3]
+            scaled[..., 4] * scaled[..., 2] - 2.0 * scaled[..., 0] * scaled[..., 3]
         ) / safe_determinant
         local_flux = (
             coefficient[..., 0] * local_radial**2
@@ -1037,12 +1104,6 @@ class _FixedDesignNull2D:
             + coefficient[..., 3] * local_vertical
             + coefficient[..., 4] * local_radial * local_vertical
             + coefficient[..., 5]
-        )
-        support = jnp.max(jnp.abs(self.locator.local_coordinate_stencil), axis=1)
-        supported = (
-            nonsingular
-            & (jnp.abs(local_radial) <= support[:, 0])
-            & (jnp.abs(local_vertical) <= support[:, 1])
         )
         kind = jnp.where(
             determinant < 0.0,
@@ -1057,13 +1118,49 @@ class _FixedDesignNull2D:
                 ),
             ),
         )
-        origin = self.locator.physical_origin
-        scale = self.locator.physical_scale
+        origin = self.fit_locator.physical_origin
+        scale = self.fit_locator.physical_scale
         physical = origin + jnp.stack((local_radial, local_vertical), axis=-1) * scale
         result = jnp.column_stack((physical, local_flux, kind))
-        finite = supported & jnp.all(jnp.isfinite(result), axis=1)
+        near_cell = inside_or_near_source_cell(
+            physical,
+            self.source_edge_start,
+            self.source_edge_end,
+            self.source_edge_valid,
+            0.25 * self.source_pitch,
+        )
+        finite = nonsingular & near_cell & jnp.all(jnp.isfinite(result), axis=1)
+        if self.wall_coordinate.shape[0]:
+            finite = self._contained_local_roots(physical, finite)
         masks = jnp.stack((finite & (kind != 0.0), finite & (kind == 0.0)))
         return result, masks
+
+    def _contained_local_roots(self, physical, eligible):
+        """Check boundary-adjacent eligible roots in bounded wall-test batches."""
+        pending = eligible & ~self.source_wall_interior
+        count = jnp.sum(pending, dtype=jnp.int32)
+        width = min(pending.size, 2 * self.locator.maxsize)
+        # Padding permits a final full-width slice without repeating tail roots.
+        slots = ((pending.size + width - 1) // width) * width
+        index = jnp.where(pending, size=slots, fill_value=0)[0]
+        retained = eligible & self.source_wall_interior
+
+        def check_batch(batch, contained):
+            selected = jax.lax.dynamic_slice_in_dim(index, batch * width, width)
+            active = batch * width + jnp.arange(width) < count
+            points = physical[selected]
+            inside = _points_inside_wall_units(
+                points[:, 0],
+                points[:, 1],
+                self.wall_coordinate[:, 0],
+                self.wall_coordinate[:, 1],
+                self.wall_offsets,
+                self.wall_closed,
+                self.wall_vessel,
+            )
+            return contained.at[selected].max(active & inside)
+
+        return jax.lax.fori_loop(0, (count + width - 1) // width, check_batch, retained)
 
     @staticmethod
     def _root_uncertainty(polish, cell_width, domain_scale):
@@ -1127,6 +1224,44 @@ class _FixedDesignNull2D:
             (representatives, multiplicity, representative_index),
         )
 
+    def _representative_merge_radius(self):
+        """Combine cell-fit discretisation error with the arithmetic radius."""
+        roundoff = 256.0 * jnp.finfo(self.fit_dtype).eps * self.source_pitch
+        return _NULL_MERGE_PITCH_FRACTION * self.source_pitch + roundoff
+
+    def _seed_representatives(self, candidate, masks, uncertainty):
+        """Deduplicate admitted roots in bounded work slots before polishing."""
+        # Process the first pending origin and all of its duplicates together.
+        # The loop count follows admitted roots, never the full carrier size;
+        # vmap therefore does not execute a dormant all-origin fallback lane.
+        pending = jnp.any(masks, axis=0)
+        representatives = jnp.zeros_like(masks)
+        multiplicities = jnp.zeros(masks.shape, dtype=jnp.int32)
+
+        def retain_one(state):
+            remaining, retained, counts = state
+            index = jnp.argmax(remaining).astype(jnp.int32)
+            distance = jnp.linalg.norm(candidate[:, :2] - candidate[index, :2], axis=1)
+            same_type = jnp.any(masks & masks[:, index, None], axis=0)
+            same_root = (
+                remaining
+                & same_type
+                & jnp.isfinite(distance)
+                & (distance <= uncertainty + uncertainty[index])
+            )
+            retained = retained.at[:, index].set(masks[:, index])
+            counts = counts.at[:, index].set(
+                jnp.sum(masks & same_root, axis=1, dtype=jnp.int32)
+            )
+            return remaining & ~same_root, retained, counts
+
+        _, representatives, multiplicities = jax.lax.while_loop(
+            lambda state: jnp.any(state[0]),
+            retain_one,
+            (pending, representatives, multiplicities),
+        )
+        return representatives, multiplicities
+
     def _structured_census(self, psi):
         """Return spline-authored candidates and complete fixed-slot telemetry.
 
@@ -1140,20 +1275,27 @@ class _FixedDesignNull2D:
         """
         radial_count, vertical_count = self.spline_shape
         values = (
-            jnp.asarray(psi, dtype=self.fit_dtype)
+            jnp.asarray(psi[: self.node_number], dtype=self.fit_dtype)
             .reshape((radial_count, vertical_count))
             .T
         )
         spline = fit_tensor_spline(self.spline_radial, self.spline_vertical, values)
-        ring_coordinate = self.locator.coordinate[self.locator.stencil]
+        ring_coordinate = self.fit_locator.coordinate[self.fit_locator.stencil]
         ring_values = spline(
             ring_coordinate[..., 0].astype(self.fit_dtype),
             ring_coordinate[..., 1].astype(self.fit_dtype),
         )
         crossing_count = self.locator.crossing_count(ring_values)
-        ring_mask = jnp.stack((crossing_count == 0, crossing_count == 4), axis=0)
+        diagnostic_ring_mask = jnp.stack(
+            (crossing_count == 0, crossing_count == 4), axis=0
+        )
+        local_candidate, quadratic_mask = self._local_fit_census(psi)
+        seed_uncertainty = self._representative_merge_radius()
+        ring_mask, _seed_multiplicity = self._seed_representatives(
+            local_candidate, quadratic_mask, seed_uncertainty
+        )
         admitted = jnp.any(ring_mask, axis=0)
-        origin = self.locator.physical_origin.astype(self.fit_dtype)
+        origin = self.fit_locator.physical_origin.astype(self.fit_dtype)
         neighbours = ring_coordinate[:, 1:] - ring_coordinate[:, :1]
         cell_width = jnp.max(jnp.linalg.norm(neighbours, axis=-1), axis=1).astype(
             self.fit_dtype
@@ -1162,8 +1304,8 @@ class _FixedDesignNull2D:
             self.spline_radial[-1] - self.spline_radial[0],
             self.spline_vertical[-1] - self.spline_vertical[0],
         )
-        source_origin = self.locator.stencil[:, 0].astype(jnp.int32)
-        raw_ring_count = jnp.sum(ring_mask, axis=1, dtype=jnp.int32)
+        source_origin = self.fit_locator.stencil[:, 0].astype(jnp.int32)
+        raw_ring_count = jnp.sum(diagnostic_ring_mask, axis=1, dtype=jnp.int32)
         work_capacity = min(admitted.size, 2 * self.locator.maxsize)
         slots_exhausted = jnp.sum(admitted, dtype=jnp.int32) > work_capacity
 
@@ -1174,7 +1316,7 @@ class _FixedDesignNull2D:
             ].astype(jnp.int32)
             compact_valid = jnp.arange(work_slots) < jnp.sum(admitted, dtype=jnp.int32)
             compact_ring_mask = ring_mask[:, compact_index] & compact_valid[None, :]
-            compact_seed = origin[compact_index]
+            compact_seed = local_candidate[compact_index, :2].astype(self.fit_dtype)
             compact_polish = polish_stationary_points(
                 spline, compact_seed, compact_valid
             )
@@ -1182,7 +1324,23 @@ class _FixedDesignNull2D:
                 compact_polish["position_rz"] - compact_seed, axis=1
             )
             compact_cell_width = cell_width[compact_index]
-            compact_within_cell = compact_displacement < compact_cell_width
+            compact_within_cell = inside_or_near_source_cell(
+                compact_polish["position_rz"],
+                self.source_edge_start[compact_index],
+                self.source_edge_end[compact_index],
+                self.source_edge_valid[compact_index],
+                0.25 * self.source_pitch[compact_index],
+            )
+            if self.wall_coordinate.shape[0]:
+                compact_within_cell = compact_within_cell & _points_inside_wall_units(
+                    compact_polish["position_rz"][:, 0],
+                    compact_polish["position_rz"][:, 1],
+                    self.wall_coordinate[:, 0],
+                    self.wall_coordinate[:, 1],
+                    self.wall_offsets,
+                    self.wall_closed,
+                    self.wall_vessel,
+                )
             expected_hessian_type = jnp.asarray((1, -1), dtype=jnp.int8)[:, None]
             compact_type_agrees = (
                 compact_polish["hessian_type"][None, :] == expected_hessian_type
@@ -1193,8 +1351,9 @@ class _FixedDesignNull2D:
                 & compact_within_cell[None, :]
             )
             compact_typed_mask = compact_polished_mask & compact_type_agrees
-            compact_root_uncertainty = self._root_uncertainty(
-                compact_polish, compact_cell_width, domain_scale
+            compact_root_uncertainty = (
+                self._root_uncertainty(compact_polish, compact_cell_width, domain_scale)
+                + _NULL_MERGE_PITCH_FRACTION * self.source_pitch[compact_index]
             )
             deduplicated = [
                 self._deduplicate_type(
@@ -1216,9 +1375,7 @@ class _FixedDesignNull2D:
             compact_extremum_kind = -jnp.sign(
                 jnp.trace(compact_hessian, axis1=-2, axis2=-1)
             )
-            compact_kind = jnp.where(
-                crossing_count[compact_index] == 4, 0.0, compact_extremum_kind
-            )
+            compact_kind = jnp.where(compact_ring_mask[1], 0.0, compact_extremum_kind)
             compact_candidates = jnp.column_stack(
                 (
                     compact_polish["position_rz"].astype(jnp.float64),
@@ -1285,7 +1442,7 @@ class _FixedDesignNull2D:
             polish_converged = scatter(compact_polish["converged"])
             displacement = jnp.linalg.norm(polish_position - origin, axis=1)
             requested_displacement = jnp.where(admitted, displacement, jnp.nan)
-            within_cell = displacement < cell_width
+            within_cell = scatter(compact_within_cell)
             type_agrees = jnp.stack([scatter(item) for item in compact_type_agrees])
             typed_mask = jnp.stack([scatter(item) for item in compact_typed_mask])
             representative_mask = jnp.stack(
@@ -1313,7 +1470,7 @@ class _FixedDesignNull2D:
             polish_value = scatter(compact_polish["value"])
             hessian = scatter(compact_hessian)
             extremum_kind = -jnp.sign(jnp.trace(hessian, axis1=-2, axis2=-1))
-            kind = jnp.where(crossing_count == 4, 0.0, extremum_kind)
+            kind = jnp.where(ring_mask[1], 0.0, extremum_kind)
             candidates = jnp.column_stack(
                 (
                     polish_position.astype(jnp.float64),
@@ -1329,7 +1486,10 @@ class _FixedDesignNull2D:
             return {
                 "candidate": candidates,
                 "ring_crossing_count": crossing_count,
-                "ring_admitted_mask": ring_mask,
+                "ring_admitted_mask": diagnostic_ring_mask,
+                "quadratic_admitted_mask": quadratic_mask,
+                "seed_representative_mask": ring_mask,
+                "local_fit_candidate": local_candidate,
                 "ring_resolution_limited": crossing_count == 2,
                 "polish_converged": polish_converged,
                 "requested_displacement": requested_displacement,
@@ -1361,7 +1521,7 @@ class _FixedDesignNull2D:
                     source_origin[compact_index]
                 ),
                 "retained_representative_origin_rz": retain(
-                    self.locator.physical_origin[compact_index], trailing=1
+                    self.fit_locator.physical_origin[compact_index], trailing=1
                 ),
                 "retained_multiplicity": retained_multiplicity,
                 "retained_spline_gradient": retain(
@@ -1386,71 +1546,65 @@ class _FixedDesignNull2D:
         return census | {"census_slots_exhausted": slots_exhausted}
 
     def _compatibility_census(self, psi):
-        """Use nodal containment and local seeds on non-tensor carriers."""
-        sampled = jnp.asarray(psi, dtype=self.fit_dtype)[self.locator.stencil]
+        """Retain contained quadratic roots on carriers without a tensor map."""
+        sampled = jnp.asarray(psi, dtype=self.fit_dtype)[self.fit_locator.stencil]
         crossing_count = self.locator.crossing_count(sampled)
         ring_masks = jnp.stack((crossing_count == 0, crossing_count == 4))
-        raw_count = jnp.sum(ring_masks, axis=1, dtype=jnp.int32)
-        capacity = jnp.full(raw_count.shape, self.locator.maxsize, dtype=jnp.int32)
-        retained_index = jnp.stack(
+        candidate, masks = self._local_fit_census(psi)
+        uncertainty = self._representative_merge_radius()
+        representative_mask, multiplicity = self._seed_representatives(
+            candidate, masks, uncertainty
+        )
+        count = jnp.sum(representative_mask, axis=1, dtype=jnp.int32)
+        capacity = jnp.full(count.shape, self.locator.maxsize, dtype=jnp.int32)
+        retained_count = jnp.minimum(count, capacity)
+        index = jnp.stack(
             [
                 jnp.where(mask, size=self.locator.maxsize, fill_value=0)[0]
-                for mask in ring_masks
+                for mask in representative_mask
             ]
         )
-        retained = self.locator(psi)
-        retained_slot = jnp.arange(self.locator.maxsize)[None, :]
-        contained = retained_slot < jnp.minimum(raw_count, capacity)[:, None]
-        finite_seed = jnp.all(jnp.isfinite(retained), axis=-1)
-        expected_type = jnp.asarray(((1.0,), (0.0,)), dtype=retained.dtype)
-        type_agrees = retained[..., 3] == expected_type
-        retained_valid = contained & finite_seed & type_agrees
-        retained = jnp.where(retained_valid[..., None], retained, 0.0)
-        retained_count = jnp.sum(retained_valid, axis=1, dtype=jnp.int32)
-        source_origin = self.locator.stencil[:, 0].astype(jnp.int32)[retained_index]
-        retained_origin = jnp.where(retained_valid, source_origin, 0)
-        candidates = retained.reshape((-1, retained.shape[-1]))
-        empty_mask = jnp.zeros(self.locator.maxsize, dtype=bool)
-        representative_mask = jnp.stack(
-            (
-                jnp.concatenate((retained_valid[0], empty_mask)),
-                jnp.concatenate((empty_mask, retained_valid[1])),
-            )
-        )
-        local_candidate, local_fit_mask = self._local_fit_census(psi)
+        valid = jnp.arange(self.locator.maxsize)[None, :] < retained_count[:, None]
+        source = self.fit_locator.stencil[:, 0].astype(jnp.int32)
         return {
-            "candidate": candidates,
+            "candidate": candidate,
             "ring_crossing_count": crossing_count,
             "ring_admitted_mask": ring_masks,
             "ring_resolution_limited": crossing_count == 2,
-            "local_fit_candidate": local_candidate,
-            "local_fit_mask": local_fit_mask,
-            "unresolved_local_fit_mask": local_fit_mask & ~ring_masks,
+            "quadratic_admitted_mask": masks,
+            "local_fit_candidate": candidate,
+            "local_fit_mask": masks,
+            "unresolved_local_fit_mask": masks & ~ring_masks,
             "representative_mask": representative_mask,
-            "source_origin_index": self.locator.stencil[:, 0].astype(jnp.int32),
-            "raw_ring_count": raw_count,
-            "polished_count": retained_count,
-            "typed_count": retained_count,
-            "same_root_count": retained_count,
+            "source_origin_index": source,
+            "raw_ring_count": jnp.sum(ring_masks, axis=1, dtype=jnp.int32),
+            "polished_count": jnp.zeros_like(count),
+            "typed_count": jnp.sum(masks, axis=1, dtype=jnp.int32),
+            "same_root_count": count,
             "retained_count": retained_count,
             "capacity": capacity,
-            "overflow": raw_count > capacity,
-            "retained_candidate": retained,
-            "retained_valid": retained_valid,
-            "retained_representative_origin_index": retained_origin,
+            "overflow": count > capacity,
+            "retained_candidate": jnp.where(valid[..., None], candidate[index], 0.0),
+            "retained_valid": valid,
+            "retained_representative_origin_index": jnp.where(valid, source[index], 0),
             "retained_representative_origin_rz": jnp.where(
-                retained_valid[..., None],
-                self.locator.physical_origin[retained_index],
-                0.0,
+                valid[..., None], self.fit_locator.physical_origin[index], 0.0
             ),
-            "retained_multiplicity": retained_valid.astype(jnp.int32),
+            "retained_multiplicity": jnp.where(
+                valid, jnp.take_along_axis(multiplicity, index, axis=1), 0
+            ),
             "spline_authored": jnp.asarray(False),
-            "census_slots_exhausted": jnp.asarray(False),
+            "census_slots_exhausted": jnp.sum(jnp.any(masks, axis=0), dtype=jnp.int32)
+            > min(masks.shape[1], 2 * self.locator.maxsize),
         }
 
     @jax.jit
     def candidate_census(self, psi):
         """Publish the fixed-shape stationary-point census and its evidence."""
+        if self.direct_sample_count and psi.shape[0] != self.fit_locator.node_number:
+            raise ValueError(
+                "own-node null census requires the direct sampling flux values"
+            )
         if self.structured:
             return self._structured_census(psi)
         return self._compatibility_census(psi)
@@ -1507,17 +1661,44 @@ class _FixedDesignNull2D:
             self.fit_weight,
             self.spline_radial,
             self.spline_vertical,
+            self.fit_locator,
+            self.source_edge_start,
+            self.source_edge_end,
+            self.source_edge_valid,
+            self.source_pitch,
+            self.source_wall_interior,
+            self.wall_coordinate,
+            self.wall_offsets,
+            self.wall_closed,
+            self.wall_vessel,
         )
         return children, {
             "spline_shape": self.spline_shape,
             "structured": self.structured,
             "extremum_polarity": self.extremum_polarity,
+            "direct_sample_count": self.direct_sample_count,
         }
 
     @classmethod
     def tree_unflatten(cls, aux_data, children):
         """Rebuild a fixed-design locator from JAX pytree state."""
-        return cls(*children, **aux_data)
+        names = (
+            "locator",
+            "fit_weight",
+            "spline_radial",
+            "spline_vertical",
+            "fit_locator",
+            "source_edge_start",
+            "source_edge_end",
+            "source_edge_valid",
+            "source_pitch",
+            "source_wall_interior",
+            "wall_coordinate",
+            "wall_offsets",
+            "wall_closed",
+            "wall_vessel",
+        )
+        return cls(**dict(zip(names, children, strict=True)), **aux_data)
 
 
 class PoloidalField(NamedTuple):
@@ -2335,7 +2516,24 @@ class ForwardFluxOperator:
         )
         self._fixed_design_topology = _host_tree(
             Topology(
-                _FixedDesignNull2D.from_locator(production_locator, self.polarity),
+                _FixedDesignNull2D.from_locator(
+                    production_locator,
+                    self.polarity,
+                    sample_coordinate=None
+                    if self.sample is None
+                    else self.sample.coordinate,
+                    cell_sample_nodes=None
+                    if self.moment_geometry is None
+                    else self.moment_geometry.cell_sample_nodes,
+                    cell_polygons=None
+                    if self.moment_geometry is None
+                    else self.moment_geometry.polygons,
+                    cell_area=self.area,
+                    wall_coordinate=self.wall.coordinate,
+                    wall_offsets=self.wall_unit_offsets,
+                    wall_closed=self.wall_unit_closed,
+                    wall_vessel=self._wall_unit_vessel,
+                ),
                 self.wall.null,
                 **topology_geometry,
             )
@@ -2768,6 +2966,33 @@ class ForwardFluxOperator:
         distance2 = jnp.where(jnp.isfinite(vmap_o[:, 0]), distance2, jnp.inf)
         return vmap_o[jnp.argmin(distance2), :2]
 
+    def null_flux_pool(self, state):
+        """Keep direct authored sampling values beside the centroid values."""
+        state = jnp.asarray(state)
+        grid_flux = state[: self.grid.node_number]
+        if self._fixed_design_topology.grid.direct_sample_count:
+            if state.shape[0] != self.node_number:
+                raise ValueError(
+                    "own-node null census requires the direct sampling flux values"
+                )
+            return jnp.concatenate((grid_flux, state[self.physical_node_number :]))
+        return grid_flux
+
+    _null_flux_pool = null_flux_pool
+
+    def secondary_x_point(self, state, topology):
+        """Select a distinct contained saddle without repeating the topology read."""
+        _axis_rows, saddles = self._fixed_design_topology.grid(
+            self.null_flux_pool(state)
+        )
+        distance = jnp.linalg.norm(saddles[:, :2] - topology.x_point, axis=1)
+        qualified = self._fixed_design_topology.contained_x_candidates(saddles) & (
+            distance > self._x_qualification_distance
+        )
+        score = self.polarity * (saddles[:, 2] - topology.axis_flux)
+        index = jnp.argmax(jnp.where(qualified, score, -jnp.inf))
+        return jnp.where(jnp.any(qualified), saddles[index, :2], jnp.nan)
+
     def _fixed_design_read(
         self, physical, requested_class=None, private_wall_node_mask=None
     ):
@@ -2780,7 +3005,9 @@ class ForwardFluxOperator:
             private_wall_node_mask,
         )
         grid_flux, _wall_flux = self._fixed_design_topology.split_flux_map(physical)
-        vmap_o, _vmap_x = self._fixed_design_topology.grid(grid_flux)
+        vmap_o, _vmap_x = self._fixed_design_topology.grid(
+            self._null_flux_pool(physical)
+        )
         rescue_axis = self._independent_rescue_axis(vmap_o)
         _seed, material = self.connectivity_axis_seed(rescue_axis)
         result = self._fixed_design_topology.read_qualification(
@@ -2867,7 +3094,9 @@ class ForwardFluxOperator:
             self.connectivity_grid_axes()
         )
         grid_flux, wall_flux = self.topology.split_flux_map(physical)
-        _vmap_o, vmap_x = self._fixed_design_topology.grid(grid_flux)
+        _vmap_o, vmap_x = self._fixed_design_topology.grid(
+            self._null_flux_pool(physical)
+        )
         classification_wall = jnp.concatenate(
             (topology.wall_point, topology.wall_point_flux[None])
         )
@@ -2902,17 +3131,35 @@ class ForwardFluxOperator:
             wall_unit_vessel=self._wall_unit_vessel,
         )
 
-    def _carrier_shadow_read(self, physical, masks: DomainMasks):
-        """Return wall-shadow operands from the carrier's own topology read."""
+    def _carrier_shadow_read(self, physical, masks: DomainMasks, topology=None):
+        """Read every wall node's flux against the admitted saddle and height band.
+
+        Cell masks are accepted alongside the completed topology read but do
+        not determine a wall flag: even an excluded-material cell can contain
+        a wall node on the private side of the saddle.
+        """
         if not hasattr(self, "_wall_carrier_index"):
             # Lightweight composition fixtures supply the operands directly
             # without constructing carrier geometry.
             return self._connectivity_read(physical, None, classify=False)
-        grid_flux, _wall_flux = self.topology.split_flux_map(physical)
-        _vmap_o, vmap_x = self._fixed_design_topology.grid(grid_flux)
+        _grid_flux, wall_flux = self.topology.split_flux_map(physical)
+        _vmap_o, vmap_x = self._fixed_design_topology.grid(
+            self._null_flux_pool(physical)
+        )
+        if topology is None:
+            topology = self._fixed_design_read(physical)[1]
+        admitted = self._fixed_design_topology.contained_x_candidates(vmap_x)
+        reading = private_wall_node_read(
+            wall_flux,
+            self.wall.coordinate[:, 1],
+            topology.axis[1],
+            topology.x_point_flux,
+            self.polarity,
+            jnp.where(admitted[:, None], vmap_x[:, :2], jnp.nan),
+        )
         return {
+            **reading,
             "xset": vmap_x[:, :2],
-            "private_wall_node_mask": masks.private_flux[self._wall_carrier_index],
         }
 
     def topology_margin(self, psi) -> jax.Array:
@@ -2922,7 +3169,7 @@ class ForwardFluxOperator:
         the marginal wall/X-point hand-off. A selected wall extremum outside
         the X-point height band is excluded by the private-flux shadow.
         """
-        physical = jnp.asarray(psi)[: self.physical_node_number]
+        physical = jnp.asarray(psi)
         _masks, topology, _connected, admitted = self._fixed_design_read(physical)
         require_qualified_axis(admitted)
         return self._connectivity_class_margin(physical, topology)
@@ -2931,7 +3178,7 @@ class ForwardFluxOperator:
         self, psi, requested_class=None
     ) -> tuple[DomainMasks, ForwardTopologyState]:
         """Return domain labels and an achieved saddle-aware topology read."""
-        physical = jnp.asarray(psi)[: self.physical_node_number]
+        physical = jnp.asarray(psi)
         masks, topology, _connected, admitted = self._fixed_design_read(
             physical, requested_class
         )
@@ -3073,7 +3320,7 @@ class ForwardFluxOperator:
         """Trace the profile-owned support and sampling state once."""
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
-        physical = jnp.asarray(psi)[: self.physical_node_number]
+        physical = jnp.asarray(psi)
         masks, topology, _connected, _admitted = self._fixed_design_read(
             physical, requested_class
         )
@@ -3185,6 +3432,7 @@ class ForwardFluxOperator:
             atomic_mesh.centroids,
             atomic_mesh.support_capacity,
             inside_boundary,
+            saddle_vertex=topology.x_point,
             curve_evaluator=curved_level,
             participating_cell=participation,
             arc_tracer=_implicit_traced_level_arc,
@@ -3199,10 +3447,30 @@ class ForwardFluxOperator:
             )
         return exact_support
 
+    @staticmethod
+    def frozen_partition_usable(partition) -> jax.Array:
+        """Return whether a frozen read can normalise a state at all.
+
+        A read that admitted no finite axis leaves every normalising scalar
+        undefined, so the partition it produced has no scale to revalue a
+        state with: revaluing against it turns the whole current support into
+        ``nan``, and that reaches both the source-normalisation divisor and
+        the mask the active set records.  Refusing such a partition makes the
+        reconcile re-read the trip, so the carry is taken only where it can
+        reproduce what a fresh read returns.
+        """
+        topology = partition.topology
+        return (
+            jnp.isfinite(topology.axis_flux)
+            & jnp.isfinite(topology.boundary_flux)
+            & jnp.isfinite(topology.flux_span)
+            & (jnp.abs(topology.flux_span) > 0.0)
+        )
+
     def _partition_for_state(self, psi, frozen):
         """Revalue one state on an already-decided discrete partition."""
         topology = frozen.topology
-        physical = jnp.asarray(psi)[: self.physical_node_number]
+        physical = jnp.asarray(psi)
         grid_flux, _wall_flux = self.topology.split_flux_map(physical)
         psi_norm = self.topology.normalize(
             topology.axis_flux, topology.boundary_flux, grid_flux
@@ -3331,7 +3599,7 @@ class ForwardFluxOperator:
     def cell_current_moments(self, psi, requested_class=None) -> CellCurrentMoments:
         """Return the current and first moments driven by one trial flux."""
         if not self.use_linear_moments:
-            physical = jnp.asarray(psi)[: self.physical_node_number]
+            physical = jnp.asarray(psi)
             masks, _topology, _connected, _admitted = self._fixed_design_read(
                 physical, requested_class
             )
@@ -3442,7 +3710,7 @@ class ForwardFluxOperator:
     ) -> tuple[jax.Array, jax.Array]:
         """Return independent interior-flood and wall-height shadow components."""
 
-        physical = jnp.asarray(psi)[: self.physical_node_number]
+        physical = jnp.asarray(psi)
         previous_wall_shadow = self._previous_wall_shadow(previous_shadow)
         if previous_wall_shadow is None:
             masks, topology, _connected, _admitted = self._fixed_design_read(
@@ -3486,7 +3754,7 @@ class ForwardFluxOperator:
         masks = saddle_qualified_domains(
             masks, self._private_flux_saddle_present(topology)
         )
-        reading = self._carrier_shadow_read(physical, masks)
+        reading = self._carrier_shadow_read(physical, masks, topology)
         previous_wall_shadow = self._previous_wall_shadow(previous_shadow)
         if previous_wall_shadow is None:
             previous_wall_shadow = jnp.zeros(self.wall.node_number, dtype=bool)
@@ -3508,7 +3776,7 @@ class ForwardFluxOperator:
         """Read all discrete topology state once for an active-set boundary."""
         if self.use_linear_moments and self.moment_geometry is None:
             raise ValueError("linear moments require moment geometry")
-        physical = jnp.asarray(psi)[: self.physical_node_number]
+        physical = jnp.asarray(psi)
         previous_wall_shadow = self._previous_wall_shadow(previous_shadow)
         if previous_wall_shadow is None:
             masks, topology, _connected, _admitted = self._fixed_design_read(
@@ -3871,5 +4139,6 @@ class ForwardFluxOperator:
             mapped._frozen_partition_shadow = lambda partition: (
                 partition.residual_shadow
             )
+            mapped._frozen_partition_usable = self.frozen_partition_usable
 
         return mapped

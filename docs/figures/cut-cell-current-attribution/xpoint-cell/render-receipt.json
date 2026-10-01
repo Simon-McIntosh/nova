@@ -1,0 +1,410 @@
+{
+  "all_reference_axes_drawn": true,
+  "all_reference_saddles_drawn": true,
+  "all_walls_drawn": true,
+  "allocation": {
+    "jax_default_backend": "cpu",
+    "jax_enable_x64": true,
+    "jax_platforms": [
+      "cpu"
+    ],
+    "job_id": null,
+    "node": "98dci4-srv-1006.iter.org",
+    "partition": null,
+    "solve_free": true,
+    "tmpdir": "/tmp"
+  },
+  "completed": true,
+  "no_unexpected_markers": true,
+  "null_glyph_vocabulary": {
+    "X|hollow": "analytic_saddle",
+    "X|solid": "solved_saddle",
+    "^|hollow": "analytic_axis",
+    "^|solid": "solved_axis"
+  },
+  "panels": [
+    {
+      "allocation": {
+        "jax_default_backend": "cpu",
+        "jax_enable_x64": true,
+        "jax_platforms": [
+          "cpu"
+        ],
+        "job_id": null,
+        "node": "98dci4-srv-1006.iter.org",
+        "partition": null,
+        "solve_free": true,
+        "tmpdir": "/tmp"
+      },
+      "axis_admitted": true,
+      "figure_png_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-the-wedge-null-markers/docs/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-110.png",
+      "figure_svg_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-the-wedge-null-markers/docs/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-110.svg",
+      "figure_svg_src": "/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-110.svg",
+      "glyphs": {
+        "analytic_axis": 1,
+        "analytic_saddle": 1,
+        "solved_axis": 1,
+        "solved_saddle": 0
+      },
+      "legend_labels": [
+        "solved axis",
+        "solved saddle",
+        "analytic axis (hollow)",
+        "analytic saddle (hollow)"
+      ],
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.8742700139991939,
+        "lock_wait_seconds": 2.4088658392429352e-05,
+        "semantic_key": "0f57b1368c29a88a",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_110.zarr",
+        "store_seconds": 0.0
+      },
+      "realised_cells": 132,
+      "reference": true,
+      "requested_cells": 110,
+      "saddle_admitted": false,
+      "saddle_case": "interior-four-crossing",
+      "title_lines": [
+        "110 requested / 132 realised cells",
+        "analytic nulls hollow blue; solved solid ochre; X-point cell outlined"
+      ],
+      "unexpected_markers": [],
+      "vs_draw_nulls_tallies": {
+        "reference_axis": {
+          "other_x_points_drawn": 1,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0
+        },
+        "reference_saddle": {
+          "other_x_points_drawn": 1,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0
+        },
+        "solved": {
+          "other_x_points_drawn": 0,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0
+        }
+      },
+      "wall_drawn": true,
+      "wall_node_count": 121,
+      "wall_seconds": 3.8270474770106375,
+      "xpoint_cell": 9
+    },
+    {
+      "allocation": {
+        "jax_default_backend": "cpu",
+        "jax_enable_x64": true,
+        "jax_platforms": [
+          "cpu"
+        ],
+        "job_id": null,
+        "node": "98dci4-srv-1006.iter.org",
+        "partition": null,
+        "solve_free": true,
+        "tmpdir": "/tmp"
+      },
+      "axis_admitted": true,
+      "figure_png_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-the-wedge-null-markers/docs/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-300.png",
+      "figure_svg_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-the-wedge-null-markers/docs/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-300.svg",
+      "figure_svg_src": "/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-300.svg",
+      "glyphs": {
+        "analytic_axis": 1,
+        "analytic_saddle": 1,
+        "solved_axis": 1,
+        "solved_saddle": 0
+      },
+      "legend_labels": [
+        "solved axis",
+        "solved saddle",
+        "analytic axis (hollow)",
+        "analytic saddle (hollow)"
+      ],
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.12332647480070591,
+        "lock_wait_seconds": 1.191999763250351e-05,
+        "semantic_key": "170918b0837562c5",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+        "store_seconds": 0.0
+      },
+      "realised_cells": 340,
+      "reference": false,
+      "requested_cells": 300,
+      "saddle_admitted": false,
+      "saddle_case": "interior-four-crossing",
+      "title_lines": [
+        "300 requested / 340 realised cells",
+        "analytic nulls hollow blue; solved solid ochre; X-point cell outlined"
+      ],
+      "unexpected_markers": [],
+      "vs_draw_nulls_tallies": {
+        "reference_axis": {
+          "other_x_points_drawn": 1,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0
+        },
+        "reference_saddle": {
+          "other_x_points_drawn": 1,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0
+        },
+        "solved": {
+          "other_x_points_drawn": 0,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0
+        }
+      },
+      "wall_drawn": true,
+      "wall_node_count": 121,
+      "wall_seconds": 2.3739757449366152,
+      "xpoint_cell": 5
+    },
+    {
+      "allocation": {
+        "jax_default_backend": "cpu",
+        "jax_enable_x64": true,
+        "jax_platforms": [
+          "cpu"
+        ],
+        "job_id": null,
+        "node": "98dci4-srv-1006.iter.org",
+        "partition": null,
+        "solve_free": true,
+        "tmpdir": "/tmp"
+      },
+      "axis_admitted": true,
+      "figure_png_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-the-wedge-null-markers/docs/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-500.png",
+      "figure_svg_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-the-wedge-null-markers/docs/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-500.svg",
+      "figure_svg_src": "/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-500.svg",
+      "glyphs": {
+        "analytic_axis": 1,
+        "analytic_saddle": 1,
+        "solved_axis": 1,
+        "solved_saddle": 1
+      },
+      "legend_labels": [
+        "solved axis",
+        "solved saddle",
+        "analytic axis (hollow)",
+        "analytic saddle (hollow)"
+      ],
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.27011525304988027,
+        "lock_wait_seconds": 1.0290183126926422e-05,
+        "semantic_key": "107d56a690b8eaa3",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
+        "store_seconds": 0.0
+      },
+      "realised_cells": 550,
+      "reference": false,
+      "requested_cells": 500,
+      "saddle_admitted": true,
+      "saddle_case": "interior-four-crossing",
+      "title_lines": [
+        "500 requested / 550 realised cells",
+        "analytic nulls hollow blue; solved solid ochre; X-point cell outlined"
+      ],
+      "unexpected_markers": [],
+      "vs_draw_nulls_tallies": {
+        "reference_axis": {
+          "other_x_points_drawn": 1,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0
+        },
+        "reference_saddle": {
+          "other_x_points_drawn": 1,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0
+        },
+        "solved": {
+          "other_x_points_drawn": 0,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 1,
+          "x_points_dropped_outside_wall": 0
+        }
+      },
+      "wall_drawn": true,
+      "wall_node_count": 121,
+      "wall_seconds": 2.4829034470021725,
+      "xpoint_cell": 8
+    },
+    {
+      "allocation": {
+        "jax_default_backend": "cpu",
+        "jax_enable_x64": true,
+        "jax_platforms": [
+          "cpu"
+        ],
+        "job_id": null,
+        "node": "98dci4-srv-1006.iter.org",
+        "partition": null,
+        "solve_free": true,
+        "tmpdir": "/tmp"
+      },
+      "axis_admitted": true,
+      "figure_png_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-the-wedge-null-markers/docs/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-1000.png",
+      "figure_svg_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-the-wedge-null-markers/docs/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-1000.svg",
+      "figure_svg_src": "/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-1000.svg",
+      "glyphs": {
+        "analytic_axis": 1,
+        "analytic_saddle": 1,
+        "solved_axis": 1,
+        "solved_saddle": 1
+      },
+      "legend_labels": [
+        "solved axis",
+        "solved saddle",
+        "analytic axis (hollow)",
+        "analytic saddle (hollow)"
+      ],
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.38307034224271774,
+        "lock_wait_seconds": 7.930677384138107e-06,
+        "semantic_key": "283239eb6efcd66e",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+        "store_seconds": 0.0
+      },
+      "realised_cells": 1074,
+      "reference": false,
+      "requested_cells": 1000,
+      "saddle_admitted": true,
+      "saddle_case": "interior-four-crossing",
+      "title_lines": [
+        "1000 requested / 1074 realised cells",
+        "analytic nulls hollow blue; solved solid ochre; X-point cell outlined"
+      ],
+      "unexpected_markers": [],
+      "vs_draw_nulls_tallies": {
+        "reference_axis": {
+          "other_x_points_drawn": 1,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0
+        },
+        "reference_saddle": {
+          "other_x_points_drawn": 1,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0
+        },
+        "solved": {
+          "other_x_points_drawn": 0,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 1,
+          "x_points_dropped_outside_wall": 0
+        }
+      },
+      "wall_drawn": true,
+      "wall_node_count": 121,
+      "wall_seconds": 2.6287275166250765,
+      "xpoint_cell": 26
+    },
+    {
+      "allocation": {
+        "jax_default_backend": "cpu",
+        "jax_enable_x64": true,
+        "jax_platforms": [
+          "cpu"
+        ],
+        "job_id": null,
+        "node": "98dci4-srv-1006.iter.org",
+        "partition": null,
+        "solve_free": true,
+        "tmpdir": "/tmp"
+      },
+      "axis_admitted": true,
+      "figure_png_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-the-wedge-null-markers/docs/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-2500.png",
+      "figure_svg_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-the-wedge-null-markers/docs/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-2500.svg",
+      "figure_svg_src": "/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-2500.svg",
+      "glyphs": {
+        "analytic_axis": 1,
+        "analytic_saddle": 1,
+        "solved_axis": 1,
+        "solved_saddle": 1
+      },
+      "legend_labels": [
+        "solved axis",
+        "solved saddle",
+        "analytic axis (hollow)",
+        "analytic saddle (hollow)"
+      ],
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.9837511121295393,
+        "lock_wait_seconds": 1.0441988706588745e-05,
+        "semantic_key": "1172913775658e53",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_2500.zarr",
+        "store_seconds": 0.0
+      },
+      "realised_cells": 2616,
+      "reference": false,
+      "requested_cells": 2500,
+      "saddle_admitted": true,
+      "saddle_case": "interior-four-crossing",
+      "title_lines": [
+        "2500 requested / 2616 realised cells",
+        "analytic nulls hollow blue; solved solid ochre; X-point cell outlined"
+      ],
+      "unexpected_markers": [],
+      "vs_draw_nulls_tallies": {
+        "reference_axis": {
+          "other_x_points_drawn": 1,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0
+        },
+        "reference_saddle": {
+          "other_x_points_drawn": 1,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 0,
+          "x_points_dropped_outside_wall": 0
+        },
+        "solved": {
+          "other_x_points_drawn": 0,
+          "strike_points_drawn": 0,
+          "x_points_drawn": 1,
+          "x_points_dropped_outside_wall": 0
+        }
+      },
+      "wall_drawn": true,
+      "wall_node_count": 121,
+      "wall_seconds": 3.547552446834743,
+      "xpoint_cell": 1479
+    }
+  ],
+  "panels_rendered": [
+    110,
+    300,
+    500,
+    1000,
+    2500
+  ],
+  "requested_cells": [
+    110,
+    300,
+    500,
+    1000,
+    2500
+  ],
+  "schema": "nova.xpoint-cell-wedge-render",
+  "source_revision": "1cfd3fd4c2e2458d77ab7dc978e98ae21d390e9d",
+  "version": 1,
+  "wall_node_count": 121
+}

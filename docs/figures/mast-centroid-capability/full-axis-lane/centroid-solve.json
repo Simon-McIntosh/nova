@@ -1,0 +1,202 @@
+{
+  "artifact": "one centroid-constrained MAST fixed-point solve and its panels",
+  "cell_representation": {
+    "cell_count": 4225,
+    "clipped_cell_count": 0,
+    "distinct_cell_areas": 1,
+    "note": "every cell carries the full radial-by-vertical control area; no cell is cut by the wall or by the separatrix, so a panel must not be read as showing clipped cells",
+    "radial_step_m": 0.030312500020954758,
+    "shape": "uniform rectangle, one control cell per lattice node",
+    "source": "nova.equilibrium.forward._lattice_cells over the FluxLattice",
+    "vertical_step_m": 0.0625,
+    "vertices_per_cell": 4
+  },
+  "cold_solve": {
+    "converged": true,
+    "terminal_residual": 1.2573275753879723e-14,
+    "termination": "converged",
+    "trip_count": 1,
+    "wall_milliseconds": 426758.76316800714,
+    "wall_seconds": 426.75876316800714
+  },
+  "drawn_plasma_mesh": {
+    "boundary_branches_drawn": {
+      "closed_drawn": 1,
+      "open_drawn": 2
+    },
+    "boundary_clipped_cells": 1453,
+    "boundary_source": "assemble_separatrix_branches on the solved lattice spline, split at the admitted saddle",
+    "boundary_vertex_count": 1789,
+    "coil_section_count": 938,
+    "coupling": "none; cell geometry only, no Biot build",
+    "cut_at_boundary_cells": 256,
+    "delivered_cells": 4286,
+    "requested_cells": 4000,
+    "source": "nova.frame.firstwall.PlasmaGrid.insert",
+    "turn": "hex",
+    "vertex_count_range": [
+      4,
+      29
+    ],
+    "wall_clipped": true,
+    "wall_unit_count": 1
+  },
+  "evidence_inputs": {
+    "coil_mapping": {
+      "family": "p4_upper",
+      "stored_circuit": 8,
+      "two_percent_wall_flux_sup_wb": 0.018026559731829244
+    },
+    "edited_circuit": 8,
+    "grid_points": 65,
+    "lattice_shape": [
+      65,
+      65
+    ],
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-d5aa9180337b1ddf4186",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 1.0,
+      "root": "/home/ITER/mcintos/.cache",
+      "runtime_identity": {
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "Tesla P100-PCIE-16GB",
+            "platform": "gpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-d5aa9180337b1ddf4186"
+    },
+    "response_carrier": {
+      "file_sha256": "b9b6f0b4d4fcf3dad185a629be7f6ec2c9e976017e90c338333fcb2da18acf51",
+      "frozen_reference_count": 6,
+      "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/75029bb0f932cd4f6f57aa145eb49a938e2b973393ce8ae90b27634b1f6c526d.npz",
+      "resolved_target_digest": "eaa48962037c010f204885d16c5482b03721c6c7ea57ace779ada3621cc31783",
+      "response_sha256": "e2fea2f12f8ac3c7e41ac1ff2692ba0dced04e6a247d631ce388967d73ee8230",
+      "response_shape": [
+        4262,
+        101
+      ],
+      "semantic_response_identity": "75029bb0f932cd4f6f57aa145eb49a938e2b973393ce8ae90b27634b1f6c526d",
+      "size_bytes": 2739014,
+      "stored_circuit_count": 101,
+      "warm_load_seconds": 0.05418035387992859
+    },
+    "shot": 22086,
+    "slice_index": 43
+  },
+  "figure": "/home/ITER/mcintos/Code/nova/docs/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.png",
+  "identity": "22086/43 mixed",
+  "measurement_contract": {
+    "active_set_steps": 16,
+    "centroid_target_m": 0.0385013328466231,
+    "centroid_tolerance_m": 1e-06,
+    "cold_definition": "no program in hand: the wall carries tracing and compilation alongside one execution",
+    "constraint": "one vertical current-centroid row targeted on the frame's own reference centre height",
+    "newton_steps": 12,
+    "requested_class": "diverted",
+    "route": "reduced_newton.solve_constrained_reduced_newton_compiled through benchmarks.coil_edit_latency._compiled_edit",
+    "tolerance": 1e-08,
+    "warm_definition": "the same fixed-shape program re-entered on a moved current vector, so the timed solve does real trips"
+  },
+  "runtime": {
+    "cpu_provenance_marker": null,
+    "device_kind": "Tesla P100-PCIE-16GB",
+    "devices": [
+      "cuda:0"
+    ],
+    "host": "98dci4-gpu-0002.iter.org",
+    "jax": "0.11.0",
+    "jax_platforms": "cuda,cpu",
+    "platform": "gpu",
+    "python": "3.14.2",
+    "scheduler": {
+      "cpus_per_task": "4",
+      "job_id": "1275031",
+      "memory": "131072",
+      "node": "98dci4-gpu-0002",
+      "partition": "titan",
+      "reservation": null
+    },
+    "tmpdir": "/tmp"
+  },
+  "source_revision": "81204acb102aee3093e098b0240c2332b5d5ca08",
+  "summary": {
+    "cold_wall_milliseconds": 426758.76316800714,
+    "core_cell_count": 929,
+    "elapsed_seconds": 986.4093853011727,
+    "warm_converged_count": 3,
+    "warm_point_count": 3,
+    "warm_wall_milliseconds_maximum": 6168.624123558402,
+    "warm_wall_milliseconds_median": 3092.5472881644964,
+    "warm_wall_milliseconds_minimum": 3006.6627841442823
+  },
+  "warm_solves": [
+    {
+      "converged": true,
+      "edit_fraction": 0.02,
+      "terminal_residual": 7.413105843932068e-10,
+      "termination": "converged",
+      "trip_count": 2,
+      "wall_milliseconds": 3092.5472881644964,
+      "wall_seconds": 3.0925472881644964
+    },
+    {
+      "converged": true,
+      "edit_fraction": 0.04,
+      "terminal_residual": 1.5025520377098338e-09,
+      "termination": "converged",
+      "trip_count": 3,
+      "wall_milliseconds": 6168.624123558402,
+      "wall_seconds": 6.168624123558402
+    },
+    {
+      "converged": true,
+      "edit_fraction": 0.06,
+      "terminal_residual": 6.115969585856547e-10,
+      "termination": "converged",
+      "trip_count": 2,
+      "wall_milliseconds": 3006.6627841442823,
+      "wall_seconds": 3.0066627841442823
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+the same singular-direction analysis repeated with lambda held fixed at its seed value must change the projection of the accepted step onto the support-shrink direction; if the projection reading does not change, the degenerate-direction reading is not supported and the receipt says so
+{
+  "mutation": "the same singular-direction analysis repeated with lambda held fixed at its seed value must change the projection of the accepted step onto the support-shrink direction; if the projection reading does not change, the degenerate-direction reading is not supported and the receipt says so",
+  "fixed_lambda": 0.9818308983648004,
+  "normalized_step_projection_wb": 0.00299280100407004,
+  "fixed_lambda_step_projection_wb": 0.00299280100407004,
+  "projection_changed": false,
+  "verdict": "not-supported",
+  "interpretation": "The accepted physical displacement and unscaled-current gradient are held fixed, so their geometric projection is invariant under changing lambda in the map. The separately measured singular subspaces may change; this declared control does not establish a causal degenerate-direction explanation."
+}

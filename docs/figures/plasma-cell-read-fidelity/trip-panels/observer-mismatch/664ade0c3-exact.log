@@ -1,0 +1,6 @@
+revision=664ade0c32ac72ac3c37f34f711012f69fa68f5e tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3 command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py', 'arm', '--revision', '664ade0c32ac72ac3c37f34f711012f69fa68f5e', '--clip', 'exact', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels']
+BUILD 664ade0c32ac72ac3c37f34f711012f69fa68f5e exact
+E0923 08:46:44.091686 3540770 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************

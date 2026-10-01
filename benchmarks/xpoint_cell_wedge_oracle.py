@@ -19,12 +19,15 @@ import jax.numpy as jnp
 import matplotlib
 
 matplotlib.use("Agg")
+from matplotlib.lines import Line2D
 from matplotlib.path import Path as PlotPath
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import quad
 from scipy.optimize import brentq
 
+from benchmarks import limiter_read_resolution_audit as limiter_audit
+from benchmarks import solovev_certificate as certificate
 from benchmarks import topology_read_resolution_ladder as topology_ladder
 from nova.equilibrium.clip_quadrature import saddle_wedge_current_moments
 from nova.equilibrium.separatrix_clip import AtomicCellMesh
@@ -37,10 +40,10 @@ assert jax.config.jax_enable_x64 is True
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "docs/figures/cut-cell-current-attribution/xpoint-cell"
-REQUESTED_CELLS = (110, 300, 1000, 2500)
+REQUESTED_CELLS = (110, 300, 500)
 REFERENCE_CELLS = 110
 MU_0 = 4.0e-7 * math.pi
-CORE_CURRENT_RELATIVE_LIMIT = 1.0e-6
+CORE_CURRENT_RELATIVE_LIMIT = 1.0e-13
 COLOURS = {
     "analytic": "#2563eb",
     "read": "#d97706",
@@ -48,6 +51,50 @@ COLOURS = {
     "core": "#0f766e",
     "private": "#7c3aed",
     "sol": "#dc2626",
+}
+RENDER_RECEIPT_NAME = "render-receipt.json"
+RENDER_CELL_COUNTS = (110, 300, 500, 1000, 2500)
+
+# The two null sets a reader has to tell apart on every panel. Both use the
+# draw_nulls vocabulary -- an up triangle for the magnetic axis and a cross for
+# the saddle -- and they are separated by fill rather than by shape, because a
+# second shape is what put an ochre down triangle over a blue up triangle on
+# the coincident axis: two triangles pointing opposite ways read as one
+# hourglass and neither glyph is the vocabulary's axis glyph. The solved set
+# is solid and the analytic reference hollow, so a coincident pair reads as a
+# filled glyph inside an outline of the other colour.
+SOLVED_AXIS_MARKER = "^"
+SOLVED_NULL_INK = DEFAULT_INK.variant(
+    axis_color=COLOURS["read"],
+    axis_markersize=DEFAULT_INK.axis_markersize,
+    xpoint_marker="X",
+    xpoint_color=COLOURS["read"],
+    xpoint_markersize=DEFAULT_INK.xpoint_markersize,
+)
+# The reference set is drawn hollow, so it reaches the panel through
+# ``other_x_points``, whose marker literal comes from this style's x-point slot
+# rather than from the axis/x-point arguments.
+ANALYTIC_AXIS_INK = DEFAULT_INK.variant(
+    xpoint_marker="^",
+    xpoint_color=COLOURS["analytic"],
+    xpoint_markersize=DEFAULT_INK.axis_markersize,
+    xpoint_markeredgewidth=1.4,
+)
+ANALYTIC_SADDLE_INK = DEFAULT_INK.variant(
+    xpoint_marker="X",
+    xpoint_color=COLOURS["analytic"],
+    xpoint_markersize=DEFAULT_INK.xpoint_markersize,
+    xpoint_markeredgewidth=1.4,
+)
+
+# The marker literals draw_nulls can emit, mapped to the set and the null each
+# one stands for. Anything outside this table is a glyph the vocabulary does
+# not admit on a panel of this kind, and it is recorded rather than ignored.
+NULL_GLYPH_VOCABULARY = {
+    ("^", False): "solved_axis",
+    ("X", False): "solved_saddle",
+    ("^", True): "analytic_axis",
+    ("X", True): "analytic_saddle",
 }
 
 
@@ -111,6 +158,28 @@ def _allocation() -> dict[str, Any]:
     }
 
 
+def _render_allocation() -> dict[str, Any]:
+    """Describe the environment a render-only run rebuilds panels in.
+
+    A render is not a solve, so it qualifies no measurement and needs no
+    allocation. It does require the CPU backend, because the wedge geometry is
+    still traced by a JAX program and a device backend compiles a different one.
+    """
+    if os.environ.get("JAX_PLATFORMS") != "cpu" or jax.default_backend() != "cpu":
+        raise RuntimeError("a render-only run must select the JAX CPU backend")
+    job_id = os.environ.get("SLURM_JOB_ID")
+    return {
+        "job_id": int(job_id) if job_id else None,
+        "partition": os.environ.get("SLURM_JOB_PARTITION"),
+        "node": os.environ.get("SLURMD_NODENAME", socket.gethostname()),
+        "jax_platforms": ["cpu"],
+        "jax_default_backend": jax.default_backend(),
+        "jax_enable_x64": bool(jax.config.jax_enable_x64),
+        "tmpdir": os.environ.get("TMPDIR"),
+        "solve_free": True,
+    }
+
+
 def _strict(value: Any) -> Any:
     if isinstance(value, dict):
         return {str(key): _strict(item) for key, item in value.items()}
@@ -131,6 +200,30 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
         json.dumps(_strict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",
     )
+
+
+def _signed_polygon_area(vertices: np.ndarray) -> float:
+    return 0.5 * float(
+        np.dot(vertices[:, 0], np.roll(vertices[:, 1], -1))
+        - np.dot(vertices[:, 1], np.roll(vertices[:, 0], -1))
+    )
+
+
+def _orientation_normalised(vertices: np.ndarray) -> np.ndarray:
+    """Return the cell in the vertex order the atomic mesh stores it in.
+
+    ``AtomicCellMesh`` reverses any cell whose signed area is negative, so its
+    edge ``e`` is this polygon's edge ``e`` traversed in the opposite
+    direction.  Every root fraction is an edge index plus a fraction along that
+    edge, so a fraction resolved against a clockwise polygon and consumed by a
+    counter-clockwise mesh names a different segment: the root lands on the
+    wrong branch.  Normalise the polygon once, at the point the cell is
+    selected, and index every edge quantity against this frame.
+    """
+    vertices = np.ascontiguousarray(vertices, dtype=np.float64)
+    if np.array_equal(vertices[0], vertices[-1]):
+        vertices = vertices[:-1]
+    return vertices[::-1] if _signed_polygon_area(vertices) < 0.0 else vertices
 
 
 def _point_segment_distance(
@@ -443,6 +536,116 @@ def _support_vertices(wedges: Any, slot: int) -> np.ndarray:
     return np.asarray(wedges.support_vertices)[0, slot, :count]
 
 
+def _exact_edge_roots(
+    polygon: np.ndarray, exact: Any, boundary_flux: float
+) -> list[tuple[float, np.ndarray]]:
+    """Resolve the separatrix roots on the cell boundary from the exact flux."""
+    roots: list[tuple[float, np.ndarray]] = []
+    parameters = np.linspace(0.0, 1.0, 257)
+    for edge, (start, end) in enumerate(
+        zip(polygon, np.roll(polygon, -1, axis=0), strict=True)
+    ):
+        points = start[None, :] + parameters[:, None] * (end - start)[None, :]
+        values = np.asarray(exact.flux(points), dtype=np.float64) - boundary_flux
+        for slot in np.flatnonzero(values[:-1] * values[1:] < 0.0):
+            fraction = brentq(
+                lambda value, s=start, e=end: float(
+                    exact.flux((s + value * (e - s))[None, :])[0] - boundary_flux
+                ),
+                float(parameters[slot]),
+                float(parameters[slot + 1]),
+                xtol=8.9e-16,
+                rtol=8.9e-16,
+            )
+            roots.append((edge + float(fraction), start + fraction * (end - start)))
+    roots.sort(key=lambda item: item[0])
+    return roots
+
+
+def _polygon_centroid(vertices: np.ndarray) -> np.ndarray:
+    radial = vertices[:, 0]
+    vertical = vertices[:, 1]
+    following_radial = np.roll(radial, -1)
+    following_vertical = np.roll(vertical, -1)
+    cross = radial * following_vertical - following_radial * vertical
+    area = 0.5 * float(np.sum(cross))
+    return np.asarray(
+        [
+            float(np.sum((radial + following_radial) * cross)) / (6.0 * area),
+            float(np.sum((vertical + following_vertical) * cross)) / (6.0 * area),
+        ]
+    )
+
+
+def _independent_branch_sectors(
+    polygon: np.ndarray,
+    exact: Any,
+    saddle: np.ndarray,
+    boundary_flux: float,
+    polarity: float,
+) -> list[dict[str, Any]]:
+    """Build the four sectors from the exact roots and the cell boundary alone.
+
+    Every sector is bounded by one boundary arc of the cell (the straight
+    edges between two consecutive separatrix roots) and the two branch chords
+    that meet at the saddle.  The confined side of each sector is read from the
+    exact flux at the midpoint of its boundary arc, so neither the sector
+    polygons nor their signs come from the carrier's emitted vertices.
+    """
+    roots = _exact_edge_roots(polygon, exact, boundary_flux)
+    if len(roots) != 4:
+        raise RuntimeError(f"expected four exact separatrix roots, found {len(roots)}")
+    width = len(polygon)
+    perimeter = float(width)
+    sectors = []
+    for slot in range(4):
+        parameter, point = roots[slot]
+        next_parameter, next_point = roots[(slot + 1) % 4]
+        span = next_parameter - parameter
+        if span <= 0.0:
+            span += perimeter
+        between = []
+        for step in range(1, width + 1):
+            vertex_index = (int(math.floor(parameter)) + step) % width
+            absolute = float(vertex_index)
+            if absolute <= parameter:
+                absolute += perimeter
+            if parameter < absolute < parameter + span:
+                between.append(polygon[vertex_index])
+        vertices = np.asarray([saddle, point, *between, next_point], dtype=np.float64)
+        probe_parameter = parameter + 0.5 * span
+        probe_edge = int(math.floor(probe_parameter)) % width
+        probe_fraction = probe_parameter - math.floor(probe_parameter)
+        probe = polygon[probe_edge] + probe_fraction * (
+            polygon[(probe_edge + 1) % width] - polygon[probe_edge]
+        )
+        confined = bool(
+            polarity * (float(exact.flux(probe[None, :])[0]) - boundary_flux) > 0.0
+        )
+        sectors.append(
+            {
+                "vertices": vertices,
+                "confined": confined,
+                "arc_midpoint_rz_m": probe,
+            }
+        )
+    return sectors
+
+
+def _closing_vertex_sequence(vertices: np.ndarray) -> list[list[float]]:
+    """Return a rotation- and direction-free canonical vertex sequence."""
+    points = [tuple(float(value) for value in row) for row in vertices]
+    if len(points) > 1 and points[0] == points[-1]:
+        points.pop()
+    forward = min(points[index:] + points[:index] for index in range(len(points)))
+    reversed_points = list(reversed(points))
+    backward = min(
+        reversed_points[index:] + reversed_points[:index]
+        for index in range(len(reversed_points))
+    )
+    return [list(point) for point in min(forward, backward)]
+
+
 def _observed_nulls(operator: Any, analytic: np.ndarray) -> dict[str, Any]:
     physical = jnp.asarray(analytic[: operator.physical_node_number], dtype=jnp.float64)
     _masks, topology, _connected, axis_admitted = jax.block_until_ready(
@@ -459,99 +662,13 @@ def _observed_nulls(operator: Any, analytic: np.ndarray) -> dict[str, Any]:
     }
 
 
-def _render_panel(
-    output: Path,
-    requested_cells: int,
-    machine: Any,
-    exact: Any,
-    polygon: np.ndarray,
-    wedges: Any,
-    observed: dict[str, Any],
-) -> str:
-    wall = np.asarray(machine.wall_node, dtype=np.float64)
-    radial = np.linspace(float(np.min(wall[:, 0])), float(np.max(wall[:, 0])), 241)
-    vertical = np.linspace(float(np.min(wall[:, 1])), float(np.max(wall[:, 1])), 241)
-    radial_grid, vertical_grid = np.meshgrid(radial, vertical)
-    points = np.column_stack((radial_grid.ravel(), vertical_grid.ravel()))
-    flux = np.asarray(exact.flux(points), dtype=np.float64).reshape(radial_grid.shape)
-    levels = poloidal.contour_levels(flux, count=16)
-    figure, axis = plt.subplots(figsize=(6.2, 6.6), constrained_layout=True)
-    poloidal.draw_flux_contours(
-        axis, radial, vertical, flux, levels, color=COLOURS["analytic"]
-    )
-    poloidal.draw_wall(axis, units=(wall,), linewidth=0.75)
-    analytic_style = DEFAULT_INK.variant(
-        axis_marker="^",
-        axis_color=COLOURS["analytic"],
-        xpoint_color=COLOURS["analytic"],
-    )
-    poloidal.draw_nulls(
-        axis,
-        magnetic_axis=np.asarray(exact.magnetic_axis),
-        x_points=np.asarray(exact.x_point)[None, :],
-        style=analytic_style,
-        contain=(wall,),
-    )
-    observed_style = DEFAULT_INK.variant(
-        axis_marker="v",
-        axis_color=COLOURS["read"],
-        xpoint_color=COLOURS["read"],
-    )
-    observed_x = (
-        np.asarray(observed["saddle_rz_m"])[None, :]
-        if observed["saddle_admitted"]
-        else np.empty((0, 2))
-    )
-    poloidal.draw_nulls(
-        axis,
-        magnetic_axis=np.asarray(observed["axis_rz_m"]),
-        x_points=observed_x,
-        style=observed_style,
-        contain=(wall,),
-    )
-    cell_loop = np.vstack((polygon, polygon[0]))
-    axis.plot(cell_loop[:, 0], cell_loop[:, 1], color=COLOURS["cell"], linewidth=2.0)
-    for slot, colour in enumerate(
-        (COLOURS["core"], COLOURS["private"], COLOURS["sol"], COLOURS["sol"])
-    ):
-        wedge = _support_vertices(wedges, slot)
-        wedge_loop = np.vstack((wedge, wedge[0]))
-        axis.plot(wedge_loop[:, 0], wedge_loop[:, 1], color=colour, linewidth=1.1)
-    poloidal_axes(axis)
-    axis.set_title(
-        f"{requested_cells} requested / {len(machine.node)} realised cells\n"
-        "analytic nulls blue; production read ochre; X-point cell outlined",
-        fontsize=9,
-    )
-    name = f"single-null-wedges-cells-{requested_cells}.svg"
-    destination = output / name
-    figure.savefig(destination)
-    plt.close(figure)
-    return f"/nova/figures/cut-cell-current-attribution/xpoint-cell/{name}"
+def _resolve_xpoint_cell(machine: Any, exact: Any) -> dict[str, Any]:
+    """Select the analytic saddle's cell and trace its four wedges.
 
-
-def _measure_row(
-    requested_cells: int,
-    output: Path,
-    allocation: dict[str, Any],
-    *,
-    diagnose_only: bool = False,
-) -> dict[str, Any]:
-    started = perf_counter()
-    part_path = _part_path(output, requested_cells)
-    progress = {
-        "schema": "nova.xpoint-cell-wedge-oracle-part",
-        "version": 1,
-        "source_revision": _source_revision(),
-        "allocation": allocation,
-        "requested_cells": requested_cells,
-        "reference": requested_cells == REFERENCE_CELLS,
-        "completed": False,
-        "stage": "machine-load",
-    }
-    _write_json(part_path, progress)
-    machine, operator, analytic = topology_ladder._machine_and_field(requested_cells)
-    exact = topology_ladder.ANALYTIC
+    Shared by the measurement row and the render-only entry point, so a panel
+    rebuilt from a persisted part is built from the same cell, in the same
+    orientation frame, as the row that measured it.
+    """
     x_point = np.asarray(exact.x_point, dtype=np.float64)
     axis = np.asarray(exact.magnetic_axis, dtype=np.float64)
     boundary_flux = float(exact.flux(x_point[None, :])[0])
@@ -562,8 +679,8 @@ def _measure_row(
     selected_geometry = None
     for candidate in candidates:
         candidate_cell = int(candidate["cell"])
-        candidate_polygon = np.asarray(
-            machine.cell_polygons[candidate_cell], dtype=np.float64
+        candidate_polygon = _orientation_normalised(
+            np.asarray(machine.cell_polygons[candidate_cell], dtype=np.float64)
         )
         candidate_centre = np.asarray(machine.node[candidate_cell], dtype=np.float64)
         candidate_mesh = AtomicCellMesh.from_cells(
@@ -589,27 +706,262 @@ def _measure_row(
                 edge_root_positive_after=jnp.asarray(root_positive_after),
             )
         )(signed_flux)
-        candidate_row = candidate | {
-            "selected": candidate_cell == cell,
-            "centroid_rz_m": candidate_centre,
-            "characteristic_pitch_m": math.sqrt(
-                float(np.asarray(machine.area)[candidate_cell])
-            ),
-            "edge_root_count": int(sum(row["root_count"] for row in edge_rows)),
-            "edge_roots": edge_rows,
-            "wedge_shape": _wedge_shape_diagnostics(candidate_wedges, x_point),
-        }
-        candidate_diagnostics.append(candidate_row)
+        candidate_diagnostics.append(
+            candidate
+            | {
+                "selected": candidate_cell == cell,
+                "centroid_rz_m": candidate_centre,
+                "characteristic_pitch_m": math.sqrt(
+                    float(np.asarray(machine.area)[candidate_cell])
+                ),
+                "edge_root_count": int(sum(row["root_count"] for row in edge_rows)),
+                "edge_roots": edge_rows,
+                "wedge_shape": _wedge_shape_diagnostics(candidate_wedges, x_point),
+            }
+        )
         if candidate_cell == cell:
-            selected_geometry = (
-                candidate_polygon,
-                candidate_centre,
-                candidate_wedges,
-                candidate_row,
-            )
+            selected_geometry = (candidate_polygon, candidate_centre, candidate_wedges)
     if selected_geometry is None:
         raise RuntimeError("the selected X-point cell has no diagnostic row")
-    polygon, centre, wedges, selected_diagnostic = selected_geometry
+    polygon, centre, wedges = selected_geometry
+    return {
+        "cell": cell,
+        "polygon": polygon,
+        "centre": centre,
+        "wedges": wedges,
+        "candidate_rows": candidate_diagnostics,
+        "x_point": x_point,
+        "axis": axis,
+        "boundary_flux": boundary_flux,
+        "polarity": polarity,
+    }
+
+
+def _marker_glyphs(axes: Any) -> dict[str, Any]:
+    """Classify every marker glyph ``axes`` drew against the null vocabulary.
+
+    A glyph is classified from the artist -- its marker literal and whether it
+    has a face -- so the count is read off what was drawn rather than off an
+    assumption about which call ran. A literal outside the vocabulary is
+    recorded under ``unexpected_markers``, which is what makes an inverted
+    axis triangle a failure of the check rather than a silent style choice.
+    """
+    glyphs = {name: 0 for name in NULL_GLYPH_VOCABULARY.values()}
+    unexpected: list[str] = []
+    for line in axes.lines:
+        marker = line.get_marker()
+        if marker is None:
+            continue
+        literal = str(marker)
+        if literal.lower() in ("none", ""):
+            continue
+        drawn = int(
+            np.count_nonzero(
+                np.isfinite(np.asarray(line.get_xdata(), dtype=np.float64))
+            )
+        )
+        if drawn == 0:
+            continue
+        face = line.get_markerfacecolor()
+        hollow = isinstance(face, str) and face.lower() == "none"
+        key = (literal, hollow)
+        if key in NULL_GLYPH_VOCABULARY:
+            glyphs[NULL_GLYPH_VOCABULARY[key]] += drawn
+        else:
+            unexpected.append(literal)
+    return {"glyphs": glyphs, "unexpected_markers": sorted(set(unexpected))}
+
+
+def _legend_handles() -> list[Any]:
+    """Build the four legend entries that name the two null sets."""
+    return [
+        Line2D(
+            [],
+            [],
+            marker=SOLVED_AXIS_MARKER,
+            color=COLOURS["read"],
+            markerfacecolor=COLOURS["read"],
+            linestyle="none",
+            markersize=DEFAULT_INK.axis_markersize,
+            label="solved axis",
+        ),
+        Line2D(
+            [],
+            [],
+            marker=SOLVED_NULL_INK.xpoint_marker,
+            color=COLOURS["read"],
+            markerfacecolor=COLOURS["read"],
+            linestyle="none",
+            markersize=DEFAULT_INK.xpoint_markersize,
+            label="solved saddle",
+        ),
+        Line2D(
+            [],
+            [],
+            marker=ANALYTIC_AXIS_INK.xpoint_marker,
+            color=COLOURS["analytic"],
+            markerfacecolor="none",
+            linestyle="none",
+            markersize=DEFAULT_INK.axis_markersize,
+            label="analytic axis (hollow)",
+        ),
+        Line2D(
+            [],
+            [],
+            marker=ANALYTIC_SADDLE_INK.xpoint_marker,
+            color=COLOURS["analytic"],
+            markerfacecolor="none",
+            linestyle="none",
+            markersize=DEFAULT_INK.xpoint_markersize,
+            label="analytic saddle (hollow)",
+        ),
+    ]
+
+
+def _draw_panel(
+    output: Path,
+    requested_cells: int,
+    machine: Any,
+    exact: Any,
+    polygon: np.ndarray,
+    wedges: Any,
+    observed: dict[str, Any],
+    *,
+    write: bool = True,
+) -> dict[str, Any]:
+    """Draw one X-point-cell panel and record every null glyph it drew.
+
+    The production read is drawn solid and the analytic reference hollow, both
+    in the ``draw_nulls`` vocabulary: an up triangle for the magnetic axis and
+    a cross for the saddle. Separating the sets by fill rather than by shape is
+    what removes the hourglass a reader saw where the two axes coincide, and it
+    keeps every glyph a shape the vocabulary already defines. The reference
+    glyphs reach the panel through ``other_x_points``, which is the only route
+    that draws hollow.
+    """
+    wall = np.asarray(machine.wall_node, dtype=np.float64)
+    radial = np.linspace(float(np.min(wall[:, 0])), float(np.max(wall[:, 0])), 241)
+    vertical = np.linspace(float(np.min(wall[:, 1])), float(np.max(wall[:, 1])), 241)
+    radial_grid, vertical_grid = np.meshgrid(radial, vertical)
+    points = np.column_stack((radial_grid.ravel(), vertical_grid.ravel()))
+    flux = np.asarray(exact.flux(points), dtype=np.float64).reshape(radial_grid.shape)
+    levels = poloidal.contour_levels(flux, count=16)
+    figure, axis = plt.subplots(figsize=(6.2, 6.6), constrained_layout=True)
+    poloidal.draw_flux_contours(
+        axis, radial, vertical, flux, levels, color=COLOURS["analytic"]
+    )
+    poloidal.draw_wall(axis, units=(wall,), linewidth=0.75)
+    observed_x = (
+        np.asarray(observed["saddle_rz_m"], dtype=np.float64)[None, :]
+        if observed["saddle_admitted"]
+        else None
+    )
+    solved = poloidal.draw_nulls(
+        axis,
+        magnetic_axis=np.asarray(observed["axis_rz_m"], dtype=np.float64),
+        x_points=observed_x,
+        style=SOLVED_NULL_INK.variant(axis_marker=SOLVED_AXIS_MARKER),
+        contain=(wall,),
+    )
+    reference_axis = poloidal.draw_nulls(
+        axis,
+        magnetic_axis=None,
+        x_points=None,
+        other_x_points=np.asarray(exact.magnetic_axis, dtype=np.float64)[None, :],
+        style=ANALYTIC_AXIS_INK,
+    )
+    reference_saddle = poloidal.draw_nulls(
+        axis,
+        magnetic_axis=None,
+        x_points=None,
+        other_x_points=np.asarray(exact.x_point, dtype=np.float64)[None, :],
+        style=ANALYTIC_SADDLE_INK,
+    )
+    cell_loop = np.vstack((polygon, polygon[0]))
+    axis.plot(cell_loop[:, 0], cell_loop[:, 1], color=COLOURS["cell"], linewidth=2.0)
+    for slot, colour in enumerate(
+        (COLOURS["core"], COLOURS["private"], COLOURS["sol"], COLOURS["sol"])
+    ):
+        wedge = _support_vertices(wedges, slot)
+        wedge_loop = np.vstack((wedge, wedge[0]))
+        axis.plot(wedge_loop[:, 0], wedge_loop[:, 1], color=colour, linewidth=1.1)
+    poloidal_axes(axis)
+    handles = _legend_handles()
+    axis.legend(
+        handles=handles,
+        loc="lower right",
+        fontsize=6.5,
+        framealpha=0.9,
+        labelspacing=0.3,
+        handletextpad=0.4,
+        borderpad=0.4,
+    )
+    title_lines = [
+        f"{requested_cells} requested / {len(machine.node)} realised cells",
+        "analytic nulls hollow blue; solved solid ochre; X-point cell outlined",
+    ]
+    axis.set_title("\n".join(title_lines), fontsize=9)
+    name = f"single-null-wedges-cells-{requested_cells}"
+    record = {
+        "requested_cells": requested_cells,
+        "realised_cells": int(len(machine.node)),
+        "title_lines": title_lines,
+        "legend_labels": [handle.get_label() for handle in handles],
+        "wall_node_count": int(wall.shape[0]),
+        "wall_drawn": bool(wall.shape[0] > 0),
+        "figure_svg_path": str((output / f"{name}.svg").resolve()),
+        "figure_svg_src": (
+            f"/nova/figures/cut-cell-current-attribution/xpoint-cell/{name}.svg"
+        ),
+        "figure_png_path": str((output / f"{name}.png").resolve()),
+        "vs_draw_nulls_tallies": {
+            "solved": solved,
+            "reference_axis": reference_axis,
+            "reference_saddle": reference_saddle,
+        },
+    }
+    record |= _marker_glyphs(axis)
+    if write:
+        output.mkdir(parents=True, exist_ok=True)
+        figure.savefig(output / f"{name}.svg")
+        figure.savefig(output / f"{name}.png")
+    plt.close(figure)
+    return record
+
+
+def _measure_row(
+    requested_cells: int,
+    output: Path,
+    allocation: dict[str, Any],
+    *,
+    diagnose_only: bool = False,
+) -> dict[str, Any]:
+    started = perf_counter()
+    part_path = _part_path(output, requested_cells)
+    progress = {
+        "schema": "nova.xpoint-cell-wedge-oracle-part",
+        "version": 1,
+        "source_revision": _source_revision(),
+        "allocation": allocation,
+        "requested_cells": requested_cells,
+        "reference": requested_cells == REFERENCE_CELLS,
+        "completed": False,
+        "stage": "machine-load",
+    }
+    _write_json(part_path, progress)
+    machine, operator, analytic = topology_ladder._machine_and_field(requested_cells)
+    exact = topology_ladder.ANALYTIC
+    resolved = _resolve_xpoint_cell(machine, exact)
+    x_point = resolved["x_point"]
+    axis = resolved["axis"]
+    boundary_flux = resolved["boundary_flux"]
+    polarity = resolved["polarity"]
+    cell = resolved["cell"]
+    polygon = resolved["polygon"]
+    centre = resolved["centre"]
+    wedges = resolved["wedges"]
+    candidate_diagnostics = resolved["candidate_rows"]
+    selected_diagnostic = next(row for row in candidate_diagnostics if row["selected"])
     saddle_case = (
         "edge-coincident-degenerate-wedge"
         if any(row["saddle_on_edge"] for row in selected_diagnostic["edge_roots"])
@@ -650,12 +1002,71 @@ def _measure_row(
         ),
         axis=1,
     )
-    expected = np.asarray(
-        [
-            _analytic_polygon_moments(_support_vertices(wedges, slot), centre, item)
-            for slot, item in enumerate(profiles)
-        ]
+    sectors = _independent_branch_sectors(
+        polygon, exact, x_point, boundary_flux, polarity
     )
+    core_direction = axis - x_point
+    confined_slots = [slot for slot, item in enumerate(sectors) if item["confined"]]
+    if len(confined_slots) != 2:
+        raise RuntimeError(
+            f"expected two confined sectors, found {len(confined_slots)}"
+        )
+    core_slot = max(
+        confined_slots,
+        key=lambda slot: float(
+            np.dot(
+                _polygon_centroid(sectors[slot]["vertices"]) - x_point,
+                core_direction,
+            )
+        ),
+    )
+    private_slot = next(slot for slot in confined_slots if slot != core_slot)
+    sector_area = np.asarray(
+        [_signed_polygon_area(np.asarray(item["vertices"])) for item in sectors]
+    )
+    cell_interior_area = abs(_signed_polygon_area(polygon))
+    sector_winding_consistent = bool(
+        np.all(sector_area > 0.0) or np.all(sector_area < 0.0)
+    )
+    sector_largest_area = float(np.max(np.abs(sector_area)))
+    sector_area_total = float(np.sum(sector_area))
+    sector_area_closure = sector_area_total - cell_interior_area
+    if not sector_winding_consistent:
+        raise AssertionError(
+            f"reconstructed sectors do not wind consistently: {sector_area}"
+        )
+    if sector_largest_area > cell_interior_area + 1.0e-14:
+        raise AssertionError(
+            f"reconstructed sector area {sector_largest_area:.6e} m2 exceeds the "
+            f"cell interior {cell_interior_area:.6e} m2"
+        )
+    if abs(sector_area_closure) > 2.0e-14:
+        raise AssertionError(
+            f"reconstructed sectors close to {sector_area_closure:.3e} m2 against the "
+            f"cell interior, so they are not a partition"
+        )
+    expected = np.zeros((4, 3))
+    expected[0] = _analytic_polygon_moments(
+        sectors[core_slot]["vertices"], centre, profiles[0]
+    )
+    carrier_core_vertices = _closing_vertex_sequence(_support_vertices(wedges, 0))
+    carrier_private_vertices = _closing_vertex_sequence(_support_vertices(wedges, 1))
+    independent_core_vertices = _closing_vertex_sequence(sectors[core_slot]["vertices"])
+    independent_private_vertices = _closing_vertex_sequence(
+        sectors[private_slot]["vertices"]
+    )
+    geometry_matches_carrier = independent_core_vertices == carrier_core_vertices
+    private_matches_carrier = independent_private_vertices == carrier_private_vertices
+    if not geometry_matches_carrier:
+        raise AssertionError(
+            "the independent reconstruction's core sector is not the carrier's core "
+            "wedge, so the core selection or the edge frame is still wrong"
+        )
+    if not private_matches_carrier:
+        raise AssertionError(
+            "the independent reconstruction's private-flux sector is not the "
+            "carrier's private wedge"
+        )
     scale = np.maximum(np.abs(expected), 1.0e-12)
     relative_error = np.abs(actual - expected) / scale
     core_current_relative_error = float(relative_error[0, 0])
@@ -667,6 +1078,16 @@ def _measure_row(
         "core_current_relative_error": core_current_relative_error,
         "private_flux_current_a": float(actual[1, 0]),
         "common_sol_current_a": [float(actual[2, 0]), float(actual[3, 0])],
+        "cell_interior_area_m2": cell_interior_area,
+        "independent_sector_signed_area_m2": sector_area,
+        "independent_sector_largest_area_m2": sector_largest_area,
+        "independent_sector_winding_consistent": sector_winding_consistent,
+        "independent_sector_area_total_m2": sector_area_total,
+        "independent_sector_area_closure_m2": sector_area_closure,
+        "independent_core_sector": int(core_slot),
+        "independent_private_sector": int(private_slot),
+        "carrier_core_polygon_matches_independent": geometry_matches_carrier,
+        "carrier_private_polygon_matches_independent": private_matches_carrier,
         "wall_seconds": perf_counter() - started,
     }
     _write_json(part_path, progress)
@@ -693,9 +1114,10 @@ def _measure_row(
     if abs(area_closure) > 2.0e-12:
         raise AssertionError(f"wedge area closure is {area_closure:.3e} m2")
     observed = _observed_nulls(operator, analytic)
-    figure_src = _render_panel(
+    panel = _draw_panel(
         output, requested_cells, machine, exact, polygon, wedges, observed
     )
+    figure_src = panel["figure_svg_src"]
     row = {
         "schema": "nova.xpoint-cell-wedge-oracle-part",
         "version": 1,
@@ -715,6 +1137,20 @@ def _measure_row(
         "saddle_inserted_as_first_vertex": saddle_inserted,
         "exact_zero_padding": exact_zero_padding,
         "profile_order": ["confined-core", "zero-private", "zero-sol", "zero-sol"],
+        "independent_core_sector": int(core_slot),
+        "independent_private_sector": int(private_slot),
+        "independent_confined_sectors": [int(slot) for slot in confined_slots],
+        "independent_sector_area_m2": [
+            abs(_signed_polygon_area(np.asarray(item["vertices"]))) for item in sectors
+        ],
+        "independent_sector_signed_area_m2": sector_area,
+        "cell_interior_area_m2": cell_interior_area,
+        "independent_sector_largest_area_m2": sector_largest_area,
+        "independent_sector_winding_consistent": sector_winding_consistent,
+        "independent_sector_area_total_m2": sector_area_total,
+        "independent_sector_area_closure_m2": sector_area_closure,
+        "carrier_core_polygon_matches_independent": geometry_matches_carrier,
+        "carrier_private_polygon_matches_independent": private_matches_carrier,
         "measured_moments": actual,
         "analytic_moments": expected,
         "relative_moment_error": relative_error,
@@ -722,6 +1158,7 @@ def _measure_row(
         "private_flux_current_a": float(actual[1, 0]),
         "common_sol_current_a": [float(actual[2, 0]), float(actual[3, 0])],
         "observed_nulls": observed,
+        "render_panel": panel,
         "figure_src": figure_src,
         "wall_seconds": perf_counter() - started,
         "oracle_completed": True,
@@ -730,6 +1167,139 @@ def _measure_row(
     }
     _write_json(part_path, row)
     return row
+
+
+def _render_carrier(requested_cells: int) -> tuple[Any, Any]:
+    """Load the single-null carrier and its closed-form flux, with no solve.
+
+    The panel is a picture of a read that was already measured, so the render
+    path needs the machine and the analytic reference and nothing else. Building
+    the forward operator here would run a qualification for a figure that does
+    not consume it.
+    """
+    carrier_case, _source_case, exact = certificate._case(topology_ladder.CASE_NAME)
+    machine = limiter_audit._machine(
+        topology_ladder.CASE_NAME,
+        carrier_case,
+        exact,
+        -requested_cells,
+        topology_ladder.WALL_NODE_COUNT,
+    )
+    return machine, exact
+
+
+def _render_row(
+    requested_cells: int,
+    output: Path,
+    allocation: dict[str, Any],
+) -> dict[str, Any]:
+    """Redraw one panel from its persisted part receipt, without solving."""
+    started = perf_counter()
+    part_path = _part_path(output, requested_cells)
+    if not part_path.exists():
+        raise FileNotFoundError(
+            f"no persisted part receipt at {part_path}; the panel cannot be "
+            "rebuilt from a read that was never measured"
+        )
+    part = json.loads(part_path.read_text(encoding="utf-8"))
+    if not part.get("oracle_completed"):
+        raise ValueError(
+            f"part receipt {part_path} has no completed measurement to render"
+        )
+    machine, exact = _render_carrier(requested_cells)
+    if int(len(machine.node)) != int(part["realised_cells"]):
+        raise ValueError(
+            f"carrier realised {len(machine.node)} cells against "
+            f"{part['realised_cells']} in the persisted part receipt"
+        )
+    resolved = _resolve_xpoint_cell(machine, exact)
+    if int(resolved["cell"]) != int(part["xpoint_cell"]):
+        raise ValueError(
+            f"carrier selected X-point cell {resolved['cell']} against "
+            f"{part['xpoint_cell']} in the persisted part receipt"
+        )
+    panel = _draw_panel(
+        output,
+        requested_cells,
+        machine,
+        exact,
+        resolved["polygon"],
+        resolved["wedges"],
+        part["observed_nulls"],
+    )
+    return panel | {
+        "reference": requested_cells == REFERENCE_CELLS,
+        "machine_cache": machine.cache,
+        "xpoint_cell": int(resolved["cell"]),
+        "saddle_case": part["saddle_case"],
+        "saddle_admitted": bool(part["observed_nulls"]["saddle_admitted"]),
+        "axis_admitted": bool(part["observed_nulls"]["axis_admitted"]),
+        "wall_seconds": perf_counter() - started,
+        "allocation": allocation,
+    }
+
+
+def render_only(
+    output: Path,
+    requested_cells: tuple[int, ...] = RENDER_CELL_COUNTS,
+) -> dict[str, Any]:
+    """Rebuild every panel and write the render receipt that audits them."""
+    output.mkdir(parents=True, exist_ok=True)
+    receipt = {
+        "schema": "nova.xpoint-cell-wedge-render",
+        "version": 1,
+        "source_revision": _source_revision(),
+        "allocation": _render_allocation(),
+        "requested_cells": list(requested_cells),
+        "null_glyph_vocabulary": {
+            f"{marker}|{'hollow' if hollow else 'solid'}": name
+            for (marker, hollow), name in NULL_GLYPH_VOCABULARY.items()
+        },
+        "panels": [],
+        "completed": False,
+    }
+    receipt_path = output / RENDER_RECEIPT_NAME
+    _write_json(receipt_path, receipt)
+    panels = []
+    for cells in requested_cells:
+        panel = _render_row(cells, output, receipt["allocation"])
+        panels.append(panel)
+        receipt["panels"] = panels
+        _write_json(receipt_path, receipt)
+        print(
+            "XPOINT_WEDGE_PANEL "
+            f"cells={cells} glyphs={panel['glyphs']} "
+            f"unexpected={panel['unexpected_markers']}",
+            flush=True,
+        )
+    receipt.update(
+        {
+            "panels_rendered": [panel["requested_cells"] for panel in panels],
+            "all_reference_axes_drawn": all(
+                panel["glyphs"]["analytic_axis"] >= 1 for panel in panels
+            ),
+            "all_reference_saddles_drawn": all(
+                panel["glyphs"]["analytic_saddle"] >= 1 for panel in panels
+            ),
+            "no_unexpected_markers": all(
+                not panel["unexpected_markers"] for panel in panels
+            ),
+            "all_walls_drawn": all(panel["wall_drawn"] for panel in panels),
+            "wall_node_count": topology_ladder.WALL_NODE_COUNT,
+            "completed": True,
+        }
+    )
+    _write_json(receipt_path, receipt)
+    print(
+        "XPOINT_WEDGE_RENDER "
+        f"panels={receipt['panels_rendered']} "
+        f"reference_axes={receipt['all_reference_axes_drawn']} "
+        f"reference_saddles={receipt['all_reference_saddles_drawn']} "
+        f"no_unexpected={receipt['no_unexpected_markers']} "
+        f"walls={receipt['all_walls_drawn']}",
+        flush=True,
+    )
+    return receipt
 
 
 def run(
@@ -825,6 +1395,15 @@ def run(
                 if not diagnose_only
                 else None
             ),
+            "all_carrier_core_polygons_match_independent": (
+                all(
+                    row["carrier_core_polygon_matches_independent"]
+                    for row in rows
+                    if row.get("oracle_completed")
+                )
+                if not diagnose_only
+                else None
+            ),
             "diagnostic_completed": diagnose_only,
             "completed": True,
         }
@@ -850,10 +1429,24 @@ def run(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--cells", type=int, nargs="+", default=REQUESTED_CELLS)
+    parser.add_argument("--cells", type=int, nargs="+", default=None)
     parser.add_argument("--diagnose-only", action="store_true")
+    parser.add_argument("--render-only", action="store_true")
     args = parser.parse_args()
-    run(args.output, tuple(args.cells), diagnose_only=args.diagnose_only)
+    if args.render_only and args.diagnose_only:
+        parser.error("--render-only and --diagnose-only are mutually exclusive")
+    if args.render_only:
+        # A render covers every published panel, because the panel set is what
+        # is under repair; a measurement covers only the cells it is told.
+        render_only(
+            args.output, tuple(args.cells) if args.cells else RENDER_CELL_COUNTS
+        )
+    else:
+        run(
+            args.output,
+            tuple(args.cells) if args.cells else REQUESTED_CELLS,
+            diagnose_only=args.diagnose_only,
+        )
     return 0
 
 

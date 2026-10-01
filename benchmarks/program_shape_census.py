@@ -170,18 +170,6 @@ def certificate_rows(
         sys.path.insert(0, str(ROOT / "benchmarks"))
     import solovev_certificate
 
-    import nova.equilibrium.clip_quadrature as clip_quadrature
-    import nova.equilibrium.observation as observation
-
-    # The builder reads the quadrature axis node count from
-    # nova.equilibrium.observation._UNIT_NODE, which that module does not
-    # define; the constant lives in nova.equilibrium.clip_quadrature.  Publish
-    # it under the expected name for the duration of the call so the capacity
-    # vector is the route's own, then restore the module.
-    shimmed = not hasattr(observation, "_UNIT_NODE")
-    if shimmed:
-        observation._UNIT_NODE = clip_quadrature._UNIT_NODE
-
     names = cases if cases is not None else tuple(solovev_certificate.CASE_NAMES)
     rows = []
     for name in names:
@@ -206,8 +194,6 @@ def certificate_rows(
                 },
             }
         )
-    if shimmed:
-        del observation._UNIT_NODE
     return rows
 
 
@@ -456,11 +442,6 @@ def main(argv: list[str] | None = None) -> int:
         "certificate_source": (
             "benchmarks/solovev_certificate._certificate_compile_problem dimensions"
         ),
-        "framework_compat_shims": [
-            "clip_quadrature._UNIT_NODE is published as observation._UNIT_NODE "
-            "for the duration of the certificate call: solovev_certificate.py "
-            "reads it from the module that does not define it"
-        ],
         "requested_cells": arguments.requested_cells,
         "bank": bank_summary,
         "certificate": certificate_summary,

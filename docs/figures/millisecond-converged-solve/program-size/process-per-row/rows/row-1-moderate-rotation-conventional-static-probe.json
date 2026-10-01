@@ -1,0 +1,39 @@
+{
+  "command": [
+    "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+    "-m",
+    "benchmarks.solve_program_size_gate",
+    "--certificate-output",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-1-moderate-rotation-conventional-static.json",
+    "--certificate-row",
+    "moderate-rotation-conventional-static",
+    "--certificate-baseline-receipt",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json",
+    "--certificate-panel-dir",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/panels",
+    "--certificate-state-dir",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/states"
+  ],
+  "pid": 767153,
+  "exit_code": 1,
+  "wall_seconds": 401.239,
+  "interval_seconds": 0.2,
+  "max_map_count": 65530,
+  "samples_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-1-moderate-rotation-conventional-static-maps.jsonl",
+  "samples_written": 1977,
+  "peak_maps": 40756,
+  "peak_sample": {
+    "n": 1898,
+    "t": 384.821,
+    "maps": 40756,
+    "VmPeak": 23257420,
+    "VmSize": 22134980,
+    "VmHWM": 14863268,
+    "VmRSS": 13727164
+  },
+  "last_sample": {
+    "n": 1977,
+    "t": 401.037,
+    "maps": 0
+  }
+}

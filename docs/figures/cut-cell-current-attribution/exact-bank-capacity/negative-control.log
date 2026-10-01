@@ -1,0 +1,42 @@
+pass the inherited cut_cell_capacity to the callback again
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python3
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-bank-callback-capacity-from-the-mesh
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 07:07:50 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 1 item
+
+tests/test_exact_bank_callback_capacity.py::test_flux_selected_moments_size_their_own_bank_to_the_moments FAILED [100%]
+
+=================================== FAILURES ===================================
+________ test_flux_selected_moments_size_their_own_bank_to_the_moments _________
+
+    def test_flux_selected_moments_size_their_own_bank_to_the_moments():
+        """Every returned moment is finite and the fixture carries a known current."""
+        support = _two_cell_support()
+        moments = clipped_support_current_moments(
+            support,
+            support.included,
+            _crossing_field(),
+            _confined_profile(),
+            cut_cell_capacity=1,
+            boundary_reduction=True,
+        )
+        values = np.asarray(moments)
+>       assert np.all(np.isfinite(values))
+E       AssertionError: assert np.False_
+E        +  where np.False_ = <function all at 0x7f856fff35b0>(array([[False, False],\n       [False, False],\n       [False, False]]))
+E        +    where <function all at 0x7f856fff35b0> = np.all
+E        +    and   array([[False, False],\n       [False, False],\n       [False, False]]) = <ufunc 'isfinite'>(array([[nan, nan],\n       [nan, nan],\n       [nan, nan]]))
+E        +      where <ufunc 'isfinite'> = np.isfinite
+
+tests/test_exact_bank_callback_capacity.py:156: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_exact_bank_callback_capacity.py::test_flux_selected_moments_size_their_own_bank_to_the_moments - AssertionError: assert np.False_
+ +  where np.False_ = <function all at 0x7f856fff35b0>(array([[False, False],\n       [False, False],\n       [False, False]]))
+ +    where <function all at 0x7f856fff35b0> = np.all
+ +    and   array([[False, False],\n       [False, False],\n       [False, False]]) = <ufunc 'isfinite'>(array([[nan, nan],\n       [nan, nan],\n       [nan, nan]]))
+ +      where <ufunc 'isfinite'> = np.isfinite
+============================== 1 failed in 24.39s ==============================

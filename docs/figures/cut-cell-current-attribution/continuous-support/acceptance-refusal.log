@@ -1,0 +1,13 @@
+REFUSED: 135 cells: residual 0.045193155486587 exceeds 1e-12; converged=False
+REFUSED: 135 cells: outside-centroid fraction 4.913399823% exceeds 4.9%
+REFUSED: 342 cells: residual 0.051851170516115 exceeds 1e-12; converged=False
+REFUSED: The complete imported-module baseline/after delta is unverified
+{
+  "accepted": false,
+  "failures": [
+    "135 cells: residual 0.045193155486587 exceeds 1e-12; converged=False",
+    "135 cells: outside-centroid fraction 4.913399823% exceeds 4.9%",
+    "342 cells: residual 0.051851170516115 exceeds 1e-12; converged=False",
+    "The complete imported-module baseline/after delta is unverified"
+  ]
+}

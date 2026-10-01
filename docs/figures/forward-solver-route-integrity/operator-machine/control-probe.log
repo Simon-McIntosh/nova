@@ -1,0 +1,22 @@
+revision=775720c77c5443e990a74b52ea464b73ce87b6aa plus uncommitted measurement prototype; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine; command=python probe.py (control-flow probe before scan-layout repair)
+direct sine_count 3 result [0.         0.67843048 0.70970004 0.14018878]
+shared sine_count 1 result [0.         0.67843048 0.70970004 0.14018878]
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/probe.py", line 37, in <module>
+    shared_result = jax.jit(lambda y: shared_operator_call(fn, y))(x)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/probe.py", line 37, in <lambda>
+    shared_result = jax.jit(lambda y: shared_operator_call(fn, y))(x)
+                                      ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 223, in shared_operator_call
+    result = Machine().execute(closed, flat)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 195, in execute
+    entry = self.lower(closed, inputs, outputs, -1)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 85, in lower
+    pc = self.control(group, [resolve(v) for v in group.invars],
+                      [env[v] for v in group.outvars], pc)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/machine.py", line 154, in control
+    nc, nk, length = params["num_consts"], params["num_carry"], params["length"]
+                     ~~~~~~^^^^^^^^^^^^^^
+KeyError: 'num_consts'
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.

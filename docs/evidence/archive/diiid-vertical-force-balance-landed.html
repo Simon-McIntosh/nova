@@ -243,4 +243,216 @@ from the passive description. Both statements are correct about their own subjec
 same shape as a stored verdict carrying no observation time. The wording is a followup, not a behaviour defect: no
 assertion in either file tests the artifact for absence.</p>
 </section>
+
+  <section id="separatrix-import-restored">
+    <h2>The DIII-D gates collect again</h2>
+    <p><strong>Commit that removed the export: <code>130d84e3</code></strong> (<em>feat(equilibrium): compare assembled
+    DIII-D boundaries</em>, 2026-08-26). It deleted <code>def _separatrix(...)</code> and
+    <code>def contour_separation(...)</code> from <code>benchmarks/diiid_forward_gs_match.py</code> and replaced the
+    caller inside the module with <code>assemble_separatrix_branches</code> and
+    <code>compare_closed_boundaries</code>. The module's own call sites moved; the three outside drivers that import the
+    two names did not, and nothing in the default lane collected them.</p>
+    <p><strong>Reproduced at base <code>1bbde0d2</code> before the repair.</strong> Collecting the two test modules
+    aborted with <code>ImportError: cannot import name '_separatrix' from 'benchmarks.diiid_forward_gs_match'</code> at
+    <code>benchmarks/diiid_diverted_solve_overlay.py:45</code> and
+    <code>benchmarks/diiid_circuit_driven_forward_validation.py</code> (its
+    <code>from benchmarks.diiid_forward_gs_match import (&hellip;)</code> block): <code>4 errors during collection, no tests
+    collected, 4 errors in 12.29s</code>, exit 2. Both modules load their driver by
+    <code>importlib.util.spec_from_file_location</code> at module import, so the driver's <code>ImportError</code> is the
+    test module's collection error.</p>
+    <p><strong>What was restored, and on which machinery.</strong> Two names, not one:
+    <code>contour_separation</code> is imported by the circuit-validation driver and comes back quoting the module's own
+    driver list. <code>_separatrix</code> returns the closed boundary from the assembled branch API the tracer repair
+    landed — the axis-enclosing branch of <code>assemble_separatrix_branches</code> sampled to ordered R,Z vertices — with
+    the magnetic axis located on the grid as the flux extremum the boundary-minus-axis span selects. No private copy of
+    the deleted contour extraction is reintroduced: the geometry comes from the same assembler the forward-match scorer
+    uses, so a solved field and a traced one share one boundary construction. An assembly that yields no closed branch
+    returns an empty array. The overlay driver's <code>len(boundary) &gt;= 4</code> check reads that as
+    undrawable; the circuit-validation driver has no vertex-count check and passes the empty array to
+    <code>contour_separation</code>, whose guard returns <code>(nan, nan)</code> below two vertices, which
+    <code>_strict_float</code> then turns into a <code>None</code> metric rather than a refusal.</p>
+    <table>
+      <caption>Gate on all_debug CPU, one job, shared interpreter, JAX_PLATFORMS=cpu</caption>
+      <thead><tr><th scope="col">Gate</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Control on the restored extractor</th><td>analytic circular field <code>psi=(R-5)^2+Z^2</code> on a 129 by 129 grid: axis located at exactly (5.0, 0.0); closed boundary 801 vertices, all finite, radius 0.999997 to 1.000000 m; the sampled loop closes with a 0.0316 m gap on the rising polarity (one solve cell, 0.5 percent of the 5.96 m perimeter), 0.000000 m for the falling polarity; symmetric self-separation 0.0 mm. A level with no contour returns shape (0, 2) — the guard fires and the negative is refused</td></tr>
+        <tr><th scope="row">The two modules</th><td>10 passed in 7.71 s, exit 0 — <code>tests/imas/test_diiid_circuit_driven_forward_validation.py</code> 4, <code>tests/imas/test_diiid_diverted_solve_overlay.py</code> 6, no pre-existing failures</td></tr>
+        <tr><th scope="row">Path-free default lane</th><td><code>pytest --collect-only -q</code> with the repository's own addopts (<code>-rfEs --doctest-modules -m 'not slow'</code>): exit 0, <code>6983/7837 tests collected (854 deselected) in 36.63 s</code>, no ERROR and no ImportError line, and all ten restored tests present in the collected set</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Side effect, not this node's measure.</strong>
+    <code>benchmarks/diiid_solenoid_inclusion_ladder.py</code> — whose broken
+    <code>_separatrix</code> import §4 recorded as pre-existing breakage — imports cleanly again, as does
+    <code>benchmarks/diiid_vacuum_from_description.py</code>; both are out of this node's write scope and were not run.</p>
+    <p><strong>Owed elsewhere.</strong> The drivers that import the two names are outside this node's write scope, so the
+    long-term shape — whether they should read the assembled branch API directly rather than through a restored module
+    name — is a followup. So is a pinning unit test in the forward-match module's own test file, which is also outside
+    scope; the collection failure itself is the regression guard, and it fires.</p>
+    <p><strong>Logs and receipts:</strong>
+    <code>~/.config/reckon/crew/reports/nova/s19-local/dvfb-separatrix-import/</code>
+    (<code>modules.log</code>, <code>default-lane-collect.log</code>, <code>lane.sh</code>).</p>
+  </section>
+
+  <section id="axis-located-for-both-flux-polarities">
+    <h2>The grid axis under both flux polarities</h2>
+    <p><strong>The defect, reproduced before the repair.</strong> The restored helper normalised the flux by the
+    boundary-minus-axis span and then took <code>nanargmin</code> or <code>nanargmax</code> of the <em>normalised</em>
+    array according to the sign of that span. The map <code>psi -&gt; (psi - axis)/(boundary - axis)</code> is affine with
+    slope <code>1/(boundary - axis)</code>, so it preserves the ordering of <code>psi</code> when the span is positive and
+    reverses it when the span is negative. Under the falling span <code>nanargmax</code> of the normalised array is
+    therefore <code>argmin</code> of the flux — the outermost grid corner — while the axis under that sign is the flux
+    maximum.</p>
+    <table>
+      <caption>Analytic field <code>psi = +-((R-5)^2+Z^2)</code> on R in [3,7], Z in [-2,2], 129 by 129, true axis (5.0, 0.0); measured with the review node's own polarity probe run from this node's worktree</caption>
+      <thead><tr><th scope="col">Polarity</th><th scope="col">Located axis</th><th scope="col">Distance from the true axis</th><th scope="col">Assembled boundary</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">rising, level 0.9</th><td>[5.0, 0.0]</td><td>0.0000 m</td><td>1953 vertices, radius 0.9486828 to 0.9486839 m</td></tr>
+        <tr><th scope="row">falling, level -0.9</th><td>[3.0, -2.0]</td><td>2.8284 m — a grid corner</td><td>EMPTY (0, 2), where an explicit axis (5, 0) assembles the same 1953-vertex boundary</td></tr>
+      </tbody>
+    </table>
+    <p>The empty return is silent: the overlay driver raises
+    <code>RuntimeError("the converged solve did not yield a drawable boundary")</code> on fewer than four vertices, so a
+    field of the opposite sign reads as an explicit refusal there, while the circuit-validation driver reports no
+    boundary at all.</p>
+    <p><strong>The repair.</strong> The helper now takes the extremum of the <em>raw</em> flux, the sign of the span
+    choosing which extremum is the axis, and its docstring states that mechanism.
+    <code>tests/imas/test_diiid_forward_gs_match_helpers.py</code> pins both polarities on the analytic field:
+    <code>_grid_axis_rz</code> returns (5.0, 0.0) for both, <code>_separatrix</code> returns a finite (N, 2) loop with
+    N &gt; 4 at levels 0.9 and -0.9 for both, and a level the field never reaches still returns shape (0, 2).</p>
+    <p><strong>Gate.</strong> The new module plus the two driver test modules, <code>JAX_PLATFORMS=cpu</code> on the
+    login node under the shared interpreter with <code>-p no:cacheprovider</code>, captured once:
+    <code>13 passed in 192.09 s</code>, exit 0 (new module 3, circuit-validation 4, overlay 6). The same three checks
+    applied to the base revision's module source fail exactly on the falling polarity — <code>[axis] sign -1 located
+    [3.0, -2.0]</code>, <code>[boundary] sign -1 shape (0, 2)</code>, two failures, exit 1.</p>
+    <p><strong>Two corrections to the section above.</strong> First, the <code>len(boundary) &gt;= 4</code> check belongs
+    to the overlay driver only: the circuit-validation driver has no vertex-count check and passes an empty boundary to
+    <code>contour_separation</code>, whose guard returns <code>(nan, nan)</code> below two vertices, which
+    <code>_strict_float</code> then turns into a <code>None</code> metric rather than a refusal. Second, the sampled loop
+    is not exactly closed: its closure gap is 0.0316 m on the rising polarity — one solve cell, 0.5 percent of the 5.96 m
+    perimeter — and 0.000000 m for the falling polarity. No other claim in that section is changed; in particular the
+    control row's 801-vertex count is left as written, because it is not reproducible from its stated inputs (level 1.0
+    is node-aligned on this lattice) and deciding otherwise is outside this node's scope.</p>
+    <p><strong>Logs:</strong> <code>~/.config/reckon/crew/reports/nova/s19-local/dvfb-axis-polarity-repair/</code>
+    (<code>polarity-probe-base.log</code>, <code>gate-head.log</code>, <code>gate-base-falling-case.log</code>,
+    <code>guard-probe.log</code>).</p>
+  </section>
+
+  <section id="drivers-call-the-public-comparators">
+    <h2>The two DIII-D drivers call the public comparators, and the readings do not move</h2>
+    <p><strong>Base: <code>6c122a0a</code></strong>, this node's own worktree. The
+    <code>separatrix-import-restored</code> section above restored <code>_separatrix</code> and
+    <code>contour_separation</code> to <code>benchmarks/diiid_forward_gs_match.py</code> so the drivers could keep
+    importing them; this node removes the imports and calls the public surface instead. The two drivers named by the
+    followup, <code>benchmarks/diiid_diverted_solve_overlay.py</code> and
+    <code>benchmarks/diiid_circuit_driven_forward_validation.py</code>, now build their closed boundary from
+    <code>nova.equilibrium.separatrix_branches.assemble_separatrix_branches</code>, and the circuit driver also calls
+    <code>nova.equilibrium.boundary_comparison.compare_closed_boundaries</code>.</p>
+    <p><strong>How many drivers, named.</strong> The followup counts three and names two. Measured by parsing every
+    <code>benchmarks/*.py</code> with <code>ast</code> and intersecting its imports of
+    <code>benchmarks.diiid_forward_gs_match</code> with the comparator names, three files import a comparator at base,
+    and the unnamed third is <code>benchmarks/diiid_solenoid_inclusion_ladder.py</code>:</p>
+    <table>
+      <caption>Drivers importing a match-module comparator (<code>_separatrix</code>, <code>contour_separation</code>)</caption>
+      <thead><tr><th scope="col">Driver</th><th scope="col">At base <code>6c122a0a</code></th><th scope="col">At this head</th></tr></thead>
+      <tbody>
+        <tr><th scope="row"><code>diiid_circuit_driven_forward_validation.py</code></th><td><code>_separatrix</code>, <code>contour_separation</code></td><td>none</td></tr>
+        <tr><th scope="row"><code>diiid_diverted_solve_overlay.py</code></th><td><code>_separatrix</code></td><td>none</td></tr>
+        <tr><th scope="row"><code>diiid_solenoid_inclusion_ladder.py</code></th><td><code>_separatrix</code></td><td><code>_separatrix</code> — outside this node's write scope</td></tr>
+      </tbody>
+    </table>
+    <p><code>contour_separation</code> has no importer left. The ladder keeps its import and is the only remaining
+    comparator importer, so the count is stated rather than rounded: three at base, one at this head, and the one is
+    owed to a node with that path in its fence.</p>
+    <p><strong>The readings do not move, and that is measured, not asserted.</strong> A solved flux field is extremal at
+    its magnetic axis, so the axis-enclosing branch is fixed by the sign of the boundary-minus-axis span, and the two
+    local constructions reproduce the replaced calls step for step; the committed case
+    <code>test_driver_boundary_readings_reproduce_the_match_module_on_a_synthetic_field</code> compares them on
+    <code>psi = &plusmn;((R-1.6)&sup2;+Z&sup2;)</code> over R in [0.8, 2.4], Z in [-0.8, 0.8], 65 by 65, at both
+    polarities: <code>np.testing.assert_array_equal</code> on the boundary vertices, and exact equality on the
+    separation pair. Equality is exact because one ulp of movement is a changed terminal reading. The circuit driver's
+    banked millimetre series is kept, and it is kept by arithmetic as well — its
+    <code>symmetric_vertex_separation</code> is the removed <code>contour_separation</code> body — while the comparator's
+    arc-length resampled metre distances are recorded beside it under a new <code>boundary_comparison</code> row rather
+    than replacing it, so the series stays comparable across the cohort. The comparator fails closed, so a
+    non-converged frame stores a <code>failures</code> tuple instead of a distance.</p>
+    <table>
+      <caption>Gate on all_debug CPU, one job, shared root interpreter run directly, <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in the submit environment and in the payload, <code>uv</code> never invoked on the compute node (host <code>98dci4-clu-3141</code>, python 3.14.2, jax 0.11.0 backend cpu)</caption>
+      <thead><tr><th scope="col">Measurement</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Base revision, same three modules</th><td>19 passed, 0 failed, exit 0 — the three files at <code>6c122a0a</code> copied into a scratch tree with the repository's data tree linked, config and conftest taken from the worktree</td></tr>
+        <tr><th scope="row">This head, same three modules</th><td>22 passed, 0 failed, exit 0 (19 + the 3 cases this node adds)</td></tr>
+        <tr><th scope="row">Added failures against base</th><td>0</td></tr>
+        <tr><th scope="row">Negative control</th><td><code>_separatrix</code> re-added to the overlay driver's import block in a scratch copy: <code>1 failed, 11 deselected</code>, exit 1, <code>AssertionError</code> naming the re-introduced import</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The first baseline was an instrument fault, and it looked like a regression.</strong> The base revision's
+    first run reported <code>4 failed, 15 passed</code>, all four <code>FileNotFoundError</code> for
+    <code>&lt;scratch&gt;/docs/figures/coil-circuit-discovery/circuit-driven-forward-validation/&hellip;.json</code>:
+    those cases read banked receipts through a path relative to the module root, so running them from a scratch tree
+    without a reachable data tree fails them for the harness's reason, not the base revision's. Linking the worktree's
+    <code>docs</code> into the scratch tree moved them to passed. The four ids are recorded here because a
+    <code>4 failed</code> baseline is exactly the reading that would hide a real added failure.</p>
+    <p><strong>Logs:</strong> <code>~/.config/reckon/crew/runs/r-20260920T000512017766-dvfb-drivers-call-the-public-comparators/logs/</code>
+    (<code>header.log</code>, <code>baseline.log</code>, <code>after.log</code>, <code>negative_control.log</code>,
+    <code>gate_status.log</code>, <code>gate.sh</code>, <code>baseline2.sh</code>). Commit
+    <code>0705871ee</code>.</p>
+  </section>
+
+  <section id="last-private-importer-retired">
+    <h2>The last private comparator importer is retired, and the declaration goes to empty</h2>
+    <p><strong>Base: <code>7a869bc1</code></strong>, this node's own worktree at
+    <code>.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/dvfb-retire-the-last-private-importer</code>. The
+    section above re-pointed two of the three drivers importing a match-module comparator and left the third,
+    <code>benchmarks/diiid_solenoid_inclusion_ladder.py</code>, outside its fence. This node takes that third one:
+    the <code>_separatrix</code> import at line 36 is gone, and the call at line 258 goes to a local
+    <code>assembled_closed_boundary</code> that samples the axis-enclosing closed branch of
+    <code>nova.equilibrium.separatrix_branches.assemble_separatrix_branches</code> — the same construction, with the
+    same axis extremum rule, the two drivers re-pointed before it use. Commit <code>b5c724932</code>.</p>
+    <p><strong>The declaration is empty now, and an empty declaration still guards.</strong>
+    <code>MATCH_COMPARATOR_IMPORTERS</code> in <code>tests/imas/test_diiid_forward_gs_match.py</code> declared exactly
+    one importer at base and declares none here. The case is an equality against a full parse of
+    <code>benchmarks/*.py</code>, so an empty map is strictly stronger than the one-entry map it replaces: any
+    re-introduced import of <code>_separatrix</code> or <code>contour_separation</code> in any driver reddens it, where
+    before the ladder's own entry would have been satisfied by the import being present.</p>
+    <table>
+      <caption>Drivers importing a match-module comparator (<code>_separatrix</code>, <code>contour_separation</code>), measured by parsing <code>benchmarks/*.py</code> with <code>ast</code></caption>
+      <thead><tr><th scope="col">Driver</th><th scope="col">At base <code>7a869bc1</code></th><th scope="col">At this head</th></tr></thead>
+      <tbody>
+        <tr><th scope="row"><code>diiid_solenoid_inclusion_ladder.py</code></th><td><code>_separatrix</code></td><td>none</td></tr>
+        <tr><th scope="row">every other <code>benchmarks/*.py</code></th><td>none</td><td>none</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Its terminal readings are unchanged, shown on the instrument the previous node used.</strong> The
+    committed case <code>test_driver_boundary_readings_reproduce_the_match_module_on_a_synthetic_field</code> compared
+    the two re-pointed drivers against the replaced call; the ladder is now a third member of that comparison, on
+    <code>psi = &plusmn;((R-1.6)&sup2;+Z&sup2;)</code> over R in [0.8, 2.4], Z in [-0.8, 0.8], 65 by 65, at both
+    polarities: <code>np.testing.assert_array_equal</code> on the sampled boundary vertices, exact. Every terminal
+    reading the ladder banks follows from those vertices through <code>_boundary_separation</code> and the
+    <code>len(boundary) &gt;= 4</code> finite-boundary flag, so an identical vertex array is an identical reading.
+    <strong>What this does not show:</strong> the ladder's own five-frame receipt was not regenerated, so the identity is
+    asserted at the boundary construction rather than observed at the cohort. Regenerating it is a GPU-shaped solve and
+    the H200 allowance is held by the local serve.</p>
+    <table>
+      <caption>Gate on all_debug CPU, one job holding both modules in one pytest process, shared root interpreter run directly, <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in the submit environment and in the payload, <code>uv</code> never invoked on the compute node</caption>
+      <thead><tr><th scope="col">Measurement</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Base <code>7a869bc1</code>, both modules, in this worktree before any edit</th><td>15 passed, 0 failed, exit 0 — log sha256 <code>f08d3446&hellip;b3b0</code></td></tr>
+        <tr><th scope="row">This head, both modules</th><td>15 passed, 0 failed, exit 0 — log sha256 <code>418fb64a&hellip;21e3</code></td></tr>
+        <tr><th scope="row">Added failures against base</th><td>0, with no failure id on either side</td></tr>
+        <tr><th scope="row">Negative control, declared: a driver module in <code>benchmarks/</code> re-imports the private comparator</th><td>a scratch module carrying <code>from benchmarks.diiid_forward_gs_match import _separatrix</code>: <code>1 failed</code>, exit 1, <code>AssertionError</code> at the declaration case; removing the module returns the same case to <code>1 passed</code>, exit 0</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The stale comment is deleted, not updated.</strong>
+    <code>benchmarks/diiid_vacuum_from_description.py</code> carried a five-line comment justifying its own decision to
+    reproduce <code>ECOILA_INDEX</code>, <code>MISSING_CONDUCTOR_ORDER</code> and <code>CURRENT_SCALE</code> rather than
+    import them, by the claim that the match module no longer exports <code>_separatrix</code> and that the ladder's
+    import chain therefore raised. That stopped being true when the export was restored, and it was never this driver's
+    fact to hold. Deleted whole rather than rewritten to a new reason: the constants state their own provenance as
+    copies of the ladder's all-conductors rung, and a comment whose subject is another module's export surface is a
+    fact that rots. The file contains no mention of <code>_separatrix</code> or <code>ImportError</code> at this head.</p>
+    <p><strong>Logs:</strong>
+    <code>~/.config/reckon/crew/reports/nova/s19-codex-20260916/dvfb-retire-the-last-private-importer/</code>
+    (<code>gate-base.log</code>, <code>gate-head.log</code>, <code>negative-control-red.log</code>,
+    <code>negative-control-green.log</code>). Commit <code>b5c724932</code>.</p>
+  </section>
 </main>

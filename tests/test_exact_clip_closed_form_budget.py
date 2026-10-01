@@ -56,3 +56,35 @@ def test_row_budget_gives_every_coupling_row_the_tenth_and_the_rest_the_triple()
             if (case, cells) in MODULE.COUPLING_BUDGET:
                 continue
             assert MODULE._row_budget(case, cells) == MODULE.FALLBACK_BUDGET
+
+
+def test_production_boundary_reduction_has_no_gauss_evaluations():
+    """The endpoint route samples its density fit once and has no edge nodes."""
+    from nova.equilibrium.clip_quadrature import cut_cell_moment_evaluation_bound
+
+    assert cut_cell_moment_evaluation_bound() == 25
+
+
+def test_production_boundary_lowering_uses_endpoint_recurrence():
+    """Trace a live density with every monomial to expose the integration body."""
+    import jax
+    import jax.numpy as jnp
+
+    from nova.equilibrium.clip_quadrature import _sampled_arc_polynomial_moments
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
+    vertices = jnp.asarray([[[0.0, 0.0], [0.8, -0.2], [0.1, 0.7]]])
+    lowered = jax.jit(_sampled_arc_polynomial_moments).lower(
+        vertices,
+        jnp.asarray([3]),
+        jnp.zeros((1, 2)),
+        jnp.ones((1, 2)),
+        jnp.arange(1.0, 16.0)[None],
+        jnp.zeros((1, 2)),
+    )
+    text = lowered.as_text(debug_info=True)
+    assert "_sampled_arc_polynomial_moments" in text
+    assert "_straight_edge_monomial_moments" in text
+    assert "_monomial_antiderivative" not in text

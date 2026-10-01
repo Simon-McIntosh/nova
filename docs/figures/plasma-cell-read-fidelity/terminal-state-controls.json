@@ -1,0 +1,25 @@
+{
+  "jax_platform": "cpu",
+  "arithmetic_floor_m": 1.653979811200153e-13,
+  "zero_and_nonzero_gradient_uncertainty_m": [
+    1.653979811200153e-13,
+    1e-05
+  ],
+  "representatives": [
+    true,
+    false,
+    true
+  ],
+  "multiplicity": [
+    2,
+    0,
+    1
+  ],
+  "parent": [
+    0,
+    0,
+    2
+  ],
+  "synthetic_qualified_receipt_accepted": true,
+  "scope": "Synthetic instrument controls only; no additional physical solve."
+}

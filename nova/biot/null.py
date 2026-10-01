@@ -227,3 +227,33 @@ class Null2D(NullBase):
         )
         aux_data |= {"maxsize": self.maxsize, "precision": self.precision}
         return (children, aux_data)
+
+
+def inside_or_near_source_cell(
+    position, edge_start, edge_end, edge_valid, distance_limit
+):
+    """Test each stationary point against its source polygon and edge distance."""
+    point = position[:, None, :]
+    first_x, first_y = edge_start[..., 0], edge_start[..., 1]
+    second_x, second_y = edge_end[..., 0], edge_end[..., 1]
+    span = second_y - first_y
+    safe_span = jnp.where(span != 0.0, span, 1.0)
+    crossing_x = first_x + (point[..., 1] - first_y) * (second_x - first_x) / safe_span
+    crossing = (
+        edge_valid
+        & ((first_y > point[..., 1]) != (second_y > point[..., 1]))
+        & (point[..., 0] < crossing_x)
+    )
+    inside = (jnp.sum(crossing, axis=1) % 2) == 1
+    edge = edge_end - edge_start
+    length_squared = jnp.sum(edge * edge, axis=-1)
+    safe_length = jnp.where(length_squared > 0.0, length_squared, 1.0)
+    fraction = jnp.clip(
+        jnp.sum((point - edge_start) * edge, axis=-1) / safe_length, 0.0, 1.0
+    )
+    closest = edge_start + fraction[..., None] * edge
+    distance = jnp.min(
+        jnp.where(edge_valid, jnp.linalg.norm(point - closest, axis=-1), jnp.inf),
+        axis=1,
+    )
+    return inside | (distance <= distance_limit)

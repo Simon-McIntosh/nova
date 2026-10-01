@@ -1,0 +1,61 @@
+{
+  "base_fixed": {
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/baseline-fixed-point.log",
+    "completed": true,
+    "failure_ids": [],
+    "abort_ids": [],
+    "observed_pass_count": 42,
+    "exit_status": 0
+  },
+  "base_reduced": {
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/baseline-reduced-newton.log",
+    "completed": false,
+    "failure_ids": [
+      "tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback",
+      "tests/test_reduced_newton.py::test_reduced_newton_reaches_the_production_fixed_point"
+    ],
+    "abort_ids": [
+      "tests/test_reduced_newton.py::test_threshold_one_reproduces_the_refusal_only_policy"
+    ],
+    "observed_pass_count": 6,
+    "exit_status": 134
+  },
+  "after_fixed": {
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/after-fixed-point.log",
+    "completed": true,
+    "failure_ids": [],
+    "abort_ids": [],
+    "observed_pass_count": 44,
+    "exit_status": 0
+  },
+  "after_reduced": {
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/after-reduced-newton.log",
+    "completed": false,
+    "failure_ids": [
+      "tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback",
+      "tests/test_reduced_newton.py::test_reduced_newton_reaches_the_production_fixed_point",
+      "tests/test_reduced_newton.py::test_ladder_scoring_evaluates_one_map_per_accepted_step"
+    ],
+    "abort_ids": [
+      "tests/test_reduced_newton.py::test_threshold_one_reproduces_the_refusal_only_policy"
+    ],
+    "observed_pass_count": 5,
+    "exit_status": null,
+    "payload_signal": "SIGABRT",
+    "scheduler_exit_code": "6:0"
+  },
+  "added_failure_ids": [
+    "tests/test_reduced_newton.py::test_ladder_scoring_evaluates_one_map_per_accepted_step"
+  ],
+  "comparison_complete": false,
+  "note": "Both reduced processes aborted at the threshold-one test. The added failure is an observed prefix delta and passes in isolation; its cause remains unresolved. The baseline prints EXIT=134; the candidate prints SIGABRT and SLURM reports 6:0, without a completed pytest summary.",
+  "added_failure_isolation": {
+    "revision": "a359f8fed22b69798a5668c33a1dc9708f830405",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_reduced_newton.py::test_ladder_scoring_evaluates_one_map_per_accepted_step -vv --tb=short",
+    "completed": true,
+    "exit_status": 0,
+    "passed": 1,
+    "seconds": 311.37,
+    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/added-failure-isolated.log"
+  }
+}

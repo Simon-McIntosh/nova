@@ -106,6 +106,9 @@ from nova.equilibrium.fixed_point import (
     _smooth_relative_sup_merit,
     FIXED_POINT_RESIDUAL_TOLERANCE,
     FixedPointTerminationReason,
+    OperatorRequestKind,
+    operator_request,
+    operator_request_body,
 )
 
 
@@ -968,11 +971,50 @@ def _reduced_kernels(
         """Return the dense plain-Newton step of the reduced system."""
         return -jnp.linalg.solve(jacobian, residual)
 
+    request_body = operator_request_body(reduced_residual)
+
+    def residual_request(
+        reduced,
+        shadow,
+        base_state,
+        external_value=None,
+        target_value=None,
+        requested_value=None,
+        rows=None,
+    ):
+        request = operator_request(OperatorRequestKind.RESIDUAL, reduced, shadow)
+        return request_body(
+            request, base_state, external_value, target_value, requested_value, rows
+        ).mapped
+
+    def jacobian_request(
+        reduced,
+        shadow,
+        base_state,
+        external_value=None,
+        target_value=None,
+        requested_value=None,
+        rows=None,
+    ):
+        """Compose the dense local Jacobian from requests for its columns."""
+
+        def column(vector):
+            request = operator_request(
+                OperatorRequestKind.JVP, reduced, shadow, vector=vector
+            )
+            return request_body(
+                request, base_state, external_value, target_value, requested_value, rows
+            ).tangent
+
+        basis = jnp.eye(reduced.size, dtype=reduced.dtype)
+        return jax.vmap(column, out_axes=1)(basis)
+
     return {
         "reconstruct": jax.jit(reconstruct),
         "reduced_map": jax.jit(reduced_map),
-        "reduced_residual": jax.jit(reduced_residual),
-        "jacobian": jax.jit(jax.jacfwd(reduced_residual, argnums=0)),
+        "reduced_residual": jax.jit(residual_request),
+        "jacobian": jax.jit(jacobian_request),
+        "request": request_body,
         "flux_scores": jax.jit(flux_scores),
         "ladder": jax.jit(ladder),
         "leakage": jax.jit(leakage),

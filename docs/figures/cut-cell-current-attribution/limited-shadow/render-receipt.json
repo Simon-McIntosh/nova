@@ -1,0 +1,559 @@
+{
+  "mode": "chord",
+  "roundoff_level_floor": 1e-12,
+  "rows": [
+    {
+      "case": "diverted-single-null",
+      "figure_filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/diverted-single-null-production-route-cells-500.png",
+      "figure_project_absolute_src": "/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/diverted-single-null-production-route-cells-500.png",
+      "panels": [
+        {
+          "caption": "analytic blue contours and nulls /\nsolved ochre contours and nulls \u00b7 shared Wb levels",
+          "levels": [
+            -0.00881788094003087,
+            -0.00749769986728019,
+            -0.0061775187945295115,
+            -0.004857337721778832,
+            -0.003537156649028153,
+            -0.002216975576277474,
+            -0.0008967945035267943,
+            0.0004233865692238846,
+            0.0017435676419745635,
+            0.0030637487147252424,
+            0.004383929787475921,
+            0.005704110860226601
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": null,
+          "name": "flux",
+          "null_glyphs": {
+            "analytic": 2,
+            "solved": 2
+          },
+          "raw_levels": [
+            -0.00881788094003087,
+            -0.00749769986728019,
+            -0.0061775187945295115,
+            -0.004857337721778832,
+            -0.003537156649028153,
+            -0.002216975576277474,
+            -0.0008967945035267943,
+            0.0004233865692238846,
+            0.0017435676419745635,
+            0.0030637487147252424,
+            0.004383929787475921,
+            0.005704110860226601
+          ]
+        },
+        {
+          "caption": "absolute psi error \u00b7 max 8.15e-17\nround-off floor 1e-12 \u00b7 levels: none (every contour level is below the floor)\nthis panel is round-off, not signal",
+          "levels": [],
+          "levels_suppressed_below_floor": 8,
+          "max_absolute": 8.153200337090993e-17,
+          "name": "psi",
+          "null_glyphs": {
+            "analytic": 2,
+            "solved": 2
+          },
+          "raw_levels": [
+            4.721510083254025e-20,
+            1.1351838310202681e-17,
+            2.2656461519572825e-17,
+            3.3961084728942965e-17,
+            4.5265707938313105e-17,
+            5.657033114768325e-17,
+            6.787495435705339e-17,
+            7.917957756642353e-17
+          ]
+        },
+        {
+          "caption": "absolute gradient error \u00b7 max 1.60e-04\nround-off floor 1e-12 \u00b7 levels: 1.23e-05, 3.28e-05, 5.32e-05, 7.37e-05, 9.42e-05, 1.15e-04, 1.35e-04, 1.56e-04",
+          "levels": [
+            1.2309931497125058e-05,
+            3.277738850784532e-05,
+            5.324484551856558e-05,
+            7.371230252928584e-05,
+            9.41797595400061e-05,
+            0.00011464721655072637,
+            0.00013511467356144662,
+            0.00015558213057216688
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": 0.00015953742918049677,
+          "name": "gradient",
+          "null_glyphs": {
+            "analytic": 2,
+            "solved": 2
+          },
+          "raw_levels": [
+            1.2309931497125058e-05,
+            3.277738850784532e-05,
+            5.324484551856558e-05,
+            7.371230252928584e-05,
+            9.41797595400061e-05,
+            0.00011464721655072637,
+            0.00013511467356144662,
+            0.00015558213057216688
+          ]
+        },
+        {
+          "caption": "absolute hessian error \u00b7 max 5.09e-03\nround-off floor 1e-12 \u00b7 levels: 9.72e-06, 7.07e-04, 1.40e-03, 2.10e-03, 2.80e-03, 3.49e-03, 4.19e-03, 4.89e-03",
+          "levels": [
+            9.724648287463868e-06,
+            0.0007065124388578261,
+            0.0014033002294281884,
+            0.0021000880199985505,
+            0.0027968758105689127,
+            0.003493663601139275,
+            0.004190451391709637,
+            0.004887239182279999
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": 0.005088221153769086,
+          "name": "hessian",
+          "null_glyphs": {
+            "analytic": 2,
+            "solved": 2
+          },
+          "raw_levels": [
+            9.724648287463868e-06,
+            0.0007065124388578261,
+            0.0014033002294281884,
+            0.0021000880199985505,
+            0.0027968758105689127,
+            0.003493663601139275,
+            0.004190451391709637,
+            0.004887239182279999
+          ]
+        }
+      ],
+      "part_filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-parts/chord/diverted-single-null-production-route-cells-500.json",
+      "receipt_converged": true,
+      "receipt_residual": 2.4230081673565618e-17,
+      "requested_cells": -500,
+      "title": "diverted-single-null \u00b7 cells-500 \u00b7 qualified \u00b7 residual=2.423e-17 \u00b7 converged=yes"
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "figure_filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/moderate-rotation-conventional-static-production-route-cells-1000.png",
+      "figure_project_absolute_src": "/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/moderate-rotation-conventional-static-production-route-cells-1000.png",
+      "panels": [
+        {
+          "caption": "analytic blue contours and nulls /\nsolved ochre contours and nulls \u00b7 shared Wb levels",
+          "levels": [
+            -0.4302917463671611,
+            -0.2656450829150214,
+            -0.10099841946288168,
+            0.063648243989258,
+            0.22829490744139774,
+            0.3929415708935375,
+            0.5575882343456771,
+            0.7222348977978168,
+            0.8868815612499565,
+            1.0515282247020963,
+            1.216174888154236,
+            1.3808215516063755
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": null,
+          "name": "flux",
+          "null_glyphs": {
+            "analytic": 1,
+            "solved": 1
+          },
+          "raw_levels": [
+            -0.4302917463671611,
+            -0.2656450829150214,
+            -0.10099841946288168,
+            0.063648243989258,
+            0.22829490744139774,
+            0.3929415708935375,
+            0.5575882343456771,
+            0.7222348977978168,
+            0.8868815612499565,
+            1.0515282247020963,
+            1.216174888154236,
+            1.3808215516063755
+          ]
+        },
+        {
+          "caption": "absolute psi error \u00b7 max 2.89e-01\nround-off floor 1e-12 \u00b7 levels: 4.76e-04, 4.17e-02, 8.29e-02, 1.24e-01, 1.65e-01, 2.07e-01, 2.48e-01, 2.89e-01",
+          "levels": [
+            0.0004760013954594822,
+            0.04169472625411471,
+            0.08291345111276995,
+            0.12413217597142517,
+            0.1653509008300804,
+            0.20656962568873563,
+            0.24778835054739085,
+            0.2890070754060461
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": 0.28908708280771167,
+          "name": "psi",
+          "null_glyphs": {
+            "analytic": 1,
+            "solved": 1
+          },
+          "raw_levels": [
+            0.0004760013954594822,
+            0.04169472625411471,
+            0.08291345111276995,
+            0.12413217597142517,
+            0.1653509008300804,
+            0.20656962568873563,
+            0.24778835054739085,
+            0.2890070754060461
+          ]
+        },
+        {
+          "caption": "absolute gradient error \u00b7 max 3.62e-01\nround-off floor 1e-12 \u00b7 levels: 6.90e-03, 5.76e-02, 1.08e-01, 1.59e-01, 2.10e-01, 2.60e-01, 3.11e-01, 3.62e-01",
+          "levels": [
+            0.006899926295902427,
+            0.05757761128093596,
+            0.1082552962659695,
+            0.15893298125100302,
+            0.20961066623603655,
+            0.2602883512210701,
+            0.31096603620610364,
+            0.36164372119113714
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": 0.3623229925319649,
+          "name": "gradient",
+          "null_glyphs": {
+            "analytic": 1,
+            "solved": 1
+          },
+          "raw_levels": [
+            0.006899926295902427,
+            0.05757761128093596,
+            0.1082552962659695,
+            0.15893298125100302,
+            0.20961066623603655,
+            0.2602883512210701,
+            0.31096603620610364,
+            0.36164372119113714
+          ]
+        },
+        {
+          "caption": "absolute hessian error \u00b7 max 5.04e+00\nround-off floor 1e-12 \u00b7 levels: 1.95e-01, 8.71e-01, 1.55e+00, 2.22e+00, 2.90e+00, 3.57e+00, 4.25e+00, 4.92e+00",
+          "levels": [
+            0.19544584488527744,
+            0.8706352285517536,
+            1.5458246122182298,
+            2.2210139958847064,
+            2.8962033795511823,
+            3.5713927632176583,
+            4.246582146884135,
+            4.921771530550611
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": 5.0377001849344865,
+          "name": "hessian",
+          "null_glyphs": {
+            "analytic": 1,
+            "solved": 1
+          },
+          "raw_levels": [
+            0.19544584488527744,
+            0.8706352285517536,
+            1.5458246122182298,
+            2.2210139958847064,
+            2.8962033795511823,
+            3.5713927632176583,
+            4.246582146884135,
+            4.921771530550611
+          ]
+        }
+      ],
+      "part_filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-parts/chord/moderate-rotation-conventional-static-production-route-cells-1000.json",
+      "receipt_converged": true,
+      "receipt_residual": 5.875220964438613e-16,
+      "requested_cells": -1000,
+      "title": "moderate-rotation-conventional-static \u00b7 cells-1000 \u00b7 qualified \u00b7 residual=5.875e-16 \u00b7 converged=yes"
+    },
+    {
+      "case": "strong-rotation-compact-static",
+      "figure_filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/strong-rotation-compact-static-production-route-cells-1000.png",
+      "figure_project_absolute_src": "/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/strong-rotation-compact-static-production-route-cells-1000.png",
+      "panels": [
+        {
+          "caption": "analytic blue contours and nulls /\nsolved ochre contours and nulls \u00b7 shared Wb levels",
+          "levels": [
+            -0.032358260648726975,
+            -0.01891598530835287,
+            -0.005473709967978767,
+            0.007968565372395334,
+            0.02141084071276944,
+            0.03485311605314355,
+            0.04829539139351764,
+            0.06173766673389175,
+            0.07517994207426586,
+            0.08862221741463996,
+            0.10206449275501407,
+            0.11550676809538817
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": null,
+          "name": "flux",
+          "null_glyphs": {
+            "analytic": 1,
+            "solved": 1
+          },
+          "raw_levels": [
+            -0.032358260648726975,
+            -0.01891598530835287,
+            -0.005473709967978767,
+            0.007968565372395334,
+            0.02141084071276944,
+            0.03485311605314355,
+            0.04829539139351764,
+            0.06173766673389175,
+            0.07517994207426586,
+            0.08862221741463996,
+            0.10206449275501407,
+            0.11550676809538817
+          ]
+        },
+        {
+          "caption": "absolute psi error \u00b7 max 2.35e-02\nround-off floor 1e-12 \u00b7 levels: 6.19e-05, 3.42e-03, 6.77e-03, 1.01e-02, 1.35e-02, 1.68e-02, 2.02e-02, 2.35e-02",
+          "levels": [
+            6.191299430629337e-05,
+            0.003416663250675127,
+            0.00677141350704396,
+            0.010126163763412794,
+            0.013480914019781626,
+            0.01683566427615046,
+            0.020190414532519296,
+            0.02354516478888813
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": 0.023546524469404,
+          "name": "psi",
+          "null_glyphs": {
+            "analytic": 1,
+            "solved": 1
+          },
+          "raw_levels": [
+            6.191299430629337e-05,
+            0.003416663250675127,
+            0.00677141350704396,
+            0.010126163763412794,
+            0.013480914019781626,
+            0.01683566427615046,
+            0.020190414532519296,
+            0.02354516478888813
+          ]
+        },
+        {
+          "caption": "absolute gradient error \u00b7 max 7.81e-02\nround-off floor 1e-12 \u00b7 levels: 2.18e-03, 1.30e-02, 2.39e-02, 3.47e-02, 4.55e-02, 5.64e-02, 6.72e-02, 7.81e-02",
+          "levels": [
+            0.002177224219122619,
+            0.013020117750789931,
+            0.02386301128245724,
+            0.034705904814124555,
+            0.04554879834579187,
+            0.05639169187745918,
+            0.06723458540912648,
+            0.0780774789407938
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": 0.07809856368880527,
+          "name": "gradient",
+          "null_glyphs": {
+            "analytic": 1,
+            "solved": 1
+          },
+          "raw_levels": [
+            0.002177224219122619,
+            0.013020117750789931,
+            0.02386301128245724,
+            0.034705904814124555,
+            0.04554879834579187,
+            0.05639169187745918,
+            0.06723458540912648,
+            0.0780774789407938
+          ]
+        },
+        {
+          "caption": "absolute hessian error \u00b7 max 2.51e+00\nround-off floor 1e-12 \u00b7 levels: 1.20e-01, 4.52e-01, 7.85e-01, 1.12e+00, 1.45e+00, 1.78e+00, 2.12e+00, 2.45e+00",
+          "levels": [
+            0.11959037436623234,
+            0.4523944698257548,
+            0.7851985652852773,
+            1.1180026607448,
+            1.4508067562043223,
+            1.7836108516638447,
+            2.1164149471233675,
+            2.44921904258289
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": 2.5068247146691647,
+          "name": "hessian",
+          "null_glyphs": {
+            "analytic": 1,
+            "solved": 1
+          },
+          "raw_levels": [
+            0.11959037436623234,
+            0.4523944698257548,
+            0.7851985652852773,
+            1.1180026607448,
+            1.4508067562043223,
+            1.7836108516638447,
+            2.1164149471233675,
+            2.44921904258289
+          ]
+        }
+      ],
+      "part_filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-parts/chord/strong-rotation-compact-static-production-route-cells-1000.json",
+      "receipt_converged": true,
+      "receipt_residual": 2.912526675978791e-16,
+      "requested_cells": -1000,
+      "title": "strong-rotation-compact-static \u00b7 cells-1000 \u00b7 qualified \u00b7 residual=2.913e-16 \u00b7 converged=yes"
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "figure_filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/weak-rotation-reactor-static-production-route-cells-1000.png",
+      "figure_project_absolute_src": "/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/weak-rotation-reactor-static-production-route-cells-1000.png",
+      "panels": [
+        {
+          "caption": "analytic blue contours and nulls /\nsolved ochre contours and nulls \u00b7 shared Wb levels",
+          "levels": [
+            -14.42447354038939,
+            -8.574795758571632,
+            -2.725117976753875,
+            3.124559805063882,
+            8.974237586881639,
+            14.823915368699396,
+            20.673593150517153,
+            26.523270932334906,
+            32.37294871415267,
+            38.22262649597043,
+            44.07230427778818,
+            49.92198205960594
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": null,
+          "name": "flux",
+          "null_glyphs": {
+            "analytic": 1,
+            "solved": 1
+          },
+          "raw_levels": [
+            -14.42447354038939,
+            -8.574795758571632,
+            -2.725117976753875,
+            3.124559805063882,
+            8.974237586881639,
+            14.823915368699396,
+            20.673593150517153,
+            26.523270932334906,
+            32.37294871415267,
+            38.22262649597043,
+            44.07230427778818,
+            49.92198205960594
+          ]
+        },
+        {
+          "caption": "absolute psi error \u00b7 max 1.05e+01\nround-off floor 1e-12 \u00b7 levels: 2.06e-02, 1.51e+00, 3.01e+00, 4.50e+00, 5.99e+00, 7.49e+00, 8.98e+00, 1.05e+01",
+          "levels": [
+            0.020637109190255812,
+            1.5140802933925694,
+            3.007523477594883,
+            4.500966661797197,
+            5.9944098459995105,
+            7.4878530302018245,
+            8.981296214404138,
+            10.474739398606452
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": 10.47609129132115,
+          "name": "psi",
+          "null_glyphs": {
+            "analytic": 1,
+            "solved": 1
+          },
+          "raw_levels": [
+            0.020637109190255812,
+            1.5140802933925694,
+            3.007523477594883,
+            4.500966661797197,
+            5.9944098459995105,
+            7.4878530302018245,
+            8.981296214404138,
+            10.474739398606452
+          ]
+        },
+        {
+          "caption": "absolute gradient error \u00b7 max 3.74e+00\nround-off floor 1e-12 \u00b7 levels: 1.35e-01, 6.50e-01, 1.16e+00, 1.68e+00, 2.20e+00, 2.71e+00, 3.23e+00, 3.74e+00",
+          "levels": [
+            0.13491633115529175,
+            0.6499579244576793,
+            1.1649995177600667,
+            1.6800411110624542,
+            2.1950827043648418,
+            2.7101242976672295,
+            3.225165890969617,
+            3.7402074842720046
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": 3.74145935768333,
+          "name": "gradient",
+          "null_glyphs": {
+            "analytic": 1,
+            "solved": 1
+          },
+          "raw_levels": [
+            0.13491633115529175,
+            0.6499579244576793,
+            1.1649995177600667,
+            1.6800411110624542,
+            2.1950827043648418,
+            2.7101242976672295,
+            3.225165890969617,
+            3.7402074842720046
+          ]
+        },
+        {
+          "caption": "absolute hessian error \u00b7 max 1.49e+01\nround-off floor 1e-12 \u00b7 levels: 5.71e-01, 2.38e+00, 4.19e+00, 6.00e+00, 7.81e+00, 9.61e+00, 1.14e+01, 1.32e+01",
+          "levels": [
+            0.570927455380572,
+            2.3795754882392344,
+            4.188223521097897,
+            5.996871553956559,
+            7.805519586815222,
+            9.614167619673884,
+            11.422815652532547,
+            13.231463685391208
+          ],
+          "levels_suppressed_below_floor": 0,
+          "max_absolute": 14.853661572567693,
+          "name": "hessian",
+          "null_glyphs": {
+            "analytic": 1,
+            "solved": 1
+          },
+          "raw_levels": [
+            0.570927455380572,
+            2.3795754882392344,
+            4.188223521097897,
+            5.996871553956559,
+            7.805519586815222,
+            9.614167619673884,
+            11.422815652532547,
+            13.231463685391208
+          ]
+        }
+      ],
+      "part_filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-parts/chord/weak-rotation-reactor-static-production-route-cells-1000.json",
+      "receipt_converged": true,
+      "receipt_residual": 1.3877444620608284e-15,
+      "requested_cells": -1000,
+      "title": "weak-rotation-reactor-static \u00b7 cells-1000 \u00b7 qualified \u00b7 residual=1.388e-15 \u00b7 converged=yes"
+    }
+  ],
+  "schema": "nova.limited-shadow-render-receipt",
+  "source_revision": "6a1b3121951b4f8d4fef32d444cf0bfd438f3b8d"
+}

@@ -1,0 +1,60 @@
+Replace moving confined-support integration with fixed atomic-cell pointwise selection.
+17:33:37 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 3 items
+
+tests/test_continuous_confined_moments.py F.F                            [100%]
+
+=================================== FAILURES ===================================
+____________ test_confined_moments_carry_continuous_boundary_motion ____________
+
+    def test_confined_moments_carry_continuous_boundary_motion():
+        moments = _moment_map()
+        cutoff = jnp.asarray(0.47)
+        value, tangent = jax.jvp(moments, (cutoff,), (jnp.ones_like(cutoff),))
+        expected = np.asarray([0.47, 0.47 * (0.47 / 2 - 0.5), 0.0])
+>       np.testing.assert_allclose(value, expected, rtol=1e-11, atol=1e-12)
+E       AssertionError: 
+E       Not equal to tolerance rtol=1e-11, atol=1e-12
+E       
+E       Mismatched elements: 3 / 3 (100%)
+E       Mismatch at indices:
+E        [0]: 0.5066759223173865 (ACTUAL), 0.47 (DESIRED)
+E        [1]: -0.12590558194423762 (ACTUAL), -0.12455 (DESIRED)
+E        [2]: -0.0010550071277232037 (ACTUAL), 0.0 (DESIRED)
+E       Max absolute difference among violations: 0.03667592
+E       Max relative difference among violations: 0.07803388
+E        ACTUAL: array([ 0.506676, -0.125906, -0.001055])
+E        DESIRED: array([ 0.47   , -0.12455,  0.     ])
+
+tests/test_continuous_confined_moments.py:51: AssertionError
+___________ test_open_closure_uses_the_complement_of_moving_support ____________
+
+    def test_open_closure_uses_the_complement_of_moving_support():
+        moments = _moment_map(_UniformDensity(2.0))
+        cutoff = jnp.asarray(0.47)
+        value, tangent = jax.jvp(moments, (cutoff,), (jnp.ones_like(cutoff),))
+>       np.testing.assert_allclose(value, [1.53, 0.12455, 0.0], atol=1e-11)
+E       AssertionError: 
+E       Not equal to tolerance rtol=1e-07, atol=1e-11
+E       
+E       Mismatched elements: 3 / 3 (100%)
+E       Mismatch at indices:
+E        [0]: 1.493324077682614 (ACTUAL), 1.53 (DESIRED)
+E        [1]: 0.1259055819442372 (ACTUAL), 0.12455 (DESIRED)
+E        [2]: 0.0010550071277231482 (ACTUAL), 0.0 (DESIRED)
+E       Max absolute difference among violations: 0.03667592
+E       Max relative difference among violations: 0.02397119
+E        ACTUAL: array([1.493324e+00, 1.259056e-01, 1.055007e-03])
+E        DESIRED: array([1.53   , 0.12455, 0.     ])
+
+tests/test_continuous_confined_moments.py:73: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_continuous_confined_moments.py::test_confined_moments_carry_continuous_boundary_motion
+FAILED tests/test_continuous_confined_moments.py::test_open_closure_uses_the_complement_of_moving_support
+========================= 2 failed, 1 passed in 12.69s =========================

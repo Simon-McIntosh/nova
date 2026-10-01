@@ -1,0 +1,9 @@
+{
+  "case": "diverted-single-null",
+  "rung": 2500,
+  "mode": "exact",
+  "count": 0,
+  "geometric_region_rule": "union of faces with nonzero winding, either sign",
+  "analytic_current_fraction_in_non_simple_cells": 0.0,
+  "cells": []
+}

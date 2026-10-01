@@ -8,6 +8,7 @@ the five readings.
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 from types import SimpleNamespace
@@ -263,3 +264,43 @@ def test_reading_keys_are_ordered_and_labelled():
     block = readings(combination)
     assert list(block) == list(READING_KEYS)
     assert all(entry["label"] for entry in block.values())
+
+
+def test_the_committed_receipt_agrees_with_its_own_stored_numbers():
+    """Pin the driver's output against the arithmetic the pure functions leave free.
+
+    The pure checks above cannot see the driver: a regression that relabelled the
+    profile column, or that handed ``commensurability`` a different radius, would
+    leave every one of them green while the emitted receipt misstated its own
+    mechanism.  The committed receipt is read here and required to satisfy the two
+    claims it makes about itself, on every row.
+    """
+    receipt = json.loads(
+        (discriminator.DEFAULT_DIRECTORY / "receipt.json").read_text(encoding="utf-8")
+    )
+    rows = receipt["rows_receipt"]
+    assert rows
+    shifted = 0
+    for row in rows:
+        normalisation = row["profile_normalisation"]
+        assert normalisation["path"].startswith("normalised")
+        # The column the receipt reports is the one the moment path used, so the
+        # label and the stored numbers cannot disagree.
+        assert (
+            row["profile_implied_combination"]
+            == normalisation["normalised_combination"]
+        )
+        if normalisation["combination_shift"] != 0.0:
+            shifted += 1
+        # The commensurability baseline is the volume-weighted radius the
+        # convention string defines, not the current centroid.
+        assert (
+            row["commensurability"]["nova_major_radius_m"]
+            == row["unit_check"]["major_radius_m"]
+        )
+        assert row["commensurability"]["nova_major_radius_m"] != row["major_radius_m"]
+        assert (
+            row["commensurability"]["boundary_minor_radius_m"] == row["minor_radius_m"]
+        )
+    # The label would be vacuous if the two columns were equal everywhere.
+    assert shifted == len(rows)

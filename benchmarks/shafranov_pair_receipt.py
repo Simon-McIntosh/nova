@@ -470,12 +470,12 @@ def write_entry(directory: Path, entry: dict[str, Any]) -> None:
     )
 
 
-def _emissions(path: Path) -> list[dict[str, Any]]:
+def _emissions(path: Path, prefix: str = EMISSION_PREFIX) -> list[dict[str, Any]]:
     """Return the per-row emissions a banked lane log carries, in log order."""
     emissions = [
-        json.loads(line[len(EMISSION_PREFIX) :])
+        json.loads(line[len(prefix) :])
         for line in path.read_text(encoding="utf-8").splitlines()
-        if line.startswith(EMISSION_PREFIX)
+        if line.startswith(prefix)
     ]
     if not emissions:
         raise ValueError("the banked lane log carries no row emission")
@@ -659,6 +659,26 @@ PROJECTION_DIRECTORY = (
 )
 #: The prefix the projection lane prints one row emission under.
 PROJECTION_EMISSION_PREFIX = "FLUX-FIT-ROW "
+#: Fields of one projection row receipt, in the order the document is written.
+#: The projection's own move of the target is named for what it measures: it is
+#: the shift the polynomial projection applies to the profiles-implied
+#: combination, not the gap the row was asked to close, which the imposed mode
+#: records under ``reference_combination_gap``.
+PROJECTION_ROW_FIELDS = (
+    "identity",
+    "status",
+    "minor_radius_m",
+    "geometric_minor_radius_m",
+    "elongation",
+    "plasma_current_a",
+    "target_combination",
+    "source_combination_at_reference",
+    "projected_combination_at_reference",
+    "projection_move_of_target",
+    "projection",
+    "scale_alone_closes_the_gap",
+    "variants",
+)
 #: Normalised-flux base the extracted gradients are sampled and fitted on.  It
 #: is the bank's own declared extraction base, so the projection is stated
 #: against the profiles the row is measured from rather than a re-grid.
@@ -1025,7 +1045,7 @@ def _projection_row_receipt(
         "target_combination": _strict_float(target),
         "source_combination_at_reference": _strict_float(projection_only),
         "projected_combination_at_reference": _strict_float(target),
-        "reference_combination_gap": _strict_float(target - projection_only),
+        "projection_move_of_target": _strict_float(target - projection_only),
         "projection": projection.receipt(),
         "scale_alone_closes_the_gap": scale_alone_closes,
         "variants": variants,
@@ -1047,7 +1067,8 @@ def _projection_row_receipt(
             units=_wall_units(projected.operator),
             identity=identity,
             caption=(
-                f"gap on the combination {entry['reference_combination_gap']:+.3e}; "
+                f"the projection moved the target by "
+                f"{entry['projection_move_of_target']:+.3e}; "
                 f"after freeing one scale at a time: {gap_after}; "
                 + ("scale alone closes it" if scale_alone_closes else "shape needed")
             ),
@@ -1141,6 +1162,90 @@ def project_rows(*, directory: Path, cache_root: Path | None = None) -> dict[str
     return receipt
 
 
+def _projection_emission_entry(
+    emission: dict[str, Any], *, figure: dict[str, Any] | None
+) -> dict[str, Any]:
+    """Return one projection receipt entry replayed from a banked emission.
+
+    A log banked before the projection's own move of the target was renamed
+    under ``projection_move_of_target`` carries the same quantity under the
+    shared field name, so the move is recomputed from the two combinations the
+    emission states and required to reproduce the banked value rather than
+    copied across under its old name.
+    """
+    # The renamed field is the one a pre-rename log lacks; every other field of
+    # the document must be there for the replay to be a replay.
+    absent = [
+        field
+        for field in PROJECTION_ROW_FIELDS
+        if field not in emission and field != "projection_move_of_target"
+    ]
+    if absent:
+        raise KeyError(f"the banked projection emission is missing {absent}")
+    entry = {
+        field: emission[field] for field in PROJECTION_ROW_FIELDS if field in emission
+    }
+    move = (
+        emission["projected_combination_at_reference"]
+        - emission["source_combination_at_reference"]
+    )
+    legacy = emission.get("reference_combination_gap")
+    if legacy is not None and legacy != move:
+        raise ValueError(
+            "the banked projection emission states two different moves of the "
+            f"target: {legacy!r} against {move!r}"
+        )
+    entry["projection_move_of_target"] = move
+    entry = {field: entry[field] for field in PROJECTION_ROW_FIELDS}
+    if figure is not None:
+        entry["figure"] = figure
+    return entry
+
+
+def regenerate_projections(*, emissions: Path, directory: Path) -> dict[str, Any]:
+    """Rewrite the projection receipt from a banked lane log, without a solve.
+
+    The projection lane prints two kinds of line under one prefix — a
+    per-variant line as each freed scale settles and one row document per row —
+    so the replay selects the lines that carry the document.  The figure block
+    is carried forward from the committed entry rather than looked up on disk:
+    unlike the imposed mode, this directory keeps its figures inside the
+    aggregate receipt alone, and a replay does not re-render the panel.
+    """
+    receipt_path = directory / "receipt.json"
+    if not receipt_path.exists():
+        raise FileNotFoundError(
+            f"the aggregate receipt {receipt_path} must exist to be rewritten"
+        )
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    committed = {entry["identity"]: entry for entry in receipt.get("rows_receipt", [])}
+    entries = [
+        _projection_emission_entry(
+            emission, figure=committed.get(emission["identity"], {}).get("figure")
+        )
+        for emission in _emissions(emissions, PROJECTION_EMISSION_PREFIX)
+        if "projected_combination_at_reference" in emission
+    ]
+    replayed = [entry["identity"] for entry in entries]
+    if sorted(replayed) != sorted(committed):
+        raise ValueError(
+            "the banked log replays a different row set than the receipt holds: "
+            f"{sorted(replayed)} against {sorted(committed)}"
+        )
+    for entry in entries:
+        print(
+            PROJECTION_EMISSION_PREFIX
+            + json.dumps(
+                {key: value for key, value in entry.items() if key != "figure"},
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+    receipt["rows_receipt"] = entries
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    return receipt
+
+
 def _check_receipt_projection(entry: dict[str, Any], projection) -> None:
     """Refuse to redraw a row whose receipt describes a different projection.
 
@@ -1222,7 +1327,8 @@ def render_vector_companion(
             for variant in entry["variants"]
         )
         caption = (
-            f"gap on the combination {entry['reference_combination_gap']:+.3e}; "
+            f"the projection moved the target by "
+            f"{entry['projection_move_of_target']:+.3e}; "
             f"after freeing one scale at a time: {terminals}; "
             + (
                 "scale alone closes it"
@@ -1273,6 +1379,12 @@ def main(argv=None):
         "under the Shafranov row, writing to this directory",
     )
     parser.add_argument(
+        "--projection-emissions",
+        type=Path,
+        default=None,
+        help="rewrite the projection receipt from a banked lane log instead of solving",
+    )
+    parser.add_argument(
         "--vector-directory",
         type=Path,
         default=None,
@@ -1284,6 +1396,11 @@ def main(argv=None):
         render_vector_companion(
             directory=arguments.vector_directory,
             cache_root=arguments.cache_root,
+        )
+    elif arguments.projection_emissions is not None:
+        regenerate_projections(
+            emissions=arguments.projection_emissions,
+            directory=arguments.projection_directory or PROJECTION_DIRECTORY,
         )
     elif arguments.projection_directory is not None:
         project_rows(

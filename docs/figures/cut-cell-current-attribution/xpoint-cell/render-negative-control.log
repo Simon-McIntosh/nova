@@ -1,0 +1,44 @@
+draw the solved axis with the inverted triangle again and observe the marker check fail
+revision 1cfd3fd4c
+command NOVA_XPOINT_WEDGE_MUTATION=inverted-axis-marker python -m pytest -p no:cacheprovider -s --no-header -q tests/test_xpoint_cell_wedge_render.py
+21:36:11 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+....draw the solved axis with the inverted triangle again and observe the marker check fail
+F
+=================================== FAILURES ===================================
+__________ test_the_marker_check_refuses_a_live_inverted_axis_marker ___________
+
+    def test_the_marker_check_refuses_a_live_inverted_axis_marker() -> None:
+        if os.environ.get(MUTATION_ENV) != MUTATION_INVERTED_AXIS:
+            pytest.skip(
+                f"declared negative control: set {MUTATION_ENV}={MUTATION_INVERTED_AXIS}"
+            )
+        print(DECLARED_NEGATIVE_CONTROL, flush=True)
+        machine, exact = oracle._render_carrier(oracle.REFERENCE_CELLS)
+        resolved = oracle._resolve_xpoint_cell(machine, exact)
+        part = part_row(oracle.REFERENCE_CELLS)
+        oracle.SOLVED_AXIS_MARKER = "v"
+        panel = oracle._draw_panel(
+            oracle.DEFAULT_OUTPUT,
+            oracle.REFERENCE_CELLS,
+            machine,
+            exact,
+            resolved["polygon"],
+            resolved["wedges"],
+            part["observed_nulls"],
+            write=False,
+        )
+>       assert panel["unexpected_markers"] == [], (
+            "the vocabulary check admitted a marker outside the draw_nulls "
+            f"vocabulary: {panel['unexpected_markers']}"
+        )
+E       AssertionError: the vocabulary check admitted a marker outside the draw_nulls vocabulary: ['v']
+E       assert ['v'] == []
+E         
+E         Left contains one more item: 'v'
+E         Use -v to get more diff
+
+tests/test_xpoint_cell_wedge_render.py:123: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_xpoint_cell_wedge_render.py::test_the_marker_check_refuses_a_live_inverted_axis_marker
+1 failed, 4 passed in 16.78s
+EXIT=1

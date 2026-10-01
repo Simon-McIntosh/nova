@@ -1,0 +1,70 @@
+{
+  "revision": "6204bfd6feb7227dd66c2594dd2433248072e4a1",
+  "vmapped_width16_h200": {
+    "rule_first": {
+      "job": "1277146",
+      "backend": "gpu",
+      "arm": "rule",
+      "median_seconds": 0.008222226984798908,
+      "base_median_seconds": 0.00835456419736147,
+      "ratio_over_base": 0.9841598903980706
+    },
+    "rule_second": {
+      "job": "1277151",
+      "backend": "gpu",
+      "arm": "rule",
+      "median_seconds": 0.008209084160625935,
+      "base_median_seconds": 0.008887352421879768,
+      "ratio_over_base": 0.9236816287847429
+    },
+    "carry_selecting_control_first": {
+      "job": "1277146",
+      "backend": "gpu",
+      "arm": "selected",
+      "median_seconds": 0.014428921975195408,
+      "base_median_seconds": 0.008356629870831966,
+      "ratio_over_base": 1.7266436587742395
+    },
+    "carry_selecting_control_second": {
+      "job": "1277151",
+      "backend": "gpu",
+      "arm": "selected",
+      "median_seconds": 0.01441764272749424,
+      "base_median_seconds": 0.008253643289208412,
+      "ratio_over_base": 1.7468216425521101
+    }
+  },
+  "vmapped_width16_cpu": {
+    "rule": {
+      "job": "1277152",
+      "backend": "cpu",
+      "arm": "rule",
+      "median_seconds": 0.10713266395032406,
+      "base_median_seconds": 0.07972660660743713,
+      "ratio_over_base": 1.3437504555766506
+    },
+    "carry_selecting_control": {
+      "job": "1277152",
+      "backend": "cpu",
+      "arm": "selected",
+      "median_seconds": 0.14071573317050934,
+      "base_median_seconds": 0.08058091066777706,
+      "ratio_over_base": 1.7462663551999191
+    }
+  },
+  "unbatched_optimised_instructions_300": 261735,
+  "census_job": "1277150",
+  "exit_loop_instructions_300": 261735,
+  "diverted_terminal": {
+    "rule": 0.06325730373091486,
+    "exit_loop_head": 0.06325730373091486,
+    "difference": 0.0,
+    "bound": 3.07e-12
+  },
+  "toy_identity": "8/8",
+  "tests": {
+    "single_site_krylov": "5 passed",
+    "fixed_point": "45 passed",
+    "reduced_newton": "4 failed, 18 passed, 4 warnings"
+  }
+}

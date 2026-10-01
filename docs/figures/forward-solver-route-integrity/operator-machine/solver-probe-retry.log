@@ -1,0 +1,3 @@
+revision=d8d858ff09a39851885a738c2293544785df32be plus uncommitted measurement prototype; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine; command=python solver-probe.py
+direct wall 2.2125822491943836
+slurmstepd: error: *** JOB 1275678 ON 98dci4-clu-3141 CANCELLED AT 2026-09-22T12:58:39 DUE TO TIME LIMIT ***

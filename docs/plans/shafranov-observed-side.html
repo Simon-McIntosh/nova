@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="shafranov-observed-side">
+  <meta name="plan-title" content="Shafranov observed side — the exact contour functional on the exact Biot field, in production">
+  <meta name="plan-summary" content="Field responses built at operator build, the grid route at the right order, the constraint observed side on the contour integral, the toroidal term ruled.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="17.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,mast,active-set,grad-shafranov,efit">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <title>Shafranov observed side | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-north-star" content="ns-accurate-millisecond-gs">
+<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-version" content="8">
+<meta name="plan-blocks" content="constraint-augmented-newton-krylov">
+<meta name="plan-impl" content="0.2">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s0">Why this plan exists</h2>
+    <p>The lead ruled on 2026-09-18 that the magnetics-implied β<sub>p</sub> + l<sub>i</sub>/2 is an exact
+    Shafranov contour integral, never the ln(8R/a) formula, that the poloidal field on the contour is the exact
+    Biot field imaged on the grid and never a flux gradient, and that no interaction is recalculated per
+    evaluation. The constraint-augmented-newton-krylov plan landed the integrals (82/100), the field response
+    machinery (83/100), the discriminator and the flux-function fit, and reached 0.92 with the production half
+    still open: nothing in the tree constructs the field blocks at operator build, the analytic grid route
+    converges at first order, the constraint's observed side still calls the formula, and the toroidal-field
+    volume term needs a ruling. This plan carries those as sections. Its record is
+    <code>docs/evidence/archive/shafranov-observed-side-landed.html</code>.</p>
+
+    <h2 id="s-contract">Section contract</h2>
+    <table>
+      <thead><tr><th>Section</th><th>Effort (worker-hours)</th><th>Reasoning</th><th>Risk</th><th>Attempts so far</th></tr></thead>
+      <tbody>
+        <tr><td>§1 Field responses in production</td><td>5</td><td>deep</td><td>moderate</td><td>1 (machinery landed, builder missing)</td></tr>
+        <tr><td>§2 Grid route order</td><td>4</td><td>deep</td><td>moderate</td><td>0</td></tr>
+        <tr><td>§3 Constraint observed side</td><td>6</td><td>deep</td><td>elevated</td><td>0</td></tr>
+        <tr><td>§4 The toroidal term</td><td>2</td><td>standard</td><td>moderate</td><td>0 (awaits the lead)</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s1">§1 — Build the field responses at operator build and measure the reuse across two solves</h2>
+    <p>The radial and vertical field blocks are fixed-shape pytree leaves of PrescribedCurrentField whose digest
+    folds into the geometry identity, and poloidal_field images the current vector and interpolates to the
+    contour through the shared-node stencil with no kernel call per evaluation; the review of 2026-09-19
+    verified that by reading the code path. But no production code constructs a PrescribedCurrentField carrying
+    them (every construction is a test or an uncommitted timing driver), the reuse test counts the fixture's own
+    nine constructions rather than two solves, and the receipt's 0 kernel calls per evaluation is a literal in
+    the driver. Construct the blocks inside the operator build from the machine's cached radial and vertical
+    field tuples, replace the reuse test with one counting kernel evaluations across two solves on one operator,
+    and commit the kernel counter so 76 at build and 0 per evaluation are measured in the tree.</p>
+    <p><strong>Done when.</strong> A production solve on a MAST bank row carries the field blocks under the
+    same cache path as the flux response, the two-solve test asserts zero kernel evaluations on the second, and
+    the receipt numbers come from the committed counter.</p>
+
+    <h2 id="s2">§2 — The grid route converges at order 1.1 where a fixed-weight cubic stencil should give two</h2>
+    <p>Measured by the review at 21, 31 and 41 nodes per axis with 501, 1001 and 2001 contour points: relative
+    errors 0.747, 0.490 and 0.358, fitted order 1.10, and the test asserts order above 0.5 without printing the
+    order. Find whether the contour interpolation, the field imaging or the contour quadrature is first order,
+    fix it or state why the discretisation predicts one, and make the test print and persist the fitted order.</p>
+    <p><strong>Done when.</strong> The fitted order on the analytic route is stated in the receipt with its
+    mechanism, the test asserts the order the discretisation predicts, and the certificate figure shows the
+    ladder.</p>
+    <p><strong>Landed 2026-09-19 (partial).</strong> The first-order stage is the contour quadrature in
+    <code>shafranov_contour_integrals</code>, which sampled the integrand at each chord's leading vertex while
+    weighting it by that chord's length and outward normal; it now samples the segment midpoint through
+    <code>_segment_mean</code>, the trapezoidal rule on a closed polyline. Held-analytic measurements: the
+    quadrature fitted order 0.985 before and 2.151 after, the shared-node stencil fitted third order, and the
+    field imaging was exact on this control. The reported order 1.10 was the quadrature's order measured against
+    a ladder that advanced the grid and the contour sampling together. The test now holds the grid and refines
+    the sampling, fits 2.064, prints and persists it to the receipt, and asserts above 1.8. Open: the fix moved
+    the contour side to its converged value and exposed a pre-existing marginal identity bound &mdash;
+    fractionated per virial term, the <code>radial_moment</code> residual is flat in volume resolution and falls
+    only in the contour sampling, localising a surviving first-order term to the contour side of the radial
+    surface integral. Three rungs of <code>test_shafranov_contour_integrals_equal_their_volume_side</code> stand
+    red at resolutions 321/641/1281 and the bound is left untouched. Commits <code>3818bd05</code>,
+    <code>f633a00a</code>, <code>c6dae3cb</code>; record
+    <a href="/nova/evidence/archive/shafranov-observed-side-landed.html">shafranov-observed-side-landed</a>. The
+    certificate figure is not yet redrawn.</p>
+
+    <h2 id="s3">§3 — The constraint's observed side is the contour integral and the six-row receipt is regenerated</h2>
+    <p>ExternalShafranovConstraint.observed still embeds the large-aspect-ratio identity. Wire it to
+    beta_p_plus_half_internal_inductance on the solved state's boundary with the grid-imaged field from §1, move
+    the formula helpers out of the constraint module to diagnostics, make the receipt driver's observed column the
+    integral, and regenerate the six-row MAST receipt and its panels. The commensurability finding stands as the
+    reference for the panel: EFIT's stored scalars are reproduced by a denominator radius near the boundary
+    minor radius, so the panel compares on nova's convention and says so.</p>
+    <p><strong>Done when.</strong> The constraint row carries no formula, the six-row receipt states the
+    observed column as the contour integral with the toroidal term's provenance per §4, and the discriminator
+    strip is regenerated on it with both null sets, wall and shared levels.</p>
+
+    <h2 id="s4">§4 — Where the toroidal-field volume term comes from</h2>
+    <p>The assembled functional W = -2 μ<sub>0</sub> S<sub>v</sub> - 6 μ<sub>0</sub> P - Z carries the volume
+    integrals P = ∫ p dV and Z = ∫ B<sub>φ</sub><sup>2</sup> dV, so β<sub>p</sub> + l<sub>i</sub>/2 is not a
+    functional of the boundary field alone; the integral node's derivation shows a single virial field cannot
+    remove both. Until the lead rules, Z is the solved state's own integral and every receipt says so. The
+    alternative is a diamagnetic-loop measurement where the machine carries one, which makes the observed side
+    fully external at the cost of a new input.</p>
+    <p><strong>Done when.</strong> The decision below is locked, the receipt provenance field names the source
+    of Z, and, if the diamagnetic route is chosen, the MAST diamagnetic signal is read through the store with its
+    calibration stated.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="toroidal-volume-term" data-choice="diamagnetic-loop" data-by="Simon McIntosh" data-when="2026-10-01T20:41:48+00:00">
+    <p class="r-dec-q">Where does the toroidal-field volume term Z of the Shafranov functional come from?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="solved-state">the solved state&#x27;s own integral of B_phi squared</button>
+      <button class="r-opt chosen" data-value="diamagnetic-loop">a diamagnetic-loop measurement where the machine carries one, the solved state elsewhere</button>
+      </p>
+    <p class="r-dec-rat">Lead decision 2026-10-01. The plan exists to make the Shafranov constraint&#x27;s observed side external, and the diamagnetic flux is the standard measurement that separates beta_p from l_i/2. Taking Z from the solved state&#x27;s own integral of B_phi squared leaves the observed side partly self-referential: the constraint would partly check the solve against itself. Where a machine carries a diamagnetic loop (MAST does), Z comes from it; elsewhere it falls back to the solved state, and every receipt names which source it used. Accepted cost: a new calibrated input whose sign and calibration must be stated.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sos-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-build shafranov-observed-side §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land §1 and §2 together on CPU, then §3 once §4 is locked</h4>
+    <div class="r-fu-body"><p>§1 and §2 share the analytic route and its gate. §3 waits on the decision in §4 so the receipt is regenerated once.</p></div>
+    <pre class="r-fu-prompt">/reckon-build shafranov-observed-side §1</pre>
+    </article>
+<article class="r-fu" data-id="f-fsa-figrepair-shafranov-integral" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="figure-and-solver-audit reviewer fsa-audit-figures-newton-krylov" data-written-at="2026-09-21" data-recommends-skill="/reckon-build shafranov-observed-side" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Regenerate the Shafranov integral certificate: three caption numbers are in no receipt and the panel draws an unnamed positive-control boundary</h4>
+    <div class="r-fu-body"><p>Audit anchor: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figures-newton-krylov</code>; reviewer node <code>fsa-audit-figures-newton-krylov</code>, review lane claude-opus.</p><p>Independent-lane figure audit of docs/figures/constraint-augmented-newton-krylov/shafranov-integral scored 4 figure(s) under 70 or misrepresenting their physics out of 4 in the directory (directory mean 44.5). Regenerate them under the committed nova.media painters and the plotting rules of nova/AGENTS.md; do not recaption. Every deduction, with the file, the receipt JSON path and the repair, is in the reviewer record at crew/reviews/nova/s19-codex-20260916/fsa-audit-figures-newton-krylov/review.md#shafranov-integral. Leading defect per figure:</p><ul><li>shafranov-integral-certificate.png (score 26, MISREPRESENTS PHYSICS): The right panel title states "assembly order 0.35 over 321-1281" and "circular-formula bias 1.40e-01". The receipt carries quadrature_order 2.0643612255761723 and contains no 0.35, no 321, no 1281 and no 0.140 at any path. None of the three is re-derivable. Receipt path: docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json (802 bytes, full key list: exact, grid_resolution, contour_samplings, errors, limit, departure_from_limit, quadrature_order, grid_resolutions, grid_gap, mechanism) Repair: Emit the plotted order, the fitted range and the bias into the receipt, and print them from it.</li><li>shafranov-integral-certificate.svg (score 20, MISREPRESENTS PHYSICS): The right panel title states "assembly order 0.35 over 321-1281" and "circular-formula bias 1.40e-01". The receipt carries quadrature_order 2.0643612255761723 and contains no 0.35, no 321, no 1281 and no 0.140 at any path. None of the three is re-derivable. Receipt path: docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json (802 bytes, full key list: exact, grid_resolution, contour_samplings, errors, limit, departure_from_limit, quadrature_order, grid_resolutions, grid_gap, mechanism) Repair: Emit the plotted order, the fitted range and the bias into the receipt, and print them from it.</li><li>field-response-timing.png (score 69): The whole content is two wall times and their ratio, all three printed as text on the canvas. A two-bar log chart adds no relationship a sentence does not carry, and the repo s representation rule forbids an image of what is naturally a table. Receipt path: n/a Repair: Put the two times and the ratio in the evidence paragraph.</li><li>field-response-timing.svg (score 63): The whole content is two wall times and their ratio, all three printed as text on the canvas. A two-bar log chart adds no relationship a sentence does not carry, and the repo s representation rule forbids an image of what is naturally a table. Receipt path: n/a Repair: Put the two times and the ratio in the evidence paragraph.</li></ul><p>Files: docs/figures/constraint-augmented-newton-krylov/shafranov-integral/field-response-timing.png, docs/figures/constraint-augmented-newton-krylov/shafranov-integral/field-response-timing.svg, docs/figures/constraint-augmented-newton-krylov/shafranov-integral/shafranov-integral-certificate.png, docs/figures/constraint-augmented-newton-krylov/shafranov-integral/shafranov-integral-certificate.svg</p></div>
+    <pre class="r-fu-prompt">/reckon-build shafranov-observed-side</pre>
+    </article>
+<article class="r-fu" data-id="f-sos-diamagnetic-input" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build shafranov-observed-side" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Read the MAST diamagnetic flux through the store as the source of the volume term Z</h4>
+    <div class="r-fu-body"><p>Decision <code>toroidal-volume-term</code> is locked to <code>diamagnetic-loop</code>. Ingest the MAST diamagnetic signal through <code>nova.io</code> into the standard-name store, using the DD 4 paths <code>magnetics.diamagnetic_flux(:).data</code> and <code>.time</code>. When the value is carried into a reconstruction, write it as <code>equilibrium.time_slice.constraints.diamagnetic_flux.measured</code>, which DD 4 declares <code>b0_like</code>, so its sign follows the toroidal field under COCOS 17. Derive Z from it in §3 with the calibration and sign stated.</p><p><strong>Done when:</strong> the store row carries the source, units (Wb), COCOS and calibration as attributes; a MAST shot's diamagnetic flux reproduces the archived EFIT constraint value within its stated error; the §3 receipt's provenance field names <code>diamagnetic-loop</code> or <code>solved-state</code> per row; and a sign-flip negative control (B0 reversed without flipping the flux) is refused by the convention check.</p></div>
+    <pre class="r-fu-prompt">/reckon-build shafranov-observed-side</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-sos-grid-route-order-reviewed" data-who="" data-when="">
+    <div class="r-comment-body">Run r-20260919T111700847506 (local lane, commits 3818bd05 f633a00a c6dae3cb, merged at e9683030; review r-20260919T115006363350) found the first-order stage: shafranov_contour_integrals sampled the contour metric at the leading vertex; sampled at the chord midpoint with each field averaged to it the fitted order is 2.064 and the test persists it. The fix exposed what a 5e-4 bound had hidden, and the review sharpened it: the receipt's errors converge to their own limit 0.22281 against exact 1.23255, a 22 percent offset, so the measured order is the order of departure from a plateau, not of convergence to the exact value. The node's probes name the plateau's sources: a first-order surface term surviving in the radial moment, and the volume side's cell-centre mask (inside = flux greater than zero) carrying no boundary correction, orders 0.82 and 0.93 on the vertical moment and toroidal stress. Both are the next node's work before section 3 wires the constraint; the gate for this run therefore records the three exposed identity tests as pre-existing failures, not regressions. Two review findings for the next node: the test rewrites the tracked receipt.json on every run (a side effect the manifest did not name), and the certificate figure still shows the assembly-order ladder rather than the 21, 41 and 81 grid ladder.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260919T115006363350-review-of-sos-grid-route-order" data-who="reckon-ship" data-when="2026-09-19T12:11:14.180Z">
+    <div class="r-comment-body"><p>Review stored: 89/100; the receipt errors converge to a 22 percent plateau, so the order is of departure from it</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260919T111700847506-sos-grid-route-order" data-who="reckon-ship" data-when="2026-09-19T11:47:43.637Z">
+    <div class="r-comment-body"><p>Contour quadrature made second order (fitted 2.064) and the grid route order persisted; the fix exposes three volume-side identity tests hidden by a 5e-4 bound whose sources are named for the next node; review 89/100</p></div>
+</div>
+</section>
+</main>
+</body>
+</html>

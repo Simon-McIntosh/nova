@@ -1,0 +1,252 @@
+restore the original moment reduction
+revision=38b441dad1dea2b10b684fa612b8802ef0973b86 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair command=pytest tests/test_exact_moment_reduction_cut_cells.py -vv
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 4 items
+
+tests/test_exact_moment_reduction_cut_cells.py::test_sampled_arc_moments_match_order_doubled_reference[weak-rotation-reactor-static-110-108] FAILED [ 25%]
+tests/test_exact_moment_reduction_cut_cells.py::test_sampled_arc_moments_match_order_doubled_reference[weak-rotation-reactor-static-300-187] FAILED [ 50%]
+tests/test_exact_moment_reduction_cut_cells.py::test_sampled_arc_moments_match_order_doubled_reference[diverted-single-null-110-110] FAILED [ 75%]
+tests/test_exact_moment_reduction_cut_cells.py::test_recorded_cells_are_distinct_rows PASSED [100%]
+
+=================================== FAILURES ===================================
+_ test_sampled_arc_moments_match_order_doubled_reference[weak-rotation-reactor-static-110-108] _
+
+case_name = 'weak-rotation-reactor-static', requested_cells = 110, cell = 108
+
+    @pytest.mark.parametrize(("case_name", "requested_cells", "cell"), RECORDED_CUT_CELLS)
+    def test_sampled_arc_moments_match_order_doubled_reference(
+        case_name: str,
+        requested_cells: int,
+        cell: int,
+    ):
+        _incoming, effective, production, field, _topology, _selected, profile = (
+            _recorded_row(case_name, requested_cells)
+        )
+        vertices = np.asarray(effective.support_vertices)[cell]
+        count = int(np.asarray(effective.vertex_count)[cell])
+        centre = np.asarray(effective.centroids)[cell]
+        assert count > 24
+    
+        rings = [[vertices[:count]]]
+        cells = np.asarray([cell], dtype=np.int32)
+        centres = centre[None]
+        reference_order_8 = stages._profile_reference(
+            field,
+            profile.confined,
+            rings,
+            centres,
+            cells,
+            8,
+            positive_orientation=True,
+        )[0]
+        reference_order_16 = stages._profile_reference(
+            field,
+            profile.confined,
+            rings,
+            centres,
+            cells,
+            16,
+            positive_orientation=True,
+        )[0]
+        np.testing.assert_allclose(
+            reference_order_8,
+            reference_order_16,
+            rtol=2e-11,
+            atol=2e-9,
+        )
+>       np.testing.assert_allclose(
+            np.asarray(production)[cell],
+            reference_order_16,
+            rtol=2e-6,
+            atol=2e-8,
+        )
+E       AssertionError: 
+E       Not equal to tolerance rtol=2e-06, atol=2e-08
+E       
+E       Mismatched elements: 3 / 3 (100%)
+E       Mismatch at indices:
+E        [0]: 0.0007330238238006195 (ACTUAL), 192266.36623449638 (DESIRED)
+E        [1]: 0.00020727703598044008 (ACTUAL), 313.6417476942098 (DESIRED)
+E        [2]: -6.469678654622693e-06 (ACTUAL), -0.004941845470426642 (DESIRED)
+E       Max absolute difference among violations: 192266.36550147
+E       Max relative difference among violations: 1.
+E        ACTUAL: array([ 7.330238e-04,  2.072770e-04, -6.469679e-06])
+E        DESIRED: array([ 1.922664e+05,  3.136417e+02, -4.941845e-03])
+
+tests/test_exact_moment_reduction_cut_cells.py:92: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+07:33:57 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+_ test_sampled_arc_moments_match_order_doubled_reference[weak-rotation-reactor-static-300-187] _
+
+case_name = 'weak-rotation-reactor-static', requested_cells = 300, cell = 187
+
+    @pytest.mark.parametrize(("case_name", "requested_cells", "cell"), RECORDED_CUT_CELLS)
+    def test_sampled_arc_moments_match_order_doubled_reference(
+        case_name: str,
+        requested_cells: int,
+        cell: int,
+    ):
+        _incoming, effective, production, field, _topology, _selected, profile = (
+            _recorded_row(case_name, requested_cells)
+        )
+        vertices = np.asarray(effective.support_vertices)[cell]
+        count = int(np.asarray(effective.vertex_count)[cell])
+        centre = np.asarray(effective.centroids)[cell]
+        assert count > 24
+    
+        rings = [[vertices[:count]]]
+        cells = np.asarray([cell], dtype=np.int32)
+        centres = centre[None]
+        reference_order_8 = stages._profile_reference(
+            field,
+            profile.confined,
+            rings,
+            centres,
+            cells,
+            8,
+            positive_orientation=True,
+        )[0]
+        reference_order_16 = stages._profile_reference(
+            field,
+            profile.confined,
+            rings,
+            centres,
+            cells,
+            16,
+            positive_orientation=True,
+        )[0]
+        np.testing.assert_allclose(
+            reference_order_8,
+            reference_order_16,
+            rtol=2e-11,
+            atol=2e-9,
+        )
+>       np.testing.assert_allclose(
+            np.asarray(production)[cell],
+            reference_order_16,
+            rtol=2e-6,
+            atol=2e-8,
+        )
+E       AssertionError: 
+E       Not equal to tolerance rtol=2e-06, atol=2e-08
+E       
+E       Mismatched elements: 3 / 3 (100%)
+E       Mismatch at indices:
+E        [0]: 0.001429387746453501 (ACTUAL), 71095.6181024792 (DESIRED)
+E        [1]: 0.00023948773037139713 (ACTUAL), 38.267458389018145 (DESIRED)
+E        [2]: -1.481609332084209e-05 (ACTUAL), -0.04449933236577408 (DESIRED)
+E       Max absolute difference among violations: 71095.61667309
+E       Max relative difference among violations: 0.99999998
+E        ACTUAL: array([ 1.429388e-03,  2.394877e-04, -1.481609e-05])
+E        DESIRED: array([ 7.109562e+04,  3.826746e+01, -4.449933e-02])
+
+tests/test_exact_moment_reduction_cut_cells.py:92: AssertionError
+_ test_sampled_arc_moments_match_order_doubled_reference[diverted-single-null-110-110] _
+
+case_name = 'diverted-single-null', requested_cells = 110, cell = 110
+
+    @pytest.mark.parametrize(("case_name", "requested_cells", "cell"), RECORDED_CUT_CELLS)
+    def test_sampled_arc_moments_match_order_doubled_reference(
+        case_name: str,
+        requested_cells: int,
+        cell: int,
+    ):
+        _incoming, effective, production, field, _topology, _selected, profile = (
+            _recorded_row(case_name, requested_cells)
+        )
+        vertices = np.asarray(effective.support_vertices)[cell]
+        count = int(np.asarray(effective.vertex_count)[cell])
+        centre = np.asarray(effective.centroids)[cell]
+        assert count > 24
+    
+        rings = [[vertices[:count]]]
+        cells = np.asarray([cell], dtype=np.int32)
+        centres = centre[None]
+        reference_order_8 = stages._profile_reference(
+            field,
+            profile.confined,
+            rings,
+            centres,
+            cells,
+            8,
+            positive_orientation=True,
+        )[0]
+        reference_order_16 = stages._profile_reference(
+            field,
+            profile.confined,
+            rings,
+            centres,
+            cells,
+            16,
+            positive_orientation=True,
+        )[0]
+        np.testing.assert_allclose(
+            reference_order_8,
+            reference_order_16,
+            rtol=2e-11,
+            atol=2e-9,
+        )
+>       np.testing.assert_allclose(
+            np.asarray(production)[cell],
+            reference_order_16,
+            rtol=2e-6,
+            atol=2e-8,
+        )
+E       AssertionError: 
+E       Not equal to tolerance rtol=2e-06, atol=2e-08
+E       
+E       Mismatched elements: 3 / 3 (100%)
+E       Mismatch at indices:
+E        [0]: 0.00026009703220492903 (ACTUAL), 652.1728870327481 (DESIRED)
+E        [1]: 1.4265316733968105e-05 (ACTUAL), 0.6979659549222528 (DESIRED)
+E        [2]: 1.7186587041669864e-05 (ACTUAL), -0.20466185696604922 (DESIRED)
+E       Max absolute difference among violations: 652.17262694
+E       Max relative difference among violations: 1.00008398
+E        ACTUAL: array([2.600970e-04, 1.426532e-05, 1.718659e-05])
+E        DESIRED: array([ 6.521729e+02,  6.979660e-01, -2.046619e-01])
+
+tests/test_exact_moment_reduction_cut_cells.py:92: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_exact_moment_reduction_cut_cells.py::test_sampled_arc_moments_match_order_doubled_reference[weak-rotation-reactor-static-110-108] - AssertionError: 
+Not equal to tolerance rtol=2e-06, atol=2e-08
+
+Mismatched elements: 3 / 3 (100%)
+Mismatch at indices:
+ [0]: 0.0007330238238006195 (ACTUAL), 192266.36623449638 (DESIRED)
+ [1]: 0.00020727703598044008 (ACTUAL), 313.6417476942098 (DESIRED)
+ [2]: -6.469678654622693e-06 (ACTUAL), -0.004941845470426642 (DESIRED)
+Max absolute difference among violations: 192266.36550147
+Max relative difference among violations: 1.
+ ACTUAL: array([ 7.330238e-04,  2.072770e-04, -6.469679e-06])
+ DESIRED: array([ 1.922664e+05,  3.136417e+02, -4.941845e-03])
+FAILED tests/test_exact_moment_reduction_cut_cells.py::test_sampled_arc_moments_match_order_doubled_reference[weak-rotation-reactor-static-300-187] - AssertionError: 
+Not equal to tolerance rtol=2e-06, atol=2e-08
+
+Mismatched elements: 3 / 3 (100%)
+Mismatch at indices:
+ [0]: 0.001429387746453501 (ACTUAL), 71095.6181024792 (DESIRED)
+ [1]: 0.00023948773037139713 (ACTUAL), 38.267458389018145 (DESIRED)
+ [2]: -1.481609332084209e-05 (ACTUAL), -0.04449933236577408 (DESIRED)
+Max absolute difference among violations: 71095.61667309
+Max relative difference among violations: 0.99999998
+ ACTUAL: array([ 1.429388e-03,  2.394877e-04, -1.481609e-05])
+ DESIRED: array([ 7.109562e+04,  3.826746e+01, -4.449933e-02])
+FAILED tests/test_exact_moment_reduction_cut_cells.py::test_sampled_arc_moments_match_order_doubled_reference[diverted-single-null-110-110] - AssertionError: 
+Not equal to tolerance rtol=2e-06, atol=2e-08
+
+Mismatched elements: 3 / 3 (100%)
+Mismatch at indices:
+ [0]: 0.00026009703220492903 (ACTUAL), 652.1728870327481 (DESIRED)
+ [1]: 1.4265316733968105e-05 (ACTUAL), 0.6979659549222528 (DESIRED)
+ [2]: 1.7186587041669864e-05 (ACTUAL), -0.20466185696604922 (DESIRED)
+Max absolute difference among violations: 652.17262694
+Max relative difference among violations: 1.00008398
+ ACTUAL: array([2.600970e-04, 1.426532e-05, 1.718659e-05])
+ DESIRED: array([ 6.521729e+02,  6.979660e-01, -2.046619e-01])
+==================== 3 failed, 1 passed in 86.27s (0:01:26) ====================
+srun: error: 98dci4-clu-3141: task 0: Exited with exit code 1

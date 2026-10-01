@@ -1,0 +1,11 @@
+baseline tests/test_xpoint_cell_wedge_clip.py 0
+after tests/test_xpoint_cell_wedge_clip.py 0
+baseline tests/test_clipped_support_quadrature.py 0
+after tests/test_clipped_support_quadrature.py 0
+baseline tests/test_solovev_certificate_builder.py 0
+after tests/test_solovev_certificate_builder.py 0
+baseline tests/test_exact_clip_moments.py 0
+after tests/test_exact_clip_moments.py 0
+baseline tests/test_moment_path_separatrix_test.py 0
+after tests/test_moment_path_separatrix_test.py 0
+slurmstepd: error: *** JOB 1275202 ON 98dci4-clu-3143 CANCELLED AT 2026-09-21T18:05:08 DUE TO TIME LIMIT ***

@@ -1,0 +1,9 @@
+JobID|State|ExitCode|Elapsed|NodeList|Partition|AllocTRES
+1276828|CANCELLED by 39486|0:0|00:01:13|98dci4-gpu-0003|betelgeuse|billing=2,cpu=2,gres/gpu=1,mem=32G,node=1
+1276828.batch|CANCELLED|0:15|00:01:13|98dci4-gpu-0003||cpu=2,gres/gpu=1,mem=32G,node=1
+1276828.extern|COMPLETED|0:0|00:01:13|98dci4-gpu-0003||billing=2,cpu=2,gres/gpu=1,mem=32G,node=1
+1276828.0|CANCELLED|0:15|00:01:12|98dci4-gpu-0003||cpu=2,gres/gpu=1,mem=32G,node=1
+1276829|COMPLETED|0:0|00:17:06|98dci4-gpu-0003|betelgeuse|billing=2,cpu=2,gres/gpu=1,mem=32G,node=1
+1276829.batch|COMPLETED|0:0|00:17:06|98dci4-gpu-0003||cpu=2,gres/gpu=1,mem=32G,node=1
+1276829.extern|COMPLETED|0:0|00:17:06|98dci4-gpu-0003||billing=2,cpu=2,gres/gpu=1,mem=32G,node=1
+1276829.0|CANCELLED|0:15|00:17:06|98dci4-gpu-0003||cpu=2,gres/gpu=1,mem=32G,node=1

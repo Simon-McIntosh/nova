@@ -1,0 +1,46 @@
+restore the traced binomial evaluation
+revision=83fcedfce8308128abdf01dd667e53f53500ee85 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program command=srun --jobid=1275837 --overlap --ntasks=1 --cpus-per-task=8 --cpu-bind=none taskset -c 4-7 /home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/exact-clip-closed-form/measure_bernstein.py --negative-tests
+15:22:57 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_bicubic_derivatives_lower_to_static_polynomials _____________
+
+    def test_bicubic_derivatives_lower_to_static_polynomials():
+        """A linear field retains its derivatives without traced binomial work."""
+        configure_dtypes()
+        coefficient = 2 * jnp.arange(4)[:, None] / 3 + jnp.arange(4)[None, :] / 3
+        radial = jnp.asarray([0.0, 0.23, 0.74, 1.0])
+        vertical = jnp.asarray([1.0, 0.66, 0.38, 0.0])
+        function = jax.jit(_bicubic_derivatives)
+        values = function(coefficient, radial, vertical)
+        expected = (
+            radial + 2 * vertical,
+            jnp.ones(4),
+            2 * jnp.ones(4),
+            jnp.zeros(4),
+            jnp.zeros(4),
+            jnp.zeros(4),
+        )
+        for actual, reference in zip(values, expected, strict=True):
+            np.testing.assert_allclose(actual, reference, atol=4e-15, rtol=4e-15)
+        text = function.lower(coefficient, radial, vertical).compile().as_text()
+>       assert "Bernstein.binom" not in text, (
+            "traced binomial evaluation remains in optimized HLO"
+        )
+E       AssertionError: traced binomial evaluation remains in optimized HLO
+E       assert 'Bernstein.binom' not in 'HloModule j...sion)\n}\n\n'
+E         
+E         'Bernstein.binom' is contained here:
+E           atrix"
+E           2 "Bernstein.binom"
+E           3 "Bernstein.basis"
+E           4 "Bernstein.coefficent_matrix.<locals>.basis"
+E           5 "<module>"...
+E         
+E         ...Full output truncated (3002 lines hidden), use '-vv' to show
+
+tests/test_flux_surface_extraction.py:776: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_flux_surface_extraction.py::test_bicubic_derivatives_lower_to_static_polynomials
+1 failed in 3.81s
+srun: error: 98dci4-clu-3142: task 0: Exited with exit code 1

@@ -947,21 +947,16 @@ class ForwardSource:
         *_,
         sample_flux=None,
     ) -> CellCurrentMoments:
-        """Return profile-owned current moments without a boundary clip.
+        """Return profile-owned current moments with the separatrix tested pointwise.
 
-        The static material boundary and saddle-aware private-flux shadow are
-        the only geometric participation decisions. When an open-field-line
-        continuation is declared, a composite profile tests normalised flux at
-        every quadrature evaluation, so a cell straddling the separatrix
-        integrates both profiles without a frozen whole-cell category. With no
-        continuation, the supplied profile path remains bit-identical.
+        A composite profile tests normalised flux at every quadrature evaluation,
+        so a cell straddling the separatrix integrates only the part of it that
+        lies inside. An undeclared common-SOL closure contributes nothing above
+        the separatrix, so the same test confines the support at every flux
+        evaluation.
         """
 
-        profile = (
-            self.core
-            if self.common_sol is None
-            else _FluxSelectedProfile(self.core, self.common_sol)
-        )
+        profile = _FluxSelectedProfile(self.core, self.common_sol)
         selected = support_moments(
             profile,
             masks.psi_norm,

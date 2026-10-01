@@ -1,0 +1,6 @@
+revision=c7eb43483b64890b8cc0dcb15b1651a7d32cb2c9 base=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/measure_clip_body.py', '--suites', 'candidate']
+revision=c7eb43483b64890b8cc0dcb15b1651a7d32cb2c9 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/measure_clip_body.py', '--suites', 'candidate']
+candidate-test_equilibrium_separatrix_clip EXIT 0
+candidate-test_exact_clip_moments EXIT 0
+candidate-test_null_generator_admission EXIT 0
+candidate-test_flux_surface_extraction EXIT 0

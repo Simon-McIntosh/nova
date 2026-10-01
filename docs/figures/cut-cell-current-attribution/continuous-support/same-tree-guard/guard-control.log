@@ -1,0 +1,75 @@
+Zero the moving-support vertex JVP only in the scratch whole_cell_guard branch.
+COMMAND=["/home/ITER/mcintos/Code/nova/.venv/bin/python", "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/same-tree-gate/guard_control.py"]
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+SCRATCH_GUARD_MODULE_LOADED=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/same-tree-gate/test_exact_clip_memory.py
+03:47:50 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 1 item
+
+tests/test_exact_clip_memory.py F
+
+=================================== FAILURES ===================================
+______________ test_whole_cell_terminal_state_ignores_polish_jvp _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-mcintos/pytest-3132/test_whole_cell_terminal_state0')
+
+    @pytest.mark.slow
+    def test_whole_cell_terminal_state_ignores_polish_jvp(tmp_path):
+        """The single-null whole-cell solve stays bit-identical across the JVP change."""
+        output_root = Path(os.environ.get("NOVA_EXACT_CLIP_IDENTITY_ROOT", tmp_path))
+        output_root.mkdir(parents=True, exist_ok=True)
+        driver = output_root / "terminal_driver.py"
+        driver.write_text(TERMINAL_DRIVER, encoding="utf-8")
+        reference_path = output_root / "single-null-500-whole-cell-current.npz"
+        current_path = (
+            output_root / "single-null-500-implicit-fixed-root-guarded-current.npz"
+        )
+        for checkout, output, mode in (
+            (WORKTREE, reference_path, "whole_cell"),
+            (WORKTREE, current_path, "whole_cell_guard"),
+        ):
+            _run_terminal_driver(
+                checkout,
+                driver,
+                output,
+                "diverted-single-null",
+                -500,
+                mode,
+            )
+        reference = _terminal_arrays(reference_path)
+        current = _terminal_arrays(current_path)
+        committed = json.loads(WHOLE_CELL_CONTROL.read_text(encoding="utf-8"))
+        committed_flux = np.asarray(
+            committed["render_data"]["terminal_flux_wb"], dtype=np.float64
+        )
+        assert current["flux"].size == committed_flux.size
+        assert reference.keys() <= current.keys()
+        for name in reference:
+>           np.testing.assert_array_equal(current[name], reference[name])
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2226 / 2226 (100%)
+E           First 5 mismatches are at indices:
+E            [0]: 0.015259179899534098 (ACTUAL), -0.03297830192955325 (DESIRED)
+E            [1]: 0.012150951635992835 (ACTUAL), -0.030938260137598157 (DESIRED)
+E            [2]: 0.013850502050905975 (ACTUAL), -0.03524702549212717 (DESIRED)
+E            [3]: 0.00880947026070207 (ACTUAL), -0.02930036647440118 (DESIRED)
+E            [4]: 0.010156396998764958 (ACTUAL), -0.03301853191896991 (DESIRED)
+E           Max absolute difference among violations: 0.44478477
+E           Max relative difference among violations: 466.9500116
+E            ACTUAL: array([ 0.015259,  0.012151,  0.013851, ..., -0.022415, -0.024002,
+E                  -0.024582], shape=(2226,))
+E            DESIRED: array([-0.032978, -0.030938, -0.035247, ..., -0.035052, -0.037342,
+E                  -0.040474], shape=(2226,))
+
+tests/test_exact_clip_memory.py:570: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_exact_clip_memory.py::test_whole_cell_terminal_state_ignores_polish_jvp
+======================== 1 failed in 1437.85s (0:23:57) ========================
+
+EXIT=1

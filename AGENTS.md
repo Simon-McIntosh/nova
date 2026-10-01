@@ -277,7 +277,7 @@ tmpfs — slurmstepd then cancels the job in zero seconds with an empty log.
 
 ## Coupled Repositories
 
-Prior-art scouts (reckon-ship §1b) search these repos in both directions
+Prior-art scouts (reckon-build §1b) search these repos in both directions
 before authoring new machinery here, and their sessions search nova likewise:
 
 - **imas-ambix** (`~/Code/imas-ambix`) — the flux-function seam, challenge
@@ -404,14 +404,76 @@ more often than `NOVA_CACHE_MISS_BUDGET` allows. Preserve
 GPU failures from CPU-specific identity assertions as device-qualified evidence;
 do not weaken those CPU contracts to make the H200 lane green.
 
-The H200 node is shared and its reservation is a **core** budget (30 cores, no
-cards): every submission states an explicit `--mem` (never `--mem=0`, which
-SLURM reads as the whole 1.5 TB and leaves the job pending on `Resources`
-while blocking the queue behind it) and sizes `--cpus-per-task` against the
-cores the serving jobs already hold (`squeue -w 98dci4-gpu-0003 -o '%C %b %m %j'`).
-A single-card measurement job is 8 cores, `--gres=gpu:1`, `--mem=128G`. The
-node's live budget and the serving footprint are kept in imas-ambix
-`imas_ambix/agent/AGENTS.md`.
+The H200 node is shared and two separate budgets govern it. The **reservation**
+is 30 cores and no cards, so every submission states an explicit `--mem` (never
+`--mem=0`, which SLURM reads as the whole 1.5 TB and leaves the job pending on
+`Resources` while blocking the queue behind it) and sizes `--cpus-per-task`
+against the cores the serving jobs already hold
+(`squeue -w 98dci4-gpu-0003 -o '%C %b %m %j'`). The **QoS** is what carries the
+cards and the memory, and it is the one that refuses:
+`sacctmgr show qos gpu_0003_grpa` reads `cpu=30,gres/gpu=4,mem=650G` with
+`DenyOnLimit`.
+
+**The reservation admits jobs, and `--test-only` misreports it.** Measured
+2026-09-23 09:20: every `sbatch --test-only` into `gpu_0003_grpA` predicted a
+start on 2026-10-07, fourteen days out. That included a request naming no GPU.
+The same shape submitted for real (probe job 1276415, one card, two cores,
+8 GB) started within seconds on 98dci4-gpu-0003 and listed an H200 NVL. The
+production-route ladder (1276244) had been admitted the same way that morning.
+The 2026-09-21 refusal (`Requested node configuration is not available` on the
+minimal request) is fixed: the reservation now carries
+`CoreIDs=15-29,47-61`, not `(null)`.
+
+A fourteen-day estimate therefore says nothing about admission, and a worker
+that routes off the H200 on it lands on titan while the H200 has free cards.
+One node did exactly that three times in a row that morning. **Never decide
+the rung from a `--test-only` estimate.** Submit to betelgeuse and read
+`squeue -j <id> -o '%T %R'` a minute later. Only a job still `PENDING` with a
+resource or configuration reason counts as "betelgeuse will not admit it".
+Check free cards with `scontrol show node 98dci4-gpu-0003 | grep AllocTRES`
+against `Gres=gpu:h200:8`. The node's live budget and the serving footprint are
+kept in imas-ambix `imas_ambix/agent/AGENTS.md`.
+
+### Compute hierarchy: H200, then titan, then CPU (binding, lead 2026-09-21)
+
+**Every GPU-shaped gate defaults to the H200 and falls back to titan before it
+falls back to CPU.** A node that lands on CPU without trying titan has skipped a
+rung, and that is a scope defect in the brief rather than a worker's choice.
+
+| Rung | Submission | When |
+|---|---|---|
+| 1. H200 | `--partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1` | always first; submit for real and read `squeue`, never a `--test-only` estimate |
+| 2. titan (P100) | `--partition=titan --gres=gpu:1` | only when a real betelgeuse submission is still pending on a resource or configuration reason |
+| 3. CPU | `--partition=all_debug` (or `sirius` past the hour) with `JAX_PLATFORMS=cpu` | only when neither GPU rung can serve the shape |
+
+**Titan is a working JAX lane, measured rather than assumed.** The worry is that
+a P100 is compute capability 6.0 and recent jaxlib CUDA wheels drop pre-Volta.
+It does not: on `98dci4-gpu-0002`, JAX 0.11.0 reports `devices
+[CudaDevice(id=0)]`, `x64 True` and `default backend gpu` on a
+`Tesla P100-PCIE-16GB`. The node carries `gpu:p100:8` with 20 cores and 256 GB,
+needs **no reservation and no special account**, and a plain submission starts
+immediately.
+
+Read a titan number as a titan number. It has 16 GB of device memory against the
+H200's 141, and P100 fp64 at roughly a seventh of H200 fp64, so it serves a
+solve or a render honestly and must never carry a throughput or latency
+headline attributed to the H200. The persistent compilation cache keys on
+backend platform and device topology, so an H200 entry is never read on a P100:
+a first titan run cold-compiles even where the H200 cache is warm, which is
+correct rather than a cache defect, and its compile wall belongs in the receipt
+beside the execute wall.
+
+**CPU is the last rung because its compile is itself the constraint.** Measured
+2026-09-21 on the centroid-constrained MAST sweep: a warm edit took 322 s on
+CPU against 370 ms on the H200, about 870 times, and the twenty-edit sweep
+aborted at edit nine with `LLVM ERROR: Unable to allocate section memory` at a
+128 GB allocation. Size a CPU fallback to what its backend can actually compile,
+and say in the receipt that the walls are not the GPU measurement.
+
+For CPU work the partition is `all_debug`. **`rigel_debug` is up, accepts jobs
+and has zero nodes**, so a job sent there pends forever with reason
+`PartitionConfig`; the login host being named rigel is what invites the
+mistake.
 
 ```bash
 # In a worktree, reuse the main checkout's environment (see One Environment

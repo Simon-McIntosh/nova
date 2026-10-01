@@ -1,0 +1,8 @@
+{
+  "job_id": "1276326",
+  "sacct_state": "CANCELLED by 39486",
+  "cause": "Coordinator confirmed cancellation on lead instruction to move this still-authorized retry from titan to H200.",
+  "counts_as_worker_failure": false,
+  "retry_authority": "still authorized; location changed to direct H200 submission",
+  "supersedes": "Earlier statement that the one-retry authority was consumed."
+}

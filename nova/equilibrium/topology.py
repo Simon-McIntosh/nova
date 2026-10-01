@@ -49,6 +49,44 @@ qualifying as if it were the confined region.
 """
 
 
+def x_point_height_limits(axis_height, qualified_x_points):
+    """Bound the axis-facing height interval with admitted saddle positions.
+
+    A side with no saddle beyond the axis has an infinite limit and casts no
+    private shadow. Finite wall heights outside this interval are in the
+    private-shadow height bands; a height on either limit is not shadowed.
+    """
+    points = jnp.asarray(qualified_x_points)
+    finite = jnp.all(jnp.isfinite(points[:, :2]), axis=1)
+    lower = jnp.min(jnp.where(finite, points[:, 1], jnp.inf), initial=jnp.inf)
+    upper = jnp.max(jnp.where(finite, points[:, 1], -jnp.inf), initial=-jnp.inf)
+    return (
+        jnp.where(lower > axis_height, -jnp.inf, lower),
+        jnp.where(upper < axis_height, jnp.inf, upper),
+    )
+
+
+def private_wall_node_read(
+    node_flux, node_height, axis_height, saddle_flux, polarity, qualified_x_points
+):
+    """Read private wall flux at each node, independently of cell ownership."""
+    flux = jnp.asarray(node_flux)
+    height = jnp.asarray(node_height)
+    lower, upper = x_point_height_limits(axis_height, qualified_x_points)
+    flux_side = jnp.isfinite(flux) & (polarity * (flux - saddle_flux) >= 0.0)
+    height_band = jnp.isfinite(height) & ((height < lower) | (height > upper))
+    qualified = jnp.isfinite(saddle_flux) & jnp.isfinite(axis_height)
+    return {
+        "private_wall_node_mask": qualified & flux_side & height_band,
+        "wall_node_flux": flux,
+        "admitted_saddle_flux": saddle_flux,
+        "wall_node_private_flux_side": flux_side,
+        "wall_node_height_band": height_band,
+        "private_height_lower": lower,
+        "private_height_upper": upper,
+    }
+
+
 class TopologyState(NamedTuple):
     """Axis, boundary-selection and wall-limit state read from one flux map.
 
@@ -523,8 +561,8 @@ class Topology(Pytree):
             brackets = jnp.where(closed[:, jnp.newaxis], closed_brackets, open_brackets)
             fitted = (ends - starts) >= 3
 
-        coordinate = self.wall.coordinate[brackets]
-        values = wall_flux[brackets]
+        coordinate = jnp.asarray(self.wall.coordinate)[brackets]
+        values = jnp.asarray(wall_flux)[brackets]
 
         def fit_one(points, samples):
             length = select.length_2d(points[:, 0], points[:, 1], array_namespace=jnp)
@@ -640,6 +678,7 @@ class Topology(Pytree):
         axis_data=None,
         inside_material=None,
         containment_required=True,
+        x_point_flux=None,
     ):
         """Return the wall extremum on the surface that traces the boundary.
 
@@ -654,6 +693,13 @@ class Topology(Pytree):
         therefore has one boundary authority: its last closed contour passes
         through the published wall contact. Unstructured reads have no tensor
         surface and retain their wall-zone samples.
+
+        ``containment_required`` of ``None`` evaluates containment inside this
+        pass rather than receiving it: the strongest fitted contact reached by
+        the axis-enclosing component at its own level is screened against the
+        pass' X-point level, and containment is required only when that
+        contact outranks the saddle and would therefore bind the boundary. A
+        diverted plasma keeps the raw wall extremum as its wall diagnostic.
 
         Masked samples receive a finite losing score before the wall extremum
         is selected.  Keeping the operand finite preserves the fixed-shape
@@ -707,6 +753,21 @@ class Topology(Pytree):
                 inside_material,
                 surface,
             )
+            if containment_required is None:
+                screened = self._wall_anchor_selection(masked_flux, polarity, eligible)[
+                    0
+                ]
+                if x_point_flux is None:
+                    containment_required = jnp.asarray(False)
+                else:
+                    ranked = jnp.asarray(polarity) * (
+                        screened[2] - jnp.asarray(x_point_flux)
+                    )
+                    containment_required = (
+                        jnp.isfinite(screened[2])
+                        & jnp.isfinite(jnp.asarray(x_point_flux))
+                        & (ranked > 0)
+                    )
             eligible = jnp.where(
                 jnp.asarray(containment_required),
                 eligible,
@@ -729,19 +790,16 @@ class Topology(Pytree):
         """Return boundary data structure."""
         # x-point vertical bounds
         contained_x = self.contained_x_candidates(vmap_x)
-        x_heights = jnp.where(contained_x, vmap_x[:, 1], jnp.nan)
-        x_height_min = jnp.nanmin(x_heights)
-        x_height_max = jnp.nanmax(x_heights)
+        x_height_min, x_height_max = x_point_height_limits(
+            data_o[1], jnp.where(contained_x[:, None], vmap_x[:, :2], jnp.nan)
+        )
         # select grid x-point
         data_x = self.x_point_data(vmap_x, polarity, data_o[2])
         # o-point and w-point heights
-        o_height = data_o[1]
         w_height = data_w[1]
         # A wall contact vertically beyond the x-point band lies in the
         # private-flux shadow of a null, so it cannot bind the plasma; a side
         # with no x-point beyond the axis casts no shadow (bound at infinity).
-        x_height_min = jnp.where(x_height_min > o_height, -jnp.inf, x_height_min)
-        x_height_max = jnp.where(x_height_max < o_height, jnp.inf, x_height_max)
         # asses plasma operational mode
         selection_flux = jnp.asarray(
             jnp.r_[data_x[2], data_w[2]], dtype=self.grid.fit_dtype
@@ -1111,10 +1169,18 @@ class Topology(Pytree):
             surface = None
             comparison_flux = psi_grid
         census_authored = structured and hasattr(self.grid, "read_census")
+        null_flux = psi_grid
+        if getattr(self.grid, "direct_sample_count", 0):
+            sample_flux = psi[self.grid.node_number + self.wall.node_number :]
+            if sample_flux.shape[0] != self.grid.direct_sample_count:
+                raise ValueError(
+                    "own-node null census requires the direct sampling flux values"
+                )
+            null_flux = jnp.concatenate((psi_grid, sample_flux))
         if census_authored:
-            (vmap_o, vmap_x), census = self.grid.read_census(psi_grid)
+            (vmap_o, vmap_x), census = self.grid.read_census(null_flux)
         else:
-            vmap_o, vmap_x = self.grid(psi_grid)
+            vmap_o, vmap_x = self.grid(null_flux)
             census = None
         data_w = self.wall_anchor_data(
             psi_wall,
@@ -1134,10 +1200,10 @@ class Topology(Pytree):
         )
         selection = self.o_point_qualification(vmap_o, polarity, qualified_o)
         data_o = selection.data
-        provisional_x = self.x_point_data(vmap_x, polarity, data_o[2])
-        provisional_boundary = self.boundary(data_o, vmap_x, data_w, polarity)
         if requested_class is None:
-            containment_required = ~jnp.equal(provisional_boundary[2], provisional_x[2])
+            # A class-free read has no branch to pin containment to, so each
+            # containment pass evaluates it from the state that pass holds.
+            containment_required = None
         else:
             containment_required = jnp.asarray(requested_class) == int(
                 TopologyClass.LIMITED
@@ -1153,6 +1219,7 @@ class Topology(Pytree):
                 data_o,
                 inside_material,
                 containment_required,
+                self.x_point_data(vmap_x, polarity, data_o[2])[2],
             )
             qualified_o = self.qualified_o_candidates(
                 vmap_o,
@@ -1175,6 +1242,7 @@ class Topology(Pytree):
                 data_o,
                 inside_material,
                 containment_required,
+                self.x_point_data(vmap_x, polarity, data_o[2])[2],
             )
         wall_node = jnp.argmin(
             jnp.sum((self.wall.coordinate - data_w[:2]) ** 2, axis=1)

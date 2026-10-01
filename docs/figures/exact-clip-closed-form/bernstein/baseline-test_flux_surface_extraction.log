@@ -1,0 +1,14 @@
+revision=b3abce70bd92fa143dbfbfd9d449f7de06de7dc2 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/measure_bernstein.py', '--suite', 'baseline', 'test_flux_surface_extraction.py']
+15:11:27 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+...........                                                              [100%]
+=============================== warnings summary ===============================
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; zarr
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+tests/test_flux_surface_extraction.py::test_even_edge_root_pair_is_resolved_on_iter_inner_surface
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jaxopt/__init__.py:59: DeprecationWarning: JAXopt is no longer maintained. See https://docs.jax.dev/en/latest/ for alternatives.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+11 passed, 2 warnings in 713.49s (0:11:53)

@@ -1,0 +1,4 @@
+revision=b3abce70bd92fa143dbfbfd9d449f7de06de7dc2+working-diff tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program command=python -m pytest -p no:cacheprovider -q tests/test_interpolant.py tests/test_flux_surface_extraction.py::test_bicubic_derivatives_lower_to_static_polynomials
+15:17:38 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+.................                                                        [100%]
+17 passed in 16.95s

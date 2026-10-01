@@ -1,0 +1,16 @@
+{
+  "revision": "9aebe5fae",
+  "case": "diverted-single-null",
+  "clip_mode": "exact",
+  "status": "not-measured",
+  "exception": null,
+  "slurm_job_id": "1276276",
+  "slurm_partition": "titan",
+  "seed_policy": {
+    "status": "not-built",
+    "type": null,
+    "construction_type": null,
+    "state_sha256": null
+  },
+  "harness_sha256": "a3da4222cc038dec40a10c6ca3067deface21eaa29b07002b82516ce2a71f7cc"
+}

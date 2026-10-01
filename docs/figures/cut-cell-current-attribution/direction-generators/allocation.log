@@ -1,0 +1,4 @@
+revision=2502e08b50f955f45e826ed933522efec6b98bd8 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed command=two fresh measure.py processes: --cells 110 and --cells 300
+ROW_EXIT cells=110 status=0
+ROW_EXIT cells=300 status=124
+GATE_EXIT=1

@@ -230,6 +230,27 @@
     </tbody>
   </table>
   <p><strong>Conclusion:</strong> the evidence record is complete, but a positive accuracy claim is withheld. The production solve does not reach the root from its own seed on any exact-reference or EFIT case. <code>solver-convergence-regression</code> owns that convergence question; <code>millisecond-converged-solve</code> consumes the result only after it is answered.</p>
+  <section id="production-solver-receipt-trip-alignment">
+    <h2>Reduced-Newton production receipt: aligned trips and explicit unavailable telemetry</h2>
+    <p>The certificate receipt failed after the numerical solve completed because <code>FixedPointResult.active_set_cycle_damping_activations</code> is the scalar unavailable sentinel <code>-1</code> on this route. The residual and mask-difference histories are vectors. Indexing all three as vectors raised <code>IndexError: too many indices for array: array is 0-dimensional, but 1 were indexed</code>.</p>
+    <p>Repair <code>8977ecd3b76367e334bf24b33d5b9e3a27640c32</code> validates every per-trip array before constructing the receipt, reads the same executed prefix from each, and expands only the declared unavailable damping sentinel. It emits <code>null</code> rather than inventing an observed boolean. Short arrays, non-sentinel scalars, multidimensional arrays, and negative trip counts refuse with <code>ProductionSolverReceiptAlignmentError</code> and the marker <code>production_solver_receipt_trip_alignment</code>. Fixed-size arrays may retain unused trailing entries.</p>
+    <table>
+      <caption>Bounded verification on all_debug; CPU x64, shared project interpreter</caption>
+      <thead><tr><th>Gate</th><th>Result</th><th>Record</th></tr></thead>
+      <tbody>
+        <tr><td>Unrepaired numerical row; base f8c24a819fc821e6549b791892295da30323d2f9; job 1277027</td><td>Expected IndexError after 157.740 s build and solve; job exit 1, elapsed 3m28s.</td><td><a href="/nova/figures/gs-absolute-accuracy/production-solver-receipt/reproduction.log">Reproduction log</a></td></tr>
+        <tr><td>Focused receipt contracts; job 1277029</td><td>9 passed in 8.36 s against the working-tree repair subsequently committed as 8977ecd3b.</td><td><a href="/nova/figures/gs-absolute-accuracy/production-solver-receipt/focused.log">Passing gate</a></td></tr>
+        <tr><td>Declared mutation: revert the receipt repair</td><td>Original receipt function loaded from the base commit in memory: 8 failed, 1 passed in 2.41 s; exit 1. The empty-history case is the one pass.</td><td><a href="/nova/figures/gs-absolute-accuracy/production-solver-receipt/negative-control.log">Negative control</a></td></tr>
+        <tr><td>Same numerical row at repaired commit; job 1277030</td><td>Receipt written; job exit 0, elapsed 2m22s; build and solve 125.609 s.</td><td><a href="/nova/figures/gs-absolute-accuracy/production-solver-receipt/repaired-row.log">Repaired row log</a> and <a href="/nova/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json">receipt JSON</a></td></tr>
+      </tbody>
+    </table>
+    <p>The row is <code>weak-rotation-reactor-static</code>, chord support, 300 requested cells (the fixture argument is <code>-300</code>), 342 realised cells. Both solves return exactly <code>0.05474333838145354</code>, <code>converged=false</code>. The receipt retains one trip, zero mask changes, <code>cycle_damping_activated=null</code>, and <code>termination=active_set_settled</code>. This is a telemetry repair, with no numerical convergence claim or timing speedup claim. Inner globalisation arrays are unavailable on this route; empty lists do not establish that no numerical Newton work occurred.</p>
+    <figure>
+      <img src="/nova/figures/gs-absolute-accuracy/production-solver-receipt/terminal.svg" alt="Nonconverged reduced-Newton terminal flux beside analytic flux, with both magnetic axes, wall, and line-contour error panels">
+      <figcaption>Terminal residual 0.05474333838145354, converged=false. Analytic blue and solved ochre flux contours use twelve shared levels in Wb; solid triangles mark their respective axes. This limited case has no admitted X-point. Black is the wall, cyan the analytic boundary in the error panels; error contour levels are printed on those panels. Rendered with the committed nova.media painters in the repaired all_debug job; the SVG canvas is extended to retain the full labels.</figcaption>
+    </figure>
+    <p>Both numerical submissions set TMPDIR=/tmp in the submit environment and payload, JAX_PLATFORMS=cpu, four CPU cores, 64 GiB, and a 00:59:00 time limit; the contract job used 16 GiB. No shared environment was synced. The reproducible <a href="/nova/figures/gs-absolute-accuracy/production-solver-receipt/measure.py">row driver</a> and <a href="/nova/figures/gs-absolute-accuracy/production-solver-receipt/check.py">contract and mutation driver</a> are retained. The driving followup stays open for coordinator adjudication; integration verification belongs to the separately dispatched node.</p>
+  </section>
 </main>
 </body>
 </html>

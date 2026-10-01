@@ -1,0 +1,20 @@
+revision=664ade0c32ac72ac3c37f34f711012f69fa68f5e tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3 command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py', 'arm', '--revision', '664ade0c32ac72ac3c37f34f711012f69fa68f5e', '--clip', 'exact', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels']
+BUILD 664ade0c32ac72ac3c37f34f711012f69fa68f5e exact
+SOLVE route=newton_krylov
+E0923 09:36:35.361030  555906 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0923 09:36:51.123629  552765 slow_operation_alarm.cc:140] The operation took 2m15.762688116s
+
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+CAPTURE trip=1 residual=0.45149058309753 lambda_calls=132
+CAPTURE trip=2 residual=0.062712202679892 lambda_calls=100
+CAPTURE trip=3 residual=0.061916583426008 lambda_calls=238
+CAPTURE trip=4 residual=0.061916581954172 lambda_calls=48
+CAPTURE trip=5 residual=0.061916581218368 lambda_calls=48
+CAPTURE trip=6 residual=0.061916581126632 lambda_calls=48
+CAPTURE trip=7 residual=0.061916581126632 lambda_calls=150
+ARM_COMPLETE {"revision": "664ade0c32ac72ac3c37f34f711012f69fa68f5e", "clip_mode": "exact", "terminal_residual": 0.06191658112663247, "trip_count": 7, "saddle_loss_trip": 1}

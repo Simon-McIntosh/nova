@@ -1,0 +1,6 @@
+the reading-rule function is fed a synthetic arm pair with non-finite moments at the saddle-loss trip in the pre-repair arm and a retained saddle in the repaired arm, and must return support-overflow; fed a pair where both arms lose the saddle with all-finite moments it must return census-read; swapping the two inputs must change the verdict
+nonfinite loss then retained: observed=support-overflow expected=support-overflow
+finite losses in both arms: observed=census-read expected=census-read
+reverse support pair refuses attribution: observed=neither expected=neither
+unmeasured arm refuses attribution: observed=neither expected=neither
+PASS: reversing the asymmetric support pair changes its verdict; the finite/finite census rule is symmetric.

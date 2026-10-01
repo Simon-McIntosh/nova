@@ -692,9 +692,10 @@ def _row_document(
     )
     if not bool(profile.operator.use_linear_moments):
         profile_path = (
-            "unnormalised: the operator's moment path resolves moments from the "
-            "flux directly and ignores the requested current, so the profile "
-            "column is the unnormalised observation"
+            "normalised: the operator's moment path rescales the current moments "
+            "and the support integrals by current_normalisation_amplitude on the "
+            "requested current, so the profile column is the current-normalised "
+            "observation"
         )
     elif profile_current_difference == 0.0:
         profile_path = (
@@ -727,7 +728,7 @@ def _row_document(
     convention = commensurability(
         efit=efit,
         unit_check=unit_check,
-        major_radius=shape["major_radius_m"],
+        major_radius=unit_check["major_radius_m"],
         minor_radius=minor,
     )
     constraint_normalisation = {

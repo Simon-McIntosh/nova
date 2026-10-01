@@ -1,0 +1,133 @@
+{
+  "driver": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-low-state-amplitude-nan-attribution/docs/figures/figure-and-solver-audit/low-state-amplitude-nan/probe_low_state_amplitude_nan.py",
+  "revision": "9121a3850b4549ef05a5b998f53b11a8cf75e739",
+  "requested_cells": -300,
+  "environment": {},
+  "state": {
+    "realised_cells": 342,
+    "arm": "B",
+    "mechanism": "production iteration from current-aligned cold seed",
+    "reference_trip_count": 2,
+    "reference_converged": true,
+    "reference_part": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-low-state-amplitude-nan-attribution/docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/weak-rotation-reactor-static-production-route-cells-300.json",
+    "reference_part_sha256": "c1a0c713a8b89f74d38bef2e12e727d87d3664dec264b6b65ba7a6880548c373",
+    "target_current_a": 16314773.311828371,
+    "terminal_flux_shape": [
+      1529
+    ],
+    "terminal_flux_finite": true
+  },
+  "outcome": "raised",
+  "error": {
+    "type": "CurrentNormalisationError",
+    "message": "source amplitude nan is outside (1e-06, 1000000.0)",
+    "traceback": "Traceback (most recent call last):\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-low-state-amplitude-nan-attribution/docs/figures/figure-and-solver-audit/low-state-amplitude-nan/probe_low_state_amplitude_nan.py\", line 202, in main\n    disc._reference_seed_arm(context, reference, reference_path)\n    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-low-state-amplitude-nan-attribution/benchmarks/exact_clip_low_state_discriminator.py\", line 393, in _reference_seed_arm\n    measured = _state_metrics(\n        context,\n    ...<3 lines>...\n        trip_count=int(reference[\"solver\"][\"production_telemetry\"][\"trip_count\"]),\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-low-state-amplitude-nan-attribution/benchmarks/exact_clip_low_state_discriminator.py\", line 261, in _state_metrics\n    moments, amplitude = operator.normalised_current_moments(\n                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        jnp.asarray(state), context[\"target_current\"], REQUESTED_CLASS\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-low-state-amplitude-nan-attribution/nova/equilibrium/forward_operator.py\", line 3629, in normalised_current_moments\n    amplitude = self.current_normalisation_amplitude(\n        target_current, jnp.sum(moments.cell_current)\n    )\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-low-state-amplitude-nan-attribution/docs/figures/figure-and-solver-audit/low-state-amplitude-nan/probe_low_state_amplitude_nan.py\", line 180, in guarded_amplitude\n    return original_amplitude(target_current, unscaled_current)\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-low-state-amplitude-nan-attribution/nova/equilibrium/forward_operator.py\", line 3621, in current_normalisation_amplitude\n    raise CurrentNormalisationError(attempted)\nnova.equilibrium.source.CurrentNormalisationError: source amplitude nan is outside (1e-06, 1000000.0)\n"
+  },
+  "amplitude_calls": [
+    {
+      "label": "nova/equilibrium/forward_operator.py:3590",
+      "phase": "reference-seed-arm",
+      "target_current": {
+        "shape": [],
+        "finite": true,
+        "is_nan": false,
+        "is_inf": false,
+        "value": 16314773.311828371
+      },
+      "unscaled_current": {
+        "shape": [],
+        "finite": false,
+        "is_nan": true,
+        "is_inf": false,
+        "value": NaN
+      }
+    }
+  ],
+  "lane": {
+    "job_id": 1276161,
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "node": "98dci4-gpu-0003",
+    "allocated_cpus": 8,
+    "memory_mb": 65536,
+    "device": "NVIDIA H200 NVL",
+    "platform": "gpu",
+    "jax_platforms": null,
+    "tmpdir": "/tmp",
+    "jax_enable_x64": true
+  },
+  "compilation_cache": {
+    "selection": "explicit_per_recipe",
+    "root": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "version_key": "runtime-0745ecebea4cb264e054",
+    "runtime_identity": {
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0",
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_enable_x64": true,
+        "jax_default_matmul_precision": null,
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "platform": "gpu",
+          "kind": "NVIDIA H200 NVL",
+          "process_index": 0,
+          "id": 0
+        }
+      ]
+    },
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "minimum_compile_seconds": 1.0,
+    "maximum_bytes": 8589934592
+  },
+  "driver_sha256": "f5ec0fe97c643107037803d893edc6872a4aeee5cfa1b22c79af57f4b173fa48",
+  "stages": [
+    {
+      "label": "clipped_support_current_moments()",
+      "producer": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/source_info_util.py:712",
+      "float": true,
+      "shape": [
+        3,
+        342
+      ],
+      "size": 1026,
+      "nonfinite": 1026,
+      "nan": 1026,
+      "inf": 0,
+      "all_nonfinite": true,
+      "first_index": [
+        0,
+        0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+revision=96cbb2f0e488a4a1f49b3266c4de7b9814a64622 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step command=program_census.py 300 stream job=1276452
+revision=96cbb2f0e488a4a1f49b3266c4de7b9814a64622 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step/docs/figures/forward-solver-route-integrity/single-site-krylov/program_census.py', '300', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step/docs/figures/forward-solver-route-integrity/single-site-krylov/program-stream-300.json', 'stream', '/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T074118384717-fsri-single-site-krylov-for-the-qualified-step/optimized-hlo/stream-300.hlo.txt']
+{"mode": "stream", "revision": "96cbb2f0e488a4a1f49b3266c4de7b9814a64622", "cells": 300, "optimized_instructions": 284792, "compile_seconds": 168.72520983219147, "hlo_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T074118384717-fsri-single-site-krylov-for-the-qualified-step/optimized-hlo/stream-300.hlo.txt", "job_id": "1276452"}
+COMPILE_EXIT=0
+{"hlo": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T074118384717-fsri-single-site-krylov-for-the-qualified-step/optimized-hlo/stream-300.hlo.txt", "optimized_instructions": 284792, "map_site_count": 30, "map_instructions": 154535, "shared_body_sites": 6, "shared_body_instructions": 30554, "direct_map_instructions": 123981}
+20209 4 False {'jvp': 5275, 'transpose': 7276, 'primal': 7658} ranch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call
+17749 3 False {'primal': 9938, 'jvp': 227, 'transpose': 7584} body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun
+17352 3 False {'jvp': 10462, 'transpose': 6890} ond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun
+16171 4 False {'jvp': 8005, 'primal': 8166} ranch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call
+12671 2 False {'jvp': 12671} jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body
+10015 6 False {'jvp': 2677, 'transpose': 7338} /cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body/while/body
+10013 5 False {'jvp': 2675, 'transpose': 7338} /while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body
+8170 4 True {'jvp': 8170} ile/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/jit(evaluate)
+7726 2 True {'jvp': 7726} jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/closed_call/jit(evaluate)
+7722 4 True {'jvp': 7722} ch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/jit(evaluate)
+2696 3 False {'jvp': 2696} while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/branch_0_fun
+2694 3 False {'jvp': 2694} jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body
+2614 3 False {'jvp': 2614} body/closed_call/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun
+2407 0 False {'primal': 2407} jit(solve)
+2316 2 True {'primal': 2316} jit(solve)/while/body/closed_call/cond/branch_1_fun/while/body/closed_call/jit(evaluate)/cond/branch_1_fun
+2310 4 True {'primal': 2310} un/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/jit(evaluate)/jvp()/cond/branch_0_fun
+2310 4 False {'primal': 2310} body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_0_fun
+2310 3 False {'primal': 2310} ond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_0_fun
+2310 4 False {'primal': 2310} body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/branch_0_fun
+2310 4 True {'primal': 2310} un/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/jit(evaluate)/jvp()/cond/branch_0_fun
+1886 1 False {'primal': 1886} jit(solve)/while/body/closed_call/cond/branch_1_fun
+320 0 False {'jvp': 200, 'primal': 110, 'transpose': 10} 
+76 2 False {'primal': 66, 'transpose': 10} cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun
+68 2 False {'transpose': 10, 'jvp': 58} ond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun
+58 1 False {'jvp': 58} cond/branch_1_fun/while/body
+16 2 False {'transpose': 10, 'jvp': 6} while/body/while/body
+16 1 False {'transpose': 10, 'jvp': 6} while/body
+7 2 False {'jvp': 7} cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun
+7 2 False {'jvp': 7} cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body
+6 0 False {'jvp': 6} cond/branch_0_fun
+EXIT=0

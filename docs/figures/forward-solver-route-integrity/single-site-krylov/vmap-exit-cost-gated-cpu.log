@@ -1,0 +1,48 @@
+revision=6179bf47a0edcac21013375418f97772072d5355 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit command=/home/ITER/mcintos/Code/nova/.venv/bin/python vmap_exit_cost.py exit job=1276883
+{
+  "arm": "exit",
+  "backend": "cpu",
+  "devices": [
+    "cpu:0"
+  ],
+  "size": 1529,
+  "width": 16,
+  "gmres_iterations": 8,
+  "member_applications_first_four": [
+    83,
+    83,
+    83,
+    83
+  ],
+  "walls": {
+    "exit": {
+      "median_seconds": 0.13886350207030773,
+      "first_call_seconds": 1.017504133284092,
+      "all": [
+        0.14097941294312477,
+        0.1384239848703146,
+        0.13886350207030773,
+        0.1388337817043066,
+        0.1386207640171051,
+        0.15010128170251846,
+        0.14786496199667454
+      ]
+    },
+    "base": {
+      "median_seconds": 0.080116743221879,
+      "first_call_seconds": 1.0348304063081741,
+      "all": [
+        0.08037738129496574,
+        0.080116743221879,
+        0.07930268533527851,
+        0.0798782929778099,
+        0.08430255018174648,
+        0.08106598630547523,
+        0.07955783233046532
+      ]
+    }
+  },
+  "ratio_over_base": 1.73326443994026
+}
+VMAP_COST arm=exit ratio=1.733
+EXIT=0

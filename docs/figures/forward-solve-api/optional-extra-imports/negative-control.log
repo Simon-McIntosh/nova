@@ -1,0 +1,4 @@
+mutation: replace the try guard's 'except ImportError' with 'except ValueError' in a synthetic module; the extra-only import must move from guarded=True (excluded) to guarded=False (reported)
+guarded variant : [('vedo', 3, True, False)]
+mutated variant : [('vedo', 3, False, False)]
+control outcome: PASS

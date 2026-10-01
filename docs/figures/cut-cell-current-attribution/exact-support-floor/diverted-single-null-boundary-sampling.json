@@ -1,0 +1,20 @@
+[
+  {
+    "requested_points": 23041,
+    "passed": false,
+    "error": "zero-flux lobe is not star-shaped at angle -1.831818"
+  },
+  {
+    "requested_points": 11521,
+    "passed": false,
+    "error": "zero-flux lobe is not star-shaped at angle 4.450549"
+  },
+  {
+    "requested_points": 5761,
+    "passed": true
+  },
+  {
+    "requested_points": 2881,
+    "passed": true
+  }
+]

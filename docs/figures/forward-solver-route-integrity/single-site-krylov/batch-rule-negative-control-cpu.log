@@ -1,0 +1,50 @@
+restore the per-slot select of the whole carry under vmap
+revision=6204bfd6feb7227dd66c2594dd2433248072e4a1 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit command=/home/ITER/mcintos/Code/nova/.venv/bin/python vmap_exit_cost.py selected job=1277152
+MUTATION_APPLIED restore the per-slot select of the whole carry under vmap
+{
+  "arm": "selected",
+  "backend": "cpu",
+  "devices": [
+    "cpu:0"
+  ],
+  "size": 1529,
+  "width": 16,
+  "gmres_iterations": 8,
+  "member_applications_first_four": [
+    83,
+    83,
+    83,
+    83
+  ],
+  "walls": {
+    "selected": {
+      "median_seconds": 0.14071573317050934,
+      "first_call_seconds": 0.9242766927927732,
+      "all": [
+        0.13773072510957718,
+        0.14071573317050934,
+        0.14331232011318207,
+        0.1440711822360754,
+        0.14178962633013725,
+        0.13816994056105614,
+        0.13942942023277283
+      ]
+    },
+    "base": {
+      "median_seconds": 0.08058091066777706,
+      "first_call_seconds": 1.0135939419269562,
+      "all": [
+        0.08081040717661381,
+        0.07982038147747517,
+        0.08058091066777706,
+        0.08026553131639957,
+        0.08089458383619785,
+        0.08091813698410988,
+        0.08009719476103783
+      ]
+    }
+  },
+  "ratio_over_base": 1.7462663551999191
+}
+VMAP_COST arm=selected ratio=1.746
+EXIT=0

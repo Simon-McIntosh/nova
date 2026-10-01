@@ -1,0 +1,71 @@
+restore the Gauss antiderivative path
+revision=09f3b82243b2c7c086400dee1869cbff26e6e564 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-closed-form-polygon-moments-replace-the-gauss-antiderivative command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-closed-form-polygon-moments-replace-the-gauss-antiderivative/docs/figures/exact-clip-closed-form/measure_replacement.py', '--program', 'negative']
+{"revision": "07e16f911d520cdd091ec7e685a506c9615dd6a4", "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72", "arm": "negative", "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-closed-form-polygon-moments-replace-the-gauss-antiderivative", "job": "1275743", "node": "98dci4-clu-3141", "requested_cells": 110, "realised_cells": 135, "mode": "exact", "evaluations_per_cut_cell": 621, "completed": false, "lower_seconds": 41.52330326847732, "lowered_antiderivative_present": true, "lowered_closed_form_present": false}
+{"revision": "07e16f911d520cdd091ec7e685a506c9615dd6a4", "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72", "arm": "negative", "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-closed-form-polygon-moments-replace-the-gauss-antiderivative", "job": "1275743", "node": "98dci4-clu-3141", "requested_cells": 110, "realised_cells": 135, "mode": "exact", "evaluations_per_cut_cell": 621, "completed": true, "lower_seconds": 41.52330326847732, "lowered_antiderivative_present": true, "lowered_closed_form_present": false, "compile_seconds": 433.70258370414376, "serialized_bytes": 234137743, "serialized_sha256": "ea5d79c7b57573e68998662c7f70eded6b2b6d6f67d6cdfb2c1c8b41f2eabf71", "top_five_hlo_ops": [["parameter", 124212], ["broadcast", 89497], ["bitcast", 74875], ["constant", 74478], ["add", 55569]], "hlo_instructions": 741991, "hlo_antiderivative_occurrences": 1, "hlo_closed_form_occurrences": 0, "hlo_bernstein_binom_occurrences": 1, "below_byte_ceiling": false}
+14:42:56 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 4.1.1
+....F..........FF                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_arc_route_carries_the_fixed_edge_and_point_bound _____________
+
+    @requires_boundary_route
+    def test_arc_route_carries_the_fixed_edge_and_point_bound():
+        support = _curved_support(128, capacity=3072)
+        edges = cut_capacity_edge_bound()
+        assert edges == 149
+        # Endpoint moments sample only the density fit, independently of edge count.
+>       assert cut_cell_moment_evaluation_bound() == 25
+E       assert 621 == 25
+E        +  where 621 = cut_cell_moment_evaluation_bound()
+
+tests/test_exact_clip_moments.py:248: AssertionError
+_________ test_production_boundary_reduction_has_no_gauss_evaluations __________
+
+    def test_production_boundary_reduction_has_no_gauss_evaluations():
+        """The endpoint route samples its density fit once and has no edge nodes."""
+        from nova.equilibrium.clip_quadrature import cut_cell_moment_evaluation_bound
+    
+>       assert cut_cell_moment_evaluation_bound() == 25
+E       assert 621 == 25
+E        +  where 621 = <function cut_cell_moment_evaluation_bound at 0x7f01b4410720>()
+
+tests/test_exact_clip_closed_form_budget.py:65: AssertionError
+__________ test_production_boundary_lowering_uses_endpoint_recurrence __________
+
+    def test_production_boundary_lowering_uses_endpoint_recurrence():
+        """Trace a live density with every monomial to expose the integration body."""
+        import jax
+        import jax.numpy as jnp
+    
+        from nova.equilibrium.clip_quadrature import _sampled_arc_polynomial_moments
+        from nova.jax.config import configure_dtypes
+    
+        configure_dtypes()
+        assert jax.config.jax_enable_x64
+        vertices = jnp.asarray([[[0.0, 0.0], [0.8, -0.2], [0.1, 0.7]]])
+        lowered = jax.jit(_sampled_arc_polynomial_moments).lower(
+            vertices,
+            jnp.asarray([3]),
+            jnp.zeros((1, 2)),
+            jnp.ones((1, 2)),
+            jnp.arange(1.0, 16.0)[None],
+            jnp.zeros((1, 2)),
+        )
+        text = lowered.as_text(debug_info=True)
+        assert "_sampled_arc_polynomial_moments" in text
+>       assert "_straight_edge_monomial_moments" in text
+E       assert '_straight_edge_monomial_moments' in '#loc = loc(unknown)\n#loc1 = loc("vertices")\n#loc2 = loc("count")\n#loc3 = loc("polynomial_centre")\n#loc4 = loc("co...(_sampled_arc_polynomial_moments)/mul"(#loc496))\n#loc506 = loc("jit(_sampled_arc_polynomial_moments)/mul"(#loc497))\n'
+
+tests/test_exact_clip_closed_form_budget.py:89: AssertionError
+=============================== warnings summary ===============================
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; zarr
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_exact_clip_moments.py::test_arc_route_carries_the_fixed_edge_and_point_bound
+FAILED tests/test_exact_clip_closed_form_budget.py::test_production_boundary_reduction_has_no_gauss_evaluations
+FAILED tests/test_exact_clip_closed_form_budget.py::test_production_boundary_lowering_uses_endpoint_recurrence
+3 failed, 14 passed, 1 warning in 33.89s
+restored_gauss_test_exit=1

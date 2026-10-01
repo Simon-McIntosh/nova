@@ -1,0 +1,4 @@
+revision=5ed1c449579c3eca17a476f019bab4d12b02fb2b tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state command=['docs/figures/cut-cell-current-attribution/exact-support-floor/audit.py']
+PASS: ten paired rows; cell/class totals, four-term closure, controls, panels
+REFUSED: one missing case/rung row
+REFUSED: false chord control verdict

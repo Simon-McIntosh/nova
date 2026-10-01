@@ -1,0 +1,668 @@
+{
+  "$id": "nova.exact-clip-seed-render-receipt",
+  "clip_mode": "exact",
+  "figure_count": 12,
+  "figures": [
+    {
+      "converged": true,
+      "figure": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-production-route-reduced.png",
+      "poloidal_panels": [
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "flux"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "psi_error"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "gradient_error"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "hessian_error"
+        }
+      ],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-production-route-reduced.png",
+      "residual": 3.419964981783324e-13,
+      "sha256": "78e0fe5cda053b6cddf314879d3efc48329bc9602d82713efe6d5354121c4978",
+      "title": "weak-rotation-reactor-static \u00b7 reduced \u00b7 residual=3.419964981783324e-13 \u00b7 converged=True"
+    },
+    {
+      "converged": true,
+      "figure": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-110-comparison.png",
+      "poloidal_panels": [
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "shared_levels"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "difference"
+        }
+      ],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-110-comparison.png",
+      "residual": 3.419964981783324e-13,
+      "sha256": "e378d8cf5136b4be72b66a60bf45055e098239c5ed9237dc9ea62045f69d3204",
+      "title": "weak-rotation-reactor-static \u00b7 110 requested cells \u00b7 residual=3.419964981783324e-13 \u00b7 converged=True"
+    },
+    {
+      "converged": true,
+      "figure": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-production-route-cells-300.png",
+      "poloidal_panels": [
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "flux"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "psi_error"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "gradient_error"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "hessian_error"
+        }
+      ],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-production-route-cells-300.png",
+      "residual": 2.0794676063057824e-13,
+      "sha256": "c3497013e8e76ef4600fd1bc6200cac6bdec5bf425182d5abcab55ea88087b5a",
+      "title": "weak-rotation-reactor-static \u00b7 cells-300 \u00b7 residual=2.0794676063057824e-13 \u00b7 converged=True"
+    },
+    {
+      "converged": true,
+      "figure": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-300-comparison.png",
+      "poloidal_panels": [
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "shared_levels"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "difference"
+        }
+      ],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-300-comparison.png",
+      "residual": 2.0794676063057824e-13,
+      "sha256": "7747ba42451ff4ca9ca519e5fa828375dbbd3741df78ecbca0186721c51ababb",
+      "title": "weak-rotation-reactor-static \u00b7 300 requested cells \u00b7 residual=2.0794676063057824e-13 \u00b7 converged=True"
+    },
+    {
+      "converged": true,
+      "figure": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-production-route-reduced.png",
+      "poloidal_panels": [
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "flux"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "psi_error"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "gradient_error"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "hessian_error"
+        }
+      ],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-production-route-reduced.png",
+      "residual": 1.444216995437516e-13,
+      "sha256": "93112af6c963ba8af7b414515cf40f9c158a8365ceb5a5d53369be77e293875f",
+      "title": "moderate-rotation-conventional-static \u00b7 reduced \u00b7 residual=1.444216995437516e-13 \u00b7 converged=True"
+    },
+    {
+      "converged": true,
+      "figure": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-110-comparison.png",
+      "poloidal_panels": [
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "shared_levels"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "difference"
+        }
+      ],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-110-comparison.png",
+      "residual": 1.444216995437516e-13,
+      "sha256": "9f31f372006bf2e6df2a6e5d360420617c78240435ff449b6d6ea922ece33f5e",
+      "title": "moderate-rotation-conventional-static \u00b7 110 requested cells \u00b7 residual=1.444216995437516e-13 \u00b7 converged=True"
+    },
+    {
+      "converged": true,
+      "figure": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-production-route-cells-300.png",
+      "poloidal_panels": [
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "flux"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "psi_error"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "gradient_error"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "hessian_error"
+        }
+      ],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-production-route-cells-300.png",
+      "residual": 3.856209915032976e-13,
+      "sha256": "afff0677fdc693bbf5755369b68c5d0dec99aad802489fdc8bc8ab0b39933093",
+      "title": "moderate-rotation-conventional-static \u00b7 cells-300 \u00b7 residual=3.856209915032976e-13 \u00b7 converged=True"
+    },
+    {
+      "converged": true,
+      "figure": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-300-comparison.png",
+      "poloidal_panels": [
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "shared_levels"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "difference"
+        }
+      ],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-300-comparison.png",
+      "residual": 3.856209915032976e-13,
+      "sha256": "8e41d199491512f50dd3070c25baa8acd864ad760a584b0e098bd24cda304ecb",
+      "title": "moderate-rotation-conventional-static \u00b7 300 requested cells \u00b7 residual=3.856209915032976e-13 \u00b7 converged=True"
+    },
+    {
+      "converged": true,
+      "figure": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-production-route-reduced.png",
+      "poloidal_panels": [
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "flux"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "psi_error"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "gradient_error"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "hessian_error"
+        }
+      ],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-production-route-reduced.png",
+      "residual": 6.711667497659967e-13,
+      "sha256": "2314f0bb13fd10e2dc4f54b0fb3ade0a01643093bdd97af09f944ab5929df701",
+      "title": "strong-rotation-compact-static \u00b7 reduced \u00b7 residual=6.711667497659967e-13 \u00b7 converged=True"
+    },
+    {
+      "converged": true,
+      "figure": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-110-comparison.png",
+      "poloidal_panels": [
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "shared_levels"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "difference"
+        }
+      ],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-110-comparison.png",
+      "residual": 6.711667497659967e-13,
+      "sha256": "86aae9d3081935541bc734b4d7ca26df3d3a8166833867b2c8913551c0dfb3bc",
+      "title": "strong-rotation-compact-static \u00b7 110 requested cells \u00b7 residual=6.711667497659967e-13 \u00b7 converged=True"
+    },
+    {
+      "converged": true,
+      "figure": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-production-route-cells-300.png",
+      "poloidal_panels": [
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "flux"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "psi_error"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "gradient_error"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "hessian_error"
+        }
+      ],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-production-route-cells-300.png",
+      "residual": 1.1998637468319157e-13,
+      "sha256": "eb84de535d89baf1f3e37b486aade833a244bfeb1da307857b7a4f91a7bef6b2",
+      "title": "strong-rotation-compact-static \u00b7 cells-300 \u00b7 residual=1.1998637468319157e-13 \u00b7 converged=True"
+    },
+    {
+      "converged": true,
+      "figure": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-300-comparison.png",
+      "poloidal_panels": [
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "shared_levels"
+        },
+        {
+          "null_glyphs": {
+            "analytic": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            },
+            "solved": {
+              "admitted_saddle": 0,
+              "axis": 1,
+              "other_qualified": 0
+            }
+          },
+          "panel": "difference"
+        }
+      ],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-300-comparison.png",
+      "residual": 1.1998637468319157e-13,
+      "sha256": "f9cabdb32391de6ada90d645486ae54d0b332d6fdc020049246a9d34ac629dc1",
+      "title": "strong-rotation-compact-static \u00b7 300 requested cells \u00b7 residual=1.1998637468319157e-13 \u00b7 converged=True"
+    }
+  ],
+  "revision": "6a1b3121951b4f8d4fef32d444cf0bfd438f3b8d"
+}

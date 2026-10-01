@@ -1,0 +1,1 @@
+/var/spool/slurm/d/job1276172/slurm_script: line 40: 3785543 Aborted                 (core dumped) env $extra ABORT_TIMELINE=$OUT/$name.timeline.txt "$PY" -m pytest -p no:cacheprovider -p abort_timeline -vv --tb=line "$@" >> "$log" 2>&1

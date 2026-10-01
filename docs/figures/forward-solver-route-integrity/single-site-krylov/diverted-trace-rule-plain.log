@@ -1,0 +1,26 @@
+revision=6204bfd6feb7227dd66c2594dd2433248072e4a1 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit command=diverted_trace.py exit /home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T163850406961-fsri-single-site-krylov-vmap-exit/mechanism/rule-6204bfd6f-plain job=1277159
+SERVED []
+ARM exit fixed_point=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit/nova/equilibrium/fixed_point.py instrument=False
+SOLOVEV_COMPILATION_CACHE directory=/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe version=runtime-ea5c55820be3d80549fe
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=case_and_machine
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=case_and_machine elapsed_seconds=0.834926
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=operator_and_seed
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=operator_and_seed elapsed_seconds=30.001
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=operator_and_seed elapsed_seconds=33.620506
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=production_solve
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=30.000
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=60.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=90.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=120.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=150.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=180.002
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=210.002
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=240.002
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=270.002
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=291.094500
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=accuracy_scoring
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=accuracy_scoring elapsed_seconds=1.096504
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=figure_render
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=figure_render elapsed_seconds=0.518195
+TERMINAL arm=exit residual=0.06325730373091486 seconds=327.3
+EXIT=0

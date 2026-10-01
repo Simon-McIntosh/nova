@@ -1,0 +1,4 @@
+revision=34c591907abe69e8b041c2e4b06abed5be1df706 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-first-step-degenerate-direction command=python synthetic spectrum controls
+PASS: known-null step energy=1; rotated-null step energy=0; shrink cosine changes 1 to 0
+PASS: nonfinite counter detects one injected NaN: 1
+Effective command: env -u UV_NO_SYNC -u UV_RUN_RECURSION_DEPTH UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv uv run --no-sync python - (synthetic spectrum and injected-NaN controls through stdin).

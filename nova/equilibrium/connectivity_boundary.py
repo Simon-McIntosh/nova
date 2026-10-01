@@ -982,6 +982,8 @@ def _sample_wall_polyline(
     wall_r, wall_z, sample_count, wall_unit_offsets=None, wall_unit_closed=None
 ):
     """Return equal-arc samples without introducing inter-unit segments."""
+    wall_r = jnp.asarray(wall_r)
+    wall_z = jnp.asarray(wall_z)
     if wall_unit_offsets is None:
         wall_unit_offsets = jnp.asarray([0, wall_r.size], dtype=jnp.int32)
     if wall_unit_closed is None:
@@ -1055,6 +1057,8 @@ def _select_reachable_wall_limiter(
     masked argmin.  The selected-wall path checks only its selected point,
     nearest support node, segment samples, and refined roots.
     """
+    wall_r = jnp.asarray(wall_r)
+    wall_z = jnp.asarray(wall_z)
     if wall_unit_offsets is None:
         wall_unit_offsets = jnp.asarray([0, wall_r.size], dtype=jnp.int32)
     if wall_unit_closed is None:

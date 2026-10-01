@@ -1,0 +1,12 @@
+{
+  "source_digest": "9220784d0817001b7cc03dc5a7782369acc3da85d49c2575cc0d84acacf86bac",
+  "revision": "d8d858ff09a39851885a738c2293544785df32be",
+  "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine",
+  "cells": 1000,
+  "optimized_instructions": 344858,
+  "compile_seconds": 178.64703487604856,
+  "job_id": "1275682",
+  "platform": "cpu",
+  "hlo_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T103934949557-fsri-one-traced-operator-state-machine/optimized-hlo/baseline-1000.hlo.txt",
+  "solver_source_revision": "775720c77c5443e990a74b52ea464b73ce87b6aa"
+}

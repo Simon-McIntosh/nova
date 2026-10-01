@@ -1,15 +1,19 @@
 """Manage sectional transforms."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import numpy as np
 import shapely.geometry
 import shapely.ops
-import vedo
 
 from nova.geometry.frenet import Frenet
 from nova.geometry.rotate import to_vector, to_axes, by_angle
-from nova.geometry.vtkgen import VtkFrame
+
+if TYPE_CHECKING:
+    from nova.geometry.vtkgen import VtkFrame
 
 
 def distinct_corners(points: np.ndarray, tolerance: float = 1e-9) -> np.ndarray:
@@ -141,6 +145,11 @@ class Section:
 
     def _append(self):
         """Generate mesh and append mesh to list."""
+        # VtkFrame subclasses a vedo mesh, so it is imported here rather than
+        # at module scope: a consumer without the viz extra can then import and
+        # transform a section without pulling a renderer into the import graph.
+        from nova.geometry.vtkgen import VtkFrame
+
         self.point_array.append(self.points.tolist())
         self.mesh_array.append(
             VtkFrame([self.points, [[*range(len(self.points))]]]).c(len(self))
@@ -235,4 +244,8 @@ class Section:
 
     def plot(self):
         """Plot mesh instances."""
+        # Imported here so the module is importable without the viz extra --
+        # vedo is the only renderer this module reaches for.
+        import vedo
+
         vedo.show(*self.mesh_array, new=True, axes=True)

@@ -1,0 +1,13 @@
+{
+  "source_revision": "0c685775797acfc1648cbf375033391f62456603",
+  "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body",
+  "sha256": {
+    "nova/equilibrium/separatrix_clip.py": "df245270ecfade43fd60cea5ba5c11c2b6b4d08a6ca42b2fd5de2fcaffbe5aa8",
+    "nova/equilibrium/forward_operator.py": "88402a6d39a831183124d37eaa76e002bc3b33adb96137548562d451b9310213",
+    "tests/test_equilibrium_separatrix_clip.py": "5608b4a2e42adfdb730146131114bf270ea86f076edfa5aa0a0c68343b6957a0",
+    "tests/test_exact_clip_moments.py": "d2a0227eb2edfea5ec1f709ca9dae29af9a19a5da9b5cbad02af61abaadf6d3a",
+    "tests/test_null_generator_admission.py": "cbfe5d4a9c3d902c1beb841ef1dd34aafed508ce94a15c887a04f79c77aafb7d",
+    "tests/test_flux_surface_extraction.py": "8b7573832783777a5dccb933a7618a5011cb1a1bf3fd6564bf838f54eb4b9c4a"
+  },
+  "all_source_and_tests_unchanged": true
+}

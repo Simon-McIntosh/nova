@@ -1,0 +1,64 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python3
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-positional-stiffness-figures
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 15:27:24 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 1 item
+
+tests/test_fixture_positional_stiffness_render.py::test_the_residual_figure_pair_are_two_distinct_measurements FAILED [100%]
+
+=================================== FAILURES ===================================
+_________ test_the_residual_figure_pair_are_two_distinct_measurements __________
+
+    def test_the_residual_figure_pair_are_two_distinct_measurements():
+>       _assert_residual_figures_are_distinct_measurements(_receipt())
+
+tests/test_fixture_positional_stiffness_render.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+receipt = {'$id': 'nova.fixture-positional-stiffness-render-receipt', 'render_input': 'docs/figures/cut-cell-current-attribution...45fc5b46c57009e0ec9e221fed2b67f4bc07e4a16909a4caa', ...}], 'revision': 'c054dc50fe02add3b03555a99ce66a099485dc72', ...}
+
+    def _assert_residual_figures_are_distinct_measurements(receipt: dict) -> None:
+        """Two residual figures, two row selections, two digests, one receipt."""
+    
+        figures = receipt["residual_figures"]
+        assert len(figures) >= 2, "the receipt must carry the residual figure pair"
+    
+        selections = {
+            (figure["case"], figure["requested_cells"], figure["realised_cells"])
+            for figure in figures
+        }
+        assert len(selections) == len(figures), (
+            "each residual figure draws its own disjoint row selection; "
+            f"found {sorted(selections)}"
+        )
+    
+        sources = {figure["source_receipt"] for figure in figures}
+        assert len(sources) == 1, (
+            "every residual figure is drawn from the one committed measurement "
+            f"receipt; found {sorted(sources)}"
+        )
+        digests = {figure["source_receipt_sha256"] for figure in figures}
+        assert digests == {_file_digest(SOURCE_RECEIPT)}, (
+            "the receipt the figures name must be the committed measurement receipt "
+            f"on disk; found {sorted(digests)}"
+        )
+    
+        pixels = [figure["pixel_sha256"] for figure in figures]
+>       assert len(set(pixels)) == len(pixels), (
+            "two residual figures sharing one pixel digest are the same picture "
+            f"drawn twice; found {sorted(pixels)}"
+        )
+E       AssertionError: two residual figures sharing one pixel digest are the same picture drawn twice; found ['26c8e8428281fc316b3ae1b170cc6662d57034de00dfc06414d532f2bbe2c161', '26c8e8428281fc316b3ae1b170cc6662d57034de00dfc06414d532f2bbe2c161', 'c25d94d9e6c425a45fc5b46c57009e0ec9e221fed2b67f4bc07e4a16909a4caa']
+E       assert 2 == 3
+E        +  where 2 = len({'26c8e8428281fc316b3ae1b170cc6662d57034de00dfc06414d532f2bbe2c161', 'c25d94d9e6c425a45fc5b46c57009e0ec9e221fed2b67f4bc07e4a16909a4caa'})
+E        +    where {'26c8e8428281fc316b3ae1b170cc6662d57034de00dfc06414d532f2bbe2c161', 'c25d94d9e6c425a45fc5b46c57009e0ec9e221fed2b67f4bc07e4a16909a4caa'} = set(['26c8e8428281fc316b3ae1b170cc6662d57034de00dfc06414d532f2bbe2c161', '26c8e8428281fc316b3ae1b170cc6662d57034de00dfc06414d532f2bbe2c161', 'c25d94d9e6c425a45fc5b46c57009e0ec9e221fed2b67f4bc07e4a16909a4caa'])
+E        +  and   3 = len(['26c8e8428281fc316b3ae1b170cc6662d57034de00dfc06414d532f2bbe2c161', '26c8e8428281fc316b3ae1b170cc6662d57034de00dfc06414d532f2bbe2c161', 'c25d94d9e6c425a45fc5b46c57009e0ec9e221fed2b67f4bc07e4a16909a4caa'])
+
+tests/test_fixture_positional_stiffness_render.py:91: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_fixture_positional_stiffness_render.py::test_the_residual_figure_pair_are_two_distinct_measurements
+============================== 1 failed in 12.23s ==============================

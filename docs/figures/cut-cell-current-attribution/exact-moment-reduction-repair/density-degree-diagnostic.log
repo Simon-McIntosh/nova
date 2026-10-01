@@ -1,0 +1,86 @@
+revision=a28a3e880dd4430fb13077c5f8954dce30cf1f02 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair command=diagnose-density-projection-degree
+{"cell_108_current_a": 0.0007330238238006195, "cell_108_reference_a": 192266.36623449935, "corrected_exact_support_fraction": 0.9998647038651871, "degree": 4, "moment_reduction_a": -1009496.0723701832, "moment_reduction_over_base": 0.9981494784610744, "sample_count": 25}
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/docs/figures/cut-cell-current-attribution/exact-moment-reduction-repair/diagnose_density_degree.py", line 82, in <module>
+    stages._evaluate_path(operator, state)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/benchmarks/exact_cut_cell_moment_stages.py", line 261, in _evaluate_path
+    evaluate(jnp.asarray(state), operator)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/benchmarks/exact_cut_cell_moment_stages.py", line 237, in evaluate
+    moments = active.source.current_moments(
+        active._moment_support_masks(masks, support),
+    ...<2 lines>...
+        sample_flux=samples,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/source.py", line 960, in current_moments
+    selected = support_moments(
+        profile,
+    ...<2 lines>...
+        profile_support,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/forward_operator.py", line 3253, in support_current_moments
+    moments = moment_integrator(
+        support,
+    ...<3 lines>...
+        cut_cell_capacity=self._cut_cell_bank_capacity,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/forward_operator.py", line 365, in _cell_banked_current_moments
+    whole_moments = clipped_support_current_moments(
+        support,
+    ...<3 lines>...
+        cut_cell_capacity=1,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/clip_quadrature.py", line 726, in clipped_support_current_moments
+    return _flux_selected_current_moments(
+        support, selection, field, profile, cut_cell_capacity=cut_cell_capacity
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/clip_quadrature.py", line 936, in _flux_selected_current_moments
+    confined = integrate(1.0, profile.confined)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/clip_quadrature.py", line 927, in integrate
+    return clipped_support_current_moments(
+        clipped,
+    ...<4 lines>...
+        boundary_reduction=True,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/clip_quadrature.py", line 806, in clipped_support_current_moments
+    _, (cut_current, cut_radial, cut_vertical) = jax.lax.scan(
+                                                 ~~~~~~~~~~~~^
+        scan_cut,
+        ^^^^^^^^^
+    ...<2 lines>...
+        unroll=1,
+        ^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/clip_quadrature.py", line 798, in scan_cut
+    values = jax.lax.cond(
+        live,
+    ...<2 lines>...
+        (cell, polygon, polygon_count, centroid),
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/clip_quadrature.py", line 768, in integrate
+    value = _integrate_current_polynomial(
+        carried_vertices[None, ...],
+    ...<4 lines>...
+        profile,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/clip_quadrature.py", line 648, in _integrate_current_polynomial
+    return _sampled_arc_polynomial_moments(
+        vertices,
+    ...<4 lines>...
+        moment_centres,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/clip_quadrature.py", line 264, in _sampled_arc_polynomial_moments
+    current = area_scale * line_integral(0, 0)
+                           ~~~~~~~~~~~~~^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/clip_quadrature.py", line 256, in line_integral
+    tuple(
+    ^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair/nova/equilibrium/clip_quadrature.py", line 257, in <genexpr>
+    powers.index((radial + radial_shift, vertical + vertical_shift))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: tuple.index(x): x not in tuple
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+srun: error: 98dci4-clu-3141: task 0: Exited with exit code 1

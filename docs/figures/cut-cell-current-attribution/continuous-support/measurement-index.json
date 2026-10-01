@@ -1,0 +1,50 @@
+[
+  {
+    "compact_receipt": "rows-all_debug/record/cells-110/receipt.json",
+    "raw_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/rows-all_debug/record/cells-110/receipt.json",
+    "raw_sha256": "ceb5816f0cbd72e129e662aa66daff1110dedde2274de17ed3802b4ed51a96d7",
+    "completed": true,
+    "authoritative": false,
+    "terminal_residual": 0.05227718740197289
+  },
+  {
+    "compact_receipt": "rows-all_debug/record/cells-300/receipt.json",
+    "raw_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/rows-all_debug/record/cells-300/receipt.json",
+    "raw_sha256": "524010ee26bb47dbd5021dcc13df02b789230b5e4b1a01d20ef521a5a91935a4",
+    "completed": false,
+    "authoritative": false,
+    "terminal_residual": null
+  },
+  {
+    "compact_receipt": "rows-titan/record/cells-110/receipt.json",
+    "raw_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/rows-titan/record/cells-110/receipt.json",
+    "raw_sha256": "eb417b135502459a71680106d69014353d15981892b5c1660c4a98ad17213616",
+    "completed": true,
+    "authoritative": false,
+    "terminal_residual": 0.052277187401972014
+  },
+  {
+    "compact_receipt": "rows-titan/record/cells-300/receipt.json",
+    "raw_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/rows-titan/record/cells-300/receipt.json",
+    "raw_sha256": "833ab94e0a2f159ff052a7e37e196d2ab4970981eeb2b76da9892349deaa7c18",
+    "completed": false,
+    "authoritative": false,
+    "terminal_residual": null
+  },
+  {
+    "compact_receipt": "rows-titan-adjoint/record/cells-110/receipt.json",
+    "raw_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/rows-titan-adjoint/record/cells-110/receipt.json",
+    "raw_sha256": "23243c619c1a97b66b5a0bd08b4d5e57defccd8037113f7e5bb3f499db87a09a",
+    "completed": true,
+    "authoritative": true,
+    "terminal_residual": 0.045193155486586804
+  },
+  {
+    "compact_receipt": "rows-titan-adjoint/record/cells-300/receipt.json",
+    "raw_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/rows-titan-adjoint/record/cells-300/receipt.json",
+    "raw_sha256": "8ad260e5bf17747b8faffe652571a1c01ae17171b291cfe594a8cf2b9826015d",
+    "completed": true,
+    "authoritative": true,
+    "terminal_residual": 0.05185117051611476
+  }
+]

@@ -24,8 +24,8 @@
   <title>Dual-Branch Selection | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="12">
+<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-version" content="13">
 <meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8,a9ea090c">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
 <meta name="plan-impl" content="0.7">
@@ -545,7 +545,7 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="selection-observable" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="selection-observable" data-choice="both-explicit-roles" data-by="Simon McIntosh" data-when="2026-10-01T20:42:03+00:00">
     <p class="r-dec-q">Which observable carries branch selection: the smooth softmax weight
         p_diverted, the exact signed class_margin, or both with explicit roles (smooth weight for
         selection and gradients, exact margin for reporting and gates)? The capability map warns
@@ -555,9 +555,9 @@
     <p class="r-dec-opts">
       <button class="r-opt" data-value="p-diverted-only">p-diverted-only</button>
       <button class="r-opt" data-value="class-margin-only">class-margin-only</button>
-      <button class="r-opt" data-value="both-explicit-roles">both-explicit-roles</button>
+      <button class="r-opt chosen" data-value="both-explicit-roles">both-explicit-roles</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-10-01, from the traced-selection receipt this decision asked for: 53/53 exact-class agreement, both 257-point rails continuous (max adjacent step 3.5255e-4), and p_diverted against sigmoid(class_margin/0.01) agreeing to 2.2e-16. Each observable does one job: the smooth weight carries selection and gradients, and the exact signed margin carries reporting and gates. A gate reading only the smooth weight judges a softened quantity. Using only the exact margin leaves no gradient through branch selection. Accepted cost: two observables must stay consistent, which the receipt&#x27;s agreement check enforces. The margin&#x27;s definition moves to signed webers under contour-tree-topology-authority; the roles are unchanged by that.</p>
     </div>
 <div class="r-dec" data-key="fork-arming" data-choice="superseded-by-measurement: single pinned solve + post-hoc classification" data-by="sprint-review" data-when="2026-08-26T08:51:14+00:00">
     <p class="r-dec-q">Does the catalog fork both branches on every slice (simple, uniform
@@ -591,10 +591,15 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-dbs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship dual-branch-selection" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dbs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-25" data-recommends-skill="/reckon-build dual-branch-selection" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Implement the traced selection seam and fork policy</h4>
     <div class="r-fu-body">The selection-seam prototype is landed and passing (commit 632a4396; 53/53 exact-class agreement, continuous rails, exact degrade semantics). Next: promote the seam to a production API consuming the connectivity-localization repair, close the three host islands (array-only seed construction, lax.scan selector state, fixed-ladder bootstrap), and measure the fork-arming economics on catalog frames. The pinned-branch-contrast receipt and discrete-operator-analytic-error section 4 feed the open decisions.</div>
-    <pre class="r-fu-prompt">/reckon-ship dual-branch-selection</pre>
+    <pre class="r-fu-prompt">/reckon-build dual-branch-selection</pre>
+    </article>
+<article class="r-fu" data-id="f-dbs-margin-in-signed-webers" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build dual-branch-selection" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Re-express the selection margin and the smooth weight&#x27;s temperature in signed webers</h4>
+    <div class="r-fu-body"><p>Under contour-tree-topology-authority the class margin is a signed flux difference in webers, oriented by the plasma-current sign, not a difference of normalised flux. The current normalisation divides by the extreme flux at the grid edge, so the margin depends on the size of the solve box. Once that plan's §4 lands, re-express <code>class_margin</code> here in webers, restate the smooth weight's temperature (today 0.01 in normalised units) in webers, and re-run the traced-selection receipt.</p><p><strong>Done when:</strong> the receipt shows exact-class agreement and continuous rails on the webers margin over the same 53 cases, with the temperature stated in Wb and its choice justified against the rail's step; and no normalised-flux quantity remains in the selection path.</p></div>
+    <pre class="r-fu-prompt">/reckon-build dual-branch-selection</pre>
     </article>
 </section>
 

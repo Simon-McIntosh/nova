@@ -1,0 +1,3 @@
+revision=ccc09221d1e982026eed45b5ee5cc0f865188d96 source_checkpoint=067ea754ce138a8b93a704f42877ab501957c9ad tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/replay_reference.py', '--suite', 'test_exact_clip_moments.py']
+............                                                             [100%]
+12 passed in 51.82s

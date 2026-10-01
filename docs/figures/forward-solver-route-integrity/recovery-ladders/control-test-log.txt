@@ -1,0 +1,54 @@
+09:32:59 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+F
+=================================== FAILURES ===================================
+______ test_diverted_normalised_certificate_rung_retains_finite_fallback _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fe1ed7e9220>
+tmp_path = PosixPath('/tmp/pytest-of-mcintos/pytest-3196/test_diverted_normalised_certi0')
+
+    @pytest.mark.slow
+    def test_diverted_normalised_certificate_rung_retains_finite_fallback(
+        monkeypatch, tmp_path
+    ):
+        """The constrained diverted rung re-reads its current support per trip."""
+        from benchmarks import solovev_certificate
+    
+        monkeypatch.setattr(solovev_certificate, "PART_ROOT", tmp_path)
+        row = solovev_certificate._measure("diverted-single-null", -300)
+    
+        # The rung now terminates at the un-carried fixed point: the frozen
+        # topology partition whose target-current suppression produced the retired
+        # 0.025515711279493654 is not in effect for this row at this revision.
+>       assert row["solver"]["terminal_fixed_point_residual"] == 2.248351582217136
+E       assert 0.27948523220464483 == 2.248351582217136
+
+tests/test_reduced_newton.py:167: AssertionError
+----------------------------- Captured stdout call -----------------------------
+SOLOVEV_COMPILATION_CACHE directory=/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe version=runtime-ea5c55820be3d80549fe
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=case_and_machine
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=case_and_machine elapsed_seconds=1.206086
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=operator_and_seed
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=operator_and_seed elapsed_seconds=30.018
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=operator_and_seed elapsed_seconds=30.774576
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=production_solve
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=30.000
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=60.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=90.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=120.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=150.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=180.001
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=210.002
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=240.002
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=270.002
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=300.003
+SOLOVEV_STAGE_HEARTBEAT case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=330.003
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=production_solve elapsed_seconds=335.823586
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=accuracy_scoring
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=accuracy_scoring elapsed_seconds=0.977629
+SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=figure_render
+SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=figure_render elapsed_seconds=0.754051
+=========================== short test summary info ============================
+FAILED tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 393.95s (0:06:33)
+srun: error: 98dci4-clu-3141: task 0: Exited with exit code 1

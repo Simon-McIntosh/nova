@@ -1,0 +1,4 @@
+revision=a2c8836289ab399e3ed836f94c904ce111852ea4 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-why-the-merit-model-refuses-the-analytic-direction command=measure.py --cells 110 then --cells 300
+ROW_EXIT cells=110 status=0
+ROW_EXIT cells=300 status=0
+GATE_EXIT=0

@@ -1,0 +1,65 @@
+{
+  "requested_cells": -300,
+  "rows": [
+    {
+      "backtrack_trials": 60,
+      "case": "weak-rotation-reactor-static",
+      "continuation_promotions": 10,
+      "converged": false,
+      "descent_rung_promotions": 10,
+      "promotions_accepted": 23,
+      "promotions_attempted": 40,
+      "promotions_recorded": 10,
+      "rebuild_rung_promotions": 10,
+      "status": "recorded",
+      "terminal_fixed_point_residual": 0.0055589300334190185,
+      "termination": "active_set_settled",
+      "trips": 4
+    },
+    {
+      "backtrack_trials": 60,
+      "case": "moderate-rotation-conventional-static",
+      "continuation_promotions": 10,
+      "converged": false,
+      "descent_rung_promotions": 10,
+      "promotions_accepted": 16,
+      "promotions_attempted": 30,
+      "promotions_recorded": 10,
+      "rebuild_rung_promotions": 10,
+      "status": "recorded",
+      "terminal_fixed_point_residual": 0.008455791545012673,
+      "termination": "active_set_settled",
+      "trips": 3
+    },
+    {
+      "backtrack_trials": 60,
+      "case": "strong-rotation-compact-static",
+      "continuation_promotions": 10,
+      "converged": false,
+      "descent_rung_promotions": 10,
+      "promotions_accepted": 33,
+      "promotions_attempted": 50,
+      "promotions_recorded": 10,
+      "rebuild_rung_promotions": 10,
+      "status": "recorded",
+      "terminal_fixed_point_residual": 0.01738831511268224,
+      "termination": "active_set_settled",
+      "trips": 5
+    },
+    {
+      "backtrack_trials": 0,
+      "case": "diverted-single-null",
+      "continuation_promotions": 0,
+      "converged": true,
+      "descent_rung_promotions": 0,
+      "promotions_accepted": 3,
+      "promotions_attempted": 3,
+      "promotions_recorded": 1,
+      "rebuild_rung_promotions": 0,
+      "status": "recorded",
+      "terminal_fixed_point_residual": 5.626976272072871e-15,
+      "termination": "converged",
+      "trips": 2
+    }
+  ]
+}

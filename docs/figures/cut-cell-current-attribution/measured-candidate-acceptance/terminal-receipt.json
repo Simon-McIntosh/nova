@@ -1,0 +1,10 @@
+{
+  "case": "weak-rotation-reactor-static",
+  "requested_cells": 300,
+  "realised_cells": 342,
+  "state_digest": "bfdc797c2b9cc85a36ed04124019b8d4baf7ad0af145d861e88b6808fcd5a5b7",
+  "residual": 0.05529921020198606,
+  "converged": false,
+  "active_set_iterations": 16,
+  "termination_reason": "10"
+}

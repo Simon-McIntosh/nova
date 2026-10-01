@@ -50,7 +50,6 @@ from benchmarks.diiid_forward_gs_match import (
     _LABEL_COLUMNS,
     _plasma_mask,
     _read,
-    _separatrix,
     build_profile,
     canonical_axes,
     gauge_metrics,
@@ -64,6 +63,7 @@ from benchmarks.diiid_state_of_play_figures import (
     _boundary_separation,
     boundary_gradient_minimum,
 )
+from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.diiid_description import POLOIDAL_CONDUCTORS
 from nova.jax.config import configure_dtypes
@@ -110,6 +110,58 @@ def contour_levels_from_given(
     if np.isclose(lower, upper):
         raise ValueError("the given labelled map has no finite contour span")
     return np.linspace(float(lower), float(upper), count)
+
+
+def assembled_closed_boundary(
+    radius: np.ndarray,
+    height: np.ndarray,
+    flux: np.ndarray,
+    axis_flux: float,
+    boundary_flux: float,
+    *,
+    samples_per_segment: int = 8,
+) -> np.ndarray:
+    """Sample the axis-enclosing closed branch of one solved flux field.
+
+    A solved flux field is extremal at the magnetic axis and monotone toward
+    the boundary, so the sign of the boundary-minus-axis span says which grid
+    extremum the axis is; that coordinate reaches
+    :func:`nova.equilibrium.separatrix_branches.assemble_separatrix_branches`
+    only to choose the branch that encloses it, and the returned controls are
+    sampled to ordered R,Z vertices. An assembly carrying no closed branch
+    returns an empty array, which the caller reads as an undrawable boundary
+    rather than a boundary at the origin.
+    """
+
+    field = np.asarray(flux, dtype=float)
+    flat = np.nanargmin(field) if boundary_flux > axis_flux else np.nanargmax(field)
+    radial_index, vertical_index = np.unravel_index(flat, field.shape)
+    radial = np.asarray(radius, dtype=float)
+    vertical = np.asarray(height, dtype=float)
+    branches = assemble_separatrix_branches(
+        field.T,
+        radial,
+        vertical,
+        boundary_flux,
+        np.asarray([radial[radial_index], vertical[vertical_index]], dtype=float),
+    )
+    controls = np.asarray(branches["closed_controls_rz"], dtype=float)[
+        np.asarray(branches["closed_valid"], dtype=bool)
+    ]
+    if not len(controls):
+        return np.empty((0, 2), dtype=float)
+    parameter = np.linspace(0.0, 1.0, samples_per_segment, endpoint=False)
+    one_minus = 1.0 - parameter
+    weights = np.column_stack(
+        (
+            one_minus**3,
+            3.0 * one_minus**2 * parameter,
+            3.0 * one_minus * parameter**2,
+            parameter**3,
+        )
+    )
+    sampled = np.einsum("tc,scd->std", weights, controls).reshape(-1, 2)
+    return np.vstack((sampled, controls[-1, -1]))
 
 
 def gauge_match(
@@ -494,7 +546,7 @@ def run(data: Path, output: Path) -> dict[str, Any]:
     gauge = gauge_match(given_registered_total, solved_total, interior)
 
     _masks, solved_topology = profile.operator.read(np.asarray(result["state"]))
-    solved_boundary = _separatrix(
+    solved_boundary = assembled_closed_boundary(
         solve_radius,
         solve_height,
         solved_total,

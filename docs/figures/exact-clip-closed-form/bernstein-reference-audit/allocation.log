@@ -1,0 +1,5 @@
+revision=ccc09221d1e982026eed45b5ee5cc0f865188d96 source_checkpoint=067ea754ce138a8b93a704f42877ab501957c9ad tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program command=srun --partition=all_debug --time=00:14:00 --ntasks=1 --cpus-per-task=16 --mem=128G python docs/figures/exact-clip-closed-form/replay_reference.py
+baseline-program 0
+candidate-program 0
+suites 0
+rows 0

@@ -1,0 +1,24 @@
+E0921 17:23:29.708825 3026313 numa_hwloc.cc:121] Call to hwloc_set_cpubind() failed: Invalid argument [22]
+{
+  "backend": "gpu",
+  "devices": "[CudaDevice(id=0)]",
+  "map_tangent_max_wb": 6.383330668944786,
+  "control_error": 8.881784197001252e-16,
+  "steps": [
+    {
+      "step": 1e-06,
+      "fd_max_wb": 6.383330671155818,
+      "relative_error": 3.6698097045895964e-09,
+      "map_jump_wb": 6.3833305432581255e-06,
+      "cell_66_delta_a": -0.029190984379965812
+    },
+    {
+      "step": 1e-08,
+      "fd_max_wb": 6.383332618042914,
+      "relative_error": 5.346096155737336e-07,
+      "map_jump_wb": 6.383331196957442e-08,
+      "cell_66_delta_a": -0.00029190993518568575
+    }
+  ],
+  "wall_seconds": 75.49947000853717
+}

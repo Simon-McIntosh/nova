@@ -1,0 +1,178 @@
+{
+  "source_sha256": {
+    "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+    "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+  },
+  "helper_sha256": "6854f39e70c75b175ea50ee410e1a92369f40931475064508cf91ee6fe630ab5",
+  "job": "1275884",
+  "completed": true,
+  "controls": {
+    "longdouble_mantissa_bits": 63,
+    "double_mantissa_bits": 52,
+    "triangle_moment_max_absolute_error": 1.3552527156068805e-20,
+    "linear_root_absolute_error": 2.710505431213761e-20
+  },
+  "production": {
+    "reference": "production-patch-reference",
+    "job": "1275884",
+    "cells": [
+      2,
+      3,
+      4,
+      11,
+      13,
+      14,
+      28,
+      35,
+      36,
+      38,
+      50,
+      52,
+      54,
+      68,
+      71,
+      72,
+      75,
+      76,
+      78,
+      80
+    ],
+    "cell_count": 20,
+    "degree": 6,
+    "coefficient_sha256": "6584f6cb8450a0d691c208733468e70c8d1fb215a14386b8adf3bf38dc6e8953",
+    "maximum_reference_arc_residual": 5.149960319306146e-19,
+    "rows": [
+      {
+        "quantity": "crossing_radial",
+        "baseline_relative_l2": 1.1546855492016737e-16,
+        "candidate_relative_l2": 1.1546855492016737e-16,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "crossing_vertical",
+        "baseline_relative_l2": 9.878821886897903e-17,
+        "candidate_relative_l2": 9.878821886897903e-17,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "area",
+        "baseline_relative_l2": 7.488144102970363e-16,
+        "candidate_relative_l2": 7.708598810746024e-16,
+        "candidate_no_worse": false
+      },
+      {
+        "quantity": "first_radial",
+        "baseline_relative_l2": 1.2210100875262634e-15,
+        "candidate_relative_l2": 1.3263963897056763e-15,
+        "candidate_no_worse": false
+      },
+      {
+        "quantity": "first_vertical",
+        "baseline_relative_l2": 1.609255285410016e-15,
+        "candidate_relative_l2": 1.3888809121564742e-15,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "second_radial",
+        "baseline_relative_l2": 8.399547089559398e-16,
+        "candidate_relative_l2": 9.467551282851415e-16,
+        "candidate_no_worse": false
+      },
+      {
+        "quantity": "second_mixed",
+        "baseline_relative_l2": 2.6630846718192657e-15,
+        "candidate_relative_l2": 2.441937741992741e-15,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "second_vertical",
+        "baseline_relative_l2": 7.11293438428993e-16,
+        "candidate_relative_l2": 6.918673549122702e-16,
+        "candidate_no_worse": true
+      }
+    ],
+    "passed": false
+  },
+  "bicubic": {
+    "reference": "bicubic-reference",
+    "job": "1275884",
+    "cells": [
+      2,
+      3,
+      4,
+      11,
+      13,
+      14,
+      28,
+      35,
+      36,
+      38,
+      50,
+      52,
+      54,
+      68,
+      71,
+      72,
+      75,
+      76,
+      78,
+      80
+    ],
+    "cell_count": 20,
+    "degree": 3,
+    "coefficient_sha256": "561b9a08abfdbf1122bfe11829024af70249b41e6a22c2363f1b89e482ddb4b6",
+    "maximum_reference_arc_residual": 4.408806490458633e-19,
+    "rows": [
+      {
+        "quantity": "crossing_radial",
+        "baseline_relative_l2": 6.921916368768183e-17,
+        "candidate_relative_l2": 6.921916368768183e-17,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "crossing_vertical",
+        "baseline_relative_l2": 9.023335318760017e-17,
+        "candidate_relative_l2": 9.023335318760017e-17,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "area",
+        "baseline_relative_l2": 2.6817149774086177e-16,
+        "candidate_relative_l2": 2.4731605600501704e-16,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "first_radial",
+        "baseline_relative_l2": 8.265367584350822e-16,
+        "candidate_relative_l2": 7.370743260111984e-16,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "first_vertical",
+        "baseline_relative_l2": 4.690530523149709e-16,
+        "candidate_relative_l2": 6.505999079124688e-16,
+        "candidate_no_worse": false
+      },
+      {
+        "quantity": "second_radial",
+        "baseline_relative_l2": 5.56918372471136e-16,
+        "candidate_relative_l2": 4.713302103801958e-16,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "second_mixed",
+        "baseline_relative_l2": 1.6062670380454085e-15,
+        "candidate_relative_l2": 1.4962918270621386e-15,
+        "candidate_no_worse": true
+      },
+      {
+        "quantity": "second_vertical",
+        "baseline_relative_l2": 4.189417801857244e-16,
+        "candidate_relative_l2": 3.235766453631422e-16,
+        "candidate_no_worse": true
+      }
+    ],
+    "passed": false
+  },
+  "passed": false
+}

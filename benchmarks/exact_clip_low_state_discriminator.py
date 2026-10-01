@@ -239,6 +239,8 @@ def _build_context(requested_cells: int) -> dict[str, Any]:
         "current_receipt": current_receipt,
         "analytic_topology": analytic_topology,
         "span": span,
+        "wall": np.asarray(machine.wall_node, dtype=np.float64),
+        "boundary": certificate._boundary(CASE_NAME, exact),
         "grid_count": len(machine.node),
     }
 
@@ -268,6 +270,10 @@ def _state_metrics(
         "converged": bool(converged),
         "axis_flux_wb": topology["axis_flux_wb"],
         "axis_rz_m": topology.get("axis_rz_m"),
+        "topology": {
+            "axis_rz_m": topology.get("axis_rz_m"),
+            "x_point_rz_m": topology.get("x_point_rz_m"),
+        },
         "boundary_level_wb": topology["boundary_flux_wb"],
         "max_solved_minus_analytic_over_span": float(
             np.max(np.abs(grid_difference)) / span
@@ -598,6 +604,24 @@ def _booking_census_arm(
     }
 
 
+def _wrapped_level_lines(label: str, levels: np.ndarray, per_line: int) -> list[str]:
+    """Return the stated level array as title lines that carry every level.
+
+    The array is wrapped rather than clipped: each line holds ``per_line``
+    levels per line (the count may reach 14), so the last rendered token is
+    always the final level instead of a digit cut off by the panel width.
+    """
+    values = [f"{float(level):.6g}" for level in np.asarray(levels, dtype=np.float64)]
+    chunks = [
+        ", ".join(values[index : index + per_line])
+        for index in range(0, len(values), per_line)
+    ]
+    lines = [f"{label} ({len(values)}): {chunks[0]}"]
+    indent = " " * (len(label) + 4)
+    lines.extend(f"{indent}{chunk}" for chunk in chunks[1:])
+    return lines
+
+
 def _draw_row_figure(
     path: Path,
     context: dict[str, Any],
@@ -608,8 +632,8 @@ def _draw_row_figure(
 ) -> dict[str, Any]:
     coordinates = context["coordinates"]
     analytic = context["analytic"]
-    wall = np.asarray(context["machine"].wall_node, dtype=np.float64)
-    boundary = certificate._boundary(CASE_NAME, context["exact"])
+    wall = np.asarray(context["wall"], dtype=np.float64)
+    boundary = np.asarray(context["boundary"], dtype=np.float64)
     radial, height, analytic_field = certificate._raster_field(
         coordinates, analytic, wall
     )
@@ -634,20 +658,19 @@ def _draw_row_figure(
         (
             "analytic-start terminal",
             analytic_terminal_field,
-            analytic_terminal,
             analytic_arm,
         ),
         (
             "current-aligned-seed terminal",
             reference_terminal_field,
-            reference_terminal,
             reference_arm,
         ),
     )
-    figure, axes = plt.subplots(2, 2, figsize=(10.8, 9.5), constrained_layout=True)
+    figure, axes = plt.subplots(2, 2, figsize=(12.8, 10.6), constrained_layout=True)
     wall_units = (wall,)
     analytic_topology = context["analytic_topology"]
-    for row_index, (label, field, state, arm) in enumerate(states):
+    panel_records: list[dict[str, Any]] = []
+    for row_index, (label, field, arm) in enumerate(states):
         overlay_axis = axes[row_index, 0]
         difference_axis = axes[row_index, 1]
         poloidal.draw_flux_contours(
@@ -665,42 +688,58 @@ def _draw_row_figure(
             FIXED_DIFFERENCE_LEVELS,
             color="#7a3e9d",
         )
-        terminal_topology = oracle_probe._topology(context["operator"], state)
-        for axis in (overlay_axis, difference_axis):
+        terminal_topology = arm["terminal"]["topology"]
+        drawn: dict[str, dict[str, int]] = {}
+        for kind, axis in (("overlay", overlay_axis), ("difference", difference_axis)):
             poloidal.draw_wall(axis, units=wall_units)
-            poloidal.draw_nulls(
+            analytic_tally = poloidal.draw_nulls(
                 axis,
                 magnetic_axis=analytic_topology["axis_rz_m"],
-                x_points=analytic_topology["x_point_rz_m"],
+                x_points=analytic_topology.get("x_point_rz_m"),
                 style=DEFAULT_INK.variant(
                     axis_marker="^", axis_color="#3366cc", xpoint_color="#3366cc"
                 ),
                 contain=wall_units,
             )
-            poloidal.draw_nulls(
+            terminal_tally = poloidal.draw_nulls(
                 axis,
                 magnetic_axis=terminal_topology["axis_rz_m"],
-                x_points=terminal_topology["x_point_rz_m"],
+                x_points=terminal_topology.get("x_point_rz_m"),
                 style=DEFAULT_INK.variant(
                     axis_marker="^", axis_color="#cc7722", xpoint_color="#cc7722"
                 ),
                 contain=wall_units,
             )
             poloidal_axes(axis)
+            drawn[kind] = {"analytic": analytic_tally, "solved": terminal_tally}
         poloidal.draw_boundary(
             overlay_axis, boundary[:, 0], boundary[:, 1], color="#3366cc"
         )
         terminal_metrics = arm["terminal"]
-        overlay_axis.set_title(
-            f"{label}: analytic blue / solved ochre\n"
-            f"residual={terminal_metrics['terminal_residual']:.3e}; "
-            f"converged={terminal_metrics['converged']}",
-            fontsize=8,
-        )
-        difference_axis.set_title(
-            f"({label} - analytic) / span\n"
-            f"fixed levels {FIXED_DIFFERENCE_LEVELS.tolist()}",
-            fontsize=7,
+        residual = float(terminal_metrics["terminal_residual"])
+        converged = bool(terminal_metrics["converged"])
+        overlay_lines = [
+            f"{label}: analytic blue / solved ochre",
+            f"residual={residual:.3e}; converged={converged}",
+            *_wrapped_level_lines("shared levels", shared_levels, 4),
+        ]
+        difference_lines = [
+            f"({label} - analytic) / span",
+            f"residual={residual:.3e}; converged={converged}",
+            *_wrapped_level_lines("fixed levels", FIXED_DIFFERENCE_LEVELS, 5),
+        ]
+        overlay_axis.set_title("\n".join(overlay_lines), fontsize=7)
+        difference_axis.set_title("\n".join(difference_lines), fontsize=7)
+        panel_records.append(
+            {
+                "arm": str(arm["arm"]),
+                "state": label,
+                "terminal_residual": residual,
+                "converged": converged,
+                "overlay_title_lines": overlay_lines,
+                "difference_title_lines": difference_lines,
+                "nulls_drawn_by_panel": drawn,
+            }
         )
     figure.suptitle(
         f"{CASE_NAME} · {abs(int(context['requested_cells']))} requested cells",
@@ -715,6 +754,7 @@ def _draw_row_figure(
         "sha256": _file_digest(path),
         "shared_flux_levels_wb": shared_levels,
         "difference_levels_fraction_of_span": FIXED_DIFFERENCE_LEVELS,
+        "panels": panel_records,
     }
 
 
@@ -880,6 +920,81 @@ def _report(receipt: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+RENDER_INPUTS_NAME = "render-inputs.json"
+RENDER_RECEIPT_NAME = "render-receipt.json"
+
+
+def _render_context(row: dict[str, Any]) -> dict[str, Any]:
+    """Rebuild the draw-time context from one persisted render-input row.
+
+    The render-only route reads the arrays the solve persisted, so it never
+    rebuilds the operator and never solves.
+    """
+    return {
+        "coordinates": np.asarray(row["coordinates_rz_m"], dtype=np.float64),
+        "analytic": np.asarray(row["analytic_flux_wb"], dtype=np.float64),
+        "wall": np.asarray(row["wall_units_rz_m"], dtype=np.float64),
+        "boundary": np.asarray(row["boundary_rz_m"], dtype=np.float64),
+        "analytic_topology": row["analytic_topology"],
+        "span": float(row["analytic_flux_span_wb"]),
+        "requested_cells": int(row["requested_cells"]),
+    }
+
+
+def render_only(output_root: Path) -> dict[str, Any]:
+    """Rebuild the panel figures from the persisted render inputs, no solve."""
+    inputs_path = output_root / RENDER_INPUTS_NAME
+    inputs = json.loads(inputs_path.read_text(encoding="utf-8"))
+    figures: list[dict[str, Any]] = []
+    for row in inputs["rows"]:
+        slug = f"weak-static-{abs(int(row['requested_cells']))}"
+        result = _draw_row_figure(
+            output_root / "panels" / f"{slug}-terminals.png",
+            _render_context(row),
+            np.asarray(row["analytic_terminal_flux_wb"], dtype=np.float64),
+            np.asarray(row["reference_terminal_flux_wb"], dtype=np.float64),
+            {"arm": "A", "terminal": row["arms"]["A"]["terminal"]},
+            {"arm": "B", "terminal": row["arms"]["B"]["terminal"]},
+        )
+        figures.append(
+            {
+                "figure": result["filesystem_path"],
+                "project_absolute_src": result["project_absolute_src"],
+                "sha256": result["sha256"],
+                "shared_flux_levels_wb": result["shared_flux_levels_wb"],
+                "difference_levels_fraction_of_span": result[
+                    "difference_levels_fraction_of_span"
+                ],
+                "title_lines": [
+                    line
+                    for panel in result["panels"]
+                    for line in (
+                        panel["overlay_title_lines"] + panel["difference_title_lines"]
+                    )
+                ],
+                "panels": result["panels"],
+            }
+        )
+    receipt = {
+        "$id": "nova.exact-clip-low-state-render-receipt",
+        "render_only": True,
+        "case": CASE_NAME,
+        "source_receipt": str(inputs_path.relative_to(ROOT)),
+        "driver": {
+            "path": str(Path(__file__).relative_to(ROOT)),
+            "sha256": _file_digest(Path(__file__)),
+        },
+        "figures": figures,
+    }
+    _write_json(output_root / RENDER_RECEIPT_NAME, receipt)
+    print(
+        f"LOW_STATE_RENDER_ONLY figures={len(figures)} "
+        f"receipt={output_root / RENDER_RECEIPT_NAME}",
+        flush=True,
+    )
+    return receipt
+
+
 def run(
     output_root: Path,
     reference_parts: Path,
@@ -910,6 +1025,8 @@ def run(
         "completed": False,
     }
     _write_json(receipt_path, receipt)
+    render_inputs_path = output_root / RENDER_INPUTS_NAME
+    render_rows: list[dict[str, Any]] = []
     for requested_cells in REQUESTED_ROWS:
         context = _build_context(requested_cells)
         context["requested_cells"] = requested_cells
@@ -936,6 +1053,33 @@ def run(
         )
         booking_arm = _booking_census_arm(context, reference_terminal)
         _write_json(row_directory / f"{row_slug}-booking-census.json", booking_arm)
+        render_rows.append(
+            {
+                "requested_cells": requested_cells,
+                "coordinates_rz_m": context["coordinates"],
+                "wall_units_rz_m": context["wall"],
+                "boundary_rz_m": context["boundary"],
+                "analytic_flux_span_wb": context["span"],
+                "analytic_flux_wb": context["analytic"],
+                "analytic_topology": context["analytic_topology"],
+                "analytic_terminal_flux_wb": analytic_terminal,
+                "reference_terminal_flux_wb": reference_terminal,
+                "arms": {
+                    "A": {"terminal": analytic_arm["terminal"]},
+                    "B": {"terminal": reference_arm["terminal"]},
+                },
+            }
+        )
+        _write_json(
+            render_inputs_path,
+            {
+                "$id": "nova.exact-clip-low-state-render-inputs",
+                "case": CASE_NAME,
+                "source_receipt": str(receipt_path.relative_to(ROOT)),
+                "rows": render_rows,
+                "completed": len(render_rows) == len(REQUESTED_ROWS),
+            },
+        )
         figure = _draw_row_figure(
             output_root / "panels" / f"{row_slug}-terminals.png",
             context,
@@ -1008,7 +1152,18 @@ def main() -> int:
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--reference-parts", type=Path, default=DEFAULT_REFERENCE_PARTS)
     parser.add_argument("--report-path", type=Path, default=DEFAULT_REPORT_PATH)
+    parser.add_argument(
+        "--render-only",
+        action="store_true",
+        help=(
+            "rebuild the panel figures from the persisted render inputs "
+            "(render-inputs.json) without any solve"
+        ),
+    )
     arguments = parser.parse_args()
+    if arguments.render_only:
+        receipt = render_only(arguments.output_root.resolve())
+        return 0 if receipt["figures"] else 1
     receipt = run(
         arguments.output_root.resolve(),
         arguments.reference_parts.resolve(),

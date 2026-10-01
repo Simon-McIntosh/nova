@@ -2,7 +2,7 @@
 
 import abc
 from dataclasses import dataclass, field
-from functools import cached_property
+from functools import cache, cached_property
 import jax
 import jax.numpy as jnp
 import jax.scipy as jsp
@@ -10,6 +10,48 @@ import numpy as np
 
 from nova.graphics.plot import Plot1D
 from nova.jax.tree_util import Pytree
+
+
+@cache
+def _binomial_coefficients(order, extended_precision):
+    """Freeze the device evaluator's integer-order coefficients on the host."""
+    with jax.ensure_compile_time_eval():
+        dtype = jnp.int64 if extended_precision else jnp.int32
+        terms = jnp.arange(order + 1, dtype=dtype)
+
+        @jax.jit
+        def coefficients(term):
+            return jsp.special.gamma(order + 1) / (
+                jsp.special.gamma(term + 1) * jsp.special.gamma(order - term + 1)
+            )
+
+        @jax.jit
+        def table():
+            def element(carry, term):
+                return carry, coefficients(term)
+
+            return jax.lax.scan(element, None, terms)[1]
+
+        return tuple(np.asarray(table()).tolist())
+
+
+@jax.named_scope("bernstein_basis")
+def bernstein_basis(coordinate, order):
+    """Evaluate the basis with host constants and a fixed-width term loop."""
+    coordinate = jnp.asarray(coordinate)
+    coefficients = jnp.asarray(
+        _binomial_coefficients(order, jax.config.jax_enable_x64),
+        dtype=jnp.result_type(coordinate, 0.0),
+    )
+
+    def term_basis(carry, term):
+        value = (
+            coefficients[term] * coordinate**term * (1 - coordinate) ** (order - term)
+        )
+        return carry, value
+
+    values = jax.lax.scan(term_basis, None, jnp.arange(order + 1))[1]
+    return jnp.moveaxis(values, 0, -1)
 
 
 @dataclass
@@ -107,9 +149,17 @@ class Bernstein(Pytree):
 
     @jax.jit
     def binom(self, term):
-        """Return Binomial cooefcient (order term)."""
-        return jsp.special.gamma(self.order + 1) / (
-            jsp.special.gamma(term + 1) * jsp.special.gamma(self.order - term + 1)
+        """Look up integer-order binomial coefficients without special functions."""
+        term = jnp.asarray(term)
+        if not jnp.issubdtype(term.dtype, jnp.integer):
+            raise TypeError("binomial terms must be integers")
+        coefficients = jnp.asarray(
+            _binomial_coefficients(self.order, jax.config.jax_enable_x64)
+        )
+        return jnp.where(
+            (term >= 0) & (term <= self.order),
+            coefficients[jnp.clip(term, 0, self.order)],
+            0,
         )
 
     @jax.jit
@@ -124,11 +174,7 @@ class Bernstein(Pytree):
     @jax.jit
     def coefficent_matrix(self, coordinate: jnp.ndarray):
         """Return coefficent matrix."""
-
-        def basis(_, term):
-            return _, self.basis(coordinate, term)
-
-        return jax.lax.scan(basis, None, jnp.arange(self.order + 1))[1].T
+        return bernstein_basis(coordinate, self.order)
 
     def tree_flatten(self):
         """Return flattened pytree."""

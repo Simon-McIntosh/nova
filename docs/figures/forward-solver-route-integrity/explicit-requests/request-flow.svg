@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 570" role="img" aria-labelledby="title desc">
+<title id="title">Explicit live operator requests and the remaining sharing boundary</title>
+<desc id="desc">A fixed payload enters one request switch and a live primal and tangent evaluation. A scan shares that body within a request stream. Separate caller streams still inline separate bodies, so the whole-program instruction ceiling is not met. Krylov control remains outside the operator body.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8" fill="none" stroke="#526274"/></marker></defs>
+<rect width="1100" height="570" fill="white"/>
+<g font-family="sans-serif" fill="#26364a">
+<text x="30" y="36" font-size="24">Explicit requests preserve each candidate's live read</text>
+<rect x="20" y="67" width="1060" height="227" rx="7" fill="#f4f8fa" stroke="#b1bec9"/>
+<text x="40" y="97" font-size="17">One traced scan body per request stream</text>
+<g fill="white" stroke="#526274"><rect x="45" y="122" width="255" height="123" rx="5"/><rect x="355" y="142" width="170" height="78" rx="5"/><rect x="580" y="122" width="230" height="123" rx="5"/><rect x="865" y="142" width="180" height="78" rx="5"/></g>
+<g text-anchor="middle" font-size="17"><text x="172" y="151">Fixed-shape request</text><text x="172" y="180">kind · state · vector</text><text x="172" y="209">shadow · use_incumbent</text><text x="440" y="174">one lax.switch</text><text x="440" y="199">read authority</text><text x="695" y="154">live map + JVP</text><text x="695" y="184">request's own state</text><text x="695" y="214">selected residual mask</text><text x="955" y="174">response</text><text x="955" y="199">field · scores · tangent</text></g>
+<path d="M300 181 H350 M525 181 H575 M810 181 H860 M955 221 V272 H172 V250" fill="none" stroke="#526274" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="34" y="330" font-size="17">Request kinds: residual, merit, acceptance, recovery, reconciliation, JVP</text>
+<rect x="45" y="354" width="310" height="67" rx="5" fill="#edf6ef" stroke="#477855"/>
+<text x="200" y="382" text-anchor="middle" font-size="18">Krylov / dense linear solve</text><text x="200" y="405" text-anchor="middle" font-size="16">caller-owned; outside the body</text>
+<path d="M355 386 H692 V300" fill="none" stroke="#477855" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="410" y="371" font-size="16">compose tangent requests</text>
+<text x="30" y="464" font-size="21" fill="#975600">Whole-solve sharing remains incomplete</text>
+<text x="30" y="498" font-size="17">Separate caller streams still inline separate operator bodies.</text>
+<text x="30" y="529" font-size="17">Measured instructions: 302,553 / 304,913; required ceilings: 203,078 / 204,531.</text>
+</g></svg>

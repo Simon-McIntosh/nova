@@ -1,0 +1,753 @@
+{
+  "$id": "nova.net-current-scaling-census",
+  "amplitude_band": [
+    1e-06,
+    1000000.0
+  ],
+  "certificate_cells": -110,
+  "completed_rows": 8,
+  "lambda_definition": "declared-current amplitude target_current / sum(unscaled cell current); the amplitude admitted within SCALAR_CURRENT_AMPLITUDE_BAND",
+  "lane": {
+    "cpu_count": 4,
+    "hostname": "98dci4-clu-3142.iter.org",
+    "jax_enable_x64": true,
+    "jax_platform": "cpu",
+    "job_id": "1276603",
+    "node": "98dci4-clu-3142",
+    "partition": "all_debug",
+    "tmpdir": "/tmp"
+  },
+  "neighbourhood": [
+    0.9,
+    1.1
+  ],
+  "not_run": [
+    {
+      "reason": "the exact clip mode did not finish inside a one-hour all_debug allocation; its job log under logs/ records 'CANCELLED ... DUE TO TIME LIMIT' and no row file was written, so its seed and terminal lambda are absent from this census",
+      "row": "newton_krylov/exact/weak-rotation-reactor-static"
+    },
+    {
+      "reason": "the exact clip mode did not finish inside a one-hour all_debug allocation; its job log under logs/ records 'CANCELLED ... DUE TO TIME LIMIT' and no row file was written, so its seed and terminal lambda are absent from this census",
+      "row": "newton_krylov/exact/moderate-rotation-conventional-static"
+    },
+    {
+      "reason": "the exact clip mode did not finish inside a one-hour all_debug allocation; its job log under logs/ records 'CANCELLED ... DUE TO TIME LIMIT' and no row file was written, so its seed and terminal lambda are absent from this census",
+      "row": "newton_krylov/exact/strong-rotation-compact-static"
+    },
+    {
+      "reason": "the exact clip mode did not finish inside a one-hour all_debug allocation; its job log under logs/ records 'CANCELLED ... DUE TO TIME LIMIT' and no row file was written, so its seed and terminal lambda are absent from this census",
+      "row": "newton_krylov/exact/diverted-single-null"
+    }
+  ],
+  "reads": [
+    {
+      "expected_rows": 12,
+      "missing_rows": [
+        "newton_krylov/exact/weak-rotation-reactor-static",
+        "newton_krylov/exact/moderate-rotation-conventional-static",
+        "newton_krylov/exact/strong-rotation-compact-static",
+        "newton_krylov/exact/diverted-single-null"
+      ],
+      "reason": "per-row files merged over the rows already measured in report.json",
+      "route": "assembly",
+      "rows": 8,
+      "status": "assembled"
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "clip_mode": "chord",
+      "converged": false,
+      "reason": "read off the certificate row above, which records the seed state and the terminal state of the same forward solve",
+      "requested_cells": -110,
+      "route": "cold-seed",
+      "seed_lambda": 2.0365885467960005,
+      "seed_support_current_a": 8010834.263747128,
+      "status": "derived-from-row",
+      "terminal_lambda": 1.8111782126499791
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "clip_mode": "chord",
+      "converged": false,
+      "reason": "read off the certificate row above, which records the seed state and the terminal state of the same forward solve",
+      "requested_cells": -110,
+      "route": "cold-seed",
+      "seed_lambda": 2.0619248214048866,
+      "seed_support_current_a": 788094.2898555372,
+      "status": "derived-from-row",
+      "terminal_lambda": 1.7776445749403242
+    },
+    {
+      "case": "strong-rotation-compact-static",
+      "clip_mode": "chord",
+      "converged": false,
+      "reason": "read off the certificate row above, which records the seed state and the terminal state of the same forward solve",
+      "requested_cells": -110,
+      "route": "cold-seed",
+      "seed_lambda": 1.8907511583421348,
+      "seed_support_current_a": 132881.5311361998,
+      "status": "derived-from-row",
+      "terminal_lambda": 3.0343567247476493
+    },
+    {
+      "case": "diverted-single-null",
+      "clip_mode": "chord",
+      "converged": false,
+      "reason": "read off the certificate row above, which records the seed state and the terminal state of the same forward solve",
+      "requested_cells": -110,
+      "route": "cold-seed",
+      "seed_lambda": 1.000371726062665,
+      "seed_support_current_a": 37305.47850607022,
+      "status": "derived-from-row",
+      "terminal_lambda": 11.987140291128696
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "clip_mode": "chord",
+      "converged": false,
+      "reason": "read off the certificate row above, which records the seed state and the terminal state of the same forward solve",
+      "requested_cells": -110,
+      "route": "cold-seed",
+      "seed_lambda": 2.0365885467960005,
+      "seed_support_current_a": 8010834.263747128,
+      "status": "derived-from-row",
+      "terminal_lambda": 1.7155546507539798
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "clip_mode": "chord",
+      "converged": false,
+      "reason": "read off the certificate row above, which records the seed state and the terminal state of the same forward solve",
+      "requested_cells": -110,
+      "route": "cold-seed",
+      "seed_lambda": 2.0619248214048866,
+      "seed_support_current_a": 788094.2898555372,
+      "status": "derived-from-row",
+      "terminal_lambda": 1.6008339156886973
+    },
+    {
+      "case": "strong-rotation-compact-static",
+      "clip_mode": "chord",
+      "converged": false,
+      "reason": "read off the certificate row above, which records the seed state and the terminal state of the same forward solve",
+      "requested_cells": -110,
+      "route": "cold-seed",
+      "seed_lambda": 1.8907511583421348,
+      "seed_support_current_a": 132881.5311361998,
+      "status": "derived-from-row",
+      "terminal_lambda": 1.8193532721239911
+    },
+    {
+      "case": "diverted-single-null",
+      "clip_mode": "chord",
+      "converged": false,
+      "reason": "read off the certificate row above, which records the seed state and the terminal state of the same forward solve",
+      "requested_cells": -110,
+      "route": "cold-seed",
+      "seed_lambda": 1.000371726062665,
+      "seed_support_current_a": 37305.47850607022,
+      "status": "derived-from-row",
+      "terminal_lambda": 53.8025621707743
+    },
+    {
+      "common_sol_over_plasma_current": 0.0019575671865414233,
+      "converged": true,
+      "fixed_point_residual": 1.5685695634626642e-14,
+      "plasma_current_a": 547979.0199766452,
+      "reason": "the SOL ledger census books a terminal plasma current and its common-SOL split; it records no seed state and no declared-current amplitude, so a seed-to-terminal lambda pair cannot be read from it without re-evaluating the operator on its fixture",
+      "receipt": "docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json",
+      "route": "sol-ledger-census",
+      "seed_lambda": null,
+      "status": "read-from-committed-receipt",
+      "support_clip_mode": {
+        "available": false,
+        "reason": "the mapped-case machine exposes no set_support_clip_mode or support_clip_mode symbol on this revision (package-wide grep returns none), so the committed chord clip cannot be compared against an exact-support clip here; that switch is the in-flight uniform-clip work"
+      },
+      "terminal_lambda": null,
+      "verdict": "the scrape-off-layer current is entirely full-cell labelling - no cell is geometrically cut - split 0.787252 in the 16 cells the fitted separatrix cuts and 0.212748 in the 15 fully open cells"
+    },
+    {
+      "amplitude_fields_present": [],
+      "converged_rows": 4,
+      "reason": "each bank row carries a terminal residual, termination reason and class verdict, not a declared-current amplitude; deriving seed and terminal lambda needs the MAST machine and corpus, which this node is not scoped or equipped to reach on the CPU lane",
+      "receipt": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "route": "mast-bank-twelve-rows",
+      "row_count": 12,
+      "seed_lambda": null,
+      "status": "read-from-committed-receipt",
+      "terminal_lambda": null
+    }
+  ],
+  "reconciliation": {
+    "chord weak-rotation-reactor-static -110 [newton_krylov]": {
+      "banked": {
+        "case": "weak-rotation-reactor-static",
+        "clip_mode": "chord",
+        "note": "discriminator control arm",
+        "requested_cells": -110,
+        "seed_lambda": 0.93,
+        "terminal_lambda": 1.05
+      },
+      "measured": {
+        "converged": false,
+        "seed_lambda": 2.0365885467960005,
+        "terminal_lambda": 1.8111782126499791
+      },
+      "reason": "measured on the newton_krylov route",
+      "route": "newton_krylov",
+      "seed_delta": 1.1065885467960004,
+      "terminal_delta": 0.7611782126499791
+    },
+    "chord weak-rotation-reactor-static -110 [reduced_newton]": {
+      "banked": {
+        "case": "weak-rotation-reactor-static",
+        "clip_mode": "chord",
+        "note": "discriminator control arm",
+        "requested_cells": -110,
+        "seed_lambda": 0.93,
+        "terminal_lambda": 1.05
+      },
+      "measured": {
+        "converged": false,
+        "seed_lambda": 2.0365885467960005,
+        "terminal_lambda": 1.7155546507539798
+      },
+      "reason": "measured on the reduced_newton route",
+      "route": "reduced_newton",
+      "seed_delta": 1.1065885467960004,
+      "terminal_delta": 0.6655546507539798
+    },
+    "diverted production seed": {
+      "banked": {
+        "case": "diverted-single-null",
+        "clip_mode": "chord",
+        "note": "eighteen S18 trip panels, eighty-three-cell diverted production seed",
+        "requested_cells": null,
+        "seed_lambda": 0.98,
+        "terminal_lambda": null
+      },
+      "measured": null,
+      "reason": "no row in this run matches case=diverted-single-null requested_cells=None clip_mode=chord"
+    },
+    "exact support weak-rotation-reactor-static -110": {
+      "banked": {
+        "case": "weak-rotation-reactor-static",
+        "clip_mode": "exact",
+        "note": "exact-support deficit, a symptom of the dropped clip",
+        "requested_cells": -110,
+        "seed_lambda": 2.201,
+        "terminal_lambda": 5.561
+      },
+      "measured": null,
+      "reason": "no row in this run matches case=weak-rotation-reactor-static requested_cells=-110 clip_mode=exact"
+    }
+  },
+  "revision": "26fc98cff318fd9c0cab291fb9869fa7130a9e9c",
+  "routes_requested": [
+    "certificate",
+    "cold-seed",
+    "reduced-newton"
+  ],
+  "rows": [
+    {
+      "case": "weak-rotation-reactor-static",
+      "clip_mode": "chord",
+      "converged": false,
+      "elapsed_seconds": 937.2515375390649,
+      "lambda_within_neighbourhood": null,
+      "normalisation_policy": "declared_scalar_current",
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "route": "newton_krylov",
+      "seed": {
+        "anchor_available": true,
+        "anchor_m": [
+          7.801395788445413,
+          -5.030998247260066e-11
+        ],
+        "branch_index": 0,
+        "construction": "current_centroid_disc",
+        "current_centroid_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "current_target_provenance": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "declared_current_a": 16314773.311828371,
+          "quadrature_current_a": 16314773.311828367,
+          "quadrature_nodes": 512,
+          "quadrature_relative_closure": 2.2833846522164315e-16
+        },
+        "declared_axis_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "declared_boundary_m": [
+          7.801395788445413,
+          -5.030998247260066e-11
+        ],
+        "factory": "profile.cold_seed_portfolio",
+        "plasma_current_a": 16314773.311828371,
+        "requested_class": "limited",
+        "seed_radius_m": 1.564079053601776,
+        "state_sha256_binary64": "363917278f301b7bb3bbe524e9c353ffa3463d62484044981213fc23ce87a45e",
+        "stored_flux_samples_used": false,
+        "supported_cell_count": 36
+      },
+      "seed_lambda": 2.0365885467960005,
+      "seed_support_current_a": 8010834.263747128,
+      "solver_route": "newton_krylov",
+      "target_current_a": 16314773.311828371,
+      "terminal_core_cell_count": 54,
+      "terminal_fixed_point_residual": 0.05245103919643807,
+      "terminal_lambda": 1.8111782126499791,
+      "terminal_rescaled": true,
+      "terminal_support_current_a": 9007823.304123025,
+      "termination": "active_set_settled"
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "clip_mode": "chord",
+      "converged": false,
+      "elapsed_seconds": 666.9020687285811,
+      "lambda_within_neighbourhood": null,
+      "normalisation_policy": "declared_scalar_current",
+      "realised_cells": 136,
+      "requested_cells": -110,
+      "route": "newton_krylov",
+      "seed": {
+        "anchor_available": true,
+        "anchor_m": [
+          2.1548879715360223,
+          0.008483892850961185
+        ],
+        "branch_index": 0,
+        "construction": "current_centroid_disc",
+        "current_centroid_m": [
+          1.6580796852430872,
+          0.0
+        ],
+        "current_target_provenance": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "current_centroid_m": [
+            1.6580796852430872,
+            0.0
+          ],
+          "declared_current_a": 1624991.1778605897,
+          "quadrature_current_a": 1624991.1778605892,
+          "quadrature_nodes": 512,
+          "quadrature_relative_closure": 2.8656234793890617e-16
+        },
+        "declared_axis_m": [
+          1.6580796852430872,
+          0.0
+        ],
+        "declared_boundary_m": [
+          2.1548879715360223,
+          0.008483892850961185
+        ],
+        "factory": "profile.cold_seed_portfolio",
+        "plasma_current_a": 1624991.1778605897,
+        "requested_class": "limited",
+        "seed_radius_m": 0.44721614229132306,
+        "state_sha256_binary64": "d19dd27bb7c24aa7f9a188e2543b47dee8e8b43d4f82490e1cd866a775677daf",
+        "stored_flux_samples_used": false,
+        "supported_cell_count": 36
+      },
+      "seed_lambda": 2.0619248214048866,
+      "seed_support_current_a": 788094.2898555372,
+      "solver_route": "newton_krylov",
+      "target_current_a": 1624991.1778605897,
+      "terminal_core_cell_count": 56,
+      "terminal_fixed_point_residual": 0.052140628723408806,
+      "terminal_lambda": 1.7776445749403242,
+      "terminal_rescaled": true,
+      "terminal_support_current_a": 914126.0298983788,
+      "termination": "active_set_settled"
+    },
+    {
+      "case": "strong-rotation-compact-static",
+      "clip_mode": "chord",
+      "converged": false,
+      "elapsed_seconds": 364.33680369891226,
+      "lambda_within_neighbourhood": null,
+      "normalisation_policy": "declared_scalar_current",
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "route": "newton_krylov",
+      "seed": {
+        "anchor_available": true,
+        "anchor_m": [
+          1.0902999676767633,
+          0.005210856843975905
+        ],
+        "branch_index": 0,
+        "construction": "current_centroid_disc",
+        "current_centroid_m": [
+          0.8875010108629255,
+          0.0
+        ],
+        "current_target_provenance": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "current_centroid_m": [
+            0.8875010108629255,
+            0.0
+          ],
+          "declared_current_a": 251245.90891804622,
+          "quadrature_current_a": 251245.90891804622,
+          "quadrature_nodes": 512,
+          "quadrature_relative_closure": 0.0
+        },
+        "declared_axis_m": [
+          0.8875010108629255,
+          0.0
+        ],
+        "declared_boundary_m": [
+          1.0902999676767633,
+          0.005210856843975905
+        ],
+        "factory": "profile.cold_seed_portfolio",
+        "plasma_current_a": 251245.90891804622,
+        "requested_class": "limited",
+        "seed_radius_m": 0.18257506240510613,
+        "state_sha256_binary64": "e60ef066d303048460a46057bc926ec461ddae472e8759521f46a2102ac34c2b",
+        "stored_flux_samples_used": false,
+        "supported_cell_count": 39
+      },
+      "seed_lambda": 1.8907511583421348,
+      "seed_support_current_a": 132881.5311361998,
+      "solver_route": "newton_krylov",
+      "target_current_a": 251245.90891804622,
+      "terminal_core_cell_count": 32,
+      "terminal_fixed_point_residual": 0.02143706673186788,
+      "terminal_lambda": 3.0343567247476493,
+      "terminal_rescaled": true,
+      "terminal_support_current_a": 82800.38627921737,
+      "termination": "active_set_settled"
+    },
+    {
+      "case": "diverted-single-null",
+      "clip_mode": "chord",
+      "converged": false,
+      "elapsed_seconds": 281.2788064200431,
+      "lambda_within_neighbourhood": null,
+      "normalisation_policy": "declared_scalar_current",
+      "realised_cells": 132,
+      "requested_cells": -110,
+      "route": "newton_krylov",
+      "seed": {
+        "anchor_available": true,
+        "anchor_m": [
+          1.5019897592858356,
+          -1.019292805308505
+        ],
+        "branch_index": 1,
+        "construction": "axis_saddle_geometry",
+        "current_centroid_m": [
+          1.7120154725908823,
+          0.030254757713386198
+        ],
+        "current_target_provenance": {
+          "closed_form_flux_samples_used_for_current_support_only": true,
+          "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+          "current_centroid_m": [
+            1.7120154725908823,
+            0.030254757713386198
+          ],
+          "declared_current_a": 37319.34592471112
+        },
+        "declared_axis_m": [
+          1.7870647018106887,
+          0.0467736265648528
+        ],
+        "declared_boundary_m": [
+          1.5025279999999999,
+          -1.01728
+        ],
+        "factory": "profile.cold_seed_portfolio",
+        "plasma_current_a": 37319.34592471112,
+        "requested_class": "diverted",
+        "seed_radius_m": 0.649709176903539,
+        "state_sha256_binary64": "e870873e0ca4a1a87576b041e2b9bb16ac566b8193543015ccc098325cb51b86",
+        "stored_flux_samples_used": false,
+        "supported_cell_count": 58
+      },
+      "seed_lambda": 1.000371726062665,
+      "seed_support_current_a": 37305.47850607022,
+      "solver_route": "newton_krylov",
+      "target_current_a": 37319.34592471112,
+      "terminal_core_cell_count": 4,
+      "terminal_fixed_point_residual": 0.4957473457696963,
+      "terminal_lambda": 11.987140291128696,
+      "terminal_rescaled": true,
+      "terminal_support_current_a": 3113.2818185443266,
+      "termination": "active_set_settled"
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "clip_mode": "chord",
+      "converged": false,
+      "elapsed_seconds": 74.32291600294411,
+      "lambda_within_neighbourhood": null,
+      "normalisation_policy": "declared_scalar_current",
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "route": "reduced_newton",
+      "seed": {
+        "anchor_available": true,
+        "anchor_m": [
+          7.801395788445413,
+          -5.030998247260066e-11
+        ],
+        "branch_index": 0,
+        "construction": "current_centroid_disc",
+        "current_centroid_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "current_target_provenance": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "declared_current_a": 16314773.311828371,
+          "quadrature_current_a": 16314773.311828367,
+          "quadrature_nodes": 512,
+          "quadrature_relative_closure": 2.2833846522164315e-16
+        },
+        "declared_axis_m": [
+          6.063530173332898,
+          0.0
+        ],
+        "declared_boundary_m": [
+          7.801395788445413,
+          -5.030998247260066e-11
+        ],
+        "factory": "profile.cold_seed_portfolio",
+        "plasma_current_a": 16314773.311828371,
+        "requested_class": "limited",
+        "seed_radius_m": 1.564079053601776,
+        "state_sha256_binary64": "363917278f301b7bb3bbe524e9c353ffa3463d62484044981213fc23ce87a45e",
+        "stored_flux_samples_used": false,
+        "supported_cell_count": 36
+      },
+      "seed_lambda": 2.0365885467960005,
+      "seed_support_current_a": 8010834.263747128,
+      "solver_route": "reduced_newton",
+      "target_current_a": 16314773.311828371,
+      "terminal_core_cell_count": 62,
+      "terminal_fixed_point_residual": 0.05989207082153331,
+      "terminal_lambda": 1.7155546507539798,
+      "terminal_rescaled": true,
+      "terminal_support_current_a": 9509911.738840898,
+      "termination": "active_set_settled"
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "clip_mode": "chord",
+      "converged": false,
+      "elapsed_seconds": 74.0595667231828,
+      "lambda_within_neighbourhood": null,
+      "normalisation_policy": "declared_scalar_current",
+      "realised_cells": 136,
+      "requested_cells": -110,
+      "route": "reduced_newton",
+      "seed": {
+        "anchor_available": true,
+        "anchor_m": [
+          2.1548879715360223,
+          0.008483892850961185
+        ],
+        "branch_index": 0,
+        "construction": "current_centroid_disc",
+        "current_centroid_m": [
+          1.6580796852430872,
+          0.0
+        ],
+        "current_target_provenance": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "current_centroid_m": [
+            1.6580796852430872,
+            0.0
+          ],
+          "declared_current_a": 1624991.1778605897,
+          "quadrature_current_a": 1624991.1778605892,
+          "quadrature_nodes": 512,
+          "quadrature_relative_closure": 2.8656234793890617e-16
+        },
+        "declared_axis_m": [
+          1.6580796852430872,
+          0.0
+        ],
+        "declared_boundary_m": [
+          2.1548879715360223,
+          0.008483892850961185
+        ],
+        "factory": "profile.cold_seed_portfolio",
+        "plasma_current_a": 1624991.1778605897,
+        "requested_class": "limited",
+        "seed_radius_m": 0.44721614229132306,
+        "state_sha256_binary64": "d19dd27bb7c24aa7f9a188e2543b47dee8e8b43d4f82490e1cd866a775677daf",
+        "stored_flux_samples_used": false,
+        "supported_cell_count": 36
+      },
+      "seed_lambda": 2.0619248214048866,
+      "seed_support_current_a": 788094.2898555372,
+      "solver_route": "reduced_newton",
+      "target_current_a": 1624991.1778605897,
+      "terminal_core_cell_count": 63,
+      "terminal_fixed_point_residual": 0.05914081548290632,
+      "terminal_lambda": 1.6008339156886973,
+      "terminal_rescaled": true,
+      "terminal_support_current_a": 1015090.4237692264,
+      "termination": "active_set_settled"
+    },
+    {
+      "case": "strong-rotation-compact-static",
+      "clip_mode": "chord",
+      "converged": false,
+      "elapsed_seconds": 70.21830168552697,
+      "lambda_within_neighbourhood": null,
+      "normalisation_policy": "declared_scalar_current",
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "route": "reduced_newton",
+      "seed": {
+        "anchor_available": true,
+        "anchor_m": [
+          1.0902999676767633,
+          0.005210856843975905
+        ],
+        "branch_index": 0,
+        "construction": "current_centroid_disc",
+        "current_centroid_m": [
+          0.8875010108629255,
+          0.0
+        ],
+        "current_target_provenance": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "current_centroid_m": [
+            0.8875010108629255,
+            0.0
+          ],
+          "declared_current_a": 251245.90891804622,
+          "quadrature_current_a": 251245.90891804622,
+          "quadrature_nodes": 512,
+          "quadrature_relative_closure": 0.0
+        },
+        "declared_axis_m": [
+          0.8875010108629255,
+          0.0
+        ],
+        "declared_boundary_m": [
+          1.0902999676767633,
+          0.005210856843975905
+        ],
+        "factory": "profile.cold_seed_portfolio",
+        "plasma_current_a": 251245.90891804622,
+        "requested_class": "limited",
+        "seed_radius_m": 0.18257506240510613,
+        "state_sha256_binary64": "e60ef066d303048460a46057bc926ec461ddae472e8759521f46a2102ac34c2b",
+        "stored_flux_samples_used": false,
+        "supported_cell_count": 39
+      },
+      "seed_lambda": 1.8907511583421348,
+      "seed_support_current_a": 132881.5311361998,
+      "solver_route": "reduced_newton",
+      "target_current_a": 251245.90891804622,
+      "terminal_core_cell_count": 55,
+      "terminal_fixed_point_residual": 0.05272644187320817,
+      "terminal_lambda": 1.8193532721239911,
+      "terminal_rescaled": true,
+      "terminal_support_current_a": 138096.2745210725,
+      "termination": "sufficient_decrease_refused"
+    },
+    {
+      "case": "diverted-single-null",
+      "clip_mode": "chord",
+      "converged": false,
+      "elapsed_seconds": 117.36926055699587,
+      "lambda_within_neighbourhood": null,
+      "normalisation_policy": "declared_scalar_current",
+      "realised_cells": 132,
+      "requested_cells": -110,
+      "route": "reduced_newton",
+      "seed": {
+        "anchor_available": true,
+        "anchor_m": [
+          1.5019897592858356,
+          -1.019292805308505
+        ],
+        "branch_index": 1,
+        "construction": "axis_saddle_geometry",
+        "current_centroid_m": [
+          1.7120154725908823,
+          0.030254757713386198
+        ],
+        "current_target_provenance": {
+          "closed_form_flux_samples_used_for_current_support_only": true,
+          "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+          "current_centroid_m": [
+            1.7120154725908823,
+            0.030254757713386198
+          ],
+          "declared_current_a": 37319.34592471112
+        },
+        "declared_axis_m": [
+          1.7870647018106887,
+          0.0467736265648528
+        ],
+        "declared_boundary_m": [
+          1.5025279999999999,
+          -1.01728
+        ],
+        "factory": "profile.cold_seed_portfolio",
+        "plasma_current_a": 37319.34592471112,
+        "requested_class": "diverted",
+        "seed_radius_m": 0.649709176903539,
+        "state_sha256_binary64": "e870873e0ca4a1a87576b041e2b9bb16ac566b8193543015ccc098325cb51b86",
+        "stored_flux_samples_used": false,
+        "supported_cell_count": 58
+      },
+      "seed_lambda": 1.000371726062665,
+      "seed_support_current_a": 37305.47850607022,
+      "solver_route": "reduced_newton",
+      "target_current_a": 37319.34592471112,
+      "terminal_core_cell_count": 1,
+      "terminal_fixed_point_residual": 0.05703223727273296,
+      "terminal_lambda": 53.8025621707743,
+      "terminal_rescaled": true,
+      "terminal_support_current_a": 693.6351061917101,
+      "termination": "active_set_settled"
+    }
+  ],
+  "verdicts": {
+    "newton_krylov/chord": {
+      "all_converged_terminal_within_neighbourhood": false,
+      "clip_mode": "chord",
+      "converged_rows": 0,
+      "converged_seed_lambda": [],
+      "converged_terminal_lambda": [],
+      "route": "newton_krylov",
+      "rows": 4,
+      "terminal_lambda_max": null,
+      "terminal_lambda_min": null
+    },
+    "reduced_newton/chord": {
+      "all_converged_terminal_within_neighbourhood": false,
+      "clip_mode": "chord",
+      "converged_rows": 0,
+      "converged_seed_lambda": [],
+      "converged_terminal_lambda": [],
+      "route": "reduced_newton",
+      "rows": 4,
+      "terminal_lambda_max": null,
+      "terminal_lambda_min": null
+    }
+  }
+}

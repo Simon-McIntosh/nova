@@ -56,6 +56,7 @@ from nova.equilibrium.flux_surface_connectivity import (
 from nova.geometry.hexstencil import hex_stencil
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
+from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_efit_referee import read_efit_referee
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 from nova.jax.config import (
@@ -73,6 +74,10 @@ DIIID_CACHE = HERE / "diiid-topology-operands.npz"
 MAST_AUTHORITY = (
     ROOT / "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py"
 )
+TOPOLOGY_LABEL_BY_CLASS = {
+    int(TopologyClass.DIVERTED): "diverted",
+    int(TopologyClass.LIMITED): "limited",
+}
 DIIID_AUTHORITY = ROOT / "benchmarks/diiid_forward_gs_match.py"
 EXPECTED_MAST_ROWS = 12
 EXPECTED_DIIID_ROWS = 5
@@ -122,18 +127,25 @@ class StaleOperandCacheError(RuntimeError):
 
 
 class _ObservedProfile:
-    """Forward a profile while retaining the portfolio returned by its solve."""
+    """Forward a profile while retaining the solve receipts it forwards to.
+
+    The public seam returns a receipt rather than a branch portfolio, so the
+    solve is what gets intercepted: every receipt the wrapped profile returns
+    is kept here, in call order, for the caller to read its terminal state and
+    iteration count from.
+    """
 
     def __init__(self, profile) -> None:
         self._profile = profile
-        self.portfolio = None
+        self.receipts: list[Any] = []
 
     def __getattr__(self, name: str):
         return getattr(self._profile, name)
 
-    def solve_portfolio(self, *args, **kwargs):
-        self.portfolio = self._profile.solve_portfolio(*args, **kwargs)
-        return self.portfolio
+    def solve(self, *args, **kwargs):
+        receipt = self._profile.solve(*args, **kwargs)
+        self.receipts.append(receipt)
+        return receipt
 
 
 def _source_authority(path: Path) -> dict[str, str]:
@@ -155,6 +167,66 @@ def _load_path(path: Path, name: str):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def _solve_receipt_topology_class(receipt: Any):
+    """Return the achieved topology class carried by one solve receipt."""
+
+    topology = getattr(receipt, "topology_read", None)
+    if topology is None:
+        return None
+    return (
+        TopologyClass.DIVERTED
+        if bool(np.asarray(topology.diverted))
+        else TopologyClass.LIMITED
+    )
+
+
+def _topology_class_label(requested_class) -> str | None:
+    """Return the persisted label for a solve-owned class, if resolved."""
+
+    if requested_class is None:
+        return None
+    return TOPOLOGY_LABEL_BY_CLASS.get(int(requested_class))
+
+
+def _class_boundary_flux(topology, requested_class) -> float:
+    """Boundary flux level the persisted polyline is traced at for a class.
+
+    A class-free read lets the wall contact win the boundary level.  A frame
+    whose recorded class is diverted persists the admitted saddle flux and a
+    limited frame the wall contact flux.
+    """
+    if requested_class is None:
+        return float(np.asarray(topology.boundary_flux))
+    if int(requested_class) == int(TopologyClass.DIVERTED):
+        return float(np.asarray(topology.x_point_flux))
+    if int(requested_class) == int(TopologyClass.LIMITED):
+        return float(np.asarray(topology.wall_point_flux))
+    raise ValueError(f"unsupported requested topology class {requested_class!r}")
+
+
+def _governed_topology_read(operator, state, solve_receipt):
+    """Read topology under the class achieved by the solve receipt."""
+
+    requested_class = _solve_receipt_topology_class(solve_receipt)
+    masks, topology = operator.read(state, requested_class=requested_class)
+    return (
+        requested_class,
+        _topology_class_label(requested_class),
+        masks,
+        topology,
+        _class_boundary_flux(topology, requested_class),
+    )
+
+
+def _sample_closed_boundary(authority, controls: np.ndarray) -> np.ndarray:
+    """Return a shaped empty boundary when the authority has no closed branch."""
+
+    sampled = authority._sample_cubic_controls(controls)
+    if sampled is None:
+        return np.empty((0, 2), dtype=float)
+    return np.asarray(sampled, dtype=float).reshape((-1, 2))
 
 
 def _stationary_records(
@@ -231,17 +303,25 @@ def _mast_rows(
         target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
         observed_profile = _ObservedProfile(profile)
         states = reachability._mast_states(
-            observed_profile, jnp.asarray(passive_case["state"]), target_current
+            observed_profile,
+            jnp.asarray(passive_case["state"]),
+            target_current,
+            carrier_identity=carrier["carrier"]["semantic_response_identity"],
         )
-        if observed_profile.portfolio is None:
-            raise RuntimeError("the MAST solve returned no observable branch portfolio")
-        pure_branch = jax.tree.map(
-            lambda value: value[int(reachability.TopologyClass.DIVERTED)],
-            observed_profile.portfolio.branches,
+        if not observed_profile.receipts:
+            raise RuntimeError("the MAST solve returned no observable receipt")
+        if len(observed_profile.receipts) != 2:
+            raise RuntimeError(
+                "the MAST solve returned an unexpected receipt count: "
+                f"{len(observed_profile.receipts)}"
+            )
+        solve_receipts = dict(
+            zip(("pure", "mixed"), observed_profile.receipts, strict=True)
         )
+        pure_receipt = observed_profile.receipts[0]
         active_set_iterations = {
             "pure": int(
-                np.asarray(pure_branch.equilibrium.fixed_point.active_set_iterations)
+                np.asarray(pure_receipt.equilibrium.fixed_point.active_set_iterations)
             ),
             "mixed": 0,
         }
@@ -255,6 +335,8 @@ def _mast_rows(
                 flush=True,
             )
             state = arm_result.state
+            requested_class = _solve_receipt_topology_class(solve_receipts[arm])
+            solve_topology_class = _topology_class_label(requested_class)
             governed_wall = reachability._closed_wall(
                 np.asarray(profile.operator.wall.coordinate, dtype=float)
             )
@@ -266,7 +348,15 @@ def _mast_rows(
                 source_o, source_x = jax.device_get(
                     profile.operator._fixed_design_topology.grid(grid_flux)
                 )
-                masks, topology = profile.operator.read(state)
+                (
+                    requested_class,
+                    solve_topology_class,
+                    masks,
+                    topology,
+                    boundary_flux,
+                ) = _governed_topology_read(
+                    profile.operator, state, solve_receipts[arm]
+                )
                 geometry = reachability._grid_geometry(profile, state)
                 flux = np.asarray(geometry["flux"], dtype=float)
                 radius = np.asarray(geometry["radius"], dtype=float)
@@ -360,9 +450,7 @@ def _mast_rows(
                     vertices = np.asarray(polygon, dtype=float)
                     padded_polygons[polygon_index, : len(vertices)] = vertices
                 shared_flux = moment_geometry.shared_node_flux(grid_flux)
-                signed_flux = profile.operator.polarity * (
-                    shared_flux - topology.boundary_flux
-                )
+                signed_flux = profile.operator.polarity * (shared_flux - boundary_flux)
                 print(
                     f"MAST_REPLAY_FIELDS_READY {shot}/{slice_index} {arm}",
                     flush=True,
@@ -372,15 +460,24 @@ def _mast_rows(
                         jnp.asarray(flux),
                         jnp.asarray(radius),
                         jnp.asarray(height),
-                        topology.boundary_flux,
+                        boundary_flux,
                         topology.axis,
                     )
                 )
-                closed = authority._sample_cubic_controls(
+                closed = _sample_closed_boundary(
+                    authority,
                     np.asarray(assembled["closed_controls_rz"])[
                         np.asarray(assembled["closed_valid"], dtype=bool)
-                    ]
+                    ],
                 )
+                boundary_failure_class = None
+                boundary_failure_message = None
+                if requested_class == TopologyClass.DIVERTED and len(closed) < 3:
+                    boundary_failure_class = "BoundaryGenerationFailure"
+                    boundary_failure_message = (
+                        "the receipt class is diverted, but the class-governed "
+                        "separatrix assembly returned no closed branch"
+                    )
                 visual = {
                     "cell_rz": np.asarray(profile.lattice.coordinate, dtype=float),
                     "domain_labels": np.asarray(masks.label, dtype=np.int8),
@@ -391,6 +488,12 @@ def _mast_rows(
                     "wall_point": np.asarray(topology.wall_point, dtype=float),
                     "wall": governed_wall,
                     "nova_boundary": closed,
+                    "class": solve_topology_class,
+                    "solve_topology_class": solve_topology_class,
+                    "boundary_generation_failure": boundary_failure_class,
+                    "boundary_generation_failure_reason": boundary_failure_message,
+                    "panel_failure_exception_class": boundary_failure_class,
+                    "panel_failure_message": boundary_failure_message,
                     "converged": bool(arm_result.converged),
                     "qualification": str(arm_result.termination_reason),
                     "termination_reason": str(arm_result.termination_reason),
@@ -416,6 +519,12 @@ def _mast_rows(
                     "wall_point": empty_points,
                     "wall": governed_wall,
                     "nova_boundary": empty_points,
+                    "class": solve_topology_class,
+                    "solve_topology_class": solve_topology_class,
+                    "boundary_generation_failure": None,
+                    "boundary_generation_failure_reason": None,
+                    "panel_failure_exception_class": None,
+                    "panel_failure_message": None,
                     "converged": False,
                     "qualification": type(error).__name__,
                     "termination_reason": str(arm_result.termination_reason),
@@ -1042,6 +1151,24 @@ def _draw_row(row: dict[str, Any], path: Path) -> dict[str, Any]:
             label="Nova closest plasma-wall point",
             zorder=9,
         )
+    boundary_failure = row.get("boundary_generation_failure")
+    if boundary_failure is not None:
+        failure_message = textwrap.fill(
+            str(row.get("boundary_generation_failure_reason") or "unknown reason"),
+            width=72,
+        )
+        axis.text(
+            0.5,
+            0.94,
+            f"{boundary_failure}: {failure_message}",
+            transform=axis.transAxes,
+            ha="center",
+            va="top",
+            fontsize=8,
+            color="#b00020",
+            bbox={"facecolor": "#fff1f1", "edgecolor": "#b00020"},
+            zorder=11,
+        )
     efit_axis = _finite_points(row["efit_axis"])
     efit_x = _finite_points(row["efit_x"])
     if len(efit_axis):
@@ -1201,8 +1328,12 @@ def _publish_row_contents(row: dict[str, Any], index: int) -> dict[str, Any]:
     shadow = labels == int(PlasmaDomain.PRIVATE_FLUX)
     total_shadow_cells = int(np.count_nonzero(shadow))
     source_qualification = str(row["qualification"])
-    retained_failure_class = row.get("panel_failure_exception_class")
-    retained_failure_message = row.get("panel_failure_message")
+    retained_failure_class = row.get("panel_failure_exception_class") or row.get(
+        "boundary_generation_failure"
+    )
+    retained_failure_message = row.get("panel_failure_message") or row.get(
+        "boundary_generation_failure_reason"
+    )
     try:
         boundary = _closed_separatrix_points(row["nova_boundary"])
     except ValueError as error:

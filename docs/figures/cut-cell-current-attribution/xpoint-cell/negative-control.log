@@ -1,0 +1,3 @@
+declared mutation: index the supplied root fractions against the un-normalised (clockwise) cell polygon
+NEGATIVE CONTROL RED: AssertionError: reconstructed sectors close to -4.588e-02 m2 against the cell interior, so they are not a partition
+srun: error: 98dci4-clu-3141: task 0: Exited with exit code 1

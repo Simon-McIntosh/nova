@@ -1,0 +1,5 @@
+revision=237e3e931c2a1ce89a647917e249a160de9631db tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-census-partition-probe-reads-the-full-state command=repin-probe terminal_booked_currents
+REPIN_OBSERVED chord=15875439.764504185
+REPIN_OBSERVED exact=14013835.43717596
+REPIN_OBSERVED per_cell={"104": {"chord": 192269.94030158775, "exact": 192269.94030158775}, "106": {"chord": 192343.79043466656, "exact": 192343.79043466656}, "108": {"chord": 192269.94030158763, "exact": 192269.94030158763}, "116": {"chord": 112349.6683601451, "exact": 112349.6683601451}, "83": {"chord": 112349.6683601459, "exact": 112349.6683601459}}
+PROBE_EXIT=0

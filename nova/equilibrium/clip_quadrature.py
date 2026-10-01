@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from math import factorial
 from typing import TYPE_CHECKING, NamedTuple
 
 import jax
@@ -47,15 +48,8 @@ _QUADRATIC_SAMPLE_DESIGN = np.stack(
     axis=1,
 )
 _QUADRATIC_SAMPLE_INVERSE = np.linalg.inv(_QUADRATIC_SAMPLE_DESIGN)
-#: Per-edge Gauss order of the sampled-arc boundary rule. Chosen as the lowest
-#: order whose line integral of the local density model's radial antiderivative
-#: meets the row budget; see the dropped-term receipt in the evidence record.
-# Gauss order per sampled-arc edge, set by the shifted paths rather than the
-# zeroth one: the unshifted integrand reaches degree five in the edge parameter
-# and a third-order rule is exact on it, but the two first moments raise the
-# degree to six, where a third-order rule carries a relative defect near 1e-6.
-# Fourth order is exact through degree seven and reaches roundoff on all three
-# paths, so the fixed edge count costs four evaluations rather than three.
+# Reference rule used by the independent edge-order measurement. The production
+# boundary reduction uses endpoint moments and never evaluates this rule.
 _ARC_EDGE_ORDER = 4
 _ARC_EDGE_RULE = np.polynomial.legendre.leggauss(_ARC_EDGE_ORDER)
 _ARC_EDGE_NODE = 0.5 * (_ARC_EDGE_RULE[0] + 1.0)
@@ -126,8 +120,8 @@ def cut_capacity_edge_bound() -> int:
 
 
 def cut_cell_moment_evaluation_bound() -> int:
-    """Return the fixed live point bound for one curved cut-cell reduction."""
-    return len(_DENSITY_SAMPLE_LOCAL) + cut_capacity_edge_bound() * _ARC_EDGE_NODE.size
+    """Return the density samples; exact endpoint moments need no edge samples."""
+    return len(_DENSITY_SAMPLE_LOCAL)
 
 
 def _quadratic_sample_field(field, cell_index):
@@ -158,22 +152,78 @@ def _density_coefficients(values):
     return jnp.einsum("ij,nj->ni", inverse, jnp.asarray(values))
 
 
-def _monomial_antiderivative(
-    points, coefficients, powers, radial_shift, vertical_shift
-):
-    """Evaluate a shifted radial antiderivative of a local density monomial."""
-    radial = points[..., 0]
-    vertical = points[..., 1]
-    value = jnp.zeros(radial.shape, dtype=radial.dtype)
-    for column, (radial_power, vertical_power) in enumerate(powers):
-        exponent = radial_power + radial_shift + 1
-        value = value + (
-            coefficients[..., column]
-            * radial**exponent
-            * vertical ** (vertical_power + vertical_shift)
-            / exponent
+def _straight_edge_monomial_moments(vertices, count, *, max_degree: int):
+    """Integrate local monomials by a fixed-width endpoint recurrence.
+
+    An edge with endpoints a and b bounds the signed triangle (0, a, b).
+    If H[p,q] is the coefficient of u**p v**q in
+    1 / ((1 - a.x*u - a.y*v) * (1 - b.x*u - b.y*v)), its triangle moment is
+    cross(a,b) * p! q! H[p,q] / (p+q+2)!. Summing signed triangles also covers
+    concave polygons and polygons whose origin lies outside their support.
+
+    The homogeneous coefficients satisfy H[n] = (a.x*u+a.y*v) H[n-1]
+    + (b.x*u+b.y*v)**n. A scan advances both polynomials by multiplication
+    and a one-slot shift. It carries no binomial expansion or quadrature axis;
+    each degree reduces its edge contributions before returning its table.
+    Columns are ordered by total degree, then increasing radial exponent.
+    """
+    point = jnp.asarray(vertices)
+    live = jnp.asarray(count)
+    if point.ndim != 3 or point.shape[-1] != 2:
+        raise ValueError("vertices must have shape (cells, capacity, 2)")
+    if live.shape != (point.shape[0],):
+        raise ValueError("count must carry one vertex count per cell")
+    if max_degree < 0:
+        raise ValueError("max_degree must be nonnegative")
+    slot = jnp.arange(point.shape[1])
+    valid = slot[None, :] < live[:, None]
+    point = jnp.where(valid[..., None], point, 0.0)
+    following_slot = jnp.where(slot[None, :] + 1 < live[:, None], slot[None, :] + 1, 0)
+    following = jnp.take_along_axis(point, following_slot[..., None], axis=1)
+    following = jnp.where(valid[..., None], following, 0.0)
+    cross = point[..., 0] * following[..., 1] - following[..., 0] * point[..., 1]
+    orientation = jnp.where(jnp.sum(cross, axis=1) < 0.0, -1.0, 1.0)
+    cross = orientation[:, None] * cross
+    factors = np.zeros((max_degree + 1, max_degree + 1), dtype=np.float64)
+    for total in range(max_degree + 1):
+        for radial in range(total + 1):
+            factors[total, radial] = (
+                factorial(radial) * factorial(total - radial) / factorial(total + 2)
+            )
+
+    initial = jnp.zeros(point.shape[:2] + (max_degree + 1,), dtype=point.dtype)
+    initial = initial.at[..., 0].set(1.0)
+
+    def multiply_linear(polynomial, endpoint):
+        shifted = jnp.concatenate(
+            (jnp.zeros_like(polynomial[..., :1]), polynomial[..., :-1]), axis=-1
         )
-    return value
+        return endpoint[..., 1, None] * polynomial + endpoint[..., 0, None] * shifted
+
+    def advance(carried, factor):
+        homogeneous, endpoint_power = carried
+        endpoint_power = multiply_linear(endpoint_power, following)
+        homogeneous = multiply_linear(homogeneous, point) + endpoint_power
+        moment = jnp.sum(cross[..., None] * homogeneous, axis=1) * factor
+        return (homogeneous, endpoint_power), moment
+
+    _, moments = jax.lax.scan(
+        advance, (initial, initial), jnp.asarray(factors[1:], dtype=point.dtype)
+    )
+    area = jnp.sum(cross, axis=1) / 2.0
+    table = jnp.concatenate(
+        (area[None, :, None] * jnp.eye(1, max_degree + 1, dtype=point.dtype), moments),
+        axis=0,
+    )
+    degrees, radial_powers = zip(
+        *(
+            (total, radial)
+            for total in range(max_degree + 1)
+            for radial in range(total + 1)
+        ),
+        strict=True,
+    )
+    return table[jnp.asarray(degrees), :, jnp.asarray(radial_powers)].T
 
 
 def _sampled_arc_polynomial_moments(
@@ -186,49 +236,29 @@ def _sampled_arc_polynomial_moments(
 ) -> ClippedCurrentMoments:
     """Integrate a local density over the clip's own sampled arc polygon.
 
-    The region is the polygon the clip books: its fixed 128 straight arc
-    segments joined to the straight cell edges. Green's theorem rewrites the
-    area moment of the density as a boundary line integral of the density's
-    radial antiderivative, and each edge evaluates its own stretch of that
-    integral with its own Gauss rule. A padded slot carries an exactly zero
-    edge weight, so dead capacity adds neither evaluation nor rounding. The
-    orientation is read from the traced vertices, so a polygon traversed either
-    way contracts consistently.
+    The density fit and the sampled polygon enter unchanged. Closed-form
+    geometric moments through degree five contract with the degree-four
+    density to give its current and first moments. Unused slots contribute
+    exact zero, and either polygon winding gives the same oriented area.
     """
     centre = jnp.asarray(polynomial_centre)
     scale = jnp.asarray(coordinate_scale)
     local = (jnp.asarray(vertices) - centre[:, None, :]) / scale[:, None, :]
     coefficient = jnp.asarray(coefficients)
-    capacity = local.shape[1]
     count = jnp.asarray(count)
-    slot = jnp.arange(capacity)
-    valid = slot[None, :] < count[:, None]
-    following_slot = jnp.where(slot[None, :] + 1 < count[:, None], slot[None, :] + 1, 0)
-    following = jnp.take_along_axis(local, following_slot[..., None], axis=1)
-    cross = local[..., 0] * following[..., 1] - following[..., 0] * local[..., 1]
-    cross = jnp.where(valid, cross, 0.0)
-    orientation = jnp.where(jnp.sum(cross, axis=1) < 0.0, -1.0, 1.0)
-    delta = following - local
-
-    node = jnp.asarray(_ARC_EDGE_NODE, dtype=local.dtype)
-    weight = jnp.asarray(_ARC_EDGE_WEIGHT, dtype=local.dtype)
-    points = local[:, :, None, :] + node[None, None, :, None] * delta[:, :, None, :]
-    edge_weight = jnp.where(
-        valid[:, :, None], weight.reshape(1, 1, -1) * delta[..., 1][:, :, None], 0.0
-    )
-    edge_coefficient = jnp.broadcast_to(
-        coefficient[:, None, None, :], points.shape[:-1] + (len(_DENSITY_POWERS),)
+    table = _straight_edge_monomial_moments(local, count, max_degree=5)
+    powers = tuple(
+        (radial, total - radial) for total in range(6) for radial in range(total + 1)
     )
 
     def line_integral(radial_shift, vertical_shift):
-        value = _monomial_antiderivative(
-            points,
-            edge_coefficient,
-            _DENSITY_POWERS,
-            radial_shift,
-            vertical_shift,
+        slots = jnp.asarray(
+            tuple(
+                powers.index((radial + radial_shift, vertical + vertical_shift))
+                for radial, vertical in _DENSITY_POWERS
+            )
         )
-        return orientation * jnp.sum(edge_weight * value, axis=(1, 2))
+        return jnp.sum(coefficient * table[:, slots], axis=1)
 
     area_scale = scale[:, 0] * scale[:, 1]
     current = area_scale * line_integral(0, 0)
@@ -238,7 +268,7 @@ def _sampled_arc_polynomial_moments(
         * jnp.stack((line_integral(1, 0), line_integral(0, 1)), axis=1)
     )
     first = shifted_current + current[:, None] * (centre - jnp.asarray(moment_centres))
-    supported = jnp.any(valid, axis=1)
+    supported = count > 0
     return ClippedCurrentMoments(
         jnp.where(supported, current, jnp.nan),
         jnp.where(supported, first[:, 0], jnp.nan),
@@ -486,7 +516,8 @@ def clipped_support_field_integrals(
     count = jnp.asarray(support.vertex_count)
     centroids = jnp.asarray(support.centroids)
     selected = jnp.asarray(selection, dtype=bool)
-    boundary = selected & jnp.asarray(support.boundary, dtype=bool)
+    sampled_boundary = count > _WHOLE_CELL_VERTEX_CAPACITY
+    boundary = selected & (jnp.asarray(support.boundary, dtype=bool) | sampled_boundary)
     whole = selected & jnp.asarray(support.included, dtype=bool) & ~boundary
 
     whole_vertices = vertices[:, :_WHOLE_CELL_VERTEX_CAPACITY]
@@ -690,11 +721,18 @@ def clipped_support_current_moments(
     boundary_reduction: bool = False,
 ) -> ClippedCurrentMoments:
     """Reduce current moments with an opt-in sampled-arc boundary route."""
+    from nova.equilibrium.source import _FluxSelectedProfile
+
+    if isinstance(profile, _FluxSelectedProfile):
+        return _flux_selected_current_moments(
+            support, selection, field, profile, cut_cell_capacity=cut_cell_capacity
+        )
     vertices = jnp.asarray(support.support_vertices)
     count = jnp.asarray(support.vertex_count)
     centroids = jnp.asarray(support.centroids)
     selected = jnp.asarray(selection, dtype=bool)
-    boundary = selected & jnp.asarray(support.boundary, dtype=bool)
+    sampled_boundary = count > _WHOLE_CELL_VERTEX_CAPACITY
+    boundary = selected & (jnp.asarray(support.boundary, dtype=bool) | sampled_boundary)
     whole = selected & jnp.asarray(support.included, dtype=bool) & ~boundary
 
     whole_points, whole_weights = _quadrature_from_arrays(
@@ -787,4 +825,120 @@ def clipped_support_current_moments(
                 scatter(whole_moments.vertical_moment, cut_vertical),
             )
         )
+    )
+
+
+def _quadratic_support(vertices, count, centres, coefficient, origin, scale, selected):
+    """Clip per-cell polygons by their own quadratic normalized-flux level."""
+    from nova.equilibrium.separatrix_clip import _traced_clip
+
+    cell_count, capacity, _ = vertices.shape
+    nodes = jnp.arange(cell_count * capacity).reshape(cell_count, capacity)
+    return _traced_clip(
+        vertices.reshape(-1, 2),
+        nodes,
+        count,
+        centres,
+        capacity + 2,
+        jnp.ones(cell_count * capacity, dtype=vertices.dtype),
+        curve_coefficient=coefficient,
+        curve_centre=origin,
+        curve_scale=scale,
+        participating_cell=selected,
+    )
+
+
+@jax.custom_jvp
+def _quadratic_support_vertices(
+    coefficient, vertices, count, centres, origin, scale, selected
+):
+    """Return moving vertices with a transpose-safe local polynomial tangent."""
+    return _quadratic_support(
+        vertices, count, centres, coefficient, origin, scale, selected
+    ).support_vertices
+
+
+@_quadratic_support_vertices.defjvp
+def _quadratic_support_vertices_jvp(primals, tangents):
+    coefficient, vertices, count, centres, origin, scale, selected = primals
+
+    def one_cell(coefficients, polygon, number, centroid, local_origin, extent, live):
+        value = _quadratic_support(
+            polygon[None],
+            number[None],
+            centroid[None],
+            coefficients[None],
+            local_origin[None],
+            extent[None],
+            live[None],
+        ).support_vertices[0]
+        return value, value
+
+    # Forward differentiation selects only live roots before transposition.
+    # A six-column local Jacobian avoids undefined inactive-root cotangents
+    # without forming a cell-by-cell dense Jacobian or freezing boundary motion.
+    jacobian, value = jax.vmap(jax.jacfwd(one_cell, argnums=0, has_aux=True))(
+        coefficient, vertices, count, centres, origin, scale, selected
+    )
+    tangent = jnp.einsum("nvdk,nk->nvd", jacobian, tangents[0])
+    return value, tangent
+
+
+def _flux_selected_current_moments(
+    support, selection, field, profile, *, cut_cell_capacity
+) -> ClippedCurrentMoments:
+    """Integrate each closure on the moving level-set region of its cell field.
+
+    The same local polynomial supplies the separatrix and the density's flux
+    coordinate. Differentiating its clipped vertices carries boundary motion
+    into the moments while region membership remains a discrete branch choice.
+    Density is smooth within each region; pointwise level signs exclude cells
+    wholly outside the confined region.
+    """
+    vertices = jnp.asarray(support.support_vertices)
+    count = jnp.asarray(support.vertex_count)
+    centres = jnp.asarray(support.centroids)
+    selected = jnp.asarray(selection, dtype=bool) & jnp.asarray(field.active)
+    coefficient = -jnp.asarray(field.coefficient)
+    coefficient = coefficient.at[:, 0].add(1.0)
+    cut_cell_capacity = max(int(cut_cell_capacity), int(vertices.shape[0]))
+
+    def integrate(sign, closure):
+        clipped = _quadratic_support(
+            vertices,
+            count,
+            centres,
+            sign * coefficient,
+            field.centre,
+            field.scale,
+            selected,
+        )
+        moving_vertices = _quadratic_support_vertices(
+            sign * coefficient,
+            vertices,
+            count,
+            centres,
+            field.centre,
+            field.scale,
+            selected,
+        )
+        clipped = clipped._replace(support_vertices=moving_vertices)
+        # The re-derived level marks cut cells over this call's whole mesh, not
+        # only the cells the caller's bank was sized for, so the callback's
+        # capacity is raised to at least one slot per cell it can mark.
+        return clipped_support_current_moments(
+            clipped,
+            selected & clipped.included,
+            field,
+            closure,
+            cut_cell_capacity=cut_cell_capacity,
+            boundary_reduction=True,
+        )
+
+    confined = integrate(1.0, profile.confined)
+    if profile.open_field_line is None:
+        return confined
+    opened = integrate(-1.0, profile.open_field_line)
+    return ClippedCurrentMoments(
+        *(a + b for a, b in zip(confined, opened, strict=True))
     )

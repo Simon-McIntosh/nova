@@ -1,0 +1,87 @@
+{
+  "completed": true,
+  "figures": [
+    {
+      "companion": "base-memory-scaling.png",
+      "figure": "base-memory-scaling.svg",
+      "gate_gib": 20.0,
+      "kind": "memory_scaling",
+      "points": [
+        {
+          "above_gate": true,
+          "plotted_y_gib": 25.46567139774561,
+          "printed_label": "25.47",
+          "realised_cells": 135,
+          "receipt_plotted_gib": 25.46567139774561,
+          "receipt_temporary_bytes": 27343556456,
+          "requested_cells": -110
+        },
+        {
+          "above_gate": true,
+          "plotted_y_gib": 51.807054080069065,
+          "printed_label": "51.81",
+          "realised_cells": 342,
+          "receipt_plotted_gib": 51.807054080069065,
+          "receipt_temporary_bytes": 55627400744,
+          "requested_cells": -300
+        },
+        {
+          "above_gate": true,
+          "plotted_y_gib": 70.40527264028788,
+          "printed_label": "70.41",
+          "realised_cells": 555,
+          "receipt_plotted_gib": 70.40527264028788,
+          "receipt_temporary_bytes": 75597085864,
+          "requested_cells": -500
+        }
+      ],
+      "poloidal_panels": [],
+      "title_lines": [
+        "Base exact-clip solve: pairwise JVP state exceeds the gate at every rung",
+        "3 compiled rungs, one cell count each; the coordinate of every mark and the label beside it come from the same receipt byte count. No solve is executed to draw this figure."
+      ]
+    },
+    {
+      "converged": true,
+      "figure": "solve-panels-final-receipted/weak-rotation-reactor-static-production-route-cells-1000.png",
+      "kind": "poloidal_panel",
+      "poloidal_panels": [
+        {
+          "null_glyph_total": 2,
+          "null_sets": {
+            "analytic_admitted_x_points": {
+              "drawn": 0,
+              "dropped_outside_wall": 0
+            },
+            "analytic_magnetic_axis": {
+              "drawn": 1,
+              "dropped_outside_wall": 0
+            },
+            "terminal_admitted_x_points": {
+              "drawn": 0,
+              "dropped_outside_wall": 0
+            },
+            "terminal_magnetic_axis": {
+              "drawn": 1,
+              "dropped_outside_wall": 0
+            }
+          },
+          "wall_node_count": 121
+        }
+      ],
+      "realised_cells": 1072,
+      "terminal_class": "limited",
+      "terminal_residual": 1.4517110204130745e-13,
+      "title_lines": [
+        "weak-rotation-reactor-static \u00b7 cells=1072 \u00b7 residual=1.452e-13 \u00b7 converged=yes",
+        "analytic blue contours and nulls / solved ochre contours and nulls; shared Wb levels",
+        "wall drawn at its unit-faithful closure"
+      ]
+    }
+  ],
+  "gate_gib": 20.0,
+  "render_entry_point": "benchmarks/exact_clip_memory_scaling.py render",
+  "schema": "nova.exact-clip-memory-render-receipt",
+  "source_receipt": "base-memory.json",
+  "source_receipt_sha256": "5b95a9ce519ee65a7ec010d8fcffbc7c94c5fe520c62042be212cb02be3c78eb"
+}

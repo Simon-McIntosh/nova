@@ -1,0 +1,98 @@
+revision=6315abefa8a3d7cf38037aa0a3848fe891403e88 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution command=/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/benchmarks/diverted_chord_response_attribution.py
+name, uuid
+NVIDIA H200 NVL, GPU-492a2dee-88e3-a142-6707-7ade0192889a
+revision=6315abefa8a3d7cf38037aa0a3848fe891403e88 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/benchmarks/diverted_chord_response_attribution.py']
+device=[CudaDevice(id=0)] x64=True
+REPRODUCED diverted-single-null-cells-110-chord map=0.0950848225228 plasma=0.00735661869453
+ATTRIBUTED diverted-single-null-cells-110-chord placement=0.0208442 green=-9.66879e-08
+REPRODUCED weak-rotation-reactor-static-cells-110-chord map=9.54028928988e-05 plasma=2.45257636163e-05
+ATTRIBUTED weak-rotation-reactor-static-cells-110-chord placement=4.44089e-16 green=-4.81869e-08
+REPRODUCED diverted-single-null-cells-300-chord map=0.022909979027 plasma=0.0016676095237
+QUADRATURE order=4/16 cell=200
+QUADRATURE order=6/32 cell=200
+ATTRIBUTED diverted-single-null-cells-300-chord placement=-0.00374906 green=2.71582e-09
+REPRODUCED weak-rotation-reactor-static-cells-300-chord map=9.59681102457e-05 plasma=2.47406020441e-05
+QUADRATURE order=4/16 cell=200
+QUADRATURE order=6/32 cell=200
+ATTRIBUTED weak-rotation-reactor-static-cells-300-chord placement=1.33227e-15 green=-5.95569e-09
+REPRODUCED diverted-single-null-cells-500-chord map=0.0338673253923 plasma=0.00223852432749
+QUADRATURE order=4/16 cell=200
+QUADRATURE order=4/16 cell=400
+QUADRATURE order=6/32 cell=200
+QUADRATURE order=6/32 cell=400
+ATTRIBUTED diverted-single-null-cells-500-chord placement=-0.00198374 green=7.74434e-09
+REPRODUCED weak-rotation-reactor-static-cells-500-chord map=4.84588729732e-05 plasma=1.24968728808e-05
+QUADRATURE order=4/16 cell=200
+QUADRATURE order=4/16 cell=400
+QUADRATURE order=6/32 cell=200
+QUADRATURE order=6/32 cell=400
+ATTRIBUTED weak-rotation-reactor-static-cells-500-chord placement=0 green=-4.28322e-10
+REPRODUCED diverted-single-null-cells-1000-chord map=0.0126759887886 plasma=0.000810786360619
+QUADRATURE order=4/16 cell=200
+QUADRATURE order=4/16 cell=400
+QUADRATURE order=4/16 cell=1000
+QUADRATURE order=6/32 cell=200
+QUADRATURE order=6/32 cell=400
+QUADRATURE order=6/32 cell=1000
+ATTRIBUTED diverted-single-null-cells-1000-chord placement=0.000339798 green=3.17763e-09
+REPRODUCED weak-rotation-reactor-static-cells-1000-chord map=4.67931855269e-05 plasma=1.20659976836e-05
+QUADRATURE order=4/16 cell=200
+QUADRATURE order=4/16 cell=400
+QUADRATURE order=4/16 cell=600
+QUADRATURE order=4/16 cell=800
+QUADRATURE order=4/16 cell=1000
+QUADRATURE order=6/32 cell=200
+QUADRATURE order=6/32 cell=400
+QUADRATURE order=6/32 cell=600
+QUADRATURE order=6/32 cell=800
+QUADRATURE order=6/32 cell=1000
+ATTRIBUTED weak-rotation-reactor-static-cells-1000-chord placement=1.11022e-16 green=5.40554e-10
+REPRODUCED diverted-single-null-cells-2500-chord map=0.00409184461617 plasma=0.000243153753461
+QUADRATURE order=4/16 cell=0
+QUADRATURE order=4/16 cell=200
+QUADRATURE order=4/16 cell=400
+QUADRATURE order=4/16 cell=600
+QUADRATURE order=4/16 cell=1000
+QUADRATURE order=4/16 cell=1200
+QUADRATURE order=4/16 cell=1600
+QUADRATURE order=4/16 cell=1800
+QUADRATURE order=4/16 cell=2000
+QUADRATURE order=4/16 cell=2400
+QUADRATURE order=6/32 cell=0
+QUADRATURE order=6/32 cell=200
+QUADRATURE order=6/32 cell=400
+QUADRATURE order=6/32 cell=600
+QUADRATURE order=6/32 cell=1000
+QUADRATURE order=6/32 cell=1200
+QUADRATURE order=6/32 cell=1600
+QUADRATURE order=6/32 cell=1800
+QUADRATURE order=6/32 cell=2000
+QUADRATURE order=6/32 cell=2400
+ATTRIBUTED diverted-single-null-cells-2500-chord placement=-0.00508757 green=2.09747e-09
+REPRODUCED weak-rotation-reactor-static-cells-2500-chord map=4.82138406919e-05 plasma=1.24306936191e-05
+QUADRATURE order=4/16 cell=200
+QUADRATURE order=4/16 cell=400
+QUADRATURE order=4/16 cell=600
+QUADRATURE order=4/16 cell=800
+QUADRATURE order=4/16 cell=1000
+QUADRATURE order=4/16 cell=1200
+QUADRATURE order=4/16 cell=1400
+QUADRATURE order=4/16 cell=1600
+QUADRATURE order=4/16 cell=1800
+QUADRATURE order=4/16 cell=2000
+QUADRATURE order=4/16 cell=2200
+QUADRATURE order=4/16 cell=2400
+QUADRATURE order=6/32 cell=200
+QUADRATURE order=6/32 cell=400
+QUADRATURE order=6/32 cell=600
+QUADRATURE order=6/32 cell=800
+QUADRATURE order=6/32 cell=1000
+QUADRATURE order=6/32 cell=1200
+QUADRATURE order=6/32 cell=1400
+QUADRATURE order=6/32 cell=1600
+QUADRATURE order=6/32 cell=1800
+QUADRATURE order=6/32 cell=2000
+QUADRATURE order=6/32 cell=2200
+QUADRATURE order=6/32 cell=2400
+ATTRIBUTED weak-rotation-reactor-static-cells-2500-chord placement=1.11022e-16 green=7.55318e-12
+ATTRIBUTION_COMPLETE

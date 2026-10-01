@@ -1,0 +1,22 @@
+revision=86a1c1b4dfd3bc7b9070c4bd16f139b9cf40d552 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-bank-callback-capacity-from-the-mesh command=unit amplitude census
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-bank-callback-capacity-from-the-mesh/docs/figures/cut-cell-current-attribution/exact-bank-capacity/run_census.py", line 30, in <module>
+    result = census.measure()
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-bank-callback-capacity-from-the-mesh/benchmarks/unit_amplitude_current_census.py", line 796, in measure
+    probe = _partition_probe(operator, state, "exact")
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-bank-callback-capacity-from-the-mesh/benchmarks/unit_amplitude_current_census.py", line 298, in _partition_probe
+    base_masks, topology, _connected, _admitted = operator._fixed_design_read(physical)
+                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-bank-callback-capacity-from-the-mesh/nova/equilibrium/forward_operator.py", line 2989, in _fixed_design_read
+    initial = self._fixed_design_topology.read_qualification(
+        physical,
+    ...<3 lines>...
+        private_wall_node_mask,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-bank-callback-capacity-from-the-mesh/nova/equilibrium/topology.py", line 1176, in read_qualification
+    raise ValueError(
+        "own-node null census requires the direct sampling flux values"
+    )
+ValueError: own-node null census requires the direct sampling flux values
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.

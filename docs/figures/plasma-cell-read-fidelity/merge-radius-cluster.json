@@ -1,0 +1,103 @@
+{
+  "revision": "a1f4717e8a8a13296cdf55d96d617a014f232866",
+  "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-merge-radius-carries-the-pitch",
+  "slurm_job_id": "1276216",
+  "slurm_partition": "betelgeuse",
+  "jax_platform": "gpu",
+  "devices": [
+    "cuda:0"
+  ],
+  "x64": true,
+  "support_clip_mode": "exact",
+  "requested_cells": 110,
+  "realised_cells": 132,
+  "candidates": [
+    {
+      "source_index": 2,
+      "position_rz_m": [
+        1.5107863810710611,
+        -1.0275005315610446
+      ],
+      "source_pitch_m": 0.15145387287104764,
+      "root_uncertainty_radius_m": 1.519273353773991e-13,
+      "roundoff_radius_m": 8.609155933700529e-15,
+      "active_merge_radius_m": 0.015145387287113374,
+      "gradient_norm": 9.011991026260689e-18,
+      "representative": true
+    },
+    {
+      "source_index": 4,
+      "position_rz_m": [
+        1.4930225591761932,
+        -1.0188319093078109
+      ],
+      "source_pitch_m": 0.15145387287104764,
+      "root_uncertainty_radius_m": 1.519273353773991e-13,
+      "roundoff_radius_m": 8.609155933700529e-15,
+      "active_merge_radius_m": 0.015145387287113374,
+      "gradient_norm": 5.1924024584355396e-18,
+      "representative": false
+    },
+    {
+      "source_index": 9,
+      "position_rz_m": [
+        1.506509523756129,
+        -1.000151395931814
+      ],
+      "source_pitch_m": 0.15145387287104764,
+      "root_uncertainty_radius_m": 1.519273353773991e-13,
+      "roundoff_radius_m": 8.609155933700529e-15,
+      "active_merge_radius_m": 0.015145387287113374,
+      "gradient_norm": 3.9840805930253165e-18,
+      "representative": false
+    }
+  ],
+  "pairs": [
+    {
+      "candidates": [
+        0,
+        1
+      ],
+      "distance_m": 0.019766091674426882,
+      "uncertainty_sum_m": 3.038546707547982e-13,
+      "merge_criterion_holds": false,
+      "active_merge_radius_sum_m": 0.03029077457422675,
+      "active_merge_criterion_holds": true
+    },
+    {
+      "candidates": [
+        0,
+        2
+      ],
+      "distance_m": 0.027681523226844612,
+      "uncertainty_sum_m": 3.038546707547982e-13,
+      "merge_criterion_holds": false,
+      "active_merge_radius_sum_m": 0.03029077457422675,
+      "active_merge_criterion_holds": true
+    },
+    {
+      "candidates": [
+        1,
+        2
+      ],
+      "distance_m": 0.023040394822381856,
+      "uncertainty_sum_m": 3.038546707547982e-13,
+      "merge_criterion_holds": false,
+      "active_merge_radius_sum_m": 0.03029077457422675,
+      "active_merge_criterion_holds": true
+    }
+  ],
+  "retained_count": 1,
+  "representatives_rz_m": [
+    [
+      1.5107863810710611,
+      -1.0275005315610446
+    ]
+  ],
+  "reference_x_point_rz_m": [
+    1.5025279999999999,
+    -1.01728
+  ],
+  "active_merge_method": "0.10 * source_pitch + 256 * eps * source_pitch",
+  "domain_scale_m": 2.67273394919159
+}

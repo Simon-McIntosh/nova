@@ -1,0 +1,413 @@
+{
+  "base_revision": "52bfefc0a0f02412d8910aaccb632bfbd9fd43b5",
+  "ceilings": {
+    "300": 302553,
+    "1000": 304913
+  },
+  "runs": {
+    "stream-300": {
+      "revision": "96cbb2f0e488a4a1f49b3266c4de7b9814a64622",
+      "job_id": "1276452",
+      "compile_seconds": 168.72520983219147,
+      "optimized_instructions": 284792,
+      "base_optimized_instructions": 302553,
+      "delta_against_base": -17761,
+      "below_base": true,
+      "qualified_step_map_sites": 1,
+      "qualified_step_map_instructions": 2696,
+      "qualified_step_map_site_rows": [
+        {
+          "instructions": 2696,
+          "kinds": {
+            "jvp": 2696
+          },
+          "callers": [
+            [
+              [
+                "_newton_krylov_inner.<locals>.newton_body.<locals>.attempt_step.<locals>.linear_action:3391",
+                "_single_site_krylov.<locals>.serve:2247",
+                "_single_site_krylov.<locals>.serve:2258"
+              ],
+              2
+            ]
+          ]
+        }
+      ],
+      "hlo_attributed": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T074118384717-fsri-single-site-krylov-for-the-qualified-step/optimized-hlo/stream-300.hlo.txt",
+      "qualified_step_non_map_instructions": 998
+    },
+    "stream-1000": {
+      "revision": "96cbb2f0e488a4a1f49b3266c4de7b9814a64622",
+      "job_id": "1276452",
+      "compile_seconds": 173.9192063640803,
+      "optimized_instructions": 287117,
+      "base_optimized_instructions": 304913,
+      "delta_against_base": -17796,
+      "below_base": true,
+      "qualified_step_map_sites": 1,
+      "qualified_step_map_instructions": 2696,
+      "qualified_step_map_site_rows": [
+        {
+          "instructions": 2696,
+          "kinds": {
+            "jvp": 2696
+          },
+          "callers": [
+            [
+              [
+                "_newton_krylov_inner.<locals>.newton_body.<locals>.attempt_step.<locals>.linear_action:3391",
+                "_single_site_krylov.<locals>.serve:2247",
+                "_single_site_krylov.<locals>.serve:2258"
+              ],
+              2
+            ]
+          ]
+        }
+      ],
+      "hlo_attributed": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T074118384717-fsri-single-site-krylov-for-the-qualified-step/optimized-hlo/stream-1000.hlo.txt",
+      "qualified_step_non_map_instructions": 998
+    },
+    "per-site-300": {
+      "revision": "96cbb2f0e488a4a1f49b3266c4de7b9814a64622",
+      "job_id": "1276452",
+      "compile_seconds": 184.7377336807549,
+      "optimized_instructions": 302550,
+      "base_optimized_instructions": 302553,
+      "delta_against_base": -3,
+      "below_base": true,
+      "qualified_step_map_sites": 3,
+      "qualified_step_map_instructions": 13165,
+      "qualified_step_map_site_rows": [
+        {
+          "instructions": 7916,
+          "kinds": {
+            "jvp": 7916
+          },
+          "callers": [
+            [
+              [
+                "_qualified_krylov_step:38",
+                "_qualified_krylov_step:17"
+              ],
+              20
+            ],
+            [
+              [
+                "_qualified_krylov_step:20",
+                "_qualified_krylov_step:17"
+              ],
+              12
+            ]
+          ]
+        },
+        {
+          "instructions": 2626,
+          "kinds": {
+            "jvp": 2626
+          },
+          "callers": [
+            [
+              [
+                "_qualified_krylov_step:38",
+                "_qualified_krylov_step:17"
+              ],
+              91
+            ],
+            [
+              [
+                "_newton_krylov_inner.<locals>.newton_body.<locals>.attempt_step.<locals>.linear_action:3391",
+                "_newton_krylov_inner.<locals>.newton_body:3341"
+              ],
+              3
+            ]
+          ]
+        },
+        {
+          "instructions": 2623,
+          "kinds": {
+            "jvp": 2623
+          },
+          "callers": [
+            [
+              [
+                "_projected_krylov_condition:805"
+              ],
+              60
+            ],
+            [
+              [
+                "_qualified_krylov_step:38",
+                "_qualified_krylov_step:17"
+              ],
+              30
+            ]
+          ]
+        }
+      ],
+      "hlo_attributed": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T074118384717-fsri-single-site-krylov-for-the-qualified-step/optimized-hlo/per-site-300.named.hlo.txt",
+      "qualified_step_non_map_instructions": 373
+    },
+    "per-site-1000": {
+      "revision": "96cbb2f0e488a4a1f49b3266c4de7b9814a64622",
+      "job_id": "1276452",
+      "compile_seconds": 183.23251342773438,
+      "optimized_instructions": 304910,
+      "base_optimized_instructions": 304913,
+      "delta_against_base": -3,
+      "below_base": true,
+      "qualified_step_map_sites": 3,
+      "qualified_step_map_instructions": 13166,
+      "qualified_step_map_site_rows": [
+        {
+          "instructions": 7917,
+          "kinds": {
+            "jvp": 7917
+          },
+          "callers": [
+            [
+              [
+                "_qualified_krylov_step:38",
+                "_qualified_krylov_step:17"
+              ],
+              20
+            ],
+            [
+              [
+                "_qualified_krylov_step:20",
+                "_qualified_krylov_step:17"
+              ],
+              12
+            ]
+          ]
+        },
+        {
+          "instructions": 2626,
+          "kinds": {
+            "jvp": 2626
+          },
+          "callers": [
+            [
+              [
+                "_qualified_krylov_step:38",
+                "_qualified_krylov_step:17"
+              ],
+              91
+            ],
+            [
+              [
+                "_newton_krylov_inner.<locals>.newton_body.<locals>.attempt_step.<locals>.linear_action:3391",
+                "_newton_krylov_inner.<locals>.newton_body:3341"
+              ],
+              3
+            ]
+          ]
+        },
+        {
+          "instructions": 2623,
+          "kinds": {
+            "jvp": 2623
+          },
+          "callers": [
+            [
+              [
+                "_projected_krylov_condition:805"
+              ],
+              60
+            ],
+            [
+              [
+                "_qualified_krylov_step:38",
+                "_qualified_krylov_step:17"
+              ],
+              30
+            ]
+          ]
+        }
+      ],
+      "hlo_attributed": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T074118384717-fsri-single-site-krylov-for-the-qualified-step/optimized-hlo/per-site-1000.named.hlo.txt",
+      "qualified_step_non_map_instructions": 373
+    }
+  },
+  "base_52bfefc0_300_qualified_step_sites": {
+    "sites": 3,
+    "instructions": 13165
+  },
+  "per_caller_delta_300": {
+    "total": -17758,
+    "map_sites": -2,
+    "map_instructions": -10469,
+    "non_map_instructions": 625
+  },
+  "per_caller_delta_1000": {
+    "total": -17793,
+    "map_sites": -2,
+    "map_instructions": -10470,
+    "non_map_instructions": 625
+  },
+  "vmap_cost": {
+    "size": 1529,
+    "width": 16,
+    "gmres_iterations": 8,
+    "walls": {
+      "stream": {
+        "median_seconds": 1.2397789787501097,
+        "all": [
+          1.2417467907071114,
+          1.2379473522305489,
+          1.2397789787501097,
+          1.2378030940890312,
+          1.2428336888551712,
+          1.238124292343855,
+          1.2457711603492498
+        ]
+      },
+      "base": {
+        "median_seconds": 0.0864113625138998,
+        "all": [
+          0.0865207388997078,
+          0.08693266659975052,
+          0.08640528656542301,
+          0.0863911584019661,
+          0.0864113625138998,
+          0.08650550246238708,
+          0.08620940521359444
+        ]
+      }
+    },
+    "ratio_stream_over_base": 14.34740689976603
+  },
+  "toy_dense": {
+    "rows": [
+      {
+        "size": 5,
+        "iterations": 2,
+        "base": {},
+        "base-fenced": {}
+      },
+      {
+        "size": 5,
+        "iterations": 8,
+        "base": {},
+        "base-fenced": {}
+      },
+      {
+        "size": 12,
+        "iterations": 2,
+        "base": {},
+        "base-fenced": {}
+      },
+      {
+        "size": 12,
+        "iterations": 8,
+        "base": {
+          "step": 1.1934897514720433e-15,
+          "unconditioned_step": 1.1934897514720433e-15,
+          "achieved_reduction": 3.3306690738754696e-16
+        },
+        "base-fenced": {}
+      },
+      {
+        "size": 40,
+        "iterations": 2,
+        "base": {},
+        "base-fenced": {}
+      },
+      {
+        "size": 40,
+        "iterations": 8,
+        "base": {},
+        "base-fenced": {}
+      },
+      {
+        "size": 3,
+        "iterations": 2,
+        "base": {},
+        "base-fenced": {}
+      },
+      {
+        "size": 3,
+        "iterations": 8,
+        "base": {
+          "step": 2.7755575615628914e-17,
+          "unconditioned_step": 2.7755575615628914e-17,
+          "achieved_reduction": 3.082156583454298e-17
+        },
+        "base-fenced": {}
+      }
+    ],
+    "summary": [
+      "TOY_BASE bit_identical=6/8",
+      "TOY_BASE_FENCED bit_identical=8/8",
+      "EXIT=0"
+    ]
+  },
+  "toy_elementwise": {
+    "rows": [
+      {
+        "size": 5,
+        "iterations": 2,
+        "base": {
+          "achieved_reduction": 1.0977546996415732e-17
+        },
+        "base-fenced": {
+          "achieved_reduction": 1.0977546996415732e-17
+        }
+      },
+      {
+        "size": 5,
+        "iterations": 8,
+        "base": {
+          "achieved_reduction": 9.639980075527169e-18
+        },
+        "base-fenced": {
+          "achieved_reduction": 9.639980075527169e-18
+        }
+      },
+      {
+        "size": 12,
+        "iterations": 2,
+        "base": {},
+        "base-fenced": {}
+      },
+      {
+        "size": 12,
+        "iterations": 8,
+        "base": {
+          "achieved_reduction": 5.312590645178972e-18
+        },
+        "base-fenced": {
+          "achieved_reduction": 5.312590645178972e-18
+        }
+      },
+      {
+        "size": 40,
+        "iterations": 2,
+        "base": {},
+        "base-fenced": {}
+      },
+      {
+        "size": 40,
+        "iterations": 8,
+        "base": {},
+        "base-fenced": {}
+      },
+      {
+        "size": 3,
+        "iterations": 2,
+        "base": {},
+        "base-fenced": {}
+      },
+      {
+        "size": 3,
+        "iterations": 8,
+        "base": {},
+        "base-fenced": {}
+      }
+    ],
+    "summary": [
+      "TOY_BASE bit_identical=5/8",
+      "TOY_BASE_FENCED bit_identical=5/8",
+      "EXIT=0"
+    ]
+  }
+}

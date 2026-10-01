@@ -1,0 +1,9 @@
+PASS tests/test_clipped_support_quadrature.py
+PASS tests/test_continuous_confined_moments.py
+PASS tests/test_exact_bank_callback_capacity.py
+PASS tests/test_exact_clip_closed_form_budget.py
+PASS tests/test_exact_clip_memory.py::test_cell_banked_current_moments_are_bit_identical tests/test_exact_clip_memory.py::test_cell_banked_field_integrals_are_bit_identical
+PASS tests/test_exact_clip_moments.py
+PASS tests/test_solovev_certificate_builder.py
+PASS tests/test_xpoint_cell_wedge_clip.py
+PASS tests/test_exact_moment_reduction_cut_cells.py

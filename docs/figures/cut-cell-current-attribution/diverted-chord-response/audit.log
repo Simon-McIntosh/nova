@@ -1,0 +1,13 @@
+revision=6315abefa8a3d7cf38037aa0a3848fe891403e88 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution command=['docs/figures/cut-cell-current-attribution/diverted-chord-response/audit.py']
+PASS diverted-single-null cells=132 closure=4.981909e-17 Wb
+PASS weak-rotation-reactor-static cells=135 closure=7.9372273e-14 Wb
+PASS diverted-single-null cells=340 closure=6.0566244e-17 Wb
+PASS weak-rotation-reactor-static cells=342 closure=7.9581741e-14 Wb
+PASS diverted-single-null cells=550 closure=7.4064561e-17 Wb
+PASS weak-rotation-reactor-static cells=555 closure=8.085416e-14 Wb
+PASS diverted-single-null cells=1074 closure=6.4177992e-17 Wb
+PASS weak-rotation-reactor-static cells=1072 closure=8.8753657e-14 Wb
+PASS diverted-single-null cells=2616 closure=9.2099586e-17 Wb
+PASS weak-rotation-reactor-static cells=2608 closure=9.8040066e-14 Wb
+PASS: ten reconstructed norms and decompositions; five weak controls
+REFUSED: one-percent mismatch perturbation in all ten rows

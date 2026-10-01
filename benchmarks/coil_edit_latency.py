@@ -44,7 +44,18 @@ from benchmarks import efit_forward_parity_slice as parity
 from benchmarks import mast_response_carrier_warm as response_carrier
 from benchmarks.diiid_forward_gs_match import _margin_graded_newton_krylov
 from nova.equilibrium import reduced_newton
+from nova.equilibrium.constraint import (
+    CircuitCurrentUnknown,
+    ConstraintBinding,
+    ConstraintPair,
+    CurrentCentroidConstraint,
+)
 from nova.equilibrium.fixed_point import FixedPointResult, FixedPointTerminationReason
+from nova.equilibrium.observation import MomentIntegralSupport
+from nova.equilibrium.flux_surface_connectivity import (
+    fit_tensor_spline,
+    traced_spline_contour,
+)
 from nova.equilibrium.separatrix_branches import (
     assemble_separatrix_branches,
     boundary_flux_at_admitted_saddle,
@@ -82,12 +93,31 @@ SWEEP_FRACTIONS = np.arange(-0.20, 0.201, 0.02, dtype=np.float64)
 EDIT_FRACTIONS = SWEEP_FRACTIONS[1:]
 EDIT_COUNT = len(EDIT_FRACTIONS)
 BOUNDARY_COIL_FAMILIES = frozenset({"p4_lower", "p4_upper", "p5_lower", "p5_upper"})
+# Set to the reason a run is not on the measurement host.  A CPU re-run
+# regenerates the persisted sweep states only; its per-edit walls are not the
+# interactive measurement, and the receipt echoes the marker so the lowered
+# provenance travels with the artefact.
+CPU_PROVENANCE_MARKER = "NOVA_COIL_EDIT_CPU_PROVENANCE"
+#: Set to the reason a run is on a GPU that is not the H200 measurement host.
+#: The receipt carries this marker separately from the stricter titan marker,
+#: so a declared off-host device is never inferred from a relaxed refusal.
+OFF_HOST_PROVENANCE_MARKER = "NOVA_COIL_EDIT_OFF_HOST_PROVENANCE"
+# A marked P100 rung off the shared reservation, used when the device program
+# is wanted and the H200 reservation is held.  The device program is a
+# different compile from the CPU re-run, so its provenance is named separately
+# and travels in the receipt rather than being read as either one.
+TITAN_PROVENANCE_MARKER = "NOVA_COIL_EDIT_TITAN_PROVENANCE"
 INTERACTIVE_LATENCY_TARGET_MILLISECONDS = 100.0
 # The compiled slice route's own production budgets (the kernel's declared
 # constants), not the parity-driver Newton budgets the endpoint prep uses.
 COMPILED_SLICE_TOLERANCE = reduced_newton.FIXED_POINT_RESIDUAL_TOLERANCE
 COMPILED_SLICE_NEWTON_STEPS = reduced_newton.NEWTON_STEPS
 COMPILED_SLICE_ACTIVE_SET_STEPS = reduced_newton.ACTIVE_SET_STEPS
+# The vertical-current-centre row's declared tolerance and its declared scale,
+# both in metres: the tolerance is the physical residual the augmented solve
+# must reach on the centroid, and the scale is the length the row is normalised
+# by, so a scaled residual of one means a whole panel height of displacement.
+VERTICAL_CENTROID_TOLERANCE = 1.0e-6
 
 
 def _sha256_bytes(payload: bytes) -> str:
@@ -106,8 +136,14 @@ def _archive_scalar(archive: Any, name: str) -> str:
 
 
 def _response_cache(carrier_path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Load the persisted response and its complete input ledger."""
-    response, metadata = response_carrier.load_carrier(carrier_path)
+    """Load the persisted response against the grid identity it declares."""
+    grid = response_carrier.grid_for_carrier(carrier_path)
+    response, metadata = response_carrier.load_carrier(
+        carrier_path,
+        semantic_identity=grid.semantic_identity,
+        resolved_target_digest=grid.resolved_target_digest,
+        response_shape=grid.response_shape,
+    )
     with np.load(carrier_path, allow_pickle=False) as archive:
         input_digests = json.loads(_archive_scalar(archive, "input_digests_json"))
         audit = json.loads(_archive_scalar(archive, "audit_json"))
@@ -158,7 +194,52 @@ def _read_scheduler() -> dict[str, Any]:
 
 
 def _require_measurement_host() -> None:
+    """Require the H200 measurement host, or an explicitly marked CPU re-run.
+
+    The persisted sweep states can be regenerated while the shared reservation
+    is held, so a run that names its own reason on a CPU platform is accepted,
+    and so is a marked run on the P100 rung; the receipt records the host, the
+    partition, the reservation and the JAX platform of whatever ran, so the
+    lowered provenance is read from the artefact rather than inferred from a
+    field the refusal removed.  An unmarked run off the reservation is still
+    refused.
+    """
+    if os.environ.get("TMPDIR") != "/tmp":
+        raise RuntimeError("TMPDIR=/tmp must be set in the job body")
     device = jax.devices()[0]
+    provenance = os.environ.get(CPU_PROVENANCE_MARKER, "").strip()
+    if provenance:
+        if device.platform != "cpu":
+            raise RuntimeError(
+                "the CPU provenance marker requires a CPU platform, got "
+                f"{device.platform} on {device.device_kind}"
+            )
+        return
+    titan = os.environ.get(TITAN_PROVENANCE_MARKER, "").strip()
+    if titan:
+        if device.platform != "gpu":
+            raise RuntimeError(
+                "the titan provenance marker requires a gpu platform, got "
+                f"{device.platform} on {device.device_kind}"
+            )
+        if os.environ.get("SLURM_JOB_PARTITION") != "titan":
+            raise RuntimeError(
+                "the titan provenance marker requires the titan partition"
+            )
+        if os.environ.get("SLURM_JOB_RESERVATION") not in (None, "", "(null)"):
+            raise RuntimeError(
+                "the titan provenance marker requires an allocation off the "
+                "shared reservation"
+            )
+        return
+    off_host = os.environ.get(OFF_HOST_PROVENANCE_MARKER, "").strip()
+    if off_host:
+        if device.platform != "gpu":
+            raise RuntimeError(
+                "the off-host provenance marker requires a GPU platform, got "
+                f"{device.platform} on {device.device_kind}"
+            )
+        return
     if device.platform != "gpu" or "H200" not in device.device_kind:
         raise RuntimeError(f"one H200 is required, got {device}")
     if os.environ.get("SLURM_JOB_PARTITION") != "betelgeuse":
@@ -172,8 +253,6 @@ def _require_measurement_host() -> None:
         raise RuntimeError("the measurement requires a 128 GiB memory allocation")
     if os.environ.get("JAX_PLATFORMS") != "cuda,cpu":
         raise RuntimeError("JAX_PLATFORMS=cuda,cpu must be set in the job body")
-    if os.environ.get("TMPDIR") != "/tmp":
-        raise RuntimeError("TMPDIR=/tmp must be set in the job body")
 
 
 def _heartbeat(stop: threading.Event, started: float) -> None:
@@ -385,13 +464,128 @@ def _calibrate_cache() -> tuple[dict[str, float | int], Any]:
     return cache_events, cache
 
 
-def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, Any]]:
+def _circuit_families(policy: dict[str, Any]) -> dict[int, str]:
+    """Return the zero-based circuit index of every named active family."""
+    return {
+        int(row["stored_circuit"]) - 1: str(row["family"])
+        for row in policy["active_mapping"]
+    }
+
+
+def _vertical_centroid_pair(
+    profile: Any,
+    policy: dict[str, Any],
+    flux: jax.Array,
+    *,
+    requested_class: jax.Array,
+    target_current: float,
+    target: float,
+) -> tuple[ConstraintPair, dict[str, Any]]:
+    """Return the vertical current-centre row and the actuator that drives it.
+
+    The row reads the plasma's own current centroid on the whole authored
+    domain and is eliminated by a circuit-current direction the machine's own
+    response matrix picks out over its active mapping: no direction is written
+    here, the matrix supplies it, and the ampere scale is the current that
+    moves the row by one declared scale.  Pinning this row is what holds a
+    solved state on the vertical position its reference belongs to while a
+    boundary coil is edited, since an unconstrained slice leaves the vertical
+    current centre free and converges on a different equilibrium instead.
+    """
+    prescribed = profile.operator.prescribed_current_field
+    if prescribed is None:
+        raise RuntimeError("the vertical-centroid row needs the prescribed field")
+    circuit_count = int(prescribed.circuit_count)
+    families = _circuit_families(policy)
+    if not families:
+        raise RuntimeError("the vertical-centroid row needs a drivable circuit set")
+    position_scale = float(np.ptp(np.asarray(profile.lattice.height)))
+    seed = ConstraintPair(
+        functional=CurrentCentroidConstraint(
+            components=("centroid_z",),
+            support=MomentIntegralSupport.ALL_DOMAIN,
+        ),
+        unknown=CircuitCurrentUnknown(
+            direction=jnp.zeros(circuit_count, dtype=jnp.float64),
+            ampere_scale=jnp.asarray([1.0], dtype=jnp.float64),
+        ),
+        binding=ConstraintBinding(
+            target=jnp.atleast_1d(jnp.asarray(target, dtype=jnp.float64)),
+            tolerance=jnp.asarray([VERTICAL_CENTROID_TOLERANCE], dtype=jnp.float64),
+            scale=jnp.asarray([position_scale], dtype=jnp.float64),
+            initial_unknown=jnp.asarray([0.0], dtype=jnp.float64),
+            payload=None,
+            policy="imposed",
+        ),
+    )
+    derived, selection = profile.derived_constraint_pairs(
+        (seed,),
+        flux,
+        requested_class=requested_class,
+        target_current=target_current,
+        circuits=sorted(families),
+    )
+    (pair,) = derived
+    authority = float(
+        np.asarray(selection.direction_authority, dtype=float).reshape(-1)[0]
+    )
+    if not np.isfinite(authority) or authority <= 0.0:
+        raise RuntimeError("the vertical-centroid row has no circuit authority")
+    direction = np.asarray(pair.unknown.direction, dtype=float).reshape(-1)
+    pair = ConstraintPair(
+        functional=pair.functional,
+        unknown=CircuitCurrentUnknown(
+            direction=pair.unknown.direction,
+            ampere_scale=jnp.asarray([1.0 / authority], dtype=jnp.float64),
+            singular_values=pair.unknown.singular_values,
+            authority=pair.unknown.authority,
+            rule=pair.unknown.rule,
+        ),
+        binding=pair.binding,
+    )
+    actuator = {
+        "definition": "vertical current-centre row, matrix-led over the active mapping",
+        "components": ["centroid_z"],
+        "support": MomentIntegralSupport.ALL_DOMAIN.value,
+        "target_m": float(target),
+        "tolerance_m": VERTICAL_CENTROID_TOLERANCE,
+        "position_scale_m": position_scale,
+        "selection_rule": selection.rule.name.lower(),
+        "ampere_scale_a": float(1.0 / authority),
+        "direction_authority_m_per_a": authority,
+        "drivable_circuits": [
+            {
+                "circuit": index,
+                "family": families[index],
+                "direction_weight": float(direction[index]),
+            }
+            for index in sorted(families)
+            if abs(direction[index]) > 0.0
+        ],
+    }
+    return pair, actuator
+
+
+def _prepare_case(
+    carrier_path: Path,
+    grid_points: int | None = None,
+    flux_function_factory: Any = None,
+    *,
+    impose_vertical_centroid: bool = True,
+) -> tuple[Any, dict[str, Any], dict[str, Any]]:
+    """Prepare the sweep frame on the carrier's declared receiver grid.
+
+    ``grid_points`` selects a uniform per-axis node count and must agree with
+    the supplied carrier. The default retains the stored-axis stride.
+    """
     response_cache, carrier = _response_cache(carrier_path)
     selected = {"shot": SHOT, "slice_index": SLICE_INDEX}
     case, context = parity._mast_case_from_selection(
         SHOT_STORE,
         selected,
         qualification=None,
+        grid_points=grid_points,
+        flux_function_factory=flux_function_factory,
     )
     passive_case, profile, policy = parity._passive_inclusive_case(
         case,
@@ -493,8 +687,48 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
         "nulls": _null_points(profile, mixed_seed.state),
         "branches": _branches_of(profile, mixed_seed.state, reference_raster),
     }
+    # The vertical current centre the reference frame already carries is the
+    # target every edit is held to: the row is measured on the base frame's own
+    # terminal state, through the same observation the constraint reads, and
+    # the compensating direction is derived there once so it is a constant of
+    # the compiled slice rather than a per-edit re-derivation.
+    reference_centroid = profile.current_moment_observation(
+        mixed_seed.state,
+        support=MomentIntegralSupport.ALL_DOMAIN,
+        requested_class=TopologyClass.DIVERTED,
+        target_current=target_current,
+    )
+    reference_centroid_z = float(np.asarray(reference_centroid.centroid_z))
+    if not np.isfinite(reference_centroid_z):
+        raise RuntimeError("the reference frame carries no vertical current centre")
+    # The reference's own centre is measured on both arms: it is the quantity
+    # the constrained arm holds every edit to, and the quantity the
+    # unconstrained arm records that it was not held to, so the two arms state
+    # one number and differ only in whether a row was added to the solve.
+    if impose_vertical_centroid:
+        vertical_pair, vertical_actuator = _vertical_centroid_pair(
+            profile,
+            policy,
+            mixed_seed.state,
+            requested_class=jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8),
+            target_current=target_current,
+            target=reference_centroid_z,
+        )
+        reference_panel["vertical_centroid"] = {
+            "reference_m": reference_centroid_z,
+            "target_m": reference_centroid_z,
+            "tolerance_m": VERTICAL_CENTROID_TOLERANCE,
+        }
+    else:
+        # An arm run without the constraint persists no centroid row, so its
+        # panel caption states the absence rather than a target it never held.
+        vertical_pair = None
+        vertical_actuator = None
     prepared = {
         "initial": mixed_seed.state,
+        "vertical_centroid_pair": vertical_pair,
+        "vertical_centroid_actuator": vertical_actuator,
+        "reference_centroid_z": reference_centroid_z,
         "reference_lcfs": np.asarray(reference_labelled.lcfs)[:reference_lcfs_count],
         "reference_raster_separatrix": reference_raster_separatrix,
         "reference_panel": reference_panel,
@@ -536,11 +770,18 @@ def _compiled_edit(
     *,
     newton_steps: int = COMPILED_SLICE_NEWTON_STEPS,
     active_set_steps: int = COMPILED_SLICE_ACTIVE_SET_STEPS,
+    constraint_pairs: tuple[ConstraintPair, ...] = (),
 ) -> Any:
-    """Re-enter the compiled slice program with one edited current vector."""
-    return reduced_newton.solve_reduced_newton_compiled(
-        profile.operator,
+    """Re-enter the compiled slice program with one edited current vector.
+
+    With rows registered the slice solves the augmented fixed point, folding
+    each row's compensating circuit current into the prescribed vector it is
+    handed; with none it is the same unconstrained entry the sweep always took.
+    """
+    return reduced_newton.solve_constrained_reduced_newton_compiled(
+        profile,
         state,
+        constraint_pairs=constraint_pairs,
         requested_class=requested_class,
         target_current=target_current,
         prescribed_current=current,
@@ -550,6 +791,37 @@ def _compiled_edit(
         program=program,
         stream=False,
     )
+
+
+def _vertical_centroid_row(result: Any) -> dict[str, Any] | None:
+    """Return the terminal state of the vertical current-centre row, or nothing.
+
+    The row is the difference between the solved state's own current centroid
+    and the vertical position its reference carries, together with the circuit
+    current the augmented solve spent to hold it, so every sweep point states
+    both the constraint it was solved under and what that constraint cost.
+    """
+    records = tuple(getattr(result, "constraints", ()) or ())
+    if not records:
+        return None
+    record = records[0]
+    compensating = getattr(result, "compensating_current", None)
+    return {
+        "observed_m": float(np.asarray(record.observed).reshape(-1)[0]),
+        "target_m": float(np.asarray(record.target).reshape(-1)[0]),
+        "residual_m": float(np.asarray(record.physical_residual).reshape(-1)[0]),
+        "scaled_residual": float(np.asarray(record.scaled_residual).reshape(-1)[0]),
+        "tolerance_m": float(np.asarray(record.tolerance).reshape(-1)[0]),
+        "qualified": bool(np.asarray(record.qualified)),
+        "compensating_current_a": float(
+            np.asarray(record.physical_unknown).reshape(-1)[0]
+        ),
+        "compensating_current_norm_a": (
+            None
+            if compensating is None
+            else float(np.linalg.norm(np.asarray(compensating, dtype=float)))
+        ),
+    }
 
 
 def _achieved_class(profile: Any, state: Any) -> dict[str, Any]:
@@ -615,7 +887,8 @@ def _seed_probe(
     current: jax.Array,
     requested_class: jax.Array,
     target_current: float,
-) -> dict[str, Any]:
+    program: Any = None,
+) -> tuple[dict[str, Any], Any]:
     """Measure the seed's own residual on the edited operator, before any trip.
 
     One trip closed with zero Newton steps evaluates the trip boundary at the
@@ -623,7 +896,10 @@ def _seed_probe(
     edited operator rather than the post-correction residual a full edit
     reports.  The program is not threaded from the sweep: this probe's policy
     key differs from the sweep's, so reusing the sweep program would only add
-    the probe's solver to a chain whose reuse the latency gates measure.
+    the probe's solver to a chain whose reuse the latency gates measure.  Its
+    own program is handed back so the caller can hold it across edits; a fresh
+    program loaded per edit would accumulate the section mappings the process
+    cannot exceed.
     """
     result = _compiled_edit(
         profile,
@@ -631,13 +907,13 @@ def _seed_probe(
         current,
         requested_class,
         target_current,
-        None,
+        program,
         newton_steps=0,
         active_set_steps=1,
     )
     jax.block_until_ready(result.state)
     residuals = [float(value) for value in result.active_set_residuals]
-    return {
+    probe = {
         "residual": float(np.asarray(result.terminal_residual)),
         "trip_count": int(np.asarray(result.active_set_iterations)),
         "termination": result.termination_name,
@@ -649,6 +925,7 @@ def _seed_probe(
         "achieved_class": _achieved_class(profile, state),
         "achieved_class_after_trip": _achieved_class(profile, result.state),
     }
+    return probe, result.program
 
 
 def _equilibrium_receipt(
@@ -736,6 +1013,29 @@ def _wall_units(operator: Any) -> tuple[Any, ...]:
         for index, (start, stop) in enumerate(
             zip(offsets[:-1], offsets[1:], strict=True)
         )
+    )
+
+
+def _preflight_panel_wall(profile: Any) -> None:
+    """Resolve the vessel units and one interior mask before the sweep runs.
+
+    The panel writer builds its interior mask from the operator's wall units,
+    so an operator whose wall is not a unit collection fails the write only
+    after every edit has been solved.  Making the same call first turns that
+    into a failure of seconds rather than of the whole allocation.
+    """
+    units = _wall_units(profile.operator)
+    if not units:
+        raise RuntimeError("the operator carries no wall units to draw")
+    mask = _wall_interior(
+        np.asarray(profile.lattice.radius, dtype=float),
+        np.asarray(profile.lattice.height, dtype=float),
+        units,
+    )
+    print(
+        "PREFLIGHT_WALL_OK units=%d interior_samples=%d"
+        % (len(units), int(np.count_nonzero(mask))),
+        flush=True,
     )
 
 
@@ -885,11 +1185,14 @@ def _write_diagnostics(
                 "trip_boundary": reduced_newton.TRIP_BOUNDARY,
                 "ladder_scoring": reduced_newton.LADDER_SCORING,
             },
+            "constraint": prepared["vertical_centroid_actuator"],
         },
         "seed_probe_definition": (
             "one trip closed with zero Newton steps on this edit's current "
             "vector, seeded from the state the edit starts from; the reported "
-            "residual is the seed's own residual on the edited operator"
+            "residual is the seed's own residual on the edited operator, "
+            "measured without the vertical current-centre row so it stays the "
+            "same quantity every earlier sweep recorded"
         ),
         "summary": _group_nonconverged(rows),
         "edits": rows,
@@ -935,6 +1238,122 @@ def _persist_branches(
     payload[f"{prefix}overflow"] = np.asarray(branches["overflow"])
 
 
+SADDLE_FLUX_TOLERANCE = 1.0e-9
+
+
+def _field_admitted_saddle(
+    radius: Any,
+    height: Any,
+    psi: Any,
+    axis: Any,
+    xpoint_rz: Any,
+) -> tuple[np.ndarray, float, Any]:
+    """Read a persisted field's own admitted saddle coordinate and level.
+
+    A persisted field's X-point coordinate and its boundary flux have to be
+    read off the same field the panel contours, inside one tensor-spline fit.
+    A coordinate carried over from the solve lattice names a point in a
+    different field, and the flux read beside it -- or a level carried from the
+    lattice -- misses the raster's own stationary cell by far more than the
+    pairing tolerance, so the traced lobe leaves through a divertor leg instead
+    of closing on its separatrix.
+
+    ``xpoint_rz`` only has to land in the saddle's cell; the returned
+    coordinate and value are that cell's own polished stationary pair. Where
+    the field carries no stationary cell the locator and its flux are returned
+    unchanged.
+    """
+    surface = fit_tensor_spline(
+        jnp.asarray(radius), jnp.asarray(height), jnp.asarray(psi)
+    )
+    locator = surface(jnp.asarray(xpoint_rz[0]), jnp.asarray(xpoint_rz[1]))
+    contour = traced_spline_contour(
+        jnp.asarray(psi),
+        jnp.asarray(radius),
+        jnp.asarray(height),
+        locator,
+        40,
+        8,
+        surface=surface,
+        axis_rz=jnp.asarray(axis).reshape(2),
+    )
+    stationary = np.asarray(contour["saddle_stationary"]).reshape(-1)
+    saddle_value = np.asarray(contour["saddle_value"]).reshape(-1)
+    saddle_rz = np.asarray(contour["saddle_rz"]).reshape(-1, 2)
+    reference = np.asarray(xpoint_rz, dtype=float).reshape(2)
+    distance = np.where(
+        stationary, np.linalg.norm(saddle_rz - reference[None, :], axis=-1), np.inf
+    )
+    nearest = int(np.argmin(distance))
+    if not np.isfinite(distance[nearest]):
+        return reference, float(np.asarray(locator)), surface
+    return (
+        np.asarray(saddle_rz[nearest], dtype=float),
+        float(np.asarray(saddle_value[nearest])),
+        surface,
+    )
+
+
+def _persisted_positions(data: Any) -> list[int]:
+    """Return the state positions an archive carries a persisted field for."""
+    keys = getattr(data, "files", None)
+    if keys is None:
+        keys = list(data.keys())
+    return sorted(int(key.split("_")[1]) for key in keys if key.startswith("psi_"))
+
+
+def _persisted_saddle_residuals(data: Any) -> dict[int, float]:
+    """Read every persisted X-point pair back against its own stored field.
+
+    The archive is what a panel draws from, so the pair is measured where it
+    is stored: each stored field is refit independently and its value
+    evaluated at that state's own stored X-point coordinate, and the
+    difference against the stored flux is the disagreement the archive
+    actually carries. Nothing is assumed zero here -- this is the same
+    measurement the writer refuses an archive for, and against a field stored
+    beside a field it is the audit of whether the pair is one terminal state.
+
+    A stored index outside either stored array is a pair that cannot be read
+    back at all, and is refused rather than skipped.
+    """
+    radius = np.asarray(data["radius"], dtype=float)
+    height = np.asarray(data["height"], dtype=float)
+    residuals: dict[int, float] = {}
+    for position in _persisted_positions(data):
+        surface = fit_tensor_spline(
+            jnp.asarray(radius),
+            jnp.asarray(height),
+            jnp.asarray(np.asarray(data[f"psi_{position}"], dtype=float)),
+        )
+        x_points = np.asarray(data[f"xpoints_{position}"], dtype=float).reshape(-1, 2)
+        flux = np.asarray(data[f"xpoint_flux_{position}"], dtype=float).reshape(-1)
+        index = int(np.asarray(data[f"saddle_index_{position}"]))
+        if not (0 <= index < x_points.shape[0] and 0 <= index < flux.shape[0]):
+            raise ValueError(
+                "panel state %d persists a saddle index %d outside its stored "
+                "X-point pair" % (position, index)
+            )
+        coordinate = x_points[index]
+        residuals[position] = abs(
+            float(np.asarray(surface(coordinate[0], coordinate[1])))
+            - float(flux[index])
+        )
+    return residuals
+
+
+def _refuse_inconsistent_persisted_pairs(data: Any) -> dict[int, float]:
+    """Raise unless every persisted pair reads back as its own stored field."""
+    residuals = _persisted_saddle_residuals(data)
+    for position, residual in residuals.items():
+        if residual > SADDLE_FLUX_TOLERANCE:
+            raise ValueError(
+                "panel state %d persists an xpoint_flux that is not its own "
+                "field at its own X-point coordinate: residual %.3e Wb exceeds "
+                "%.1e" % (position, residual, SADDLE_FLUX_TOLERANCE)
+            )
+    return residuals
+
+
 def _write_panel_data(
     path: Path,
     *,
@@ -976,6 +1395,15 @@ def _write_panel_data(
     payload["edit_index"] = np.asarray(
         [state["edit_index"] for state in panel_states], dtype=int
     )
+    centroid = reference_panel.get("vertical_centroid")
+    if centroid is not None:
+        payload["vertical_centroid_target_m"] = np.asarray(float(centroid["target_m"]))
+        payload["vertical_centroid_reference_m"] = np.asarray(
+            float(centroid["reference_m"])
+        )
+        payload["vertical_centroid_tolerance_m"] = np.asarray(
+            float(centroid["tolerance_m"])
+        )
     payload["edit_fraction"] = np.asarray(
         [state["edit_fraction"] for state in panel_states], dtype=float
     )
@@ -994,24 +1422,75 @@ def _write_panel_data(
     payload["achieved_class"] = np.asarray(
         [state["class"] for state in panel_states], dtype=str
     )
+    wall = _wall_units(profile.operator)
+    inside = _wall_interior(payload["radius"], payload["height"], wall)
     for position, state in enumerate(panel_states):
         if state["psi"] is None:
             continue
-        payload[f"psi_{position}"] = _grid_field(state["psi"], state["shape"])
+        field = _grid_field(state["psi"], state["shape"])
+        payload[f"psi_{position}"] = field
         payload[f"separatrix_{position}"] = np.asarray(state["separatrix"], dtype=float)
-        payload[f"axis_{position}"] = np.asarray(state["nulls"]["axis"], dtype=float)
-        payload[f"xpoints_{position}"] = np.asarray(
-            state["nulls"]["x_points"], dtype=float
+        axis = np.asarray(state["nulls"]["axis"], dtype=float).reshape(2)
+        payload[f"axis_{position}"] = axis
+        x_points = np.asarray(state["nulls"]["x_points"], dtype=float).reshape(-1, 2)
+        saddle_index = int(np.asarray(state["nulls"]["saddle_index"]))
+        locator = (
+            x_points[saddle_index] if 0 <= saddle_index < x_points.shape[0] else axis
         )
-        _persist_branches(payload, f"branches_{position}_", state.get("branches"))
-        payload[f"xpoint_flux_{position}"] = np.asarray(
-            state["nulls"]["x_point_flux"], dtype=float
+        # Every persisted quantity of this edit is read off the field persisted
+        # for this edit, so the coordinate the panel marks and the level the
+        # census traces belong to one terminal state.
+        coordinate, level, surface = _field_admitted_saddle(
+            payload["radius"], payload["height"], field, axis, locator
         )
-        payload[f"saddle_index_{position}"] = np.asarray(
-            state["nulls"]["saddle_index"], dtype=int
+        flux = (
+            np.asarray(state["nulls"]["x_point_flux"], dtype=float).reshape(-1).copy()
+        )
+        x_points = x_points.copy()
+        # One range guard for the coordinate and the flux together: a state
+        # whose flux row is shorter than its coordinate row would otherwise
+        # take the raster coordinate beside an unoverwritten archived flux.
+        in_range = (
+            0 <= saddle_index < x_points.shape[0] and 0 <= saddle_index < flux.shape[0]
+        )
+        if in_range:
+            archived = x_points[saddle_index]
+            # The archived pair's own disagreement with the field persisted
+            # beside it. It is the same quantity the read-back guard refuses a
+            # stored pair for, recorded before the substitution so the audit
+            # trail carries what the raster pair replaced rather than a zero.
+            payload[f"saddle_flux_archived_delta_{position}"] = np.asarray(
+                float(flux[saddle_index])
+                - float(np.asarray(surface(archived[0], archived[1]))),
+                dtype=float,
+            )
+            x_points[saddle_index] = coordinate
+            flux[saddle_index] = level
+        payload[f"xpoints_{position}"] = x_points
+        payload[f"xpoint_flux_{position}"] = flux
+        payload[f"saddle_index_{position}"] = np.asarray(saddle_index, dtype=int)
+        _persist_branches(
+            payload,
+            f"branches_{position}_",
+            _assemble_raster_branches(
+                payload["radius"],
+                payload["height"],
+                field,
+                axis,
+                x_points,
+                saddle_index,
+                inside,
+            ),
         )
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(path, **payload)
+    # The guard measures the archive on disk rather than the arrays that were
+    # handed to it: the stored field is refit and read at the stored
+    # coordinate, so what passes is the pair a panel will actually draw.
+    with np.load(path, allow_pickle=False) as archive:
+        stored = {key: np.asarray(archive[key]) for key in archive.files}
+    for position, residual in _refuse_inconsistent_persisted_pairs(stored).items():
+        payload[f"saddle_flux_residual_{position}"] = np.asarray(residual, dtype=float)
     np.savez_compressed(path, **payload)
 
 
@@ -1208,6 +1687,7 @@ def _assemble_raster_branches(
             np.asarray(assembled["closed_segment_count"]).item()
         ),
         "open_branch_count": int(np.asarray(assembled["open_branch_count"]).item()),
+        "overflow": bool(np.asarray(assembled["overflow"])),
         "source": "raster-saddle",
     }
 
@@ -1273,6 +1753,19 @@ def _panel_load(data_path: Path) -> dict[str, Any]:
             "reference_saddle_index": reference_saddle_index,
             "wall": wall,
             "inside": inside,
+            "vertical_centroid": (
+                {
+                    "reference_m": float(
+                        np.asarray(data["vertical_centroid_reference_m"])
+                    ),
+                    "target_m": float(np.asarray(data["vertical_centroid_target_m"])),
+                    "tolerance_m": float(
+                        np.asarray(data["vertical_centroid_tolerance_m"])
+                    ),
+                }
+                if "vertical_centroid_target_m" in data.files
+                else None
+            ),
         }
         passed, failed = _panel_edits(data)
         selected = (("converged", passed), ("failed", failed))
@@ -1327,10 +1820,11 @@ def _draw_branch_set(
 
     The assembler returns zero geometry for any violation of its terms, so a
     present set is not the same as a drawn boundary: a rejected set falls back
-    to the raw level set, dashed, and reports the fallback beside its zero
-    counts rather than leaving the panel without the boundary the reader is
-    looking for.  A set whose terms did not travel with it -- an archive written
-    before the terms accompanied the geometry -- is drawn as stored.
+    to its crossings drawn as unconnected marks, and reports the fallback
+    beside its zero counts rather than leaving the panel without the boundary
+    the reader is looking for.  A set whose terms did not travel with it -- an
+    archive written before the terms accompanied the geometry -- is drawn as
+    stored.
     """
     tally = {"closed_drawn": 0, "open_drawn": 0, "unassembled": 0}
     verdict = None if branches is None else branches.get("well_formed")
@@ -1349,7 +1843,20 @@ def _draw_branch_set(
         np.asarray(fallback, dtype=float) if fallback is not None else np.empty((0, 2))
     )
     if array.size:
-        axis.plot(array[:, 0], array[:, 1], color=color, linewidth=0.7, linestyle="--")
+        # The fallback is a scan-order crossing list, not an ordered path: two
+        # consecutive entries are neighbours in the raster walk, not endpoints
+        # of one segment.  Joining them draws a fan of chords across the vessel,
+        # so the crossings are drawn as separate unconnected marks and the
+        # caption says the boundary is not assembled here.
+        axis.plot(
+            array[:, 0],
+            array[:, 1],
+            color=color,
+            linestyle="none",
+            marker="+",
+            markersize=3.0,
+            markeredgewidth=0.7,
+        )
         tally["unassembled"] = 1
     return tally
 
@@ -1499,13 +2006,40 @@ def _branch_style_note(drawn: dict[str, int]) -> str:
     """Return the caption fragment describing how one set was drawn.
 
     A set the assembler rejected carries zero geometry, so it is drawn as its
-    own solved separatrix, dashed; the caption has to say which of the two
-    drawings the reader is looking at, because the two are indistinguishable on
-    the panel and one of them is not an assembled boundary.
+    own scan-order crossings, unconnected; the caption has to say which of the
+    two drawings the reader is looking at, because the two are indistinguishable
+    on the panel and one of them is not an assembled boundary.
     """
     if drawn.get("unassembled"):
-        return "unassembled at its own saddle level, drawn dashed from its separatrix"
+        return "unassembled, crossings drawn unconnected"
     return "lobe solid, legs dashed"
+
+
+def _null_ordering(x_points: Any, saddle_index: int, axis: Any) -> str:
+    """Compare the admitted saddle's height with the magnetic axis's.
+
+    The reference and every solved state carry their own qualified null set,
+    and nothing requires the admitted saddle to sit on the same side of the
+    axis from one set to the next.  The caption therefore reads the comparison
+    out of whichever set it is describing, for the reference and for each drawn
+    panel alike, so a state whose ordering differs from the reference is stated
+    rather than described by a clause written for a different state.
+    """
+    array = np.atleast_2d(np.asarray(x_points, dtype=float))
+    if not 0 <= saddle_index < array.shape[0]:
+        return "saddle absent"
+    point = np.asarray(axis, dtype=float).reshape(2)
+    return "above its axis" if array[saddle_index][1] > point[1] else "below its axis"
+
+
+def _constraint_note(centroid: dict[str, Any] | None) -> str:
+    """Name the vertical current-centre row the solved states were held to."""
+    if centroid is None:
+        return "(none recorded in this archive)"
+    return "at %.6f m (the reference's own centre, tolerance %.0e m)" % (
+        centroid["target_m"],
+        centroid["tolerance_m"],
+    )
 
 
 def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
@@ -1530,21 +2064,47 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
     reference_note = _saddle_note(
         loaded["reference_xpoints"], loaded["reference_saddle_index"]
     )
-    solved_note = _saddle_note(
-        loaded["failed"]["xpoints"], loaded["failed"]["saddle_index"]
+    # Both drawn panels report their own admitted saddle and its side of their
+    # own axis: the constrained solve need not place the null where the
+    # reference placed its own, and a caption that said so would describe a
+    # state other than the one drawn.
+    solved_notes = tuple(
+        _saddle_note(loaded[label]["xpoints"], loaded[label]["saddle_index"])
+        for label in ("converged", "failed")
     )
+    solved_orderings = tuple(
+        _null_ordering(
+            loaded[label]["xpoints"],
+            loaded[label]["saddle_index"],
+            loaded[label]["axis"],
+        )
+        for label in ("converged", "failed")
+    )
+    constraint_note = _constraint_note(loaded.get("vertical_centroid"))
     figure.suptitle(
         "terminal poloidal flux on shared levels between the axis and boundary "
-        "flux (%.4f to %.4f Wb)  |  reference set blue: %s, admitted %s, other "
-        "qualified nulls hollow  |  solved set orange: %s, admitted %s, other "
-        "hollow  |  wall drawn"
+        "flux (%.4f to %.4f Wb)  |  every solved state imposes the "
+        "vertical current-centre row %s  |  reference is the unedited "
+        "equilibrium, its admitted saddle %s (blue set: %s, admitted %s)  |  "
+        "solved sets orange: %s, admitted %s %s in the converged panel "
+        "and %s %s in the failed panel  |  other qualified nulls hollow  |  "
+        "wall drawn"
         % (
             loaded["reference_axis_flux"],
             loaded["reference_boundary_flux"],
+            constraint_note,
+            _null_ordering(
+                loaded["reference_xpoints"],
+                loaded["reference_saddle_index"],
+                loaded["reference_axis"],
+            ),
             _branch_style_note(loaded.get("reference_branches_drawn", {})),
             reference_note,
             _branch_style_note(loaded["failed"].get("branches_drawn", {})),
-            solved_note,
+            solved_notes[0],
+            solved_orderings[0],
+            solved_notes[1],
+            solved_orderings[1],
         ),
         fontsize=9,
     )
@@ -1564,9 +2124,24 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
         },
         "reference_branches": _branch_terms(loaded["reference_branches"]),
         "reference_branches_drawn": dict(loaded.get("reference_branches_drawn", {})),
+        "vertical_centroid": loaded.get("vertical_centroid"),
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
     }
+
+
+def _declared_path(path: Path) -> str:
+    """Return a repository-relative path, or the absolute one outside the root.
+
+    A run that keeps its figures in a scratch directory writes outside the
+    repository, and a receipt field must name where the file actually is rather
+    than fail to describe it.
+    """
+    resolved = Path(path)
+    try:
+        return str(resolved.relative_to(ROOT))
+    except ValueError:
+        return str(resolved)
 
 
 def _receipt_document(
@@ -1585,6 +2160,7 @@ def _receipt_document(
     elapsed_seconds: float,
     exit_marker: int | None,
     figure: Path,
+    raster_figure: Path | None = None,
 ) -> dict[str, Any]:
     """Assemble the wire receipt over the edits recorded so far.
 
@@ -1671,12 +2247,21 @@ def _receipt_document(
         "measurement_state": measurement_state,
         "verdict": verdict,
         "gates": gates,
+        "gate_notes": _gate_notes(rows),
+        "vertical_centroid_constraint": {
+            # Read off the prepared pair rather than off a run argument, so the
+            # receipt cannot disagree with what the solve was given.
+            "imposed": prepared["vertical_centroid_pair"] is not None,
+            "reference_m": prepared["reference_centroid_z"],
+            "tolerance_m": VERTICAL_CENTROID_TOLERANCE,
+        },
         "interactive_path": {
             "route": "compiled slice (reduced fixed point, one fixed-shape "
             "program re-entered per edit)",
-            "solve_entry": "reduced_newton.solve_reduced_newton_compiled",
+            "solve_entry": ("reduced_newton.solve_constrained_reduced_newton_compiled"),
             "prescribed_current": "traced 101-circuit vector, replacement semantics",
             "raster_target": "operator-held receiver grid built once at construction",
+            "constraint": prepared["vertical_centroid_actuator"],
         },
         "source_revision": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
@@ -1690,7 +2275,7 @@ def _receipt_document(
             "sha256": _sha256(ROOT / "nova/equilibrium/reduced_newton.py"),
         },
         "driver": {
-            "path": str(Path(__file__).relative_to(ROOT)),
+            "path": _declared_path(Path(__file__)),
             "sha256": _sha256(Path(__file__)),
         },
         "scheduler": _scheduler(),
@@ -1702,6 +2287,11 @@ def _receipt_document(
             "platform": jax.devices()[0].platform,
             "jax_platforms": os.environ.get("JAX_PLATFORMS"),
             "tmpdir": os.environ.get("TMPDIR"),
+            "measurement_host_marker": (
+                os.environ.get(CPU_PROVENANCE_MARKER)
+                or os.environ.get(TITAN_PROVENANCE_MARKER)
+            ),
+            "off_host_marker": os.environ.get(OFF_HOST_PROVENANCE_MARKER),
             "elapsed_seconds": elapsed_seconds,
             "exit_marker": marker,
         },
@@ -1811,9 +2401,43 @@ def _receipt_document(
             ),
         },
         "edits": rows,
-        "figure": str(figure.relative_to(ROOT)),
-        "raster_figure": str(DEFAULT_RASTER_FIGURE.relative_to(ROOT)),
+        "figure": _declared_path(figure),
+        "raster_figure": _declared_path(
+            DEFAULT_RASTER_FIGURE if raster_figure is None else raster_figure
+        ),
     }
+
+
+def _compile_witness_note(rows: list[dict[str, Any]]) -> str:
+    """State what the first-edit compile gate does and does not witness.
+
+    The gate holds when the persistent compilation cache misses on the first
+    edit. An allocation served from a pre-warmed cache never misses there: the
+    program it re-enters was compiled by an earlier job, so reading the gate as
+    evidence that this run compiled anything is wrong on such a rung. The note
+    carries the first row's own cache outcome, so the caveat is a measurement
+    rather than a claim about rungs in general.
+    """
+    if not rows:
+        return "no edit was recorded, so this gate witnesses nothing"
+    first = rows[0]
+    return (
+        "first edit reported compilation_cache=%r with "
+        "persistent_cache_miss_count=%d and persistent_cache_hit_count=%d; the "
+        "gate records a persistent-cache outcome on the first edit rather than "
+        "a compile, so on a rung served by the pre-warmed cache it is not a "
+        "compile witness"
+        % (
+            first["compilation_cache"],
+            first["persistent_cache_miss_count"],
+            first["persistent_cache_hit_count"],
+        )
+    )
+
+
+def _gate_notes(rows: list[dict[str, Any]]) -> dict[str, str]:
+    """Return the note each gate needs to be read at its real strength."""
+    return {"first_edit_compiles_program": _compile_witness_note(rows)}
 
 
 def run(
@@ -1823,8 +2447,15 @@ def run(
     diagnostics: Path,
     panel_data: Path,
     panel_figure: Path,
+    raster_figure: Path = DEFAULT_RASTER_FIGURE,
+    grid_points: int | None = None,
+    impose_vertical_centroid: bool = True,
 ) -> dict[str, Any]:
-    """Compile once and measure successive warm prescribed-current edits."""
+    """Compile once and measure successive warm prescribed-current edits.
+
+    ``grid_points`` selects the uniform per-axis node count and must agree
+    with the grid the supplied carrier was built for.
+    """
     total_started = time.perf_counter()
     configure_dtypes()
     _require_measurement_host()
@@ -1837,7 +2468,12 @@ def run(
     )
     reporter.start()
     try:
-        profile, prepared, carrier = _prepare_case(carrier_path)
+        profile, prepared, carrier = _prepare_case(
+            carrier_path,
+            grid_points,
+            impose_vertical_centroid=impose_vertical_centroid,
+        )
+        _preflight_panel_wall(profile)
         solve_persistent_hits_start = int(cache_events["hits"])
         solve_persistent_misses_start = int(cache_events["misses"])
         solve_persistent_saved_start = float(cache_events["saved_seconds"])
@@ -1854,8 +2490,13 @@ def run(
 
         rows: list[dict[str, Any]] = []
         panel_states: list[dict[str, Any]] = []
+        constraint_pair = prepared["vertical_centroid_pair"]
+        constraint_pairs: tuple[ConstraintPair, ...] = (
+            () if constraint_pair is None else (constraint_pair,)
+        )
         state = initial
         program = None
+        probe_program = None
         program_reused_from_edit: int | None = None
         reference_raster_separatrix = prepared["reference_raster_separatrix"]
         for index, (fraction, current) in enumerate(
@@ -1867,9 +2508,18 @@ def run(
             # the seed's, not the post-correction residual a full edit
             # reports.  It runs off the clock and before the miss counter is
             # sampled, so the probe's one-off program build lands in neither
-            # an edit's wall or its cache accounting.
-            seed_probe = _seed_probe(
-                profile, state, current, requested_class, target_current
+            # an edit's wall or its cache accounting.  The probe program is
+            # held from edit to edit and re-entered: loading one costs about
+            # seventeen thousand XLA section mappings against a 65,530 cap,
+            # so building a fresh one per edit exhausts the process's mapping
+            # space and aborts the sweep part-way through the chain.
+            seed_probe, probe_program = _seed_probe(
+                profile,
+                state,
+                current,
+                requested_class,
+                target_current,
+                probe_program,
             )
             persistent_misses_before = int(cache_events["misses"])
             persistent_hits_before = int(cache_events["hits"])
@@ -1882,6 +2532,7 @@ def run(
                 requested_class,
                 target_current,
                 program,
+                constraint_pairs=constraint_pairs,
             )
             if program is None:
                 # The first edit builds the fixed-shape program; every later
@@ -1993,6 +2644,7 @@ def run(
                 ],
                 "achieved_class": _achieved_class(profile, result.state),
                 "seed_probe": seed_probe,
+                "vertical_centroid": _vertical_centroid_row(result),
                 "reduced_dimension": int(result.reduced_dimension),
                 "off_support_leakage_wb": float(result.off_support_leakage),
                 "program_reused": program_reused_this_edit,
@@ -2090,6 +2742,7 @@ def run(
                 elapsed_seconds=time.perf_counter() - total_started,
                 exit_marker=None,
                 figure=figure,
+                raster_figure=raster_figure,
             )
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(
@@ -2118,7 +2771,7 @@ def run(
             persistent_cache_misses=persistent_misses,
         )
         if equilibrium is not None and equilibrium.raster_flux is not None:
-            _render_raster(equilibrium.raster_flux, DEFAULT_RASTER_FIGURE)
+            _render_raster(equilibrium.raster_flux, raster_figure)
         try:
             panel = _render_panel(panel_data, panel_figure)
             print("PANEL=" + json.dumps(panel, sort_keys=True), flush=True)
@@ -2139,6 +2792,7 @@ def run(
             elapsed_seconds=time.perf_counter() - total_started,
             exit_marker=None,
             figure=figure,
+            raster_figure=raster_figure,
         )
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(
@@ -2214,7 +2868,9 @@ def _check_case(carrier_path: Path) -> dict[str, Any]:
     return message
 
 
-def _probe(carrier_path: Path) -> dict[str, Any]:
+def _probe(
+    carrier_path: Path, *, impose_vertical_centroid: bool = False
+) -> dict[str, Any]:
     """Run one compiled-slice edit end to end on any host (CPU smoke).
 
     Exercises the exact per-edit path the H200 job measures — the compiled
@@ -2268,6 +2924,27 @@ def _probe(carrier_path: Path) -> dict[str, Any]:
         .multiply(1.0 + EDIT_FRACTIONS[0])
     )
     seed = np.asarray(_passive["state"], dtype=np.float64)
+    constraint_pairs: tuple[ConstraintPair, ...] = ()
+    if impose_vertical_centroid:
+        reference_centroid_z = float(
+            np.asarray(
+                profile.current_moment_observation(
+                    jnp.asarray(seed),
+                    support=MomentIntegralSupport.ALL_DOMAIN,
+                    requested_class=requested_class,
+                    target_current=target_current,
+                ).centroid_z
+            )
+        )
+        pair, actuator = _vertical_centroid_pair(
+            profile,
+            policy,
+            jnp.asarray(seed),
+            requested_class=requested_class,
+            target_current=target_current,
+            target=reference_centroid_z,
+        )
+        constraint_pairs = (pair,)
     result = _compiled_edit(
         profile,
         jnp.asarray(seed),
@@ -2275,6 +2952,7 @@ def _probe(carrier_path: Path) -> dict[str, Any]:
         requested_class,
         target_current,
         None,
+        constraint_pairs=constraint_pairs,
     )
     equilibrium = _equilibrium_receipt(
         profile,
@@ -2308,6 +2986,8 @@ def _probe(carrier_path: Path) -> dict[str, Any]:
         "coil_family": selected_coil["family"],
         "coil_circuit_index": circuit_index,
         "target_current_a": target_current,
+        "vertical_centroid": _vertical_centroid_row(result),
+        "vertical_centroid_actuator": (actuator if impose_vertical_centroid else None),
     }
 
 
@@ -2323,7 +3003,8 @@ def _sbatch_script(arguments: argparse.Namespace) -> str:
         f"--figure {arguments.figure.resolve()} "
         f"--diagnostics {arguments.diagnostics.resolve()} "
         f"--panel-data {arguments.panel_data.resolve()} "
-        f"--panel-figure {arguments.panel_figure.resolve()}"
+        f"--panel-figure {arguments.panel_figure.resolve()} "
+        f"--raster-figure {arguments.raster_figure.resolve()}"
     )
     return f"""#!/usr/bin/env bash
 #SBATCH --job-name=coil-edit-latency
@@ -2405,8 +3086,19 @@ def main() -> None:
     run_parser.add_argument("--diagnostics", type=Path, default=DEFAULT_DIAGNOSTICS)
     run_parser.add_argument("--panel-data", type=Path, default=DEFAULT_PANEL_DATA)
     run_parser.add_argument("--panel-figure", type=Path, default=DEFAULT_PANEL_FIGURE)
+    run_parser.add_argument("--raster-figure", type=Path, default=DEFAULT_RASTER_FIGURE)
     run_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
+    )
+    run_parser.add_argument("--grid-points", type=int, default=None)
+    run_parser.add_argument(
+        "--without-vertical-centroid",
+        action="store_true",
+        help=(
+            "run the sweep without the vertical current-centre row, so the "
+            "unconstrained control arm is measured on the same code as the "
+            "constrained arm it is compared against"
+        ),
     )
     for name in ("sbatch", "submit"):
         job_parser = subparsers.add_parser(name)
@@ -2416,6 +3108,9 @@ def main() -> None:
         job_parser.add_argument("--panel-data", type=Path, default=DEFAULT_PANEL_DATA)
         job_parser.add_argument(
             "--panel-figure", type=Path, default=DEFAULT_PANEL_FIGURE
+        )
+        job_parser.add_argument(
+            "--raster-figure", type=Path, default=DEFAULT_RASTER_FIGURE
         )
         job_parser.add_argument(
             "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
@@ -2442,6 +3137,11 @@ def main() -> None:
     probe_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
     )
+    probe_parser.add_argument(
+        "--impose-vertical-centroid",
+        action="store_true",
+        help="carry the vertical current-centre row on the probed edit",
+    )
     arguments = parser.parse_args()
     if arguments.command == "run":
         run(
@@ -2451,6 +3151,9 @@ def main() -> None:
             arguments.diagnostics,
             arguments.panel_data,
             arguments.panel_figure,
+            arguments.raster_figure,
+            arguments.grid_points,
+            impose_vertical_centroid=not arguments.without_vertical_centroid,
         )
     elif arguments.command == "panel":
         print(
@@ -2463,7 +3166,16 @@ def main() -> None:
     elif arguments.command == "checkcase":
         print(json.dumps(_check_case(arguments.carrier), indent=2, sort_keys=True))
     elif arguments.command == "probe":
-        print(json.dumps(_probe(arguments.carrier), indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                _probe(
+                    arguments.carrier,
+                    impose_vertical_centroid=arguments.impose_vertical_centroid,
+                ),
+                indent=2,
+                sort_keys=True,
+            )
+        )
     elif arguments.command == "sbatch":
         print(_sbatch_script(arguments), end="")
     elif arguments.command == "submit":

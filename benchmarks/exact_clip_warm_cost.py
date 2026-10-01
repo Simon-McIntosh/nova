@@ -329,8 +329,6 @@ def _solve_program(profile: Any, request: Any) -> Callable[[jax.Array], Any]:
 
 def _certificate_problem(cells: int) -> tuple[Any, np.ndarray, Any, dict[str, Any]]:
     """Build one certificate row across the quadrature-node ownership move."""
-    if not hasattr(certificate.observation, "_UNIT_NODE"):
-        certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
     return certificate._certificate_compile_problem(CASE, -abs(cells))
 
 

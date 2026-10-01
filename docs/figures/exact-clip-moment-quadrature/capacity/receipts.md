@@ -20,11 +20,25 @@ caller that must not lose a cell gets `TracedCapacityRefusalError` naming the
 count and the capacity instead of a zeroed row.
 
 `tests/test_equilibrium_separatrix_clip.py` presents a two-arc layout (a saddle
-level function on one rectangular cell), which realises 258 live vertices
+level function on one rectangular cell), which realises 260 live vertices
 against a 136-slot fixture capacity, and asserts that the refusal is
 **counted** (one cell) and **raised**. The assertions that the cell carries
 included 0, vertex count 0 and area 0.0 are kept beside them, because the point
 of the change is that the zero alone was the silent case.
+
+The 260 is measured, not read off the entry that refused. The fixture's saddle
+level function leaves the level set on two runs, so the clip hands
+`_pack_traced_vertices` an array named `_pack_traced_vertices.vertices` of full
+shape `(1, 1024, 2)` — 8 chord slots × 128 arc samples — carrying **260** live
+entries on its vertex axis. Raising the derived capacity to 4096 for one
+diagnostic run admits the same cell with `vertex_count` 260 and area
+0.7499999999999982; the head run refuses it with `refused_cell_count` 1,
+`vertex_count` 0 and area 0.0. Measured by
+`docs/figures/exact-clip-moment-quadrature/capacity/measure_live_vertices.py`
+on the login node (`JAX_PLATFORMS=cpu`, root interpreter, exit 0); the full
+record of every packer call is `live-vertex-fixture.json`. The earlier 258 was
+read from the cell's zeroed `vertex_count`, which cannot exceed the bound it
+failed to meet.
 
 Module gate: `tests/test_equilibrium_separatrix_clip.py` 25 passed in 62.12 s,
 one fresh `all_debug` process (`reports/nova/s19-local/exact-capacity-refusal/test-module.log`).
@@ -56,19 +70,49 @@ analytic row does realise a layout wider than one arc plus its straight chain,
 and before this change that cell was dropped from the support with no error.
 This is the case the followup predicted and it is not hypothetical.
 
+The cell's own live vertex count is now measured. Building the row twice in one
+process — once at the derived bound, once with the capacity raised to 4096 for
+the diagnostic run — the refused cell is **cell 9** (centroid
+`(1.4180122291353958, -1.022978034837412)`, cell bounds
+`[1.32404975578631, -1.1043519237601387, 1.5119747024844816, -0.9416041459146856]`):
+
+| quantity | value |
+|---|---|
+| derived bound for this row | 162 = 128 arc samples + 34 straight slots |
+| base run | refused cell count 1, cell 9 included 0, vertex count 0, area 0.0 |
+| capacity-raised run | refused cell count 0, cell 9 admitted, vertex count **260**, area 0.007077604229482379 |
+| 260 decomposed by position | **256 interior vertices** (level-arc samples) + **4 on the cell boundary** (straight chain), boundary indices `[0, 128, 129, 259]` |
+
+So 260 = 2 × 128 + 4: the cell realises **two** traced level runs, each entering
+as the fixed 128 arc samples, joined by a 4-vertex straight chain. The derived
+bound is not merely tight by a few vertices — it is a bound for a layout with
+**one** traced arc, and this cell's layout is not that one. The row's one-arc
+premise, measured only on the three rotating rows, fails on the diverted
+single-null row.
+
+Deciding what to do about it (widen the bound to a two-arc layout, or refuse the
+row's cells by design) is a change to the derived bound and belongs to the
+coordinator, not to this record repair. What is settled here is the measurement
+the decision needs: the refused cell carries 260 live vertices against 162, its
+extra 98 vertices are a whole second arc plus the chain's final edges, and its
+area is 0.007077604229482379.
+
+Figure: `diverted-single-null-refused-cell.png` — the row's 132 atomic cells
+with cell 9 outlined, beside cell 9's own admitted polygon at the raised
+capacity, its 256 arc samples and 4 boundary vertices drawn in their own styles.
+Driver: `measure_refused_cell.py`, receipt `refused-cell-diverted-single-null.json`,
+both on the login node (`JAX_PLATFORMS=cpu`, root interpreter, exit 0).
+
 Two consequences, both for the coordinator rather than this node:
 
 - The row's *maximal live vertex count* cannot be read from the `included`
   column. A refused cell has its `vertex_count` zeroed before the maximum is
   taken, so the 134 above is the maximum over the cells that survived, and the
-  row's true maximum is at least the capacity `162`. The instrument in this
-  directory cannot see above the bound; measuring the refused cell's own live
-  count needs the capacity raised for one diagnostic run.
+  row's true maximum is 260, measured above.
 - Whether the single-null row *should* refuse that cell is a question about the
-  derived bound, not about the refusal: either a clipped polygon there really
-  carries a second traced run and the capacity is too tight, or its live count
-  is inflated by a layout the bound was not derived for. Both are decidable
-  from the refused cell's polygon and neither is settled here.
+  derived bound, not about the refusal. The measurement answers it: the cell
+  realises a second traced run, so its layout is not the one the bound was
+  derived for.
 
 ## The largest-intermediate census on the 300-cell row
 

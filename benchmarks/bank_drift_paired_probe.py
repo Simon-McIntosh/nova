@@ -338,11 +338,12 @@ def _emit(
     done = {row["identity"] for row in rows}
     if done:
         print(f"resuming {out_path}: {sorted(done)} already emitted", flush=True)
-    rows: list[dict[str, Any]] = []
     for selected_row, qualification in selected:
         shot = int(selected_row["shot"])
         slice_index = int(selected_row["slice_index"])
         arm_identity = _identity_of(selected_row)
+        if arm_identity in done:
+            continue
         entry: dict[str, Any] = {
             "identity": arm_identity,
             "stages": {},

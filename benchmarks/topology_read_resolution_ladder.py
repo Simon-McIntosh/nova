@@ -306,13 +306,15 @@ def _measure_row(requested_cells: int, report_directory: Path) -> dict[str, Any]
     _write_json(part_path, progress)
     started = perf_counter()
     machine, operator, analytic = _machine_and_field(requested_cells)
-    physical = jnp.asarray(analytic[: operator.physical_node_number], dtype=jnp.float64)
+    physical = jnp.asarray(analytic, dtype=jnp.float64)
     grid_flux, _wall_flux = operator._fixed_design_topology.split_flux_map(physical)
     _masks, topology, _connected, axis_admitted = jax.block_until_ready(
         operator._fixed_design_read(physical)
     )
     (_axis_rows, saddle_rows), census = jax.block_until_ready(
-        operator._fixed_design_topology.grid.read_census(grid_flux)
+        operator._fixed_design_topology.grid.read_census(
+            operator.null_flux_pool(physical)
+        )
     )
     pitch = math.sqrt(float(np.median(np.asarray(machine.area, dtype=np.float64))))
     exact_axis_flux = float(
@@ -860,7 +862,7 @@ def _device_timing(requested_cells: int, expected: dict[str, Any]) -> dict[str, 
     """Measure one admitted read as a single state and a vmapped batch."""
 
     machine, operator, analytic = _machine_and_field(requested_cells)
-    physical = jnp.asarray(analytic[: operator.physical_node_number], dtype=jnp.float64)
+    physical = jnp.asarray(analytic, dtype=jnp.float64)
 
     def read_one(state: jax.Array) -> tuple[jax.Array, ...]:
         _masks, topology, _connected, admitted = operator._fixed_design_read(state)

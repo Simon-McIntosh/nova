@@ -1,0 +1,23 @@
+revision=74489a363091c1c70b520af3fc4cc17980a123cb tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-cut-cell-moment-stage-attribution command=/home/ITER/mcintos/Code/nova/.venv/bin/python\ /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-cut-cell-moment-stage-attribution/benchmarks/exact_cut_cell_moment_stages.py
+revision=74489a363091c1c70b520af3fc4cc17980a123cb tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-cut-cell-moment-stage-attribution command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-cut-cell-moment-stage-attribution/benchmarks/exact_cut_cell_moment_stages.py']
+devices=[CudaDevice(id=0)] x64=True
+BUILD weak-rotation-reactor-static-cells-110
+ATTRIBUTED weak-rotation-reactor-static-cells-110 stage=moment_reduction share=0.998149478 closure=2.3e-16 corrected_fraction=0.999864703865
+BUILD weak-rotation-reactor-static-cells-300
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-cut-cell-moment-stage-attribution/benchmarks/exact_cut_cell_moment_stages.py", line 610, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-cut-cell-moment-stage-attribution/benchmarks/exact_cut_cell_moment_stages.py", line 595, in main
+    rows.append(measure(case_name, requested_cells, args.output))
+                ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-cut-cell-moment-stage-attribution/benchmarks/exact_cut_cell_moment_stages.py", line 346, in measure
+    simple_result = _stage_census(
+        np.flatnonzero(simple_cut),
+    ...<6 lines>...
+        centres,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-cut-cell-moment-stage-attribution/benchmarks/exact_cut_cell_moment_stages.py", line 222, in _stage_census
+    raise ValueError(f"secondary reclip made non-simple polygons: {invalid}")
+ValueError: secondary reclip made non-simple polygons: [5, 13, 23, 24, 172, 173, 272]
+EXIT=1

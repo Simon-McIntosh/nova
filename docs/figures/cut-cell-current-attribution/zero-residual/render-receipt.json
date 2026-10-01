@@ -1,0 +1,111 @@
+{
+  "driver_sha256": "61db99e7815005ac50dc28a168f885b15ae6daf2388c24cf770ee2de4f937929",
+  "figures": {
+    "zero-residual-map": {
+      "figure": {
+        "png_relative": "docs/figures/cut-cell-current-attribution/zero-residual/panels/zero-residual-map.png",
+        "render_source": "zero_residual_check",
+        "sha256": "91fb7d71d9a2c264d9ed7fa987f66f9a77e1c5eda1d1009c6bda14511e82ca01",
+        "src": "/nova/figures/cut-cell-current-attribution/zero-residual/panels/zero-residual-map.png"
+      },
+      "panels": [
+        {
+          "case": "weak-rotation-reactor-static",
+          "kind": "terminal_flux",
+          "level_count": 10,
+          "levels_inside_raster": 8,
+          "levels_wb": [
+            -12.57141928806472,
+            -6.546858634450527,
+            -0.5222979808363348,
+            5.502262672777858,
+            11.52682332639205,
+            17.551383980006243,
+            23.575944633620438,
+            29.600505287234625,
+            35.62506594084882,
+            41.649626594463015
+          ],
+          "null_glyphs": {
+            "reference_axis": 1,
+            "reference_x_points": 0,
+            "solved_axis": 1,
+            "solved_other_x_points": 0,
+            "solved_x_points": 0,
+            "solved_x_points_dropped_outside_wall": 0
+          },
+          "persisted_raster_present": true,
+          "raster_max_wb": 41.649626594463015,
+          "raster_min_wb": -12.57141928806472,
+          "reference_receipt": "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows/weak-rotation-reactor-static-production-route-cells-2500.json",
+          "title": "weak-rotation-reactor-static terminal flux (persisted)  levels=10\nresidual=0.000e+00  converged=True"
+        },
+        {
+          "case": "weak-rotation-reactor-static",
+          "kind": "relative_residual",
+          "level_count": 8,
+          "levels_relative_span": [
+            0.00011900753575153502,
+            0.10316570391560599,
+            0.20621240029546045,
+            0.3092590966753149,
+            0.4123057930551694,
+            0.5153524894350239,
+            0.6183991858148783,
+            0.7214458821947328
+          ],
+          "title": "weak-rotation-reactor-static |map-state|/|span|  levels=8\nresidual=0.000e+00  converged=True"
+        },
+        {
+          "case": "moderate-rotation-conventional-static",
+          "kind": "terminal_flux",
+          "level_count": 10,
+          "levels_inside_raster": 8,
+          "levels_wb": [
+            -0.37380983967588405,
+            -0.2035816570126283,
+            -0.033353474349372525,
+            0.1368747083138832,
+            0.307102890977139,
+            0.4773310736403948,
+            0.6475592563036505,
+            0.8177874389669064,
+            0.9880156216301621,
+            1.1582438042934178
+          ],
+          "null_glyphs": {
+            "reference_axis": 1,
+            "reference_x_points": 0,
+            "solved_axis": 1,
+            "solved_other_x_points": 0,
+            "solved_x_points": 0,
+            "solved_x_points_dropped_outside_wall": 0
+          },
+          "persisted_raster_present": true,
+          "raster_max_wb": 1.1582438042934178,
+          "raster_min_wb": -0.37380983967588405,
+          "reference_receipt": "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows/moderate-rotation-conventional-static-production-route-cells-2500.json",
+          "title": "moderate-rotation-conventional-static terminal flux (persisted)  levels=10\nresidual=2.011e-03  converged=False"
+        },
+        {
+          "case": "moderate-rotation-conventional-static",
+          "kind": "relative_residual",
+          "level_count": 8,
+          "levels_relative_span": [
+            7.85904262136884e-05,
+            0.10455819577713237,
+            0.20903780112805104,
+            0.3135174064789697,
+            0.41799701182988835,
+            0.5224766171808071,
+            0.6269562225317258,
+            0.7314358278826444
+          ],
+          "title": "moderate-rotation-conventional-static |map-state|/|span|  levels=8\nresidual=2.011e-03  converged=False"
+        }
+      ]
+    }
+  },
+  "schema": "nova.zero-residual-render-receipt",
+  "source_revision": "9d62c8f4cf31bae5b105ef32e17860b5dde6877e"
+}

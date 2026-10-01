@@ -86,12 +86,13 @@ def _closest_polyline_pair(
     return float(best), best_point, best_polyline_point
 
 
-def _limited_read(
+def _topology_read(
     radius: np.ndarray,
     height: np.ndarray,
     flux: np.ndarray,
     wall: np.ndarray,
     wall_zone: np.ndarray,
+    requested_class: int | None,
 ):
     topology = _topology(radius, height, wall)
     radial, vertical = np.meshgrid(radius, height, indexing="ij")
@@ -110,9 +111,21 @@ def _limited_read(
         jnp.asarray(state),
         1.0,
         jnp.asarray(inside_material),
-        requested_class=int(TopologyClass.LIMITED),
+        requested_class=requested_class,
     )
     return topology, topology_state
+
+
+def _limited_read(
+    radius: np.ndarray,
+    height: np.ndarray,
+    flux: np.ndarray,
+    wall: np.ndarray,
+    wall_zone: np.ndarray,
+):
+    return _topology_read(
+        radius, height, flux, wall, wall_zone, int(TopologyClass.LIMITED)
+    )
 
 
 def _traced_boundary(
@@ -184,6 +197,60 @@ def test_persisted_limited_terminal_boundary_contact_is_axis_connected():
     assert contact_distance < pitch
     assert np.linalg.norm(closest_wall_point - contact[:2]) < pitch
     assert wall_distance <= contact_distance + np.finfo(float).eps * 32
+    assert np.linalg.norm(contact[:2] - detached_contact) > pitch
+
+
+def test_persisted_class_free_read_publishes_the_axis_connected_contact():
+    """A class-free read evaluates containment and reads the wall contact.
+
+    The emergent read has no requested class to pin containment to, so the
+    screen has to be evaluated from each pass' own state. If it is decided once
+    from the provisional pass the detached divertor lobe survives and the read
+    still classifies diverted, which is the defect this test guards.
+    """
+
+    with np.load(LIMITED_TOUCH / "row-16-terminal-state.npz") as state:
+        radius = np.asarray(state["radius_axis"], dtype=np.float64)
+        height = np.asarray(state["height_axis"], dtype=np.float64)
+        flux = np.asarray(state["values"], dtype=np.float64)
+        wall = np.asarray(state["wall"], dtype=np.float64)
+        wall_zone = np.asarray(state["wall_zone"], dtype=np.float64)
+    receipt = json.loads((LIMITED_TOUCH / "receipt.json").read_text())
+    measured = receipt["after"]["rows"][0]
+    detached_contact = np.asarray(
+        receipt["before"]["rows"][0]["contact_position_m"], dtype=np.float64
+    )
+
+    _topology_instance, topology_state = _topology_read(
+        radius, height, flux, wall, wall_zone, None
+    )
+    contact = np.r_[
+        np.asarray(topology_state.wall_point, dtype=np.float64),
+        float(topology_state.wall_point_flux),
+    ]
+    assert not bool(np.asarray(topology_state.diverted))
+    np.testing.assert_allclose(
+        contact[:2],
+        np.asarray(measured["contact_position_m"], dtype=np.float64),
+        rtol=0.0,
+        atol=2.0e-12,
+    )
+    np.testing.assert_allclose(
+        contact[2],
+        measured["boundary_flux_wb"],
+        rtol=0.0,
+        atol=2.0e-15,
+    )
+
+    contour = _traced_boundary(
+        radius,
+        height,
+        flux,
+        np.asarray(topology_state.axis, dtype=np.float64),
+        float(contact[2]),
+    )
+    pitch = max(float(np.mean(np.diff(radius))), float(np.mean(np.diff(height))))
+    assert _polyline_distance(contour, contact[None, :2]) < pitch
     assert np.linalg.norm(contact[:2] - detached_contact) > pitch
 
 

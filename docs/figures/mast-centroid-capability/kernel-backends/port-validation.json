@@ -1,0 +1,18 @@
+{
+  "artifact": "the ported response build against the published carrier",
+  "acceptance_test": "elementwise comparison of the rebuilt response against the published one. The carrier pins do NOT check response values: the semantic identity digests input arrays and the resolved targets, and the stored response digest is self-consistent with whatever was built. A changed kernel therefore passes every loader check, so the loader is not the acceptance test and this comparison is.",
+  "identity_matches_pin": true,
+  "target_digest_matches_pin": true,
+  "shape_matches_pin": true,
+  "all_finite": true,
+  "response_bit_identical": false,
+  "maximum_absolute_difference": 3.5973785731421674e-16,
+  "peak_stored_magnitude": 8.423988122680913e-06,
+  "difference_over_peak": 4.2703984392576647e-11,
+  "changed_element_fraction": 0.9852100662997028,
+  "section_kernel_evaluations": 938,
+  "rebuild_seconds_on_titan": 117.40153194218874,
+  "published_cold_seconds_other_host": 492.949,
+  "host_kernel_seconds_on_titan": 1599.7384241484106,
+  "reading": "a faithful port at float64 round-off: the values move at 3.6e-16 absolute, 4.3e-11 of the peak element, on 98.5 percent of elements. The published carrier is NOT republished, because rebuilding it would move almost every element at that level for no gain -- it warm-loads in 0.04 s and nothing needs it rebuilt. The gain is for the NEXT build: the Green kernel is no longer the dominant cost, and the 117 s that remains is host work -- shapely section polygons, the per-circuit union and overlap attribution, and the input digests -- which is now the bottleneck to attack."
+}

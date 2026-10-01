@@ -1,0 +1,366 @@
+{
+  "programs": {
+    "baseline": {
+      "revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+      "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+      "arm": "baseline",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-closed-form-polygon-moments-replace-the-gauss-antiderivative",
+      "job": "1275743",
+      "node": "98dci4-clu-3141",
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "mode": "exact",
+      "evaluations_per_cut_cell": 621,
+      "completed": true,
+      "lower_seconds": 56.72075625881553,
+      "lowered_antiderivative_present": false,
+      "lowered_closed_form_present": false,
+      "compile_seconds": 449.785877102986,
+      "serialized_bytes": 234138055,
+      "serialized_sha256": "2df7c18f5a3fee998b49c1b4d01af6a07cf7ff8145b00494693d42f6ddb0cadf",
+      "top_five_hlo_ops": [
+        [
+          "parameter",
+          124212
+        ],
+        [
+          "broadcast",
+          89497
+        ],
+        [
+          "bitcast",
+          74875
+        ],
+        [
+          "constant",
+          74478
+        ],
+        [
+          "add",
+          55569
+        ]
+      ],
+      "hlo_instructions": 741991,
+      "hlo_antiderivative_occurrences": 1,
+      "hlo_closed_form_occurrences": 0,
+      "below_byte_ceiling": false
+    },
+    "candidate": {
+      "revision": "09f3b82243b2c7c086400dee1869cbff26e6e564",
+      "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+      "arm": "candidate",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-closed-form-polygon-moments-replace-the-gauss-antiderivative",
+      "job": "1275743",
+      "node": "98dci4-clu-3141",
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "mode": "exact",
+      "evaluations_per_cut_cell": 25,
+      "completed": true,
+      "lower_seconds": 42.73141594789922,
+      "lowered_antiderivative_present": false,
+      "lowered_closed_form_present": true,
+      "compile_seconds": 400.85785275138915,
+      "serialized_bytes": 207228014,
+      "serialized_sha256": "5047692d03a16ce05cccc75fa125acaf6ef2ae8485bbaf75bc64b601bf9cb13e",
+      "top_five_hlo_ops": [
+        [
+          "parameter",
+          121618
+        ],
+        [
+          "broadcast",
+          76195
+        ],
+        [
+          "constant",
+          70114
+        ],
+        [
+          "bitcast",
+          63927
+        ],
+        [
+          "add",
+          46804
+        ]
+      ],
+      "hlo_instructions": 668305,
+      "hlo_antiderivative_occurrences": 0,
+      "hlo_closed_form_occurrences": 3,
+      "hlo_bernstein_binom_occurrences": 1,
+      "below_byte_ceiling": false
+    },
+    "negative": {
+      "revision": "07e16f911d520cdd091ec7e685a506c9615dd6a4",
+      "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+      "arm": "negative",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-closed-form-polygon-moments-replace-the-gauss-antiderivative",
+      "job": "1275743",
+      "node": "98dci4-clu-3141",
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "mode": "exact",
+      "evaluations_per_cut_cell": 621,
+      "completed": true,
+      "lower_seconds": 41.52330326847732,
+      "lowered_antiderivative_present": true,
+      "lowered_closed_form_present": false,
+      "compile_seconds": 433.70258370414376,
+      "serialized_bytes": 234137743,
+      "serialized_sha256": "ea5d79c7b57573e68998662c7f70eded6b2b6d6f67d6cdfb2c1c8b41f2eabf71",
+      "top_five_hlo_ops": [
+        [
+          "parameter",
+          124212
+        ],
+        [
+          "broadcast",
+          89497
+        ],
+        [
+          "bitcast",
+          74875
+        ],
+        [
+          "constant",
+          74478
+        ],
+        [
+          "add",
+          55569
+        ]
+      ],
+      "hlo_instructions": 741991,
+      "hlo_antiderivative_occurrences": 1,
+      "hlo_closed_form_occurrences": 0,
+      "hlo_bernstein_binom_occurrences": 1,
+      "below_byte_ceiling": false
+    }
+  },
+  "rows": [
+    {
+      "revision": "81cb16ec33119d1e67747a4028c6fa5722c3715c",
+      "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+      "case": "weak-rotation-reactor-static",
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "cut_cells": 43,
+      "refused_cell_count": 0,
+      "refusal_message": null,
+      "moment_relative_l2": {
+        "current": 2.6688536697926264e-16,
+        "radial": 3.457955196012815e-16,
+        "vertical": 4.746213769445637e-16,
+        "radial_squared": 2.7001035178120573e-16,
+        "radial_vertical": 6.339775391613779e-16,
+        "vertical_squared": 2.894956177947285e-16
+      },
+      "frozen_image_sup_over_span": 1.138217807391719e-15,
+      "image_positive_control_sup_over_span": 0.00014508831126141685,
+      "image_floor": 1.52e-15,
+      "moment_tolerance": 1e-12,
+      "passed": true,
+      "job": "1275743",
+      "backend": "cpu",
+      "evaluations_before": 621,
+      "evaluations_after": 25
+    },
+    {
+      "revision": "6ac6f8c4b03e29bcbe86550d5de56b6e0e2774f4",
+      "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+      "case": "weak-rotation-reactor-static",
+      "requested_cells": 300,
+      "realised_cells": 342,
+      "cut_cells": 75,
+      "refused_cell_count": 0,
+      "refusal_message": null,
+      "moment_relative_l2": {
+        "current": 1.8440652571764928e-16,
+        "radial": 3.4835141131110524e-16,
+        "vertical": 5.790205502457225e-16,
+        "radial_squared": 2.018091313556537e-16,
+        "radial_vertical": 5.495942549946481e-16,
+        "vertical_squared": 3.0929407743050416e-16
+      },
+      "frozen_image_sup_over_span": 1.138217807391719e-15,
+      "image_positive_control_sup_over_span": 0.0001819881380168984,
+      "image_floor": 1.52e-15,
+      "moment_tolerance": 1e-12,
+      "passed": true,
+      "job": "1275743",
+      "backend": "cpu",
+      "evaluations_before": 621,
+      "evaluations_after": 25
+    },
+    {
+      "revision": "6ac6f8c4b03e29bcbe86550d5de56b6e0e2774f4",
+      "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+      "case": "moderate-rotation-conventional-static",
+      "requested_cells": 110,
+      "realised_cells": 136,
+      "cut_cells": 46,
+      "refused_cell_count": 0,
+      "refusal_message": null,
+      "moment_relative_l2": {
+        "current": 1.9072319413596688e-16,
+        "radial": 3.3474503863253937e-16,
+        "vertical": 4.506668497068713e-16,
+        "radial_squared": 2.4433636295541394e-16,
+        "radial_vertical": 6.398526765941941e-16,
+        "vertical_squared": 2.2336572873199775e-16
+      },
+      "frozen_image_sup_over_span": 1.286083072682141e-15,
+      "image_positive_control_sup_over_span": 0.0004105733950647106,
+      "image_floor": 1.52e-15,
+      "moment_tolerance": 1e-12,
+      "passed": true,
+      "job": "1275743",
+      "backend": "cpu",
+      "evaluations_before": 621,
+      "evaluations_after": 25
+    },
+    {
+      "revision": "6ac6f8c4b03e29bcbe86550d5de56b6e0e2774f4",
+      "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+      "case": "moderate-rotation-conventional-static",
+      "requested_cells": 300,
+      "realised_cells": 341,
+      "cut_cells": 73,
+      "refused_cell_count": 0,
+      "refusal_message": null,
+      "moment_relative_l2": {
+        "current": 2.510327407998107e-16,
+        "radial": 3.654514733967697e-16,
+        "vertical": 3.3356491166058824e-16,
+        "radial_squared": 2.5496613771934917e-16,
+        "radial_vertical": 5.086922029519459e-16,
+        "vertical_squared": 2.3746811826609777e-16
+      },
+      "frozen_image_sup_over_span": 6.430415363410705e-16,
+      "image_positive_control_sup_over_span": 0.00013036647753508502,
+      "image_floor": 1.52e-15,
+      "moment_tolerance": 1e-12,
+      "passed": true,
+      "job": "1275743",
+      "backend": "cpu",
+      "evaluations_before": 621,
+      "evaluations_after": 25
+    },
+    {
+      "revision": "6ac6f8c4b03e29bcbe86550d5de56b6e0e2774f4",
+      "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+      "case": "strong-rotation-compact-static",
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "cut_cells": 44,
+      "refused_cell_count": 0,
+      "refusal_message": null,
+      "moment_relative_l2": {
+        "current": 1.9669727479973313e-16,
+        "radial": 3.055257487873435e-16,
+        "vertical": 3.8062532523213774e-16,
+        "radial_squared": 2.2020710333433554e-16,
+        "radial_vertical": 6.157419778769968e-16,
+        "vertical_squared": 2.7627555299356723e-16
+      },
+      "frozen_image_sup_over_span": 9.60753520904847e-16,
+      "image_positive_control_sup_over_span": 0.0005757701570295974,
+      "image_floor": 1.52e-15,
+      "moment_tolerance": 1e-12,
+      "passed": true,
+      "job": "1275743",
+      "backend": "cpu",
+      "evaluations_before": 621,
+      "evaluations_after": 25
+    },
+    {
+      "revision": "6ac6f8c4b03e29bcbe86550d5de56b6e0e2774f4",
+      "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+      "case": "strong-rotation-compact-static",
+      "requested_cells": 300,
+      "realised_cells": 341,
+      "cut_cells": 73,
+      "refused_cell_count": 0,
+      "refusal_message": null,
+      "moment_relative_l2": {
+        "current": 2.0574073552043654e-16,
+        "radial": 3.597876278453837e-16,
+        "vertical": 4.949508556142757e-16,
+        "radial_squared": 2.0332306478194204e-16,
+        "radial_vertical": 5.03944327820408e-16,
+        "vertical_squared": 2.1588991379914952e-16
+      },
+      "frozen_image_sup_over_span": 9.60753520904847e-16,
+      "image_positive_control_sup_over_span": 0.00022245508700909232,
+      "image_floor": 1.52e-15,
+      "moment_tolerance": 1e-12,
+      "passed": true,
+      "job": "1275743",
+      "backend": "cpu",
+      "evaluations_before": 621,
+      "evaluations_after": 25
+    },
+    {
+      "revision": "6ac6f8c4b03e29bcbe86550d5de56b6e0e2774f4",
+      "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+      "case": "diverted-single-null",
+      "requested_cells": 110,
+      "realised_cells": 132,
+      "cut_cells": 36,
+      "refused_cell_count": 0,
+      "refusal_message": null,
+      "moment_relative_l2": {
+        "current": 1.6124502780952485e-16,
+        "radial": 4.803398077621088e-16,
+        "vertical": 4.34536200446477e-16,
+        "radial_squared": 1.8998362529887713e-16,
+        "radial_vertical": 5.453690411918883e-16,
+        "vertical_squared": 2.705798153877749e-16
+      },
+      "frozen_image_sup_over_span": 4.861232291633413e-15,
+      "image_positive_control_sup_over_span": 0.0035114495095922914,
+      "image_floor": 1.52e-15,
+      "moment_tolerance": 1e-12,
+      "passed": false,
+      "job": "1275743",
+      "backend": "cpu",
+      "evaluations_before": 621,
+      "evaluations_after": 25
+    },
+    {
+      "revision": "6ac6f8c4b03e29bcbe86550d5de56b6e0e2774f4",
+      "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+      "case": "diverted-single-null",
+      "requested_cells": 300,
+      "realised_cells": 340,
+      "cut_cells": 66,
+      "refused_cell_count": 0,
+      "refusal_message": null,
+      "moment_relative_l2": {
+        "current": 2.1075625365612386e-16,
+        "radial": 2.3540763418727624e-16,
+        "vertical": 4.017988722721877e-16,
+        "radial_squared": 2.24910524946017e-16,
+        "radial_vertical": 6.18600935563655e-16,
+        "vertical_squared": 2.313169994295329e-16
+      },
+      "frozen_image_sup_over_span": 4.861232291633413e-15,
+      "image_positive_control_sup_over_span": 0.0013364609264445927,
+      "image_floor": 1.52e-15,
+      "moment_tolerance": 1e-12,
+      "passed": false,
+      "job": "1275743",
+      "backend": "cpu",
+      "evaluations_before": 621,
+      "evaluations_after": 25
+    }
+  ],
+  "missing_rows": [],
+  "byte_reduction_fraction": 0.11493236757262715,
+  "negative_minus_baseline_bytes": -312,
+  "negative_top_five_match_baseline": true,
+  "complete_row_census": true,
+  "negative_control_guards_fired": true,
+  "full_gate_passed": false
+}

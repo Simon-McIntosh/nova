@@ -1,0 +1,9 @@
+baseline-program EXIT 0
+baseline-suites EXIT 1
+{"baseline-program": 0, "baseline-suites": 1}
+candidate-program EXIT 0
+negative-program EXIT 0
+candidate-suites EXIT 0
+rows EXIT 0
+{"baseline-program": 0, "baseline-suites": 1, "candidate-program": 0, "negative-program": 0, "candidate-suites": 0, "rows": 0}
+srun: error: 98dci4-clu-4073: task 0: Exited with exit code 1

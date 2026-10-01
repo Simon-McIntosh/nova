@@ -1,0 +1,21 @@
+revision=db2108e6adaca770cda30e39e052d9dcf20e18a9 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-db2108e6a command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py', 'arm', '--revision', 'db2108e6adaca770cda30e39e052d9dcf20e18a9', '--clip', 'exact', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels']
+BUILD db2108e6adaca770cda30e39e052d9dcf20e18a9 exact
+SOLVE route=newton_krylov
+E0923 09:48:28.548619  651558 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0923 09:48:47.563823  647517 slow_operation_alarm.cc:140] The operation took 2m19.01529373s
+
+********************************
+[Compiling module jit_solve for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+CAPTURE trip=1 residual=0.63115053028397 lambda_calls=107
+CAPTURE trip=2 residual=0.07789976166863 lambda_calls=132
+CAPTURE trip=3 residual=0.077587127321111 lambda_calls=210
+CAPTURE trip=4 residual=0.077587037021366 lambda_calls=48
+CAPTURE trip=5 residual=0.077587025733914 lambda_calls=48
+CAPTURE trip=6 residual=0.07758702291205 lambda_calls=48
+CAPTURE trip=7 residual=0.077587021501116 lambda_calls=48
+CAPTURE trip=8 residual=0.077587021501116 lambda_calls=150
+ARM_COMPLETE {"revision": "db2108e6adaca770cda30e39e052d9dcf20e18a9", "clip_mode": "exact", "terminal_residual": 0.07758702150111606, "trip_count": 8, "saddle_loss_trip": 1}

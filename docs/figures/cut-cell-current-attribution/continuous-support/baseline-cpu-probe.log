@@ -1,0 +1,23 @@
+{
+  "backend": "cpu",
+  "devices": "[CpuDevice(id=0)]",
+  "map_tangent_max_wb": 0.0,
+  "control_error": 0.0,
+  "steps": [
+    {
+      "step": 1e-06,
+      "fd_max_wb": 12097.097462060447,
+      "relative_error": 1.0,
+      "map_jump_wb": 0.024194194924120893,
+      "cell_66_delta_a": -847.431878816431
+    },
+    {
+      "step": 1e-08,
+      "fd_max_wb": 1209709.7462060447,
+      "relative_error": 1.0,
+      "map_jump_wb": 0.024194194924120893,
+      "cell_66_delta_a": -847.431878816431
+    }
+  ],
+  "wall_seconds": 35.93828332610428
+}

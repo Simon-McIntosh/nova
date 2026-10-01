@@ -1,0 +1,29 @@
+revision=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=AST census of clip branch/root/wedge loops
+{
+  "_traced_clip": [
+    {
+      "line": 1268,
+      "loop": "branch",
+      "iterator": "range(2)"
+    },
+    {
+      "line": 1289,
+      "loop": "branch",
+      "iterator": "range(2)"
+    }
+  ],
+  "_sampled_spline_edge_roots": [
+    {
+      "line": 1782,
+      "loop": "root_slot",
+      "iterator": "range(2)"
+    }
+  ],
+  "_expand_spline_saddle_wedges": [
+    {
+      "line": 1832,
+      "loop": "wedge",
+      "iterator": "range(4)"
+    }
+  ]
+}

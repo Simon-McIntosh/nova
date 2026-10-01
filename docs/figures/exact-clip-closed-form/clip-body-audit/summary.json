@@ -1,0 +1,3107 @@
+{
+  "programs": {
+    "baseline": {
+      "revision": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "base_revision": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "arm": "baseline",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body",
+      "job": "1275982",
+      "cpu_affinity": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "completed": true,
+      "lower_seconds": 35.65120420791209,
+      "compile_seconds": 291.2611204329878,
+      "serialized_bytes": 179997008,
+      "serialized_sha256": "dd290f51bb3ee29cf1e591f919e258be6f85ef7238f25ed85f2fa9ecc042a69b",
+      "top_five_hlo_ops": [
+        [
+          "parameter",
+          120270
+        ],
+        [
+          "broadcast",
+          74743
+        ],
+        [
+          "bitcast",
+          63112
+        ],
+        [
+          "constant",
+          53609
+        ],
+        [
+          "compare",
+          33524
+        ]
+      ],
+      "hlo_instructions": 572827,
+      "bernstein_binom_present": false,
+      "static_basis_present": true,
+      "instruction_ownership": [
+        [
+          "nova/equilibrium/forward_operator.py",
+          102858
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py",
+          86101
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py",
+          77296
+        ],
+        [
+          "nova/equilibrium/topology.py",
+          41582
+        ],
+        [
+          "nova/equilibrium/fixed_point.py",
+          26293
+        ],
+        [
+          "nova/linalg/interpolant.py",
+          21315
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py",
+          16913
+        ],
+        [
+          "nova/linalg/split_spline.py",
+          9655
+        ],
+        [
+          "nova/linalg/tensor_spline.py",
+          6767
+        ],
+        [
+          "nova/equilibrium/flux_surface_connectivity.py",
+          6744
+        ],
+        [
+          "nova/equilibrium/parallel_components.py",
+          6232
+        ],
+        [
+          "nova/equilibrium/stencil_mesh.py",
+          6028
+        ],
+        [
+          "nova/geometry/select.py",
+          5955
+        ],
+        [
+          "nova/equilibrium/rotation.py",
+          4593
+        ],
+        [
+          "nova/biot/null.py",
+          3285
+        ],
+        [
+          "nova/equilibrium/convention.py",
+          1391
+        ],
+        [
+          "nova/equilibrium/domain.py",
+          916
+        ],
+        [
+          "nova/biot/target.py",
+          510
+        ],
+        [
+          "nova/equilibrium/source.py",
+          183
+        ]
+      ],
+      "function_ownership": [
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_clip",
+          51671
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments",
+          22054
+        ],
+        [
+          "nova/equilibrium/fixed_point.py:_active_set_newton_krylov",
+          17514
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_cell_banked_current_moments",
+          14397
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D.read_census",
+          13951
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census",
+          13454
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments",
+          13176
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_quadrature_from_arrays",
+          11985
+        ],
+        [
+          "nova/linalg/interpolant.py:bernstein_basis",
+          11282
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.boundary",
+          10982
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_ExactClipLevel.__call__",
+          10871
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._local_fit_census",
+          10300
+        ],
+        [
+          "nova/linalg/interpolant.py:bernstein_basis.<locals>.term_basis",
+          10033
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_pack_traced_vertices",
+          9327
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._seed_representatives.<locals>.compact",
+          8802
+        ],
+        [
+          "nova/linalg/split_spline.py:SplitTensorBSpline._patch_evaluation",
+          6569
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_polished_level_root.<locals>.polish",
+          6166
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.read_qualification",
+          5930
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_arc",
+          5696
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py:_points_inside_polygon",
+          5660
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._deduplicate_type.<locals>.retain_one",
+          5292
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_flux_selected_current_moments.<locals>.integrate",
+          5258
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_implicit_traced_level_arc",
+          5257
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_sampled_arc_polynomial_moments",
+          5190
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_value",
+          4696
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.axis_component",
+          4641
+        ],
+        [
+          "nova/geometry/select.py:wall_coordinate",
+          4409
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_polygon_moments",
+          4299
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py:_points_inside_wall_units",
+          4008
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology._wall_anchor_selection",
+          3943
+        ]
+      ],
+      "unowned_instructions": 148210,
+      "ownership_examples": {
+        "nova/equilibrium/separatrix_clip.py:_traced_clip": {
+          "frame_id": 297763,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/separatrix_clip.py",
+          "function": "_traced_clip",
+          "line": 1197
+        },
+        "nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments": {
+          "frame_id": 299694,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/clip_quadrature.py",
+          "function": "_straight_edge_monomial_moments",
+          "line": 210
+        },
+        "nova/equilibrium/fixed_point.py:_active_set_newton_krylov": {
+          "frame_id": 40284,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/fixed_point.py",
+          "function": "_active_set_newton_krylov",
+          "line": 3973
+        },
+        "nova/equilibrium/forward_operator.py:_cell_banked_current_moments": {
+          "frame_id": 299796,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_cell_banked_current_moments",
+          "line": 413
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D.read_census": {
+          "frame_id": 330379,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D.read_census",
+          "line": 1546
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census": {
+          "frame_id": 214855,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D._compatibility_census",
+          "line": 1503
+        },
+        "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments": {
+          "frame_id": 299592,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/clip_quadrature.py",
+          "function": "clipped_support_current_moments",
+          "line": 806
+        },
+        "nova/equilibrium/clip_quadrature.py:_quadrature_from_arrays": {
+          "frame_id": 300188,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/clip_quadrature.py",
+          "function": "_quadrature_from_arrays",
+          "line": 406
+        },
+        "nova/linalg/interpolant.py:bernstein_basis": {
+          "frame_id": 296627,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/linalg/interpolant.py",
+          "function": "bernstein_basis",
+          "line": 53
+        },
+        "nova/equilibrium/topology.py:Topology.boundary": {
+          "frame_id": 204070,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/topology.py",
+          "function": "Topology.boundary",
+          "line": 762
+        },
+        "nova/equilibrium/forward_operator.py:_ExactClipLevel.__call__": {
+          "frame_id": 297520,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_ExactClipLevel.__call__",
+          "line": 531
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._local_fit_census": {
+          "frame_id": 3,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D._local_fit_census",
+          "line": 1021
+        },
+        "nova/linalg/interpolant.py:bernstein_basis.<locals>.term_basis": {
+          "frame_id": 296628,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/linalg/interpolant.py",
+          "function": "bernstein_basis.<locals>.term_basis",
+          "line": 49
+        },
+        "nova/equilibrium/separatrix_clip.py:_pack_traced_vertices": {
+          "frame_id": 300449,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/separatrix_clip.py",
+          "function": "_pack_traced_vertices",
+          "line": 601
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._seed_representatives.<locals>.compact": {
+          "frame_id": 330609,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D._seed_representatives.<locals>.compact",
+          "line": 1167
+        }
+      },
+      "source_checkpoint": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "below_ceiling": false
+    },
+    "candidate": {
+      "revision": "0c685775797acfc1648cbf375033391f62456603",
+      "base_revision": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "arm": "candidate",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body",
+      "job": "1275982",
+      "cpu_affinity": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "completed": true,
+      "lower_seconds": 45.01716079004109,
+      "compile_seconds": 293.98291471786797,
+      "serialized_bytes": 170127989,
+      "serialized_sha256": "e72ab71d24d62c2409240560f908322280ca5b7152dc32f34d899ae90ab0bf52",
+      "top_five_hlo_ops": [
+        [
+          "parameter",
+          109611
+        ],
+        [
+          "broadcast",
+          67681
+        ],
+        [
+          "bitcast",
+          63531
+        ],
+        [
+          "constant",
+          49262
+        ],
+        [
+          "compare",
+          31753
+        ]
+      ],
+      "hlo_instructions": 530152,
+      "bernstein_binom_present": false,
+      "static_basis_present": true,
+      "instruction_ownership": [
+        [
+          "nova/equilibrium/forward_operator.py",
+          93078
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py",
+          83127
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py",
+          77216
+        ],
+        [
+          "nova/equilibrium/topology.py",
+          40842
+        ],
+        [
+          "nova/equilibrium/fixed_point.py",
+          23609
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py",
+          16913
+        ],
+        [
+          "nova/linalg/interpolant.py",
+          13077
+        ],
+        [
+          "nova/linalg/split_spline.py",
+          6863
+        ],
+        [
+          "nova/equilibrium/flux_surface_connectivity.py",
+          6758
+        ],
+        [
+          "nova/equilibrium/parallel_components.py",
+          6239
+        ],
+        [
+          "nova/equilibrium/stencil_mesh.py",
+          6017
+        ],
+        [
+          "nova/geometry/select.py",
+          5955
+        ],
+        [
+          "nova/equilibrium/rotation.py",
+          4593
+        ],
+        [
+          "nova/linalg/tensor_spline.py",
+          4350
+        ],
+        [
+          "nova/biot/null.py",
+          2734
+        ],
+        [
+          "nova/equilibrium/convention.py",
+          1391
+        ],
+        [
+          "nova/equilibrium/domain.py",
+          916
+        ],
+        [
+          "nova/biot/target.py",
+          510
+        ],
+        [
+          "nova/equilibrium/source.py",
+          183
+        ]
+      ],
+      "function_ownership": [
+        [
+          "nova/equilibrium/separatrix_clip.py:_clip_cell",
+          43860
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments",
+          22054
+        ],
+        [
+          "nova/equilibrium/fixed_point.py:_active_set_newton_krylov",
+          15556
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_cell_banked_current_moments",
+          14525
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D.read_census",
+          13427
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census",
+          13332
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments",
+          13233
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_quadrature_from_arrays",
+          11985
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.boundary",
+          10982
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._local_fit_census",
+          10182
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._seed_representatives.<locals>.compact",
+          8802
+        ],
+        [
+          "nova/linalg/interpolant.py:bernstein_basis",
+          7120
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_ExactClipLevel.__call__",
+          6990
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_pack_traced_vertices",
+          6962
+        ],
+        [
+          "nova/linalg/interpolant.py:bernstein_basis.<locals>.term_basis",
+          5957
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_arc",
+          5669
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py:_points_inside_polygon",
+          5660
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_flux_selected_current_moments.<locals>.integrate",
+          5342
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.read_qualification",
+          5332
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._deduplicate_type.<locals>.retain_one",
+          5292
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_sampled_arc_polynomial_moments",
+          5190
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_value",
+          4928
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.axis_component",
+          4621
+        ],
+        [
+          "nova/geometry/select.py:wall_coordinate",
+          4409
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_polygon_moments",
+          4355
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_implicit_traced_level_arc",
+          4057
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py:_points_inside_wall_units",
+          4008
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology._wall_anchor_selection",
+          3943
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_segment_root",
+          3801
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.x_point_data",
+          3699
+        ]
+      ],
+      "unowned_instructions": 135781,
+      "ownership_examples": {
+        "nova/equilibrium/separatrix_clip.py:_clip_cell": {
+          "frame_id": 290692,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/separatrix_clip.py",
+          "function": "_clip_cell",
+          "line": 1291
+        },
+        "nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments": {
+          "frame_id": 292356,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/clip_quadrature.py",
+          "function": "_straight_edge_monomial_moments",
+          "line": 210
+        },
+        "nova/equilibrium/fixed_point.py:_active_set_newton_krylov": {
+          "frame_id": 37762,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/fixed_point.py",
+          "function": "_active_set_newton_krylov",
+          "line": 3973
+        },
+        "nova/equilibrium/forward_operator.py:_cell_banked_current_moments": {
+          "frame_id": 292458,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_cell_banked_current_moments",
+          "line": 413
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D.read_census": {
+          "frame_id": 322428,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D.read_census",
+          "line": 1554
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census": {
+          "frame_id": 209614,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D._compatibility_census",
+          "line": 1511
+        },
+        "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments": {
+          "frame_id": 292254,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/clip_quadrature.py",
+          "function": "clipped_support_current_moments",
+          "line": 806
+        },
+        "nova/equilibrium/clip_quadrature.py:_quadrature_from_arrays": {
+          "frame_id": 292870,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/clip_quadrature.py",
+          "function": "_quadrature_from_arrays",
+          "line": 406
+        },
+        "nova/equilibrium/topology.py:Topology.boundary": {
+          "frame_id": 199054,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/topology.py",
+          "function": "Topology.boundary",
+          "line": 762
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._local_fit_census": {
+          "frame_id": 3,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D._local_fit_census",
+          "line": 1029
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._seed_representatives.<locals>.compact": {
+          "frame_id": 322658,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D._seed_representatives.<locals>.compact",
+          "line": 1175
+        },
+        "nova/linalg/interpolant.py:bernstein_basis": {
+          "frame_id": 289602,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/linalg/interpolant.py",
+          "function": "bernstein_basis",
+          "line": 53
+        },
+        "nova/equilibrium/forward_operator.py:_ExactClipLevel.__call__": {
+          "frame_id": 290463,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_ExactClipLevel.__call__",
+          "line": 539
+        },
+        "nova/equilibrium/separatrix_clip.py:_pack_traced_vertices": {
+          "frame_id": 291389,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/separatrix_clip.py",
+          "function": "_pack_traced_vertices",
+          "line": 602
+        },
+        "nova/linalg/interpolant.py:bernstein_basis.<locals>.term_basis": {
+          "frame_id": 289603,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/linalg/interpolant.py",
+          "function": "bernstein_basis.<locals>.term_basis",
+          "line": 49
+        }
+      },
+      "source_checkpoint": "0c685775797acfc1648cbf375033391f62456603",
+      "below_ceiling": false,
+      "shared_cell_body_present": true
+    },
+    "negative": {
+      "revision": "c7eb43483b64890b8cc0dcb15b1651a7d32cb2c9",
+      "base_revision": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "arm": "negative",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body",
+      "job": "1275982",
+      "cpu_affinity": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "completed": true,
+      "lower_seconds": 36.12669906951487,
+      "compile_seconds": 295.0340735428035,
+      "serialized_bytes": 179996928,
+      "serialized_sha256": "34263436e22b59b0d96775c5d6dfe8dacbceaa9f624cbca0166cecaca57f5810",
+      "top_five_hlo_ops": [
+        [
+          "parameter",
+          120270
+        ],
+        [
+          "broadcast",
+          74743
+        ],
+        [
+          "bitcast",
+          63112
+        ],
+        [
+          "constant",
+          53609
+        ],
+        [
+          "compare",
+          33524
+        ]
+      ],
+      "hlo_instructions": 572827,
+      "bernstein_binom_present": false,
+      "static_basis_present": true,
+      "instruction_ownership": [
+        [
+          "nova/equilibrium/forward_operator.py",
+          102858
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py",
+          86101
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py",
+          77296
+        ],
+        [
+          "nova/equilibrium/topology.py",
+          41582
+        ],
+        [
+          "nova/equilibrium/fixed_point.py",
+          26293
+        ],
+        [
+          "nova/linalg/interpolant.py",
+          21315
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py",
+          16913
+        ],
+        [
+          "nova/linalg/split_spline.py",
+          9655
+        ],
+        [
+          "nova/linalg/tensor_spline.py",
+          6767
+        ],
+        [
+          "nova/equilibrium/flux_surface_connectivity.py",
+          6744
+        ],
+        [
+          "nova/equilibrium/parallel_components.py",
+          6232
+        ],
+        [
+          "nova/equilibrium/stencil_mesh.py",
+          6028
+        ],
+        [
+          "nova/geometry/select.py",
+          5955
+        ],
+        [
+          "nova/equilibrium/rotation.py",
+          4593
+        ],
+        [
+          "nova/biot/null.py",
+          3285
+        ],
+        [
+          "nova/equilibrium/convention.py",
+          1391
+        ],
+        [
+          "nova/equilibrium/domain.py",
+          916
+        ],
+        [
+          "nova/biot/target.py",
+          510
+        ],
+        [
+          "nova/equilibrium/source.py",
+          183
+        ]
+      ],
+      "function_ownership": [
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_clip",
+          51671
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments",
+          22054
+        ],
+        [
+          "nova/equilibrium/fixed_point.py:_active_set_newton_krylov",
+          17514
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_cell_banked_current_moments",
+          14397
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D.read_census",
+          13951
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census",
+          13454
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments",
+          13176
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_quadrature_from_arrays",
+          11985
+        ],
+        [
+          "nova/linalg/interpolant.py:bernstein_basis",
+          11282
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.boundary",
+          10982
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_ExactClipLevel.__call__",
+          10871
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._local_fit_census",
+          10300
+        ],
+        [
+          "nova/linalg/interpolant.py:bernstein_basis.<locals>.term_basis",
+          10033
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_pack_traced_vertices",
+          9327
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._seed_representatives.<locals>.compact",
+          8802
+        ],
+        [
+          "nova/linalg/split_spline.py:SplitTensorBSpline._patch_evaluation",
+          6569
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_polished_level_root.<locals>.polish",
+          6166
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.read_qualification",
+          5930
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_arc",
+          5696
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py:_points_inside_polygon",
+          5660
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._deduplicate_type.<locals>.retain_one",
+          5292
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_flux_selected_current_moments.<locals>.integrate",
+          5258
+        ],
+        [
+          "nova/equilibrium/forward_operator.py:_implicit_traced_level_arc",
+          5257
+        ],
+        [
+          "nova/equilibrium/clip_quadrature.py:_sampled_arc_polynomial_moments",
+          5190
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_quadratic_value",
+          4696
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology.axis_component",
+          4641
+        ],
+        [
+          "nova/geometry/select.py:wall_coordinate",
+          4409
+        ],
+        [
+          "nova/equilibrium/separatrix_clip.py:_traced_polygon_moments",
+          4299
+        ],
+        [
+          "nova/equilibrium/connectivity_boundary.py:_points_inside_wall_units",
+          4008
+        ],
+        [
+          "nova/equilibrium/topology.py:Topology._wall_anchor_selection",
+          3943
+        ]
+      ],
+      "unowned_instructions": 148210,
+      "ownership_examples": {
+        "nova/equilibrium/separatrix_clip.py:_traced_clip": {
+          "frame_id": 297763,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/separatrix_clip.py",
+          "function": "_traced_clip",
+          "line": 1197
+        },
+        "nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments": {
+          "frame_id": 299694,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/clip_quadrature.py",
+          "function": "_straight_edge_monomial_moments",
+          "line": 210
+        },
+        "nova/equilibrium/fixed_point.py:_active_set_newton_krylov": {
+          "frame_id": 40284,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/fixed_point.py",
+          "function": "_active_set_newton_krylov",
+          "line": 3973
+        },
+        "nova/equilibrium/forward_operator.py:_cell_banked_current_moments": {
+          "frame_id": 299796,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_cell_banked_current_moments",
+          "line": 413
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D.read_census": {
+          "frame_id": 330379,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D.read_census",
+          "line": 1554
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census": {
+          "frame_id": 214855,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D._compatibility_census",
+          "line": 1511
+        },
+        "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments": {
+          "frame_id": 299592,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/clip_quadrature.py",
+          "function": "clipped_support_current_moments",
+          "line": 806
+        },
+        "nova/equilibrium/clip_quadrature.py:_quadrature_from_arrays": {
+          "frame_id": 300188,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/clip_quadrature.py",
+          "function": "_quadrature_from_arrays",
+          "line": 406
+        },
+        "nova/linalg/interpolant.py:bernstein_basis": {
+          "frame_id": 296627,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/linalg/interpolant.py",
+          "function": "bernstein_basis",
+          "line": 53
+        },
+        "nova/equilibrium/topology.py:Topology.boundary": {
+          "frame_id": 204070,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/topology.py",
+          "function": "Topology.boundary",
+          "line": 762
+        },
+        "nova/equilibrium/forward_operator.py:_ExactClipLevel.__call__": {
+          "frame_id": 297520,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_ExactClipLevel.__call__",
+          "line": 539
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._local_fit_census": {
+          "frame_id": 3,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D._local_fit_census",
+          "line": 1029
+        },
+        "nova/linalg/interpolant.py:bernstein_basis.<locals>.term_basis": {
+          "frame_id": 296628,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/linalg/interpolant.py",
+          "function": "bernstein_basis.<locals>.term_basis",
+          "line": 49
+        },
+        "nova/equilibrium/separatrix_clip.py:_pack_traced_vertices": {
+          "frame_id": 300449,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/separatrix_clip.py",
+          "function": "_pack_traced_vertices",
+          "line": 601
+        },
+        "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._seed_representatives.<locals>.compact": {
+          "frame_id": 330609,
+          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+          "function": "_FixedDesignNull2D._seed_representatives.<locals>.compact",
+          "line": 1175
+        }
+      },
+      "source_checkpoint": "c7eb43483b64890b8cc0dcb15b1651a7d32cb2c9",
+      "below_ceiling": false,
+      "source_sha256": {
+        "nova/equilibrium/separatrix_clip.py": "3a42a36b47b3b13602cd4923a2e6b767b0f6fee9e6d5114ab584b46844678ff7",
+        "nova/equilibrium/forward_operator.py": "88402a6d39a831183124d37eaa76e002bc3b33adb96137548562d451b9310213"
+      },
+      "shared_cell_body_present": false,
+      "unchanged_control_reuse": {
+        "measured_revision": "c7eb43483b64890b8cc0dcb15b1651a7d32cb2c9",
+        "candidate_revision": "72916e649ecf615ca654e8b24062971acb3d66dc",
+        "changed_package_paths": [
+          "nova/equilibrium/separatrix_clip.py"
+        ],
+        "replaced_module_revision": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+        "effective_control_source_unchanged": true
+      }
+    }
+  },
+  "rows": [
+    {
+      "case": "weak-rotation-reactor-static",
+      "cells": 110,
+      "job": "1275982",
+      "revision": "0c685775797acfc1648cbf375033391f62456603",
+      "base": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "comparisons": {
+        "support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 523.8101015860633,
+          "max_absolute": 0.0
+        },
+        "vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 866.3198023824689,
+          "max_absolute": 0.0
+        },
+        "centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 72.95961760497659,
+          "max_absolute": 0.0
+        },
+        "included": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 11.0,
+          "max_absolute": 0.0
+        },
+        "boundary": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 6.557438524302,
+          "max_absolute": 0.0
+        },
+        "area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 2.073090395704426,
+          "max_absolute": 0.0
+        },
+        "full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 2.216343890696656,
+          "max_absolute": 0.0
+        },
+        "first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.040330630729810045,
+          "max_absolute": 0.0
+        },
+        "second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.05055764006744783,
+          "max_absolute": 0.0
+        },
+        "contour_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 21.09164579713711,
+          "max_absolute": 0.0
+        },
+        "patch_area_sum": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 21.20135866955966,
+          "max_absolute": 0.0
+        },
+        "branch_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 523.8101015860633,
+          "max_absolute": 0.0
+        },
+        "branch_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 866.3198023824689,
+          "max_absolute": 0.0
+        },
+        "branch_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 2.073090395704426,
+          "max_absolute": 0.0
+        },
+        "branch_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.040330630729810045,
+          "max_absolute": 0.0
+        },
+        "branch_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.05055764006744783,
+          "max_absolute": 0.0
+        },
+        "saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "vertex_capacity": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 158.0,
+          "max_absolute": 0.0
+        },
+        "refused_cell_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1601623.3868434608,
+          "max_absolute": 0.0
+        },
+        "radial": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 22564.038904415687,
+          "max_absolute": 0.0
+        },
+        "vertical": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 17216.891442166783,
+          "max_absolute": 0.0
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 16.55294535724685,
+          "max_absolute": 0.0
+        },
+        "crossings": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 123.82578547774088,
+          "max_absolute": 0.0
+        },
+        "wedge_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 72.95961760497659,
+          "max_absolute": 0.0
+        },
+        "wedge_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "wedge_reference_policy": "admitted-saddle-only",
+      "passed": true
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "cells": 300,
+      "job": "1275982",
+      "revision": "0c685775797acfc1648cbf375033391f62456603",
+      "base": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "comparisons": {
+        "support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 697.5527074922035,
+          "max_absolute": 0.0
+        },
+        "vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1146.6228673805524,
+          "max_absolute": 0.0
+        },
+        "centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 115.8795858816471,
+          "max_absolute": 0.0
+        },
+        "included": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 17.52141546793523,
+          "max_absolute": 0.0
+        },
+        "boundary": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 8.660254037844387,
+          "max_absolute": 0.0
+        },
+        "area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.2756711466560888,
+          "max_absolute": 0.0
+        },
+        "full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.3555931807672499,
+          "max_absolute": 0.0
+        },
+        "first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.011502716746095556,
+          "max_absolute": 0.0
+        },
+        "second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.011468780410538686,
+          "max_absolute": 0.0
+        },
+        "contour_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 19.762766711088638,
+          "max_absolute": 0.0
+        },
+        "patch_area_sum": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 21.201362842000293,
+          "max_absolute": 0.0
+        },
+        "branch_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 697.5527074922035,
+          "max_absolute": 0.0
+        },
+        "branch_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1146.6228673805524,
+          "max_absolute": 0.0
+        },
+        "branch_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.2756711466560888,
+          "max_absolute": 0.0
+        },
+        "branch_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.011502716746095558,
+          "max_absolute": 0.0
+        },
+        "branch_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.011468780410538686,
+          "max_absolute": 0.0
+        },
+        "saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "vertex_capacity": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 152.0,
+          "max_absolute": 0.0
+        },
+        "refused_cell_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 985011.2781331909,
+          "max_absolute": 0.0
+        },
+        "radial": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 6174.432279556891,
+          "max_absolute": 0.0
+        },
+        "vertical": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 5447.33268097451,
+          "max_absolute": 0.0
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 18.138357147217054,
+          "max_absolute": 0.0
+        },
+        "crossings": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 132.0516306699001,
+          "max_absolute": 0.0
+        },
+        "wedge_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 115.8795858816471,
+          "max_absolute": 0.0
+        },
+        "wedge_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "wedge_reference_policy": "admitted-saddle-only",
+      "passed": true
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "cells": 110,
+      "job": "1275982",
+      "revision": "817231f5505e8262234e8ec843199c24daf5c1fa",
+      "base": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "comparisons": {
+        "support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 147.082587926401,
+          "max_absolute": 0.0
+        },
+        "vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 896.5288617774667,
+          "max_absolute": 0.0
+        },
+        "centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 20.108314517574556,
+          "max_absolute": 0.0
+        },
+        "included": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 11.0,
+          "max_absolute": 0.0
+        },
+        "boundary": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 6.782329983125268,
+          "max_absolute": 0.0
+        },
+        "area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.1651912131253085,
+          "max_absolute": 0.0
+        },
+        "full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.17599952381223247,
+          "max_absolute": 0.0
+        },
+        "first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0008923962079450095,
+          "max_absolute": 0.0
+        },
+        "second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0003203085965196563,
+          "max_absolute": 0.0
+        },
+        "contour_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.569691559223049,
+          "max_absolute": 0.0
+        },
+        "patch_area_sum": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.685979021125654,
+          "max_absolute": 0.0
+        },
+        "branch_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 147.082587926401,
+          "max_absolute": 0.0
+        },
+        "branch_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 896.5288617774667,
+          "max_absolute": 0.0
+        },
+        "branch_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.1651912131253085,
+          "max_absolute": 0.0
+        },
+        "branch_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0008923962079450095,
+          "max_absolute": 0.0
+        },
+        "branch_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0003203085965196563,
+          "max_absolute": 0.0
+        },
+        "saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "vertex_capacity": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 160.0,
+          "max_absolute": 0.0
+        },
+        "refused_cell_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 159802.5005656143,
+          "max_absolute": 0.0
+        },
+        "radial": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 633.6427233718673,
+          "max_absolute": 0.0
+        },
+        "vertical": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 461.1340993182278,
+          "max_absolute": 0.0
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 15.874507866387544,
+          "max_absolute": 0.0
+        },
+        "crossings": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 32.42153921418501,
+          "max_absolute": 0.0
+        },
+        "wedge_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 20.108314517574556,
+          "max_absolute": 0.0
+        },
+        "wedge_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "wedge_reference_policy": "admitted-saddle-only",
+      "passed": true
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "cells": 300,
+      "job": "1275982",
+      "revision": "817231f5505e8262234e8ec843199c24daf5c1fa",
+      "base": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "comparisons": {
+        "support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 189.4904545141242,
+          "max_absolute": 0.0
+        },
+        "vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1131.8992888062082,
+          "max_absolute": 0.0
+        },
+        "centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 31.707322823897673,
+          "max_absolute": 0.0
+        },
+        "included": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 17.406895185529212,
+          "max_absolute": 0.0
+        },
+        "boundary": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 8.54400374531753,
+          "max_absolute": 0.0
+        },
+        "area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.101357857835437,
+          "max_absolute": 0.0
+        },
+        "full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.10774793647068108,
+          "max_absolute": 0.0
+        },
+        "first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0002637519956390485,
+          "max_absolute": 0.0
+        },
+        "second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 7.247090687421704e-05,
+          "max_absolute": 0.0
+        },
+        "contour_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.5281084952821933,
+          "max_absolute": 0.0
+        },
+        "patch_area_sum": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.6859793321954353,
+          "max_absolute": 0.0
+        },
+        "branch_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 189.49045451412414,
+          "max_absolute": 0.0
+        },
+        "branch_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1131.8992888062082,
+          "max_absolute": 0.0
+        },
+        "branch_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.101357857835437,
+          "max_absolute": 0.0
+        },
+        "branch_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0002637519956390485,
+          "max_absolute": 0.0
+        },
+        "branch_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 7.247090687421705e-05,
+          "max_absolute": 0.0
+        },
+        "saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "vertex_capacity": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 152.0,
+          "max_absolute": 0.0
+        },
+        "refused_cell_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 98015.40674353627,
+          "max_absolute": 0.0
+        },
+        "radial": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 177.89139374940345,
+          "max_absolute": 0.0
+        },
+        "vertical": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 154.5725634639735,
+          "max_absolute": 0.0
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 42.23742416388575,
+          "max_absolute": 0.0
+        },
+        "crossings": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 57.4344397100842,
+          "max_absolute": 0.0
+        },
+        "wedge_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 31.707322823897673,
+          "max_absolute": 0.0
+        },
+        "wedge_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "wedge_reference_policy": "admitted-saddle-only",
+      "passed": true
+    },
+    {
+      "case": "strong-rotation-compact-static",
+      "cells": 110,
+      "job": "1275982",
+      "revision": "72916e649ecf615ca654e8b24062971acb3d66dc",
+      "base": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "comparisons": {
+        "support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 74.34143337227371,
+          "max_absolute": 0.0
+        },
+        "vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 876.6059548052363,
+          "max_absolute": 0.0
+        },
+        "centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 10.498031225910209,
+          "max_absolute": 0.0
+        },
+        "included": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 11.0,
+          "max_absolute": 0.0
+        },
+        "boundary": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 6.6332495807108,
+          "max_absolute": 0.0
+        },
+        "area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.026496121520198465,
+          "max_absolute": 0.0
+        },
+        "full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.028232084559921825,
+          "max_absolute": 0.0
+        },
+        "first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 5.724613542513486e-05,
+          "max_absolute": 0.0
+        },
+        "second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 8.236846395174903e-06,
+          "max_absolute": 0.0
+        },
+        "contour_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.2571191817294599,
+          "max_absolute": 0.0
+        },
+        "patch_area_sum": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.2704274040142444,
+          "max_absolute": 0.0
+        },
+        "branch_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 74.34143337227371,
+          "max_absolute": 0.0
+        },
+        "branch_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 876.6059548052363,
+          "max_absolute": 0.0
+        },
+        "branch_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.026496121520198465,
+          "max_absolute": 0.0
+        },
+        "branch_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 5.724613542513485e-05,
+          "max_absolute": 0.0
+        },
+        "branch_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 8.236846395174903e-06,
+          "max_absolute": 0.0
+        },
+        "saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "vertex_capacity": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 158.0,
+          "max_absolute": 0.0
+        },
+        "refused_cell_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 24673.391763434396,
+          "max_absolute": 0.0
+        },
+        "radial": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 40.598409464069604,
+          "max_absolute": 0.0
+        },
+        "vertical": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 28.213124658053314,
+          "max_absolute": 0.0
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 15.716233645501712,
+          "max_absolute": 0.0
+        },
+        "crossings": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 16.34333749088647,
+          "max_absolute": 0.0
+        },
+        "wedge_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 10.498031225910209,
+          "max_absolute": 0.0
+        },
+        "wedge_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "wedge_reference_policy": "admitted-saddle-only",
+      "passed": true
+    },
+    {
+      "case": "strong-rotation-compact-static",
+      "cells": 300,
+      "job": "1275982",
+      "revision": "72916e649ecf615ca654e8b24062971acb3d66dc",
+      "base": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "comparisons": {
+        "support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 97.40294829311257,
+          "max_absolute": 0.0
+        },
+        "vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1131.3072084982045,
+          "max_absolute": 0.0
+        },
+        "centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 16.666619895187587,
+          "max_absolute": 0.0
+        },
+        "included": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 17.435595774162696,
+          "max_absolute": 0.0
+        },
+        "boundary": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 8.54400374531753,
+          "max_absolute": 0.0
+        },
+        "area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.016260198586913802,
+          "max_absolute": 0.0
+        },
+        "full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.017283014331573542,
+          "max_absolute": 0.0
+        },
+        "first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.695116655777449e-05,
+          "max_absolute": 0.0
+        },
+        "second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.8644244768520982e-06,
+          "max_absolute": 0.0
+        },
+        "contour_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.24903633301162004,
+          "max_absolute": 0.0
+        },
+        "patch_area_sum": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.2704274550069342,
+          "max_absolute": 0.0
+        },
+        "branch_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 97.40294829311257,
+          "max_absolute": 0.0
+        },
+        "branch_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1131.3072084982045,
+          "max_absolute": 0.0
+        },
+        "branch_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.016260198586913802,
+          "max_absolute": 0.0
+        },
+        "branch_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.695116655777449e-05,
+          "max_absolute": 0.0
+        },
+        "branch_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.864424476852098e-06,
+          "max_absolute": 0.0
+        },
+        "saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "vertex_capacity": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 152.0,
+          "max_absolute": 0.0
+        },
+        "refused_cell_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 15135.825769126443,
+          "max_absolute": 0.0
+        },
+        "radial": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 11.302269658517462,
+          "max_absolute": 0.0
+        },
+        "vertical": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 9.657489668045208,
+          "max_absolute": 0.0
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 18.947295321496416,
+          "max_absolute": 0.0
+        },
+        "crossings": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 19.486678583755168,
+          "max_absolute": 0.0
+        },
+        "wedge_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 16.666619895187587,
+          "max_absolute": 0.0
+        },
+        "wedge_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "wedge_reference_policy": "admitted-saddle-only",
+      "passed": true
+    },
+    {
+      "case": "diverted-single-null",
+      "cells": 110,
+      "job": "1275982",
+      "revision": "72916e649ecf615ca654e8b24062971acb3d66dc",
+      "base": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "comparisons": {
+        "support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 129.76487893075137,
+          "max_absolute": 0.0
+        },
+        "vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 781.4678496265857,
+          "max_absolute": 0.0
+        },
+        "centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 20.666446557206754,
+          "max_absolute": 0.0
+        },
+        "included": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 9.273618495495704,
+          "max_absolute": 0.0
+        },
+        "boundary": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 6.0,
+          "max_absolute": 0.0
+        },
+        "area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.1784865898930967,
+          "max_absolute": 0.0
+        },
+        "full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.2327275607189158,
+          "max_absolute": 0.0
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 1.8487307864407088e-17,
+          "baseline_norm": 0.0016391987524709106,
+          "max_absolute": 2.710505431213761e-20
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 3.866278209105697e-18,
+          "baseline_norm": 0.00046474364375642034,
+          "max_absolute": 1.6940658945086007e-21
+        },
+        "contour_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.400267584782418,
+          "max_absolute": 0.0
+        },
+        "patch_area_sum": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.5057638098877515,
+          "max_absolute": 0.0
+        },
+        "branch_support_vertices": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 1.6708729512852859e-18,
+          "baseline_norm": 132.89137558557513,
+          "max_absolute": 2.220446049250313e-16
+        },
+        "branch_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 802.7627295782983,
+          "max_absolute": 0.0
+        },
+        "branch_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.17848099328024092,
+          "max_absolute": 0.0
+        },
+        "branch_first_area_moment": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 4.624261710019063e-18,
+          "baseline_norm": 0.0016383356894692724,
+          "max_absolute": 6.776263578034403e-21
+        },
+        "branch_second_area_moment": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 3.866444428932096e-18,
+          "baseline_norm": 0.00046472366426125234,
+          "max_absolute": 1.6940658945086007e-21
+        },
+        "saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.0,
+          "max_absolute": 0.0
+        },
+        "saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.8145106748608562,
+          "max_absolute": 0.0
+        },
+        "vertex_capacity": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 162.0,
+          "max_absolute": 0.0
+        },
+        "refused_cell_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 4513.823711878021,
+          "max_absolute": 0.0
+        },
+        "radial": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 35.373081125346545,
+          "max_absolute": 0.0
+        },
+        "vertical": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 21.958408604680766,
+          "max_absolute": 0.0
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 8.602325267042627,
+          "max_absolute": 0.0
+        },
+        "crossings": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 15.476414958102987,
+          "max_absolute": 0.0
+        },
+        "wedge_support_vertices": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 1.098444596379887e-17,
+          "baseline_norm": 41.67316962192172,
+          "max_absolute": 2.220446049250313e-16
+        },
+        "wedge_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 267.05055701121466,
+          "max_absolute": 0.0
+        },
+        "wedge_centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 20.666446557206754,
+          "max_absolute": 0.0
+        },
+        "wedge_area": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 1.2336454217152987e-16,
+          "baseline_norm": 0.028178409693658476,
+          "max_absolute": 3.469446951953614e-18
+        },
+        "wedge_full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.022938275607639457,
+          "max_absolute": 0.0
+        },
+        "wedge_first_area_moment": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 1.7935376871295599e-16,
+          "baseline_norm": 0.0006422863687405939,
+          "max_absolute": 1.0842021724855044e-19
+        },
+        "wedge_second_area_moment": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 1.7472391967645808e-16,
+          "baseline_norm": 7.874936541055472e-05,
+          "max_absolute": 1.3552527156068805e-20
+        },
+        "wedge_saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.0,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.8145106748608562,
+          "max_absolute": 0.0
+        }
+      },
+      "wedge_reference_policy": "admitted-saddle-only",
+      "passed": true
+    },
+    {
+      "case": "diverted-single-null",
+      "cells": 300,
+      "job": "1275982",
+      "revision": "72916e649ecf615ca654e8b24062971acb3d66dc",
+      "base": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+      "comparisons": {
+        "support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 182.24756422054568,
+          "max_absolute": 0.0
+        },
+        "vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1076.5709451773255,
+          "max_absolute": 0.0
+        },
+        "centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 32.959103466985425,
+          "max_absolute": 0.0
+        },
+        "included": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 14.560219778561036,
+          "max_absolute": 0.0
+        },
+        "boundary": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 8.12403840463596,
+          "max_absolute": 0.0
+        },
+        "area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.11003493817246063,
+          "max_absolute": 0.0
+        },
+        "full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.14333774830304866,
+          "max_absolute": 0.0
+        },
+        "first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0004744089440002424,
+          "max_absolute": 0.0
+        },
+        "second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.00010451130577419977,
+          "max_absolute": 0.0
+        },
+        "contour_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.4073577687934562,
+          "max_absolute": 0.0
+        },
+        "patch_area_sum": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.509658603311467,
+          "max_absolute": 0.0
+        },
+        "branch_support_vertices": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 182.24756422054568,
+          "max_absolute": 0.0
+        },
+        "branch_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1076.5709451773255,
+          "max_absolute": 0.0
+        },
+        "branch_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.11003493817246063,
+          "max_absolute": 0.0
+        },
+        "branch_first_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0004744089440002424,
+          "max_absolute": 0.0
+        },
+        "branch_second_area_moment": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.00010451130577419976,
+          "max_absolute": 0.0
+        },
+        "saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "vertex_capacity": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 154.0,
+          "max_absolute": 0.0
+        },
+        "refused_cell_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.0,
+          "max_absolute": 0.0
+        },
+        "current": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 2783.3228956747,
+          "max_absolute": 0.0
+        },
+        "radial": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 10.353856620433838,
+          "max_absolute": 0.0
+        },
+        "vertical": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 6.31194189308068,
+          "max_absolute": 0.0
+        },
+        "crossing_mask": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 11.489125293076057,
+          "max_absolute": 0.0
+        },
+        "crossings": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 20.792190310465095,
+          "max_absolute": 0.0
+        },
+        "wedge_support_vertices": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 6.793745126235981e-17,
+          "baseline_norm": 59.14753198207982,
+          "max_absolute": 3.3306690738754696e-15
+        },
+        "wedge_vertex_count": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 375.54493739098655,
+          "max_absolute": 0.0
+        },
+        "wedge_centroids": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 32.959103466985425,
+          "max_absolute": 0.0
+        },
+        "wedge_area": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 5.388302981862217e-16,
+          "baseline_norm": 0.008247321146715343,
+          "max_absolute": 4.336808689942018e-18
+        },
+        "wedge_full_area": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 0.011894527502651058,
+          "max_absolute": 0.0
+        },
+        "wedge_first_area_moment": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 2.20242918239055e-15,
+          "baseline_norm": 0.00012431744574375387,
+          "max_absolute": 2.710505431213761e-19
+        },
+        "wedge_second_area_moment": {
+          "array_equal": false,
+          "dtype_equal": true,
+          "relative_l2": 1.5455925329862242e-15,
+          "baseline_norm": 9.448111276055727e-06,
+          "max_absolute": 1.4134862307306137e-20
+        },
+        "wedge_saddle": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 1.4142135623730951,
+          "max_absolute": 0.0
+        },
+        "wedge_saddle_vertex": {
+          "array_equal": true,
+          "dtype_equal": true,
+          "relative_l2": 0.0,
+          "baseline_norm": 2.56610560545898,
+          "max_absolute": 0.0
+        }
+      },
+      "wedge_reference_policy": "admitted-saddle-only",
+      "passed": true
+    }
+  ],
+  "suites": {
+    "baseline": {
+      "modules": {
+        "test_equilibrium_separatrix_clip.py": {
+          "passed": 25,
+          "failure_ids": [],
+          "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/clip-body-audit/baseline-refusal-corrected.log"
+        },
+        "test_exact_clip_moments.py": {
+          "passed": 12,
+          "failure_ids": [],
+          "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/clip-body-audit/baseline-test_exact_clip_moments.log"
+        },
+        "test_null_generator_admission.py": {
+          "passed": 20,
+          "failure_ids": [],
+          "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/clip-body-audit/baseline-test_null_generator_admission.log"
+        },
+        "test_flux_surface_extraction.py": {
+          "passed": 12,
+          "failure_ids": [],
+          "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/clip-body-audit/baseline-test_flux_surface_extraction.log"
+        }
+      },
+      "passed": 69,
+      "failure_ids": [],
+      "failure_count": 0,
+      "completed": true,
+      "exit_status": 0
+    },
+    "candidate": {
+      "modules": {
+        "test_equilibrium_separatrix_clip.py": {
+          "passed": 27,
+          "failure_ids": [],
+          "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/clip-body-audit/candidate-test_equilibrium_separatrix_clip.log"
+        },
+        "test_exact_clip_moments.py": {
+          "passed": 13,
+          "failure_ids": [],
+          "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/clip-body-audit/candidate-test_exact_clip_moments.log"
+        },
+        "test_null_generator_admission.py": {
+          "passed": 20,
+          "failure_ids": [],
+          "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/clip-body-audit/candidate-test_null_generator_admission.log"
+        },
+        "test_flux_surface_extraction.py": {
+          "passed": 12,
+          "failure_ids": [],
+          "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/clip-body-audit/candidate-test_flux_surface_extraction.log"
+        }
+      },
+      "passed": 72,
+      "failure_ids": [],
+      "failure_count": 0,
+      "completed": true,
+      "exit_status": 0
+    }
+  },
+  "jobs": [
+    "1275982"
+  ],
+  "added_failure_ids": [],
+  "gates": {
+    "eight_rows_agree": true,
+    "zero_added_failures": true,
+    "candidate_below_ceiling": false,
+    "negative_bytes_rise": true,
+    "cell_body_marker": true
+  },
+  "measurements_completed": true,
+  "passed": false,
+  "candidate_source": "0c685775797acfc1648cbf375033391f62456603"
+}

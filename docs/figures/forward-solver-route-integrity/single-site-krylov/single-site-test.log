@@ -1,0 +1,15 @@
+revision=d1eb899974913c2eee199aa104244e21820e51ff plus tests/test_single_site_krylov.py; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step; command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_single_site_krylov.py -vv --tb=short (login node, seconds)
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 11:48:24 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 2 items
+
+tests/test_single_site_krylov.py::test_the_qualified_step_applies_its_operator_at_one_site PASSED [ 50%]
+tests/test_single_site_krylov.py::test_the_single_site_step_still_solves_a_full_dimension_system PASSED [100%]
+
+============================== 2 passed in 33.27s ==============================
+EXIT=0

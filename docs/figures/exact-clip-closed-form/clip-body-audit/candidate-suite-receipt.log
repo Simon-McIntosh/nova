@@ -1,0 +1,29 @@
+revision=0c685775797acfc1648cbf375033391f62456603 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=/home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/exact-clip-closed-form/replay_clip_body.py --suites
+
+MODULE_LOG candidate-test_equilibrium_separatrix_clip.log
+revision=0c685775797acfc1648cbf375033391f62456603 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/replay_clip_body.py', '--suite', 'test_equilibrium_separatrix_clip.py']
+18:36:48 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+...........................                                              [100%]
+27 passed in 85.80s (0:01:25)
+
+MODULE_LOG candidate-test_exact_clip_moments.log
+revision=0c685775797acfc1648cbf375033391f62456603 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/replay_clip_body.py', '--suite', 'test_exact_clip_moments.py']
+.............                                                            [100%]
+13 passed in 49.97s
+
+MODULE_LOG candidate-test_null_generator_admission.log
+revision=817231f5505e8262234e8ec843199c24daf5c1fa tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/replay_clip_body.py', '--suite', 'test_null_generator_admission.py']
+....................                                                     [100%]
+20 passed in 71.84s (0:01:11)
+
+MODULE_LOG candidate-test_flux_surface_extraction.log
+revision=817231f5505e8262234e8ec843199c24daf5c1fa tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/replay_clip_body.py', '--suite', 'test_flux_surface_extraction.py']
+18:40:51 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+............                                                             [100%]
+=============================== warnings summary ===============================
+tests/test_flux_surface_extraction.py::test_even_edge_root_pair_is_resolved_on_iter_inner_surface
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jaxopt/__init__.py:59: DeprecationWarning: JAXopt is no longer maintained. See https://docs.jax.dev/en/latest/ for alternatives.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+12 passed, 1 warning in 508.83s (0:08:28)

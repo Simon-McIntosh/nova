@@ -1,0 +1,16 @@
+revision=7c74bf18b72f1b15d57f006f3eb6462cc6acba7b tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_reduced_newton.py::test_prescribed_currents_reuse_one_program -vv --tb=short
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 13:29:40 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 1 item
+
+tests/test_reduced_newton.py::test_prescribed_currents_reuse_one_program PASSED [100%]
+
+======================== 1 passed in 318.95s (0:05:18) =========================
+EXIT=0
+
+PROVENANCE_CORRECTION: This fallback process started after the request integration was written. The inherited revision header identifies the allocation start, not this process source. Treat the 1-pass result as supplemental candidate evidence for source digest e5fa1479a94cb6f52e549ea2ae5c77bae3e19143dc82cf1f31f3168d8ce7c695, not as baseline evidence. The unchanged-source module baseline had already passed this test and later aborted in test_threshold_one_reproduces_the_refusal_only_policy.

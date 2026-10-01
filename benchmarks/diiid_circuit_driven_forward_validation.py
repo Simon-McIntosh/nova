@@ -23,6 +23,7 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
+from scipy.spatial import cKDTree
 
 from benchmarks import diiid_current_pinned_forward as current_pinned
 from benchmarks.diiid_forward_gs_match import (
@@ -34,10 +35,8 @@ from benchmarks.diiid_forward_gs_match import (
     _eligible_frame,
     _plasma_mask,
     _read,
-    _separatrix,
     build_profile,
     canonical_axes,
-    contour_separation,
     gauge_metrics,
 )
 from benchmarks.diiid_state_of_play_figures import boundary_gradient_minimum
@@ -47,6 +46,11 @@ from nova.equilibrium import (
     SelectionPolicy,
     select_forward_branch,
 )
+from nova.equilibrium.boundary_comparison import (
+    BoundaryMode,
+    compare_closed_boundaries,
+)
+from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.diiid_current import (
     complete_profile_current_adapter,
@@ -305,6 +309,79 @@ def _label_boundary(row: dict[str, Any], frame: int) -> np.ndarray:
     )
 
 
+def assembled_closed_boundary(
+    radius: np.ndarray,
+    height: np.ndarray,
+    flux: np.ndarray,
+    axis_flux: float,
+    boundary_flux: float,
+    *,
+    samples_per_segment: int = 8,
+) -> np.ndarray:
+    """Sample the axis-enclosing closed branch of one solved flux field.
+
+    A solved flux field is extremal at the magnetic axis and monotone toward
+    the boundary, so the sign of the boundary-minus-axis span says which grid
+    extremum the axis is; that coordinate reaches
+    :func:`nova.equilibrium.separatrix_branches.assemble_separatrix_branches`
+    only to choose the branch that encloses it, and the returned controls are
+    sampled to ordered R,Z vertices. An assembly carrying no closed branch
+    returns an empty array, which the caller reads as an undrawable boundary
+    rather than a boundary at the origin.
+    """
+
+    field = np.asarray(flux, dtype=float)
+    flat = np.nanargmin(field) if boundary_flux > axis_flux else np.nanargmax(field)
+    radial_index, vertical_index = np.unravel_index(flat, field.shape)
+    radial = np.asarray(radius, dtype=float)
+    vertical = np.asarray(height, dtype=float)
+    branches = assemble_separatrix_branches(
+        field.T,
+        radial,
+        vertical,
+        boundary_flux,
+        np.asarray([radial[radial_index], vertical[vertical_index]], dtype=float),
+    )
+    controls = np.asarray(branches["closed_controls_rz"], dtype=float)[
+        np.asarray(branches["closed_valid"], dtype=bool)
+    ]
+    if not len(controls):
+        return np.empty((0, 2), dtype=float)
+    parameter = np.linspace(0.0, 1.0, samples_per_segment, endpoint=False)
+    one_minus = 1.0 - parameter
+    weights = np.column_stack(
+        (
+            one_minus**3,
+            3.0 * one_minus**2 * parameter,
+            3.0 * one_minus * parameter**2,
+            parameter**3,
+        )
+    )
+    sampled = np.einsum("tc,scd->std", weights, controls).reshape(-1, 2)
+    return np.vstack((sampled, controls[-1, -1]))
+
+
+def symmetric_vertex_separation(
+    predicted: np.ndarray, labelled: np.ndarray
+) -> tuple[float, float]:
+    """Return the receipt's symmetric nearest-vertex separation in millimetres.
+
+    The banked separation series is a nearest-vertex statistic, which the
+    shared boundary comparator does not report: that comparator works on
+    arc-length resampled polylines and returns RMS and supremum
+    point-to-segment distances in metres. Both are recorded, and this one is
+    measured here so the series stays comparable across the cohort.
+    """
+
+    if len(predicted) < 2 or len(labelled) < 2:
+        return float("nan"), float("nan")
+    distances = np.r_[
+        cKDTree(labelled).query(predicted)[0],
+        cKDTree(predicted).query(labelled)[0],
+    ]
+    return 1000.0 * float(np.mean(distances)), 1000.0 * float(np.max(distances))
+
+
 def _score_state(
     profile,
     state: np.ndarray,
@@ -325,14 +402,14 @@ def _score_state(
         label, predicted, interior
     )
     label_boundary = _label_boundary(row, frame)
-    predicted_boundary = _separatrix(
+    predicted_boundary = assembled_closed_boundary(
         radius,
         height,
         predicted,
         float(topology.axis_flux),
         float(topology.boundary_flux),
     )
-    boundary_mean, boundary_maximum = contour_separation(
+    boundary_mean, boundary_maximum = symmetric_vertex_separation(
         predicted_boundary, label_boundary
     )
     full_radius, full_height = canonical_axes(row)
@@ -344,6 +421,14 @@ def _score_state(
     )
     solved_x = np.asarray(topology.x_point, dtype=float)
     x_separation = float(np.linalg.norm(solved_x - label_x))
+    boundary_comparison = compare_closed_boundaries(
+        predicted_boundary,
+        label_boundary,
+        class_margin=float(topology.class_margin),
+        reference_mode=BoundaryMode.DIVERTED,
+        predicted_saddle_rz_m=solved_x,
+        reference_x_points_rz_m=label_x[None, :],
+    )
     metrics = {
         "interior_r_squared": _strict_float(r_squared),
         "fractional_flux_rms": _strict_float(fractional_rms),
@@ -355,6 +440,22 @@ def _score_state(
             _strict_float(boundary_maximum / 1000.0) if converged else None
         ),
         "x_point_separation_m": _strict_float(x_separation) if converged else None,
+        "boundary_comparison": (
+            {
+                "symmetric_rms_distance_m": (
+                    boundary_comparison.symmetric_rms_distance_m
+                ),
+                "symmetric_sup_distance_m": (
+                    boundary_comparison.symmetric_sup_distance_m
+                ),
+                "topology_class_agreement": (
+                    boundary_comparison.topology_class_agreement
+                ),
+                "failures": list(boundary_comparison.failures),
+            }
+            if converged
+            else None
+        ),
         "within_label_representability_ceiling": bool(
             converged
             and np.isfinite(fractional_rms)

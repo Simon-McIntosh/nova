@@ -1,0 +1,613 @@
+{
+  "completed": false,
+  "passed": false,
+  "stop_reason": "Two attempted numerical repairs failed the same weak-row 1e-14 comparison. No further repairs were attempted.",
+  "final_source_commit": "067ea754ce138a8b93a704f42877ab501957c9ad",
+  "final_source_fully_measured": false,
+  "programs": {
+    "baseline": {
+      "revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "arm": "baseline",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program",
+      "job": "1275837",
+      "cpu_affinity": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "completed": true,
+      "lower_seconds": 41.64808211475611,
+      "compile_seconds": 404.75860085710883,
+      "serialized_bytes": 207227911,
+      "serialized_sha256": "559c430a3a6f16d825f6a7e70c589a0423a66bd6392bd73302817e4a31347d4e",
+      "top_five_hlo_ops": [
+        [
+          "parameter",
+          121618
+        ],
+        [
+          "broadcast",
+          76195
+        ],
+        [
+          "constant",
+          70114
+        ],
+        [
+          "bitcast",
+          63927
+        ],
+        [
+          "add",
+          46804
+        ]
+      ],
+      "hlo_instructions": 668305,
+      "bernstein_binom_present": true,
+      "static_basis_present": false,
+      "below_ceiling": false
+    },
+    "candidate": {
+      "revision": "83fcedfce8308128abdf01dd667e53f53500ee85",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "arm": "candidate",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program",
+      "job": "1275837",
+      "cpu_affinity": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "completed": true,
+      "lower_seconds": 40.820248264819384,
+      "compile_seconds": 287.91302729025483,
+      "serialized_bytes": 164997235,
+      "serialized_sha256": "6d8fc785d7bc99caf0cadbd5dcaa7f0c20939e853fca423712a985adc76e557c",
+      "top_five_hlo_ops": [
+        [
+          "parameter",
+          105009
+        ],
+        [
+          "broadcast",
+          74269
+        ],
+        [
+          "bitcast",
+          61030
+        ],
+        [
+          "constant",
+          49287
+        ],
+        [
+          "multiply",
+          34552
+        ]
+      ],
+      "hlo_instructions": 530748,
+      "bernstein_binom_present": false,
+      "static_basis_present": true,
+      "below_ceiling": false
+    },
+    "negative": {
+      "revision": "6e738823ae1fb52416391f401e0bfd7e66cd2824",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "arm": "negative",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program",
+      "job": "1275837",
+      "cpu_affinity": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "completed": true,
+      "lower_seconds": 44.31923317350447,
+      "compile_seconds": 428.410491168499,
+      "serialized_bytes": 207227991,
+      "serialized_sha256": "4664579f8d6a82e871189876bb6db599aa11c9292f21d3b2cb0cbd53fffe6b24",
+      "top_five_hlo_ops": [
+        [
+          "parameter",
+          121618
+        ],
+        [
+          "broadcast",
+          76195
+        ],
+        [
+          "constant",
+          70114
+        ],
+        [
+          "bitcast",
+          63927
+        ],
+        [
+          "add",
+          46804
+        ]
+      ],
+      "hlo_instructions": 668305,
+      "bernstein_binom_present": true,
+      "static_basis_present": false,
+      "below_ceiling": false
+    }
+  },
+  "program_candidate_implementation": "integer powers; superseded attempted code, not final HEAD",
+  "rows": [
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "weak-rotation-reactor-static",
+      "requested_cells": 110,
+      "revision": "79c09b8bb56da88fc06173ab09b897e866c889f6",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275837",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 2.433749812617173e-14,
+          "max_absolute": 5.426770144367765e-13
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 2.7516138483141077e-14,
+          "max_absolute": 5.426770144367765e-13
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 1.999530876208627e-13,
+          "max_absolute": 1.6056583262979984e-07
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 2.017236555604793e-12,
+          "max_absolute": 2.600745574454777e-08
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 1.5980687244511438e-12,
+          "max_absolute": 1.5045316104078665e-08
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 1.8154892354236001e-13,
+          "max_absolute": 1.863231791077169e-13
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.5343508263400305e-12,
+          "max_absolute": 3.01200037133853e-14
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 2.3013880527264065e-13,
+          "max_absolute": 5.3806785416110614e-15
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "passed": false,
+      "implementation": "scalar host coefficients"
+    },
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "c122821a0bf48626566ad1526e3a4b0a606d60927b200e2a9afb7cf787667e6d",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "weak-rotation-reactor-static",
+      "requested_cells": 300,
+      "revision": "219c01732d177b14878f691e61c580d0fc258bbc",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275837",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 1.7178420631492086e-13,
+          "max_absolute": 1.240346714226348e-11
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 2.5720397523495704e-13,
+          "max_absolute": 1.240346714226348e-11
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 1.6518715234094955e-13,
+          "max_absolute": 6.693153409287333e-08
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 1.5210795186298057e-12,
+          "max_absolute": 3.5464324810163816e-09
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 1.1209109784433149e-12,
+          "max_absolute": 2.5188455765601248e-09
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 1.5628464290786346e-13,
+          "max_absolute": 8.306549892367343e-14
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.2065800235335185e-12,
+          "max_absolute": 3.9485287869206465e-15
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.608591900657575e-13,
+          "max_absolute": 5.457331635205787e-16
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "passed": false,
+      "implementation": "integer powers"
+    },
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "c122821a0bf48626566ad1526e3a4b0a606d60927b200e2a9afb7cf787667e6d",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "moderate-rotation-conventional-static",
+      "requested_cells": 110,
+      "revision": "219c01732d177b14878f691e61c580d0fc258bbc",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275837",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 4.3335322586506094e-13,
+          "max_absolute": 6.9586292962339515e-12
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 6.747549448025336e-13,
+          "max_absolute": 6.9586292962339515e-12
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 3.036791877574677e-13,
+          "max_absolute": 2.3772372514940798e-08
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 2.6520473920209353e-12,
+          "max_absolute": 8.209184443330741e-10
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 2.0364253041329015e-12,
+          "max_absolute": 5.986962037241028e-10
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 2.8013302167960657e-13,
+          "max_absolute": 2.2534057952938724e-14
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 2.0412841891135143e-12,
+          "max_absolute": 7.579928438389283e-16
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 3.0247213659210576e-13,
+          "max_absolute": 3.088620938868081e-17
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "passed": false,
+      "implementation": "integer powers"
+    },
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "77fcdcb8f5a0e3320ef8807237174eed024265fda9b09502ae559a25c7506d22",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "moderate-rotation-conventional-static",
+      "requested_cells": 300,
+      "revision": "79c09b8bb56da88fc06173ab09b897e866c889f6",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275837",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 2.0227073610998218e-13,
+          "max_absolute": 4.027347899615563e-12
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 2.8066377949783007e-13,
+          "max_absolute": 4.027347899615563e-12
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 1.9088032083076314e-13,
+          "max_absolute": 6.4221694628940895e-09
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 1.7785383574193788e-12,
+          "max_absolute": 1.3809042798129667e-10
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 1.3698328237492763e-12,
+          "max_absolute": 7.323031070427533e-11
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 1.846234986856429e-13,
+          "max_absolute": 6.368386720745356e-15
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.4343474773372229e-12,
+          "max_absolute": 1.2233103934130782e-16
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.8997093966550576e-13,
+          "max_absolute": 3.870093536004898e-18
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "passed": false,
+      "implementation": "vector host coefficients"
+    },
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "77fcdcb8f5a0e3320ef8807237174eed024265fda9b09502ae559a25c7506d22",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "strong-rotation-compact-static",
+      "requested_cells": 110,
+      "revision": "79c09b8bb56da88fc06173ab09b897e866c889f6",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275837",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 1.1034436557618406e-13,
+          "max_absolute": 9.297499536690336e-13
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 1.4075148209973224e-13,
+          "max_absolute": 9.297499536690336e-13
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 2.1839905892818623e-13,
+          "max_absolute": 3.1782292353454977e-09
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 2.0768604286439026e-12,
+          "max_absolute": 6.378320094313494e-11
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 1.8261803689324105e-12,
+          "max_absolute": 3.482236721197296e-11
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 2.0154768792589031e-13,
+          "max_absolute": 3.1324769167451194e-15
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 1.7052798686737505e-12,
+          "max_absolute": 6.279986974238108e-17
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 2.655348854328557e-13,
+          "max_absolute": 1.3542998035412195e-18
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "passed": false,
+      "implementation": "vector host coefficients"
+    },
+    {
+      "source_sha256": {
+        "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+        "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+      },
+      "case": "strong-rotation-compact-static",
+      "requested_cells": 300,
+      "revision": "79c09b8bb56da88fc06173ab09b897e866c889f6",
+      "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+      "job": "1275837",
+      "comparisons": {
+        "vertices": {
+          "array_equal": false,
+          "relative_l2": 5.621811291751656e-13,
+          "max_absolute": 5.823862225806664e-12
+        },
+        "crossings": {
+          "array_equal": false,
+          "relative_l2": 8.986591481622714e-13,
+          "max_absolute": 5.823862225806664e-12
+        },
+        "current": {
+          "array_equal": false,
+          "relative_l2": 7.035355899083787e-13,
+          "max_absolute": 3.2416096473752987e-09
+        },
+        "radial_moment": {
+          "array_equal": false,
+          "relative_l2": 5.592020507522123e-12,
+          "max_absolute": 2.588151915006165e-11
+        },
+        "vertical_moment": {
+          "array_equal": false,
+          "relative_l2": 6.2692627404007805e-12,
+          "max_absolute": 2.998756798433533e-11
+        },
+        "area": {
+          "array_equal": false,
+          "relative_l2": 6.688523325676323e-13,
+          "max_absolute": 3.1838680997209323e-15
+        },
+        "first_area_moment": {
+          "array_equal": false,
+          "relative_l2": 5.337685577447948e-12,
+          "max_absolute": 3.1572517834193604e-17
+        },
+        "second_area_moment": {
+          "array_equal": false,
+          "relative_l2": 6.863108956905568e-13,
+          "max_absolute": 3.9389679025285135e-19
+        },
+        "counts": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "live": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        },
+        "refused": {
+          "array_equal": true,
+          "relative_l2": 0.0,
+          "max_absolute": 0.0
+        }
+      },
+      "passed": false,
+      "implementation": "scalar host coefficients"
+    },
+    {
+      "case": "diverted-single-null",
+      "requested_cells": 110,
+      "completed": false,
+      "reason": "Allocation cancelled under repeated-failure contract before row completed."
+    },
+    {
+      "case": "diverted-single-null",
+      "requested_cells": 300,
+      "completed": false,
+      "reason": "Allocation cancelled under repeated-failure contract before row completed."
+    }
+  ],
+  "baseline_tests": {
+    "interpolant": 7,
+    "exact_clip_moments": 12,
+    "flux_surface_extraction": 11,
+    "failures": 0
+  },
+  "initial_candidate_tests": {
+    "interpolant": 16,
+    "exact_clip_moments": 12,
+    "flux_surface_extraction": 12,
+    "failures": 0
+  },
+  "vector_host_focused_tests": {
+    "passed": 17,
+    "failures": 0
+  },
+  "final_source_full_suite_completed": false,
+  "remaining": [
+    "100000000-byte ceiling unmet for measured candidate; final source byte count unmeasured",
+    "1e-14 relative numerical fence unmet",
+    "single-null rows incomplete",
+    "final source full test modules unmeasured"
+  ],
+  "negative_control": {
+    "mutation": "restore the traced binomial evaluation",
+    "marker_returned": true,
+    "serialized_bytes": 207227991,
+    "difference_from_baseline": 80,
+    "increase_from_measured_candidate": 42230756,
+    "guard_failure_log": "negative-tests.log"
+  }
+}

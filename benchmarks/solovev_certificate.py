@@ -50,7 +50,7 @@ from nova.equilibrium import (
 )
 from nova.equilibrium.forward import RasterFluxReceiptStatus
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
-from nova.equilibrium import observation, separatrix_clip
+from nova.equilibrium import clip_quadrature, separatrix_clip
 from nova.equilibrium.analytic_single_null import (
     CerfonFreidbergSingleNull,
     cerfon_freidberg_single_null,
@@ -703,22 +703,65 @@ def _enum_name(enum_type: Any, value: Any) -> str:
     return enum_type(int(value)).name.lower()
 
 
+class ProductionSolverReceiptAlignmentError(ValueError):
+    """Per-trip telemetry cannot describe the declared executed trips."""
+
+
+def _receipt_trip_arrays(history: Any, trip_count: int) -> dict[str, np.ndarray]:
+    """Align executed trip prefixes and preserve absent damping telemetry.
+
+    FixedPointResult uses scalar -1 for unavailable cycle-damping telemetry.
+    It carries no observation for any trip, so expand only that sentinel;
+    shorter arrays and other scalars cannot establish trip identity.
+    """
+
+    error = "production_solver_receipt_trip_alignment"
+    if trip_count < 0:
+        raise ProductionSolverReceiptAlignmentError(
+            f"{error}: active_set_iterations={trip_count} must be nonnegative"
+        )
+    arrays = {}
+    for name, dtype in (
+        ("active_set_residuals", np.float64),
+        ("active_set_mask_differences", np.int64),
+        ("active_set_cycle_damping_activations", np.int64),
+    ):
+        values = np.asarray(getattr(history, name), dtype=dtype)
+        if trip_count == 0:
+            arrays[name] = np.empty(0, dtype=dtype)
+            continue
+        if (
+            name == "active_set_cycle_damping_activations"
+            and values.ndim == 0
+            and values == -1
+        ):
+            values = np.full(trip_count, -1, dtype=dtype)
+        if values.ndim != 1 or len(values) < trip_count:
+            raise ProductionSolverReceiptAlignmentError(
+                f"{error}: {name} shape={values.shape} cannot cover "
+                f"{trip_count} executed trips"
+            )
+        arrays[name] = values[:trip_count]
+    return arrays
+
+
 def _production_solver_receipt(equilibrium: Any) -> dict[str, Any]:
     """Expose all globalisation telemetry retained by the public solve result."""
 
     history = equilibrium.fixed_point
     trip_count = int(history.active_set_iterations)
-    active_residuals = np.asarray(history.active_set_residuals, dtype=np.float64)
-    mask_differences = np.asarray(history.active_set_mask_differences, dtype=np.int64)
-    cycle_damping = np.asarray(
-        history.active_set_cycle_damping_activations, dtype=np.int64
-    )
+    trip_arrays = _receipt_trip_arrays(history, trip_count)
+    active_residuals = trip_arrays["active_set_residuals"]
+    mask_differences = trip_arrays["active_set_mask_differences"]
+    cycle_damping = trip_arrays["active_set_cycle_damping_activations"]
     trips = [
         {
             "trip": index + 1,
             "live_relative_residual": float(active_residuals[index]),
             "mask_difference_cells": int(mask_differences[index]),
-            "cycle_damping_activated": bool(cycle_damping[index]),
+            "cycle_damping_activated": (
+                None if cycle_damping[index] == -1 else bool(cycle_damping[index])
+            ),
         }
         for index in range(trip_count)
     ]
@@ -809,7 +852,7 @@ def _production_solver_receipt(equilibrium: Any) -> dict[str, Any]:
         "telemetry_scope": (
             "active-set residuals cover every production trip; detailed inner "
             "globalisation arrays describe the terminal frozen-mask trip exposed "
-            "by FixedPointResult"
+            "by FixedPointResult; null cycle damping means telemetry unavailable"
         ),
         "trip_count": trip_count,
         "per_trip_residual_history": trips,
@@ -1929,6 +1972,32 @@ def _draw_error_contours(
     )
 
 
+ANALYTIC_INK_COLOR = "#3366cc"
+SOLVED_INK_COLOR = "#cc7722"
+
+
+def _figure_receipts(path: Path) -> dict[str, Any]:
+    """Compose a panel's receipt from the two files the renderer just wrote.
+
+    The digests are read back off disk rather than carried in memory, so a
+    missing or unreadable panel fails here instead of being receipted.
+    """
+
+    vector = path.with_suffix(".svg")
+    for candidate in (path, vector):
+        if not candidate.resolve().is_file():
+            raise RuntimeError(f"rendered panel is missing: {candidate}")
+    source = f"/nova/{path.relative_to(ROOT / 'docs')}"
+    return {
+        "filesystem_path": str(path.relative_to(ROOT)),
+        "project_absolute_src": source,
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "vector_filesystem_path": str(vector.relative_to(ROOT)),
+        "vector_project_absolute_src": source.removesuffix(".png") + ".svg",
+        "vector_sha256": hashlib.sha256(vector.read_bytes()).hexdigest(),
+    }
+
+
 def _plot(
     coordinates: np.ndarray,
     terminal_state: np.ndarray,
@@ -1941,8 +2010,14 @@ def _plot(
     analytic_topology: dict[str, Any],
     path: Path,
     title: str,
-) -> None:
-    """Render shared-level flux and error contours for one terminal rung."""
+) -> plt.Figure:
+    """Render shared-level flux and error contours for one terminal rung.
+
+    Both null sets are drawn: the closed-form reference's axis and admitted
+    saddle in the analytic colour and the terminal state's in the solved one,
+    against the shared level array the two flux maps are contoured on. The
+    panel is returned unclosed so a caller can inspect what was drawn.
+    """
 
     figure, axes = plt.subplots(2, 2, figsize=(10.5, 9.0), constrained_layout=True)
     flux_axis = axes[0, 0]
@@ -1952,12 +2027,14 @@ def _plot(
         np.concatenate((solved.ravel(), analytic.ravel())), count=12
     )
     poloidal.draw_flux_contours(
-        flux_axis, radial, height, analytic, levels, color="#3366cc"
+        flux_axis, radial, height, analytic, levels, color=ANALYTIC_INK_COLOR
     )
     poloidal.draw_flux_contours(
-        flux_axis, radial, height, solved, levels, color="#cc7722"
+        flux_axis, radial, height, solved, levels, color=SOLVED_INK_COLOR
     )
-    poloidal.draw_boundary(flux_axis, boundary[:, 0], boundary[:, 1], color="#3366cc")
+    poloidal.draw_boundary(
+        flux_axis, boundary[:, 0], boundary[:, 1], color=ANALYTIC_INK_COLOR
+    )
     wall_units = (wall,)
     poloidal.draw_wall(flux_axis, units=wall_units)
     poloidal.draw_nulls(
@@ -1965,7 +2042,9 @@ def _plot(
         magnetic_axis=analytic_topology["axis_rz_m"],
         x_points=analytic_topology["x_point_rz_m"],
         style=DEFAULT_INK.variant(
-            axis_marker="^", axis_color="#3366cc", xpoint_color="#3366cc"
+            axis_marker="^",
+            axis_color=ANALYTIC_INK_COLOR,
+            xpoint_color=ANALYTIC_INK_COLOR,
         ),
         contain=wall_units,
     )
@@ -1974,12 +2053,18 @@ def _plot(
         magnetic_axis=terminal_topology["axis_rz_m"],
         x_points=terminal_topology["x_point_rz_m"],
         style=DEFAULT_INK.variant(
-            axis_marker="^", axis_color="#cc7722", xpoint_color="#cc7722"
+            axis_marker="^",
+            axis_color=SOLVED_INK_COLOR,
+            xpoint_color=SOLVED_INK_COLOR,
         ),
         contain=wall_units,
     )
     poloidal_axes(flux_axis)
-    flux_axis.set_title("analytic blue / solved ochre; shared Wb levels", fontsize=9)
+    flux_axis.set_title(
+        "analytic blue contours and nulls / solved ochre contours and nulls; "
+        "shared Wb levels",
+        fontsize=9,
+    )
     for axis, name, points in zip(
         (axes[0, 1], axes[1, 0], axes[1, 1]),
         NORM_FIELDS,
@@ -1994,7 +2079,8 @@ def _plot(
     figure.suptitle(title)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
-    plt.close(figure)
+    figure.savefig(path.with_suffix(".svg"))
+    return figure
 
 
 def _render_data(
@@ -2051,15 +2137,18 @@ def _validate_render_data(data: dict[str, Any]) -> None:
         raise RuntimeError("certificate row must persist its one wall unit")
 
 
-def _render_persisted_row(row: dict[str, Any]) -> dict[str, Any]:
+def _render_persisted_row(
+    row: dict[str, Any], path: Path | None = None
+) -> dict[str, Any]:
     """Rebuild one panel from its part receipt without entering the solver."""
 
     data = row["render_data"]
     _validate_render_data(data)
-    figure = ROOT / row["figure"]["filesystem_path"]
+    if path is None:
+        path = ROOT / row["figure"]["filesystem_path"]
     errors = {name: np.asarray(data["error_fields"][name]) for name in NORM_FIELDS}
     started = perf_counter()
-    _plot(
+    figure = _plot(
         np.asarray(data["coordinates_rz_m"]),
         np.asarray(data["terminal_flux_wb"]),
         np.asarray(data["analytic_flux_wb"]),
@@ -2069,15 +2158,18 @@ def _render_persisted_row(row: dict[str, Any]) -> dict[str, Any]:
         np.asarray(data["wall_units_rz_m"][0]),
         data["terminal_topology"],
         data["analytic_topology"],
-        figure,
+        path,
         (
             f"{row['case']} · {_slug(row['requested_cells'])} · "
             f"{row['solver']['qualification']}"
         ),
     )
+    plt.close(figure)
     row["stage_wall_seconds"]["figure_render"] = perf_counter() - started
-    row["figure"]["sha256"] = hashlib.sha256(figure.read_bytes()).hexdigest()
-    row["figure"]["render_source"] = "persisted_part_receipt"
+    row["figure"] = {
+        **_figure_receipts(path),
+        "render_source": "persisted_part_receipt",
+    }
     return row
 
 
@@ -2326,7 +2418,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         case_name=case_name,
         requested_cells=requested_cells,
     ):
-        _plot(
+        panel = _plot(
             coordinates,
             terminal_state,
             oracle_state,
@@ -2343,6 +2435,8 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             figure,
             f"{case_name} · {_slug(requested_cells)} · {qualification}",
         )
+        plt.close(panel)
+    figure_receipts = _figure_receipts(figure)
     row = {
         "case": case_name,
         "requested_cells": requested_cells,
@@ -2448,9 +2542,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         "banked_read": banked_read,
         "render_data": render_data,
         "figure": {
-            "filesystem_path": str(figure.relative_to(ROOT)),
-            "project_absolute_src": f"/nova/{figure.relative_to(ROOT / 'docs')}",
-            "sha256": hashlib.sha256(figure.read_bytes()).hexdigest(),
+            **figure_receipts,
             "render_source": "fresh_production_solve",
         },
     }
@@ -3650,7 +3742,7 @@ def _certificate_compile_problem(
     atomic_mesh = operator.moment_geometry.atomic_mesh
     chord_capacity = int(atomic_mesh.support_capacity)
     chain_samples = int(separatrix_clip._SPLINE_BOUNDARY_SEGMENTS)
-    quadrature_axis_nodes = len(observation._UNIT_NODE)
+    quadrature_axis_nodes = len(clip_quadrature._UNIT_NODE)
     exact_capacity = separatrix_clip.traced_polygon_vertex_capacity(chord_capacity)
     return (
         profile,

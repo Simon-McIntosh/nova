@@ -25,6 +25,7 @@ from nova.equilibrium.constraint import (
     ExternalShafranovConstraint,
     FluxLevelConstraint,
     ProfileAmplitudeUnknown,
+    _sampled_cell_pool,
     assemble_augmented_system,
     constraint_residual_jvp,
 )
@@ -1073,6 +1074,33 @@ def test_flux_level_row_reads_a_cell_carried_mesh_through_its_owner() -> None:
         rtol=0.0,
         atol=1.0e-12,
     )
+
+
+def test_sampled_pool_refuses_the_physical_prefix_as_its_own_length() -> None:
+    """The pool slice is bounded by the cells; the physical prefix is refused.
+
+    A flux vector carries more than its cells -- the wall nodes sit between the
+    carried cells and the direct sampling nodes -- so a read that sizes its
+    pool slice from the physical prefix hands the operator a longer block and
+    answers with a neighbouring cell's polynomial.  The refusal is stated on
+    the slice that is handed over, so it fires under that indexing and not only
+    when a carrier mis-declares its own cell count, which two carrier
+    attributes that agree under either slice cannot catch.
+    """
+    configure_dtypes()
+    profile = _cell_mesh_profile()
+    operator = profile.operator
+    state = _cell_mesh_state()
+    node_count = profile.lattice.node_count
+    pool = _sampled_cell_pool(state, operator, pool_length=node_count)
+    np.testing.assert_allclose(
+        np.asarray(pool), np.asarray(state)[:node_count], rtol=0.0
+    )
+    assert int(operator.physical_node_number) > int(node_count)
+    with np.testing.assert_raises_regex(
+        ValueError, "carries the operator's cells first"
+    ):
+        _sampled_cell_pool(state, operator, pool_length=operator.physical_node_number)
 
 
 def test_unbounded_exterior_amplitude_is_reported_outside_the_field_bound() -> None:

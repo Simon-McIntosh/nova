@@ -1,0 +1,211 @@
+revert the receipt repair; revision=f8c24a819fc821e6549b791892295da30323d2f9 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/gsag-production-solver-receipt-trip-alignment command=/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/gsag-production-solver-receipt-trip-alignment/docs/figures/gs-absolute-accuracy/production-solver-receipt/check.py --negative
+23:54:24 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 4.1.1
+FFFFFFF.F                                                                [100%]
+=================================== FAILURES ===================================
+_______ test_reduced_newton_preserves_trip_index_and_unavailable_damping _______
+
+    def test_reduced_newton_preserves_trip_index_and_unavailable_damping():
+>       receipt = certificate._production_solver_receipt(_equilibrium())
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_production_solver_receipt_trip_alignment.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+equilibrium = namespace(fixed_point=FixedPointResult(state=array([0.]), residual=array(0.125), trace=array([0.5  , 0.25 , 0.125]), k..., domain_name='none', form_name='none', continuity_name='none', support=0.0, decay_width=0.0, truncated_fraction=0.0)))
+
+>   ???
+E   IndexError: too many indices for array: array is 0-dimensional, but 1 were indexed
+
+receipt-before-repair:721: IndexError
+________________ test_padded_arrays_share_executed_trip_indices ________________
+
+    def test_padded_arrays_share_executed_trip_indices():
+        receipt = certificate._production_solver_receipt(
+            _equilibrium(
+                active_set_residuals=np.asarray([0.5, 0.25, 0.125, np.nan, np.nan]),
+                active_set_cycle_damping_activations=np.asarray([0, 1, -1, -1]),
+            )
+        )
+        trips = receipt["per_trip_residual_history"]
+        assert [trip["live_relative_residual"] for trip in trips] == [0.5, 0.25, 0.125]
+        assert [trip["mask_difference_cells"] for trip in trips] == [7, 3, 0]
+>       assert [trip["cycle_damping_activated"] for trip in trips] == [False, True, None]
+E       assert [False, True, True] == [False, True, None]
+E         
+E         At index 2 diff: True != None
+E         Use -v to get more diff
+
+tests/test_production_solver_receipt_trip_alignment.py:75: AssertionError
+_ test_incomplete_trip_telemetry_refuses_by_name[active_set_residuals-value0] __
+
+field = 'active_set_residuals', value = array([0.5 , 0.25])
+
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            ("active_set_residuals", np.asarray([0.5, 0.25])),
+            ("active_set_mask_differences", np.asarray([7, 3])),
+            ("active_set_cycle_damping_activations", np.asarray([0, 1])),
+            ("active_set_cycle_damping_activations", np.asarray(0)),
+            ("active_set_mask_differences", np.asarray([[7, 3, 0]])),
+        ],
+    )
+    def test_incomplete_trip_telemetry_refuses_by_name(field, value):
+        with pytest.raises(
+            ValueError, match=f"production_solver_receipt_trip_alignment.*{field}"
+        ):
+>           certificate._production_solver_receipt(_equilibrium(**{field: value}))
+
+tests/test_production_solver_receipt_trip_alignment.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+equilibrium = namespace(fixed_point=FixedPointResult(state=array([0.]), residual=array(0.125), trace=array([0.5  , 0.25 , 0.125]), k..., domain_name='none', form_name='none', continuity_name='none', support=0.0, decay_width=0.0, truncated_fraction=0.0)))
+
+>   ???
+E   IndexError: too many indices for array: array is 0-dimensional, but 1 were indexed
+
+receipt-before-repair:721: IndexError
+_ test_incomplete_trip_telemetry_refuses_by_name[active_set_mask_differences-value1] _
+
+field = 'active_set_mask_differences', value = array([7, 3])
+
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            ("active_set_residuals", np.asarray([0.5, 0.25])),
+            ("active_set_mask_differences", np.asarray([7, 3])),
+            ("active_set_cycle_damping_activations", np.asarray([0, 1])),
+            ("active_set_cycle_damping_activations", np.asarray(0)),
+            ("active_set_mask_differences", np.asarray([[7, 3, 0]])),
+        ],
+    )
+    def test_incomplete_trip_telemetry_refuses_by_name(field, value):
+        with pytest.raises(
+            ValueError, match=f"production_solver_receipt_trip_alignment.*{field}"
+        ):
+>           certificate._production_solver_receipt(_equilibrium(**{field: value}))
+
+tests/test_production_solver_receipt_trip_alignment.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+equilibrium = namespace(fixed_point=FixedPointResult(state=array([0.]), residual=array(0.125), trace=array([0.5  , 0.25 , 0.125]), k..., domain_name='none', form_name='none', continuity_name='none', support=0.0, decay_width=0.0, truncated_fraction=0.0)))
+
+>   ???
+E   IndexError: too many indices for array: array is 0-dimensional, but 1 were indexed
+
+receipt-before-repair:721: IndexError
+_ test_incomplete_trip_telemetry_refuses_by_name[active_set_cycle_damping_activations-value2] _
+
+field = 'active_set_cycle_damping_activations', value = array([0, 1])
+
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            ("active_set_residuals", np.asarray([0.5, 0.25])),
+            ("active_set_mask_differences", np.asarray([7, 3])),
+            ("active_set_cycle_damping_activations", np.asarray([0, 1])),
+            ("active_set_cycle_damping_activations", np.asarray(0)),
+            ("active_set_mask_differences", np.asarray([[7, 3, 0]])),
+        ],
+    )
+    def test_incomplete_trip_telemetry_refuses_by_name(field, value):
+        with pytest.raises(
+            ValueError, match=f"production_solver_receipt_trip_alignment.*{field}"
+        ):
+>           certificate._production_solver_receipt(_equilibrium(**{field: value}))
+
+tests/test_production_solver_receipt_trip_alignment.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+equilibrium = namespace(fixed_point=FixedPointResult(state=array([0.]), residual=array(0.125), trace=array([0.5  , 0.25 , 0.125]), k..., domain_name='none', form_name='none', continuity_name='none', support=0.0, decay_width=0.0, truncated_fraction=0.0)))
+
+>   ???
+E   IndexError: index 2 is out of bounds for axis 0 with size 2
+
+receipt-before-repair:721: IndexError
+_ test_incomplete_trip_telemetry_refuses_by_name[active_set_cycle_damping_activations-value3] _
+
+field = 'active_set_cycle_damping_activations', value = array(0)
+
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            ("active_set_residuals", np.asarray([0.5, 0.25])),
+            ("active_set_mask_differences", np.asarray([7, 3])),
+            ("active_set_cycle_damping_activations", np.asarray([0, 1])),
+            ("active_set_cycle_damping_activations", np.asarray(0)),
+            ("active_set_mask_differences", np.asarray([[7, 3, 0]])),
+        ],
+    )
+    def test_incomplete_trip_telemetry_refuses_by_name(field, value):
+        with pytest.raises(
+            ValueError, match=f"production_solver_receipt_trip_alignment.*{field}"
+        ):
+>           certificate._production_solver_receipt(_equilibrium(**{field: value}))
+
+tests/test_production_solver_receipt_trip_alignment.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+equilibrium = namespace(fixed_point=FixedPointResult(state=array([0.]), residual=array(0.125), trace=array([0.5  , 0.25 , 0.125]), k..., domain_name='none', form_name='none', continuity_name='none', support=0.0, decay_width=0.0, truncated_fraction=0.0)))
+
+>   ???
+E   IndexError: too many indices for array: array is 0-dimensional, but 1 were indexed
+
+receipt-before-repair:721: IndexError
+_ test_incomplete_trip_telemetry_refuses_by_name[active_set_mask_differences-value4] _
+
+field = 'active_set_mask_differences', value = array([[7, 3, 0]])
+
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            ("active_set_residuals", np.asarray([0.5, 0.25])),
+            ("active_set_mask_differences", np.asarray([7, 3])),
+            ("active_set_cycle_damping_activations", np.asarray([0, 1])),
+            ("active_set_cycle_damping_activations", np.asarray(0)),
+            ("active_set_mask_differences", np.asarray([[7, 3, 0]])),
+        ],
+    )
+    def test_incomplete_trip_telemetry_refuses_by_name(field, value):
+        with pytest.raises(
+            ValueError, match=f"production_solver_receipt_trip_alignment.*{field}"
+        ):
+>           certificate._production_solver_receipt(_equilibrium(**{field: value}))
+
+tests/test_production_solver_receipt_trip_alignment.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+equilibrium = namespace(fixed_point=FixedPointResult(state=array([0.]), residual=array(0.125), trace=array([0.5  , 0.25 , 0.125]), k..., domain_name='none', form_name='none', continuity_name='none', support=0.0, decay_width=0.0, truncated_fraction=0.0)))
+
+>   ???
+E   TypeError: only 0-dimensional arrays can be converted to Python scalars
+
+receipt-before-repair:720: TypeError
+___________________ test_negative_trip_count_refuses_by_name ___________________
+
+    def test_negative_trip_count_refuses_by_name():
+>       with pytest.raises(
+            ValueError,
+            match="production_solver_receipt_trip_alignment.*active_set_iterations",
+        ):
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_production_solver_receipt_trip_alignment.py:108: Failed
+=============================== warnings summary ===============================
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; zarr
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_production_solver_receipt_trip_alignment.py::test_reduced_newton_preserves_trip_index_and_unavailable_damping
+FAILED tests/test_production_solver_receipt_trip_alignment.py::test_padded_arrays_share_executed_trip_indices
+FAILED tests/test_production_solver_receipt_trip_alignment.py::test_incomplete_trip_telemetry_refuses_by_name[active_set_residuals-value0]
+FAILED tests/test_production_solver_receipt_trip_alignment.py::test_incomplete_trip_telemetry_refuses_by_name[active_set_mask_differences-value1]
+FAILED tests/test_production_solver_receipt_trip_alignment.py::test_incomplete_trip_telemetry_refuses_by_name[active_set_cycle_damping_activations-value2]
+FAILED tests/test_production_solver_receipt_trip_alignment.py::test_incomplete_trip_telemetry_refuses_by_name[active_set_cycle_damping_activations-value3]
+FAILED tests/test_production_solver_receipt_trip_alignment.py::test_incomplete_trip_telemetry_refuses_by_name[active_set_mask_differences-value4]
+FAILED tests/test_production_solver_receipt_trip_alignment.py::test_negative_trip_count_refuses_by_name
+8 failed, 1 passed, 1 warning in 2.41s
+EXIT=1

@@ -712,7 +712,7 @@
 
 <p>Ten separate compilations of <code>jit(solve)</code> ran on the current tree, one per arm, at 728.5 to 774.0 seconds each — 98.6 percent of that tree's entire compile time, and roughly twelve minutes of compilation per arm against a producer tree whose heaviest single compile is thirty-five seconds and whose whole twelve-arm sweep costs 723 seconds. The shared persistent compilation cache was configured and live for both processes (the compilation-line counts are stated once, in the table above, under the <code>JAX_LOG_COMPILES</code> marker), which means the <code>solve</code> compilations missed the cache because their keys differ — a cache asset cannot rescue this cost while the trace itself changes per arm. The practical rate is about 42 arms per hour of compile on the producer tree against 4.4 on the current one.</p>
 
-<p><strong>Coverage.</strong> Twelve of twelve rows. The first allocation's current-tree process reached five of the six identities inside its <code>02:30:00</code> and was cancelled mid-identity on 22086/43, leaving ten paired arms and a merged receipt reporting <code>rows_present 10</code> with <code>rows_missing 2</code> and a nonzero exit by design — the missing rows named rather than silently absent. The remainder closed in a second single-card allocation that ran only the current-tree half: one emission closes 22086/43 and pairs both of its arms against the producer emissions that already existed, so the receipt regenerates with <code>rows_expected 12</code>, <code>rows_present 12</code>, <code>rows_missing 0</code> and <code>rows_unexpected 0</code>. Both remainder arms make <code>partition_structure</code> the first differing stage, so the count is twelve of twelve; the pure arm converges to <code>3.5849824357505203e-16</code> on the producer tree against <code>4.774937e-04</code> on the current tree, non-converged on the same active-set cycle that stalls the load-bearing row, and the mixed arm converges on both trees while its residual still moves, <code>4.929e-16</code> to <code>2.689e-16</code>.</p>
+<p><strong>Coverage.</strong> Twelve of twelve rows. The first allocation's current-tree process reached five of the six identities inside its <code>02:30:00</code> and was cancelled mid-identity on 22086/43, leaving ten paired arms and a merged receipt reporting <code>rows_present 10</code> with <code>rows_missing 2</code> and a nonzero exit by design — the missing rows named rather than silently absent. The remainder closed in a second single-card allocation that ran only the current-tree half: one emission closes 22086/43 and pairs both of its arms against the producer emissions that already existed, so the receipt regenerates with <code>rows_expected 12</code>, <code>rows_present 12</code>, <code>rows_missing 0</code> and <code>rows_unexpected 0</code>. Both remainder arms make <code>partition_structure</code> the first differing stage, so the count is twelve of twelve; the pure arm converges to <code>3.5849824357505203e-16</code> on the producer tree against <code>4.774937e-04</code> on the current tree, whose own emission under the reports fence (<code>arms/new-22086-43-pure.json</code>) records <code>converged</code> false under <code>termination_reason=active_set_settled</code> — the active set settled without reaching the residual floor, which is a different termination from the <code>active_set_cycle_detected</code> that stalls the load-bearing row — and the mixed arm converges on both trees while its residual still moves, <code>4.929e-16</code> to <code>2.689e-16</code>.</p>
 
 <p><strong>The terminal states are drawn, not only digested.</strong> A digest cannot be read, and the plotting rules require a forward-solve record to show its terminal state as line contours. The pair below renders 21978/35 pure from the two resolve archives the same allocations resolved — producer tree <code>fae50f15</code> beside the current tree — as unfilled contours on one shared level array computed from the producer state, so the two states cannot be made to agree by independent level choices. Each panel draws the vessel from its own resolved wall polygon, its own magnetic axis (solid triangle) and admitted saddle (solid cross), and the other state's in a hollow grey.</p>
 <figure><img src="/nova/figures/null-identification-authority/bank-drift-probe/21978-35-pure-panels.png" alt="MAST 21978/35 pure terminal state on the producer tree beside the current tree, both as poloidal flux line contours on one shared level array, with each panel's axis and admitted saddle solid and the other state's hollow, and the vessel drawn in both"><figcaption>The 21978/35 pure terminal state, producer tree <code>fae50f15</code> (left, converged, residual 3.857e-16) beside the current tree (right, non-converged, residual 2.451e-03), both as unfilled flux contours on one shared level array with the vessel drawn. Solid triangle and solid cross are the panel's own axis and admitted saddle; the hollow grey markers are the other state's.</figcaption></figure>
@@ -720,6 +720,23 @@
 <p><strong>Not established here.</strong> Whether the bank is reissued against the current tree or the solve is repaired to the producer's partition is not decided by this measurement and was not decided by this node. The merge and join contracts are now pinned by committed tests in <code>tests/test_bank_drift_paired_probe.py</code>, so a campaign that is not twelve arms cannot read as complete, and a committed render check writes the panel pair from synthetic resolve archives.</p>
 
 <p><strong>Evidence.</strong> Merged receipt <code>docs/figures/null-identification-authority/bank-drift-probe/receipt.json</code> with the twelve per-arm receipts under its <code>arms/</code> subdirectory; per-arm emissions, both sweep logs and the campaign log under <code>~/.config/reckon/crew/reports/nova/s19-local/bank-drift/</code>. Inputs: the accepted operand cache <code>logs/exact-operand-cache.npz</code>, sha256 <code>2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904</code>, verified unchanged before and after the run; the producer revision as an unpacked archive; one shared compilation cache root whose receipt is stored in every emission, so the directory a row was compiled against is itself evidence.</p>
+</section>
+
+<section id="the-drift-campaign-resumes-without-re-emitting-landed-rows">
+<h2>The drift campaign resumes without re-emitting landed rows (2026-09-21)</h2>
+<p><strong>Question.</strong> The paired probe writes one emission per tree as each identity's solve lands, and the campaigns were run under SLURM limits that cancelled mid-identity more than once, so a resumed campaign is the normal case rather than the exception. Does a resumed campaign continue from what it already landed, or does it start again?</p>
+
+<p><strong>Answer: it started again, and the checkpoint was read for its identity list only.</strong> <code>benchmarks/bank_drift_paired_probe.py</code> <code>_emit</code> read the checkpointed rows with <code>_resume_rows(out_path)</code>, built the emitted-identity set from them, printed that set, and then rebound <code>rows</code> to an empty list — so the loop re-solved every identity in the bank selection and the emission file was rewritten from the rows that re-run produced. The checkpoint's own rows never reached the output row list, and the wall clock the earlier allocation had already spent was spent again. The recorded reproduction (<code>/tmp/fsa-driver-reproductions.log</code>) is <code>RESUME_REPRO identities=['1/0'] old_marker=None</code>: the re-run emission carries the identity it re-solved and no trace of the row previously landed for that identity.</p>
+
+<p><strong>Repair.</strong> The checkpointed rows are kept, the loop skips an identity already in the emitted set, and the file written after each landing carries the landings plus the new rows. Each identity therefore appears exactly once, and a resumed campaign pays only for the identities that never landed. Nothing else in the driver changed: the per-arm split, the merge and the join are untouched.</p>
+
+<p><strong>Gate, and the control that makes the control real.</strong> <code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_bank_drift_resume.py tests/test_bank_drift_paired_probe.py</code> on the login node: <strong>12 passed, exit 0</strong>, no allocation and no solve. The declared negative control restores the defect verbatim — the empty-list rebind after the resume read — and the suite reports <strong>1 failed, exit 1</strong>, reddening <code>test_resume_keeps_checkpointed_rows_and_skips_their_identities</code> alone. The red log's first line repeats the declared mutation, so the log names the change it was run under rather than being read as a general failure. The gate without the control would not have shown the guard fires: the test is written so the mutation reddens it, and the control is the evidence that it does.</p>
+
+<p><strong>How the contract is observed without a solve.</strong> The new module's per-row worker is a stub, and the recording sits on the first call the emission makes inside its row loop, so an identity the resume path skips never reaches it. The recorded list is therefore a direct observation of "was this landed identity re-solved" rather than an inference from the output file alone. The output file is read back independently and asserted twice: the checkpointed row objects are compared whole, not merely counted, so a row regenerated with the same identity but different content still fails; and the identity list is required to carry each identity exactly once, so a resume that keeps the rows but forgets to skip duplicates them instead. Both assertions were shown live under the control: the mutation reddens on the kept-rows assertion, with the emitted file carrying the re-solved row where the landed one had been.</p>
+
+<p><strong>Not established here.</strong> This node repairs the resume half of the review finding only. The join's identity coverage — <code>_compare</code> iterating left-tree identities alone, so a right-only identity is omitted while the merge can still report the expected count — is a separate guard at lines 477–483 and is untouched, so the review's finding is partly delivered and its coverage half remains open.</p>
+
+<p><strong>Evidence.</strong> Implementation at commit <code>4a6964cfb</code>; gate log <code>gate-resume.log</code> and the declared control's red log <code>negative-control-resume.log</code> in the node's run directory <code>~/.config/reckon/crew/runs/r-20260921T103310878070-nia-the-drift-campaign-resumes-without-re-emitting-landed-rows/</code>. Inputs: no archive is read and nothing was measured by a solve, so no operand cache is involved and no allocation was spent. The reproduction this repair was confirmed against is <code>/tmp/fsa-driver-reproductions.log</code>, quoted above.</p>
 </section>
 
 <section id="the-support-rows-are-identical-and-rerouted-not-missing">
@@ -730,13 +747,38 @@
 
 <p><strong>Verdict: no — the support is identical on both trees, on all twelve paired arms, and the cycle is not attributable to missing or misrouted support.</strong> The audit reads the paired emissions under <code>~/.config/reckon/crew/reports/nova/s19-local/bank-drift/</code> (twelve old, ten new, plus the producer-tree archive) and each tree's operator source. <code>profile_support</code> is <code>5683f88ca97c076e</code> on every row of the table — both trees, both arms of every identity — and its parts are identical everywhere (<code>inside_material 7406355ef5eb56a2</code>, <code>physical_node_number e706f97a7d7d60e5</code>). The operands did not move, which is the same reading the paired probe reached and the reason this audit could answer at all.</p>
 
-<p><strong>The mechanism is routing, and the partition is where it shows.</strong> The producer tree's <code>partition_structure</code> digest is the single constant <code>236cbb2e1af2dded</code> across all six identities, with <code>partition_values</code> literally <code>empty</code> and a leaf count of 1. The current tree gives a distinct per-identity digest (<code>0fe0dcdf920a9b66</code>, <code>c6153172715a1fbf</code>, <code>1aa36966cece689e</code>, <code>7ce799b69367d32d</code>, <code>2bffef758c015b38</code>, <code>b4214b763f3aed67</code>) at a leaf count of 76. A partition byte-identical for six different equilibria, carrying no values, is a partition with nothing shot-specific in it: the declared anchors were captured as host constants. Source confirms it — the current tree returns <code>declared_axis_flux</code>, <code>declared_boundary_flux</code> and <code>declared_support</code> from <code>_dynamic_extra_names</code> (<code>nova/equilibrium/forward_operator.py:2121-2131</code>), so the identical values enter the trace <em>as data</em>; the producer tree has no such hook and held them as constants. The bank builder that writes those rows is unchanged between the trees — identical occurrence counts of the three anchors. Identical support content, rerouted into the traced partition.</p>
+<p><strong>The mechanism is routing, and the partition is where it shows.</strong> The producer tree's <code>partition_structure</code> digest is the single constant <code>236cbb2e1af2dded</code> across all six identities, with <code>partition_values</code> literally <code>empty</code> and a leaf count of 1. The current tree gives a distinct per-identity digest (<code>0fe0dcdf920a9b66</code>, <code>c6153172715a1fbf</code>, <code>1aa36966cece689e</code>, <code>7ce799b69367d32d</code>, <code>2bffef758c015b38</code>, <code>b4214b763f3aed67</code>) at a leaf count of 76. A partition byte-identical for six different equilibria, carrying no values, is a partition with nothing shot-specific in it: the declared anchors were captured as host constants. Source confirms it — the current tree returns <code>declared_axis_flux</code>, <code>declared_boundary_flux</code> and <code>declared_support</code> from <code>_dynamic_extra_names</code> (<code>nova/equilibrium/forward_operator.py:2121-2131</code>), so the identical values enter the trace <em>as data</em>; the producer tree has no such hook and held them as constants. The bank builder that writes those rows is not unchanged as a file — it differs by 98 lines between the trees — but every changed line is the solve-seam conversion and none of them touches the three anchors, whose per-occurrence counts are identical in both trees (18 / 15 / 27). Identical support content, rerouted into the traced partition.</p>
 
 <p><strong>The caveat that makes the answer honest.</strong> "Constraint rows and compensating unknowns" invites a reading this solve does not support: on this corroboration solve <em>neither</em> tree carries <code>constraint_pairs</code>, so there is no augmented net-current row and no vertical-position row on either side. The support that exists is the operator-internal normalisation <code>current_normalisation_amplitude</code> (present at identical count in both trees) for net current, the declared <code>declared_axis_flux</code> anchor for position, and the LCFS-and-material mask <code>declared_support</code> for participation. Every piece of support this solve carries is on both trees; none is missing, none is reordered, and none is a compensating unknown that one tree omits.</p>
 
 <p><strong>What remains.</strong> Causation. This audit removes support as the explanation and localises the drift to the traced partition, which is where the paired probe already placed it; it does not show that the anchors entering the trace as data rather than as host constants <em>causes</em> the non-termination. Establishing that needs the two trees compared at equal compile cost with the anchor routing held fixed. Separately, no poloidal flux contour panels accompany this record: the result is two digest columns and a partition summary, which is a table, and a plot of digest hex would add no spatial or sequential information the table withholds.</p>
 
 <p><strong>Evidence.</strong> Report <code>docs/figures/null-identification-authority/support-audit/support-audit.md</code>; audit program <code>benchmarks/bank_drift_support_audit.py</code>; run log and machine-readable table <code>~/.config/reckon/crew/reports/nova/s19-local/bank-drift-support/audit-run4.log</code> and <code>support-table.json</code>. Source-level and receipt-level reads only: no geometry built, no IMAS data opened, nothing compiled.</p>
+</section>
+<section id="the-support-audit-record-states-what-it-compared">
+<h2>The support-audit record states what it compared, and the audit's refusals are exercised (2026-09-19)</h2>
+<p>Node <code>nia-support-audit-record-repairs</code> (implement role). An independent review of the support-row audit above raised two findings against its record: a corroboration claim the evidence did not support, and an audit program with no committed test of its own refusal paths. Both are repaired here, and the repair changed no verdict — the audit's answer is unchanged and its numbers still reproduce.</p>
+
+<p><strong>Finding 1: the builder identity claim was false, and is withdrawn.</strong> The corroboration paragraph asserted the bank builder is byte-identical between the producer revision <code>fae50f15</code> and the current tree <code>299e4b64</code>. It is not. Measured: <code>git diff --stat fae50f15 299e4b64 -- benchmarks/efit_forward_parity_slice.py</code> reports <code>1 file changed, 51 insertions(+), 47 deletions(-)</code>, 98 changed lines.</p>
+
+<p><strong>What was actually compared.</strong> The <em>declared-anchor rows</em> and the <em>augmented row set</em>, not the builder file as a whole. On that 98-line diff, <strong>zero</strong> changed lines mention <code>declared_axis_flux</code>, <code>declared_boundary_flux</code>, <code>declared_support</code> or <code>TOTAL_FLUX_FACTOR</code>; every changed line is the solve-seam conversion (<code>solve_portfolio</code> and <code>solve_branch</code> giving way to <code>ForwardSolveRequest</code> plus <code>profile.solve</code>, and the receipt fields that rename with it — <code>branch.converged</code> to <code>receipt.qualified</code>, <code>branch.residual</code> to <code>equilibrium.fixed_point.residual</code>). The per-occurrence counts of the anchor names are identical in both trees: <code>declared_axis_flux</code> 18, <code>declared_boundary_flux</code> 15, <code>declared_support</code> 27, as is every expression that derives them — <code>declared_support</code> remains the LCFS-and-material mask, the axis and boundary fluxes remain <code>TOTAL_FLUX_FACTOR</code>-scaled bank values. The augmented row set was compared too, and on this solve neither tree carries one: <code>constraint_pairs</code> does not appear on the parity-slice path in either tree — at <code>299e4b64</code> the name occurs only in <code>nova/equilibrium/batched_labeller.py</code>, and <code>_parity_solve_request</code> passes none — so no <code>CircuitCurrentUnknown</code>, <code>BoundedExteriorFieldUnknown</code> or <code>ProfileAmplitudeUnknown</code> row exists on one side and not the other. A byte-identity claim over the builder file would be false and is not what the comparison rested on; the sentence now says what was measured, in both the report and the section above.</p>
+
+<p><strong>Finding 2: the audit's refusals are now made to fire.</strong> <code>benchmarks/bank_drift_support_audit.py</code> had no committed test. Every one of its failure modes is a silent non-result — a receipt field the merge never populated, a field present but blank, a pair carrying stage evidence on one side only, an arm only one tree emitted, a report it cannot parse — and each renders as a blank or a skipped comparison that reads as a finding about the data rather than a gap in the instrument. <code>tests/test_bank_drift_support_audit.py</code> presents each case on synthetic emissions and asserts the emitted form, with a negative control beside each refusal showing it does not fire on a well-formed pair:</p>
+<ul>
+<li>the receipt-cell guard — <code>NO-FIELD</code> for a key the merge never populated, where the bare cell formatter renders the identical absent value as <code>-</code>;</li>
+<li>the empty-value form — <code>EMPTY@&lt;source&gt;</code> naming the file the blank came from, and <code>EMPTY@(no source)</code> where no source was recorded;</li>
+<li>the stage-evidence refusal — <code>NO STAGE EVIDENCE on one side -- not a pass</code> for a pair whose stage digests are present on one side only, counted under <code>unpaired_or_missing</code> rather than as a comparison;</li>
+<li>the <code>UNPAIRED old=… new=…</code> row for an arm only one tree emitted;</li>
+<li>a malformed report named in the run's <code>skipped</code> list rather than dropped;</li>
+<li>one end-to-end run of the program over synthetic reports and two stub trees, asserting each refusal as it is actually printed, the summary line, and the two source-inventory rows (<code>trace_hook=False traced_rows=[]</code> against <code>trace_hook=True traced_rows=['declared_axis_flux', 'declared_boundary_flux', 'declared_support']</code>).</li>
+</ul>
+<p>Nine tests, all passing. Nothing in the module builds geometry, opens IMAS data or compiles: it reads JSON and source text only, so the whole gate runs on the login node, which it did.</p>
+
+<p><strong>The claim still reproduces.</strong> Re-running the record's own reproduce command from the repaired tree returns the numbers already on this record unchanged: <code>paired=12 support_identical=12 support_differs=0 structure_identical=0 structure_differs=12 unpaired_or_missing=0</code>, with the producer tree's inventory reading <code>trace_hook=False traced_rows=[]</code> and the current tree's <code>trace_hook=True</code>. The correction is to the record's wording, not to its measurement.</p>
+
+<p><strong>What remains.</strong> The audit program's <code>except TypeError, ValueError:</code> at its parse site is not a defect: under the project interpreter (Python 3.14.2) it compiles and the parser builds an <code>ExceptHandler</code> whose <code>type</code> is a <code>Tuple</code> of both names, so it catches both. Checked with <code>ast.parse</code>, <code>compile</code> and <code>exec</code> before it was left unchanged. The causation question this audit opened — the two trees compared at equal compile cost with the anchor routing held fixed — is not in scope here and is carried by the anchor bisect above.</p>
+
+<p><strong>Evidence.</strong> Report <code>docs/figures/null-identification-authority/support-audit/support-audit.md</code>; test module <code>tests/test_bank_drift_support_audit.py</code>; gate log <code>~/.config/reckon/crew/reports/nova/s19-local/nia-support-audit-record-repairs/test_bank_drift_support_audit.log</code> (<code>9 passed</code>, exit 0), the reproduce log and the regenerated table beside it. No figure accompanies this record: the result is a line-count, two occurrence counts and a test tally, which are a table and a list, and no spatial or plotted relationship is present to draw.</p>
 </section>
 <section id="the-traced-anchor-hook-is-not-the-carrier-of-the-pure-arm-cycle">
 <h2>The traced-anchor hook is not the carrier of the pure-arm cycle (2026-09-18)</h2>
@@ -765,7 +807,32 @@
 
 <p><strong>What remains.</strong> The producer revision does not contain the hook's name at all — its <code>nova/equilibrium/forward_operator.py</code> is 1805 lines with zero occurrences of <code>dynamic_extra</code>, and the arrangement arrives later at <code>879a33ee</code> (<em>feat(equilibrium): separate operator geometry from member data</em>). Between <code>fae50f15</code> and this tree, 175 commits touch <code>nova/equilibrium/</code>. The anchor names being exonerated, the standing candidate is what the operand partition <em>contains</em>: the producer's partition carries no values at all against 76 leaves now, and the families that add leaves to it are the traced profile-coefficient work and the traced-polygon-capacity refactor. This record localises the drift downstream of the anchor store; it does not name the commit.</p>
 
-<p><strong>Instrument and one recorded defect.</strong> Job <code>1273425</code> on <code>98dci4-gpu-0003</code> (reservation <code>gpu_0003_grpA</code>, one card, eight cores, 128G, wall 52m51s) ran four <code>jit(solve)</code> compilations, the slowest 4m18s, with <code>jax_enable_x64 true</code> asserted before any array. A pre-flight control on the login node showed the two treatments separating on four instruments before any allocation was spent, and the traced arm reproduced the committed bank reference's operand digests both there and on device. The first submission (<code>1273419</code>) died in operand construction because the payload's working directory was the report directory and the producer's response-carrier check resolves its receipt path relative to the repository root; the defect is recorded, reproduced by hand and repaired in the launcher, and the driver's receipt path still owes a repair for reporting <em>"the override did not take effect"</em> when its arms are merely absent.</p>
+<p><strong>Instrument and one recorded defect.</strong> Job <code>1273425</code> on <code>98dci4-gpu-0003</code> (reservation <code>gpu_0003_grpA</code>, one card, eight cores, 128G, wall 52m51s) ran four <code>jit(solve)</code> compilations, the slowest 4m30.6s, with <code>jax_enable_x64 true</code> asserted before any array. A pre-flight control on the login node showed the two treatments separating on four instruments before any allocation was spent, and the traced arm reproduced the committed bank reference's operand digests both there and on device. The first submission (<code>1273419</code>) died in operand construction because the payload's working directory was the report directory and the producer's response-carrier check resolves its receipt path relative to the repository root; the defect is recorded, reproduced by hand and repaired in the launcher. The driver's receipt path reported <em>"the override
+did not take effect"</em> when its arms were merely absent; that reading is repaired, together with
+the compile figure in the receipt below.</p>
+
+<p><strong>Receipt repairs (2026-09-19).</strong> Three review findings on the record above are
+repaired in the driver and pinned in <code>tests/test_bank_drift_anchor_bisect.py</code>. (1) An arm
+that never landed or whose solve raised carries no terminal state, and the verdict reported its
+empty hook-name list as a treatment that failed to take effect; the verdict now keys on the arm's
+absence first, publishing <code>arms_absent</code> with each treatment's reason and a finding that
+says the record compares nothing about the hook. Reproduced on the committed driver with an empty
+arm directory, which answered <em>"the override did not take effect"</em> for both classes. (2) The
+mixed class's two residual values, <code>2.2041968427410595e-16</code> and
+<code>3.0996518101046146e-16</code>, differ bitwise, so the verdict named the anchor partition the
+carrier of their <code>8.95e-17</code> gap; that gap is below the round-off floor
+(<code>2.220446049250313e-16</code>, one machine epsilon, the floor a normalised residual can
+reach), so the finding now compares the gap to the floor and reports the two arms as having
+reached the same state by a different arithmetic order. The regenerated receipt carries
+<code>terminal_residual_gap</code>, <code>round_off_floor</code> as data beside the sentence. On
+the pure class, whose arms agree exactly, the finding is unchanged. (3) The receipt's instrument
+table stated the allocation's slowest compile as 4m18s, the first of the log's two slow-operation
+alarms; the log's alarms read <code>4m18.232613536s</code> and <code>4m30.589312894s</code>, so
+the receipt and this record now state 4m30.6s. The receipt subcommand was re-run against the
+committed arm records with no allocation, so the machine-readable receipt is regenerated rather
+than edited; a positive control (a separation far above the floor) still names the carrier.
+Gate on the login node: the new test module plus <code>tests/test_bank_drift_paired_probe.py</code>,
+18 passed, exit 0.</p>
 
 <p><strong>Evidence.</strong> Receipt <code>docs/figures/null-identification-authority/anchor-bisect/receipt.html</code> with the machine-readable <code>receipt-21978-35-anchor-bisect.json</code> and the four committed arm records and terminal-array archives under <code>arms/</code>; driver <code>benchmarks/bank_drift_anchor_bisect.py</code>; run log <code>~/.config/reckon/crew/reports/nova/s19-local/anchor-bisect/bisect.log</code> with the control at <code>control.log</code> and the failed first submission at <code>bisect-run1-chdir-defect.log</code>.</p>
 </section>
@@ -820,6 +887,898 @@
   </figure>
   <p><strong>Gate.</strong> One <code>all_debug</code> CPU allocation pinned <code>JAX_PLATFORMS=cpu</code> and ran the persisted before/after fixtures, twelve-arm bank, four limited Solovev rows, traversed topology reference, analytic limiter contacts and topology receipts through the project interpreter: <strong>33 passed in 314.72 seconds</strong>. The traversed reference now requires zero vertical-half-plane label disagreements under the spline-authored contact; the historical 51-cell disagreement was the retired contact defect, not a property to preserve. Log: <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/containment-anchor/coordinator-final-gate.log</code>.</p>
   <p><strong>Artifacts.</strong> The strict JSON receipt and the PNG/SVG panel are under <code>docs/figures/null-identification-authority/limited-touch/</code>. Row 17 retains no persisted terminal raster, so the repaired receipt explicitly makes no containment-aware row-17 claim rather than reusing the old wall-gap number.</p>
+</section>
+<section id="panel-test-strength">
+  <h2>The paired-probe panel test can now fail on both of its panel rules (2026-09-19)</h2>
+  <p><strong>Reproduction.</strong> The shared-level assertion in <code>test_panel_keeps_one_shared_level_array_across_both_panels</code> demanded, for each panel, the level array <code>contour_levels</code> returns for the producer archive's flux. Both fixture archives were written from the same default radius (9 points) and height (11 points), so the producer and current states carried the same flux array and a panel that computed its own levels from its own archive returned the array the assertion required. The line-contour check asserted that exactly one collection was attached to each panel and that its levels equalled the expected array; a filled contour set satisfies both, because it carries the same levels.</p>
+  <p><strong>Repair.</strong> Commit <code>7efd909c</code>, test-only. The current archive is written on its own 7x8 grid, so the panels' own level arrays are separated by <code>0.3131</code> at the widest sample and the sidecar's <code>grid_bit_identical</code> is <code>False</code>. The test asserts that the two archives' level arrays differ before asserting anything about the drawn panels, so a later edit that restores identical grids fails rather than silently restoring the reproduction. The contour check additionally requires the collection to be a <code>matplotlib.contour.ContourSet</code> with <code>filled</code> <code>False</code>.</p>
+  <table>
+    <caption>Three runs of the module, one fresh process each, all_debug CPU</caption>
+    <thead><tr><th>Tree state</th><th>exit</th><th>result</th><th>which assertion failed</th></tr></thead>
+    <tbody>
+      <tr><td>head, 7efd909c</td><td><code>0</code></td><td>11 passed</td><td>-</td></tr>
+      <tr><td>per-panel levels from own archive</td><td><code>1</code></td><td>1 failed, 10 passed</td><td>shared-level array: drawn <code>0.98033376</code> against expected <code>0.999375</code></td></tr>
+      <tr><td>filled contour in place of line contour</td><td><code>1</code></td><td>1 failed, 10 passed</td><td><code>assert contours[0].filled is False</code></td></tr>
+    </tbody>
+  </table>
+  <p><strong>Positive control on the second mutant.</strong> Under the filled-contour mutant the superseded assertion set was measured green: the collection count is one and its levels equal the shared array, so the count-and-levels check could not fail on a filled set. That is the finding this repair closes; the discriminating attribute is <code>filled</code>.</p>
+  <p><strong>Gate.</strong> One <code>all_debug</code> CPU allocation per run (<code>--cpus-per-task=4 --mem=32G</code>, <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>), the shared root environment interpreter invoked directly with the worktree on <code>PYTHONPATH</code> and <code>uv</code> never invoked on the compute node, the module collected in one fresh process, whole run captured once to a log. Both mutants were applied by hand once and reverted; <code>benchmarks/bank_drift_paired_probe.py</code> ends byte-identical to its committed state.</p>
+  <p><strong>Artifacts.</strong> <code>green-head.log</code> (exit 0), <code>mutant-per-panel-levels.log</code> (exit 1), <code>mutant-filled-contour.log</code> (exit 1) under the reports fence <code>~/.config/reckon/crew/reports/nova/s19-local/nia-panel-test-strength/</code>. The change is confined to <code>tests/test_bank_drift_paired_probe.py</code>.</p>
+</section>
+<section id="the-certificate-panels-draw-both-null-sets">
+  <h2>The certificate panels draw both null sets</h2>
+  <p>Node <code>nia-certificate-analytic-nulls</code> (s19-codex, implement spec exact; commit <code>edb02142</code> in the node worktree). Renderer <code>benchmarks/solovev_certificate.py</code>, guard <code>tests/test_solovev_certificate_render.py</code>.</p>
+  <p><strong>The defect had two halves and the second was only visible after the first was fixed.</strong> The panels drew the solved stationary points alone, so on a non-converged diverted row a solved null was the only marker on the figure and read as the answer. Drawing the closed-form set beside it then required knowing which file the panel came from, and re-rendering the persisted weak-rotation-reactor-static 1000-cell partition on the merged tree reproduces bitmap digest <code>ef467c654a11b577</code> where the pin held <code>6b0a38974ee8b43c</code>. The count carried beside that observation, thirteen of sixteen, was not reproduced: re-rendering each pre-change persisted part with the current renderer leaves <strong>sixteen of sixteen</strong> old pins unreproduced, because the added analytic markers change every bitmap, so the two counts measure different things rather than each other. The renderer also closed the figure it returned, so no caller could receipt what was drawn; it now returns the open figure, writes the SVG beside the PNG, and the receipt is read back off both files, adding a vector digest per row to the pin.</p>
+  <p><strong>What was measured.</strong> The sixteen panels, their sixteen persisted parts and the aggregate pin were re-rendered from the persisted parts in one <code>all_debug</code> job with no solve: sixteen <code>SOLOVEV_RENDER_PERSISTED</code> markers, <code>--aggregate</code> and <code>--validate</code> reporting <code>schema_valid: true</code> over four cases and sixteen rows, and the aggregate's <code>aggregation_lane</code> for the same job (slurm <code>1274019</code>) records <code>SOLOVEV_AGGREGATE_EXIT=0</code>, which is where the job's exit status is written — the render log itself ends without an exit line; every one of the sixteen PNG digests differs from its predecessor. Gate on the login node, one capture: the four guards in <code>tests/test_solovev_certificate_render.py</code> plus the four in <code>tests/test_solovev_certificate_builder.py</code>, <strong>8 passed in 22.82 s</strong>, EXIT=0. Log: <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/nia-certificate-analytic-nulls/gate.log</code>.</p>
+  <p><strong>Evidence that could have failed.</strong> Fourteen of the sixteen persisted parts read limited, each with a null <code>x_point_rz_m</code>, so on those rows an absent analytic X-point is absence by construction. The diverted single-null case at 500 and 1000 cells is the exception: it reads diverted and carries an analytic X-point at about (1.5014, -1.0176) m and (1.5025, -1.0188) m, and its redrawn 500-cell panel places the analytic cross 1.199e-03 m from the module's closed-form <code>X_POINT_M</code>, so the analytic saddle vocabulary does fire from shipped data on two of the sixteen panels. The rung the test pins (cells-300) is limited, so the test injects a saddle onto the reference axis and asserts it is absent again in the persisted part afterwards, and it asserts the negative directly: suppressing the analytic <code>draw_nulls</code> call drops the analytic colour from the marker census, and a <code>contourf</code> trips the unfilled-collection assertion. Artifacts: <code>docs/figures/gs-absolute-accuracy/solovev/*.png</code> and their SVG siblings, once per row, with the pin at <code>docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json</code>.</p>
+  <p><strong>Where the corrected sentences also live, stated once.</strong> The reference-X-point claim, the intermediate digest and the attributed exit status also appear in the body of commit <code>edb02142</code>, which is immutable history that cannot be rewritten; this record is the corrected account of what the persisted parts and the job logs carry.</p>
+</section>
+<section id="the-frozen-read-that-admitted-no-finite-axis">
+  <h2>The frozen read that admitted no finite axis</h2>
+  <p>Node <code>nia-promotion-fallback-nan</code> (s19-codex, implement spec exact). Sources
+  <code>nova/equilibrium/forward_operator.py</code>, <code>nova/equilibrium/fixed_point.py</code>;
+  guard <code>tests/test_promotion_fallback_amplitude.py</code>.</p>
+  <p><strong>The reproduction, quoted before anything was repaired.</strong> The promotion
+  fallback carry (<code>c5e1498a</code>, whose contract is that it carries a frozen topology read
+  unchanged across the inner iterations of a trip) makes the diverted single-null Solovev rung at
+  300 cells raise <code>CurrentNormalisationError</code> with a non-finite source amplitude out of
+  <code>current_normalisation_amplitude</code>, while its predecessor <code>e0eb4956</code>
+  terminates finite and unqualified. A carried quantity that changed no value must reproduce what a
+  fresh read returns, so the question was which carried quantity became non-finite.</p>
+  <p><strong>The carried quantity, named with its shape and finite count.</strong> It is the frozen
+  read's <em>normalising pair</em>: <code>topology.axis_flux</code> and
+  <code>topology.flux_span</code> arrive <code>nan</code> while <code>topology.boundary_flux</code>
+  stays finite at <code>0.004708612000369493</code>. Measured by instrumenting the refusal
+  predicate with <code>jax.debug.callback</code> over the diverted &minus;300 run: every refusal
+  printed the same pair, <code>axis=nan span=nan</code>, six times across the run. The source
+  amplitude divides the target current by the cell-current sum, so the non-finite divisor reaches
+  the amplitude directly and the cell-current sum was the first suspect: it is the quantity the
+  frozen scale multiplies, and a non-finite scale makes that sum a fabricated number rather than a
+  measured one.</p>
+  <p><strong>What refusing it does not do.</strong> The lead's premise for the refusal was that a
+  carried non-finite normaliser has already broken the carry's contract, so refusing to freeze that
+  partition restores the rung. The premise is half right and the conclusion does not follow, which
+  the arms below measure rather than argue. Refusing only the reads whose normaliser is non-finite
+  leaves the terminal residual bit-identical to the unrefused carry (<code>6.3706933429737305</code>
+  both ways), at the map level and at the reconcile level alike. Only removing the carry moves the
+  rung (<code>2.248351582217136</code>). So the divergence this node was dispatched against is not
+  produced by the non-finite read alone: a carried partition whose normalisers are <em>finite</em>
+  moves the terminal residual too, which is the same shape as the stale discrete partition the
+  carry holds (label, profile support, residual shadow) and is a separate defect from the
+  non-finite scale.</p>
+  <table>
+    <caption>Diverted single-null Solovev, &minus;300 cells, terminal fixed-point residual. One
+    fresh process per arm, all_debug CPU, root interpreter with the worktree on PYTHONPATH.</caption>
+    <thead><tr><th>arm</th><th>terminal residual</th></tr></thead>
+    <tbody>
+      <tr><td>carry off (un-carried, the <code>e0eb4956</code>-contract value)</td><td><code>2.248351582217136</code></td></tr>
+      <tr><td>carry on, <code>target_current</code> guard suppressed</td><td><code>6.3706933429737305</code></td></tr>
+      <tr><td>carry on, non-finite reads refused at the map level</td><td><code>6.3706933429737305</code></td></tr>
+      <tr><td>carry on, non-finite reads refused at the reconcile level</td><td><code>6.3706933429737305</code></td></tr>
+      <tr><td>every carried evaluation refused</td><td><code>2.248351582217136</code></td></tr>
+    </tbody>
+  </table>
+  <p><strong>What landed.</strong> Two halves. The operator exposes
+  <code>ForwardFluxOperator.frozen_partition_usable</code>, attached to the shadowed map beside the
+  other carry hooks, which admits a frozen read only when both normalising scalars are finite and
+  the span is non-zero; and the active-set reconcile consults it, falling back to a fresh read of
+  its own state for a partition it may not carry, so the trip re-reads instead of revaluing against
+  an undefined scale. The refusal is a bounded safety net: where the non-finite read is legitimate
+  at that state a fresh read returns non-finite too, so the cost is one re-read and never a wrong
+  answer. The un-carried rung itself is held finite by the <code>target_current is None</code>
+  guard, which is already committed; the new cases drive the carry through the state that produced
+  the non-finite amplitude, so neither that guard nor the refusal can be removed silently. The
+  positive controls are explicit: a read with a finite admitted axis must pass the refusal, a
+  usable read must reach the carried map, and the refused read must leave the trip finite with the
+  plain map evaluated instead.</p>
+  <p><strong>Gate.</strong> One <code>all_debug</code> CPU allocation, both arms in one job
+  (<code>--cpus-per-task=8 --mem=64G</code>, <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>,
+  the shared root environment interpreter invoked directly and <code>uv</code> never invoked on the
+  compute node), captured once with the exit status. The base arm is stated as a failure set so the
+  delta is a set difference. The changed tree reads <strong>1 failed, 8 passed</strong> and the
+  base revision's own sources read <strong>5 failed, 4 passed</strong>: the added failure set is
+  empty, and the removed set is the four cases that cannot import the predicate at base. The one
+  failure common to both arms is the pre-existing axes case below. Gate log under the reports fence
+  at <code>~/.config/reckon/crew/reports/nova/s19-local/nia-promotion-fallback-nan/gate3.log</code>,
+  with <code>gate.log</code> and <code>gate2.log</code> from the two earlier drafts of the guard
+  module, the arm probes <code>refusal-probe.log</code> and <code>refusal-probe3.log</code>, and the
+  test-order probe <code>order.log</code>.</p>
+  <p><strong>Reported, not repaired.</strong> Two failures sit in this node's gate that are not this
+  node's change. <code>tests/test_forward_operator_axes.py::test_tensor_product_grid_class_margin_is_read_on_the_spline</code>
+  fails with <code>inf</code> where it expects <code>-0.31887492472951007</code>, identically on the
+  base revision's own sources and on the changed tree, alone and in file order, so it is
+  pre-existing at the base revision and the delta this node adds is empty. And
+  <code>tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback</code>
+  pins <code>0.025515711279493654</code> where the un-carried arm terminates at
+  <code>2.248351582217136</code>; it is marked slow, so the default lane never sees it red.</p>
+  <p>A third observation belongs to whoever owns the figure pins: the driver's render stage writes
+  <code>docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.{png,svg}</code>
+  directly, and a run of it against the current tree changed both files' bytes. They are restored to
+  the committed revision here rather than committed, so the digest pin stays green, and whether that
+  move is a real change in the drawn panels or renderer metadata is not established. The guard
+  module therefore redirects the figure, diagnostic and part roots into a scratch subtree of its own
+  under <code>docs</code> and removes it afterwards, because the driver receipts a panel against the
+  served docs mount and refuses a figure outside it.</p>
+</section>
+<section id="the-panel-pin-separates-a-moved-panel-from-a-moved-container">
+  <h2>The panel pin now separates a moved panel from a moved container (2026-09-20)</h2>
+  <p>Node <code>nia-pin-the-panel-rather-than-its-container</code>, answering the third observation
+  above. Renderer <code>benchmarks/solovev_certificate.py</code> stage <code>_render_persisted_row</code>;
+  pin <code>docs/figures/gs-absolute-accuracy/figure-panel-pin.json</code>; guard
+  <code>tests/test_figure_panel_pin.py</code>.</p>
+  <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png" alt="The diverted single-null production-route 300-cell certificate panel: analytic and solved poloidal flux as unfilled line contours on one shared level array, both null sets drawn in their own styles, the vessel drawn"><figcaption>The pinned panel. A re-render at this revision reproduces it byte-for-byte, so on the bitmap the file digest already isolates a real move; the vector file is the one whose container moves.</figcaption></figure>
+  <p><strong>Render twice from one revision.</strong> The persisted part
+  <code>production-route-parts/diverted-single-null-production-route-cells-300.json</code> was rendered
+  twice through the driver's own render stage with the root redirected to a scratch tree. The bitmap is
+  byte-reproducible: <code>48093d505dd61c490446f1d5f27c37507413e82884667b5cbc8512011491172e</code>
+  both times, and the committed file carries that digest. The vector file is not: the two renders wrote
+  <code>5b3a57d94566ab50…</code> and <code>50a9d6a6c7152f54…</code>. Decoded, the two renders are
+  identical — the PNG pixel buffers are equal with maximum difference 0.</p>
+  <table>
+    <caption>One revision, three vectors: the committed artifact and two fresh renders</caption>
+    <thead><tr><th>source</th><th>bitmap file sha256</th><th>bitmap content sha256</th><th>vector file sha256</th><th>vector content sha256</th></tr></thead>
+    <tbody>
+      <tr><td>committed (pin taken at <code>edb02142f</code>)</td><td><code>48093d505dd61c49…</code></td><td><code>375613cfb2406c7e…</code></td><td><code>a0f5c9dee6e15128…</code></td><td><code>cc7f1f370f4fce46…</code></td></tr>
+      <tr><td>render 1</td><td><code>48093d505dd61c49…</code></td><td><code>375613cfb2406c7e…</code></td><td><code>5b3a57d94566ab50…</code></td><td><code>cc7f1f370f4fce46…</code></td></tr>
+      <tr><td>render 2</td><td><code>48093d505dd61c49…</code></td><td><code>375613cfb2406c7e…</code></td><td><code>50a9d6a6c7152f54…</code></td><td><code>cc7f1f370f4fce46…</code></td></tr>
+    </tbody>
+  </table>
+  <p><strong>Which fields move.</strong> Three, all container-only. The <code>&lt;dc:date&gt;</code>
+  element reads <code>2026-09-19T16:20:34.378676</code> in the committed file and
+  <code>2026-09-20T17:46:58.557177</code> then <code>2026-09-20T17:46:58.888561</code> in the two
+  renders, so it advances on every write. The <code>Matplotlib v…</code> token is a library version,
+  the shipped panel naming <code>v3.11.1</code>. And every <code>clip-path</code> reference is a
+  generated element id — <code>p8c9390ab6e</code> committed, <code>pa7365b360d</code> and
+  <code>peeefd185d8</code> in the renders — so 175 of the file's lines differ between two renders of
+  identical pixels. Those are the three fields a content digest normalises: date, version token, and
+  generated ids renumbered in first-appearance order.</p>
+  <p><strong>Render at the revision the pin was taken at.</strong> The last commit to touch the pinned
+  files is <code>edb02142f</code>, and the renderer has not changed since — <code>git log
+  edb02142f..HEAD -- benchmarks/solovev_certificate.py</code> is empty — so rendering at HEAD is
+  rendering at the pin's revision. It reproduces the committed bitmap exactly, <strong>both files
+  byte-identical on the bitmap and both content digests equal on the vector</strong>. The pin was
+  therefore never stale; it was unsatisfiable for the wrong reason, and only on the vector file.</p>
+  <p><strong>What the pin becomes.</strong> The panels are stable and only the container moves, so the
+  bitmaps are pinned as bytes and content alike, and the vector is pinned by content. The guard is
+  controlled both ways: an unchanged re-render keeps the pin, and a five-percent rescale of the solved
+  flux breaks it on both files. The negative control is the declared mutation of the guard's own
+  normalisation — replacing the content digest with the raw file digest — which reddens three tests,
+  including the committed-artifact case, exactly as it should: it is the failure the old pin would
+  have produced on a faithful re-render.</p>
+  <p><strong>Should a measurement driver write into the served figure tree? No.</strong> This is the
+  mechanism the followup names: <code>_render_persisted_row</code> resolves its output under
+  <code>ROOT/docs</code>, so the render stage that produces a row's receipt writes the published
+  artifact, and the receipt it then computes describes the file it just overwrote. A measurement run
+  therefore mutates the thing it measures, and a node that then "restores the committed bytes so the
+  pin stays green" cannot be distinguished from one hiding a real move. The render stage should write
+  to a scratch root and publish in an explicit separate step; until the driver changes, a measuring
+  caller must redirect <code>ROOT</code>, as the guard here and the frozen-partition node's guard
+  module both do.</p>
+  <p><strong>Gate.</strong> One <code>all_debug</code> CPU allocation, <code>TMPDIR=/tmp</code> in the
+  submit environment and in the payload, <code>JAX_PLATFORMS=cpu</code>, the shared root environment
+  interpreter run directly with the worktree on <code>PYTHONPATH</code> and <code>uv</code> never
+  invoked on the compute node: the new guard plus the existing certificate render guards,
+  <strong>9 passed in 10.52 s, EXIT=0</strong>. Added failures against the base revision: none — the
+  existing render module is unmodified from base and passes unchanged. Logs:
+  <code>gate_all_debug.log</code> and <code>negative_control.log</code> (first line names the
+declared mutation) under the reports fence
+  <code>~/.config/reckon/crew/reports/nova/s19-local/nia-pin-the-panel-rather-than-its-container/</code>,
+  with the probe driver <code>figure_panel_pin_probe.py</code> beside them.
+  Implementation at commit <code>436b814b9</code>.</p>
+</section>
+<section id="the-grid-class-margin-infinity-is-the-wall-operand">
+  <h2>The grid class margin's infinity is the wall operand, not an absent-xpoint sentinel (2026-09-20)</h2>
+  <p>Node <code>nia-the-grid-class-margin-reads-infinite</code> (s19-codex, implement spec exact).
+  Source <code>nova/equilibrium/forward_operator.py</code>. The failing case is
+  <code>tests/test_forward_operator_axes.py::test_tensor_product_grid_class_margin_is_read_on_the_spline</code>,
+  which pins the structured-grid read at <code>-0.31887492472951007</code> and obtains <code>inf</code>.
+  The margin is the subtraction at <code>nova/equilibrium/connectivity_boundary.py</code>
+  <code>class_margin = class_u_wall - class_u_x</code>, so the question is which operand is not finite.
+  Both are printed below with their values, and every fixture array with its shape and finite count.</p>
+  <p><strong>The operands, printed rather than reasoned about.</strong> The read is instrumented at the
+  <code>_connectivity_read</code> seam on the exact fixture the case builds. <code>class_u_x</code> is
+  <strong>finite</strong> at <code>0.051708397272780315</code>: an X-point IS admitted on this fixture,
+  at <code>(0.78, 0)</code>, so no absent-saddle sentinel is involved. <code>class_u_wall</code> is
+  <code>inf</code>. The margin is therefore <code>inf - 0.051708397272780315</code>. Every fixture input
+  is finite: <code>grid_flux</code> <code>(81,)</code> finite 81, <code>wall_flux</code>
+  <code>(64,)</code> finite 64, <code>state</code> <code>(145,)</code> finite 145;
+  <code>moment_geometry</code> is <code>None</code>, so the degenerate short-circuit at
+  <code>forward_operator.py</code> <code>_connectivity_class_margin</code> is not the branch taken;
+  <code>_fixed_design_topology.connectivity_radius.size</code> is 9, so the read does reach the
+  traced boundary seam. <code>jax_enable_x64</code> is asserted, not trusted, and the fixture arrays are
+  built after <code>configure_dtypes()</code>.</p>
+  <table>
+    <caption>The two operands and the shadow that sets the wall value, same fixture, same process.</caption>
+    <thead><tr><th>quantity</th><th>value</th><th>finite</th></tr></thead>
+    <tbody>
+      <tr><td><code>class_u_x</code> (read <code>u_xpoint</code>)</td><td><code>0.051708397272780315</code></td><td>yes</td></tr>
+      <tr><td><code>class_u_wall</code> (read <code>u_wall</code>)</td><td><code>inf</code></td><td><strong>no</strong></td></tr>
+      <tr><td>read <code>wall_shadowed</code></td><td><code>True</code></td><td>&mdash;</td></tr>
+      <tr><td><code>reachable_wall_node_mask</code>, classification supplied</td><td>0 of 64</td><td>&mdash;</td></tr>
+      <tr><td><code>reachable_wall_node_mask</code>, classification withheld</td><td>5 of 64</td><td>&mdash;</td></tr>
+      <tr><td><code>topology.wall_point</code></td><td><code>(1.58202873, 0.38889916)</code>, wall vertex 6</td><td>yes</td></tr>
+      <tr><td><code>topology.wall_point_flux</code></td><td><code>-0.18879455615639096</code></td><td>yes</td></tr>
+    </tbody>
+  </table>
+  <p><strong>What sets the infinity.</strong> Not the saddle. The supplied wall operand is shadowed:
+  <code>class_wall_shadowed = supplied_wall_valid &amp; ~class_wall["reachable"][supplied_wall_index]</code>
+  evaluates <code>True</code> because <em>no</em> wall node is reachable when the classification
+  operands are supplied, and the wall level is then replaced outright by
+  <code>u_wall_c = jnp.where(class_wall_shadowed, jnp.inf, u_wall_c)</code> in
+  <code>nova/equilibrium/connectivity_boundary.py</code>. Withholding the classification operands on the
+  identical state leaves 5 of 64 wall nodes reachable and the margin finite, which is the same state
+  reading differently only because the reachable-wall search runs from a different region
+  (<code>wall_region</code> is <code>pre_saddle_region</code> with a classification and <code>reach</code>
+  without it). So the infinity enters as a shadowing verdict on the wall operand, and the subtraction
+  merely propagates it.</p>
+  <p><strong>The saddle operand did not move; the wall operand did.</strong> The same probe at the revision
+  that set the pin (<code>268e6928d</code>) reads <code>class_u_x</code>
+  <code>0.051708397272780315</code> &mdash; bit-identical to the current tree, so the xpoint candidate is
+  unchanged &mdash; with <code>class_u_wall</code> <code>-0.26716652745672975</code>, wall point
+  <code>(0.3, 0)</code>, <code>wall_point_flux</code> <code>-0.11954666666666702</code>, 2 of 64 wall nodes
+  reachable, <code>wall_shadowed</code> <code>False</code>, and the margin at its pinned
+  <code>-0.31887492472951007</code>. The pinned margin is therefore a true read of its revision, not a
+  stale pin; what changed is which wall anchor the read selects and whether that anchor is reachable from
+  the region the classification read searches.</p>
+  <p><strong>The revision that moved it, measured on both sides of one commit.</strong> The flip is
+  <code>8fdc71ef5</code> (<em>unify limited boundary authority</em>), and its own parent
+  <code>09f5cc508</code> reads the pinned value. Probed serially, one revision at a time, the parent reads
+  <code>class_margin</code> <code>-0.31887492472951007</code>, <code>u_wall</code>
+  <code>-0.26716652745672975</code>, <code>wall_point_flux</code> <code>-0.11954666666666702</code>,
+  <code>reachable</code> 2 of 64, <code>wall_shadowed</code> <code>False</code>; the child reads
+  <code>class_margin</code> <code>inf</code>, <code>u_wall</code> <code>inf</code>,
+  <code>wall_point_flux</code> <code>0.0804533333333329</code>, <code>reachable</code> 0 of 64,
+  <code>wall_shadowed</code> <code>True</code>. The <code>class_u_x</code> operand is identical on both
+  sides.</p>
+  <p><strong>The mechanical difference is exactly the state's wall offset.</strong>
+  <code>8fdc71ef5</code> changed <code>wall_anchor_data</code> to evaluate the wall flux on the tensor
+  spline that traces the boundary and to publish that surface value at the fitted contact, where the read
+  had previously used the wall nodes' own flux from the state. The fixture authors its wall flux as the
+  same spline value <em>minus</em> <code>_WALL_SEPARATRIX_OFFSET = 0.2</code>, and the two anchor fluxes
+  differ by exactly that 0.2: <code>-0.11954666666666702</code> against
+  <code>0.0804533333333329</code>. So the change discards the offset the fixture deliberately put into the
+  state, the anchor moves from the inboard limiter vertex to wall vertex 6, no wall node is then reachable
+  from the classification read's pre-saddle region, and the shadow turns a defined wall level into
+  <code>inf</code>.</p>
+  <p><strong>Status.</strong> Diagnosis and attribution, committed before any repair. No repair is landed,
+  and the derivation says one cannot be expressed inside this node's write scope. The shadow rule that
+  writes the infinity lives in <code>nova/equilibrium/connectivity_boundary.py</code> and the anchor
+  selection in <code>nova/equilibrium/topology.py</code>; both are outside this node's exclusive write
+  path. Nor does the in-scope call site have an operand combination that reproduces the pin: withholding
+  the classification operands on the identical state returns <code>+0.2667392207631908</code> (positive,
+  because the reachable wall level is then the read's own <code>0.3184476180359711</code>), and supplying
+  them forces the shadow and returns <code>inf</code>. The choice between re-pinning the case and repairing
+  the anchor authority belongs to whoever owns <code>tests/test_forward_operator_axes.py</code>, which this
+  node may not edit, so the conclusion is reported with this derivation rather than acted on.</p>
+  <p><strong>What a repairer needs, in four facts.</strong> The node closes on the diagnosis, and these
+  four measurements are what the repair node's fence inherits:</p>
+  <ol>
+    <li>An X-point <em>is</em> admitted on this fixture and its operand is finite:
+      <code>class_u_x</code> <code>0.051708397272780315</code>. The infinity is not an absent-saddle
+      sentinel.</li>
+    <li>The reachable-wall set is <strong>0 of 64</strong> nodes with the classification operands
+      supplied, against <strong>5 of 64</strong> without them, on the identical state. That difference,
+      not the subtraction, is what makes <code>class_u_wall</code> <code>inf</code>.</li>
+    <li>The two anchor fluxes differ by exactly the fixture offset <code>_WALL_SEPARATRIX_OFFSET = 0.2</code>:
+      parent <code>-0.11954666666666702</code> against child <code>0.0804533333333329</code>, because
+      <code>8fdc71ef5</code> moved the anchor to the boundary-authority spline surface value and discarded
+      the offset the state carries.</li>
+    <li>The parent commit <code>09f5cc508</code> reads the pinned value
+      <code>-0.31887492472951007</code>.</li>
+  </ol>
+  <p>The pinned value is therefore <strong>not stale</strong>, because the parent commit produces it.</p>
+</section>
+<section>
+  <h2>The diverted certificate pin rested on an unreachable rung</h2>
+  <p>The pin asserted <code>0.025515711279493654</code> for
+  <code>tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback</code>.
+  At base <code>9c5e64da8</code> the recorded defect does not reproduce as recorded. The test calls
+  <code>solovev_certificate._measure("diverted-jump-bearing", -300)</code>, which labels the returned row
+  with the alias, and <code>_validate_row</code> then tests <code>row["case"] in CASE_NAMES</code>. The
+  alias is not in <code>CASE_NAMES</code>; it lives in <code>DIVERTED_CASE_ALIASES</code>. The rung
+  therefore raises <code>RuntimeError: unknown certificate case</code> before the assertion, so the
+  stale pin was never the failing line.</p>
+  <pre>E           RuntimeError: unknown certificate case
+benchmarks/solovev_certificate.py:2514: RuntimeError
+1 failed in 189.33s</pre>
+  <p>History places the mask: <code>8c2c4b278</code> introduced the pin when
+  <code>"diverted-jump-bearing"</code> was a member of <code>CASE_NAMES</code>, so the pin was reachable
+  then; <code>81b6cc235</code> renamed the case to <code>diverted-single-null</code> and moved the old
+  spelling into <code>DIVERTED_CASE_ALIASES</code> without widening the membership test.
+  <code>_case</code>, <code>_case_machine</code> and <code>_exact_state</code> route both spellings
+  identically, so the rung computed is the same one.</p>
+  <p>With the rung reachable by its canonical name, the terminal residual is exactly
+  <code>2.248351582217136</code> — the un-carried baseline, and the value the plan attributed to the
+  carry-off arm. The pin now records it with the mechanism stated in-line. The alias rejection in the
+  benchmark is left for a follow-on, since repairing it is outside this node's write scope.</p>
+  <p><strong>Gate.</strong> One <code>all_debug</code> CPU allocation per run, <code>TMPDIR=/tmp</code>
+  in the submit environment and in the payload, <code>JAX_PLATFORMS=cpu</code>, the shared root
+  environment interpreter run directly with the worktree on <code>PYTHONPATH</code> and
+  <code>uv</code> never invoked on the compute node, the case selected explicitly by path so the slow
+  marker does not exclude it. Baseline: <strong>1 failed in 189.33s</strong> (alias rejection).
+  After: <strong>1 passed in 185.99s, EXIT=0, 1 collected</strong>. Negative control — the retired
+  value restored on the corrected tree: <strong>1 failed in 188.41s</strong> at
+  <code>assert 2.248351582217136 == 0.025515711279493654</code>. Added failures against the base
+  revision: none. Logs <code>baseline-stale-pin.log</code>, <code>after-pin.log</code> and
+  <code>negative-control.log</code> (first line names the declared mutation) under
+  <code>~/.config/reckon/crew/runs/r-20260920T160154139156-nia-retire-the-stale-certificate-pin/logs/</code>.
+  Implementation at commit <code>f205bff1f</code>.</p>
+  </section>
+
+<section id="the-drift-probe-statements-cite-what-carries-them">
+  <h2>Every drift-probe statement now cites the receipt or log that carries it (2026-09-20)</h2>
+  <p>Node <code>nia-make-the-drift-probe-record-match-its-receipts</code>, route map, the review's
+  five statement defects. The record's producer
+  <code>benchmarks/bank_drift_paired_probe.py</code> and its guard
+  <code>tests/test_bank_drift_paired_probe.py</code> were unchanged by this node; three of the five
+  defects were already repaired at commit <code>1892b73f6</code> and were verified here rather than
+  reimplemented, and the two that still stood were repaired in the two documents this node holds.</p>
+
+  <p><strong>The pure remainder arm was reported on the wrong termination.</strong> This record's
+  coverage paragraph called the current-tree <code>22086/43</code> pure arm non-converged "on the same
+  active-set cycle that stalls the load-bearing row". Its own emission, under the reports fence at
+  <code>bank-drift-remainder/arms/new-22086-43-pure.json</code>, carries
+  <code>rows[0].arms.pure = {converged: false, terminal_residual: 4.7749374833599707e-04,
+  termination_reason: "active_set_settled"}</code>, against the producer emission
+  <code>bank-drift/emit-faefloor.json</code> carrying <code>{converged: true,
+  terminal_residual: 3.5849824357505203e-16, termination_reason: "converged"}</code>. A settled
+  active set is not a cycling one: the load-bearing row's <code>21978/35</code> pure arm is the one
+  that ends under <code>active_set_cycle_detected</code>, and the repair this record's own finding
+  argues for is a function of which of the two a row ends on. The paragraph now states the
+  termination the emission records, in both places the claim appears, and every other number in it is
+  unchanged — the merged receipt's row for that arm still reads <code>residual_right
+  0.00047749374833599707</code>, which is the same residual the paragraph quotes as
+  <code>4.774937e-04</code>.</p>
+
+  <p><strong>The compile-line count was cited to a field no emission writes.</strong> The
+  <code>462</code> lines matching <code>Compiling </code>, of which <code>2</code> are
+  <code>Compiling jit(solve)</code>, come from the job's own <code>JAX_LOG_COMPILES=1</code> capture,
+  which the remainder driver writes as <code>grep 'Compiling ' "$RXR/emit-$SLUG.log" &gt;
+  "$RXR/compile-$SLUG.txt"</code> inside the allocation that ran the solve. The capture is
+  <code>b96f7b6d80277ce11c3ddb737b5e0dc854626e49768ce1e08d7c8b7123aeffb0</code>, 462 marker lines and
+  2 solve compiles by direct count, and the merged receipt's <code>compile_evidence</code> block
+  states the count beside that capture's repository-root-relative location and digest — which is the
+  field the sentence wrongly attributed it to, so the receipt and the sentence now agree. The record
+  also states that the merge raises rather than reporting a zero when the capture carries no compile
+  line, so a missing capture cannot read as a cheap compile.</p>
+
+  <table>
+    <caption>The gate: one <code>all_debug</code> allocation, three runs of
+    <code>tests/test_bank_drift_paired_probe.py</code>.</caption>
+    <tr><th>run</th><th>tree</th><th>result</th></tr>
+    <tr><td>baseline</td><td>extracted copy of the base revision
+      <code>83f585a11</code></td><td><strong>11 passed</strong>, exit 0</td></tr>
+    <tr><td>after</td><td>the worktree head</td><td><strong>11 passed</strong>, exit 0</td></tr>
+    <tr><td>declared negative control</td><td>extracted copy of the base revision with
+      <code>wall = panel["wall"]</code> replaced by <code>wall = panels[0]["wall"]</code> at
+      <code>benchmarks/bank_drift_paired_probe.py:913</code></td>
+      <td><strong>1 failed, 10 passed</strong>, exit 1: <code>test_panel_draws_each_archive_s_own_wall_and_grid</code>
+      alone reddens</td></tr>
+  </table>
+
+  <p><strong>The control's first form did not fire, and the instrument was at fault.</strong> The
+  mutation was first placed on <code>PYTHONPATH</code> as a mutated copy of the <code>benchmarks</code>
+  package beside an unmutated extracted tree, and all 11 tests passed. pytest prepends the test
+  package's rootdir to <code>sys.path</code>, so the unmutated tree answered for the mutated one and
+  the control measured nothing. Rebuilt as an independent extraction mutated in place, it reddens
+  exactly the guard it should, and leaves the shared-level guard green — which it must, because both
+  of that guard's fixture archives carry the same wall, so the two guards are shown to be
+  discriminating rather than merely strict. This record reports the false pass because the same
+  shape recurs: a control that cannot fail is indistinguishable from a guard that fires.</p>
+
+  <p><strong>One statement is reported rather than changed.</strong> The compile-cost table's
+  current-tree cell of <code>468</code> compilation lines does not reproduce from the log that
+  carries that tree. The producer-side peer <code>1068</code> reproduces exactly from
+  <code>bank-drift/sweep-old.log</code> (1068 marker lines, all <code>Compiling jit</code>), and the
+  remainder capture's <code>462</code> reproduces exactly from its own file; but
+  <code>bank-drift/sweep-new.log</code> comprises 2003 lines with sha256
+  <code>e8be7d16e0f0b8a10faad9ca8b4c8d78948aac82b30ff91a7bddcd8edf6005fa</code> and carries
+  <code>482</code> marker lines at its end (469 <code>Compiling jit</code>, 13
+  <code>Compiling module</code>, 11 <code>Compiling jit(solve)</code>). <code>468</code> is the
+  running count at line 1933 of that same log, so it is a reading taken while the log was still being
+  written — the sweep was cancelled by the limit with the sixth identity's compile in flight — rather
+  than a count from a different instrument. It sits beside the row's own terminal readings
+  (<code>5</code> of <code>10</code> arms swept, "ended by the limit"), which is the inconsistency:
+  one cell of a terminal row carries a mid-run reading. The convention the cell is meant to follow is
+  not settled by the plan — whether it counts the swept identities only or the whole file — so it is
+  recorded here as a follow-on rather than edited.</p>
+
+  <figure><img src="/nova/figures/null-identification-authority/bank-drift-probe/compile-line-count-against-log-position.png" alt="A rising staircase of the running count of Compiling lines against line number in sweep-new.log, with a hollow circle at 468 near the end and a filled square at 482 at the end of the log"><figcaption>The running count of <code>Compiling </code> lines against the line number it was read at, in <code>sweep-new.log</code>. A count quoted without the position it was read at is a point on this curve rather than a property of the file: the record's cell is the hollow marker at <code>468</code>, and the end of the log is the filled marker at <code>482</code>. Reproduce with <code>compile_count_against_log_position.py</code> under the reports fence.</figcaption></figure>
+
+  <p>Gate logs, the driver and the extracted base tree:
+  <code>~/.config/reckon/crew/reports/nova/s19-local/drift-probe-record-repairs/</code>
+  (<code>gate-baseline.log</code>, <code>gate-after.log</code>, <code>gate-negative-control.log</code>
+  whose first line names the declared mutation, <code>gate_driver.sh</code>,
+  <code>base-tree.tar</code>). Implementation at commit <code>34bf882da</code>.</p>
+</section>
+<section id="the-census-read-traces-once-the-wall-arrays-are-promoted">
+<h2>The census read traces once the wall arrays are promoted (2026-09-21)</h2>
+<p><strong>Defect.</strong> The connectivity census read hands the ingredient read concrete wall coordinate and wall flux arrays. The wall-unit lane indexes them with traced segment indices inside a <code>lax.cond</code>, and indexing a concrete array by a tracer raises <code>TracerArrayConversionError</code>, so the census read could not be traced and the wall-contact read was unavailable under <code>jit</code>.</p>
+<p><strong>Repair.</strong> Promote the arrays at the three sites that index them with traced indices: <code>wall_r</code> and <code>wall_z</code> in <code>_sample_wall_polyline</code> and in <code>_select_reachable_wall_limiter</code> (<code>nova/equilibrium/connectivity_boundary.py</code> lines 985 and 1060), and <code>self.wall.coordinate</code> and <code>wall_flux</code> before the bracket index in <code>_wall_anchor_candidates</code> (<code>nova/equilibrium/topology.py</code> line 526). The supplied-wall and reachability verdicts are unchanged; the arrays stay concrete at the callers, and only the traced lanes copy them.</p>
+<p><strong>Gate.</strong> One <code>all_debug</code> allocation (job <code>1275083</code>), <code>JAX_PLATFORMS=cpu</code> with <code>TMPDIR=/tmp</code> in the submit environment and inside the payload, the root interpreter <code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code> run directly, <code>uv</code> never invoked on the node, one process per module, and the base arm built as a hardlink copy of the worktree carrying the base revision of both source modules.</p>
+<table>
+<thead><tr><th>arm</th><th>module</th><th>exit</th><th>result</th></tr></thead>
+<tbody>
+<tr><td>head <code>192a8ed20</code></td><td><code>tests/test_connectivity_class_reader.py</code></td><td>0</td><td>3 passed in 152.32s, both trace pins green</td></tr>
+<tr><td>head <code>192a8ed20</code></td><td><code>tests/test_forward_operator_axes.py</code></td><td>1</td><td>1 failed, 2 passed in 122.24s</td></tr>
+<tr><td>head <code>192a8ed20</code></td><td><code>tests/test_limiter_spline_minimum.py</code></td><td>0</td><td>10 passed in 209.71s</td></tr>
+<tr><td>base <code>0c92afb7</code></td><td><code>tests/test_forward_operator_axes.py</code></td><td>1</td><td>1 failed, 2 passed in 110.62s</td></tr>
+<tr><td>base <code>0c92afb7</code></td><td><code>tests/test_limiter_spline_minimum.py</code></td><td>0</td><td>10 passed in 202.85s</td></tr>
+<tr><td>negative control</td><td><code>tests/test_connectivity_class_reader.py</code></td><td>1</td><td>3 failed in 138.30s</td></tr>
+</tbody>
+</table>
+<p><strong>Zero added failures.</strong> Both focused modules carry the same result on the head and base arms: <code>tests/test_limiter_spline_minimum.py</code> 10 passed on each, and <code>tests/test_forward_operator_axes.py</code> carries the single pre-existing <code>test_tensor_product_grid_class_margin_is_read_on_the_spline</code> failure at both revisions, so the repair neither causes nor cures it.</p>
+<p><strong>Negative control.</strong> The declared mutation reverts the three promotions to the base modules while keeping the new pins, and the log's first line repeats it verbatim. It reddens 3 of 3 with nine <code>TracerArrayConversionError</code> frames, both new pins among them, so the pins are shown to fire rather than merely to pass. Gate logs and the driver: <code>~/.config/reckon/crew/runs/r-20260921T123729655027-nia-wall-arrays-are-promoted-before-traced-indexing/scratch/logs/</code>. Implementation at commit <code>192a8ed20</code>.</p>
+
+</section>
+<section id="the-persisted-boundary-follows-the-recorded-class">
+  <h2>The persisted boundary follows the recorded class, not the stored curve length (2026-09-21)</h2>
+
+  <p>Two source sites, and nothing else in this change. The MAST operand renderer reads the class the
+  convergence-atlas receipt records for the frame (<code>panels[].class</code>, <code>"diverted"</code>
+  or <code>"limited"</code>), inverts it through the label map the atlas already carries, and passes it
+  to the operator read as <code>requested_class</code>; the level the boundary is traced at is then the
+  admitted saddle flux for a diverted frame and the wall contact flux for a limited one. The atlas reads
+  the class the row carries instead of deriving it from <code>nova_boundary.shape[0] &gt;= 3</code>, and
+  keeps <code>unclassified</code> only where no class is recorded. Implementation at commit
+  <code>fe7d8c053</code>, in <code>docs/figures/topology-visual-corroboration/generate_topology_visuals.py</code>
+  and <code>benchmarks/poloidal_convergence_atlas.py</code>, with the contract in
+  <code>tests/test_topology_visual_generator.py</code> (8 passed, exit 0, in a fresh process under
+  <code>JAX_PLATFORMS=cpu</code>).</p>
+
+  <p><strong>The class-pinned level is the operator's own read, not an approximation of it.</strong>
+  <code>nova/equilibrium/topology.py</code> selects <code>data_x</code> for a diverted frame and
+  <code>data_w</code> for a limited one on a pinned boundary, so the pinned read's
+  <code>boundary_flux</code> is bit-identical to <code>x_point_flux</code> (diverted) or
+  <code>wall_point_flux</code> (limited). The committed case builds a synthesised read carrying the
+  three levels explicitly and asserts the level the renderer persists: saddle flux under the diverted
+  class, contact flux under the limited class, and the read's own <code>boundary_flux</code> when no
+  class is requested. A second case asserts the receipt lookup — the class is taken from the atlas
+  receipt's row for the identity, a row whose class reads <code>unclassified</code> maps to no
+  requested class, and an identity absent from the receipt does the same. The correlated negative
+  control takes the diverted level from the wall contact flux instead of the admitted saddle flux; it
+  reddens the new case (1 failed, 7 passed) rather than passing beside it.</p>
+
+  <p><strong>The named measurement is blocked, and by pre-existing faults.</strong> The gate regenerates
+  the persisted 22086/43 boundary from its banked state through the renderer as it now reads — no new
+  solve of the earlier stage — and reports its distance to the admitted saddle (0.5648, 1.2580) m
+  together with the atlas row's class. Two faults outside this node's two sites stop it, both present at
+  the base revision. First, the committed operand bank is stale against its authority: the bank records
+  MAST authority source identity <code>sha256:5b14529506daccb2…</code> while the committed authority
+  file (<code>docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py</code>, changed by
+  <code>d5354a5a2</code> after the bank's last regeneration at <code>52cad98a5</code>) hashes
+  <code>23038d9c17076ab8…</code>, so <code>_read_cache</code> refuses the refresh outright. The
+  renderer's escape hatch re-raises unless the requested shot set equals the full available set, which
+  is why the one-shot attempt and the six-shot attempt fail differently. Second, the regeneration path
+  cannot run at all at this revision: on the six-shot route it raised
+  <code>TypeError: _mast_states() missing 1 required keyword-only argument: 'carrier_identity'</code> at
+  <code>generate_topology_visuals.py:279</code>. The keyword was added to the MAST state request and
+  this call site was not updated; a second site in the same authority tree
+  (<code>reachability_grid_final.py:208</code>) also omits it, while
+  <code>efit_topology_corroboration.py:771</code>, <code>benchmarks/bank_drift_paired_probe.py</code>
+  and <code>benchmarks/jacobian_null_direction.py</code> pass it. The carrier is already in scope at
+  line 279 (<code>carrier["carrier"]["semantic_response_identity"]</code>), so the repair is one
+  argument — a third site, outside this node's spec, and therefore reported rather than made.</p>
+
+  <p>What the gate did measure is the pre-change baseline, and it is recorded as such rather than as a
+  verdict: the boundary the bank already carries for 22086/43 mixed is the 487-point class-free curve,
+  and its minimum distance to the admitted saddle is <strong>0.4853 m</strong>. The measurement is a
+  distance from that unchanged polyline, so it does not exercise the class-pinned read on a persisted
+  frame; the repaired path owes that measurement. Gate logs and drivers:
+  <code>~/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/</code>
+  (<code>gate.log</code> and <code>gate.sh</code>, job 1274725; <code>gate2.log</code> and
+  <code>gate2.sh</code>, job 1274744; <code>tests-after.log</code>;
+  <code>negative-control.log</code>, whose first line names the declared mutation).</p>
+
+  <p>Follow-on for the coordinator, in the order the repair needs: give the MAST state request its
+  carrier identity at both stale call sites, then regenerate the MAST operand bank wholesale (the
+  bank's rows carry no class field, so the retained eleven rows and every DIII-D row read
+  <code>unclassified</code> until it is refreshed), then run this node's gate for 22086/43 mixed.</p>
+
+  <p>Ruling, and what it changed here. The coordinator brought the missing
+  <code>carrier_identity</code> inside this node's fence, so the argument is now passed at
+  <code>generate_topology_visuals.py:279</code> from the carrier the row already loads; the second stale
+  call site (<code>reachability_grid_final.py:208</code>) stays outside the fence and is reported. The
+  stale bank is explicitly left alone — no regeneration runs in this node, and the single command that
+  refreshes it is recorded in the run manifest instead. The atlas receipt this node's gate had rewritten
+  is restored to its committed content in the worktree (<code>git checkout HEAD --</code> on that one
+  path, inside the worktree), so no class-less rows land. The gate stays unmeasured and the node stays
+  blocked, with the measurement it owes unchanged: regenerate the bank, then run the 22086/43 gate.</p>
+
+  <p><strong>Superseding ruling: the regeneration ran in this node, and it does not fit an hour.</strong>
+  The coordinator moved the wholesale regeneration inside the fence. Two attempts were submitted as one
+  <code>all_debug</code> allocation each, all six shots named in the single command, <code>TMPDIR=/tmp</code>
+  exported before the submit and inside the payload, <code>JAX_PLATFORMS=cpu</code>,
+  <code>NOVA_COMPILATION_CACHE_ROOT</code> pointed at the pinned pre-warm root, the root interpreter run
+  directly and <code>uv</code> never invoked on the node. Both failed, for unrelated causes, and neither
+  wrote anything on disk: the worktree carries only the source change, because the bank and the atlas
+  receipt are written once, at the end of a pass.</p>
+
+  <p><strong>First attempt (job 1275009, 19 min).</strong> The six-shot route cleared the stale-cache
+  hatch — that is what naming the full set buys — and then raised
+  <code>RuntimeError: the MAST solve returned no observable branch portfolio</code> from
+  <code>generate_topology_visuals.py:286</code> on the very first row, 21978/35, after the row's two
+  solves had already run. The cause is a seam that moved under the renderer and left a hook behind, and it
+  is repaired here. The wrapper forwarded a profile while capturing the <em>portfolio</em> the solve
+  returned (<code>_ObservedProfile.solve_portfolio</code>), and the renderer read the diverted branch's
+  iteration count off that portfolio. Production solves now go through the typed request and receipt
+  (<code>profile.solve(request)</code> at
+  <code>docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py:143</code>), and
+  <code>ForwardProfile.solve</code> builds no <code>ForwardPortfolio</code> on that route —
+  <code>solve_portfolio</code> survives on the profile but no production path calls it. So the wrapper's
+  portfolio stayed <code>None</code> on every row and the guard raised on the first one. The wrapper now
+  intercepts <code>solve</code> and keeps each receipt in call order, and the iteration count is read from
+  the pure arm's own receipt, which is the same solve the portfolio branch used to carry. The bank has
+  not been regenerated since that seam moved in <code>384d759ec</code>, which is why the fault went
+  unreported: nothing had run this path in between.</p>
+
+  <p><strong>Second attempt (job 1275068, 29 min).</strong> With the hook repaired the run made progress:
+  row 21978/35 completed both arms and the replay fields were read for each, and the pass advanced to
+  21983/35. There it died in XLA compilation — <code>execution_engine.cc:54] LLVM compilation error:
+  Cannot allocate memory</code>, thousands of lines of it, ending in a segmentation fault
+  (<code>RENDERER_EXIT=139</code>). The job's own peak resident set was <code>MaxRSS 23.5 GiB</code> against
+  a 64 GiB request, so the ceiling the job asked for is not what it hit; the compile of the next row's
+  module did not fit. That is one row of the twelve, against a 59-minute wall and roughly ten minutes of
+  wall per row: the twelve-row pass cannot complete inside a single <code>*_debug</code> allocation on
+  these partitions, which accept no more than the hour. Naming a subset is refused by the hatch above —
+  the requested set has to equal the available set, so a chunked pass cannot take the stale
+  bank as its retained rows. What the regeneration needs is one compiled pass over
+  the row set, or a pre-warm that warms <em>this</em> driver rather than the test lane, or a partition
+  whose wall is longer than the debug hour.</p>
+
+  <p><strong>The longer regeneration and the named gate close this node's measurement.</strong> One
+  Titan P100 allocation regenerated the six MAST shots and both arms in <code>03:07:00</code>
+  (job <code>1275265</code>, <code>RENDERER_EXIT=0</code>, <code>refreshed_rows=12</code>); every
+  regenerated row carries <code>class=diverted</code>. The bank and metadata are durable at
+  <code>68cfe15ce</code>. The acceptance then ran as one <code>all_debug</code> CPU allocation with
+  <code>TMPDIR=/tmp</code> in the submit environment and payload, <code>JAX_PLATFORMS=cpu</code>, the
+  root interpreter invoked directly and no <code>uv</code> on the node (job <code>1275321</code>,
+  <code>00:27:04</code>, exit <code>0:0</code>). Its receipt records <code>RENDERER_EXIT=0</code>,
+  <code>ATLAS_EXIT=0</code> and <code>MEASURE_EXIT=0</code>. For 22086/43 mixed, the refreshed atlas
+  row carries <code>class=diverted</code>, the boundary has 676 points, the admitted saddle is
+  (0.584978, 1.230503) m, and the boundary-to-saddle minimum is <strong>0.0000 m</strong>: below one
+  lattice pitch, where the stale class-free 487-point curve was 0.4853 m away.</p>
+
+  <figure><img src="/nova/figures/null-identification-authority/convergence-atlas/22086-43-mixed.png"
+  alt="MAST 22086 row 43 mixed terminal flux contours, wall, red class-governed boundary passing through the upper admitted saddle, magnetic axis and EFIT reference nulls">
+  <figcaption>The decisive 22086/43 mixed panel after the class-governed redraw. The red boundary
+  visibly passes through the upper admitted saddle. This worktree predates the later shared
+  null-vocabulary change: the literal glyphs here are a red dot for the Nova axis, a filled
+  <code>X</code> for the admitted saddle, hollow circles or squares for the other qualified X-points,
+  and grey <code>+</code> markers for the EFIT axis and X-points. The separate atlas-vocabulary item
+  owns the triangle/cross redraw; this record does not claim those later glyphs for this bitmap.</figcaption></figure>
+
+  <p>Gate log: <code>~/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/gate-final.log</code>.
+  The committed negative control changes the diverted boundary level to the wall contact flux and
+  reddens the class-anchor case (1 failed, 7 passed), while the fresh-process module gate is recorded
+  beside it in the worker manifest.</p>
+
+  <p><strong>Bookend review repairs.</strong> The review found that the prior renderer read
+  <code>panels[].class</code> from the existing atlas, whose MAST label had been inferred from
+  boundary-point presence. The repair removes that circular authority: each MAST solve receipt's
+  <code>topology_read.diverted</code> is mapped to <code>TopologyClass</code>, persisted as
+  <code>solve_topology_class</code>, and used for both the pinned operator read and the atlas label.
+  The limited end-to-end contract is exercised without an atlas file: a synthetic limited receipt
+  produces label <code>limited</code> and persists the wall-contact flux, while the diverted case
+  persists the admitted saddle flux. The source and focused test changes are in
+  <code>bb89552ad</code> and <code>f2334c8ef</code>; the empty-boundary marker is in
+  <code>51e4d0801</code>.</p>
+
+  <p>The two previously silent MAST panels, <code>21983/35 pure</code> and
+  <code>21986/46 pure</code>, remain geometrically empty in the persisted operand rather than being
+  invented. The atlas now draws and records <code>BoundaryGenerationFailure</code> with the reason
+  <code>the class-governed diverted state has no closed branch in the persisted boundary operand</code>,
+  preserving the wall, contours and null marks while making the missing boundary an explicit
+  receipt failure. The twelve refreshed panels use axes-off atlas rendering; this worktree still
+  carries the pre-shared-vocabulary glyphs (red dot axis, filled <code>X</code> admitted saddle,
+  hollow qualified X-points and grey <code>+</code> EFIT references).</p>
+
+  <p><strong>Gate and instrument evidence.</strong> One <code>all_debug</code> CPU allocation
+  (job <code>1275409</code>) exported <code>TMPDIR=/tmp</code> before submission and inside the
+  payload, set <code>JAX_PLATFORMS=cpu</code>, used the root interpreter directly and invoked no
+  <code>uv</code> on the node. The gate log is
+  <code>~/.config/reckon/crew/runs/r-20260921T091427817554-nia-the-visual-read-carries-the-receipt-class/gate-repair.log</code>:
+  <code>RENDERER_EXIT=0</code>, <code>ATLAS_EXIT=0</code>, <code>MEASURE_EXIT=0</code>;
+  <code>22086/43 mixed</code> has 676 persisted boundary points, admitted saddle
+  (0.5849783456, 1.2305027322) m, minimum distance <strong>0.0000 m</strong>, and
+  <code>atlas_class=diverted</code>. The legacy metadata <code>class</code> field is
+  <code>diverted</code> for all twelve MAST rows; the refreshed 22086/43 pair additionally carries
+  the new solve-owned <code>solve_topology_class</code> field. The two empty rows are explicitly
+  marked as generation failures in the atlas record. The focused test allocation (job
+  <code>1275404</code>) passes 8 tests in 82.66 s, exit 0; the negative control remains the required
+  1 failed / 7 passed red result. The generated receipt and panels land in
+  <code>b51d96717</code>. A wholesale re-generation is still required before the remaining ten
+  bank rows can carry <code>solve_topology_class</code> rather than their legacy class field.</p>
+
+  <p><strong>Final bookend closure (2026-09-22).</strong> The wholesale Titan regeneration
+  (job <code>1275465</code>) returned <code>RENDERER_EXIT=0</code>, twelve replay-ready rows
+  and <code>refreshed_rows=12</code>; the resulting bank has twelve of twelve non-null
+  <code>solve_topology_class</code> values, all <code>diverted</code>, at commit
+  <code>6b0530baa</code>. The acceptance replay and publication ran together in one
+  <code>all_debug</code> CPU allocation from commit <code>ee2ad2d69</code> (job
+  <code>1275502</code>, <code>00:09:21</code>, exit <code>0:0</code>) with
+  <code>TMPDIR=/tmp</code> in submit and payload, <code>JAX_PLATFORMS=cpu</code>, the root
+  interpreter directly and no <code>uv</code> on the node. It records
+  <code>RENDERER_EXIT=0</code>, <code>ATLAS_EXIT=0</code>,
+  <code>MEASURE_EXIT=0</code>, and 9 passed focused tests. The 22086/43 mixed row has 676
+  boundary points, class <code>diverted</code>, admitted saddle (0.5849783456,
+  1.2305027322) m and a minimum boundary-to-saddle distance of
+  <strong>2.1324e-13 m</strong>, below one lattice pitch.</p>
+
+  <p>The end-to-end limited fixture deliberately carries legacy <code>class=diverted</code>
+  beside solve-owned <code>solve_topology_class=limited</code>, crosses the class-pinned
+  read, operand cache and atlas publisher with no pre-existing atlas, and checks the drawn
+  boundary reaches the wall contact. Under the declared mutation, “the solve topology
+  class is read from the pre-existing atlas instead of the solve receipt”, that case alone
+  fails because the publisher emits <code>diverted</code> (job <code>1275503</code>, pytest
+  exit 1 as expected); the production case remains green. Original-resolution image reads
+  confirm 22086/43 mixed draws the red branch through the upper admitted saddle with axes
+  off. The two states with no traceable branch, 21983/35 pure and 21986/46 pure, retain the
+  wall, contours and null marks and show a wrapped <code>BoundaryGenerationFailure</code>
+  caption carrying the complete reason; commit <code>da402ccc9</code> keeps that reason
+  inside the panel. Gate logs are <code>gate-bookend-final.log</code>,
+  <code>negative-control-final.log</code> and <code>atlas-caption-final.log</code> in this
+  node's durable run directory.</p>
+</section>
+<section id="the-reachability-grid-passes-the-carrier-identity">
+  <h2>The reachability-grid driver passes the carrier identity to its MAST state request (2026-09-22)</h2>
+
+  <p><strong>Defect.</strong> <code>_mast_states</code> takes <code>carrier_identity</code> as a
+  required keyword-only argument, so a caller that omits it raises before any solve. The atlas repair
+  brought <code>generate_topology_visuals.py</code> inside its fence and left
+  <code>docs/figures/primary-xpoint-evidence/reachability_grid_final.py</code> outside it, where the
+  call at line 208 still read
+  <code>reachability._mast_states(profile, jnp.asarray(passive_case["state"]), target_current)</code>
+  — three positional arguments and no identity. Alongside that site,
+  <code>efit_topology_corroboration.py</code>, <code>bank_drift_paired_probe.py</code> and
+  <code>jacobian_null_direction.py</code> already forwarded the identity, so this driver was the
+  remaining one that could not be exercised end to end.</p>
+
+  <p><strong>Reproduction, at base revision <code>3ecafdf5a</code>.</strong> Binding the recorded
+  three-argument call against the request signature fails, which is the fault the full-set regeneration
+  reached at <code>generate_topology_visuals.py:279</code>:</p>
+
+  <pre><code>signature: (profile, seed: 'jax.Array', target_current: 'float', *, carrier_identity: 'str')
+REPRO TypeError: missing a required keyword-only argument: 'carrier_identity'</code></pre>
+
+  <p><strong>Repair.</strong> One argument, plus the binding that already held the value. The driver
+  loads the persisted response carrier through <code>_persisted_response_cache</code> and discarded its
+  second return as <code>_carrier</code>; the repair names it <code>carrier</code> and passes
+  <code>carrier["carrier"]["semantic_response_identity"]</code>, which is exactly the expression the
+  atlas generator forwards. Nothing else in the file changed
+  (<code>reachability_grid_final.py</code>, 1 insertion site plus the binding rename).</p>
+
+  <p><strong>Gate.</strong> Login node, one fresh process, <code>JAX_PLATFORMS=cpu</code> implied by the
+  default lane, the shared root environment reused with <code>PYTHONPATH</code> and
+  <code>--no-sync</code>. The test is new
+  (<code>tests/test_reachability_grid_driver.py</code>) and solves nothing: it patches the driver's
+  reconstruction, land-lookup and selection collaborators, runs the MAST panel path
+  (<code>_mast_panels</code>) on a synthesised passive case whose carrier identity is a recorded
+  sentinel, and records the state request instead of performing it. Two cases: the recorded call must
+  carry a <code>carrier_identity</code> equal to the case carrier identity (and the request path must
+  have executed at all, so the pin cannot pass vacuously), and a rotated carrier identity must be
+  forwarded from the carrier evidence rather than from anything constant in the driver.</p>
+
+  <table>
+  <thead><tr><th>arm</th><th>command</th><th>exit</th><th>result</th></tr></thead>
+  <tbody>
+  <tr><td>head</td><td><code>pytest -q tests/test_reachability_grid_driver.py</code></td><td>0</td><td>2 passed in 9.84s</td></tr>
+  <tr><td>negative control</td><td>same, call reverted to three positional arguments</td><td>1</td><td>2 failed in 11.99s</td></tr>
+  </tbody>
+  </table>
+
+  <p><strong>Negative control.</strong> The declared mutation reverts the call to
+  <code>reachability._mast_states(profile, jnp.asarray(passive_case["state"]), target_current)</code>,
+  and the log's first line repeats that mutation verbatim. Both cases redden, so the pin is shown to
+  fire rather than merely to pass; the mutated file is then restored and verified byte-identical to the
+  committed revision. Gate logs live in this node's durable run directory
+  (<code>gate.log</code>, <code>negative-control.log</code>). Implementation at commit
+  <code>0f56a51a5</code>.</p>
+
+  <p><strong>Scope.</strong> The gate measures this node's change only. Verifying the merged atlas-tree
+  result end to end belongs to a separately dispatched test node; the unchanged sites named above are
+  not this node's to alter.</p>
+
+</section>
+<section id="the-jacobian-null-benchmark-names-its-carrier">
+<h2>The Jacobian null-direction benchmark names its response carrier (2026-09-22)</h2>
+
+  <p><strong>The third stale MAST-state call site.</strong> The reachability-grid repair
+  (<code>0f56a51a5</code>) found that <code>benchmarks/jacobian_null_direction.py</code> line 804
+  called <code>settled.reachability._mast_states(observed, jnp.asarray(passive_case["state"]),
+  target_current)</code> with no carrier identity. The persisted response cache is unpacked at line
+  779 as <code>response_cache, carrier_evidence = settled._persisted_response_cache(...)</code>, so
+  the carrier was already in scope and the repair is one argument. The §1 sentence that listed this
+  file among the sites that already pass the identity is wrong; it is corrected in the plan's
+  landing record for this node, not by editing the section text.</p>
+
+  <p><strong>Reproduction.</strong> Reverting that single argument reproduces the recorded failure
+  verbatim: <code>TypeError: _mast_states() missing 1 required keyword-only argument:
+  'carrier_identity'</code> at <code>benchmarks/jacobian_null_direction.py:804</code>, 1 failed. The
+  solve entry point declares <code>carrier_identity</code> as a required keyword
+  (<code>docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py:148</code>), so a row
+  loop that omits it fails before any solve runs.</p>
+
+  <p><strong>The fix.</strong> Line 804 now passes
+  <code>carrier_identity=carrier_evidence["carrier"]["semantic_response_identity"]</code>, the same
+  expression <code>generate_topology_visuals.py</code> and
+  <code>reachability_grid_final.py</code> use. Nothing else in the file changed.</p>
+
+  <p><strong>The instrument.</strong> <code>tests/test_jacobian_null_direction_driver.py</code>
+  drives <code>measure</code>'s own row loop on a synthesised passive case with every collaborator
+  monkeypatched — the carrier cache, the slice selection, the case builder, the passive-inclusive
+  case and the observed-profile producer — and records the keyword the MAST state request receives.
+  Because the recorder declares <code>carrier_identity</code> keyword-only, the omission fails on the
+  same <code>TypeError</code> production raised; the case then asserts the recorded keyword equals
+  the case carrier identity and that the receipt's
+  <code>evidence_inputs.response_carrier</code> carries it as well.</p>
+
+  <p><strong>Gate.</strong> Fresh-process login-node run, seconds, no solve and no allocation:
+  <code>UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH=$PWD MPLBACKEND=Agg uv run --no-sync
+  pytest -p no:cacheprovider -q tests/test_jacobian_null_direction_driver.py</code> — 1 passed in
+  10.61 s, exit 0, at commit <code>c9d6f449</code>. The declared negative control, the
+  one-argument revert at line 804, is red at 1 failed. Logs
+  <code>gate-positive.log</code> and <code>negative-control.log</code> sit in this node's durable run
+  directory, <code>r-20260922T060056781862-nia-the-jacobian-null-benchmark-passes-the-carrier-identity</code>.</p>
+</section>
+<section id="the-convergence-atlas-panels-carry-the-null-vocabulary">
+  <h2 id="the-convergence-atlas-panels-carry-the-null-vocabulary-h">The convergence atlas panels carry the shared null vocabulary</h2>
+  <p>The panels under <code>docs/figures/null-identification-authority/convergence-atlas</code>
+  were drawn while the atlas carried a purpose-built null painter. That painter could show the
+  out-of-vessel candidates <code>draw_nulls</code> drops — which is what the atlas is for — but it
+  spelled its own markers and filled every cross alike, so the cross the solve actually admitted
+  was indistinguishable from a reference null by style. The committed painter fix
+  <code>2b12b210a</code> made the vocabulary expressible; the panels had not been redrawn with it.</p>
+  <p>The renderer now calls the committed <code>nova.media.poloidal.draw_nulls</code> and
+  <code>draw_wall</code>. The magnetic axis is a solid triangle, the admitted saddle a filled cross
+  under the wall containment polygon, and every other qualified null hollow and deliberately
+  unfiltered through <code>other_x_points</code>, so both saddles of a diverted frame stay visible
+  and are distinguished by fill rather than by absence. The marker idiom is read from the shared
+  <code>InkStyle</code> rather than written as literal marker strings, each panel carries a marker key
+  saying which is which, and the receipt records the style it drew with under <code>null_style</code>.</p>
+  <figure>
+    <img src="/nova/figures/null-identification-authority/convergence-atlas/22086-43-mixed.png"
+         alt="MAST 22086/43 mixed, redrawn with the shared null vocabulary">
+    <figcaption>MAST 22086/43 mixed, the one converged bank arm, redrawn: solid-triangle magnetic
+    axis, filled cross at the admitted saddle, hollow crosses for the other qualified nulls, grey
+    crosses for the EFIT references, wall and flux contours in the committed style.</figcaption>
+  </figure>
+  <p>Every panel in the directory was redrawn from the banked states and receipts already on
+  <code>main</code>: the twelve MAST rows and the five DIII-D frames, no new solve, in one
+  <code>all_debug</code> allocation with the root interpreter run directly and <code>uv</code> never
+  invoked on the node. The regenerated <code>convergence-atlas.json</code> keeps its class census:
+  twelve diverted MAST rows, five DIII-D frames and the two <code>BoundaryGenerationFailure</code>
+  markers for <code>21983/35 pure</code> and <code>21986/46 pure</code> with their captions intact.</p>
+  <p>The painter pin is a test rather than a description. A case runs a panel and inspects the
+  artists the figure actually carries: the triangle marker and its axis colour, exactly one filled
+  cross at the admitted saddle coordinates, at least one hollow cross, and that the nulls went
+  through the shared painter with the shared style. A declared mutation that routes the painter
+  through a local style variant, so the axis is a dot and the saddle a faceless lowercase x,
+  reddens it. The gate ran in a fresh process against the base revision: nine passing cases at
+  <code>3ecafdf5a</code>, ten at the change with nothing newly failing.</p>
+</section>
+<section id="the-external-coil-isolation-pin-follows-the-production-census">
+  <h2>The external-coil isolation pin follows the production census (2026-09-22)</h2>
+  <p><strong>Verdict: pin-stale for both parametrizations.</strong> A fresh CPU process at
+  <code>071dbeb386</code> reproduced the two failures before any repair. The coarse production axis
+  was (1.0064725449802572, 0.18466978826118072) m against the test's raw-grid expectation
+  (1.0096852636396698, 0.18645279538409726) m; the fine production axis was
+  (0.9972431622386931, 0.17740956978431402) m against
+  (0.9986607891769985, 0.17424244407984985) m. Both stop on the same axis equality, before the
+  external-coil partition guard runs.</p>
+  <p><strong>The dispatched date bound and all three named suspects are falsified.</strong> Each
+  revision was exported to a separate scratch tree and run in a fresh process; the final nine-row
+  matrix ran under one <code>all_debug</code> allocation. The first 2026-09-15 path landing's parent
+  already fails both cases. So do the first parents of the containment-aware limiter anchor,
+  typed census saddle clip handoff and traced wall-array promotion.</p>
+  <table>
+    <thead><tr><th>Revision</th><th>Subject</th><th>coarse</th><th>fine</th></tr></thead>
+    <tbody>
+      <tr><td><code>7bff1d5d</code></td><td>record the sixth remeasure promotion</td><td>pass</td><td>pass</td></tr>
+      <tr><td><code>47b9f996</code></td><td>Merge the null-identification integration candidate</td><td>fail</td><td>fail</td></tr>
+      <tr><td><code>6f4f14a4</code></td><td>pre-window first parent</td><td>fail</td><td>fail</td></tr>
+      <tr><td><code>fe0689ce</code></td><td>Merge the containment-aware limiter anchor</td><td>fail</td><td>fail</td></tr>
+      <tr><td><code>d90a522f</code></td><td>pass the typed census saddle into the spline-chain clip</td><td>fail</td><td>fail</td></tr>
+      <tr><td><code>192a8ed2</code></td><td>promote wall arrays before traced indexing</td><td>fail</td><td>fail</td></tr>
+    </tbody>
+  </table>
+  <p><strong>The first failing main landing is <code>47b9f996</code>.</strong> That integration made
+  structured production reads consume <code>read_census()</code> and publish the common tensor
+  spline's <code>selected_position_rz</code> and <code>selected_value</code>. The old assertion still
+  compared that output with the raw local-fit candidate from <code>topology.grid()</code>. The exact
+  values introduced there are unchanged at current head, which is why later null-read landings all
+  reproduce the same failure without causing it.</p>
+  <p><strong>The partition check had a separate instrument defect.</strong> It constructed rings in
+  the transposed internal raster order, while <code>DomainMasks.label</code> is returned in the
+  fixture's flat coordinate order. The supposed stable comparison therefore held zero cells at both
+  resolutions. Reading the labels with <code>hex_stencil(shape)</code> yields a positive control and
+  the intended invariant:</p>
+  <table>
+    <thead><tr><th>Case</th><th>In material</th><th>In band</th><th>Interior compared</th><th>Interior changed</th><th>Boundary-local changed</th><th>Stable core → private</th></tr></thead>
+    <tbody>
+      <tr><td>coarse</td><td>327</td><td>262</td><td>65</td><td>0</td><td>17</td><td>0</td></tr>
+      <tr><td>fine</td><td>478</td><td>342</td><td>136</td><td>0</td><td>25</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p>Commit <code>654e63e37</code> repins the two spline-authored axes, cites
+  <code>47b9f996</code> in the assertion message, uses the label-order rings and requires nonempty
+  interior and stable-core sets. Fresh current-head gate: <strong>2 passed in 79.71 s, exit 0</strong>.
+  Declared negative control — the identical repinned file evaluated against pre-landing production
+  <code>7bff1d5d</code>: <strong>2 failed in 75.91 s, exit 1</strong>, on the two old raw-grid axes.
+  Logs and the full transition census are under
+  <code>~/.config/reckon/crew/reports/nova/s19-codex-20260916/nia-attribute-the-coil-null-invariance-failures/</code>.
+  No figure is added: commit order and per-case numeric comparisons are naturally tables.</p>
+</section>
+<section id="the-limiter-read-coupling-feeds-the-complete-census">
+  <h2 id="the-limiter-read-coupling-feeds-the-complete-census-h">The limiter-read wall-coupling diagnostic feeds the complete census</h2>
+  <p>The recorded consumer migration for <code>benchmarks/limiter_read_resolution_audit.py</code>
+  is applied verbatim inside <code>_saddle_wall_coupling</code>, as two hunks and no more:
+  the operand becomes <code>jnp.asarray(analytic)</code> in place of its
+  <code>[: operator.physical_node_number]</code> prefix, and the census pool becomes
+  <code>operator.null_flux_pool(physical)</code> in place of
+  <code>operator._fixed_design_topology.split_flux_map(physical)</code>. The routed pool keeps the
+  direct authored sampling values beside the centroid values, so the existing
+  <code>read_census(grid_flux)</code> call receives the complete state.</p>
+  <p>On the 110-cell diverted single-null analytic hex carrier the operator reports
+  <code>node_number=730</code> (<code>grid_node_number=132</code>, <code>direct_sample_count=477</code>,
+  <code>physical_node_number=253</code>), and the diagnostic runs without raising and records
+  <code>axis_admitted=true</code>, <code>contained_x_candidate_count=3</code> and
+  <code>deduplication_retained_count=3</code>, with the selected X-point at
+  (1.49302256, -1.01883191) m, 9.631e-3 m from the analytic saddle.</p>
+  <figure>
+    <img src="/nova/figures/null-identification-authority/limiter-read-carrier-partition.png"
+         alt="Stacked bar of the carrier's 730 nodes split into 132 grid, 477 direct samples and 121 wall, with the pre-migration 253-node prefix slice marked and the census refusal named">
+    <figcaption>The carrier partition behind the migrated diagnostic. The pre-migration slice kept only
+    the grid and wall nodes (253 of 730) and would have read a null census with no authored sampling
+    values in it; the migrated operand is the whole carrier.</figcaption>
+  </figure>
+  <p>The declared negative control restores the pre-migration prefix slice and drives the migrated
+  consumer with it: the 253-node operand against a carrier whose topology grid carries direct samples
+  is refused with <code>ValueError: own-node null census requires the direct sampling flux values</code>,
+  so the guard is observed to fire rather than assumed to.</p>
+  <p>Gate in one <code>all_debug</code> allocation, root interpreter run directly with <code>uv</code>
+  never invoked on the node: probe exit 0, <strong>7 passed in 2.27 s, exit 0</strong> for
+  <code>tests/test_limiter_read_render.py</code> in a fresh process, negative-control exit 0 carrying
+  the declared refusal. Log: <code>logs/gate.log</code> under this run's directory. The focused render
+  check reads a committed render receipt and imports nothing from the changed function, so it cannot
+  move with this change; no full suite is claimed.</p>
+</section>
+<section id="the-null-detection-knowledge-exchange-cites-record-paths">
+<h2>The null-detection knowledge exchange cites record paths</h2>
+<p>A knowledge-exchange report answering another facility's null-detection questions is written at
+<code>/home/ITER/mcintos/.config/reckon/crew/reports/ship-s13/nova-null-exchange.md</code>. Report-only: no source
+changed, so no gate and no receipt are claimed here; the report's citations are its evidence, and this
+anchor records what it maps and where each mapped record lives.</p>
+<p>The report answers three question groups — the shipped census design and its cost, return on experience,
+and six open issues — by pointing at records that already exist rather than restates them:</p>
+<ul>
+<li>the crossing-count mapping and its Kuijper citation: <code>nova/biot/null.py:143-161</code>;</li>
+<li>the per-cell quadratic-root admission and its containment rule:
+<code>nova/equilibrium/forward_operator.py:1077-1136</code> and <code>nova/biot/null.py:232-259</code>,
+adoption section <a href="#null-generator-adoption">#null-generator-adoption</a>
+(<code>docs/evidence/archive/plasma-cell-topology-authority-landed.html</code>);</li>
+<li>admitted-read device cost and the reduced read:
+<a href="#adopted-read-cost">#adopted-read-cost</a> and <a href="#adopted-read-cost-reduction">#adopted-read-cost-reduction</a>
+(<code>docs/evidence/archive/plasma-cell-topology-authority-landed.html</code>), receipts
+<code>docs/figures/plasma-cell-topology-authority/adopted-read-cost.json</code> and
+<code>.../adopted-read-cost-reduction.json</code>;</li>
+<li>the resolution receipt and its floors: <a href="#resolution-gate">#resolution-gate</a>;</li>
+<li>the overflow found by review and the all-origin fallback: <a href="#census-slot-exhaustion">#census-slot-exhaustion</a>;</li>
+<li>the finite class margin: <a href="#finite-class-margin">#finite-class-margin</a>;</li>
+<li>the operand partition and the settling cost: <a href="#the-operand-partition-is-the-first-stage-that-differs">#the-operand-partition-is-the-first-stage-that-differs</a>
+and <a href="#candidate-trip-doubling">#candidate-trip-doubling</a>;</li>
+<li>the raw-fit census versus its deduplicated representatives: <a href="#x-census-consistency">#x-census-consistency</a>;</li>
+<li>the boundary traced short of its saddle: <a href="#limited-boundary-wall-contact">#limited-boundary-wall-contact</a>
+and <a href="#the-persisted-boundary-follows-the-recorded-class">#the-persisted-boundary-follows-the-recorded-class</a>;</li>
+<li>the non-tautological comparator control, including the repaired bit-for-bit tautology:
+<a href="#accepted-unmoved-authorship">#accepted-unmoved-authorship</a>.</li>
+</ul>
+<p>One premise is corrected rather than answered: the cell-centred-and-vertex-centred twin-loop is not the
+shipped design — the vertex-centred census exists only as the measured spline-orbit prototype
+(<a href="#x-census-consistency">#x-census-consistency</a>), while the shipped admission is the per-cell
+own-node quadratic, with the cyclic sign count retained on spline-sampled ring orbits as a diagnostic that
+reports but no longer vetoes. The landing record for this exchange is in the plan at
+<code>docs/plans/null-identification-authority.html</code> section <code>s5</code>.</p>
 </section>
 </main>
 </body>

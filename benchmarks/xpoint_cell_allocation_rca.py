@@ -766,7 +766,7 @@ def _support_loop(support: Any, cell: int) -> np.ndarray | None:
 
 def _candidate_table(operator: Any, physical: np.ndarray) -> dict[str, Any]:
     """Return the retained O and X candidate rows the production read emits."""
-    grid_flux = operator.topology.split_flux_map(jnp.asarray(physical))[0]
+    grid_flux = operator.null_flux_pool(jnp.asarray(physical))
     status = jax.device_get(
         operator._fixed_design_topology.grid.candidate_table_status(grid_flux)
     )

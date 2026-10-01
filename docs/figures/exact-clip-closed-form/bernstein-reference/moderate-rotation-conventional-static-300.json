@@ -1,0 +1,70 @@
+{
+  "source_sha256": {
+    "nova/linalg/interpolant.py": "92765782005309fa95b30ac0daf2a655f8a8fc75fdcaab4431e72d756d89fa94",
+    "nova/equilibrium/flux_surface_extraction.py": "4ef2050710f7cd098cc9f56c94047b1bb662f5aa8cdee079760fae9f1b48ae66"
+  },
+  "case": "moderate-rotation-conventional-static",
+  "requested_cells": 300,
+  "revision": "368d573db0d56f70f0212eaccc9db5bb27929390",
+  "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
+  "job": "1275884",
+  "comparisons": {
+    "vertices": {
+      "array_equal": false,
+      "relative_l2": 2.0227073610998218e-13,
+      "max_absolute": 4.027347899615563e-12
+    },
+    "crossings": {
+      "array_equal": false,
+      "relative_l2": 2.8066377949783007e-13,
+      "max_absolute": 4.027347899615563e-12
+    },
+    "current": {
+      "array_equal": false,
+      "relative_l2": 1.9088032083076314e-13,
+      "max_absolute": 6.4221694628940895e-09
+    },
+    "radial_moment": {
+      "array_equal": false,
+      "relative_l2": 1.7785383574193788e-12,
+      "max_absolute": 1.3809042798129667e-10
+    },
+    "vertical_moment": {
+      "array_equal": false,
+      "relative_l2": 1.3698328237492763e-12,
+      "max_absolute": 7.323031070427533e-11
+    },
+    "area": {
+      "array_equal": false,
+      "relative_l2": 1.846234986856429e-13,
+      "max_absolute": 6.368386720745356e-15
+    },
+    "first_area_moment": {
+      "array_equal": false,
+      "relative_l2": 1.4343474773372229e-12,
+      "max_absolute": 1.2233103934130782e-16
+    },
+    "second_area_moment": {
+      "array_equal": false,
+      "relative_l2": 1.8997093966550576e-13,
+      "max_absolute": 3.870093536004898e-18
+    },
+    "counts": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    },
+    "live": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    },
+    "refused": {
+      "array_equal": true,
+      "relative_l2": 0.0,
+      "max_absolute": 0.0
+    }
+  },
+  "previous_route_equivalence_1e14": false,
+  "previous_route_equivalence_is_acceptance_gate": false
+}

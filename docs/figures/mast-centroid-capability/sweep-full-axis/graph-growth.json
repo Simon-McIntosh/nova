@@ -1,0 +1,179 @@
+{
+  "artifact": "allocator growth across repeated separatrix-branch assemblies",
+  "assemblies": 20,
+  "device": {
+    "kind": "Tesla P100-PCIE-16GB",
+    "platform": "gpu"
+  },
+  "instrument": "device memory_stats after each call; the alive-graph count has no public accessor and is not what this measures",
+  "lattice_nodes": 65,
+  "rows": [
+    {
+      "assembly": 0,
+      "bytes_in_use": 101888,
+      "num_allocs": 29,
+      "peak_bytes_in_use": 21486592,
+      "wall_seconds": 12.79162353463471,
+      "well_formed": false
+    },
+    {
+      "assembly": 1,
+      "bytes_in_use": 86528,
+      "num_allocs": 58,
+      "peak_bytes_in_use": 21573632,
+      "wall_seconds": 0.882958110421896,
+      "well_formed": false
+    },
+    {
+      "assembly": 2,
+      "bytes_in_use": 102400,
+      "num_allocs": 87,
+      "peak_bytes_in_use": 21573632,
+      "wall_seconds": 0.8817049916833639,
+      "well_formed": false
+    },
+    {
+      "assembly": 3,
+      "bytes_in_use": 134912,
+      "num_allocs": 116,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8822661284357309,
+      "well_formed": false
+    },
+    {
+      "assembly": 4,
+      "bytes_in_use": 86528,
+      "num_allocs": 145,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8845151215791702,
+      "well_formed": false
+    },
+    {
+      "assembly": 5,
+      "bytes_in_use": 86528,
+      "num_allocs": 174,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8821496721357107,
+      "well_formed": false
+    },
+    {
+      "assembly": 6,
+      "bytes_in_use": 88064,
+      "num_allocs": 203,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8837752193212509,
+      "well_formed": false
+    },
+    {
+      "assembly": 7,
+      "bytes_in_use": 105216,
+      "num_allocs": 232,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8840489070862532,
+      "well_formed": false
+    },
+    {
+      "assembly": 8,
+      "bytes_in_use": 89600,
+      "num_allocs": 261,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8836243972182274,
+      "well_formed": false
+    },
+    {
+      "assembly": 9,
+      "bytes_in_use": 134912,
+      "num_allocs": 290,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8836149517446756,
+      "well_formed": false
+    },
+    {
+      "assembly": 10,
+      "bytes_in_use": 90624,
+      "num_allocs": 319,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8840886652469635,
+      "well_formed": false
+    },
+    {
+      "assembly": 11,
+      "bytes_in_use": 92416,
+      "num_allocs": 348,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8835397157818079,
+      "well_formed": false
+    },
+    {
+      "assembly": 12,
+      "bytes_in_use": 90624,
+      "num_allocs": 377,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8832578863948584,
+      "well_formed": false
+    },
+    {
+      "assembly": 13,
+      "bytes_in_use": 92416,
+      "num_allocs": 406,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.883471991866827,
+      "well_formed": false
+    },
+    {
+      "assembly": 14,
+      "bytes_in_use": 92160,
+      "num_allocs": 435,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8845061957836151,
+      "well_formed": false
+    },
+    {
+      "assembly": 15,
+      "bytes_in_use": 94976,
+      "num_allocs": 464,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8829659894108772,
+      "well_formed": false
+    },
+    {
+      "assembly": 16,
+      "bytes_in_use": 91136,
+      "num_allocs": 493,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8828503992408514,
+      "well_formed": false
+    },
+    {
+      "assembly": 17,
+      "bytes_in_use": 131840,
+      "num_allocs": 522,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8833490926772356,
+      "well_formed": false
+    },
+    {
+      "assembly": 18,
+      "bytes_in_use": 92672,
+      "num_allocs": 551,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8831259682774544,
+      "well_formed": false
+    },
+    {
+      "assembly": 19,
+      "bytes_in_use": 93952,
+      "num_allocs": 580,
+      "peak_bytes_in_use": 21622016,
+      "wall_seconds": 0.8824474532157183,
+      "well_formed": false
+    }
+  ],
+  "summary": {
+    "allocator_stats_available": true,
+    "bytes_in_use_first": 101888,
+    "bytes_in_use_growth": -7936,
+    "bytes_in_use_last": 93952,
+    "monotonic_growth": false
+  }
+}

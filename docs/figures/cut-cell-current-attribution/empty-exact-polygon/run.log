@@ -1,0 +1,8 @@
+IN_QUEUE
+/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-empty-exact-polygon-per-cell-attribution/benchmarks/empty_exact_polygon_probe.py:213: DeprecationWarning: Bitwise inversion '~' on bool is deprecated and will be removed in Python 3.16. This returns the bitwise inversion of the underlying int object and is usually not what you expect from negating a bool. Use the 'not' operator for boolean negation or ~int(x) if you really want the bitwise inversion of the underlying int.
+  int(edge) for edge in np.flatnonzero(straddle & ~participates)
+seed: boundary=35.8528226 Wb participation=135/135 exact_area_total=1.046502e+01 post_arc_matches=0/8 crossing_matches=0/8
+terminal: boundary=10.3951318 Wb participation=135/135 exact_area_total=2.047412e+01 post_arc_matches=0/8 crossing_matches=0/8
+EMPTY_EXACT_POLYGON_REPORT_EXIT=0
+EXIT=0
+LEFT_QUEUE

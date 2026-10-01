@@ -1,0 +1,108 @@
+{
+  "caption": "terminal poloidal flux on shared levels between the axis and boundary flux (0.3412 to -0.1229 Wb) | every solved state imposes the vertical current-centre row (none recorded in this archive) | reference is the unedited equilibrium, an upper-null state whose admitted saddle sits above its axis, while every solved state admits a lower null (blue, admitted saddle above its axis) | reference set blue: unassembled, crossings drawn unconnected, admitted saddle (0.585, +1.231) m, as drawn 1 admitted filled, no other qualified nulls | solved set orange: lobe solid, legs dashed, admitted saddle (0.621, -1.303) m, as drawn 1 admitted filled, no other qualified nulls | wall drawn",
+  "converged": {
+    "achieved_class": "diverted",
+    "branches": {
+      "axis_enclosing_component_count": 1,
+      "boundary_flux": -0.07618244635139551,
+      "closed_candidate_count": 1,
+      "closed_segment_count": 67,
+      "cycle_component_count": 1,
+      "open_branch_count": 2,
+      "source": "raster-saddle",
+      "well_formed": true
+    },
+    "branches_drawn": {
+      "closed_drawn": 1,
+      "open_drawn": 2,
+      "unassembled": 0
+    },
+    "converged": true,
+    "edit_index": 7,
+    "fraction": -0.04000000000000009,
+    "nulls_drawn": {
+      "other_x_points_drawn": 0,
+      "strike_points_drawn": 0,
+      "x_points_drawn": 1,
+      "x_points_dropped_outside_wall": 0
+    },
+    "residual": 5.0334295713128155e-09,
+    "termination": "converged",
+    "trips": 1
+  },
+  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-make-the-coil-edit-records-carry-their-own-numbers/docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+  "figure_vector": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-make-the-coil-edit-records-carry-their-own-numbers/docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.svg",
+  "level_band": {
+    "axis_flux": 0.34121722002326105,
+    "boundary_flux": -0.12292990492126646
+  },
+  "levels": [
+    -0.12292990492126646,
+    -0.08722627992553358,
+    -0.051522654929800696,
+    -0.015819029934067808,
+    0.019884595061665067,
+    0.05558822005739794,
+    0.09129184505313084,
+    0.12699547004886372,
+    0.1626990950445966,
+    0.19840272004032947,
+    0.23410634503606234,
+    0.2698099700317952,
+    0.3055135950275282,
+    0.34121722002326105
+  ],
+  "non_converged": {
+    "achieved_class": "diverted",
+    "branches": {
+      "axis_enclosing_component_count": 1,
+      "boundary_flux": -0.0735659077902808,
+      "closed_candidate_count": 1,
+      "closed_segment_count": 67,
+      "cycle_component_count": 1,
+      "open_branch_count": 2,
+      "source": "raster-saddle",
+      "well_formed": true
+    },
+    "branches_drawn": {
+      "closed_drawn": 1,
+      "open_drawn": 2,
+      "unassembled": 0
+    },
+    "converged": false,
+    "edit_index": 6,
+    "fraction": -0.06000000000000008,
+    "nulls_drawn": {
+      "other_x_points_drawn": 0,
+      "strike_points_drawn": 0,
+      "x_points_drawn": 1,
+      "x_points_dropped_outside_wall": 0
+    },
+    "residual": 0.004422369075619115,
+    "termination": "active_set_settled",
+    "trips": 1
+  },
+  "receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-make-the-coil-edit-records-carry-their-own-numbers/docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.json",
+  "reference_branches": {
+    "axis_enclosing_component_count": 1,
+    "boundary_flux": -0.12292990492126646,
+    "closed_candidate_count": 0,
+    "closed_segment_count": 0,
+    "cycle_component_count": 1,
+    "open_branch_count": 0,
+    "source": "raster-saddle",
+    "well_formed": false
+  },
+  "reference_branches_drawn": {
+    "closed_drawn": 0,
+    "open_drawn": 0,
+    "unassembled": 1
+  },
+  "reference_nulls_drawn": {
+    "other_x_points_drawn": 0,
+    "strike_points_drawn": 0,
+    "x_points_drawn": 1,
+    "x_points_dropped_outside_wall": 0
+  },
+  "vertical_centroid": null
+}

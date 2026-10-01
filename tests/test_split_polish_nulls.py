@@ -310,8 +310,15 @@ def test_accepted_unmoved_polish_preserves_census_value_bits():
     radial = jnp.linspace(-1.0, 1.0, 33)
     vertical = jnp.linspace(-1.0, 1.0, 33)
     radial_grid, vertical_grid = jnp.meshgrid(radial, vertical)
-    census_value = jnp.asarray(0.37)
-    values = census_value + radial_grid**2 + vertical_grid**2
+    map_value_at_seed = jnp.asarray(0.37)
+    # The census slot carries a value offset from the common map's value at the
+    # seed, so the published value can be told apart from the slot it was
+    # selected from. The adopted exact quadratic reproduces a paraboloid value
+    # bit for bit, so an inequality between the published bytes and the census
+    # bytes is not evidence of authorship; equality with the map's own value at
+    # the seed is.
+    census_value = map_value_at_seed + jnp.asarray(2.0) ** -40
+    values = map_value_at_seed + radial_grid**2 + vertical_grid**2
     selected_extremum = jnp.asarray((0.0, 0.0, census_value, -1.0))
     absent_saddle = jnp.full_like(selected_extremum, jnp.nan)
 
@@ -332,7 +339,10 @@ def test_accepted_unmoved_polish_preserves_census_value_bits():
         np.asarray(receipt["selected_position_rz"][0]),
         np.asarray(selected_extremum[:2]),
     )
-    # An accepted unmoved slot publishes the common-map value bit-for-bit.
+    # An accepted unmoved slot publishes the common map's value at the seed,
+    # not the census entry it was selected from, bit for bit. The census slot
+    # is byte-distinct from that map value by construction, so this equality
+    # is what attributes the published value to the map's own author.
     assert (
         np.asarray(extremum[2]).tobytes()
         == np.asarray(receipt["spline_value"][0]).tobytes()
@@ -341,7 +351,11 @@ def test_accepted_unmoved_polish_preserves_census_value_bits():
     assert bool(receipt["complete_map"][0])
     assert np.isfinite(float(receipt["local_value_evidence"][0]))
     assert np.isfinite(float(receipt["fit_value"][0]))
-    assert np.asarray(extremum[2]).tobytes() != np.asarray(census_value).tobytes()
+    assert np.asarray(census_value).tobytes() != np.asarray(map_value_at_seed).tobytes()
+    field_span = jnp.max(values) - jnp.min(values)
+    assert abs(float(extremum[2]) - float(map_value_at_seed)) / float(
+        field_span
+    ) <= float(receipt["value_consistency_tolerance"][0])
     assert bool(receipt["local_value_consistent"][0])
     assert not bool(receipt["value_replaced"][0])
 
@@ -372,12 +386,22 @@ def test_mast_unmoved_saddle_keeps_census_flux_and_reports_fit_misrepresentation
     seed_position = jnp.asarray(slot["seed_position_rz_m"])
     census_value = jnp.asarray(slot["seed_value_wb"])
     published_fit_value = float(slot["polished_value_wb"])
-    # Replay bank 52cad98a follows corroboration bank ed9bb793.
+    # The refreshed bank keeps the upper saddle and publishes its typed-census position.
     np.testing.assert_allclose(
-        bank_saddle, [0.5917516875565209, 1.219749197600917], atol=5.0e-9
+        bank_saddle,
+        [0.5892573682268838, 1.216816481138625],
+        atol=5.0e-9,
+        err_msg=(
+            "68cfe15c retained the same upper saddle while regenerating its "
+            "spline-authored typed-census position"
+        ),
     )
     assert np.linalg.norm(np.asarray(seed_position) - bank_saddle) == pytest.approx(
-        3.059905079630436e-3, abs=1.0e-12
+        6.518424646460277e-3,
+        abs=1.0e-12,
+    ), (
+        "68cfe15c retained the same upper saddle while regenerating its "
+        "spline-authored typed-census position"
     )
 
     radial = jnp.asarray(np.unique(operand_coordinate[:, 0]))

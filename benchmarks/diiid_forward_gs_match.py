@@ -40,6 +40,7 @@ import numpy as np
 from matplotlib.path import Path as PolygonPath
 from scipy.constants import mu_0
 from scipy.interpolate import RectBivariateSpline
+from scipy.spatial import cKDTree
 
 from benchmarks.diiid_state_of_play_figures import boundary_gradient_minimum
 
@@ -658,6 +659,13 @@ def _array_sha256(values: np.ndarray) -> str:
     return identity.hexdigest()
 
 
+def _census_flux_pool(operator, state):
+    """Use the operator's authored pool, or a grid-only diagnostic adapter."""
+    if hasattr(operator, "null_flux_pool"):
+        return operator.null_flux_pool(state)
+    return operator.topology.split_flux_map(jnp.asarray(state))[0]
+
+
 def candidate_flux_margins(
     operator, physical: Any, *, polarity: float
 ) -> dict[str, Any]:
@@ -671,9 +679,9 @@ def candidate_flux_margins(
     null and the count stands.
     """
 
-    grid_flux = operator.topology.split_flux_map(jnp.asarray(physical))[0]
+    flux_pool = _census_flux_pool(operator, physical)
     table = operator._fixed_design_topology.grid
-    status = jax.device_get(table.candidate_table_status(grid_flux))
+    status = jax.device_get(table.candidate_table_status(flux_pool))
     candidates = np.asarray(status["retained_candidate"], dtype=float)
     valid = np.asarray(status["retained_valid"], dtype=bool)
     count = np.asarray(status["candidate_count"], dtype=int)
@@ -1386,6 +1394,62 @@ def _assembled_boundary_geometry(
     return closed, open_branches
 
 
+def _grid_axis_rz(
+    radius: np.ndarray,
+    height: np.ndarray,
+    flux: np.ndarray,
+    axis: float,
+    boundary: float,
+) -> np.ndarray:
+    """Locate the enclosed O-point on the solve grid.
+
+    Flux is extremal at the magnetic axis and monotone toward the LCFS, so the
+    sign of the boundary-minus-axis span selects which grid extremum is the
+    axis: a boundary above the axis value makes the axis the flux minimum, and
+    a boundary below it makes the axis the flux maximum.  The branch assembler
+    reads the axis coordinate only to choose the lobe that encloses it, so a
+    grid-index location is sufficient.
+    """
+
+    field = np.asarray(flux, dtype=float)
+    flat = np.nanargmin(field) if boundary > axis else np.nanargmax(field)
+    radial_index, vertical_index = np.unravel_index(flat, field.shape)
+    return np.asarray(
+        [
+            np.asarray(radius, dtype=float)[radial_index],
+            np.asarray(height, dtype=float)[vertical_index],
+        ],
+        dtype=float,
+    )
+
+
+def _separatrix(
+    radius: np.ndarray,
+    height: np.ndarray,
+    flux: np.ndarray,
+    axis: float,
+    boundary: float,
+) -> np.ndarray:
+    """Return the assembled closed boundary of a solved flux field.
+
+    The geometry is the axis-enclosing branch of
+    :func:`nova.equilibrium.separatrix_branches.assemble_separatrix_branches`
+    sampled to ordered R,Z vertices, so a solved field and a traced one share
+    one boundary construction.  An assembly that yields no closed branch
+    returns an empty array, which the callers' vertex-count check reads as an
+    undrawable boundary.
+    """
+
+    closed, _open_branches = _assembled_boundary_geometry(
+        flux,
+        radius,
+        height,
+        float(boundary),
+        _grid_axis_rz(radius, height, flux, axis, boundary),
+    )
+    return closed
+
+
 def _terminal_boundary_geometry(
     equilibrium: object, assembled_closed_boundary: np.ndarray
 ) -> np.ndarray:
@@ -1415,6 +1479,20 @@ def gauge_metrics(
     reference_rms = float(np.sqrt(np.mean((actual - np.mean(actual)) ** 2)))
     fractional_rms = float(np.sqrt(np.mean(residual**2)) / reference_rms)
     return r_squared, fractional_rms, gauge, predicted + gauge
+
+
+def contour_separation(
+    predicted: np.ndarray, labelled: np.ndarray
+) -> tuple[float, float]:
+    """Return symmetric nearest-contour radial separations in millimetres."""
+
+    if len(predicted) < 2 or len(labelled) < 2:
+        return float("nan"), float("nan")
+    distances = np.r_[
+        cKDTree(labelled).query(predicted)[0],
+        cKDTree(predicted).query(labelled)[0],
+    ]
+    return 1000.0 * float(np.mean(distances)), 1000.0 * float(np.max(distances))
 
 
 def _polygon_area_centroid(boundary_rz_m: np.ndarray) -> np.ndarray:
@@ -3236,7 +3314,9 @@ def _terminal_xpoint_diagnostics(profile, state, topology) -> dict[str, Any]:
     if coordinate.shape != expected.shape or not np.array_equal(coordinate, expected):
         raise ValueError("margin diagnostics require a tensor-product grid")
     grid_flux, wall_flux = operator.topology.split_flux_map(physical)
-    _vmap_o, vmap_x = operator._fixed_design_topology.grid(grid_flux)
+    _vmap_o, vmap_x = operator._fixed_design_topology.grid(
+        _census_flux_pool(operator, state)
+    )
     classification_wall = jnp.concatenate(
         (topology.wall_point, topology.wall_point_flux[None])
     )

@@ -1,0 +1,27 @@
+{
+  "revision": "6ac6f8c4b03e29bcbe86550d5de56b6e0e2774f4",
+  "base_revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+  "case": "diverted-single-null",
+  "requested_cells": 110,
+  "realised_cells": 132,
+  "cut_cells": 36,
+  "refused_cell_count": 0,
+  "refusal_message": null,
+  "moment_relative_l2": {
+    "current": 1.6124502780952485e-16,
+    "radial": 4.803398077621088e-16,
+    "vertical": 4.34536200446477e-16,
+    "radial_squared": 1.8998362529887713e-16,
+    "radial_vertical": 5.453690411918883e-16,
+    "vertical_squared": 2.705798153877749e-16
+  },
+  "frozen_image_sup_over_span": 4.861232291633413e-15,
+  "image_positive_control_sup_over_span": 0.0035114495095922914,
+  "image_floor": 1.52e-15,
+  "moment_tolerance": 1e-12,
+  "passed": false,
+  "job": "1275743",
+  "backend": "cpu",
+  "evaluations_before": 621,
+  "evaluations_after": 25
+}

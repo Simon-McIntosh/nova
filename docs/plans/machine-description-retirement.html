@@ -20,8 +20,8 @@
   <title>Retire the Bespoke Machine-Description Layer | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-version" content="3">
 <meta name="plan-effort-hours" content="12.0">
 </head>
 <body>
@@ -136,20 +136,20 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="removal-style" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="removal-style" data-choice="clean-deletion" data-by="Simon McIntosh" data-when="2026-10-01T20:41:50+00:00">
     <p class="r-dec-q">Clean deletion in one beat, or a deprecation window where both the
           registry and the producer serve descriptions?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="clean-deletion">clean deletion once equivalence is demonstrated</button>
+      <button class="r-opt chosen" data-value="clean-deletion">clean deletion once equivalence is demonstrated</button>
       <button class="r-opt" data-value="deprecation-window">deprecation window with both paths live</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-10-01. Delete the bespoke registry in one step once f-mdr-001 shows the ambix producer yields the same description: all 44 described loop positions unique, the solve-input join at 43 of 46, and identical conductor geometry. nova carries no backward-compatibility constraint. A deprecation window keeps two sources of one description live, which is exactly the duplication the retirement removes. The demonstrated equivalence is what makes a clean deletion safe. Accepted cost: any consumer missed by the §3 inventory breaks at deletion rather than during a window.</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mdr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship machine-description-retirement §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mdr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-build machine-description-retirement §4" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Demonstrate description equivalence through the producer before deleting anything</h4>
     <div class="r-fu-body"><p>The gate that makes the removal safe rather than hopeful:
         drive the ambix producer's MAST map and show it yields the same description nova's
@@ -157,7 +157,7 @@
         43 of 46, and the conductor geometry numerically identical. A demonstrated equivalence is
         what turns the §3 inventory from a deletion into a migration. Nothing is removed under
         this followup.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship machine-description-retirement §4</pre>
+    <pre class="r-fu-prompt">/reckon-build machine-description-retirement §4</pre>
     </article>
 </section>
   </main>

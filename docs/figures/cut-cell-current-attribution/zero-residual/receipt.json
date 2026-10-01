@@ -5,30 +5,134 @@
     "host": "98dci4-clu-3141.iter.org",
     "kind": "cpu",
     "platform": "cpu",
-    "slurm_job_id": "1271078"
+    "slurm_job_id": "1275786"
   },
-  "driver_sha256": "ae46f483be84870ccd8daa81b141c8ca1b315284efd2ef45b9ee9b3a86666675",
+  "driver_sha256": "61db99e7815005ac50dc28a168f885b15ae6daf2388c24cf770ee2de4f937929",
   "figure": {
     "png_relative": "docs/figures/cut-cell-current-attribution/zero-residual/panels/zero-residual-map.png",
     "render_source": "zero_residual_check",
-    "sha256": "886803d937901684aa55052d420248b399261d82df69acd1fe08f0f7fee699ff",
+    "sha256": "91fb7d71d9a2c264d9ed7fa987f66f9a77e1c5eda1d1009c6bda14511e82ca01",
     "src": "/nova/figures/cut-cell-current-attribution/zero-residual/panels/zero-residual-map.png"
   },
+  "panels": [
+    {
+      "case": "weak-rotation-reactor-static",
+      "kind": "terminal_flux",
+      "level_count": 10,
+      "levels_inside_raster": 8,
+      "levels_wb": [
+        -12.57141928806472,
+        -6.546858634450527,
+        -0.5222979808363348,
+        5.502262672777858,
+        11.52682332639205,
+        17.551383980006243,
+        23.575944633620438,
+        29.600505287234625,
+        35.62506594084882,
+        41.649626594463015
+      ],
+      "null_glyphs": {
+        "reference_axis": 1,
+        "reference_x_points": 0,
+        "solved_axis": 1,
+        "solved_other_x_points": 0,
+        "solved_x_points": 0,
+        "solved_x_points_dropped_outside_wall": 0
+      },
+      "persisted_raster_present": true,
+      "raster_max_wb": 41.649626594463015,
+      "raster_min_wb": -12.57141928806472,
+      "reference_receipt": "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows/weak-rotation-reactor-static-production-route-cells-2500.json",
+      "title": "weak-rotation-reactor-static terminal flux (persisted)  levels=10\nresidual=0.000e+00  converged=True"
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "kind": "relative_residual",
+      "level_count": 8,
+      "levels_relative_span": [
+        0.00011900753575153502,
+        0.10316570391560599,
+        0.20621240029546045,
+        0.3092590966753149,
+        0.4123057930551694,
+        0.5153524894350239,
+        0.6183991858148783,
+        0.7214458821947328
+      ],
+      "title": "weak-rotation-reactor-static |map-state|/|span|  levels=8\nresidual=0.000e+00  converged=True"
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "kind": "terminal_flux",
+      "level_count": 10,
+      "levels_inside_raster": 8,
+      "levels_wb": [
+        -0.37380983967588405,
+        -0.2035816570126283,
+        -0.033353474349372525,
+        0.1368747083138832,
+        0.307102890977139,
+        0.4773310736403948,
+        0.6475592563036505,
+        0.8177874389669064,
+        0.9880156216301621,
+        1.1582438042934178
+      ],
+      "null_glyphs": {
+        "reference_axis": 1,
+        "reference_x_points": 0,
+        "solved_axis": 1,
+        "solved_other_x_points": 0,
+        "solved_x_points": 0,
+        "solved_x_points_dropped_outside_wall": 0
+      },
+      "persisted_raster_present": true,
+      "raster_max_wb": 1.1582438042934178,
+      "raster_min_wb": -0.37380983967588405,
+      "reference_receipt": "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows/moderate-rotation-conventional-static-production-route-cells-2500.json",
+      "title": "moderate-rotation-conventional-static terminal flux (persisted)  levels=10\nresidual=2.011e-03  converged=False"
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "kind": "relative_residual",
+      "level_count": 8,
+      "levels_relative_span": [
+        7.85904262136884e-05,
+        0.10455819577713237,
+        0.20903780112805104,
+        0.3135174064789697,
+        0.41799701182988835,
+        0.5224766171808071,
+        0.6269562225317258,
+        0.7314358278826444
+      ],
+      "title": "moderate-rotation-conventional-static |map-state|/|span|  levels=8\nresidual=2.011e-03  converged=False"
+    }
+  ],
+  "render_only": {
+    "rows": [
+      "weak-rotation-reactor-static",
+      "moderate-rotation-conventional-static"
+    ],
+    "source_revision": "9d62c8f4cf31bae5b105ef32e17860b5dde6877e"
+  },
+  "render_receipt": "docs/figures/cut-cell-current-attribution/zero-residual/render-receipt.json",
   "rows": {
     "moderate-rotation-conventional-static": {
       "cache": {
         "fixture_exterior": {
           "build_seconds": 0.0,
           "hit": true,
-          "lock_wait_seconds": 6.3944607973098755e-06,
+          "lock_wait_seconds": 6.260350346565247e-06,
           "semantic_key": "eb75e195a0186b7a",
           "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
         },
         "machine": {
           "build_seconds": 0.0,
           "hit": true,
-          "load_seconds": 0.5066392291337252,
-          "lock_wait_seconds": 1.5616416931152344e-05,
+          "load_seconds": 0.5936524663120508,
+          "lock_wait_seconds": 8.862465620040894e-06,
           "semantic_key": "89cbacdfc568073c",
           "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_2500.zarr",
           "store_seconds": 0.0
@@ -50,55 +154,55 @@
       "sample_node_number": 6381,
       "schema": "nova.zero-residual-check-row",
       "source_part_relative": "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows/moderate-rotation-conventional-static-production-route-cells-2500.json",
-      "source_revision": "fb80e97511ea48ca8ac107d4a87fce50792a6154",
-      "span_wb": -1.3328073995319099,
+      "source_revision": "9d62c8f4cf31bae5b105ef32e17860b5dde6877e",
+      "span_wb": -1.3328285586986954,
       "state_length": 9123,
       "statistics": {
         "masked_diff": {
           "cold": {
-            "count": 9050,
-            "relative_rms": 0.0004983547616012321,
-            "relative_sup": 0.001748524686020884,
-            "rms": 0.000664210913854083,
-            "sup": 0.0023304466397928436
+            "count": 9123,
+            "relative_rms": 0.031519262997927046,
+            "relative_sup": 0.8256114730347708,
+            "rms": 0.04200977387277223,
+            "sup": 1.1003985496500404
           },
           "promoted": {
-            "count": 9050,
-            "relative_rms": 0.0004983547616012321,
-            "relative_sup": 0.001748524686020884,
-            "rms": 0.000664210913854083,
-            "sup": 0.0023304466397928436
+            "count": 9123,
+            "relative_rms": 0.031519262997927046,
+            "relative_sup": 0.8256114730347708,
+            "rms": 0.04200977387277223,
+            "sup": 1.1003985496500404
           }
         },
         "physical_unmasked": {
           "argmax_index": 697,
-          "sup_all": 1.1235770982548257,
-          "sup_entering_cold": 0.0023304466397928436,
-          "sup_entering_promoted": 0.0023304466397928436,
-          "sup_shadowed_cold": 1.1235770982548257,
-          "sup_shadowed_promoted": 1.1235770982548257
+          "sup_all": 1.1003985496500404,
+          "sup_entering_cold": 1.1003985496500404,
+          "sup_entering_promoted": 1.1003985496500404,
+          "sup_shadowed_cold": null,
+          "sup_shadowed_promoted": null
         },
         "profile_owned": {
-          "entering_cold": 2548,
-          "profile_total": 2548
+          "entering_cold": 2621,
+          "profile_total": 2621
         },
         "shadow_census_cold": {
-          "entering": 9050,
-          "excluded": 73,
-          "excluded_fraction": 0.00800175380905404,
+          "entering": 9123,
+          "excluded": 0,
+          "excluded_fraction": 0.0,
           "total": 9123
         },
         "shadow_census_promoted": {
-          "entering": 9050,
-          "excluded": 73,
-          "excluded_fraction": 0.00800175380905404,
+          "entering": 9123,
+          "excluded": 0,
+          "excluded_fraction": 0.0,
           "total": 9123
         },
         "solver_scalar": {
           "persisted": null,
-          "recomputed_cold": 0.002010600391482564,
-          "recomputed_promoted": 0.002010600391482564,
-          "unmasked_all_carriers": 0.9693697830441665
+          "recomputed_cold": 0.9375378797078707,
+          "recomputed_promoted": 0.9375378797078707,
+          "unmasked_all_carriers": 0.9375378797078707
         }
       },
       "topology": {
@@ -107,10 +211,10 @@
           1.669584363075094,
           0.0012688806955203434
         ],
-        "boundary_flux_wb": -0.17434058355697607,
+        "boundary_flux_wb": -0.1743617427237616,
         "class": "limited",
         "exception_text": null,
-        "flux_span_wb": -1.3328073995319099,
+        "flux_span_wb": -1.3328285586986954,
         "o_candidate_count": 1,
         "o_second_best_flux_margin_wb": null,
         "read_status": "qualified_axis",
@@ -119,22 +223,22 @@
         "x_second_best_flux_margin_wb": null
       },
       "wall_node_number": 121,
-      "wall_seconds": 55.15303027071059
+      "wall_seconds": 49.39278674684465
     },
     "weak-rotation-reactor-static": {
       "cache": {
         "fixture_exterior": {
           "build_seconds": 0.0,
           "hit": true,
-          "lock_wait_seconds": 8.441507816314697e-06,
+          "lock_wait_seconds": 7.912516593933105e-06,
           "semantic_key": "8f2a98c27aa3a475",
           "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
         },
         "machine": {
           "build_seconds": 0.0,
           "hit": true,
-          "load_seconds": 0.5152259673923254,
-          "lock_wait_seconds": 1.4727935194969177e-05,
+          "load_seconds": 0.6016387790441513,
+          "lock_wait_seconds": 1.5875324606895447e-05,
           "semantic_key": "78af4c9e26323151",
           "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_2500.zarr",
           "store_seconds": 0.0
@@ -156,55 +260,55 @@
       "sample_node_number": 6280,
       "schema": "nova.zero-residual-check-row",
       "source_part_relative": "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows/weak-rotation-reactor-static-production-route-cells-2500.json",
-      "source_revision": "fb80e97511ea48ca8ac107d4a87fce50792a6154",
-      "span_wb": -47.59430613890367,
+      "source_revision": "9d62c8f4cf31bae5b105ef32e17860b5dde6877e",
+      "span_wb": -47.594134605475254,
       "state_length": 9009,
       "statistics": {
         "masked_diff": {
           "cold": {
-            "count": 8955,
-            "relative_rms": 1.0602451656716067e-15,
-            "relative_sup": 4.777329346490387e-15,
-            "rms": 5.0461632997267086e-14,
-            "sup": 2.2737367544323206e-13
+            "count": 9009,
+            "relative_rms": 0.03248481740794173,
+            "relative_sup": 0.8877379489842326,
+            "rms": 1.5460867723478644,
+            "sup": 42.25111943834409
           },
           "promoted": {
-            "count": 8955,
-            "relative_rms": 1.0602451656716067e-15,
-            "relative_sup": 4.777329346490387e-15,
-            "rms": 5.0461632997267086e-14,
-            "sup": 2.2737367544323206e-13
+            "count": 9009,
+            "relative_rms": 0.03248481740794173,
+            "relative_sup": 0.8877379489842326,
+            "rms": 1.5460867723478644,
+            "sup": 42.25111943834409
           }
         },
         "physical_unmasked": {
           "argmax_index": 1054,
-          "sup_all": 44.11443748514162,
-          "sup_entering_cold": 2.2737367544323206e-13,
-          "sup_entering_promoted": 2.2737367544323206e-13,
-          "sup_shadowed_cold": 44.11443748514162,
-          "sup_shadowed_promoted": 44.11443748514162
+          "sup_all": 42.25111943834409,
+          "sup_entering_cold": 42.25111943834409,
+          "sup_entering_promoted": 42.25111943834409,
+          "sup_shadowed_cold": null,
+          "sup_shadowed_promoted": null
         },
         "profile_owned": {
-          "entering_cold": 2554,
-          "profile_total": 2554
+          "entering_cold": 2608,
+          "profile_total": 2608
         },
         "shadow_census_cold": {
-          "entering": 8955,
-          "excluded": 54,
-          "excluded_fraction": 0.005994005994005994,
+          "entering": 9009,
+          "excluded": 0,
+          "excluded_fraction": 0.0,
           "total": 9009
         },
         "shadow_census_promoted": {
-          "entering": 8955,
-          "excluded": 54,
-          "excluded_fraction": 0.005994005994005994,
+          "entering": 9009,
+          "excluded": 0,
+          "excluded_fraction": 0.0,
           "total": 9009
         },
         "solver_scalar": {
           "persisted": null,
-          "recomputed_cold": 5.458057583629558e-15,
-          "recomputed_promoted": 5.458057583629558e-15,
-          "unmasked_all_carriers": 1.0589578569021467
+          "recomputed_cold": 0.9871334004495274,
+          "recomputed_promoted": 0.9871334004495274,
+          "unmasked_all_carriers": 0.9871334004495274
         }
       },
       "topology": {
@@ -213,10 +317,10 @@
           6.095776173942807,
           7.075306581460396e-05
         ],
-        "boundary_flux_wb": -5.9345186185688705,
+        "boundary_flux_wb": -5.934347085140457,
         "class": "limited",
         "exception_text": null,
-        "flux_span_wb": -47.59430613890367,
+        "flux_span_wb": -47.594134605475254,
         "o_candidate_count": 1,
         "o_second_best_flux_margin_wb": null,
         "read_status": "qualified_axis",
@@ -225,19 +329,19 @@
         "x_second_best_flux_margin_wb": null
       },
       "wall_node_number": 121,
-      "wall_seconds": 55.89032275788486
+      "wall_seconds": 49.75436280854046
     }
   },
   "schema": "nova.zero-residual-check-acceptance",
-  "source_revision": "fb80e97511ea48ca8ac107d4a87fce50792a6154",
+  "source_revision": "9d62c8f4cf31bae5b105ef32e17860b5dde6877e",
   "verdict": {
     "moderate_2500": {
-      "entering_carriers": 9050,
+      "entering_carriers": 9123,
       "qualification": "unqualified",
       "recorded_scalar": 0.002010600391485635,
-      "unmasked_sup_all": 1.1235770982548257,
-      "unmasked_sup_entering": 0.0023304466397928436,
-      "unmasked_sup_shadowed": 1.1235770982548257
+      "unmasked_sup_all": 1.1003985496500404,
+      "unmasked_sup_entering": 1.1003985496500404,
+      "unmasked_sup_shadowed": null
     },
     "qualification_bound_trace": {
       "application_lines": [
@@ -260,14 +364,14 @@
     },
     "weak_2500": {
       "converged": true,
-      "entering_carriers": 8955,
+      "entering_carriers": 9009,
       "qualification": "unqualified",
-      "recomputed_promoted_scalar": 5.458057583629558e-15,
+      "recomputed_promoted_scalar": 0.9871334004495274,
       "recorded_scalar": 0.0,
-      "unmasked_relative_scalar": 1.0589578569021467,
-      "unmasked_sup_all": 44.11443748514162,
-      "unmasked_sup_entering": 2.2737367544323206e-13,
-      "unmasked_sup_shadowed": 44.11443748514162,
+      "unmasked_relative_scalar": 0.9871334004495274,
+      "unmasked_sup_all": 42.25111943834409,
+      "unmasked_sup_entering": 42.25111943834409,
+      "unmasked_sup_shadowed": null,
       "verdict": "masked_fixed_point_rejects_shadowed_disagreement"
     }
   }

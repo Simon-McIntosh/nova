@@ -1,0 +1,13 @@
+revision=86a1c1b4dfd3bc7b9070c4bd16f139b9cf40d552 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-bank-callback-capacity-from-the-mesh command=tests/test_exact_clip_seed.py
+07:13:49 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-bank-callback-capacity-from-the-mesh
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 3 items
+
+tests/test_exact_clip_seed.py ...                                        [100%]
+
+============================== 3 passed in 4.68s ===============================

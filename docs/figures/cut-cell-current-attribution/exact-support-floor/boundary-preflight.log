@@ -1,0 +1,21 @@
+revision=b2fd0f22e98b51c68b56f157289b83369b6ee4ec tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py']
+devices=[CudaDevice(id=0)] x64=True
+BUILD diverted-single-null-cells-110
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py", line 659, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py", line 640, in main
+    rows.append(measure(case, rung, args.output))
+                ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py", line 160, in measure
+    boundary = Polygon(fixture._analytic_separatrix(exact, points=11521))
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/scripts/analytic_oracle_fixtures/measure.py", line 942, in _analytic_separatrix
+    return _clean_vertices(np.asarray(separatrix(points), dtype=np.float64))
+                                      ~~~~~~~~~~^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/nova/equilibrium/analytic_single_null.py", line 539, in separatrix
+    raise RuntimeError(
+        f"zero-flux lobe is not star-shaped at angle {angle:.6f}"
+    )
+RuntimeError: zero-flux lobe is not star-shaped at angle 4.450549

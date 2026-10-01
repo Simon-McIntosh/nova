@@ -1,0 +1,57 @@
+{
+  "revision": "38b441dad1dea2b10b684fa612b8802ef0973b86",
+  "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair",
+  "job_id": "1277161",
+  "devices": [
+    "cuda:0"
+  ],
+  "x64": true,
+  "seconds": 61.46907510701567,
+  "rows": [
+    {
+      "case": "weak-rotation-reactor-static",
+      "requested_cells": 110,
+      "realised_cells": 135,
+      "base_simple_cut_error_a": -1011367.6299531837,
+      "moment_reduction_a": 0.008951432562753325,
+      "moment_reduction_over_base": 8.850819719400836e-09,
+      "exact_support_fraction": 0.9998647044138245,
+      "interior_current_max_relative_change": 0.0,
+      "interior_current_bit_identical": true,
+      "chord_bit_identical": true,
+      "reference_order_doubling_l1_current_a": 6.302798283286393e-10,
+      "stage_record_sha256": "a1bc3cb02de1e65f5f33d31f6822315147329b8bef4860093d3403c02c7f17ba",
+      "base_record_sha256": "51dc5b1baa7f4d69b6f3891b9c0ef7b686617caa25c5de14fc0fed63c2f12974"
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "requested_cells": 300,
+      "realised_cells": 342,
+      "base_simple_cut_error_a": -303464.63377914205,
+      "moment_reduction_a": 0.0006680883494334378,
+      "moment_reduction_over_base": 2.201536110200125e-09,
+      "exact_support_fraction": 0.9995568989139908,
+      "interior_current_max_relative_change": 0.0,
+      "interior_current_bit_identical": true,
+      "chord_bit_identical": true,
+      "reference_order_doubling_l1_current_a": 4.450924073751139e-10,
+      "stage_record_sha256": "9eb258e2be47edd597ddf2ebba351ef7c3be32110170699c7e86761d3bcb2e88",
+      "base_record_sha256": "179e2b93cb1675b26470df028290c4ef6dcd55082d5663c2b5594ccdd441551d"
+    },
+    {
+      "case": "diverted-single-null",
+      "requested_cells": 110,
+      "realised_cells": 132,
+      "base_simple_cut_error_a": -1916.681634476619,
+      "moment_reduction_a": -6.240791165978976e-05,
+      "moment_reduction_over_base": 3.256039528799015e-08,
+      "exact_support_fraction": 1.0093061386435014,
+      "interior_current_max_relative_change": 0.0,
+      "interior_current_bit_identical": true,
+      "chord_bit_identical": true,
+      "reference_order_doubling_l1_current_a": 1.858069254012662e-12,
+      "stage_record_sha256": "9ba0e606af80ec9f21e4457b0d74f7a80fec7f8dd7e630c38de360fec6175b50",
+      "base_record_sha256": "ae0ee360a84e5ef5ad03fdcc2da091e72c11fbec84e4584c20aca26dcb604404"
+    }
+  ]
+}

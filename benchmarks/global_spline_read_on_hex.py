@@ -482,13 +482,13 @@ def _production_read(
 ) -> dict[str, Any]:
     """Read published landmarks and expose the exact saddle ring."""
 
-    physical = jnp.asarray(analytic, dtype=jnp.float64)[: operator.physical_node_number]
+    physical = jnp.asarray(analytic, dtype=jnp.float64)
     masks, topology, _connected, admitted = _block(
         operator._fixed_design_read(physical)
     )
-    grid_flux, _wall_flux = operator._fixed_design_topology.split_flux_map(physical)
+    flux_pool = operator.null_flux_pool(physical)
     (_axis_rows, saddle_rows), census = _block(
-        operator._fixed_design_topology.grid.read_census(grid_flux)
+        operator._fixed_design_topology.grid.read_census(flux_pool)
     )
     selected_saddle = np.asarray(topology.x_point, dtype=np.float64)
     valid = np.asarray(census["retained_valid"][1], dtype=bool)
@@ -505,23 +505,20 @@ def _production_read(
             )
         )
         origin = int(census["retained_representative_origin_index"][1, selected_slot])
-        locator = operator._fixed_design_topology.grid.locator
+        locator = operator._fixed_design_topology.grid.fit_locator
         stencil = np.asarray(locator.stencil, dtype=np.intp)
         row_index = int(np.flatnonzero(stencil[:, 0] == origin)[0])
         cells = stencil[row_index]
         ring = {
             "origin_cell": origin,
             "ring_row": row_index,
-            "cell_indices": cells.tolist(),
-            "centroid_coordinates_rz_m": np.asarray(machine.node)[cells].tolist(),
-            "centroid_flux_wb": np.asarray(grid_flux, dtype=np.float64)[cells].tolist(),
+            "sample_indices": cells.tolist(),
+            "sample_coordinates_rz_m": np.asarray(locator.coordinate)[cells].tolist(),
+            "sample_flux_wb": np.asarray(flux_pool, dtype=np.float64)[cells].tolist(),
         }
         if positive_control:
-            offsets = np.asarray(machine.node)[cells] - np.asarray(machine.node)[origin]
-            perturb_slot = int(
-                np.argmax(np.abs(offsets[:, 0]) + 0.25 * np.abs(offsets[:, 1]))
-            )
-            perturb_cell = int(cells[perturb_slot])
+            perturb_slot = 0
+            perturb_cell = origin
             perturbed = np.asarray(physical, dtype=np.float64).copy()
             perturbation = 1.0e-4 * span
             perturbed[perturb_cell] += perturbation
@@ -1238,7 +1235,7 @@ def _load_part(path: Path) -> dict[str, Any]:
 
 
 def _ring_movement(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Match every saddle-ring centroid to the 121-node carrier."""
+    """Match every admitting-stencil sample to the 121-node carrier."""
 
     diverted = [
         row
@@ -1257,14 +1254,12 @@ def _ring_movement(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             continue
         baseline_ring = group[121]["production_ring_quadratic"]["saddle_ring"]
         baseline_coordinates = np.asarray(
-            baseline_ring["centroid_coordinates_rz_m"], dtype=np.float64
+            baseline_ring["sample_coordinates_rz_m"], dtype=np.float64
         )
-        baseline_ids = baseline_ring["cell_indices"]
+        baseline_ids = baseline_ring["sample_indices"]
         for wall_nodes, row in sorted(group.items()):
             ring = row["production_ring_quadratic"]["saddle_ring"]
-            coordinates = np.asarray(
-                ring["centroid_coordinates_rz_m"], dtype=np.float64
-            )
+            coordinates = np.asarray(ring["sample_coordinates_rz_m"], dtype=np.float64)
             nearest = np.argmin(
                 np.linalg.norm(
                     coordinates[:, None, :] - baseline_coordinates[None, :, :], axis=2
@@ -1283,29 +1278,29 @@ def _ring_movement(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     "baseline_wall_nodes": 121,
                     "target_origin_cell": ring["origin_cell"],
                     "baseline_origin_cell": baseline_ring["origin_cell"],
-                    "cell_matches": [
+                    "sample_matches": [
                         {
-                            "target_cell": int(target),
-                            "baseline_cell": int(baseline_ids[int(match)]),
+                            "target_sample": int(target),
+                            "baseline_sample": int(baseline_ids[int(match)]),
                             "target_coordinate_rz_m": coordinates[index].tolist(),
                             "baseline_coordinate_rz_m": baseline_coordinates[
                                 int(match)
                             ].tolist(),
-                            "centroid_displacement_m": float(distance[index]),
-                            "centroid_displacement_in_pitch": float(
+                            "sample_displacement_m": float(distance[index]),
+                            "sample_displacement_in_pitch": float(
                                 distance[index] / pitch
                             ),
                         }
                         for index, (target, match) in enumerate(
-                            zip(ring["cell_indices"], nearest, strict=True)
+                            zip(ring["sample_indices"], nearest, strict=True)
                         )
                     ],
                     "membership_change_threshold_in_pitch": 0.25,
                     "changed_ring_member_count": int(
                         np.count_nonzero(membership_changed)
                     ),
-                    "shifted_centroid_count": int(np.count_nonzero(distance > 1.0e-12)),
-                    "maximum_centroid_displacement_m": float(np.max(distance)),
+                    "shifted_sample_count": int(np.count_nonzero(distance > 1.0e-12)),
+                    "maximum_sample_displacement_m": float(np.max(distance)),
                     "published_saddle_displacement_from_baseline_m": float(
                         np.linalg.norm(
                             np.asarray(row["production_ring_quadratic"]["saddle_rz_m"])
@@ -1588,7 +1583,7 @@ def _report(
         [
             "",
             (
-                "Cell-by-cell matching uses nearest centroid against the 121-node "
+                "Sample matching uses nearest coordinates against the 121-node "
                 "wall carrier; identifiers alone are not compared across rebuilt "
                 "meshes."
             ),
@@ -1604,19 +1599,19 @@ def _report(
         lines.append(
             f"| {item['requested_cells']} | {item['wall_nodes']} | "
             f"{item['changed_ring_member_count']} | "
-            f"{1e3 * item['maximum_centroid_displacement_m']:.6f} | "
+            f"{1e3 * item['maximum_sample_displacement_m']:.6f} | "
             f"{1e3 * item['published_saddle_displacement_from_baseline_m']:.6f} |"
         )
         moved = [
             cell
-            for cell in item["cell_matches"]
-            if cell["centroid_displacement_in_pitch"]
+            for cell in item["sample_matches"]
+            if cell["sample_displacement_in_pitch"]
             > item["membership_change_threshold_in_pitch"]
         ]
         if moved:
             detail = ", ".join(
-                f"{cell['target_cell']}<-{cell['baseline_cell']}: "
-                f"{1e3 * cell['centroid_displacement_m']:.6f} mm"
+                f"{cell['target_sample']}<-{cell['baseline_sample']}: "
+                f"{1e3 * cell['sample_displacement_m']:.6f} mm"
                 for cell in moved
             )
             lines.append(f"<!-- wall {item['wall_nodes']} moved cells: {detail} -->")

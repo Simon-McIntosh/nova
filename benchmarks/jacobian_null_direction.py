@@ -802,7 +802,10 @@ def measure(
         target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
         observed = settled.bank_producer._ObservedProfile(profile)
         states = settled.reachability._mast_states(
-            observed, jnp.asarray(passive_case["state"]), target_current
+            observed,
+            jnp.asarray(passive_case["state"]),
+            target_current,
+            carrier_identity=carrier_evidence["carrier"]["semantic_response_identity"],
         )
         if observed.portfolio is None:
             raise RuntimeError(

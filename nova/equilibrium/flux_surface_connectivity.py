@@ -1471,19 +1471,73 @@ def traced_spline_contour(
     edge_start, edge_end = _structured_cell_edges(radial, vertical)
     edge_vector = edge_end - edge_start
 
-    # Sample each cell edge at fixed interior parameters and bracket a root on
-    # every sub-interval whose ends straddle the level.  A cubic restricted to
-    # one edge can leave both endpoints on the same side of the level and still
-    # cross twice between them, and at the boundary level the field's saddle
-    # produces exactly that pair, so a corner-sign test alone loses both of its
-    # crossings and the lobe the saddle pinches stops closing.
-    subdivision = jnp.asarray((0.0, 0.25, 0.5, 0.75, 1.0), dtype=values.dtype)
-    sample_point = (
-        edge_start[..., None, :] + subdivision[..., None] * edge_vector[..., None, :]
+    # Split each cell edge at the stationary points of the cubic the spline
+    # restricts to it, and bracket one root on every monotone piece whose ends
+    # straddle the level.  A cubic restricted to one edge can leave both
+    # endpoints on the same side of the level and still cross twice between
+    # them, and at the boundary level the field's saddle produces exactly that
+    # pair, so a test on the endpoints of a fixed subdivision loses both
+    # crossings whenever the pair happens to fall inside one sub-interval, and
+    # the lobe the saddle pinches stops closing.
+    #
+    # The edge derivative is the chain rule of the spline's own partials, so
+    # delta'(t) = dr/dt . dp/dr + dz/dt . dp/dz is quadratic in the edge
+    # parameter; three evaluations fix its coefficients, and its roots are the
+    # at most two interior parameters where a single piece can hold two level
+    # crossings.  A negative discriminant is clamped rather than masked, which
+    # leaves a spurious split point on a monotone edge: splitting a monotone
+    # interval anywhere keeps every piece monotone, so the extra piece costs
+    # one evaluation and cannot hide a crossing.
+    derivative_nodes = jnp.asarray((0.0, 0.5, 1.0), dtype=values.dtype)
+    derivative_point = (
+        edge_start[..., None, :]
+        + derivative_nodes[..., None] * edge_vector[..., None, :]
     )
-    sample_delta = spline(sample_point[..., 0], sample_point[..., 1]) - level
-    sub_low_delta = sample_delta[..., :-1]
-    sub_high_delta = sample_delta[..., 1:]
+    derivative_evaluation = spline.evaluate(
+        derivative_point[..., 0], derivative_point[..., 1]
+    )
+    edge_slope = (
+        derivative_evaluation.radial_derivative * edge_vector[..., None, 0]
+        + derivative_evaluation.vertical_derivative * edge_vector[..., None, 1]
+    )
+    slope_start, slope_middle, slope_end = (
+        edge_slope[..., 0],
+        edge_slope[..., 1],
+        edge_slope[..., 2],
+    )
+    quadratic_term = 2.0 * (slope_end + slope_start - 2.0 * slope_middle)
+    linear_term = (slope_end - slope_start) - quadratic_term
+    constant_term = slope_start
+    discriminant = linear_term**2 - 4.0 * quadratic_term * constant_term
+    root_offset = jnp.sqrt(jnp.maximum(discriminant, 0.0))
+    # Stable quadratic roots: a vanishing leading coefficient sends one to
+    # infinity, where the interior test drops it, and leaves the other on the
+    # linear root.
+    far_parameter = jnp.asarray(2.0, dtype=values.dtype)
+    plus_interior = -2.0 * constant_term / (linear_term + root_offset)
+    minus_interior = -2.0 * constant_term / (linear_term - root_offset)
+    plus_valid = (plus_interior > 0.0) & (plus_interior < 1.0)
+    minus_valid = (minus_interior > 0.0) & (minus_interior < 1.0)
+    plus_parameter = jnp.where(plus_valid, plus_interior, far_parameter)
+    minus_parameter = jnp.where(minus_valid, minus_interior, far_parameter)
+    stationary_low = jnp.minimum(plus_parameter, minus_parameter)
+    stationary_high = jnp.maximum(plus_parameter, minus_parameter)
+    stationary_count = plus_valid.astype(jnp.int32) + minus_valid.astype(jnp.int32)
+    # Three pieces per edge is the fixed shape: no stationary point collapses
+    # the middle piece onto an endpoint, one opens the two pieces it bounds,
+    # and the padded pieces carry an exact-zero parameter through the mask.
+    break_low = jnp.where(stationary_count >= 1, stationary_low, 0.0)
+    break_high = jnp.where(stationary_count == 2, stationary_high, 1.0)
+    piece_low = jnp.stack((jnp.zeros_like(break_low), break_low, break_high), axis=-1)
+    piece_high = jnp.stack((break_low, break_high, jnp.ones_like(break_low)), axis=-1)
+    piece_low_point = (
+        edge_start[..., None, :] + piece_low[..., None] * edge_vector[..., None, :]
+    )
+    piece_high_point = (
+        edge_start[..., None, :] + piece_high[..., None] * edge_vector[..., None, :]
+    )
+    sub_low_delta = spline(piece_low_point[..., 0], piece_low_point[..., 1]) - level
+    sub_high_delta = spline(piece_high_point[..., 0], piece_high_point[..., 1]) - level
     sub_crossing = (sub_low_delta >= 0.0) != (sub_high_delta >= 0.0)
     edge_count = jnp.sum(sub_crossing.astype(jnp.int32), axis=-1)
 
@@ -1496,8 +1550,7 @@ def traced_spline_contour(
             low, high, value_at_low = state
             middle = 0.5 * (low + high)
             point = (
-                edge_start[..., None, :]
-                + middle[..., None] * edge_vector[..., None, :]
+                edge_start[..., None, :] + middle[..., None] * edge_vector[..., None, :]
             )
             middle_value = spline(point[..., 0], point[..., 1]) - level
             same_side = (value_at_low >= 0.0) == (middle_value >= 0.0)
@@ -1512,11 +1565,7 @@ def traced_spline_contour(
         )
         return 0.5 * (low + high)
 
-    sub_parameter = bisect_sub(
-        jnp.broadcast_to(subdivision[:-1], sub_crossing.shape),
-        jnp.broadcast_to(subdivision[1:], sub_crossing.shape),
-        sub_low_delta,
-    )
+    sub_parameter = bisect_sub(piece_low, piece_high, sub_low_delta)
     sub_edge = jnp.broadcast_to(
         jnp.arange(4, dtype=jnp.int32).reshape((1, 1, 4, 1)), sub_crossing.shape
     )
@@ -1531,10 +1580,11 @@ def traced_spline_contour(
         - sub_crossing.astype(jnp.int32)
     )
     ring_shape = candidate_index.shape[:-2]
-    index_flat = candidate_index.reshape(ring_shape + (16,))
-    valid_flat = sub_crossing.reshape(ring_shape + (16,))
-    parameter_flat = sub_parameter.reshape(ring_shape + (16,))
-    edge_flat = sub_edge.reshape(ring_shape + (16,))
+    slot_count = candidate_index.shape[-1] * candidate_index.shape[-2]
+    index_flat = candidate_index.reshape(ring_shape + (slot_count,))
+    valid_flat = sub_crossing.reshape(ring_shape + (slot_count,))
+    parameter_flat = sub_parameter.reshape(ring_shape + (slot_count,))
+    edge_flat = sub_edge.reshape(ring_shape + (slot_count,))
     slot_parameters = []
     slot_edges = []
     slot_valid = []
@@ -1631,9 +1681,7 @@ def traced_spline_contour(
     # two cells sharing the edge agree on the number and a crossing keeps one
     # node identity across the cells it separates.
     edge_spans_radius = (slot_edge % 2) == 0
-    crossing_key = jnp.where(
-        edge_spans_radius, edge_point[..., 1], edge_point[..., 0]
-    )
+    crossing_key = jnp.where(edge_spans_radius, edge_point[..., 1], edge_point[..., 0])
     slot_ordinal = jnp.arange(4, dtype=jnp.int32)
     same_edge = slot_edge[..., :, None] == slot_edge[..., None, :]
     lower_key = crossing_key[..., :, None] < crossing_key[..., None, :]
@@ -1641,11 +1689,9 @@ def traced_spline_contour(
         slot_ordinal[..., :, None] > slot_ordinal[..., None, :]
     )
     edge_rank = jnp.sum(
-        (
-            same_edge
-            & edge_crossing[..., None, :]
-            & (lower_key | tied_key)
-        ).astype(jnp.int32),
+        (same_edge & edge_crossing[..., None, :] & (lower_key | tied_key)).astype(
+            jnp.int32
+        ),
         axis=-1,
     )
     slot_node = EDGE_CROSSING_CAPACITY * edge_node + edge_rank
@@ -1694,23 +1740,19 @@ def traced_spline_contour(
         # cancels, so its magnitude carries no sector information and only its
         # sign does.  Comparing the signs is what labels the sector each
         # crossing lies in.
-        crossing_on_axis_side = (crossing_lobe_side >= 0.0) == (
-            axis_lobe_side >= 0.0
-        )
+        crossing_on_axis_side = (crossing_lobe_side >= 0.0) == (axis_lobe_side >= 0.0)
         # The two crossings bounding the lobe sector are the pair that closes
         # it, so they are joined to each other and the two leg-side crossings
         # are left to join each other.  The pairs are read from the sector
         # labels rather than chosen between two fixed ring arrangements, so a
         # cell whose sector pair is not adjacent in slot order is grouped
         # correctly as well.
-        axis_rank = (
-            jnp.cumsum(crossing_on_axis_side.astype(jnp.int32), axis=-1)
-            - crossing_on_axis_side.astype(jnp.int32)
-        )
-        leg_rank = (
-            jnp.cumsum((~crossing_on_axis_side).astype(jnp.int32), axis=-1)
-            - (~crossing_on_axis_side).astype(jnp.int32)
-        )
+        axis_rank = jnp.cumsum(
+            crossing_on_axis_side.astype(jnp.int32), axis=-1
+        ) - crossing_on_axis_side.astype(jnp.int32)
+        leg_rank = jnp.cumsum((~crossing_on_axis_side).astype(jnp.int32), axis=-1) - (
+            ~crossing_on_axis_side
+        ).astype(jnp.int32)
         slot_index = jnp.arange(4, dtype=jnp.int32)
 
         def _sector_partner(on_axis_side, rank):
@@ -1800,9 +1842,7 @@ def traced_spline_contour(
     canonical_edge_parameter = jnp.where(edge_crossing, edge_parameter, 0.0)
     canonical_edge_point = jnp.where(edge_crossing[..., None], edge_point, 0.0)
     canonical_edge_tangent = jnp.where(edge_crossing[..., None], edge_tangent, 0.0)
-    canonical_segment_source = jnp.where(
-        segment_valid[..., None], segment_source, 0
-    )
+    canonical_segment_source = jnp.where(segment_valid[..., None], segment_source, 0)
     canonical_segment_point = jnp.where(
         segment_valid[..., None, None], segment_point, 0.0
     )
@@ -1844,10 +1884,7 @@ def traced_spline_contour(
         & (ambiguous & decision_tie & saddle_stationary)[..., None],
         "edge_node_capacity": jnp.asarray(
             EDGE_CROSSING_CAPACITY
-            * (
-                vertical.size * (radial.size - 1)
-                + (vertical.size - 1) * radial.size
-            ),
+            * (vertical.size * (radial.size - 1) + (vertical.size - 1) * radial.size),
             dtype=jnp.int32,
         ),
         "crossing_overflow": crossing_overflow,

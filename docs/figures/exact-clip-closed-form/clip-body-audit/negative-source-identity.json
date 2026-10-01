@@ -1,0 +1,9 @@
+{
+  "measured_revision": "c7eb43483b64890b8cc0dcb15b1651a7d32cb2c9",
+  "candidate_revision": "72916e649ecf615ca654e8b24062971acb3d66dc",
+  "changed_package_paths": [
+    "nova/equilibrium/separatrix_clip.py"
+  ],
+  "replaced_module_revision": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
+  "effective_control_source_unchanged": true
+}

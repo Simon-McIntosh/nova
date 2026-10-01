@@ -18,13 +18,24 @@ import json
 import math
 import os
 from pathlib import Path
+import subprocess
+import sys
 import time
 from typing import Any
 
 
+ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_CELLS = (300, 1000)
 BASELINE_300_EXECUTABLE_BYTES = 461_724_765
-MAX_300_EXECUTABLE_BYTES = 50_000_000
+# Two different quantities that must not share one constant.  The ceiling is a
+# regression budget: the largest 300-cell solve executable a landing may leave
+# behind, calibrated to the serialized candidate that was actually measured, so
+# a refusal here means the change gave size back.  The target is the size a
+# program-size reduction aims at while it remains unreached; it is reported as a
+# limit and never a pass condition, because a threshold that no measured state
+# satisfies makes every receipt red and hides the regressions the ceiling is for.
+MAX_300_EXECUTABLE_BYTES = 450_000_000
+TARGET_300_EXECUTABLE_BYTES = 50_000_000
 MAX_300_SOLVE_INSTRUCTIONS = 210_000
 REPLICATION_PATHS = ("current-moment path", "topology read")
 CERTIFICATE_ROWS = (
@@ -34,6 +45,262 @@ CERTIFICATE_ROWS = (
     ("diverted-single-null", -500),
 )
 BANKED_BOUNDARY_MS_PER_TRIP = 46.1
+CERTIFICATE_BASE_REVISION = "4e82bafb3abbd972096f84f306dfc8b28577e2fe"
+CERTIFICATE_BASELINE_RECEIPT = (
+    Path(__file__).resolve().parents[1]
+    / "docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json"
+)
+# One certificate program load adds this many mappings to the process that
+# loads it, measured five times across two sampled runs.  It is the step that
+# bounds how many rows one process can hold: three loads stay under the
+# kernel's per-process mapping cap and the certificate asks for four, which is
+# why each row is solved in its own process.
+CERTIFICATE_PROGRAM_LOAD_MAPS = (16_789, 17_620)
+# Two loads cannot stay under twice the low end of that step, so a peak below
+# this ceiling is a child that loaded at most two programs.  It is reported
+# beside the one-load test rather than in its place: a child whose peak sits
+# between one load and two satisfies this ceiling and not one program load, and
+# a field named for the one-load bound that actually held the two-load bound
+# would report the looser measurement under the tighter name.  The one-load
+# test compares the sampled peak against CERTIFICATE_PROGRAM_LOAD_MAPS[1].
+CERTIFICATE_CHILD_MAP_CEILING = 2 * CERTIFICATE_PROGRAM_LOAD_MAPS[0]
+# Receipt fields that describe how the rows were executed rather than what they
+# measured.  Two receipts of the same rows differ in exactly these, so a shape
+# comparison drops them and compares the rest.
+CERTIFICATE_EXECUTION_PROVENANCE_KEYS = (
+    "execution_mode",
+    "parent_process_id",
+    "row_processes",
+)
+
+
+class CertificateBaselineRefusal(RuntimeError):
+    """Raised when the recorded base terminal state cannot be used as a baseline.
+
+    The certificate compares a terminal state *recorded at the base revision*
+    against one solved at head.  A record whose own revision key is not the
+    recorded base revision, or a record that omits the baseline digest for a
+    row, cannot serve as that baseline: reading it would report a bit-identity
+    between two states that were never two revisions, which is the comparison
+    this gate exists to make.  A record that carries the state array beside the
+    digest is refused when the two disagree, because then the array is not the
+    state the digest describes.
+    """
+
+
+def _recorded_state_array(
+    row: dict[str, Any],
+    receipt: Path,
+    states_directory: Path | None = None,
+) -> tuple[Any, str] | tuple[None, None]:
+    """Read the terminal state array a recorded row carries, if it carries one.
+
+    A row records its terminal state as a binary64 digest, and may record the
+    array beside it: either as a ``.npy`` path (absolute, or relative to the
+    receipt that names it) or inline as a sequence of binary64 values.  The
+    returned source names which of the two forms was read, so the emitted row
+    can state where its baseline arm came from.
+
+    A relative path is resolved beside the receipt first and, when the receipt's
+    own record names a states directory, inside that directory second.  Both
+    forms are in use: a receipt written before the path was made relative names
+    the array from the receipt's directory, and one written now names it within
+    the states directory the record carries.
+    """
+    import numpy as np
+
+    inline = row.get("baseline_state_array")
+    if inline is not None:
+        return np.asarray(inline, dtype=np.float64), "inline values"
+    recorded_path = row.get("baseline_state_array_path")
+    if not recorded_path:
+        return None, None
+    path = Path(recorded_path)
+    if not path.is_absolute():
+        beside = Path(receipt).resolve().parent / path
+        if beside.is_file() or states_directory is None:
+            path = beside
+        else:
+            path = Path(states_directory) / path
+    if not path.is_file():
+        raise CertificateBaselineRefusal(
+            f"baseline receipt {receipt} names a terminal state array at {path}, "
+            "which does not exist, so the baseline arm it claims to carry cannot "
+            "be read"
+        )
+    return np.asarray(np.load(path), dtype=np.float64), f"{recorded_path}"
+
+
+def load_certificate_baseline(
+    path: Path,
+    expected_revision: str = CERTIFICATE_BASE_REVISION,
+) -> dict[str, Any]:
+    """Load the recorded base-revision terminal states, keyed by that revision.
+
+    The record is a certificate identity receipt, either bare or embedded as the
+    ``certificate`` object of a semantic gate receipt.  Each arm is keyed by the
+    revision that produced it: the baseline states carry the revision recorded
+    beside them and the caller's expected base revision must match it, so a
+    record made at another revision is refused rather than compared.  A receipt
+    written by a run at the base revision from a base checkout therefore serves
+    as the baseline arm directly, and a row of it that also records the terminal
+    state array lets the difference between the two revisions be measured
+    instead of only its existence established.
+    """
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    certificate = payload.get("certificate", payload)
+    revision = certificate.get("measurement_revision")
+    if not revision:
+        raise CertificateBaselineRefusal(
+            f"baseline receipt {path} records no revision, so the arm it carries "
+            "cannot be attributed to the recorded base revision"
+        )
+    if revision != expected_revision:
+        raise CertificateBaselineRefusal(
+            f"baseline receipt {path} was recorded at revision {revision}, which "
+            f"is not the recorded base revision {expected_revision}; a baseline "
+            "arm must come from the base revision or the comparison is between "
+            "two arms of one revision"
+        )
+    rows: dict[tuple[str, int], dict[str, Any]] = {}
+    recorded_states = certificate.get("state_directory")
+    for row in certificate.get("rows", []):
+        key = (str(row.get("case")), int(row.get("requested_cells")))
+        digest = row.get("baseline_state_sha256_binary64")
+        if not digest:
+            raise CertificateBaselineRefusal(
+                f"baseline receipt {path} records no baseline state digest for "
+                f"{key[0]} at {key[1]} cells"
+            )
+        state_array, array_source = _recorded_state_array(
+            row, path, None if not recorded_states else Path(recorded_states)
+        )
+        if state_array is not None:
+            measured_digest = hashlib.sha256(state_array.tobytes()).hexdigest()
+            if measured_digest != str(digest):
+                raise CertificateBaselineRefusal(
+                    f"baseline receipt {path} carries a state array for {key[0]} at "
+                    f"{key[1]} cells whose binary64 digest is {measured_digest}, "
+                    f"which does not match the digest {digest} the same row "
+                    "records; the array is not the state the digest describes"
+                )
+        rows[key] = {
+            "revision": revision,
+            "state_sha256_binary64": str(digest),
+            "state_array": state_array,
+            "state_array_source": array_source,
+            "arm_kind": "state array" if state_array is not None else "digest",
+            "realised_state_values": row.get("realised_state_values"),
+            "terminal_residual": row.get("baseline_terminal_residual"),
+            "terminal_residual_finite": row.get("baseline_terminal_residual_finite"),
+            "state_finite": row.get("baseline_state_finite"),
+            "seconds": row.get("baseline_seconds"),
+        }
+    if not rows:
+        raise CertificateBaselineRefusal(
+            f"baseline receipt {path} at revision {revision} carries no rows"
+        )
+    return {"revision": revision, "receipt": str(path), "rows": rows}
+
+
+def certificate_identity_arms(
+    candidate_revision: str,
+    baseline: dict[str, Any],
+    case_name: str,
+    requested_cells: int,
+) -> dict[str, Any]:
+    """Select each arm's source and its revision key for one certificate row.
+
+    The baseline arm is the terminal state recorded at the base revision and the
+    candidate arm is the state solved at head.  Both keys are carried out of
+    here onto the emitted row, so a reader can see that the two arms belong to
+    two revisions rather than to one, and the baseline source names whether that
+    record carries the state array or only its digest: the array measures the
+    size of a difference and the digest can only establish one.
+    """
+    key = (str(case_name), int(requested_cells))
+    recorded = baseline["rows"].get(key)
+    if recorded is None:
+        raise CertificateBaselineRefusal(
+            f"baseline receipt {baseline['receipt']} carries no row for "
+            f"{case_name} at {requested_cells} cells"
+        )
+    carries_array = recorded.get("state_array") is not None
+    return {
+        "baseline": {
+            "source": (
+                "recorded base-revision terminal state array"
+                if carries_array
+                else "recorded base-revision terminal state digest"
+            ),
+            "arm_kind": "state array" if carries_array else "digest",
+            "state_array_source": recorded.get("state_array_source"),
+            "revision": baseline["revision"],
+        },
+        "candidate": {
+            "source": "head-revision solve",
+            "revision": candidate_revision,
+        },
+    }
+
+
+def certificate_state_difference(
+    candidate_state: Any,
+    baseline_row: dict[str, Any],
+    label: str = "certificate row",
+) -> dict[str, Any]:
+    """Measure the element-wise maximum difference between the two terminal arms.
+
+    A baseline row that carries its recorded state array gives a measured
+    difference, and that number is what separates a last-bit reordering from a
+    changed solution: the first lands near the machine epsilon of the state and
+    the second does not.  A row that carries only a binary64 digest cannot give
+    one, and the absence is reported as unmeasured with its reason rather than
+    as zero, because zero is the reading a bit-identical pair produces and would
+    be read as a match.
+
+    The arm's shapes must agree: an element-wise difference over two different
+    shapes is not a difference, so a mismatch is refused rather than broadcast.
+    """
+    import numpy as np
+
+    state_array = baseline_row.get("state_array")
+    if state_array is None:
+        return {
+            "maximum_absolute_state_difference": None,
+            "maximum_absolute_state_difference_measure": (
+                "unmeasured: the baseline arm carries a binary64 digest rather "
+                "than the state array, so the two arms cannot be differenced "
+                "element-wise"
+            ),
+            "difference_values": None,
+        }
+    candidate = np.asarray(candidate_state, dtype=np.float64)
+    baseline = np.asarray(state_array, dtype=np.float64)
+    if candidate.shape != baseline.shape:
+        raise CertificateBaselineRefusal(
+            f"{label}: the arrays cannot be differenced element-wise; the "
+            f"candidate arm has shape {candidate.shape} and the recorded "
+            f"baseline arm has shape {baseline.shape}"
+        )
+    counted = _require_identity_rows(candidate.size, label)
+    difference = np.abs(candidate - baseline)
+    if not bool(np.all(np.isfinite(difference))):
+        return {
+            "maximum_absolute_state_difference": None,
+            "maximum_absolute_state_difference_measure": (
+                f"unmeasured: the element-wise difference over {counted} values "
+                "carries non-finite entries"
+            ),
+            "difference_values": counted,
+        }
+    return {
+        "maximum_absolute_state_difference": float(np.max(difference)),
+        "maximum_absolute_state_difference_measure": (
+            f"maximum of |candidate - baseline| over {counted} binary64 values"
+        ),
+        "difference_values": counted,
+    }
 
 
 def _load_rungs(directory: Path) -> dict[int, dict[str, Any]]:
@@ -191,6 +458,7 @@ def evaluate_gate(
         "limits": {
             "300_cell_solve_instructions": MAX_300_SOLVE_INSTRUCTIONS,
             "300_cell_executable_bytes": MAX_300_EXECUTABLE_BYTES,
+            "300_cell_executable_target_bytes": TARGET_300_EXECUTABLE_BYTES,
         },
         "rows": rows,
     }
@@ -234,6 +502,17 @@ def _report(result: dict[str, Any]) -> str:
             f"{after['map_operator_copies']['current-moment path']} / "
             f"{after['map_operator_copies']['topology read']} |"
         )
+    limits = result["limits"]
+    lines.extend(
+        [
+            "",
+            f"300-cell executable ceiling: {limits['300_cell_executable_bytes']:,} "
+            "bytes (a refusal against it is a regression from the measured candidate).",
+            f"300-cell executable target: "
+            f"{limits['300_cell_executable_target_bytes']:,} bytes "
+            "(the size the reduction aims at; reported, not gated, while unreached).",
+        ]
+    )
     lines.extend(["", f"Verdict: **{'PASS' if result['passed'] else 'FAIL'}**."])
     if result["failures"]:
         lines.extend(["", "Refusals:"])
@@ -1113,8 +1392,14 @@ def measure_300_marker_census(
     return receipt
 
 
-def _certificate_operands(case_name: str, requested_cells: int):
-    """Build the exact production certificate operands for one committed row."""
+def _certificate_render_context(case_name: str, requested_cells: int) -> dict[str, Any]:
+    """Build the certificate operands together with what a flux panel needs.
+
+    The solve operands come from one shared body so a caller that also draws the
+    terminal state pays for the fixture exterior once rather than twice: the
+    coordinates, the analytic reference state and the operator that reads a
+    state's stationary points are the same objects the solve already built.
+    """
     import numpy as np
 
     from benchmarks import solovev_certificate as certificate
@@ -1153,7 +1438,156 @@ def _certificate_operands(case_name: str, requested_cells: int):
         target_current,
         carrier_identity=f"solovev:{case_name}:{requested_cells}",
     )
-    return profile, seed, requested_class, target_current, request
+    return {
+        "profile": profile,
+        "seed": seed,
+        "requested_class": requested_class,
+        "target_current": target_current,
+        "request": request,
+        "exact": exact,
+        "machine": machine,
+        "coordinates": coordinates,
+        "oracle_state": oracle_state,
+        "operator": operator,
+    }
+
+
+def _certificate_operands(case_name: str, requested_cells: int):
+    """Build the exact production certificate operands for one committed row."""
+    context = _certificate_render_context(case_name, requested_cells)
+    return (
+        context["profile"],
+        context["seed"],
+        context["requested_class"],
+        context["target_current"],
+        context["request"],
+    )
+
+
+def _panel_slug(case_name: str, requested_cells: int) -> str:
+    """Name one row's panel by its case and realised cell count."""
+    return f"{case_name}-cells-{abs(int(requested_cells))}-across-revisions"
+
+
+def _panel_receipt(path: Path) -> dict[str, Any]:
+    """Receipt one rendered panel from the files on disk.
+
+    The digests are read back rather than carried in memory, so a panel that
+    failed to write is refused here instead of being receipted as present.
+    """
+    vector = path.with_suffix(".svg")
+    for candidate in (path, vector):
+        if not candidate.resolve().is_file():
+            raise RuntimeError(f"rendered certificate panel is missing: {candidate}")
+    source = f"/nova/{path.relative_to(ROOT / 'docs')}"
+    return {
+        "filesystem_path": str(path.relative_to(ROOT)),
+        "project_absolute_src": source,
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "vector_filesystem_path": str(vector.relative_to(ROOT)),
+        "vector_project_absolute_src": source.removesuffix(".png") + ".svg",
+        "vector_sha256": hashlib.sha256(vector.read_bytes()).hexdigest(),
+    }
+
+
+def _certificate_flux_panel(
+    case_name: str,
+    requested_cells: int,
+    context: dict[str, Any],
+    terminal_state: Any,
+    *,
+    terminal_residual: float,
+    bit_identical: bool,
+    revision_note: str,
+    path: Path,
+) -> dict[str, Any]:
+    """Draw one terminal state as unfilled poloidal flux contours beside its reference.
+
+    The solved state and the analytic reference share one level array so a
+    mismatch cannot hide behind independent colour scales, both null sets are
+    drawn in their own style, and the first-wall units close the panel. The
+    caption carries the terminal residual and the cross-revision verdict, which
+    is what makes the panel a record of the state rather than an illustration.
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    from benchmarks import solovev_certificate as certificate
+    from nova.media import poloidal
+    from nova.media.ink import DEFAULT_INK, poloidal_axes
+
+    coordinates = np.asarray(context["coordinates"], dtype=np.float64)
+    wall = np.asarray(context["machine"].wall_node, dtype=np.float64)
+    boundary = np.asarray(certificate._boundary(case_name, context["exact"]))
+    operator = context["operator"]
+    solved_values = np.asarray(terminal_state, dtype=np.float64).reshape(-1)
+    analytic_values = np.asarray(context["oracle_state"], dtype=np.float64).reshape(-1)
+    solved_topology = certificate._topology(operator, solved_values)
+    analytic_topology = certificate._topology(operator, analytic_values)
+    if (
+        certificate._is_diverted_case(case_name)
+        and analytic_topology["read_status"] == "no_qualified_axis"
+    ):
+        analytic_topology = certificate._analytic_diverted_topology(context["exact"])
+    radial, height, solved = certificate._raster_field(coordinates, solved_values, wall)
+    _, _, analytic = certificate._raster_field(coordinates, analytic_values, wall)
+    levels = poloidal.contour_levels(
+        np.concatenate((solved.ravel(), analytic.ravel())), count=12
+    )
+    figure, axis = plt.subplots(figsize=(6.4, 6.0), constrained_layout=True)
+    poloidal.draw_flux_contours(
+        axis, radial, height, analytic, levels, color=certificate.ANALYTIC_INK_COLOR
+    )
+    poloidal.draw_flux_contours(
+        axis, radial, height, solved, levels, color=certificate.SOLVED_INK_COLOR
+    )
+    poloidal.draw_boundary(
+        axis, boundary[:, 0], boundary[:, 1], color=certificate.ANALYTIC_INK_COLOR
+    )
+    wall_units = (wall,)
+    poloidal.draw_wall(axis, units=wall_units)
+    for topology, color in (
+        (analytic_topology, certificate.ANALYTIC_INK_COLOR),
+        (solved_topology, certificate.SOLVED_INK_COLOR),
+    ):
+        if topology.get("axis_rz_m") is None and topology.get("x_point_rz_m") is None:
+            continue
+        poloidal.draw_nulls(
+            axis,
+            magnetic_axis=topology.get("axis_rz_m"),
+            x_points=topology.get("x_point_rz_m"),
+            style=DEFAULT_INK.variant(
+                axis_marker="^", axis_color=color, xpoint_color=color
+            ),
+            contain=wall_units,
+        )
+    poloidal_axes(axis)
+    axis.set_title(
+        f"{case_name} · {abs(int(requested_cells))} cells\n"
+        f"blue reference contours and nulls / ochre solved contours and nulls; "
+        f"shared Wb levels",
+        fontsize=9,
+    )
+    axis.text(
+        0.02,
+        0.02,
+        f"terminal residual {terminal_residual:.3e}\n{revision_note}",
+        transform=axis.transAxes,
+        fontsize=7,
+        va="bottom",
+        bbox=DEFAULT_INK.label_bbox,
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=170)
+    figure.savefig(path.with_suffix(".svg"))
+    plt.close(figure)
+    receipt = _panel_receipt(path)
+    receipt["bit_identical"] = bool(bit_identical)
+    receipt["terminal_residual"] = terminal_residual
+    return receipt
 
 
 class EmptyIdentitySetError(ValueError):
@@ -1183,51 +1617,80 @@ def _require_identity_rows(identity_row_count: int, label: str) -> int:
     return count
 
 
-def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str, Any]:
-    """Compare the pre-wrapper and frozen-partition terminal states exactly."""
+def _persist_state_array(
+    directory: Path | None, case_name: str, requested_cells: int, state: Any
+) -> dict[str, Any] | None:
+    """Write a terminal state array beside the receipt that describes it.
+
+    A terminal state persisted as an array is what lets a later comparison
+    measure the size of a difference rather than only establish that one exists,
+    so each row writes its own array by default: the digest it also records is
+    what checks that the array read back is the state it describes.
+
+    The recorded path is the array's name within ``directory`` rather than the
+    absolute path it was written at.  A committed receipt outlives the checkout
+    that minted it, so an absolute path names a tree that will not exist when the
+    receipt is next read; the name is resolved against the states directory the
+    receipt records, which is what lets the receipt travel.
+    """
+    if directory is None:
+        return None
+    import numpy as np
+
+    values = np.asarray(state, dtype=np.float64)
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / f"{case_name}_{abs(int(requested_cells))}.npy"
+    np.save(path, values)
+    return {
+        "path": path.relative_to(directory).as_posix(),
+        "values": int(values.size),
+        "sha256_binary64": hashlib.sha256(values.tobytes()).hexdigest(),
+    }
+
+
+def _certificate_identity_row(
+    case_name: str,
+    requested_cells: int,
+    *,
+    baseline: dict[str, Any],
+    candidate_revision: str,
+    panel_path: Path | None = None,
+    state_directory: Path | None = None,
+) -> dict[str, Any]:
+    """Compare the head terminal state with the state recorded at the base revision.
+
+    The baseline arm is read from the terminal state recorded at the base
+    revision and the candidate arm is solved here at head, so the comparison is
+    base against head rather than one revision against itself.  The baseline
+    record carries a binary64 digest, and carries the state array beside it when
+    the base-revision run persisted one, so the size of the difference between
+    the two revisions is reported whenever the array is available and reported
+    as unmeasured with its reason when only the digest is.  This row's own
+    terminal state is persisted as an array beside its digest so the next
+    comparison against it can measure rather than merely establish.
+
+    When ``panel_path`` is given, the state this row solved is drawn as a
+    poloidal flux contour panel beside its analytic reference, so the terminal
+    state is recorded as a figure and not only as a digest.
+    """
     import jax
     import jax.numpy as jnp
     import numpy as np
 
-    from nova.equilibrium import fixed_point
-
-    profile, seed, requested_class, target_current, request = _certificate_operands(
-        case_name, requested_cells
+    arms = certificate_identity_arms(
+        candidate_revision, baseline, case_name, requested_cells
     )
+    baseline_row = baseline["rows"][(str(case_name), int(requested_cells))]
+    context = _certificate_render_context(case_name, requested_cells)
+    profile = context["profile"]
+    seed = context["seed"]
+    requested_class = context["requested_class"]
+    target_current = context["target_current"]
+    request = context["request"]
     state = jnp.asarray(seed)
     external = profile.operator.external()
-    mapped = profile.operator.traced_flux_map(requested_class, target_current)
-    shadowed = profile.operator.traced_flux_map_with_shadow(
-        requested_class, target_current
-    )
-
-    def shadow_mask(value, operator):
-        return operator.residual_shadow_mask(value, requested_class)
-
-    def promoted_shadow_mask(value, previous, operator):
-        return operator.residual_shadow_mask(
-            value, requested_class, previous_shadow=previous
-        )
-
     options = request.policy.kernel_options()
-
-    def baseline_solve(initial, exterior):
-        return fixed_point.newton_krylov(
-            mapped,
-            initial,
-            shadow_mask_fn=shadow_mask,
-            promoted_shadow_mask_fn=promoted_shadow_mask,
-            shadowed_map_fn=shadowed,
-            map_arguments=(exterior, profile.operator),
-            callback_arguments=(profile.operator,),
-            **options,
-        )
-
-    baseline_program = jax.jit(baseline_solve)
-    baseline_started = time.perf_counter()
-    baseline = baseline_program(state, external)
-    jax.block_until_ready(baseline.state)
-    baseline_seconds = time.perf_counter() - baseline_started
     candidate_program = profile._accelerated_history_program(
         "newton_krylov",
         requested_class=requested_class,
@@ -1238,60 +1701,599 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
     candidate = candidate_program(state, external, profile.operator)
     jax.block_until_ready(candidate.state)
     candidate_seconds = time.perf_counter() - candidate_started
-    baseline_state = np.asarray(baseline.state, dtype=np.float64)
     candidate_state = np.asarray(candidate.state, dtype=np.float64)
     identity_row_count = _require_identity_rows(
-        baseline_state.size, f"solovev:{case_name}:{requested_cells}"
+        candidate_state.size, f"solovev:{case_name}:{requested_cells}"
     )
-    baseline_hash = hashlib.sha256(baseline_state.tobytes()).hexdigest()
     candidate_hash = hashlib.sha256(candidate_state.tobytes()).hexdigest()
-    baseline_state_finite = bool(np.all(np.isfinite(baseline_state)))
     candidate_state_finite = bool(np.all(np.isfinite(candidate_state)))
-    difference = np.abs(candidate_state - baseline_state)
-    max_absolute_difference = (
-        float(np.max(difference, initial=0.0))
-        if bool(np.all(np.isfinite(difference)))
-        else None
-    )
-    baseline_residual = float(baseline.residual)
     candidate_residual = float(candidate.residual)
+    baseline_hash = baseline_row["state_sha256_binary64"]
+    bit_identical = candidate_hash == baseline_hash
+    difference = certificate_state_difference(
+        candidate_state,
+        baseline_row,
+        f"solovev:{case_name}:{requested_cells}",
+    )
+    persisted = _persist_state_array(
+        state_directory, str(case_name), requested_cells, candidate_state
+    )
+    panel = None
+    if panel_path is not None:
+        panel = _certificate_flux_panel(
+            case_name,
+            requested_cells,
+            context,
+            candidate_state,
+            terminal_residual=candidate_residual,
+            bit_identical=bit_identical,
+            revision_note=(
+                f"baseline {'bit-identical' if bit_identical else 'DIFFERS'} "
+                f"across {arms['baseline']['revision'][:8]} → "
+                f"{arms['candidate']['revision'][:8]}"
+            ),
+            path=panel_path,
+        )
     return {
         "case": case_name,
         "requested_cells": requested_cells,
         "identity_row_count": identity_row_count,
         "realised_state_values": identity_row_count,
-        "baseline_seconds": baseline_seconds,
+        "baseline_revision": arms["baseline"]["revision"],
+        "candidate_revision": arms["candidate"]["revision"],
+        "baseline_arm_source": arms["baseline"]["source"],
+        "baseline_arm_kind": arms["baseline"]["arm_kind"],
+        "baseline_state_array_source": arms["baseline"]["state_array_source"],
+        "candidate_arm_source": arms["candidate"]["source"],
+        "baseline_seconds": None,
+        "baseline_recorded_seconds": baseline_row["seconds"],
         "candidate_seconds": candidate_seconds,
         "baseline_state_sha256_binary64": baseline_hash,
         "candidate_state_sha256_binary64": candidate_hash,
-        "baseline_state_finite": baseline_state_finite,
+        "baseline_state_finite": baseline_row["state_finite"],
         "candidate_state_finite": candidate_state_finite,
-        "terminal_state_bit_identical": bool(
-            np.array_equal(candidate_state, baseline_state)
+        "terminal_state_bit_identical": bit_identical,
+        "maximum_absolute_state_difference": difference[
+            "maximum_absolute_state_difference"
+        ],
+        "maximum_absolute_state_difference_measure": difference[
+            "maximum_absolute_state_difference_measure"
+        ],
+        "difference_values": difference["difference_values"],
+        "candidate_state_array_path": (
+            None if persisted is None else persisted["path"]
         ),
-        "maximum_absolute_state_difference": max_absolute_difference,
-        "baseline_terminal_residual": (
-            baseline_residual if math.isfinite(baseline_residual) else None
+        "candidate_state_array_values": (
+            None if persisted is None else persisted["values"]
         ),
+        "baseline_terminal_residual": baseline_row["terminal_residual"],
         "candidate_terminal_residual": (
             candidate_residual if math.isfinite(candidate_residual) else None
         ),
-        "baseline_terminal_residual_finite": math.isfinite(baseline_residual),
+        "baseline_terminal_residual_finite": baseline_row["terminal_residual_finite"],
         "candidate_terminal_residual_finite": math.isfinite(candidate_residual),
-        "converged_equal": bool(
-            np.asarray(candidate.converged).item()
-            == np.asarray(baseline.converged).item()
-        ),
+        "converged_equal": None,
+        "panel": panel,
     }
 
 
-def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str, Any]:
-    """Persist the four certificate identity rows as each comparison lands."""
-    identity_row_count = _require_identity_rows(
-        len(CERTIFICATE_ROWS), "certificate identity rows"
+class CertificateRowRefusal(RuntimeError):
+    """Raised when a certificate row selector names no committed row."""
+
+
+class CertificateRowProcessRefusal(RuntimeError):
+    """Raised when a merged certificate receipt did not come from one process per row.
+
+    A receipt is evidence that no process loaded more than its share of programs
+    only when each row was solved in its own process.  Rows written by one
+    process — the receipt's own pid on every one of them — describe a process
+    that loaded every row's program, which is the configuration the receipt
+    exists to rule out, so the merge refuses rather than minting it.
+    """
+
+
+def certificate_row_entry(case_name: str) -> tuple[str, int]:
+    """Resolve a row selector to the committed ``(case, cells)`` row it names."""
+    for row in CERTIFICATE_ROWS:
+        if row[0] == case_name:
+            return row
+    raise CertificateRowRefusal(
+        f"certificate row {case_name!r} is not one of "
+        f"{[row[0] for row in CERTIFICATE_ROWS]}"
     )
+
+
+def certificate_row_order(row: dict[str, Any]) -> int:
+    """Rank one landed row by its place in the committed row set.
+
+    Rows are compared across receipts, so their order must come from the
+    committed set rather than from the order the processes happened to finish
+    in; a row outside that set sorts last.
+    """
+    key = (str(row["case"]), int(row["requested_cells"]))
+    for index, committed in enumerate(CERTIFICATE_ROWS):
+        if (committed[0], committed[1]) == key:
+            return index
+    return len(CERTIFICATE_ROWS)
+
+
+def certificate_receipt_header(
+    baseline: dict[str, Any],
+    candidate_revision: str,
+    panel_dir: Path | None,
+    state_directory: Path,
+    cache_receipt: dict[str, Any],
+    rows: tuple[tuple[str, int], ...],
+) -> dict[str, Any]:
+    """Assemble a certificate receipt's header and its unresolved rows.
+
+    Both paths that produce a certificate receipt — one process solving every
+    row, and one process per row merged by the parent — begin from this header,
+    so the two receipts differ in their provenance fields and nowhere else.
+    """
     import jax
 
+    return {
+        "schema": "nova.solve-program-certificate-identity",
+        "identity_row_count": len(rows),
+        "measurement_revision": candidate_revision,
+        "baseline_revision": baseline["revision"],
+        "candidate_revision": candidate_revision,
+        "baseline_state_receipt": baseline["receipt"],
+        "captured_at": datetime.now(UTC).isoformat(),
+        "assignment": {
+            "job_id": os.environ["SLURM_JOB_ID"],
+            "partition": os.environ.get("SLURM_JOB_PARTITION"),
+            "node": os.environ.get("SLURMD_NODENAME")
+            or os.environ.get("SLURM_JOB_NODELIST"),
+            "platform": jax.default_backend(),
+        },
+        "process_id": os.getpid(),
+        "persistent_compilation_cache": cache_receipt,
+        "comparison": (
+            "terminal state recorded at the base revision against the head "
+            "accelerated program"
+        ),
+        "panel_directory": str(panel_dir) if panel_dir is not None else None,
+        "state_directory": str(state_directory),
+        "execution_mode": None,
+        "parent_process_id": None,
+        "row_processes": [],
+        "baseline_arm_kinds": {},
+        "rows": [],
+        "pending_rows": [list(row) for row in rows],
+        "passed": None,
+    }
+
+
+def finalise_certificate_receipt(
+    receipt: dict[str, Any],
+    rows: list[dict[str, Any]],
+    *,
+    declared: tuple[tuple[str, int], ...],
+    row_processes: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Settle a certificate receipt's resolved fields from the rows it carries.
+
+    Every path that produces a certificate receipt closes through this function
+    — one process solving every row, and one process per row merged by the
+    parent — so the merged receipt carries the shape a single-process one does
+    rather than a shape of its own.
+    """
+    landed = {(str(row["case"]), int(row["requested_cells"])) for row in rows}
+    receipt["rows"] = sorted(rows, key=certificate_row_order)
+    receipt["pending_rows"] = [
+        list(row) for row in declared if (row[0], row[1]) not in landed
+    ]
+    kinds: dict[str, int] = {}
+    for row in receipt["rows"]:
+        land = row["baseline_arm_kind"]
+        kinds[land] = int(kinds.get(land, 0)) + 1
+    receipt["baseline_arm_kinds"] = kinds
+    if row_processes is not None:
+        receipt["execution_mode"] = "one-process-per-row"
+        receipt["row_processes"] = row_processes
+    receipt["passed"] = len(receipt["rows"]) == int(
+        receipt["identity_row_count"]
+    ) and all(bool(row["terminal_state_bit_identical"]) for row in receipt["rows"])
+    return receipt
+
+
+def _require_distinct_row_processes(
+    row_processes: list[dict[str, Any]],
+    parent_process_id: int,
+    expected: int,
+) -> None:
+    """Refuse a receipt whose rows were not each solved by one process of their own.
+
+    The guard fires on the three ways a receipt can look merged while carrying
+    one process's work: a row whose child wrote no receipt, so the process that
+    solved it is unknown; a row solved by the process that owns the receipt,
+    which is every row when the parent solves them itself; and fewer distinct
+    processes than rows.
+    """
+    if len(row_processes) != expected:
+        raise CertificateRowProcessRefusal(
+            f"merged receipt carries {len(row_processes)} row processes for "
+            f"{expected} rows"
+        )
+    process_ids = [entry.get("process_id") for entry in row_processes]
+    unknown = [
+        str(entry.get("case"))
+        for entry, pid in zip(row_processes, process_ids, strict=True)
+        if pid is None
+    ]
+    if unknown:
+        raise CertificateRowProcessRefusal(
+            f"rows {unknown} wrote no receipt, so the process that solved each "
+            "is unknown"
+        )
+    owned = [
+        str(entry.get("case"))
+        for entry, pid in zip(row_processes, process_ids, strict=True)
+        if int(pid) == int(parent_process_id)
+    ]
+    if owned:
+        raise CertificateRowProcessRefusal(
+            f"rows {owned} were solved by process {parent_process_id}, which owns "
+            "the merged receipt, so they were not solved in a process of their own"
+        )
+    if len(set(process_ids)) != expected:
+        raise CertificateRowProcessRefusal(
+            f"{expected} rows were solved by {len(set(process_ids))} distinct "
+            "processes, so at least one process loaded more than one row's program"
+        )
+
+
+def assemble_certificate_receipt(
+    header: dict[str, Any],
+    rows: list[dict[str, Any]],
+    row_processes: list[dict[str, Any]],
+    parent_process_id: int,
+    *,
+    declared: tuple[tuple[str, int], ...] = CERTIFICATE_ROWS,
+) -> dict[str, Any]:
+    """Mint the certificate receipt a set of per-row processes produced."""
+    _require_distinct_row_processes(row_processes, parent_process_id, len(declared))
+    receipt = dict(header)
+    receipt["parent_process_id"] = int(parent_process_id)
+    return finalise_certificate_receipt(
+        receipt, rows, declared=declared, row_processes=row_processes
+    )
+
+
+def merge_certificate_row_receipts(
+    row_receipts: list[Path],
+    header: dict[str, Any],
+    row_processes: list[dict[str, Any]],
+    parent_process_id: int,
+    *,
+    declared: tuple[tuple[str, int], ...] = CERTIFICATE_ROWS,
+) -> dict[str, Any]:
+    """Merge the per-row receipts the child processes wrote into the gate's receipt.
+
+    Each child writes one row's receipt in the same shape the single-process
+    path mints, so the merge reads the row out of each rather than rebuilding
+    it, and a receipt carrying more or fewer than one row is refused instead of
+    being flattened.
+    """
+    rows: list[dict[str, Any]] = []
+    for path in row_receipts:
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+        payload_rows = payload.get("rows") or []
+        if len(payload_rows) != 1:
+            raise CertificateRowProcessRefusal(
+                f"row receipt {path} carries {len(payload_rows)} rows; one "
+                "process solves one row"
+            )
+        rows.append(payload_rows[0])
+    return assemble_certificate_receipt(
+        header, rows, row_processes, parent_process_id, declared=declared
+    )
+
+
+def certificate_row_command(
+    row: tuple[str, int],
+    row_receipt: Path,
+    samples: Path | None,
+    summary: Path | None,
+    *,
+    baseline_receipt: Path | None = None,
+    panel_dir: Path | None = None,
+    state_directory: Path | None = None,
+    cache_root: Path | None = None,
+) -> list[str]:
+    """Build the command one certificate row runs in its own process.
+
+    The command is this module with the row selector, so a child runs the same
+    code as its parent and resolves its own operands.  When a sample path and a
+    summary path are given the command is wrapped in
+    :mod:`benchmarks.compile_abort_probe`, which records the child's own
+    mapping count beside its resident memory for the life of the load.
+    """
+    command = [
+        sys.executable,
+        "-m",
+        "benchmarks.solve_program_size_gate",
+        "--certificate-output",
+        str(row_receipt),
+        "--certificate-row",
+        row[0],
+    ]
+    for flag, value in (
+        ("--certificate-baseline-receipt", baseline_receipt),
+        ("--certificate-panel-dir", panel_dir),
+        ("--certificate-state-dir", state_directory),
+        ("--cache-root", cache_root),
+    ):
+        if value is not None:
+            command += [flag, str(value)]
+    if samples is not None and summary is not None:
+        command = [
+            sys.executable,
+            "-m",
+            "benchmarks.compile_abort_probe",
+            "--samples",
+            str(samples),
+            "--summary",
+            str(summary),
+            "--interval",
+            "0.2",
+            "--",
+            *command,
+        ]
+    return command
+
+
+def _print_certificate_done(row: dict[str, Any]) -> None:
+    print(
+        f"CERTIFICATE_DONE case={row['case']} cells={row['requested_cells']} "
+        f"bit_identical={int(row['terminal_state_bit_identical'])} "
+        f"baseline_arm={row['baseline_arm_kind']} "
+        f"max_abs_state_difference={row['maximum_absolute_state_difference']} "
+        f"baseline_revision={row['baseline_revision']} "
+        f"candidate_revision={row['candidate_revision']} "
+        f"terminal_residual={row['candidate_terminal_residual']}",
+        flush=True,
+    )
+
+
+def _certificate_row_paths(
+    rows: tuple[tuple[str, int], ...],
+    panel_dir: Path | None,
+) -> list[tuple[str, int, Path | None]]:
+    """Name each row's panel path, or none when no panel directory was given."""
+    return [
+        (
+            case_name,
+            requested_cells,
+            None
+            if panel_dir is None
+            else Path(panel_dir) / f"{_panel_slug(case_name, requested_cells)}.png",
+        )
+        for case_name, requested_cells in rows
+    ]
+
+
+def _certificate_rows_in_one_process(
+    receipt: dict[str, Any],
+    output: Path,
+    rows: tuple[tuple[str, int], ...],
+    baseline: dict[str, Any],
+    candidate_revision: str,
+    panel_dir: Path | None,
+    state_directory: Path,
+) -> dict[str, Any]:
+    """Solve the selected rows in this process, persisting each as it lands.
+
+    This is the path a row process takes for its single row, and the path the
+    parent takes when the per-row processes are turned off.
+    """
+    receipt["rows"] = []
+    _write_json(output, receipt)
+    landed: list[dict[str, Any]] = []
+    for case_name, requested_cells, panel_path in _certificate_row_paths(
+        rows, panel_dir
+    ):
+        print(
+            f"CERTIFICATE_START case={case_name} cells={requested_cells} "
+            f"process={os.getpid()}",
+            flush=True,
+        )
+        landed.append(
+            _certificate_identity_row(
+                case_name,
+                requested_cells,
+                baseline=baseline,
+                candidate_revision=candidate_revision,
+                panel_path=panel_path,
+                state_directory=state_directory,
+            )
+        )
+        receipt["rows"] = list(landed)
+        finalise_certificate_receipt(receipt, landed, declared=rows)
+        _write_json(output, receipt)
+        _print_certificate_done(landed[-1])
+    return receipt
+
+
+def certificate_row_process_entry(
+    case_name: str,
+    requested_cells: int,
+    row_receipt: Path,
+    wrapper_status: int,
+    payload: dict[str, Any] | None,
+    probe: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Describe one row's child process in the receipt the parent merges.
+
+    ``exit_code`` is the status of the process that solved the row.  When the
+    child ran under :mod:`benchmarks.compile_abort_probe` the driver is the
+    wrapper's grandchild, so its status is the one the probe recorded beside its
+    own samples; the wrapper's status is the caller's.  The two are separate
+    fields because they answer different questions: a wrapper killed before it
+    wrote its summary leaves a status that is not the child's, and a receipt
+    that called that status ``exit_code`` would report a row that died inside
+    the compiler as one that completed.
+
+    The sampled peak is reported against both a single program load and the
+    two-load ceiling.  One load adds ``CERTIFICATE_PROGRAM_LOAD_MAPS`` mappings,
+    so a child whose peak stays under the upper end of that step loaded at most
+    one program; the two-load ceiling is the older, looser test and keeps its
+    own field rather than standing in for the one it never measured.
+    """
+    peak_maps = None if probe is None else probe.get("peak_maps")
+    child_status = wrapper_status if probe is None else probe.get("exit_code")
+    return {
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "process_id": None if payload is None else payload.get("process_id"),
+        "exit_code": None if child_status is None else int(child_status),
+        "probe_wrapper_exit": (None if probe is None else int(wrapper_status)),
+        "peak_maps": peak_maps,
+        "max_map_count": None if probe is None else probe.get("max_map_count"),
+        "samples_path": None if probe is None else probe.get("samples_path"),
+        "program_load_maps": list(CERTIFICATE_PROGRAM_LOAD_MAPS),
+        "within_one_program_load": (
+            None
+            if peak_maps is None
+            else bool(int(peak_maps) <= CERTIFICATE_PROGRAM_LOAD_MAPS[1])
+        ),
+        "within_two_program_loads": (
+            None
+            if peak_maps is None
+            else bool(int(peak_maps) <= CERTIFICATE_CHILD_MAP_CEILING)
+        ),
+        "row_receipt": str(row_receipt),
+    }
+
+
+def _certificate_rows_as_processes(
+    receipt: dict[str, Any],
+    output: Path,
+    rows: tuple[tuple[str, int], ...],
+    baseline_receipt: Path,
+    panel_dir: Path | None,
+    state_directory: Path,
+    cache_root: Path | None,
+    row_command: Any,
+    row_work_dir: Path | None,
+) -> dict[str, Any]:
+    """Run each selected row in a child process and merge their receipts.
+
+    One child per row means no process loads more than one row's programs, so
+    the load that a four-row process could not complete stays under the
+    kernel's per-process mapping cap.  Each child's mapping count is sampled by
+    :mod:`benchmarks.compile_abort_probe` for the life of its load and recorded
+    beside the measured per-load step, so the receipt reports each child
+    against one load rather than only asserting it.
+    """
+    parent_process_id = os.getpid()
+    work_directory = (
+        Path(row_work_dir)
+        if row_work_dir is not None
+        else Path(output).resolve().parent / f"{Path(output).stem}-rows"
+    )
+    work_directory.mkdir(parents=True, exist_ok=True)
+    receipt["rows"] = []
+    receipt["row_processes"] = []
+    _write_json(output, receipt)
+    landed: list[dict[str, Any]] = []
+    row_processes: list[dict[str, Any]] = []
+    row_receipts: list[Path] = []
+    for index, (case_name, requested_cells) in enumerate(rows):
+        row_receipt = work_directory / f"row-{index}-{case_name}.json"
+        samples = work_directory / f"row-{index}-{case_name}-maps.jsonl"
+        summary = work_directory / f"row-{index}-{case_name}-probe.json"
+        build = row_command or certificate_row_command
+        command = build(
+            (case_name, requested_cells),
+            row_receipt,
+            samples,
+            summary,
+            baseline_receipt=baseline_receipt,
+            panel_dir=panel_dir,
+            state_directory=state_directory,
+            cache_root=cache_root,
+        )
+        print(
+            f"CERTIFICATE_START case={case_name} cells={requested_cells} "
+            f"process=child command={' '.join(command)}",
+            flush=True,
+        )
+        completed = subprocess.run(command, check=False)
+        payload = (
+            json.loads(row_receipt.read_text(encoding="utf-8"))
+            if row_receipt.is_file()
+            else None
+        )
+        probe = (
+            json.loads(summary.read_text(encoding="utf-8"))
+            if summary.is_file()
+            else None
+        )
+        child_rows = [] if payload is None else list(payload.get("rows") or [])
+        entry = certificate_row_process_entry(
+            case_name,
+            requested_cells,
+            row_receipt,
+            int(completed.returncode),
+            payload,
+            probe,
+        )
+        row_processes.append(entry)
+        row_receipts.append(row_receipt)
+        landed.extend(child_rows)
+        receipt["rows"] = list(landed)
+        receipt["row_processes"] = list(row_processes)
+        finalise_certificate_receipt(receipt, landed, declared=rows)
+        _write_json(output, receipt)
+        if child_rows:
+            _print_certificate_done(child_rows[0])
+        else:
+            print(
+                f"CERTIFICATE_ROW_FAILED case={case_name} "
+                f"cells={requested_cells} exit={entry['exit_code']} "
+                f"row_receipt={row_receipt}",
+                flush=True,
+            )
+    merged = merge_certificate_row_receipts(
+        row_receipts,
+        receipt,
+        row_processes,
+        parent_process_id,
+        declared=rows,
+    )
+    _write_json(output, merged)
+    return merged
+
+
+def run_certificate_identity(
+    output: Path,
+    cache_root: Path | None,
+    baseline_receipt: Path | None = None,
+    panel_dir: Path | None = None,
+    state_dir: Path | None = None,
+    *,
+    row: str | None = None,
+    process_per_row: bool = True,
+    row_command: Any = None,
+    row_work_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Persist the certificate identity rows as each comparison lands.
+
+    By default each row is solved in a child process of this interpreter, so no
+    process loads more than one row's programs and the fourth load cannot cross
+    the kernel's per-process mapping cap; the children's receipts are merged
+    into the single receipt the gate reads.  ``row`` selects one committed row
+    and solves only it, which is what a child invocation does.
+
+    Each row writes its terminal state array beside its digest, into
+    ``state_dir`` (the receipt's own ``-states`` directory by default), so a
+    later run at another revision reads the array rather than a digest and
+    reports the size of the difference between the two revisions.
+    """
+    _require_identity_rows(len(CERTIFICATE_ROWS), "certificate identity rows")
     from benchmarks.trip_quantum_width_one import _require_revision
     from nova.jax.config import (
         configure_dtypes,
@@ -1302,45 +2304,89 @@ def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str,
     configure_dtypes()
     if os.environ.get("SLURM_JOB_ID") is None:
         raise RuntimeError("certificate identity requires a SLURM allocation")
-    receipt: dict[str, Any] = {
-        "schema": "nova.solve-program-certificate-identity",
-        "identity_row_count": identity_row_count,
-        "measurement_revision": _require_revision(),
-        "captured_at": datetime.now(UTC).isoformat(),
-        "assignment": {
-            "job_id": os.environ["SLURM_JOB_ID"],
-            "partition": os.environ.get("SLURM_JOB_PARTITION"),
-            "node": os.environ.get("SLURMD_NODENAME")
-            or os.environ.get("SLURM_JOB_NODELIST"),
-            "platform": jax.default_backend(),
-        },
-        "persistent_compilation_cache": configure_persistent_compilation_cache(
+    baseline_path = (
+        CERTIFICATE_BASELINE_RECEIPT if baseline_receipt is None else baseline_receipt
+    )
+    baseline = load_certificate_baseline(baseline_path)
+    candidate_revision = _require_revision()
+    state_directory = (
+        state_dir
+        if state_dir is not None
+        else Path(output).resolve().parent / f"{Path(output).stem}-states"
+    )
+    rows = CERTIFICATE_ROWS if row is None else (certificate_row_entry(row),)
+    receipt = certificate_receipt_header(
+        baseline,
+        candidate_revision,
+        panel_dir,
+        state_directory,
+        configure_persistent_compilation_cache(
             cache_root or default_persistent_compilation_cache_root(),
             minimum_compile_seconds=0.0,
         ).receipt(),
-        "comparison": (
-            "pre-wrapper traced map against the frozen-partition accelerated program"
-        ),
-        "rows": [],
-        "passed": None,
-    }
-    _write_json(output, receipt)
-    for case_name, requested_cells in CERTIFICATE_ROWS:
-        print(f"CERTIFICATE_START case={case_name} cells={requested_cells}", flush=True)
-        row = _certificate_identity_row(case_name, requested_cells)
-        receipt["rows"].append(row)
-        _write_json(output, receipt)
-        print(
-            f"CERTIFICATE_DONE case={case_name} cells={requested_cells} "
-            f"bit_identical={int(row['terminal_state_bit_identical'])}",
-            flush=True,
-        )
-    receipt["passed"] = len(receipt["rows"]) == identity_row_count and all(
-        row["terminal_state_bit_identical"] and row["converged_equal"]
-        for row in receipt["rows"]
+        rows,
     )
-    _write_json(output, receipt)
-    return receipt
+    if row is not None or not process_per_row:
+        return _certificate_rows_in_one_process(
+            receipt,
+            output,
+            rows,
+            baseline,
+            candidate_revision,
+            panel_dir,
+            state_directory,
+        )
+    return _certificate_rows_as_processes(
+        receipt,
+        output,
+        rows,
+        baseline_path,
+        panel_dir,
+        state_directory,
+        cache_root,
+        row_command,
+        row_work_dir,
+    )
+
+
+def certificate_baseline_source(
+    baseline_receipt: Path | None = None,
+    candidate_revision: str | None = None,
+) -> dict[str, Any]:
+    """Report the arm selection for the smallest certificate row, solving nothing.
+
+    This is the arm-selection path on its own: it loads the recorded baseline,
+    selects both arm sources for ``CERTIFICATE_ROWS[0]``, and returns their
+    revision keys, so the selection can be exercised and logged without paying
+    for a compile.
+    """
+    from benchmarks.trip_quantum_width_one import _require_revision
+
+    baseline = load_certificate_baseline(
+        baseline_receipt or CERTIFICATE_BASELINE_RECEIPT
+    )
+    case_name, requested_cells = CERTIFICATE_ROWS[0]
+    arms = certificate_identity_arms(
+        candidate_revision or _require_revision(),
+        baseline,
+        case_name,
+        requested_cells,
+    )
+    baseline_row = baseline["rows"][(str(case_name), int(requested_cells))]
+    return {
+        "schema": "nova.certificate-baseline-arm-selection",
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "baseline_revision": arms["baseline"]["revision"],
+        "candidate_revision": arms["candidate"]["revision"],
+        "baseline_arm_source": arms["baseline"]["source"],
+        "baseline_arm_kind": arms["baseline"]["arm_kind"],
+        "baseline_state_array_source": arms["baseline"]["state_array_source"],
+        "baseline_arm_measures_difference": baseline_row.get("state_array") is not None,
+        "candidate_arm_source": arms["candidate"]["source"],
+        "arms_differ": arms["baseline"]["revision"] != arms["candidate"]["revision"],
+        "baseline_state_sha256_binary64": baseline_row["state_sha256_binary64"],
+    }
 
 
 def measure_300_program(output: Path, cache_root: Path | None) -> dict[str, Any]:
@@ -1645,12 +2691,62 @@ def write_semantic_report(
     return result
 
 
-def main() -> int:
+def build_argument_parser() -> argparse.ArgumentParser:
+    """Build the command-line parser the driver and each certificate child parse.
+
+    The certificate entry point is this module, so the arguments a child is
+    handed must be the arguments this parser accepts.  The parser is built here
+    rather than inside :func:`main` so a caller can parse the argv a child will
+    receive without running one.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline-dir", type=Path)
     parser.add_argument("--candidate-dir", type=Path)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--certificate-output", type=Path)
+    parser.add_argument(
+        "--certificate-row",
+        help=(
+            "run this one committed certificate row and no other, so a child "
+            "process loads one row's programs; defaults to every row, each in "
+            "its own child process"
+        ),
+    )
+    parser.add_argument(
+        "--certificate-in-process",
+        action="store_true",
+        help=(
+            "solve every selected row in this process instead of one child "
+            "process per row; a receipt minted this way is refused as evidence "
+            "that each row had a process of its own"
+        ),
+    )
+    parser.add_argument(
+        "--certificate-row-work-dir",
+        type=Path,
+        help=(
+            "directory that receives each child's own receipt and mapping "
+            "series; defaults to a -rows directory beside the receipt"
+        ),
+    )
+    parser.add_argument(
+        "--certificate-panel-dir",
+        type=Path,
+        help=(
+            "directory that receives one poloidal flux panel per certificate "
+            "row, drawn from the state that row solved"
+        ),
+    )
+    parser.add_argument(
+        "--certificate-state-dir",
+        type=Path,
+        help=(
+            "directory that receives one terminal state array per certificate "
+            "row, so a later comparison at another revision measures the size "
+            "of a difference rather than only establishing one; defaults to a "
+            "-states directory beside the receipt"
+        ),
+    )
     parser.add_argument("--measure-300-output", type=Path)
     parser.add_argument("--marker-census-output", type=Path)
     parser.add_argument(
@@ -1677,6 +2773,22 @@ def main() -> int:
     parser.add_argument("--cache-root", type=Path)
     parser.add_argument("--semantic-report", action="store_true")
     parser.add_argument("--certificate-receipt", type=Path)
+    parser.add_argument(
+        "--certificate-baseline-receipt",
+        type=Path,
+        help=(
+            "recorded terminal state at the base revision that the baseline arm "
+            "reads; defaults to the committed certificate receipt"
+        ),
+    )
+    parser.add_argument(
+        "--certificate-baseline-source",
+        action="store_true",
+        help=(
+            "report the arm selection for the smallest certificate row without "
+            "solving; exits nonzero when a baseline receipt is refused"
+        ),
+    )
     parser.add_argument("--mast-receipt", type=Path)
     parser.add_argument("--dispatch-receipt", type=Path)
     parser.add_argument(
@@ -1685,6 +2797,11 @@ def main() -> int:
         default=BASELINE_300_EXECUTABLE_BYTES,
         help="recorded baseline executable bytes for the 300-cell comparison",
     )
+    return parser
+
+
+def main() -> int:
+    parser = build_argument_parser()
     args = parser.parse_args()
     if args.marker_census_output is not None:
         if args.marker_census_hlo_dir is None:
@@ -1704,8 +2821,49 @@ def main() -> int:
     if args.measure_300_output is not None:
         result = measure_300_program(args.measure_300_output, args.cache_root)
         return 0 if result["passed"] else 1
+    if args.certificate_baseline_source:
+        result = certificate_baseline_source(args.certificate_baseline_receipt)
+        for key in (
+            "case",
+            "requested_cells",
+            "baseline_revision",
+            "candidate_revision",
+            "baseline_arm_source",
+            "baseline_arm_kind",
+            "baseline_arm_measures_difference",
+            "candidate_arm_source",
+            "baseline_state_sha256_binary64",
+        ):
+            print(f"CERTIFICATE_BASELINE_{key.upper()}={result[key]}", flush=True)
+        print(
+            "CERTIFICATE_BASELINE_SOURCE_GATE="
+            f"{'PASS' if result['arms_differ'] else 'FAIL'}",
+            flush=True,
+        )
+        return 0 if result["arms_differ"] else 1
     if args.certificate_output is not None:
-        result = run_certificate_identity(args.certificate_output, args.cache_root)
+        result = run_certificate_identity(
+            args.certificate_output,
+            args.cache_root,
+            args.certificate_baseline_receipt,
+            args.certificate_panel_dir,
+            args.certificate_state_dir,
+            row=args.certificate_row,
+            process_per_row=not args.certificate_in_process,
+            row_work_dir=args.certificate_row_work_dir,
+        )
+        for entry in result.get("row_processes") or []:
+            print(
+                f"CERTIFICATE_ROW_PROCESS case={entry['case']} "
+                f"process_id={entry['process_id']} exit={entry['exit_code']} "
+                f"probe_wrapper_exit={entry['probe_wrapper_exit']} "
+                f"peak_maps={entry['peak_maps']} "
+                f"max_map_count={entry['max_map_count']} "
+                f"program_load_maps={entry['program_load_maps']} "
+                f"within_one_program_load={entry['within_one_program_load']} "
+                f"within_two_program_loads={entry['within_two_program_loads']}",
+                flush=True,
+            )
         print(
             f"CERTIFICATE_IDENTITY_GATE={'PASS' if result['passed'] else 'FAIL'}",
             flush=True,

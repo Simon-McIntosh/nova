@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
+import time
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 
 import jax.numpy as jnp
@@ -22,15 +25,21 @@ from nova.equilibrium.flux_surface_connectivity import fit_tensor_spline
 from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
+from nova.equilibrium.topology import NoQualifiedAxisError, private_wall_node_read
 from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import configure_dtypes
+from nova.media.ink import DEFAULT_INK, poloidal_axes
+from nova.media.poloidal import draw_nulls, draw_wall
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CACHE = (
     ROOT / "docs/figures/topology-visual-corroboration/mast-topology-operands.npz"
 )
+# Governed marginal flags are read from every receipt that carries them; a row
+# covered by more than one receipt must agree across all of them.
 DEFAULT_QUALIFICATION = (
-    ROOT / "docs/figures/gs-absolute-accuracy/efit-reproduction.json"
+    ROOT / "docs/figures/gs-absolute-accuracy/efit-reproduction.json",
+    ROOT / "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json",
 )
 DEFAULT_OUTPUT = ROOT / "docs/figures/hex-cell-single-grid/topology-parity.json"
 DEFAULT_FIGURE = ROOT / "docs/figures/hex-cell-single-grid/topology-parity.png"
@@ -51,24 +60,157 @@ def _generator_module():
 
 
 def _qualification_rows(path: Path) -> dict[str, dict[str, object]]:
+    """Index a receipt's governed solver-qualification rows by arm identity.
+
+    A receipt states its rows either at the root or under ``data``; a row names
+    its arm through ``frame_identity.label`` or through ``identity`` plus
+    ``arm``. A row without an explicit ``solver_qualification`` mapping is not
+    a governed flag and is skipped rather than inferred from convergence.
+    """
     if not path.exists():
-        return {}
-    rows = json.loads(path.read_text()).get("data", {}).get("rows", [])
+        raise FileNotFoundError(f"governed qualification receipt absent: {path}")
+    payload = json.loads(path.read_text())
+    rows = payload.get("rows", payload.get("data", {}).get("rows", []))
+    indexed = {}
+    for row in rows:
+        qualification = row.get("solver_qualification")
+        if not isinstance(qualification, dict):
+            continue
+        label = row.get("frame_identity", {}).get("label")
+        if label is None and row.get("identity") and row.get("arm"):
+            label = f"{row['identity']} {row['arm']}"
+        if label is not None:
+            indexed[str(label)] = qualification
+    return indexed
+
+
+def governed_qualifications(paths: Iterable[Path]) -> dict[str, dict[str, object]]:
+    """Merge governed qualification rows, failing closed on a disagreement.
+
+    The marginal flag is the governed verdict and must agree wherever two
+    receipts both state it. The achieved class is not governed and receipts are
+    observed to differ on it, so every value is kept per receipt for the row to
+    report rather than one of them being chosen by argument order.
+    """
+    merged: dict[str, dict[str, object]] = {}
+    for path in paths:
+        for label, qualification in _qualification_rows(path).items():
+            marginal = qualification.get("marginal_solver_basin")
+            if label in merged:
+                stated = merged[label]["qualification"].get("marginal_solver_basin")
+                if stated != marginal:
+                    raise RuntimeError(
+                        f"{label}: governed receipts disagree on "
+                        f"marginal_solver_basin between "
+                        f"{merged[label]['source']} and {path}"
+                    )
+            else:
+                merged[label] = {
+                    "qualification": qualification,
+                    "source": f"{path}:solver_qualification",
+                    "variants": {},
+                }
+            merged[label]["variants"][Path(path).as_posix()] = {
+                "marginal_solver_basin": marginal,
+                "achieved_class": qualification.get("achieved_class"),
+            }
+    return merged
+
+
+def cache_authority(cache: Path) -> dict[str, object]:
+    """Name the operand cache by digest and operand base revision."""
+    resolved = cache.resolve()
+    metadata = json.loads(resolved.with_suffix(".metadata.json").read_text())
     return {
-        str(row.get("frame_identity", {}).get("label")): row["solver_qualification"]
-        for row in rows
-        if row.get("frame_identity", {}).get("label")
-        and isinstance(row.get("solver_qualification"), dict)
+        "cache": str(resolved),
+        "cache_sha256": hashlib.sha256(resolved.read_bytes()).hexdigest(),
+        "cache_source_identity": metadata.get("authority", {}).get("source_identity"),
+        "operand_base_revision": metadata.get("base_revision"),
+        "operand_producer_commit": metadata.get("producer_commit"),
     }
 
 
+def committed_class_authority(
+    row: dict[str, object],
+    qualification: dict[str, object] | None,
+    variants: Mapping[str, Mapping[str, object]],
+    committed_x,
+) -> tuple[str, str, dict[str, object], bool]:
+    """The committed class, who stated it, every stated value, and any conflict.
+
+    The committed operand's own recorded class is the authority because the
+    operand is what is being replayed. Governed receipts' ``achieved_class``
+    values are retained beside it rather than discarded: where two receipts
+    state different classes, choosing one hides the disagreement, and a parity
+    verdict that turns on which receipt was merged first is not a verdict.
+    """
+    operand_class = row.get("class") or row.get("solve_topology_class")
+    governed_class = qualification.get("achieved_class") if qualification else None
+    if operand_class:
+        committed, source = str(operand_class), "operand bank metadata class"
+    elif governed_class:
+        committed, source = str(governed_class), "governed receipt achieved_class"
+    elif np.all(np.isfinite(np.asarray(committed_x, dtype=float))):
+        committed, source = "diverted", "committed selected X is finite"
+    else:
+        committed, source = "limited", "committed selected X is not finite"
+    records: dict[str, object] = {
+        "operand_metadata": str(operand_class) if operand_class else None,
+    }
+    records.update(
+        {path: variant.get("achieved_class") for path, variant in variants.items()}
+    )
+    stated = {value for value in records.values() if value is not None}
+    return committed, source, records, len(stated) > 1
+
+
 def marginal_status(qualification: dict[str, object] | None) -> tuple[bool | None, str]:
-    """Read the governed flag and fail closed when it is absent."""
-    if qualification is not None and "marginal_solver_basin" in qualification:
-        return bool(
-            qualification["marginal_solver_basin"]
-        ), "solver_qualification.marginal_solver_basin"
-    return None, "missing solver_qualification.marginal_solver_basin"
+    """Read the governed flag, keeping an absent or null flag unknown.
+
+    Both an absent key and an explicit JSON null mean the receipt has stated no
+    verdict, so neither may be coerced to False: a ``bool(None)`` here would
+    publish a non-marginal verdict that the receipt never gave, and a panel
+    resting on it would report exact parity it never established.
+    """
+    if qualification is None or "marginal_solver_basin" not in qualification:
+        return None, "missing solver_qualification.marginal_solver_basin"
+    value = qualification["marginal_solver_basin"]
+    if value is None:
+        return None, "null solver_qualification.marginal_solver_basin"
+    return bool(value), "solver_qualification.marginal_solver_basin"
+
+
+def differing_cell_indices(committed_labels, replayed_labels) -> np.ndarray:
+    """Return every cell index whose committed and replayed labels differ."""
+    committed = np.asarray(committed_labels)
+    replayed = np.asarray(replayed_labels)
+    if committed.shape != replayed.shape:
+        raise ValueError("committed and replayed labels must share a shape")
+    return np.flatnonzero(committed != replayed)
+
+
+def differing_cell_records(
+    indices, coordinate, committed_labels, replayed_labels, values, adjudicate
+) -> list[dict[str, object]]:
+    """Build one adjudicated record per differing cell, absorbing none."""
+    records = []
+    for index in np.asarray(indices).reshape(-1):
+        index = int(index)
+        record = {
+            "index": index,
+            "centroid_m": np.asarray(coordinate)[index].tolist(),
+            "committed_label": int(np.asarray(committed_labels)[index]),
+            "committed_label_name": PlasmaDomain(
+                int(np.asarray(committed_labels)[index])
+            ).name,
+            "replayed_label": int(np.asarray(replayed_labels)[index]),
+            "replayed_label_name": PlasmaDomain(
+                int(np.asarray(replayed_labels)[index])
+            ).name,
+        }
+        record.update(adjudicate(float(np.asarray(values)[index])))
+        records.append(record)
+    return records
 
 
 def parity_disposition(row: dict[str, object]) -> str:
@@ -160,6 +302,22 @@ def receipt_errors(receipt: dict[str, object]) -> list[str]:
     rows = receipt.get("rows")
     if not isinstance(rows, list):
         return [*errors, "rows must be a list"]
+    coverage_keys = (
+        "row_count",
+        "replayed_row_count",
+        "unavailable_row_count",
+        "not_replayable_row_count",
+    )
+    if all(key in receipt for key in coverage_keys):
+        if receipt["row_count"] != len(rows):
+            errors.append("row_count does not match the declared rows")
+        accounted = (
+            receipt["replayed_row_count"]
+            + receipt["unavailable_row_count"]
+            + receipt["not_replayable_row_count"]
+        )
+        if accounted != receipt["row_count"]:
+            errors.append("every declared row must be replayed or named unavailable")
     required = {
         "identity",
         "replayable",
@@ -174,9 +332,18 @@ def receipt_errors(receipt: dict[str, object]) -> list[str]:
                 f"{row.get('identity', '<unknown>')}: missing {sorted(missing)}"
             )
             continue
+        if row["marginal_solver_basin"] is None:
+            errors.append(
+                f"{row['identity']}: {row['marginal_flag_source']} — an absent or "
+                "null governed flag is not a non-marginal verdict"
+            )
         if not row["replayable"]:
             if not row.get("not_replayable_reason"):
                 errors.append(f"{row['identity']}: missing not-replayable reason")
+            continue
+        if row.get("replay_completed") is False:
+            if not row.get("replay_exception") or not row.get("unavailable_reason"):
+                errors.append(f"{row['identity']}: unavailable replay lacks evidence")
             continue
         for key in (
             "compared_cell_count",
@@ -188,6 +355,8 @@ def receipt_errors(receipt: dict[str, object]) -> list[str]:
         ):
             if key not in row:
                 errors.append(f"{row['identity']}: missing {key}")
+        if row.get("wall_node_census", {}).get("differing_node_count", 0) != 0:
+            errors.append(f"{row['identity']}: wall-node private flags differ")
         if row["marginal_solver_basin"] is False:
             if row.get("differing_cell_count") != 0:
                 errors.append(f"{row['identity']}: non-marginal labels differ")
@@ -283,6 +452,34 @@ def _nearest_candidate(candidates, point):
     return int(np.argmin(np.where(finite, distance, np.inf)))
 
 
+def bilinear_node_flux(values, radius, height, points):
+    """Sample the raster at physical node positions without a nearest-cell proxy."""
+    radius, height = np.asarray(radius), np.asarray(height)
+    points = np.asarray(points)
+    if np.any(~np.isfinite(points)) or np.any(
+        (points[:, 0] < radius[0])
+        | (points[:, 0] > radius[-1])
+        | (points[:, 1] < height[0])
+        | (points[:, 1] > height[-1])
+    ):
+        raise ValueError("wall nodes must lie within the raster interpolation domain")
+    field = np.asarray(values).reshape((radius.size, height.size))
+    radial = np.clip(
+        np.searchsorted(radius, points[:, 0], side="right") - 1, 0, radius.size - 2
+    )
+    vertical = np.clip(
+        np.searchsorted(height, points[:, 1], side="right") - 1, 0, height.size - 2
+    )
+    r = (points[:, 0] - radius[radial]) / (radius[radial + 1] - radius[radial])
+    z = (points[:, 1] - height[vertical]) / (height[vertical + 1] - height[vertical])
+    return (
+        (1 - r) * (1 - z) * field[radial, vertical]
+        + r * (1 - z) * field[radial + 1, vertical]
+        + (1 - r) * z * field[radial, vertical + 1]
+        + r * z * field[radial + 1, vertical + 1]
+    )
+
+
 def _retained_raster_read(values, radius, height, inside, axis, x_candidates, wall):
     """Evaluate the retained raster boundary and class diagnostic."""
     shape = (radius.size, height.size)
@@ -293,7 +490,7 @@ def _retained_raster_read(values, radius, height, inside, axis, x_candidates, wa
     finite_x = x_candidates[np.all(np.isfinite(x_candidates), axis=1)]
     x_flux = surface(jnp.asarray(finite_x[:, 0]), jnp.asarray(finite_x[:, 1]))
     candidate_state = jnp.c_[jnp.asarray(finite_x), x_flux, jnp.zeros(len(finite_x))]
-    return traced_boundary_read(
+    reading = traced_boundary_read(
         field,
         jnp.asarray(radius),
         jnp.asarray(height),
@@ -311,11 +508,35 @@ def _retained_raster_read(values, radius, height, inside, axis, x_candidates, wa
         classification_x=candidate_state,
         classification_wall=wall_state[:3],
     )
+    nearest_private = reading["private_wall_node_mask"]
+    saddle_flux = reading["psi_axis"] + reading["u_xpoint"] * (
+        reading["psi_out"] - reading["psi_axis"]
+    )
+    admitted = reading["classification_x_inside_wall"]
+    reading.update(
+        private_wall_node_read(
+            jnp.asarray(bilinear_node_flux(values, radius, height, wall)),
+            jnp.asarray(wall[:, 1]),
+            axis[1],
+            saddle_flux,
+            1,
+            jnp.where(admitted[:, None], jnp.asarray(finite_x), jnp.nan),
+        )
+    )
+    reading["nearest_in_material_private_wall_node_mask"] = nearest_private
+    return reading
 
 
-def _replay_row(row, qualification):
+def _replay_row(row, governed):
+    started = time.monotonic()
     identity = str(row["identity"])
-    marginal, source = marginal_status(qualification)
+    if governed is None:
+        qualification, variants, (marginal, source) = None, {}, marginal_status(None)
+    else:
+        qualification = governed["qualification"]
+        variants = governed["variants"]
+        marginal, _ = marginal_status(qualification)
+        source = str(governed["source"])
     record = {
         "identity": identity,
         "shot": int(row["shot"]),
@@ -333,7 +554,9 @@ def _replay_row(row, qualification):
             not_replayable_reason="no cached per-cell flux for this bank row",
         )
         record["disposition"] = parity_disposition(record)
-        return record, None
+        record["figure_panel"] = "unavailable: no cached per-cell flux"
+        record["wall_seconds"] = time.monotonic() - started
+        return record, _annotation_payload(record)
 
     wall = np.asarray(row["wall"], dtype=float)
     inside = np.asarray(
@@ -361,9 +584,23 @@ def _replay_row(row, qualification):
     physical = jnp.asarray(np.r_[values, wall_flux])
 
     # Production owns candidate selection, edge reads, flood connectivity, and labels.
-    masks, state, _connected, admitted = operator._fixed_design_read(physical)
-    if not bool(admitted):
-        raise RuntimeError(f"{identity}: production topology read rejected its axis")
+    try:
+        masks, state, _connected, admitted = operator._fixed_design_read(physical)
+        if not bool(admitted):
+            raise NoQualifiedAxisError(
+                f"{identity}: production topology read found no qualified axis"
+            )
+    except NoQualifiedAxisError as error:
+        record.update(
+            replayable=True,
+            replay_completed=False,
+            replay_exception=type(error).__name__,
+            unavailable_reason=str(error),
+            disposition="unavailable production topology read",
+            figure_panel=f"unavailable: {type(error).__name__}",
+            wall_seconds=time.monotonic() - started,
+        )
+        return record, _unavailable_payload(record, coordinate, values, committed, wall)
     replayed = np.asarray(masks.label, dtype=np.int8)
     committed_o = np.asarray(row["selected_o"], dtype=float)[0]
     committed_x = np.asarray(row["selected_x"], dtype=float)[0]
@@ -375,24 +612,20 @@ def _replay_row(row, qualification):
     raster_flux = float(retained["psi_bnd"])
     raster_margin = float(retained["class_margin"])
     cell_margin = float(operator._connectivity_class_margin(physical, state))
-    differing = np.flatnonzero(committed != replayed)
-    cells = [
-        {
-            "index": int(index),
-            "centroid_m": coordinate[index].tolist(),
-            "committed_label": int(committed[index]),
-            "committed_label_name": PlasmaDomain(int(committed[index])).name,
-            "replayed_label": int(replayed[index]),
-            "replayed_label_name": PlasmaDomain(int(replayed[index])).name,
-            **adjudicate_difference(
-                float(values[index]),
-                float(state.axis_flux),
-                float(state.boundary_flux),
-                raster_flux,
-            ),
-        }
-        for index in differing
-    ]
+    differing = differing_cell_indices(committed, replayed)
+    cells = differing_cell_records(
+        differing,
+        coordinate,
+        committed,
+        replayed,
+        values,
+        adjudicate=lambda flux: adjudicate_difference(
+            flux,
+            float(state.axis_flux),
+            float(state.boundary_flux),
+            raster_flux,
+        ),
+    )
 
     replay_o = np.asarray(state.axis, dtype=float)
     replay_x = np.asarray(state.x_point, dtype=float)
@@ -414,12 +647,8 @@ def _replay_row(row, qualification):
     }
     cell_class = "diverted" if bool(state.diverted) else "limited"
     raster_class = "diverted" if raster_margin >= 0 else "limited"
-    committed_class = (
-        str(qualification["achieved_class"])
-        if qualification and qualification.get("achieved_class")
-        else "diverted"
-        if np.all(np.isfinite(committed_x))
-        else "limited"
+    committed_class, class_source, class_records, class_disagreement = (
+        committed_class_authority(row, qualification, variants, committed_x)
     )
     classification = adjudicate_classification(
         committed=committed_class,
@@ -431,23 +660,37 @@ def _replay_row(row, qualification):
         retained_raster_boundary_flux=raster_flux,
         marginal=marginal,
     )
-    cell_private = np.asarray(
-        operator._carrier_shadow_read(physical, masks)["private_wall_node_mask"],
-        dtype=bool,
-    )
+    shadow = operator._carrier_shadow_read(physical, masks, state)
+    cell_private = np.asarray(shadow["private_wall_node_mask"], dtype=bool)
     raster_private = np.asarray(retained["private_wall_node_mask"], dtype=bool)
-    owner = np.asarray(operator._wall_carrier_index, dtype=int)
+    nearest_private = np.asarray(
+        retained["nearest_in_material_private_wall_node_mask"], dtype=bool
+    )
     wall_differing = np.flatnonzero(cell_private != raster_private)
     wall_rows = [
         {
             "index": int(index),
             "position_m": wall[index].tolist(),
-            "nearest_cell_index": int(owner[index]),
-            "nearest_cell_label": int(replayed[owner[index]]),
-            "cell_authority_private": bool(cell_private[index]),
-            "retained_raster_private": bool(raster_private[index]),
+            "node_flux": float(wall_flux[index]),
+            "raster_bilinear_node_flux": float(retained["wall_node_flux"][index]),
+            "admitted_saddle_flux": float(shadow["admitted_saddle_flux"]),
+            "raster_admitted_saddle_flux": float(retained["admitted_saddle_flux"]),
+            "node_flux_private_side": bool(
+                shadow["wall_node_private_flux_side"][index]
+            ),
+            "raster_flux_private_side": bool(
+                retained["wall_node_private_flux_side"][index]
+            ),
+            "node_height_band": bool(shadow["wall_node_height_band"][index]),
+            "raster_height_band": bool(retained["wall_node_height_band"][index]),
+            "node_flux_private": bool(cell_private[index]),
+            "raster_bilinear_private": bool(raster_private[index]),
+            "nearest_in_material_raster_private": bool(nearest_private[index]),
+            "adjudication": (
+                "node-flux and bilinear-raster flux/saddle/height operands recorded"
+            ),
         }
-        for index in wall_differing
+        for index in range(len(wall))
     ]
     record.update(
         replayable=True,
@@ -462,89 +705,282 @@ def _replay_row(row, qualification):
         raster_binding_flux=raster_flux,
         selected_primaries=primaries,
         classification=classification,
+        committed_class=committed_class,
+        committed_class_source=class_source,
+        committed_class_records=class_records,
+        committed_class_disagreement=class_disagreement,
         wall_node_census={
             "node_count": int(len(wall)),
-            "cell_authority_private_count": int(np.count_nonzero(cell_private)),
-            "retained_raster_private_count": int(np.count_nonzero(raster_private)),
+            "node_flux_private_count": int(np.count_nonzero(cell_private)),
+            "raster_bilinear_private_count": int(np.count_nonzero(raster_private)),
+            "nearest_in_material_private_count": int(np.count_nonzero(nearest_private)),
+            "nearest_in_material_differing_count": int(
+                np.count_nonzero(nearest_private != cell_private)
+            ),
             "differing_node_count": int(len(wall_differing)),
-            "differing_nodes": wall_rows,
+            "differing_nodes": [wall_rows[index] for index in wall_differing],
+            "nodes": wall_rows,
+            "node_height_limits_m": [
+                _margin_value(float(shadow[key]))
+                for key in ("private_height_lower", "private_height_upper")
+            ],
+            "raster_height_limits_m": [
+                _margin_value(float(retained[key]))
+                for key in ("private_height_lower", "private_height_upper")
+            ],
+            "nearest_in_material_retention": "diagnostic third column for one release",
         },
+    )
+    record.update(
+        replay_completed=True,
+        figure_panel="replayed",
+        wall_seconds=time.monotonic() - started,
     )
     record["disposition"] = parity_disposition(record)
     plot = {
         "coordinate": coordinate,
         "values": values,
-        "labels": replayed,
         "wall": wall,
         "differing_cells": differing,
         "differing_wall": wall_differing,
         "census_level": np.asarray(float(state.boundary_flux)),
         "raster_level": np.asarray(raster_flux),
+        "census_nulls": {
+            "magnetic_axis": np.asarray(state.axis, dtype=float),
+            "x_points": np.atleast_2d(np.asarray(state.x_point, dtype=float)),
+        },
+        "committed_nulls": {
+            "magnetic_axis": np.asarray(committed_o, dtype=float),
+            "x_points": np.atleast_2d(np.asarray(committed_x, dtype=float)),
+        },
     }
     return record, plot
 
 
+def _unavailable_payload(record, coordinate, values, committed, wall):
+    """Geometry for an unavailable row: committed operands, no replay result."""
+    return {
+        "coordinate": coordinate,
+        "values": values,
+        "wall": wall,
+        "differing_cells": np.empty(0, dtype=int),
+        "differing_wall": np.empty(0, dtype=int),
+        "census_level": np.asarray(np.nan),
+        "raster_level": np.asarray(np.nan),
+        "census_nulls": {},
+        "committed_nulls": {},
+        "annotation": (
+            f"{record['identity']}: {record['replay_exception']} — "
+            f"{record['unavailable_reason']}"
+        ),
+    }
+
+
+def _annotation_payload(record):
+    """A declared row with no drawable geometry still gets its own panel."""
+    return {
+        "coordinate": None,
+        "values": None,
+        "wall": None,
+        "differing_cells": np.empty(0, dtype=int),
+        "differing_wall": np.empty(0, dtype=int),
+        "census_level": np.asarray(np.nan),
+        "raster_level": np.asarray(np.nan),
+        "census_nulls": {},
+        "committed_nulls": {},
+        "annotation": f"{record['identity']}: {record['not_replayable_reason']}",
+    }
+
+
+def panel_labels(rows) -> list[str]:
+    """One visible panel label per declared row, replayed or annotated."""
+    labels = []
+    for record, data in rows:
+        label = str(record["identity"])
+        if data.get("annotation"):
+            label = f"{label} — {data['annotation']}"
+        labels.append(label)
+    return labels
+
+
+def _panel_levels(field: np.ndarray, count: int = 12) -> np.ndarray:
+    """Stated interior contour levels spanning one panel's own flux range."""
+    values = np.asarray(field, dtype=float)
+    values = values[np.isfinite(values)]
+    if not values.size:
+        return np.empty(0)
+    low, high = float(np.min(values)), float(np.max(values))
+    if not high > low:
+        return np.asarray([low])
+    return np.linspace(low, high, count + 2)[1:-1]
+
+
+def _finite_null(point) -> np.ndarray | None:
+    """The first two coordinates of a finite null, or nothing to draw."""
+    if point is None:
+        return None
+    value = np.asarray(point, dtype=float).reshape(-1)
+    if value.size < 2:
+        return None
+    value = value[:2]
+    return value if bool(np.all(np.isfinite(value))) else None
+
+
+def draw_topology_nulls(
+    axis, census_nulls, committed_nulls, style=DEFAULT_INK
+) -> dict[str, int]:
+    """Draw the replayed null set filled and the committed set hollow.
+
+    Both sets reach the canvas, because a parity panel whose replayed axis has
+    moved must show that it moved. The replayed axis and saddle are drawn
+    through :func:`draw_nulls`; the committed saddle arrives as that painter's
+    ``other_x_points``, and the committed axis is drawn here, hollow, in the
+    same style, because the painter takes a single axis and the second set is
+    distinguished from the first by fill rather than by absence.
+
+    Returns the drawn counts so a coverage check can assert per panel that the
+    committed axis was drawn rather than only named in a caption.
+    """
+    tally = {
+        "replayed_axis_drawn": 0,
+        "committed_axis_drawn": 0,
+        "replayed_x_points_drawn": 0,
+        "committed_x_points_drawn": 0,
+    }
+    if census_nulls:
+        drawn = draw_nulls(
+            axis,
+            magnetic_axis=census_nulls.get("magnetic_axis"),
+            x_points=census_nulls.get("x_points"),
+            other_x_points=committed_nulls.get("x_points"),
+            style=style,
+        )
+        tally["replayed_x_points_drawn"] = int(drawn["x_points_drawn"])
+        tally["committed_x_points_drawn"] = int(drawn["other_x_points_drawn"])
+        tally["replayed_axis_drawn"] = int(
+            _finite_null(census_nulls.get("magnetic_axis")) is not None
+        )
+    committed_axis = (
+        _finite_null(committed_nulls.get("magnetic_axis")) if committed_nulls else None
+    )
+    if committed_axis is not None:
+        axis.plot(
+            committed_axis[0],
+            committed_axis[1],
+            marker=style.axis_marker,
+            markersize=style.axis_markersize,
+            color=style.axis_color,
+            markerfacecolor="none",
+            linestyle="none",
+            zorder=style.zorder_markers,
+        )
+        tally["committed_axis_drawn"] = 1
+    return tally
+
+
 def _plot(rows, path):
+    """One poloidal panel per declared row: line contours, nulls, wall, no axes."""
+    column_count = min(4, len(rows))
+    row_count = int(np.ceil(len(rows) / column_count))
     figure, axes = plt.subplots(
-        1,
-        len(rows),
-        figsize=(7 * len(rows), 6.2),
+        row_count,
+        column_count,
+        figsize=(4.3 * column_count, 5.2 * row_count),
         squeeze=False,
         constrained_layout=True,
+        facecolor=DEFAULT_INK.figure_facecolor,
     )
-    for axis, (record, data) in zip(axes[0], rows, strict=True):
-        coordinate = data["coordinate"]
-        radius, height = _tensor_axes(coordinate)
-        labels = data["labels"].reshape((radius.size, height.size)).T
-        field = data["values"].reshape((radius.size, height.size)).T
-        axis.pcolormesh(radius, height, labels, shading="nearest", cmap="viridis")
-        specs = (
-            (float(data["raster_level"]), "#ff8c00", "raster binding", "--", 2.6),
-            (float(data["census_level"]), "cyan", "census saddle", "-", 1.5),
-        )
-        for level, colour, name, style, width in specs:
-            if np.nanmin(field) <= level <= np.nanmax(field):
-                axis.contour(
-                    radius,
-                    height,
-                    field,
-                    levels=[level],
-                    colors=[colour],
-                    linestyles=[style],
-                    linewidths=width,
-                )
-            axis.plot([], [], color=colour, linestyle=style, label=name)
-        if len(data["differing_cells"]):
-            point = coordinate[data["differing_cells"]]
-            axis.scatter(
-                point[:, 0],
-                point[:, 1],
-                marker="x",
-                s=55,
-                color="red",
-                label="differing cell",
-            )
+    flat_axes = axes.reshape(-1)
+    for axis, (record, data) in zip(flat_axes, rows, strict=False):
+        poloidal_axes(axis)
         wall = data["wall"]
-        axis.plot(wall[:, 0], wall[:, 1], color="black", linewidth=0.8)
-        if len(data["differing_wall"]):
-            point = wall[data["differing_wall"]]
-            axis.scatter(
-                point[:, 0],
-                point[:, 1],
-                facecolors="none",
-                edgecolors="magenta",
-                s=65,
-                label="differing wall node",
+        if data["coordinate"] is None:
+            axis.text(
+                0.5,
+                0.5,
+                data["annotation"],
+                ha="center",
+                va="center",
+                wrap=True,
+                color=DEFAULT_INK.wall_color,
             )
-        axis.set(
-            title=str(record["identity"]),
-            xlabel="R [m]",
-            ylabel="Z [m]",
-            aspect="equal",
+        else:
+            coordinate = data["coordinate"]
+            radius, height = _tensor_axes(coordinate)
+            field = np.asarray(data["values"]).reshape((radius.size, height.size)).T
+            axis.contour(
+                radius,
+                height,
+                field,
+                levels=_panel_levels(field),
+                colors=[DEFAULT_INK.contour_color],
+                linewidths=DEFAULT_INK.contour_linewidth,
+            )
+            levels = (
+                (float(data["census_level"]), "cyan", "-", 1.5),
+                (float(data["raster_level"]), "#ff8c00", "--", 1.2),
+            )
+            for level, colour, style, width in levels:
+                if np.isfinite(level) and np.nanmin(field) <= level <= np.nanmax(field):
+                    axis.contour(
+                        radius,
+                        height,
+                        field,
+                        levels=[level],
+                        colors=[colour],
+                        linestyles=[style],
+                        linewidths=width,
+                    )
+                axis.plot([], [], color=colour, linestyle=style, label=f"{level:.4f}")
+            if len(data["differing_cells"]):
+                point = coordinate[data["differing_cells"]]
+                axis.scatter(
+                    point[:, 0],
+                    point[:, 1],
+                    marker="x",
+                    s=55,
+                    color="#cc0000",
+                    label="differing cell",
+                )
+            draw_wall(axis, units=wall)
+            census = data["census_nulls"]
+            if census:
+                draw_topology_nulls(
+                    axis, census, data["committed_nulls"], style=DEFAULT_INK
+                )
+            if len(data["differing_wall"]):
+                point = wall[data["differing_wall"]]
+                axis.scatter(
+                    point[:, 0],
+                    point[:, 1],
+                    facecolors="none",
+                    edgecolors="magenta",
+                    s=65,
+                    label="differing wall node",
+                )
+            if data.get("annotation"):
+                axis.set_title(data["annotation"], fontsize=7, color="#cc0000")
+        census = record.get("wall_node_census", {})
+        counts = (
+            f"\ncells differing: {record.get('differing_cell_count', 'unavailable')}; "
+            f"wall nodes differing: {census.get('differing_node_count', 'unavailable')}"
         )
-        axis.legend(loc="best", fontsize=8)
+        axis.set_title(str(record["identity"]) + counts, fontsize=9)
+        axis.legend(loc="upper right", fontsize=6, frameon=False)
+    for axis in flat_axes[len(rows) :]:
+        axis.set_visible(False)
+    figure.supxlabel(
+        "Private: node flux on the admitted saddle's private side and height beyond an "
+        "admitted saddle limit; no cell-label ownership.",
+        fontsize=9,
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
+    figure.savefig(path.with_suffix(".svg"))
+    svg = path.with_suffix(".svg")
+    svg.write_text(
+        "\n".join(line.rstrip() for line in svg.read_text().splitlines()) + "\n"
+    )
     plt.close(figure)
 
 
@@ -560,28 +996,39 @@ def run(
         "source_identity"
     ]
     bank_rows = generator._read_cache(cache, source_identity)
-    qualifications = _qualification_rows(qualification_path)
+    qualifications = governed_qualifications(qualification_path)
     records, plots = [], []
     for row in bank_rows:
         record, plot = _replay_row(row, qualifications.get(str(row["identity"])))
         records.append(record)
-        if plot is not None:
-            plots.append((record, plot))
+        plots.append((record, plot))
     replayable = [row for row in records if row["replayable"]]
+    completed = [row for row in replayable if row.get("replay_completed") is True]
+    missing_operands = [row for row in records if not row["replayable"]]
+    unavailable = [row for row in replayable if row.get("replay_completed") is False]
     exact = [
         row
-        for row in replayable
+        for row in completed
         if row["marginal_solver_basin"] is False
         and row["differing_cell_count"] == 0
+        and row["wall_node_census"]["differing_node_count"] == 0
         and all(item["matches"] for item in row["selected_primaries"].values())
         and not row["classification"]["finding"]
     ]
     pending = [row for row in replayable if row["marginal_solver_basin"] is None]
     receipt = {
         "schema": "nova.topology-cell-parity",
-        "cache": str(cache.resolve()),
-        "cache_source_identity": source_identity,
-        "qualification_metadata": str(qualification_path.resolve()),
+        "wall_private_rule": "finite node flux with polarity*(psi_node-psi_saddle)>=0 "
+        "and height below the lower or above the upper admitted saddle limit; "
+        "a side with no saddle has no private height band",
+        "raster_wall_sampling": (
+            "bilinear at each wall node; retained nearest-in-material "
+            "flags are diagnostic only and do not gate parity"
+        ),
+        **cache_authority(cache),
+        "qualification_receipts": [
+            Path(path).resolve().as_posix() for path in qualification_path
+        ],
         "marginal_rule": (
             "only solver_qualification.marginal_solver_basin is authoritative; "
             "a missing flag is marginal-unknown and pending"
@@ -592,7 +1039,9 @@ def run(
         ),
         "row_count": len(records),
         "replayable_row_count": len(replayable),
-        "not_replayable_row_count": len(records) - len(replayable),
+        "replayed_row_count": len(completed),
+        "unavailable_row_count": len(unavailable),
+        "not_replayable_row_count": len(missing_operands),
         "marginal_unknown_row_count": sum(
             row["marginal_solver_basin"] is None for row in records
         ),
@@ -601,14 +1050,25 @@ def run(
             row["marginal_solver_basin"] is False for row in replayable
         ),
         "exact_non_marginal_pass_count": len(exact),
+        "committed_class_authority": (
+            "the operand bank's own recorded class; governed receipts' "
+            "achieved_class values are kept per row as a cross-check"
+        ),
+        "committed_class_disagreement_count": sum(
+            row.get("committed_class_disagreement") is True for row in completed
+        ),
+        "committed_class_disagreements": [
+            {
+                "identity": row["identity"],
+                "committed_class": row["committed_class"],
+                "records": row["committed_class_records"],
+            }
+            for row in completed
+            if row.get("committed_class_disagreement") is True
+        ],
         "rows": records,
     }
-    errors = receipt_errors(receipt)
-    receipt.update(
-        validation_errors=errors,
-        status="pending" if pending and not errors else "complete",
-        passes=not errors,
-    )
+    finalize_receipt(receipt, pending)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
     if plots:
@@ -616,10 +1076,39 @@ def run(
     return receipt
 
 
+def finalize_receipt(receipt: dict[str, object], pending: bool) -> dict[str, object]:
+    """Attach the verdict a receipt is published under.
+
+    ``passes`` is false whenever any validation error stands, so a run that
+    leaves a governed row unknown cannot publish a passing receipt however
+    many rows it replayed; ``status`` records whether the replay itself ran to
+    the end, which is a different fact and is not a substitute for it.
+    """
+    errors = receipt_errors(receipt)
+    receipt.update(
+        validation_errors=errors,
+        status="pending" if pending and not errors else "complete",
+        passes=not errors,
+    )
+    return receipt
+
+
+def exit_code(receipt: dict[str, object]) -> int:
+    """Zero only for a complete receipt that carries no validation error."""
+    if receipt.get("passes") is True and not receipt.get("validation_errors"):
+        return 0 if receipt.get("status") == "complete" else 1
+    return 1
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cache", type=Path, default=DEFAULT_CACHE)
-    parser.add_argument("--qualification", type=Path, default=DEFAULT_QUALIFICATION)
+    parser.add_argument(
+        "--qualification",
+        type=Path,
+        nargs="+",
+        default=list(DEFAULT_QUALIFICATION),
+    )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
     arguments = parser.parse_args()
@@ -627,8 +1116,9 @@ def main():
         arguments.cache, arguments.qualification, arguments.output, arguments.figure
     )
     print(json.dumps(receipt, indent=2, sort_keys=True))
-    if not receipt["passes"]:
-        raise SystemExit(1)
+    status = exit_code(receipt)
+    if status:
+        raise SystemExit(status)
 
 
 if __name__ == "__main__":

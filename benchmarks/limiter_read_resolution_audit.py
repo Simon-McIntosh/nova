@@ -36,6 +36,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 from scipy.optimize import minimize_scalar
 
@@ -55,6 +56,7 @@ from nova.jax.config import (
 )
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes, trace_axes
+from nova.media.sources.frame import inside_wall_units
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 
 
@@ -67,6 +69,20 @@ DEFAULT_FIGURE_DIRECTORY = (
 )
 WALL_NODE_COUNTS = (121, 241, 481, 961)
 HIGH_RESOLUTION_REALISED_CELLS = 2600
+RENDER_CASE = certificate.DIVERTED_CASE_NAME
+RENDER_REQUESTED_CELLS = -1000
+RENDER_WALL_NODES = 481
+CONTACT_MARKER = "D"
+EXCLUDED_WALL_MARKER = "s"
+EXCLUDED_WALL_COLOR = "#6a3d9a"
+GLYPH_FAMILIES = (
+    "magnetic_axis",
+    "admitted_x_point",
+    "wall_contact",
+    "excluded_private_wall_nodes",
+)
+POLOIDAL_KIND = "poloidal-contact-shadow"
+ERROR_KIND = "contact-error-vs-resolution"
 ROWS = (
     ("weak-rotation-reactor-static", -300),
     ("moderate-rotation-conventional-static", -300),
@@ -777,11 +793,11 @@ def _saddle_wall_coupling(
 ) -> dict[str, Any]:
     """Record every wall-dependent gate around the selected analytic saddle."""
 
-    physical = jnp.asarray(analytic)[: operator.physical_node_number]
+    physical = jnp.asarray(analytic)
     _masks, topology, _connected, admitted = _block_tree(
         operator._fixed_design_read(physical)
     )
-    grid_flux, _wall_flux = operator._fixed_design_topology.split_flux_map(physical)
+    grid_flux = operator.null_flux_pool(physical)
     (vmap_o, vmap_x), census = _block_tree(
         operator._fixed_design_topology.grid.read_census(grid_flux)
     )
@@ -999,7 +1015,7 @@ def _load_parts(report_directory: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def _render_error_figure(rows: list[dict[str, Any]], path: Path) -> None:
+def _render_error_figure(rows: list[dict[str, Any]], path: Path) -> dict[str, Any]:
     """Plot contact position error against local wall-to-cell resolution."""
 
     figure, axes = plt.subplots(figsize=(7.2, 4.7), constrained_layout=True)
@@ -1033,13 +1049,44 @@ def _render_error_figure(rows: list[dict[str, Any]], path: Path) -> None:
     axes.set_yscale("log")
     axes.set_xlabel("selected wall panel length / characteristic cell pitch")
     axes.set_ylabel("analytic contact position error [m]")
+    title_lines = [
+        (
+            "analytic limiter read · contact position error "
+            "against wall-panel / cell-pitch ratio"
+        ),
+        (
+            f"{len(rows)} measured rows over {len(WALL_NODE_COUNTS)} wall resolutions; "
+            "the exact field is fixed and only the carrier wall sampling varies. "
+            "No nonlinear solve is entered."
+        ),
+    ]
+    axes.set_title("\n".join(title_lines), loc="left", fontsize=7.0)
     axes.legend(frameon=False, fontsize=6, ncol=2)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, format="svg", facecolor=DEFAULT_INK.figure_facecolor)
     plt.close(figure)
+    return {
+        "figure": path.name,
+        "kind": ERROR_KIND,
+        "titles": [{"text": line, "loc": "left"} for line in title_lines],
+        "title_lines": title_lines,
+        "legend_entries": [
+            f"{case_name.replace('-', ' ')} · {abs(requested_cells)} cells"
+            for case_name, requested_cells in ROWS
+        ],
+        "glyph_markers": {
+            str(requested): marker for requested, marker in markers.items()
+        },
+        "wall_drawn": False,
+        "poloidal_panels": [],
+    }
 
 
-def _render_poloidal_figure(row: dict[str, Any], path: Path) -> None:
+def _render_poloidal_figure(
+    row: dict[str, Any],
+    path: Path,
+    source_receipt: dict[str, Any],
+) -> dict[str, Any]:
     """Render the analytic single-null contact and private-wall exclusions."""
 
     render = row.get("render")
@@ -1059,11 +1106,12 @@ def _render_poloidal_figure(row: dict[str, Any], path: Path) -> None:
         boundary=float(render["boundary_flux_wb"]),
         axis=float(render["axis_flux_wb"]),
     )
-    figure, axes = plt.subplots(figsize=(5.4, 6.2), constrained_layout=True)
+    title_lines, title_fields = _contact_title(row, source_receipt, len(wall))
+    figure, axes = plt.subplots(figsize=(7.8, 6.2), constrained_layout=True)
     poloidal_axes(axes)
     poloidal.draw_flux_contours(axes, radius, height, flux, levels)
     poloidal.draw_wall(axes, wall[:, 0], wall[:, 1])
-    poloidal.draw_nulls(
+    tally = poloidal.draw_nulls(
         axes,
         magnetic_axis=axis,
         x_points=x_point[None, :],
@@ -1072,7 +1120,7 @@ def _render_poloidal_figure(row: dict[str, Any], path: Path) -> None:
     axes.plot(
         contact[0],
         contact[1],
-        marker="D",
+        marker=CONTACT_MARKER,
         markersize=5.0,
         markerfacecolor=DEFAULT_INK.flux_color,
         markeredgecolor="white",
@@ -1083,13 +1131,26 @@ def _render_poloidal_figure(row: dict[str, Any], path: Path) -> None:
         axes.plot(
             excluded[:, 0],
             excluded[:, 1],
-            marker="s",
+            marker=EXCLUDED_WALL_MARKER,
             markersize=2.5,
             markerfacecolor="none",
-            markeredgecolor="#6a3d9a",
+            markeredgecolor=EXCLUDED_WALL_COLOR,
             linestyle="none",
             zorder=DEFAULT_INK.zorder_markers,
         )
+    title_lines = [
+        piece for line in title_lines if line for piece in _wrap_title(line, 104)
+    ]
+    _pad_panel(axes)
+    axes.set_title("\n".join(title_lines), loc="left", fontsize=5.6)
+    axes.legend(
+        handles=_contact_legend_handles(),
+        frameon=False,
+        fontsize=5.4,
+        loc="center left",
+        ncol=1,
+        bbox_to_anchor=(1.01, 0.5),
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(
         path,
@@ -1098,6 +1159,214 @@ def _render_poloidal_figure(row: dict[str, Any], path: Path) -> None:
         facecolor=DEFAULT_INK.figure_facecolor,
     )
     plt.close(figure)
+    axis_drawn = _axis_glyph_drawn(axis, wall)
+    return {
+        "figure": path.name,
+        "kind": POLOIDAL_KIND,
+        "source_row_key": {
+            "case": row["case"],
+            "requested_cells": row["requested_cells"],
+            "wall_nodes": row["wall_nodes"],
+        },
+        "titles": [{"text": line, "loc": "left"} for line in title_lines],
+        "title_lines": title_lines,
+        "title_fields": title_fields,
+        "legend_entries": list(GLYPH_FAMILIES) + ["analytic_flux_contours", "wall"],
+        "glyph_markers": {
+            "magnetic_axis": DEFAULT_INK.axis_marker,
+            "admitted_x_point": DEFAULT_INK.xpoint_marker,
+            "wall_contact": CONTACT_MARKER,
+            "excluded_private_wall_nodes": EXCLUDED_WALL_MARKER,
+        },
+        "wall_drawn": True,
+        "wall_node_count": int(len(wall)),
+        "poloidal_panels": [
+            {
+                "panel": "analytic flux levels as line contours on shared Wb levels",
+                "null_sets": {
+                    "analytic_magnetic_axis": {
+                        "drawn": int(axis_drawn),
+                        "dropped_outside_wall": int(axis_drawn == 0),
+                    },
+                    "analytic_admitted_x_points": {
+                        "drawn": int(tally["x_points_drawn"]),
+                        "dropped_outside_wall": int(
+                            tally["x_points_dropped_outside_wall"]
+                        ),
+                    },
+                },
+                "wall_contact_glyphs": int(np.size(contact) // 2),
+                "excluded_private_wall_glyphs": (
+                    int(excluded.shape[0]) if excluded.size else 0
+                ),
+                "null_glyph_total": int(tally["x_points_drawn"]) + int(axis_drawn),
+            }
+        ],
+    }
+
+
+def _axis_glyph_drawn(axis: np.ndarray, wall: np.ndarray) -> int:
+    """Return the count of axis glyphs ``draw_nulls`` admits inside the wall."""
+
+    point = np.asarray(axis, dtype=float).reshape(-1)[:2]
+    if not np.all(np.isfinite(point)):
+        return 0
+    return int(bool(inside_wall_units(point[None, :], wall)[0]))
+
+
+def _contact_title(
+    row: dict[str, Any],
+    source_receipt: dict[str, Any],
+    wall_nodes: int,
+) -> tuple[list[str], dict[str, Any]]:
+    """Compose the contact-figure title from the source receipt's own fields."""
+
+    contact = row["production_contact"]
+    residual = float(contact["level_error_in_span"])
+    entered = bool(source_receipt.get("nonlinear_solve_entered", True))
+    converged = "yes" if entered else "n/a"
+    title_line = (
+        f"{row['case']} · cells={int(row['realised_cells'])} · "
+        f"residual={residual:.3e} · converged={converged}"
+    )
+    detail = (
+        f"analytic fixed-design read of the exact diverted single-null field; "
+        f"nominal cell scale {abs(int(row['requested_cells']))} "
+        f"({int(row['realised_cells'])} realised cells), {wall_nodes} wall nodes, "
+        f"selected panel/cell pitch "
+        f"{float(row['wall']['selected_panel_over_cell_pitch']):.4g}, contact "
+        f"offset from the exact wall extremum "
+        f"{float(contact['position_error_m']):.3e} m"
+    )
+    flag = (
+        f"no nonlinear solve is entered "
+        f"(source receipt nonlinear_solve_entered={entered}); residual is the "
+        f"selected-contact level error in span {residual:.3e} against the exact "
+        f"wall extremum, so no convergence flag exists for this analytic read"
+    )
+    fields = {
+        "fixture": {
+            "value": str(row["case"]),
+            "source_path": "rows[<case,requested_cells,wall_nodes>].case",
+            "source_value": row["case"],
+        },
+        "cells": {
+            "value": str(int(row["realised_cells"])),
+            "source_path": "rows[<case,requested_cells,wall_nodes>].realised_cells",
+            "source_value": int(row["realised_cells"]),
+        },
+        "residual": {
+            "value": f"{residual:.3e}",
+            "source_path": (
+                "rows[<case,requested_cells,wall_nodes>]"
+                ".production_contact.level_error_in_span"
+            ),
+            "source_value": residual,
+        },
+        "converged": {
+            "value": converged,
+            "source_path": "nonlinear_solve_entered",
+            "source_value": entered,
+        },
+    }
+    return [title_line, detail, flag], fields
+
+
+def _pad_panel(axes: Any) -> None:
+    """Widen the autoscaled limits slightly so no glyph sits on the frame."""
+
+    spacings = []
+    for getter in (axes.get_xlim, axes.get_ylim):
+        low, high = getter()
+        spacings.append(max(high - low, np.finfo(float).tiny))
+    margin = 0.02 * max(spacings)
+    limits = ((axes.get_xlim, axes.set_xlim), (axes.get_ylim, axes.set_ylim))
+    for getter, setter in limits:
+        low, high = getter()
+        setter(low - margin, high + margin)
+
+
+def _wrap_title(line: str, width: int) -> list[str]:
+    """Break one title line at whitespace so no title runs off the panel.
+
+    A matplotlib title is not wrapped by the layout engine, so an over-long
+    line is clipped rather than reported; the break belongs to the caller.
+    """
+
+    pieces: list[str] = []
+    current = ""
+    for word in line.split():
+        if current and len(current) + 1 + len(word) > width:
+            pieces.append(current)
+            current = word
+        elif current:
+            current = f"{current} {word}"
+        else:
+            current = word
+    if current:
+        pieces.append(current)
+    return pieces
+
+
+def _contact_legend_handles() -> list[Any]:
+    """Return one legend handle per glyph family the contact figure draws."""
+
+    return [
+        Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.contour_color,
+            linewidth=DEFAULT_INK.contour_linewidth,
+            label="analytic flux contours (exact field, shared Wb levels)",
+        ),
+        Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.wall_color,
+            linewidth=DEFAULT_INK.wall_linewidth,
+            label="wall",
+        ),
+        Line2D(
+            [],
+            [],
+            marker=DEFAULT_INK.axis_marker,
+            color=DEFAULT_INK.axis_color,
+            markersize=DEFAULT_INK.axis_markersize,
+            linestyle="none",
+            label="magnetic axis (analytic)",
+        ),
+        Line2D(
+            [],
+            [],
+            marker=DEFAULT_INK.xpoint_marker,
+            color=DEFAULT_INK.xpoint_color,
+            markersize=DEFAULT_INK.xpoint_markersize,
+            linestyle="none",
+            label="admitted X-point (analytic)",
+        ),
+        Line2D(
+            [],
+            [],
+            marker=CONTACT_MARKER,
+            markerfacecolor=DEFAULT_INK.flux_color,
+            markeredgecolor="white",
+            color=DEFAULT_INK.flux_color,
+            markersize=5.0,
+            linestyle="none",
+            label="selected wall contact (read)",
+        ),
+        Line2D(
+            [],
+            [],
+            marker=EXCLUDED_WALL_MARKER,
+            markerfacecolor="none",
+            markeredgecolor=EXCLUDED_WALL_COLOR,
+            color=EXCLUDED_WALL_COLOR,
+            markersize=2.5,
+            linestyle="none",
+            label="private-wall nodes exempted from the read",
+        ),
+    ]
 
 
 def _resolution_summary(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1485,6 +1754,79 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
+def render(figure_directory: Path) -> dict[str, Any]:
+    """Rebuild the figures from the committed receipt, with no solve.
+
+    The operands live in the figure directory's own ``receipt.json``, so this
+    entry point only reads that file and paints. It never builds a machine,
+    calls an operator or enters a solve, which is what lets it run on the
+    login node in the time it takes to write two vector files.
+    """
+
+    source_receipt = json.loads(
+        (figure_directory / "receipt.json").read_text(encoding="utf-8")
+    )
+    render_receipt = _render_figures(source_receipt, figure_directory)
+    print(render_receipt["exit_marker"], flush=True)
+    return render_receipt
+
+
+def _render_figures(
+    source_receipt: dict[str, Any],
+    figure_directory: Path,
+) -> dict[str, Any]:
+    """Render both figures from a landed receipt and record their render receipt.
+
+    Reading a receipt is all this needs: no machine is built, no operator is
+    called and no solve runs, so the two figures can be rebuilt from the
+    committed operands on the login node.
+    """
+
+    rows = source_receipt["rows"]
+    contact_figure = figure_directory / "contact-error-vs-wall-resolution.svg"
+    poloidal_figure = figure_directory / "single-null-contact-shadow.png"
+    poloidal_vector = figure_directory / "single-null-contact-shadow.svg"
+    render_row = next(
+        row
+        for row in rows
+        if row["case"] == RENDER_CASE
+        and row["requested_cells"] == RENDER_REQUESTED_CELLS
+        and row["wall_nodes"] == RENDER_WALL_NODES
+    )
+    poloidal_record = _render_poloidal_figure(
+        render_row, poloidal_figure, source_receipt
+    )
+    _render_poloidal_figure(render_row, poloidal_vector, source_receipt)
+    error_record = _render_error_figure(rows, contact_figure)
+    render_receipt = {
+        "schema": "nova.limiter-read-render-receipt",
+        "version": 1,
+        "source_receipt": str((figure_directory / "receipt.json").resolve()),
+        "source_receipt_sha256": _payload_sha256(source_receipt),
+        "source_revision": source_receipt.get("source_revision"),
+        "nonlinear_solve_entered": source_receipt.get("nonlinear_solve_entered"),
+        "render_entry_point": ("benchmarks/limiter_read_resolution_audit.py render"),
+        "figures": [error_record, poloidal_record],
+        "completed": True,
+        "exit_marker": "LIMITER_READ_RENDER_EXIT=0",
+    }
+    _write_json(figure_directory / "render-receipt.json", render_receipt)
+    return render_receipt
+
+
+def _payload_sha256(payload: dict[str, Any]) -> str:
+    """Return the hex digest of the canonical JSON form of a receipt.
+
+    The digest names the content the figures were painted from, so it stays
+    true when the same receipt is read from another directory.
+    """
+
+    encoded = json.dumps(
+        _strict(payload), indent=2, sort_keys=True, allow_nan=False
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def aggregate(report_directory: Path, figure_directory: Path) -> dict[str, Any]:
     """Aggregate all parts, render both figures, and write the final receipt."""
 
@@ -1517,15 +1859,6 @@ def aggregate(report_directory: Path, figure_directory: Path) -> dict[str, Any]:
     }
     contact_figure = figure_directory / "contact-error-vs-wall-resolution.svg"
     poloidal_figure = figure_directory / "single-null-contact-shadow.png"
-    _render_error_figure(rows, contact_figure)
-    render_row = next(
-        row
-        for row in rows
-        if row["case"] == certificate.DIVERTED_CASE_NAME
-        and row["requested_cells"] == -1000
-        and row["wall_nodes"] == 481
-    )
-    _render_poloidal_figure(render_row, poloidal_figure)
     receipt = {
         "schema": "nova.limiter-read-resolution-audit",
         "version": 1,
@@ -1547,6 +1880,7 @@ def aggregate(report_directory: Path, figure_directory: Path) -> dict[str, Any]:
         "completed": True,
         "exit_marker": "LIMITER_READ_RESOLUTION_EXIT=0",
     }
+    _render_figures(receipt, figure_directory)
     _write_json(report_directory / "receipt.json", receipt)
     _write_report(report_directory / "report.md", receipt)
     print(receipt["exit_marker"], flush=True)
@@ -1616,7 +1950,9 @@ def measure(
 
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("measure", "residual", "aggregate"))
+    parser.add_argument(
+        "action", choices=("measure", "residual", "aggregate", "render")
+    )
     parser.add_argument(
         "--report-directory", type=Path, default=DEFAULT_REPORT_DIRECTORY
     )
@@ -1642,6 +1978,8 @@ def main() -> None:
         )
     elif args.action == "residual":
         measure_residual_stages(args.report_directory)
+    elif args.action == "render":
+        render(args.figure_directory)
     else:
         aggregate(args.report_directory, args.figure_directory)
 

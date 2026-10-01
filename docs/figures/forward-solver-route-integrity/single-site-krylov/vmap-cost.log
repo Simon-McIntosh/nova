@@ -1,0 +1,35 @@
+revision=96cbb2f0e488a4a1f49b3266c4de7b9814a64622 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step command=/home/ITER/mcintos/Code/nova/.venv/bin/python vmap_cost.py job=1276452
+{
+  "size": 1529,
+  "width": 16,
+  "gmres_iterations": 8,
+  "walls": {
+    "stream": {
+      "median_seconds": 1.2397789787501097,
+      "all": [
+        1.2417467907071114,
+        1.2379473522305489,
+        1.2397789787501097,
+        1.2378030940890312,
+        1.2428336888551712,
+        1.238124292343855,
+        1.2457711603492498
+      ]
+    },
+    "base": {
+      "median_seconds": 0.0864113625138998,
+      "all": [
+        0.0865207388997078,
+        0.08693266659975052,
+        0.08640528656542301,
+        0.0863911584019661,
+        0.0864113625138998,
+        0.08650550246238708,
+        0.08620940521359444
+      ]
+    }
+  },
+  "ratio_stream_over_base": 14.34740689976603
+}
+VMAP_COST ratio=14.347
+EXIT=0

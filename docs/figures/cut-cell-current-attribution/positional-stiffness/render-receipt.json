@@ -1,0 +1,209 @@
+{
+  "$id": "nova.fixture-positional-stiffness-render-receipt",
+  "render_input": "docs/figures/cut-cell-current-attribution/positional-stiffness/render/translated-40mm.json",
+  "residual_figures": [
+    {
+      "case": "weak-rotation-reactor-static",
+      "figure": "weak-rotation-reactor-static-cells-110-residual.png",
+      "filesystem_path": "docs/figures/cut-cell-current-attribution/positional-stiffness/figures/weak-rotation-reactor-static-cells-110-residual.png",
+      "pixel_sha256": "26c8e8428281fc316b3ae1b170cc6662d57034de00dfc06414d532f2bbe2c161",
+      "poloidal_panels": [],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/positional-stiffness/figures/weak-rotation-reactor-static-cells-110-residual.png",
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "sha256": "53b3208154062b69e09203711d543b2fa833d4ac8b1f38094694b6cdaaa3f980",
+      "source_receipt": "docs/figures/cut-cell-current-attribution/positional-stiffness/receipt.json",
+      "source_receipt_sha256": "6e0b30e9b875ceb1ee4714d1aee8476a8ff50ba71d476f3a34828783dec223bb",
+      "titles": [
+        "weak-rotation-reactor-static \u00b7 110 requested cells (135 realised)"
+      ]
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "figure": "weak-rotation-reactor-static-cells-300-residual.png",
+      "filesystem_path": "docs/figures/cut-cell-current-attribution/positional-stiffness/figures/weak-rotation-reactor-static-cells-300-residual.png",
+      "pixel_sha256": "54a5435489fd15f3db08247a9b8a9d232407e85fde1531d49debccb5ddaccf0b",
+      "poloidal_panels": [],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/positional-stiffness/figures/weak-rotation-reactor-static-cells-300-residual.png",
+      "realised_cells": 342,
+      "requested_cells": -300,
+      "sha256": "46c3c9281231b6c7f1da06cb3aebf768eef4809d227c2e918dfc5af80bbb23a3",
+      "source_receipt": "docs/figures/cut-cell-current-attribution/positional-stiffness/receipt.json",
+      "source_receipt_sha256": "6e0b30e9b875ceb1ee4714d1aee8476a8ff50ba71d476f3a34828783dec223bb",
+      "titles": [
+        "weak-rotation-reactor-static \u00b7 300 requested cells (342 realised)"
+      ]
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "figure": "moderate-rotation-conventional-static-cells-300-residual.png",
+      "filesystem_path": "docs/figures/cut-cell-current-attribution/positional-stiffness/figures/moderate-rotation-conventional-static-cells-300-residual.png",
+      "pixel_sha256": "c25d94d9e6c425a45fc5b46c57009e0ec9e221fed2b67f4bc07e4a16909a4caa",
+      "poloidal_panels": [],
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/positional-stiffness/figures/moderate-rotation-conventional-static-cells-300-residual.png",
+      "realised_cells": 341,
+      "requested_cells": -300,
+      "sha256": "fc9640a50ff30ba9a74ffd029dc4751141caf3a4d456aa8255e99a5909151f73",
+      "source_receipt": "docs/figures/cut-cell-current-attribution/positional-stiffness/receipt.json",
+      "source_receipt_sha256": "6e0b30e9b875ceb1ee4714d1aee8476a8ff50ba71d476f3a34828783dec223bb",
+      "titles": [
+        "moderate-rotation-conventional-static \u00b7 300 requested cells (341 realised)"
+      ]
+    }
+  ],
+  "revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+  "source_receipt": "docs/figures/cut-cell-current-attribution/positional-stiffness/receipt.json",
+  "source_receipt_sha256": "6e0b30e9b875ceb1ee4714d1aee8476a8ff50ba71d476f3a34828783dec223bb",
+  "translated_figure": {
+    "case": null,
+    "figure": "translated-40mm.png",
+    "filesystem_path": "docs/figures/cut-cell-current-attribution/positional-stiffness/figures/translated-40mm.png",
+    "pixel_sha256": "091a52df11c5415b2bcef205298bb541dbd26dec7bd2cc61d4af5c864a98489c",
+    "poloidal_panels": [
+      {
+        "null_glyphs": {
+          "analytic": {
+            "axis_drawn": 1,
+            "other_x_points_drawn": 0,
+            "strike_points_drawn": 0,
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0
+          },
+          "translated": {
+            "axis_drawn": 1,
+            "other_x_points_drawn": 0,
+            "strike_points_drawn": 0,
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0
+          }
+        },
+        "panel": 0
+      },
+      {
+        "null_glyphs": {
+          "analytic": {
+            "axis_drawn": 1,
+            "other_x_points_drawn": 0,
+            "strike_points_drawn": 0,
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0
+          },
+          "translated": {
+            "axis_drawn": 1,
+            "other_x_points_drawn": 0,
+            "strike_points_drawn": 0,
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0
+          }
+        },
+        "panel": 1
+      },
+      {
+        "null_glyphs": {
+          "analytic": {
+            "axis_drawn": 1,
+            "other_x_points_drawn": 0,
+            "strike_points_drawn": 0,
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0
+          },
+          "translated": {
+            "axis_drawn": 1,
+            "other_x_points_drawn": 0,
+            "strike_points_drawn": 0,
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0
+          }
+        },
+        "panel": 2
+      },
+      {
+        "null_glyphs": {
+          "analytic": {
+            "axis_drawn": 1,
+            "other_x_points_drawn": 0,
+            "strike_points_drawn": 0,
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0
+          },
+          "translated": {
+            "axis_drawn": 1,
+            "other_x_points_drawn": 0,
+            "strike_points_drawn": 0,
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0
+          }
+        },
+        "panel": 3
+      },
+      {
+        "null_glyphs": {
+          "analytic": {
+            "axis_drawn": 1,
+            "other_x_points_drawn": 0,
+            "strike_points_drawn": 0,
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0
+          },
+          "translated": {
+            "axis_drawn": 1,
+            "other_x_points_drawn": 0,
+            "strike_points_drawn": 0,
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0
+          }
+        },
+        "panel": 4
+      },
+      {
+        "null_glyphs": {
+          "analytic": {
+            "axis_drawn": 1,
+            "other_x_points_drawn": 0,
+            "strike_points_drawn": 0,
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0
+          },
+          "translated": {
+            "axis_drawn": 1,
+            "other_x_points_drawn": 0,
+            "strike_points_drawn": 0,
+            "x_points_drawn": 0,
+            "x_points_dropped_outside_wall": 0
+          }
+        },
+        "panel": 5
+      }
+    ],
+    "project_absolute_src": "/nova/figures/cut-cell-current-attribution/positional-stiffness/figures/translated-40mm.png",
+    "sha256": "b4515f5397cbc65adb775f0f1ea9ca030630c4672844f2afe2424575524e51b2",
+    "source_receipt": "docs/figures/cut-cell-current-attribution/positional-stiffness/receipt.json",
+    "source_receipt_sha256": "6e0b30e9b875ceb1ee4714d1aee8476a8ff50ba71d476f3a34828783dec223bb",
+    "titles": [
+      "weak-rotation-reactor-static \u00b7 110 requested cells (135 realised)",
+      "40 mm outboard: analytic blue / translated ochre",
+      "levels Wb (shared): [-19.51, -13.22, -6.931, -0.64, 5.651, 11.94, 18.23, 24.53, 30.82, 37.11, 43.4, 49.69]",
+      "residual=4.777e-02 of span \u00b7 converged=no",
+      "weak-rotation-reactor-static \u00b7 110 requested cells (135 realised)",
+      "40 mm vertical: analytic blue / translated ochre",
+      "levels Wb (shared): [-19.51, -13.22, -6.931, -0.64, 5.651, 11.94, 18.23, 24.53, 30.82, 37.11, 43.4, 49.69]",
+      "residual=4.616e-03 of span \u00b7 converged=no",
+      "weak-rotation-reactor-static \u00b7 300 requested cells (342 realised)",
+      "40 mm outboard: analytic blue / translated ochre",
+      "levels Wb (shared): [-15.77, -9.798, -3.828, 2.143, 8.113, 14.08, 20.05, 26.02, 31.99, 37.96, 43.93, 49.91]",
+      "residual=4.910e-02 of span \u00b7 converged=no",
+      "weak-rotation-reactor-static \u00b7 300 requested cells (342 realised)",
+      "40 mm vertical: analytic blue / translated ochre",
+      "levels Wb (shared): [-15.77, -9.798, -3.828, 2.143, 8.113, 14.08, 20.05, 26.02, 31.99, 37.96, 43.93, 49.91]",
+      "residual=4.643e-03 of span \u00b7 converged=no",
+      "moderate-rotation-conventional-static \u00b7 300 requested cells (341 realised)",
+      "40 mm outboard: analytic blue / translated ochre",
+      "levels Wb (shared): [-0.4158, -0.2526, -0.08932, 0.07394, 0.2372, 0.4005, 0.5637, 0.727, 0.8902, 1.053, 1.217, 1.38]",
+      "residual=1.730e-01 of span \u00b7 converged=no",
+      "moderate-rotation-conventional-static \u00b7 300 requested cells (341 realised)",
+      "40 mm vertical: analytic blue / translated ochre",
+      "levels Wb (shared): [-0.4158, -0.2526, -0.08932, 0.07394, 0.2372, 0.4005, 0.5637, 0.727, 0.8902, 1.053, 1.217, 1.38]",
+      "residual=2.334e-02 of span \u00b7 converged=no"
+    ]
+  }
+}

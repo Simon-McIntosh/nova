@@ -1,0 +1,45 @@
+revision=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['docs/figures/exact-clip-closed-form/measure_clip_body.py', '--row', 'weak-rotation-reactor-static', '110']
+SADDLE_WEDGE_POSITIVE_COUNT 0
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/measure_clip_body.py", line 331, in <module>
+    ),
+    
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/measure_clip_body.py", line 277, in main
+    args.suites + "-" + Path(name).stem,
+    ^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/measure_clip_body.py", line 191, in row
+    after = snapshot()
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/measure_clip_body.py", line 122, in snapshot
+    operator, support, field, capacity, span = _build(case, -int(cells))
+                                               ~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/benchmarks/exact_clip_moment_floor.py", line 146, in _build
+    support = fixture._analytic_profile_support(exact, operator, state)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/scripts/analytic_oracle_fixtures/measure.py", line 1039, in _analytic_profile_support
+    return operator._profile_support(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        masks, topology, physical, sample_psi_norm
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ).qualify(jnp.asarray(participation))
+    ^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py", line 3334, in _profile_support
+    traced_support = _traced_clip(
+        atomic_mesh.node_coordinates,
+    ...<8 lines>...
+        arc_tracer=_implicit_traced_level_arc,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/measure_clip_body.py", line 118, in record_clip
+    return clip(*args, **kwargs)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/separatrix_clip.py", line 1001, in _traced_clip
+    result = jax.vmap(clip_one)(jnp.arange(cells))
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/separatrix_clip.py", line 983, in clip_one
+    evaluator = evaluator.for_cell(index)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py", line 518, in for_cell
+    centre=self.centre[index][None, :],
+           ~~~~~~~~~~~^^^^^^^
+jax.errors.TracerArrayConversionError: The numpy.ndarray conversion method __array__() was called on traced array with shape int64[]
+This BatchTracer with object id 139822084587696 was created on line:
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/separatrix_clip.py:1001:13 (_traced_clip)
+See https://docs.jax.dev/en/latest/errors.html#jax.errors.TracerArrayConversionError
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+srun: error: 98dci4-clu-4073: task 0: Exited with exit code 1

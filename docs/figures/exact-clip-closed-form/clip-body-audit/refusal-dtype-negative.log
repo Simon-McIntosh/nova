@@ -1,0 +1,43 @@
+restore default-width summation of mapped refusal counts
+revision=0c685775797acfc1648cbf375033391f62456603 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=pytest test_spline_clip_refuses_a_polygon_above_the_derived_capacity with source 23a8522b6 injected
+18:42:48 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_spline_clip_refuses_a_polygon_above_the_derived_capacity _________
+
+    def test_spline_clip_refuses_a_polygon_above_the_derived_capacity():
+        """A two-arc layout is refused, counted on the result (not silently dropped)."""
+        configure_dtypes()
+        cell = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+        mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.5, 0.5]]))
+        capacity = traced_polygon_vertex_capacity(int(mesh.support_capacity))
+    
+        def saddle_level(points):
+            radial, vertical = points[..., 0], points[..., 1]
+            return (radial - 0.5) * (vertical - 0.5)
+    
+        signed = saddle_level(jnp.asarray(mesh.node_coordinates))
+        support = mesh.traced_clip(signed, curve_evaluator=saddle_level)
+    
+        live = int(np.sum(np.asarray(signed) > 0.0))
+        assert live >= 2, "the fixture must leave the level set on two runs"
+>       assert np.asarray(support.refused_cell_count).dtype == np.dtype("int32")
+E       AssertionError: assert dtype('int64') == dtype('int32')
+E        +  where dtype('int64') = array(1).dtype
+E        +    where array(1) = <built-in function asarray>(Array(1, dtype=int64))
+E        +      where <built-in function asarray> = np.asarray
+E        +      and   Array(1, dtype=int64) = TracedClippedSupports(support_vertices=Array([[[0., 0.],\n        [0., 0.],\n        [0., 0.],\n        [0., 0.],\n       ...ex=Array([[0., 0.]], dtype=float64), vertex_capacity=Array(136, dtype=int32), refused_cell_count=Array(1, dtype=int64)).refused_cell_count
+E        +  and   dtype('int32') = <class 'numpy.dtype'>('int32')
+E        +    where <class 'numpy.dtype'> = np.dtype
+
+tests/test_equilibrium_separatrix_clip.py:716: AssertionError
+=============================== warnings summary ===============================
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; zarr
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_equilibrium_separatrix_clip.py::test_spline_clip_refuses_a_polygon_above_the_derived_capacity
+1 failed, 1 warning in 14.60s
+srun: error: 98dci4-clu-4073: task 0: Exited with exit code 1

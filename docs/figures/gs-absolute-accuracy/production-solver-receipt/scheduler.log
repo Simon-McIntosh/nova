@@ -1,0 +1,11 @@
+revision=8977ecd3b76367e334bf24b33d5b9e3a27640c32 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/gsag-production-solver-receipt-trip-alignment command=sacct -j 1277027,1277029,1277030 --format=JobID,Partition,State,ExitCode,Elapsed,AllocCPUS,ReqMem -P
+JobID|Partition|State|ExitCode|Elapsed|AllocCPUS|ReqMem
+1277027|all_debug|FAILED|1:0|00:03:28|4|64G
+1277027.batch||FAILED|1:0|00:03:28|4|
+1277027.extern||COMPLETED|0:0|00:03:28|4|
+1277029|all_debug|COMPLETED|0:0|00:00:27|4|16G
+1277029.batch||COMPLETED|0:0|00:00:27|4|
+1277029.extern||COMPLETED|0:0|00:00:27|4|
+1277030|all_debug|COMPLETED|0:0|00:02:22|4|64G
+1277030.batch||COMPLETED|0:0|00:02:22|4|
+1277030.extern||COMPLETED|0:0|00:02:22|4|

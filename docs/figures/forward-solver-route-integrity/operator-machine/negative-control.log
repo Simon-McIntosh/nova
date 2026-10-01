@@ -1,0 +1,9 @@
+revert the single body to per-request evaluation
+revision=d8d858ff09a39851885a738c2293544785df32be tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine command=python negative-control.py
+mode=shared optimized_operator_bodies=1
+mode=per_request optimized_operator_bodies=3
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/operator-machine/negative-control.py", line 30, in <module>
+    assert count == 1, f"single-body guard refused {count} per-request bodies"
+           ^^^^^^^^^^
+AssertionError: single-body guard refused 3 per-request bodies

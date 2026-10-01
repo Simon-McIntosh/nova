@@ -5,6 +5,9 @@
 | 300 | 654,832 / 203,078 | 9,908 / 9,930 | 370.224 / 60.083 | 461,724,765 / 443,217,410 | 120 / 2 | 1 / 1 |
 | 1000 | 662,331 / 204,531 | 10,024 / 10,046 | 386.402 / 69.721 | unavailable / unavailable | 120 / 2 | 1 / 1 |
 
+300-cell executable ceiling: 450,000,000 bytes (a refusal against it is a regression from the measured candidate).
+300-cell executable target: 50,000,000 bytes (the size the reduction aims at; reported, not gated, while unreached).
+
 Verdict: **PASS**.
 
 Measured findings:

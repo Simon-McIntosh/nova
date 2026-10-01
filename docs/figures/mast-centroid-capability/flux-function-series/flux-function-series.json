@@ -1,0 +1,285 @@
+{
+  "artifact": "flux-function ratio series at one pinned net plasma current",
+  "evidence_inputs": {
+    "grid_points": null,
+    "lattice_shape": [
+      33,
+      33
+    ],
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-d5aa9180337b1ddf4186",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 1.0,
+      "root": "/home/ITER/mcintos/.cache",
+      "runtime_identity": {
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "Tesla P100-PCIE-16GB",
+            "platform": "gpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-d5aa9180337b1ddf4186"
+    },
+    "response_carrier": {
+      "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+      "frozen_reference_count": 6,
+      "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+      "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+      "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+      "response_shape": [
+        1126,
+        101
+      ],
+      "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+      "size_bytes": 645864,
+      "stored_circuit_count": 101,
+      "warm_load_seconds": 0.02059880457818508
+    }
+  },
+  "identity": "22086/43 mixed",
+  "measurement_contract": {
+    "fixed": "conductor currents, the vertical current-centroid row, and the pinned net plasma current",
+    "profile_representation": "65-node efm/pprime and efm/ffprime tables carried by SampledFluxFunction; the reference case closes the same tables into its evaluator behind a slope-matched cubic cap, so this series is not a bit reproduction of that case",
+    "program_reuse": "one compiled program serves every member: the tables cross the program boundary as array leaves",
+    "ratio_offsets": [
+      -0.3,
+      -0.15,
+      0.0,
+      0.15,
+      0.3
+    ],
+    "target_current_a": 933034.875,
+    "varied": "the two flux-function normalisations, scaled by 1+offset and 1-offset, coefficient vectors and evaluator untouched"
+  },
+  "members": [
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "axis_flux": 0.345169324088101,
+      "axis_rz": [
+        0.851112526514477,
+        0.03097032898327877
+      ],
+      "boundary_flux": -0.14093684936055878,
+      "converged": true,
+      "field_function_scale": 1.3,
+      "pressure_scale": 0.7,
+      "ratio_offset": -0.3,
+      "saddle_index": 0,
+      "terminal_residual": 3.580792058353213e-11,
+      "termination": "converged",
+      "trip_count": 2,
+      "wall_milliseconds": 397171.2948642671,
+      "wall_seconds": 397.1712948642671,
+      "x_point_flux": [
+        -0.14093684936055878
+      ],
+      "x_points_rz": [
+        [
+          0.5604107068591028,
+          1.1854726482471365
+        ]
+      ]
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "axis_flux": 0.34512497877270903,
+      "axis_rz": [
+        0.8774102551749079,
+        0.023383393520415303
+      ],
+      "boundary_flux": -0.13159502824194785,
+      "converged": true,
+      "field_function_scale": 1.15,
+      "pressure_scale": 0.85,
+      "ratio_offset": -0.15,
+      "saddle_index": 0,
+      "terminal_residual": 9.878048497511245e-09,
+      "termination": "converged",
+      "trip_count": 2,
+      "wall_milliseconds": 3656.2752537429333,
+      "wall_seconds": 3.6562752537429333,
+      "x_point_flux": [
+        -0.13159502824194785
+      ],
+      "x_points_rz": [
+        [
+          0.5763950488987295,
+          1.1997266529372002
+        ]
+      ]
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "axis_flux": 0.3415805471140216,
+      "axis_rz": [
+        0.9033604586455046,
+        0.022574352881492503
+      ],
+      "boundary_flux": -0.12233544542990003,
+      "converged": true,
+      "field_function_scale": 1.0,
+      "pressure_scale": 1.0,
+      "ratio_offset": 0.0,
+      "saddle_index": 0,
+      "terminal_residual": 7.621245073239913e-10,
+      "termination": "converged",
+      "trip_count": 1,
+      "wall_milliseconds": 740.0923054665327,
+      "wall_seconds": 0.7400923054665327,
+      "x_point_flux": [
+        -0.12233544542990003
+      ],
+      "x_points_rz": [
+        [
+          0.5849350258188213,
+          1.2307395193013408
+        ]
+      ]
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "axis_flux": 0.3362430821910113,
+      "axis_rz": [
+        0.9309282245036045,
+        0.00262900819847817
+      ],
+      "boundary_flux": -0.12060116138594118,
+      "converged": false,
+      "field_function_scale": 0.85,
+      "pressure_scale": 1.15,
+      "ratio_offset": 0.15,
+      "saddle_index": 0,
+      "terminal_residual": 0.00535274952386663,
+      "termination": "active_set_settled",
+      "trip_count": 4,
+      "wall_milliseconds": 5924.509763717651,
+      "wall_seconds": 5.924509763717651,
+      "x_point_flux": [
+        -0.12060116138594118
+      ],
+      "x_points_rz": [
+        [
+          0.5980536160782713,
+          1.2216520897284973
+        ]
+      ]
+    },
+    {
+      "achieved_class": {
+        "class": "diverted",
+        "class_margin": null,
+        "read_status": "qualified"
+      },
+      "axis_flux": 0.3319018212711855,
+      "axis_rz": [
+        0.9525454958608464,
+        0.021708161320508488
+      ],
+      "boundary_flux": -0.10508174011194493,
+      "converged": true,
+      "field_function_scale": 0.7,
+      "pressure_scale": 1.3,
+      "ratio_offset": 0.3,
+      "saddle_index": 0,
+      "terminal_residual": 2.9949117072357083e-12,
+      "termination": "converged",
+      "trip_count": 4,
+      "wall_milliseconds": 3797.192318364978,
+      "wall_seconds": 3.797192318364978,
+      "x_point_flux": [
+        -0.10508174011194493
+      ],
+      "x_points_rz": [
+        [
+          0.6183427148066774,
+          1.2399592935551165
+        ]
+      ]
+    }
+  ],
+  "runtime": {
+    "cpu_provenance_marker": null,
+    "device_kind": "Tesla P100-PCIE-16GB",
+    "devices": [
+      "cuda:0"
+    ],
+    "host": "98dci4-gpu-0002.iter.org",
+    "jax": "0.11.0",
+    "jax_platforms": "cuda,cpu",
+    "platform": "gpu",
+    "python": "3.14.2",
+    "scheduler": {
+      "cpus_per_task": "4",
+      "job_id": "1275051",
+      "memory": "65536",
+      "node": "98dci4-gpu-0002",
+      "partition": "titan",
+      "reservation": null
+    },
+    "tmpdir": "/tmp"
+  },
+  "source_revision": "2b34829bb7ef92ef1dbca62f81d67b8336089ceb",
+  "summary": {
+    "classes": [
+      "diverted"
+    ],
+    "converged_count": 4,
+    "elapsed_seconds": 770.0428542345762,
+    "member_count": 5
+  }
+}

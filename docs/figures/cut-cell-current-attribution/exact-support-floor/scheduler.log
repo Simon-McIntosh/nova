@@ -1,0 +1,8 @@
+revision=150a1398c478e2b11d7a25de5195e280838dd856 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state command=['sacct', '-j', '1276905,1276907', '--format=JobID,State,Elapsed,ExitCode,NodeList', '-n']
+1276905       COMPLETED   00:04:25      0:0 98dci4-gpu-0003
+1276905.bat+  COMPLETED   00:04:25      0:0 98dci4-gpu-0003
+1276905.ext+  COMPLETED   00:04:25      0:0 98dci4-gpu-0003
+1276905.0     CANCELLED   00:04:24     0:15 98dci4-gpu-0003
+1276907       COMPLETED   00:00:14      0:0 98dci4-clu-3141
+1276907.ext+  COMPLETED   00:00:14      0:0 98dci4-clu-3141
+1276907.0     COMPLETED   00:00:14      0:0 98dci4-clu-3141

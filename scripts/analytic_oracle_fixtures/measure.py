@@ -959,6 +959,35 @@ def _analytic_axis_flux(analytic: object) -> float:
     return value
 
 
+def _analytic_saddle(analytic: object) -> jnp.ndarray:
+    """Return the fixture topology's saddle vertex in the read's convention.
+
+    A diverted analytic reference declares its separatrix X-point; a limited
+    one declares none.  The production topology read carries a non-finite
+    vertex pair wherever it admits no saddle, so the fixture mirrors that
+    absent-saddle value rather than inventing a position for it.
+    """
+    x_point = getattr(analytic, "x_point", None)
+    if x_point is None:
+        return jnp.full(2, jnp.nan)
+    return jnp.asarray(np.asarray(x_point, dtype=np.float64))
+
+
+def _analytic_topology(
+    analytic: object,
+    axis_flux: jnp.ndarray,
+    boundary_flux: jnp.ndarray,
+    flux_span: jnp.ndarray,
+) -> SimpleNamespace:
+    """Return the topology record the analytic support clip traces through."""
+    return SimpleNamespace(
+        axis_flux=axis_flux,
+        boundary_flux=boundary_flux,
+        flux_span=flux_span,
+        x_point=_analytic_saddle(analytic),
+    )
+
+
 def _analytic_profile_support(
     analytic: object, operator: ForwardFluxOperator, state: np.ndarray
 ):
@@ -1003,11 +1032,7 @@ def _analytic_profile_support(
         jnp.asarray(int(PlasmaDomain.EXCLUDED_MATERIAL), dtype=jnp.int32),
     )
     masks = DomainMasks(label=labels, psi_norm=psi_norm)
-    topology = SimpleNamespace(
-        axis_flux=axis_flux,
-        boundary_flux=boundary_flux,
-        flux_span=flux_span,
-    )
+    topology = _analytic_topology(analytic, axis_flux, boundary_flux, flux_span)
     previous = support_clip_mode()
     set_support_clip_mode("exact")
     try:

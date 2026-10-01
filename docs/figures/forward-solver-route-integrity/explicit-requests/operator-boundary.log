@@ -1,0 +1,5 @@
+revision=7c74bf18b72f1b15d57f006f3eb6462cc6acba7b plus explicit request body; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine; command=python operator-boundary.py
+one {"operator_boundaries": 1, "boundary_operation": "full-flux live residual-shadow select", "compile_seconds": 7.7424648981541395, "instructions": 13677}
+nested {"operator_boundaries": 3, "boundary_operation": "full-flux live residual-shadow select", "compile_seconds": 11.201884347945452, "instructions": 36669}
+streamed {"operator_boundaries": 1, "boundary_operation": "full-flux live residual-shadow select", "compile_seconds": 7.146192114800215, "instructions": 15899}
+REAL_OPERATOR_BOUNDARY_PASS one=1 nested=3 streamed=1; terminal bit-identical

@@ -1,0 +1,18 @@
+revision=6204bfd6feb7227dd66c2594dd2433248072e4a1 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_single_site_krylov.py -vv --tb=short job=1277150
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 07:43:42 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 5 items
+
+tests/test_single_site_krylov.py::test_the_qualified_step_applies_its_operator_at_one_site PASSED [ 20%]
+tests/test_single_site_krylov.py::test_the_single_site_step_still_solves_a_full_dimension_system PASSED [ 40%]
+tests/test_single_site_krylov.py::test_the_vmapped_stream_stops_when_every_member_is_done PASSED [ 60%]
+tests/test_single_site_krylov.py::test_the_vmapped_stream_projects_once_per_cycle_outside_its_slot_loop PASSED [ 80%]
+tests/test_single_site_krylov.py::test_the_batching_rule_matches_each_members_own_step PASSED [100%]
+
+============================== 5 passed in 7.01s ===============================
+EXIT=0

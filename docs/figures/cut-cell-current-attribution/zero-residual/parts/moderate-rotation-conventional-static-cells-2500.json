@@ -3,15 +3,15 @@
     "fixture_exterior": {
       "build_seconds": 0.0,
       "hit": true,
-      "lock_wait_seconds": 6.3944607973098755e-06,
+      "lock_wait_seconds": 6.260350346565247e-06,
       "semantic_key": "eb75e195a0186b7a",
       "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
     },
     "machine": {
       "build_seconds": 0.0,
       "hit": true,
-      "load_seconds": 0.5066392291337252,
-      "lock_wait_seconds": 1.5616416931152344e-05,
+      "load_seconds": 0.5936524663120508,
+      "lock_wait_seconds": 8.862465620040894e-06,
       "semantic_key": "89cbacdfc568073c",
       "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_2500.zarr",
       "store_seconds": 0.0
@@ -33,55 +33,55 @@
   "sample_node_number": 6381,
   "schema": "nova.zero-residual-check-row",
   "source_part_relative": "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows/moderate-rotation-conventional-static-production-route-cells-2500.json",
-  "source_revision": "fb80e97511ea48ca8ac107d4a87fce50792a6154",
-  "span_wb": -1.3328073995319099,
+  "source_revision": "9d62c8f4cf31bae5b105ef32e17860b5dde6877e",
+  "span_wb": -1.3328285586986954,
   "state_length": 9123,
   "statistics": {
     "masked_diff": {
       "cold": {
-        "count": 9050,
-        "relative_rms": 0.0004983547616012321,
-        "relative_sup": 0.001748524686020884,
-        "rms": 0.000664210913854083,
-        "sup": 0.0023304466397928436
+        "count": 9123,
+        "relative_rms": 0.031519262997927046,
+        "relative_sup": 0.8256114730347708,
+        "rms": 0.04200977387277223,
+        "sup": 1.1003985496500404
       },
       "promoted": {
-        "count": 9050,
-        "relative_rms": 0.0004983547616012321,
-        "relative_sup": 0.001748524686020884,
-        "rms": 0.000664210913854083,
-        "sup": 0.0023304466397928436
+        "count": 9123,
+        "relative_rms": 0.031519262997927046,
+        "relative_sup": 0.8256114730347708,
+        "rms": 0.04200977387277223,
+        "sup": 1.1003985496500404
       }
     },
     "physical_unmasked": {
       "argmax_index": 697,
-      "sup_all": 1.1235770982548257,
-      "sup_entering_cold": 0.0023304466397928436,
-      "sup_entering_promoted": 0.0023304466397928436,
-      "sup_shadowed_cold": 1.1235770982548257,
-      "sup_shadowed_promoted": 1.1235770982548257
+      "sup_all": 1.1003985496500404,
+      "sup_entering_cold": 1.1003985496500404,
+      "sup_entering_promoted": 1.1003985496500404,
+      "sup_shadowed_cold": null,
+      "sup_shadowed_promoted": null
     },
     "profile_owned": {
-      "entering_cold": 2548,
-      "profile_total": 2548
+      "entering_cold": 2621,
+      "profile_total": 2621
     },
     "shadow_census_cold": {
-      "entering": 9050,
-      "excluded": 73,
-      "excluded_fraction": 0.00800175380905404,
+      "entering": 9123,
+      "excluded": 0,
+      "excluded_fraction": 0.0,
       "total": 9123
     },
     "shadow_census_promoted": {
-      "entering": 9050,
-      "excluded": 73,
-      "excluded_fraction": 0.00800175380905404,
+      "entering": 9123,
+      "excluded": 0,
+      "excluded_fraction": 0.0,
       "total": 9123
     },
     "solver_scalar": {
       "persisted": null,
-      "recomputed_cold": 0.002010600391482564,
-      "recomputed_promoted": 0.002010600391482564,
-      "unmasked_all_carriers": 0.9693697830441665
+      "recomputed_cold": 0.9375378797078707,
+      "recomputed_promoted": 0.9375378797078707,
+      "unmasked_all_carriers": 0.9375378797078707
     }
   },
   "topology": {
@@ -90,10 +90,10 @@
       1.669584363075094,
       0.0012688806955203434
     ],
-    "boundary_flux_wb": -0.17434058355697607,
+    "boundary_flux_wb": -0.1743617427237616,
     "class": "limited",
     "exception_text": null,
-    "flux_span_wb": -1.3328073995319099,
+    "flux_span_wb": -1.3328285586986954,
     "o_candidate_count": 1,
     "o_second_best_flux_margin_wb": null,
     "read_status": "qualified_axis",
@@ -102,5 +102,5 @@
     "x_second_best_flux_margin_wb": null
   },
   "wall_node_number": 121,
-  "wall_seconds": 55.15303027071059
+  "wall_seconds": 49.39278674684465
 }

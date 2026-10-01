@@ -1,0 +1,15 @@
+revision=918f4edb457a28e466be7be79c7570efb4a9eaec tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py']
+devices=[CudaDevice(id=0)] x64=True
+BUILD diverted-single-null-cells-110
+EVALUATE diverted-single-null-cells-110 exact
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py", line 689, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py", line 670, in main
+    rows.append(measure(case, rung, args.output))
+                ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py", line 281, in measure
+    assert not invalid, f"invalid exact polygons: {invalid}"
+           ^^^^^^^^^^^
+AssertionError: invalid exact polygons: [9]

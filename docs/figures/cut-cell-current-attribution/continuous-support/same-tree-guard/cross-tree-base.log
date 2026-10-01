@@ -1,0 +1,14 @@
+revision=814c854d79b606a378dc7209d6ce410e4b95e051 tree=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-heavy-module-arms-for-the-tangent-repair/base-tree command=PYTHONPATH=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-heavy-module-arms-for-the-tangent-repair/base-tree NOVA_EXACT_CLIP_IDENTITY_ROOT=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-slow-exact-clip-items-on-sirius/identity-base /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_exact_clip_memory.py::test_whole_cell_terminal_state_ignores_polish_jvp
+host=98dci4-clu-5005.iter.org started=2026-09-22T00:26:15+02:00
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-heavy-module-arms-for-the-tangent-repair/base-tree
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 1 item
+
+tests/test_exact_clip_memory.py .                                        [100%]
+
+======================== 1 passed in 466.03s (0:07:46) =========================
+EXIT=0

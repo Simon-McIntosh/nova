@@ -541,9 +541,15 @@ def _draw_distance_figure(
     distances: np.ndarray,
     layout: TargetLayout,
     path: Path,
-) -> None:
-    """Draw route error against distance to the nearest cut-source centroid."""
+) -> dict[str, Any]:
+    """Draw route error against distance to the nearest cut-source centroid.
+
+    Returns the render record: every title line drawn on the figure and the
+    state each panel draws, so a receipt can be written without re-reading the
+    rendered image (matplotlib writes glyph outlines, not text nodes).
+    """
     span = row["flux_span_wb"]
+    panel_records: list[dict[str, Any]] = []
     display_error = dict(route_error)
     display_error["exact"] = reference_difference
     colors = {"grid": "#1f77b4", "wall": "#d95f02", "sample": "#4d4d4d"}
@@ -570,14 +576,27 @@ def _draw_distance_figure(
             title += " (quadrature stability)"
         axis.set_title(title)
         axis.grid(True, which="both", alpha=0.15)
+        panel_records.append({"title": title, "state": "analytic"})
     axes.flat[0].legend(frameon=False, fontsize=8)
+    suptitle = (
+        f"{row['case']}, {abs(row['requested_cells'])} cells — frozen atomic blocks"
+    )
     figure.suptitle(
-        f"{row['case']}, {row['requested_cells']} cells — frozen atomic blocks",
+        suptitle,
         fontsize=11,
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path)
     plt.close(figure)
+    return {
+        "figure": path.name,
+        "case": row["case"],
+        "requested_cells": row["requested_cells"],
+        "displayed_cell_count": abs(row["requested_cells"]),
+        "title_lines": [suptitle, *(panel["title"] for panel in panel_records)],
+        "panels": panel_records,
+        "null_glyph_counts": {},
+    }
 
 
 def measure_row(case_name: str, requested_cells: int) -> tuple[dict, dict]:
@@ -1033,6 +1052,7 @@ def main() -> None:
     arguments.figure_root.mkdir(parents=True, exist_ok=True)
     arguments.report_root.mkdir(parents=True, exist_ok=True)
     rows = []
+    render_records = []
     for case_name, requested_cells in selected:
         print(
             f"MOMENT_ORDER_ROW_START case={case_name} cells={requested_cells}",
@@ -1040,13 +1060,15 @@ def main() -> None:
         )
         row, plot = measure_row(case_name, requested_cells)
         key = f"{case_name}-{abs(requested_cells)}"
-        _draw_distance_figure(
-            row,
-            plot["route_error"],
-            plot["reference_difference"],
-            plot["distance_to_cut"],
-            plot["layout"],
-            arguments.figure_root / row["figure"],
+        render_records.append(
+            _draw_distance_figure(
+                row,
+                plot["route_error"],
+                plot["reference_difference"],
+                plot["distance_to_cut"],
+                plot["layout"],
+                arguments.figure_root / row["figure"],
+            )
         )
         rows.append(row)
         _write_json(arguments.figure_root / "parts" / f"{key}.json", row)
@@ -1089,6 +1111,13 @@ def main() -> None:
     }
     _write_json(arguments.figure_root / "receipt.json", receipt)
     _write_json(arguments.report_root / "receipt.json", receipt)
+    render_receipt = {
+        "schema": "nova.coupling-moment-order-render-receipt.v1",
+        "generated_utc": datetime.now(UTC).isoformat(),
+        "source_revision": _source_revision(),
+        "figures": render_records,
+    }
+    _write_json(arguments.figure_root / "render-receipt.json", render_receipt)
     report = _report(receipt)
     (arguments.report_root / "report.md").write_text(report + "\n", encoding="utf-8")
     print(json.dumps(receipt["adjudication"], indent=2), flush=True)

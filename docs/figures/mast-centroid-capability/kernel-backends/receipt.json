@@ -1,0 +1,48 @@
+{
+  "artifact": "MAST response kernel on the host path against the device path",
+  "grids": [
+    {
+      "agreement": {
+        "finite_both": true,
+        "host_magnitude_maximum": 1.0115353948147037e-05,
+        "maximum_absolute_difference": 1.6567228588421187e-16,
+        "maximum_relative_difference": 7.898769287725133e-07
+      },
+      "build_speedup_including_compile": 220.77519797396323,
+      "device": {
+        "batched": true,
+        "compile_count": 1,
+        "compile_seconds": 2.912218911573291,
+        "edge_count": 4,
+        "first_launch_seconds": 0.0200166255235672,
+        "kernel_seconds": 4.333787156268954,
+        "tile_count": 270,
+        "tile_sizing": "declared, not from TilePlan.peak_bytes: a batched tile does not respect that model",
+        "tile_source": 64,
+        "tile_target": 64,
+        "transfer_seconds": 0.0008549802005290985
+      },
+      "host_seconds": 1599.7384241484106,
+      "kernel_speedup": 369.13174700661995,
+      "pair_count": 1056188,
+      "response_rows": 1126,
+      "section_count": 938,
+      "target_count": 1126
+    }
+  ],
+  "measurement_contract": {
+    "compared": "per-section flux rows, not assembled circuit columns: the circuit sum is shared by both paths and would dilute a kernel disagreement",
+    "device_path": "nova.biot.tiledassembly.tile_evaluator, batched quadrature kernel, one tile covering the whole pair space",
+    "host_path": "nova.biot.polygon.polygon_greens, one call per section, which is what nova.imas.mast_vacuum_response builds the carrier with",
+    "kernel_seconds": "second launch of the same executable"
+  },
+  "runtime": {
+    "device_kind": "Tesla P100-PCIE-16GB",
+    "host": "98dci4-gpu-0002.iter.org",
+    "jax": "0.11.0",
+    "jax_platforms": "cuda,cpu",
+    "platform": "gpu",
+    "slurm_job_id": "1275340"
+  },
+  "shot": 22086
+}

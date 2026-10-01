@@ -1167,6 +1167,43 @@ def _carries_cell_flux_mesh(lattice: object) -> bool:
     return hasattr(lattice, "coordinate")
 
 
+def _sampled_cell_pool(
+    state: jax.Array, operator: object, *, pool_length: int
+) -> jax.Array:
+    """Return the carried-cell block one point read is handed.
+
+    A flux vector is longer than its cells: the operator assembles the pool it
+    reads as the carried cells first and the direct sampling nodes after them,
+    indexing the second block from the cell count, while the physical prefix
+    that receipts and topology reads consume adds the wall nodes between the
+    two.  The carried block is therefore the vector's first
+    ``grid.node_number`` values, and slicing the pool by the physical prefix
+    instead moves every sampled value by the difference and answers with a
+    neighbouring cell's polynomial -- a shift a uniform offset read passes
+    through unchanged.
+
+    The guard is stated on the slice that is actually handed over: the length
+    the caller declares and the block it takes are both checked against the
+    cell count the stencil convention states, so a call site that sizes the
+    slice from the physical prefix is refused rather than silently answered.
+    """
+    stated = int(operator.grid.node_number)
+    if int(pool_length) != stated:
+        raise ValueError(
+            "a point-sampled pool carries the operator's cells first, so the "
+            f"slice handed to the read is the first {stated} flux values; got "
+            f"a declared pool of {int(pool_length)}"
+        )
+    pool = jnp.asarray(state)[: int(pool_length)]
+    if int(pool.shape[0]) != stated:
+        raise ValueError(
+            "the stencil convention states one carried value per cell, so the "
+            f"sampled pool holds {stated} values; the state supplies "
+            f"{int(pool.shape[0])}"
+        )
+    return pool
+
+
 def _mesh_carried_point_flux(
     profile: ForwardProfile, flux: jax.Array, point: jax.Array
 ) -> jax.Array:
@@ -1202,11 +1239,12 @@ def _mesh_carried_point_flux(
             "a cell-carried read needs the lattice and the operator's flux mesh "
             "to carry the same cells in the same order"
         )
+    pool = _sampled_cell_pool(state, operator, pool_length=node_count)
     owner = jnp.argmin(jnp.sum((centres - point[None, :]) ** 2, axis=-1))
     points = jnp.zeros((node_count, 1, 2), dtype=state.dtype)
     points = points.at[owner, 0].set(jnp.asarray(point, dtype=state.dtype))
     values, _radial, _vertical = operator.sample_flux_field(
-        state[:node_count],
+        pool,
         operator.sample_node_flux(state),
         points,
     )

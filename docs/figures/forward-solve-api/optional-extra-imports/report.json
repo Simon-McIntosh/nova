@@ -1,0 +1,2463 @@
+{
+  "generated_by": "benchmarks/optional_extra_import_census.py",
+  "finding_count": 205,
+  "guard_excluded_count": 13,
+  "findings": [
+    {
+      "module": "nova/biot/boundary.py",
+      "line": 7,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/biot/null.py",
+      "line": 4,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/biot/null.py",
+      "line": 5,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/biot/plasmavtk.py",
+      "line": 7,
+      "package": "pyvista",
+      "extras": [
+        "test",
+        "viz"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/circuit/propagate.py",
+      "line": 38,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/circuit/propagate.py",
+      "line": 39,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/control/circuit.py",
+      "line": 6,
+      "package": "networkx",
+      "extras": [
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/database/zarrstore.py",
+      "line": 18,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/datachain/uda_benchmark.py",
+      "line": 6,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/dataset/access.py",
+      "line": 9,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/dataset/access.py",
+      "line": 10,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/dataset/access.py",
+      "line": 16,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/diagnostics/thomson.py",
+      "line": 21,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/diagnostics/thomson.py",
+      "line": 22,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/batched_labeller.py",
+      "line": 14,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/batched_labeller.py",
+      "line": 15,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/branch_selection.py",
+      "line": 9,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/branch_selection.py",
+      "line": 10,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/clip_quadrature.py",
+      "line": 9,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/clip_quadrature.py",
+      "line": 10,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/coefficient_carrier.py",
+      "line": 17,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/coefficient_carrier.py",
+      "line": 18,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/connectivity_boundary.py",
+      "line": 71,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/connectivity_boundary.py",
+      "line": 72,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/conservation.py",
+      "line": 69,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/conservation.py",
+      "line": 70,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/constraint.py",
+      "line": 16,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/constraint.py",
+      "line": 17,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/continuation.py",
+      "line": 120,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/continuation.py",
+      "line": 121,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/diagnostics.py",
+      "line": 23,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": true
+    },
+    {
+      "module": "nova/equilibrium/domain.py",
+      "line": 54,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/domain.py",
+      "line": 55,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/extraction_lattice.py",
+      "line": 23,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/extraction_lattice.py",
+      "line": 24,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/fixed_point.py",
+      "line": 48,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/fixed_point.py",
+      "line": 49,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/flux_surface_connectivity.py",
+      "line": 69,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/flux_surface_connectivity.py",
+      "line": 70,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/flux_surface_extraction.py",
+      "line": 24,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/flux_surface_extraction.py",
+      "line": 25,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/forward.py",
+      "line": 78,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/forward.py",
+      "line": 79,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/forward_operator.py",
+      "line": 38,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/forward_operator.py",
+      "line": 39,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/manifold_advance.py",
+      "line": 15,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/manifold_advance.py",
+      "line": 16,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/map_extraction.py",
+      "line": 25,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/map_extraction.py",
+      "line": 26,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/moment.py",
+      "line": 55,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/morphology.py",
+      "line": 3,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/observation.py",
+      "line": 64,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/observation.py",
+      "line": 65,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/observation_kernels.py",
+      "line": 20,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/observation_kernels.py",
+      "line": 21,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/parallel_components.py",
+      "line": 37,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/parallel_components.py",
+      "line": 38,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/polygon_moments.py",
+      "line": 41,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/polygon_moments.py",
+      "line": 42,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/profile.py",
+      "line": 23,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/profile.py",
+      "line": 24,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/reduced_newton.py",
+      "line": 87,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/reduced_newton.py",
+      "line": 88,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/rotation.py",
+      "line": 91,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/rotation.py",
+      "line": 92,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/seed_alignment.py",
+      "line": 7,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/seed_alignment.py",
+      "line": 8,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/separatrix_branches.py",
+      "line": 15,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/separatrix_branches.py",
+      "line": 16,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/separatrix_clip.py",
+      "line": 22,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/separatrix_clip.py",
+      "line": 23,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/shape_inverse.py",
+      "line": 41,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/shape_inverse.py",
+      "line": 42,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/sol_closure.py",
+      "line": 33,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/solve_request.py",
+      "line": 12,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/solve_request.py",
+      "line": 13,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/solve_request.py",
+      "line": 19,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": true
+    },
+    {
+      "module": "nova/equilibrium/source.py",
+      "line": 45,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/source.py",
+      "line": 46,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/stencil_mesh.py",
+      "line": 57,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/stencil_mesh.py",
+      "line": 58,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/stencil_nulls.py",
+      "line": 20,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/stencil_nulls.py",
+      "line": 21,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/stencil_nulls.py",
+      "line": 22,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/topology.py",
+      "line": 9,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/equilibrium/topology.py",
+      "line": 10,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/field/errorfield.py",
+      "line": 9,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/field/gpec_benchmark.py",
+      "line": 7,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/frame/ferritic.py",
+      "line": 10,
+      "package": "sklearn",
+      "extras": [
+        "mast",
+        "test",
+        "viz"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/frame/ferritic.py",
+      "line": 11,
+      "package": "vedo",
+      "extras": [
+        "test",
+        "viz"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/frame/vde.py",
+      "line": 19,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/frame/winding.py",
+      "line": 8,
+      "package": "vedo",
+      "extras": [
+        "test",
+        "viz"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/geometry/centerline.py",
+      "line": 9,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/geometry/line.py",
+      "line": 6,
+      "package": "pyvista",
+      "extras": [
+        "test",
+        "viz"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/geometry/polyline.py",
+      "line": 9,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/geometry/section.py",
+      "line": 8,
+      "package": "vedo",
+      "extras": [
+        "test",
+        "viz"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/geometry/volume.py",
+      "line": 8,
+      "package": "meshio",
+      "extras": [
+        "test",
+        "viz"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/geometry/volume.py",
+      "line": 10,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/geometry/volume.py",
+      "line": 11,
+      "package": "pyvista",
+      "extras": [
+        "test",
+        "viz"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/geometry/volume.py",
+      "line": 15,
+      "package": "trimesh",
+      "extras": [
+        "test",
+        "viz"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/geometry/volume.py",
+      "line": 16,
+      "package": "vedo",
+      "extras": [
+        "test",
+        "viz"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/geometry/vtkgen.py",
+      "line": 5,
+      "package": "vedo",
+      "extras": [
+        "test",
+        "viz"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/addtext.py",
+      "line": 3,
+      "package": "pylab",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/addtext.py",
+      "line": 4,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/addtext.py",
+      "line": 5,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/bokeh.py",
+      "line": 8,
+      "package": "bokeh",
+      "extras": [
+        "bokeh"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/bokeh.py",
+      "line": 9,
+      "package": "bokeh",
+      "extras": [
+        "bokeh"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/bokeh.py",
+      "line": 10,
+      "package": "bokeh",
+      "extras": [
+        "bokeh"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/plot.py",
+      "line": 20,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": true
+    },
+    {
+      "module": "nova/graphics/png_tools.py",
+      "line": 7,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/png_tools.py",
+      "line": 9,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/polyfill.py",
+      "line": 4,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/polyfill.py",
+      "line": 5,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/polyfill.py",
+      "line": 6,
+      "package": "mpl_toolkits",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/polyfill.py",
+      "line": 7,
+      "package": "mpl_toolkits",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/pyplot.py",
+      "line": 3,
+      "package": "seaborn",
+      "extras": [
+        "matplotlib"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/pyplot.py",
+      "line": 4,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/pyplot.py",
+      "line": 5,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/pyplot.py",
+      "line": 6,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/pyplot.py",
+      "line": 7,
+      "package": "mpl_toolkits",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/pyplot.py",
+      "line": 9,
+      "package": "mpl_toolkits",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/pyplot.py",
+      "line": 10,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/pyplot.py",
+      "line": 11,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/graphics/pyplot.py",
+      "line": 12,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/imas/connect.py",
+      "line": 12,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/imas/contour_tree.py",
+      "line": 4,
+      "package": "pyvista",
+      "extras": [
+        "test",
+        "viz"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/imas/decimate.py",
+      "line": 9,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/imas/diiid_current.py",
+      "line": 9,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/imas/extrapolate.py",
+      "line": 518,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/imas/hdf5_read.py",
+      "line": 3,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/imas/mast_parity_chain.py",
+      "line": 24,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/imas/mast_parity_chain.py",
+      "line": 25,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/imas/test_ssh.py",
+      "line": 3,
+      "package": "pytest",
+      "extras": [
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/imas/test_utilities.py",
+      "line": 3,
+      "package": "pytest",
+      "extras": [
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/jax/tree_util.py",
+      "line": 5,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/limits/poloidal.py",
+      "line": 4,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/limits/poloidal.py",
+      "line": 5,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/linalg/interpolant.py",
+      "line": 6,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/linalg/interpolant.py",
+      "line": 7,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/linalg/interpolant.py",
+      "line": 8,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/linalg/regression.py",
+      "line": 204,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/linalg/split_spline.py",
+      "line": 17,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/linalg/split_spline.py",
+      "line": 18,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/linalg/tensor_spline.py",
+      "line": 13,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/linalg/tensor_spline.py",
+      "line": 14,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/media/gif.py",
+      "line": 20,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": true
+    },
+    {
+      "module": "nova/media/ink.py",
+      "line": 37,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": true
+    },
+    {
+      "module": "nova/media/layout.py",
+      "line": 19,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": true
+    },
+    {
+      "module": "nova/media/poloidal.py",
+      "line": 26,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": true
+    },
+    {
+      "module": "nova/media/traces.py",
+      "line": 24,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": true
+    },
+    {
+      "module": "nova/scripts/render_misfit_figures.py",
+      "line": 17,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/scripts/render_misfit_figures.py",
+      "line": 21,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/scripts/render_misfit_figures.py",
+      "line": 23,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/scripts/render_misfit_figures.py",
+      "line": 24,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/structural/catenary.py",
+      "line": 1,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/structural/finiteframe.py",
+      "line": 5,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/structural/finiteframe.py",
+      "line": 6,
+      "package": "mpl_toolkits",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/structural/properties.py",
+      "line": 1,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/attributes.py",
+      "line": 3,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/cold_test.py",
+      "line": 14,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/frequencyresponse.py",
+      "line": 3,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/naka/database.py",
+      "line": 8,
+      "package": "regex",
+      "extras": [
+        "thermofluids"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/naka/database.py",
+      "line": 9,
+      "package": "mechanize",
+      "extras": [
+        "naka"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/naka/database.py",
+      "line": 11,
+      "package": "fitz",
+      "extras": [
+        "thermofluids"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/naka/database.py",
+      "line": 12,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/naka/nakadata.py",
+      "line": 7,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/naka/nakaserver.py",
+      "line": 16,
+      "package": "mechanize",
+      "extras": [
+        "naka"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/naka/nakaserver.py",
+      "line": 17,
+      "package": "bs4",
+      "extras": [
+        "naka"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/naka/sampledata.py",
+      "line": 7,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/spectrum.py",
+      "line": 4,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/campaign.py",
+      "line": 8,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/field.py",
+      "line": 3,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/fitfluid.py",
+      "line": 10,
+      "package": "nlopt",
+      "extras": [
+        "thermofluids"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/fitfluid.py",
+      "line": 11,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/fluidprofile.py",
+      "line": 6,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/heatindex.py",
+      "line": 6,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/model.py",
+      "line": 7,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/profile.py",
+      "line": 8,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/remotedata.py",
+      "line": 7,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/remotedata.py",
+      "line": 8,
+      "package": "ftputil",
+      "extras": [
+        "thermofluids"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/sample.py",
+      "line": 6,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/sampledata.py",
+      "line": 7,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/sampledata.py",
+      "line": 10,
+      "package": "CoolProp",
+      "extras": [
+        "thermofluids"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/sultandata.py",
+      "line": 7,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/sultanspectrum.py",
+      "line": 6,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/sultan/waveform.py",
+      "line": 8,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/twente/twentedata.py",
+      "line": 10,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/thermalhydralic/twente/twentedata.py",
+      "line": 11,
+      "package": "nlopt",
+      "extras": [
+        "thermofluids"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/transport/coupled_window.py",
+      "line": 29,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/transport/coupled_window.py",
+      "line": 30,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/transport/current_diffusion.py",
+      "line": 70,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/transport/current_diffusion.py",
+      "line": 71,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/transport/ensemble.py",
+      "line": 16,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/transport/evolved_state.py",
+      "line": 27,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/transport/evolved_state.py",
+      "line": 28,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/transport/torax_geometry.py",
+      "line": 7,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/transport/torax_geometry.py",
+      "line": 8,
+      "package": "jax",
+      "extras": [
+        "gpu",
+        "jax"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/utilities/IO.py",
+      "line": 9,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/utilities/geom.py",
+      "line": 10,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/utilities/geom.py",
+      "line": 11,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/utilities/geom.py",
+      "line": 12,
+      "package": "mpl_toolkits",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/utilities/geom.py",
+      "line": 13,
+      "package": "mpl_toolkits",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/utilities/mesh.py",
+      "line": 2,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/utilities/pandasdata.py",
+      "line": 5,
+      "package": "pandas",
+      "extras": [
+        "interchange"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    },
+    {
+      "module": "nova/utilities/time.py",
+      "line": 15,
+      "package": "matplotlib",
+      "extras": [
+        "matplotlib",
+        "test"
+      ],
+      "guarded": false,
+      "annotation_only": false
+    }
+  ],
+  "revision": "4d51fba1a",
+  "core_dependencies": [
+    "appdirs>=1.4.4",
+    "contourpy>=1.3",
+    "fsspec>=2024.10",
+    "gitpython>=3.1.31",
+    "h5py>=3.15",
+    "imas-python>=2.2",
+    "netcdf4>=1.7",
+    "numpy>=2",
+    "packaging>=23.2",
+    "pyarrow>=24",
+    "pydantic>=2.9",
+    "pyquaternion>=0.9.9",
+    "pyyaml>=6",
+    "scipy>=1.14",
+    "shapely>=2.0.1",
+    "tqdm>=4.66.1",
+    "xarray>=2024.10",
+    "xxhash>=3.2.0",
+    "zarr>=3"
+  ],
+  "extras": {
+    "bokeh": [
+      "bokeh>=3.6"
+    ],
+    "io": [
+      "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.9.0",
+      "imas-standard-names-catalog @ git+https://github.com/Simon-McIntosh/imas-standard-names-catalog.git@v0.2.0rc64"
+    ],
+    "fenics": [
+      "gmsh>=4.12",
+      "pygmsh>=7.1"
+    ],
+    "interchange": [
+      "openpyxl>=3.1.5",
+      "pandas>=2.2"
+    ],
+    "mast": [
+      "intake>=2",
+      "scikit-learn>=1.5"
+    ],
+    "naka": [
+      "beautifulsoup4>=4.12",
+      "mechanize>=0.4"
+    ],
+    "jax": [
+      "jax>=0.5"
+    ],
+    "gpu": [
+      "jax[cuda12]>=0.5; sys_platform == 'linux'"
+    ],
+    "matplotlib": [
+      "matplotlib>=3.10",
+      "seaborn>=0.13"
+    ],
+    "numba": [
+      "numba>=0.61"
+    ],
+    "schema": [
+      "linkml>=1.9"
+    ],
+    "test": [
+      "nova-stella[jax,transport]",
+      "matplotlib>=3.10",
+      "meshio>=5.3.4",
+      "networkx",
+      "pyvista>=0.44",
+      "pytest",
+      "pytest-cov>=4.1.0",
+      "pytest-asyncio>=0.21.1",
+      "scikit-learn>=1.5",
+      "trimesh>=4",
+      "vedo>=2024.5.0"
+    ],
+    "thermofluids": [
+      "coolprop>=6.6.0",
+      "ftputil>=5.0.4",
+      "nlopt>=2.7",
+      "openpyxl>=3.1.2",
+      "pymupdf>=1.24",
+      "regex>=2024",
+      "tables>=3.8.0",
+      "xlrd>=2.0.1"
+    ],
+    "transport": [
+      "torax>=1.4.3"
+    ],
+    "viz": [
+      "alphashape>=1.3.1",
+      "meshio>=5.3.4",
+      "pyvista>=0.44",
+      "scikit-learn>=1.5",
+      "trimesh>=4",
+      "vedo>=2024.5.0"
+    ]
+  },
+  "extra_only_packages": {
+    "typings": [
+      "bokeh"
+    ],
+    "bokeh": [
+      "bokeh"
+    ],
+    "imas_standard_names_catalog": [
+      "io"
+    ],
+    "imas_standard_names": [
+      "io"
+    ],
+    "gmsh": [
+      "fenics"
+    ],
+    "pygmsh": [
+      "fenics"
+    ],
+    "pandas": [
+      "interchange"
+    ],
+    "openpyxl": [
+      "interchange",
+      "thermofluids"
+    ],
+    "intake": [
+      "mast"
+    ],
+    "sklearn": [
+      "mast",
+      "test",
+      "viz"
+    ],
+    "mechanize": [
+      "naka"
+    ],
+    "bs4": [
+      "naka"
+    ],
+    "jax": [
+      "gpu",
+      "jax"
+    ],
+    "matplotlib": [
+      "matplotlib",
+      "test"
+    ],
+    "seaborn": [
+      "matplotlib"
+    ],
+    "pylab": [
+      "matplotlib",
+      "test"
+    ],
+    "mpl_toolkits": [
+      "matplotlib",
+      "test"
+    ],
+    "numba": [
+      "numba"
+    ],
+    "linkml": [
+      "schema"
+    ],
+    "pytest_cov": [
+      "test"
+    ],
+    "trimesh": [
+      "test",
+      "viz"
+    ],
+    "networkx": [
+      "test"
+    ],
+    "py": [
+      "test"
+    ],
+    "meshio": [
+      "test",
+      "viz"
+    ],
+    "pytest": [
+      "test"
+    ],
+    "vedo": [
+      "test",
+      "viz"
+    ],
+    "pyvista": [
+      "test",
+      "viz"
+    ],
+    "pytest_asyncio": [
+      "test"
+    ],
+    "_pytest": [
+      "test"
+    ],
+    "tables": [
+      "thermofluids"
+    ],
+    "nlopt": [
+      "thermofluids"
+    ],
+    "pymupdf": [
+      "thermofluids"
+    ],
+    "fitz": [
+      "thermofluids"
+    ],
+    "CoolProp": [
+      "thermofluids"
+    ],
+    "ftputil": [
+      "thermofluids"
+    ],
+    "xlrd": [
+      "thermofluids"
+    ],
+    "regex": [
+      "thermofluids"
+    ],
+    "torax": [
+      "transport"
+    ],
+    "alphashape": [
+      "viz"
+    ]
+  },
+  "guarded_hits": [
+    "nova/__init__.py:51 numba",
+    "nova/__init__.py:72 vedo",
+    "nova/biot/operate.py:87 jax",
+    "nova/biot/operate.py:88 jax",
+    "nova/biot/target.py:532 jax",
+    "nova/biot/target.py:533 jax",
+    "nova/biot/zeta.py:340 jax",
+    "nova/biot/zeta.py:341 jax",
+    "nova/geometry/select.py:318 jax",
+    "nova/geometry/select.py:319 jax",
+    "nova/io/standardname.py:34 imas_standard_names",
+    "nova/io/standardname.py:35 imas_standard_names",
+    "nova/io/standardname.py:36 imas_standard_names"
+  ],
+  "unmapped_distributions": [],
+  "positive_control": {
+    "module": "nova/geometry/section.py",
+    "line": 8,
+    "package": "vedo",
+    "found": true
+  }
+}

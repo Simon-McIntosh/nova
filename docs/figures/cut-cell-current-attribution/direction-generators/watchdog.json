@@ -1,0 +1,11 @@
+{
+  "wrapper_pid": 3307508,
+  "worker_pid": 3307509,
+  "wrapper_command": "timeout 1050 /home/ITER/mcintos/Code/nova/.venv/bin/python -u docs/figures/cut-cell-current-attribution/direction-generators/measure.py --cells 300 --output /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed ",
+  "worker_command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -u docs/figures/cut-cell-current-attribution/direction-generators/measure.py --cells 300 --output /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed ",
+  "scheduler_job": 1275512,
+  "scheduler_limit_minutes": 37,
+  "suspended_at_unix": 1790051809.4548967,
+  "worker_terminal_state": "Z",
+  "resumed_at_unix": 1790052115.4967785
+}

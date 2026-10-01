@@ -1,0 +1,123 @@
+{
+  "schema": "nova.contour-tree-explanatory-figure",
+  "version": 1,
+  "flux_units": "Wb",
+  "flux_note": "raw poloidal flux at the analytic reference's own value; the outside node is a virtual node valued below every interior level and its recorded psi is the first wall-contact level",
+  "sigma": 1,
+  "nodes": [
+    {
+      "index": "axis",
+      "critical_type": 2,
+      "kind": "maximum",
+      "radius": 1.7870647018106856,
+      "height": 0.046773626564848854,
+      "psi_wb": 0.005709576080821866
+    },
+    {
+      "index": "x_point",
+      "critical_type": 1,
+      "kind": "saddle",
+      "radius": 1.5025279999999972,
+      "height": -1.0172799999999995,
+      "psi_wb": -3.975693351829396e-17
+    },
+    {
+      "index": "outside",
+      "critical_type": 0,
+      "kind": "minimum",
+      "radius": 1.5025801649274555,
+      "height": -1.2076782703693019,
+      "psi_wb": 0.0009954762478921009
+    }
+  ],
+  "edges": [
+    {
+      "first": "axis",
+      "second": "x_point"
+    },
+    {
+      "first": "x_point",
+      "second": "outside"
+    }
+  ],
+  "node_count": 3,
+  "edge_count": 2,
+  "node_count_minus_edge_count": 1,
+  "contour_levels_wb": [
+    -0.007166737101995558,
+    -0.005996163176284883,
+    -0.004825589250574208,
+    -0.003655015324863533,
+    -0.002484441399152858,
+    -0.0013138674734421828,
+    0.0,
+    0.0010272803779791664,
+    0.0021978543036898423,
+    0.0033684282294005182,
+    0.0045390021551111924,
+    0.005709576080821866
+  ],
+  "separatrix_level_wb": 0.0,
+  "wall_points": 121,
+  "wall_clearance_fraction_of_minor_radius": 0.35,
+  "superlevel_census": [
+    {
+      "fraction": -3.0,
+      "level_wb": -0.017128728242465755,
+      "components": 1,
+      "wall_touching": 1,
+      "control": false
+    },
+    {
+      "fraction": -1.0,
+      "level_wb": -0.0057095760808219456,
+      "components": 1,
+      "wall_touching": 1,
+      "control": false
+    },
+    {
+      "fraction": 0.1,
+      "level_wb": 0.0005709576080821508,
+      "components": 2,
+      "wall_touching": 1,
+      "control": false
+    },
+    {
+      "fraction": 0.25,
+      "level_wb": 0.0014273940202054367,
+      "components": 1,
+      "wall_touching": 0,
+      "control": false
+    },
+    {
+      "fraction": 0.5,
+      "level_wb": 0.002854788040410913,
+      "components": 1,
+      "wall_touching": 0,
+      "control": false
+    },
+    {
+      "fraction": 0.9,
+      "level_wb": 0.005138618472739676,
+      "components": 1,
+      "wall_touching": 0,
+      "control": false
+    },
+    {
+      "fraction": 1.5,
+      "level_wb": 0.008564364121232819,
+      "components": 0,
+      "wall_touching": 0,
+      "control": true
+    },
+    {
+      "fraction": 2.5,
+      "level_wb": 0.014273940202054724,
+      "components": 0,
+      "wall_touching": 0,
+      "control": true
+    }
+  ],
+  "figure": "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-single-null.png",
+  "figure_svg": "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-single-null.svg"
+}

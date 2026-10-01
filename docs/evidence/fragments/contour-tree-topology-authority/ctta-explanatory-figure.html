@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="contour-tree-topology-authority">
+<meta name="plan-evidence-for" content="contour-tree-topology-authority">
+<title>Contour-tree explanatory figure (landing record)</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Contour-tree explanatory figure</h1></header>
+<section id="landing">
+<p><code>benchmarks/contour_tree_explanatory_figure.py</code> renders the explanatory figure for the topology authority from the diverted single-null Solov&rsquo;ev reference (<code>CerfonFreidbergSingleNull</code>) and reuses the media painters: line contours on stated raw-flux levels in webers masked to the vessel interior, the wall as its own unit, both null kinds through <code>draw_nulls</code>, and the contour tree overlaid. Outputs (PNG, SVG, JSON receipt, run log) land under <code>docs/figures/contour-tree-topology-authority/explanatory/</code>.</p>
+
+<figure>
+<img src="/nova/figures/contour-tree-topology-authority/explanatory/contour-tree-single-null.png" alt="Single-null Solovev poloidal flux with line contours, the wall, both null kinds and the contour tree overlaid" style="width: 62%">
+<figcaption>Diverted single-null Cerfon&nbsp;Freidberg Solov&rsquo;ev reference. Grey lines are line contours on stated raw-flux levels [Wb] masked to the vessel; the red closed line is the separatrix (the zero level); the black line is the wall (a 0.35&nbsp;minor-radius offset of the separatrix). The red triangle is the magnetic axis O-point, the red cross the admitted X-point saddle. Dashed black lines are the contour-tree edges between nodes; the hollow square is the virtual outside node, placed at the first wall contact. Each node is labelled directly with its critical type and flux in webers. Annotations render as authored.</figcaption>
+</figure>
+
+<p><strong>The tree.</strong> Three nodes and two edges, so the node count minus the edge count is one. Sigma is <code>+1</code>: the axis is the in-vessel maximum of sigma&middot;psi. Nodes: maximum at the polished magnetic axis (R=1.78706&nbsp;m, Z=+0.04677&nbsp;m, psi=+5.7096e-3&nbsp;Wb); saddle at the polished X-point (R=1.50253&nbsp;m, Z=-1.01728&nbsp;m, psi=&minus;4.0e-17&nbsp;Wb, i.e. the separatrix level); minimum at the first wall contact (R=1.50258&nbsp;m, Z=&minus;1.20768&nbsp;m, psi=+9.9548e-4&nbsp;Wb). The outside node is a virtual node valued below every interior level by construction; the flux recorded for it is the level at which the outside region first joins the tree descending from the axis &mdash; the first wall contact &mdash; so its recorded level sits above the saddle by definition.</p>
+
+<p><strong>Shape check (independent of how the nodes were located).</strong> A brute-force connected-component census of the superlevel sets of sigma&middot;psi, with every wall-touching component glued to the single outside node, sampled at eight levels bracketing every node value. Positive control: a level 1.5 and 2.5 flux-spans&nbsp;/&nbsp;scale above the X-point carries zero components, so an empty count there is a real absence. Between the wall contact and the axis: one interior component touching no wall. Between the X-point and the wall contact: two components, one on the wall (the core and the outside are separate). Below the X-point: one wall-touching component (core and outside merged). No level disagrees with the three-node path.</p>
+
+<p><strong>Negative control.</strong> Dropping one edge from the tree and re-running makes the node-minus-edge guard refuse with a non-zero exit (<code>3 nodes, 1 edges</code>); log at <code>negative-control.log</code> in the run directory.</p>
+
+<p><strong>Scope note.</strong> This node measures only its own change. The tree built here is the figure&rsquo;s own; the authority&rsquo;s tree builder and the field representation are the subjects of sibling sections and are not built here. Verify mediation of the diverted reference against the certificate fixture belongs to a separately dispatched test node.</p>
+</section>
+</main></body>
+</html>

@@ -18,7 +18,7 @@
 <meta name="plan-modified" content="2026-10-02">
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-impl" content="0.85">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -335,6 +335,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20261002T0035-shadow" data-who="reckon-build" data-when="2026-10-02T00:35:00+02:00">
     <div class="r-comment-body">f-pcrf-003 telemetry item verified at 68d3f260f (review 18/16/19/19/19): the test already carries the node-flux rule; the carrier-index retirement needs a companion edit to it.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T211540931442-pcrf-shadow-telemetry-node-flux" data-who="reckon-build" data-when="2026-10-01T22:04:49.012Z">
+    <div class="r-comment-body"><p>The node-flux oracle migration already landed at base (2bf422abe, merged c6a723f1d, recorded in plan section 2&#x27;s shadow-telemetry oracle migration record) and was re-verified rather than reimplemented: head gate 3 passed in 66.89s exit 0 on the fast lane, and substituting the retired label-owned rule in the code under test makes the migrated oracle fail on the discriminating diverted fixture (1 failed, 2 passed, exit 1) — the test file is unchanged.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260923T025855016553-pcrf-merge-radius-carries-the-pitch" data-who="reckon-ship" data-when="2026-09-23T03:33:15Z">
     <div class="r-comment-body"><p>the saddle merge radius adds a tenth of the source pitch to the roundoff floor; the analytic diverted case at 132 cells reads one representative saddle, the snowflake and secondary-null families keep their counts, the twelve-row replay reads 0 differing cells and wall nodes with unchanged primaries (H200 job 1276216), the nineteen-file CPU lane adds no failures; merged at 626290a19, review 99</p></div>

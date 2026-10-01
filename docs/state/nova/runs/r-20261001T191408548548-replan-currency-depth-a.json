@@ -1,0 +1,344 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "xhigh",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 5870891,
+      "input_tokens_cumulative": 5870891,
+      "output_tokens": 51304,
+      "output_tokens_cumulative": 51304,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 33,
+    "files": 2,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "958ff2e3e1ce339f8e430920c25ed2ea087621db"
+  ],
+  "completed_at": "2026-10-01T19:41:24.483Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-01T19:14:22Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "documentation",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "/reckon-edit"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "census of row count and per-row citations (logs-currency-depth-a.txt)",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T191408548548-replan-currency-depth-a/logs-currency-depth-a.txt"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.0,
+    "plan": "nova-portfolio-replan",
+    "reason": "role-not-enforced:documentation",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-01T20:14:10.512196+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-01T19:14:10Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 27,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 0,
+    "headroom": 16,
+    "mean_context": 213333,
+    "observed_at": "2026-10-01T19:13:43Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-01T19:41:24.483Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T191408548548-replan-currency-depth-a/manifest.md",
+  "member": "s19n-imp-2",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "replan-currency-depth-a",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1410,
+          "cached_input_tokens": 292904,
+          "input_tokens": 294316,
+          "output_tokens": 1267,
+          "reasoning_output_tokens": 68,
+          "total_tokens": 295583,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md carries exactly seven rows, one each for ensemble-forward-seam, forward-profile-validator-set, separatrix-spline-extraction, profile-owned-solve-domain, mast-nonaxisymmetric-physics, plasma-cell-read-fidelity and single-grid-solver-cutover. For each plan the report has one row recording: what landed, with commits and the files that carry it; whether the plan status and impl agree with the code; implementation depth, deep (implemented, tested, reached from a real call site, used) or shallow (scaffolding, an uncalled module, docs only), naming the call site and test evidence; each open followup and whether it carries a done-when; and the next critical node or a recommendation to close or supersede. Every claim cites a file:line or a commit sha. Read-only against source: no source edits, no GPU, no SLURM jobs; search named subtrees (nova/ tests/ benchmarks/ scripts/ docs/plans/), never a whole-tree walk from the repo root.",
+    "estimated_hours": 1.0,
+    "goal": "A currency-and-depth report for seven pending nova plans",
+    "id": "replan-currency-depth-a",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-01T19:14:10Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 27,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 0,
+      "headroom": 16,
+      "mean_context": 213333,
+      "observed_at": "2026-10-01T19:13:43Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T191408548548-replan-currency-depth-a/manifest.md",
+    "negative_control": "",
+    "plan": "nova-portfolio-replan",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "documentation",
+    "section": "§1",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md",
+      "docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-a.html",
+      "docs/figures/nova-portfolio-replan/replan-currency-depth-a"
+    ]
+  },
+  "orientation_input_tokens": 2653342.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "replan-currency-depth-a",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-01T19:14:11.868122+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "nova-portfolio-replan",
+  "plan_impl_at_dispatch": 0.0,
+  "plan_link": null,
+  "promoted_revision": "958ff2e3e1ce339f8e430920c25ed2ea087621db",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+    "reviewed_head_sha": "958ff2e3e1ce339f8e430920c25ed2ea087621db",
+    "scores": {
+      "durability": 6,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 79
+  },
+  "review_tier": "none",
+  "role": "documentation",
+  "run_id": "r-20261001T191408548548-replan-currency-depth-a",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "9f1dc3a6-aace-4e8f-b1ea-7d0de87185f9",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 5870891,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 1613.254,
+    "generated_tokens": 51304,
+    "generation_seconds": 1501.521,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 49.0,
+    "machine_seconds": 111.733,
+    "peak_input_tokens": 235185,
+    "tokens_per_second": 34.17,
+    "wall_tokens_per_second": 31.8
+  },
+  "time_budget": "60m",
+  "tool_steps": 62.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1622,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-01T19:41:25Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-01T19:14:26Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261001T191408548548-replan-currency-depth-a",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 11337,
+    "worker_pid": 2410231
+  },
+  "worker_seconds": 1586,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

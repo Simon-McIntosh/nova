@@ -1,11 +1,17 @@
-# revision: 48a40fab18be098a17ea5df6d631c1b153a027f2
+# revision: 707552973b50e4e0ef967555ebf2f50296604657
 # tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher
 # command: scripts/nova_lane/run.sh --dry-run --log /tmp/nl-dryrun.log -- tests/example_target.py -vv
-SOURCE_REVISION=48a40fab18be098a17ea5df6d631c1b153a027f2
+SOURCE_REVISION=707552973b50e4e0ef967555ebf2f50296604657
 LOG_PATH=/tmp/nl-dryrun.log
 RUNG=h200 JAX_PLATFORMS=cuda,cpu SUBMIT_COMMAND=sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task=7 --mem=64G --time=01:00:00 --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher --export=ALL --output=/tmp/nl-dryrun.log --error=/tmp/nl-dryrun.log --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher/scripts/nova_lane/run.sh --payload -- tests/example_target.py -vv 
+PAYLOAD_PRELUDE=
+PAYLOAD_SAMPLER=
 RUNG=titan JAX_PLATFORMS=cuda,cpu SUBMIT_COMMAND=sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task=7 --mem=64G --time=01:00:00 --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher --export=ALL --output=/tmp/nl-dryrun.log --error=/tmp/nl-dryrun.log --partition=titan --gres=gpu:1 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher/scripts/nova_lane/run.sh --payload -- tests/example_target.py -vv 
+PAYLOAD_PRELUDE=
+PAYLOAD_SAMPLER=
 RUNG=cpu JAX_PLATFORMS=cpu SUBMIT_COMMAND=sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task=7 --mem=64G --time=01:00:00 --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher --export=ALL --output=/tmp/nl-dryrun.log --error=/tmp/nl-dryrun.log --partition=all_debug /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher/scripts/nova_lane/run.sh --payload -- tests/example_target.py -vv 
+PAYLOAD_PRELUDE=
+PAYLOAD_SAMPLER=
 EXIT=0
 
 # command: scripts/nova_lane/run.sh --dry-run --mem=0 --log /tmp/nl-dryrun.log -- tests/example_target.py

@@ -1,0 +1,346 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "xhigh",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 8981852,
+      "input_tokens_cumulative": 8981852,
+      "output_tokens": 85484,
+      "output_tokens_cumulative": 85484,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 390,
+    "files": 2,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "71adc8e6821898b7b00a97616c13ae854c8e7cfa"
+  ],
+  "completed_at": "2026-10-01T19:52:47.235Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-01T19:15:33Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "documentation",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "nova/imas/hdf5_read.py",
+    "files/177",
+    "docs/state/nova"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "bounded greps recorded verbatim in the manifest tests field",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T191520414803-replan-thin-interfaces/census.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.0,
+    "plan": "nova-portfolio-replan",
+    "reason": "role-not-enforced:documentation",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-01T20:15:21.737233+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-01T19:15:21Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 8,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 15,
+    "mean_context": 80000,
+    "observed_at": "2026-10-01T19:15:13Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-01T19:52:47.235Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T191520414803-replan-thin-interfaces/manifest.md",
+  "member": "s19n-imp-4",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "replan-thin-interfaces",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 712,
+          "cached_input_tokens": 296753,
+          "input_tokens": 297467,
+          "output_tokens": 2163,
+          "reasoning_output_tokens": 798,
+          "total_tokens": 299630,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "docs/evidence/replan-2026-09-24/thin-interfaces.md lists one row per coupling across the five areas named in plan section 2 (reckon crew and plan layer; local model lane; fleet and SLURM placement including scripts/h200_test_lane, sbatch payloads, partition and reservation literals and --mem handling; imas-python data access; hard-coded GPFS paths). Each row names the files with per-file line counts of the coupled lines, the refactor that reduces it to a thin interface, a one-line done-when, and the live plan followup that owns it, or 'unowned' when none does; the five refactors already named in the plan followup f-replan-thin-interfaces are covered and cross-referenced. Counts come from bounded greps over named subtrees (nova/ tests/ benchmarks/ scripts/), never a whole-tree walk from the repo root; each count states the exact grep used. Read-only against source: no source edits, no GPU, no SLURM jobs.",
+    "estimated_hours": 1.0,
+    "goal": "A report of every place nova reimplements or tightly couples to shared infrastructure, each with its thin-interface refactor",
+    "id": "replan-thin-interfaces",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-01T19:15:21Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 8,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 15,
+      "mean_context": 80000,
+      "observed_at": "2026-10-01T19:15:13Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T191520414803-replan-thin-interfaces/manifest.md",
+    "negative_control": "",
+    "plan": "nova-portfolio-replan",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "documentation",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/replan-2026-09-24/thin-interfaces.md",
+      "docs/evidence/fragments/nova-portfolio-replan/replan-thin-interfaces.html",
+      "docs/figures/nova-portfolio-replan/replan-thin-interfaces"
+    ]
+  },
+  "orientation_input_tokens": 3847673.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "replan-thin-interfaces",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-01T19:15:22.863659+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "nova-portfolio-replan",
+  "plan_impl_at_dispatch": 0.0,
+  "plan_link": null,
+  "promoted_revision": "71adc8e6821898b7b00a97616c13ae854c8e7cfa",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+    "reviewed_head_sha": "71adc8e6821898b7b00a97616c13ae854c8e7cfa",
+    "scores": {
+      "durability": 19,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 94
+  },
+  "review_tier": "none",
+  "role": "documentation",
+  "run_id": "r-20261001T191520414803-replan-thin-interfaces",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "1aad05a6-07c2-4dac-904c-395915287b97",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 8981852,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 2225.533,
+    "generated_tokens": 85484,
+    "generation_seconds": 2113.315,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 45.4,
+    "machine_seconds": 112.218,
+    "peak_input_tokens": 217937,
+    "tokens_per_second": 40.45,
+    "wall_tokens_per_second": 38.41
+  },
+  "time_budget": "60m",
+  "tool_steps": 84.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2234,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-01T19:52:48Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-01T19:15:36Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261001T191520414803-replan-thin-interfaces",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 20228,
+    "worker_pid": 2432265
+  },
+  "worker_seconds": 2163,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

@@ -35,6 +35,11 @@
     <p>Run <code>r-20261001T191537244113-replan-pytest-timeout-and-xdist</code> (local lane), merged at <code>d9c5d4215</code> from <code>56ee52a8d</code> and <code>96b6e8c1e</code>. pytest-timeout and pytest-xdist join the dev group and <code>timeout = 300</code> joins <code>[tool.pytest.ini_options]</code>; <code>uv lock --check</code> exits 0 (<a href="/nova/evidence/replan-2026-09-24/fast-lane/dependency-change.log">dependency-change.log</a>). The first review blocked on the gitignored evidence log, repaired in <code>96b6e8c1e</code>; the re-review scored 20/17/19/19/19. Carried to the fast-lane run: the 300 s default also applies to the slow lane, so slow runs pass their own bound; evidence logs under <code>docs/</code> are gitignored by <code>*.log</code> and need a repository-level exception.</p>
   </section>
 
+  <section id="currency-depth-b">
+    <h2>§1 — currency and depth, group B</h2>
+    <p>Run <code>r-20261001T191426544316-replan-currency-depth-b</code> (local lane), merged at <code>aac2bae7e</code> from <code>7701396385</code>, <code>848544972</code> and <code>4f1bfbdda</code>. <a href="/nova/evidence/replan-2026-09-24/plan-currency-and-depth-b">plan-currency-and-depth-b.md</a> carries six rows (diiid-forward-onboarding, machine-description-retirement, diiid-pulse-replay, dual-branch-selection, efit-baseline-demonstration, mast-catalog-gpu-solve). The first review blocked: the report read the EFIT demonstration's closed-boundary symmetric RMS gate as PASS where its receipt records <code>passes=false</code>, because 16 of the 17 declared rows are excluded, leaving one eligible row. That is two failing gates of three, not one. The repair corrected it and two citations; re-review 20/17/20/14/18, no added failure. The worker's manifest cites a full sha (<code>4f1bfbddae5b…</code>) that resolves to no object; the landed commit is <code>4f1bfbdda3737…</code>.</p>
+  </section>
+
 </main>
 </body>
 </html>

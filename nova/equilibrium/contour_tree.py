@@ -207,9 +207,7 @@ def _sweep_tree(
             representative & connect,
             vertex,
         )
-        parent_update = jnp.where(
-            root_active & usable, vertex, parents[neighbour_root]
-        )
+        parent_update = jnp.where(root_active & usable, vertex, parents[neighbour_root])
         parents = parents.at[neighbour_root].set(
             jnp.where(usable, parent_update, parents[neighbour_root])
         )

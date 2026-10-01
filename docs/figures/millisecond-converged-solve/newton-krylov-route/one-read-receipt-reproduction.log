@@ -1,0 +1,174 @@
+revision=3763af81d (HEAD before the warmup-slot repair) with tests/test_one_read_per_trip.py at the repaired revision
+tree=/tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/repro-tree
+command=timeout 900 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_one_read_per_trip.py -q
+module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton/nova/equilibrium/fixed_point.py
+cwd=/tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/repro-tree
+01:24:57 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+_______ test_the_warmed_route_reads_the_partition_once_after_its_warmup ________
+
+    def test_the_warmed_route_reads_the_partition_once_after_its_warmup():
+        """The warmup advances the state live; one partition is then taken.
+    
+        The warmup pre-pass runs with no Newton budget, so the route must still
+        take exactly one partition for the frozen solve that follows it.
+        """
+        configure_dtypes()
+>       result, counts = _partitioned_solver(count_reads=True, warmup=3)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_one_read_per_trip.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_one_read_per_trip.py:44: in _partitioned_solver
+    result = newton_krylov(
+nova/equilibrium/fixed_point.py:4997: in newton_krylov
+    result = _active_set_newton_krylov(
+nova/equilibrium/fixed_point.py:4343: in _active_set_newton_krylov
+    warmup_result = _newton_krylov_inner(
+nova/equilibrium/fixed_point.py:4178: in _newton_krylov_inner
+    loop = jax.lax.while_loop(
+nova/equilibrium/fixed_point.py:4176: in newton_body
+    return jax.lax.cond(can_attempt, attempt_step, lambda value: value, measured)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+nova/equilibrium/fixed_point.py:4172: in attempt_step
+    return jax.lax.cond(
+nova/equilibrium/fixed_point.py:4071: in promoted_state
+    result, *_cached = jax.lax.while_loop(
+nova/equilibrium/fixed_point.py:4017: in promotion_attempt
+    result = _complete_newton_promotion(
+nova/equilibrium/fixed_point.py:1821: in _complete_newton_promotion
+    backtrack_counts = measured.promotion_backtrack_counts.at[measured.attempted].set(
+/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/array_methods.py:1208: in set
+    return scatter._scatter_update(
+/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/ops/scatter.py:90: in _scatter_update
+    return internal_scatter(x, y, dynamic_idx)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/ops/scatter.py:113: in _scatter_impl
+    indexer = general_indexer.to_gather(
+/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/indexing.py:579: in to_gather
+    return _index_to_gather(self, x_sharding=x_sharding, normalize_indices=normalize_indices)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+indexer = NDIndexer(shape=(0,), indices=[ParsedIndex(index=JitTracer(int32[]), typ=<IndexType.ARRAY: 'array'>, consumed_axes=(0,))])
+x_sharding = NamedSharding(mesh=AbstractMesh((), axis_types=()), spec=P(None,))
+normalize_indices = True
+
+    def _index_to_gather(indexer: NDIndexer, *, x_sharding: NamedSharding | Any,
+                         normalize_indices: bool = True) -> _GatherIndexer:
+      indexer.validate_slices()
+      indexer = indexer.convert_sequences_to_arrays()
+    
+      is_advanced = np.nonzero(
+        np.array([idx.typ in {IndexType.ARRAY, IndexType.INTEGER} for idx in indexer.indices]))
+      advanced_axes_are_contiguous = np.all(np.diff(is_advanced) == 1)
+    
+      indexer = indexer.expand_ellipses()
+    
+      scalar_bool_dims: Sequence[int] = [n for n, i in enumerate(indexer.indices) if i.typ == IndexType.BOOLEAN]
+      indexer, x_spec = indexer.expand_scalar_bool_indices(x_sharding.spec)
+    
+      if normalize_indices:
+        indexer = indexer.normalize_indices()
+    
+      # Check for advanced indexing:
+      # https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html#advanced-indexing
+    
+      # The advanced indices.
+      advanced_indexes: Sequence[Array] = []
+    
+      # The positions of the advanced indexing axes in `idx`.
+      idx_advanced_axes: Sequence[int] = []
+    
+      # The positions of the advanced indexes in x's shape.
+      # collapsed, after None axes have been removed. See below.
+      x_advanced_axes: Sequence[int] = []
+    
+      if indexer.is_advanced_int_indexer():
+        idx_without_none = [(i, d) for i, d in enumerate(indexer.indices) if d.typ != IndexType.NONE]
+        advanced_pairs = (
+          (lax_numpy.asarray(e.index), i, j)
+          for j, (i, e) in enumerate(idx_without_none)
+          if e.typ in [IndexType.ARRAY, IndexType.INTEGER]
+        )
+        advanced_indexes, idx_advanced_axes, x_advanced_axes = unzip3(advanced_pairs)
+    
+      x_axis = 0  # Current axis in x.
+      y_axis = 0  # Current axis in y, before collapsing. See below.
+      collapsed_y_axis = 0  # Current axis in y, after collapsing.
+    
+      # Scatter dimension numbers.
+      offset_dims: list[int] = []
+      collapsed_slice_dims: list[int] = []
+      start_index_map: list[int] = []
+    
+      index_dtype = lax_utils.int_dtype_for_shape(indexer.shape, signed=True)
+    
+      # Gather indices.
+      # Pairs of (array, start_dim) values. These will be broadcast into
+      # gather_indices_shape, with the array dimensions aligned to start_dim, and
+      # then concatenated.
+      gather_indices: list[tuple[Array, int]] = []
+      gather_indices_shape: list[int] = []
+    
+      # We perform three transformations to y before the scatter op, in order:
+      # First, y is broadcast to slice_shape. In general `y` only need broadcast to
+      # the right shape.
+      slice_shape: list[int] = []
+      # Next, y is squeezed to remove newaxis_dims. This removes np.newaxis/`None`
+      # indices, which the scatter cannot remove itself.
+      newaxis_dims: list[int] = []
+      # Finally, we reverse reversed_y_dims to handle slices with negative strides.
+      reversed_y_dims: list[int] = []
+    
+      gather_slice_shape: list[int] = []
+      slice_spec = []
+    
+      for idx_pos, index in enumerate(indexer.indices):
+        # Handle the advanced indices here if:
+        # * the advanced indices were not contiguous and we are the start.
+        # * we are at the position of the first advanced index.
+        if (advanced_indexes and
+            (advanced_axes_are_contiguous and idx_pos == idx_advanced_axes[0] or
+             not advanced_axes_are_contiguous and idx_pos == 0)):
+          advanced_index_arrs = util._broadcast_arrays(*advanced_indexes)
+          shape = advanced_index_arrs[0].shape
+          aia_spec = core.typeof(advanced_index_arrs[0]).sharding.spec
+          ndim = len(shape)
+    
+          start_dim = len(gather_indices_shape)
+          gather_indices.extend(
+              (lax.convert_element_type(a, index_dtype), start_dim)
+              for a in advanced_index_arrs
+          )
+          gather_indices_shape += shape
+    
+          assert x_advanced_axes is not None
+          start_index_map.extend(x_advanced_axes)
+          collapsed_slice_dims.extend(x_advanced_axes)
+          slice_shape.extend(shape)
+          slice_spec.extend(aia_spec)
+          y_axis += ndim
+          collapsed_y_axis += ndim
+    
+        # Per-index bookkeeping for advanced indexes.
+        if idx_pos in idx_advanced_axes:
+          x_axis += 1
+          gather_slice_shape.append(1)
+          continue
+    
+        if index.typ in [IndexType.INTEGER, IndexType.ARRAY] and np.ndim(index.index) == 0:  # pyrefly: ignore[bad-argument-type]
+          # Basic scalar int indices
+          if core.definitely_equal(indexer.shape[x_axis], 0):
+            # XLA gives error when indexing into an axis of size 0
+>           raise IndexError(f"index is out of bounds for axis {x_axis} with size 0")
+E           IndexError: index is out of bounds for axis 0 with size 0
+E           --------------------
+E           For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+
+/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/numpy/indexing.py:1406: IndexError
+=========================== short test summary info ============================
+FAILED tests/test_one_read_per_trip.py::test_the_warmed_route_reads_the_partition_once_after_its_warmup
+1 failed, 2 passed in 15.67s
+EXIT=1

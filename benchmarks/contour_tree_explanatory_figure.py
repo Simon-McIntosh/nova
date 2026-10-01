@@ -10,8 +10,11 @@ topology authority is built from, rather than read it described:
   axis as an O-point and the admitted X-point as a saddle;
 * the contour tree overlaid: a node at the magnetic axis (the maximum of
   sigma*psi), a node at the X-point (the saddle) and a virtual outside node
-  attached at the first wall contact, one edge drawn for each region between
-  two nodes, and each node labelled directly with its critical type and flux.
+  attached at the first wall contact.  The outside node carries no flux of its
+  own; the level at which it joins the tree is labelled on its edge, together
+  with whether that contact lies in the private region below the X-point, since
+  a private-region contact can never be a limiter.  Each interior node is
+  labelled directly with its critical type and flux.
 
 The tree is not asserted.  Its nodes are located by solving the reference's
 stationarity conditions and classified by the Hessian signature, and its shape
@@ -81,7 +84,7 @@ CHECK_FRACTIONS = (-3.0, -1.0, 0.10, 0.25, 0.50, 0.90, 1.50, 2.50)
 
 LABEL_FONTSIZE = DEFAULT_INK.label_fontsize * 1.4
 TREE_EDGE_COLOR = "#111111"
-OUTSIDE_MARKER = "s"
+OUTSIDE_MARKER = "D"
 PAD = 0.05
 
 TREE_INK = DEFAULT_INK.variant(label_fontsize=LABEL_FONTSIZE)
@@ -89,22 +92,34 @@ TREE_INK = DEFAULT_INK.variant(label_fontsize=LABEL_FONTSIZE)
 
 @dataclass(frozen=True)
 class Node:
-    """One contour-tree node."""
+    """One contour-tree node.
+
+    ``psi_wb`` is the node's own raw flux, or null for the virtual outside
+    node, which is valued below every interior level and therefore has no flux
+    of its own.  The level at which it joins the tree belongs to its edge.
+    """
 
     index: str
     critical_type: int
     kind: str
     radius: float
     height: float
-    psi_wb: float
+    psi_wb: float | None
 
 
 @dataclass(frozen=True)
 class Edge:
-    """One contour-tree edge, the region between two nodes."""
+    """One contour-tree edge, the region between two nodes.
+
+    ``join_level_wb`` is the sigma*psi level at which the region between the
+    two nodes first meets the wall; it is null for an interior edge.
+    """
 
     first: str
     second: str
+    join_level_wb: float | None = None
+    contact_region: str | None = None
+    limiter: bool | None = None
 
 
 def _reference() -> CerfonFreidbergSingleNull:
@@ -210,13 +225,14 @@ def _components(flux: np.ndarray, inside: np.ndarray, level: float) -> tuple[int
 
 def _tree(
     exact: CerfonFreidbergSingleNull, wall: np.ndarray
-) -> tuple[list[Node], list[Edge], int]:
+) -> tuple[list[Node], list[Edge], int, float]:
     """Return the contour tree of the reference on the vessel domain.
 
-    The nodes are the in-vessel stationary points of the flux, located by
-    solving for stationarity from the reference's own declared seeds and
-    classified by their Hessian.  The outside node is placed at the first wall
-    contact and valued at that contact level.
+    The interior nodes are the in-vessel stationary points of the flux,
+    located by solving for stationarity from the reference's own declared
+    seeds and classified by their Hessian.  The outside node is virtual: it
+    carries no flux of its own, is placed at the first wall contact, and the
+    level at which it joins the tree is recorded on its edge.
     """
     axis = _polish(exact.magnetic_axis, exact)
     xpoint = _polish(exact.x_point, exact)
@@ -252,17 +268,17 @@ def _tree(
         Node(
             "outside",
             MINIMUM,
-            CRITICAL_NAME[MINIMUM],
+            "outside (virtual)",
             float(contact[0]),
             float(contact[1]),
-            contact_level,
+            None,
         ),
     ]
     edges = [
         Edge("axis", "x_point"),
-        Edge("x_point", "outside"),
+        Edge("x_point", "outside", join_level_wb=contact_level),
     ]
-    return nodes, edges, sigma
+    return nodes, edges, sigma, contact_level
 
 
 def _verify(
@@ -354,6 +370,35 @@ def _assert_verification(
             )
 
 
+def _class_read(
+    records: list[dict[str, Any]], xpoint_psi: "float | None", contact_level_wb: float
+) -> dict[str, Any]:
+    """Read the class from where the wall contact sits relative to the saddle.
+
+    A probe level strictly between the X-point and the wall contact shows
+    whether the contact's region is the plasma's own: if the core and the
+    outside are still two components there, the contact was reached through the
+    X-point, so it lies in a private region and can never be a limiter.  If
+    they have already merged, the contact was reached without passing through
+    any saddle and the state is limited.
+    """
+    probe = None
+    for record in records:
+        if xpoint_psi < record["level_wb"] < contact_level_wb:
+            probe = record
+    if probe is None:
+        raise RuntimeError("no census level falls between the saddle and the contact")
+    limiter = probe["components"] == 1
+    return {
+        "probe_level_wb": probe["level_wb"],
+        "probe_components": probe["components"],
+        "probe_wall_touching": probe["wall_touching"],
+        "contact_region": "plasma (no saddle crossed)" if limiter else "private",
+        "limiter": limiter,
+        "class": "limited" if limiter else "diverted",
+    }
+
+
 def _levels(
     exact: CerfonFreidbergSingleNull, wall: np.ndarray, axis_psi: float
 ) -> np.ndarray:
@@ -369,6 +414,25 @@ def _format_flux(value: float) -> str:
     if abs(value) < 1.0e-12:
         return "+0.000e+00"
     return f"{value:+.3e}"
+
+
+def _node_label(node: Node) -> str:
+    """Return a node's direct label; a virtual node carries no flux."""
+    if node.psi_wb is None:
+        return node.kind
+    return node.kind + "\nψ = " + _format_flux(node.psi_wb) + " Wb"
+
+
+def _join_label(edge: Edge) -> str:
+    """Return the label of the edge joining the outside node to the tree."""
+    if edge.contact_region == "private":
+        region = "private region below the X-point"
+        verdict = "never a limiter → diverted"
+    else:
+        region = "plasma region"
+        verdict = "limiter -> limited"
+    level = _format_flux(edge.join_level_wb)
+    return "wall contact " + level + " Wb\n" + region + "\n" + verdict
 
 
 def _panel(
@@ -393,7 +457,7 @@ def _panel(
     masked = np.where(inside, flux, np.nan)
     wall_units = (wall,)
 
-    view = poloidal_view((r_min, r_max, z_min, z_max), height=7.0, style=TREE_INK)
+    view = poloidal_view((r_min, r_max, z_min, z_max), height=9.5, style=TREE_INK)
     axes = view.poloidal
 
     poloidal.draw_flux_contours(axes, radius, height, masked, levels, style=TREE_INK)
@@ -426,7 +490,7 @@ def _panel(
         nodes[2].height,
         marker=OUTSIDE_MARKER,
         markersize=DEFAULT_INK.xpoint_markersize,
-        markerfacecolor="none",
+        markerfacecolor=TREE_EDGE_COLOR,
         markeredgecolor=TREE_EDGE_COLOR,
         markeredgewidth=DEFAULT_INK.xpoint_markeredgewidth,
         linestyle="none",
@@ -434,21 +498,32 @@ def _panel(
     )
 
     placements = (
-        (nodes[0], 0.05, 0.05),
-        (nodes[1], 0.05, 0.08),
-        (nodes[2], 0.05, 0.03),
+        (nodes[0], -0.06, 0.07, "right"),
+        (nodes[1], 0.06, 0.09, "left"),
+        (nodes[2], 0.06, -0.01, "left"),
     )
-    for node, dr, dz in placements:
+    for node, dr, dz, horizontal in placements:
         axes.annotate(
-            f"{node.kind}\n$\\psi$ = {_format_flux(node.psi_wb)} Wb",
+            _node_label(node),
             xy=(node.radius + dr, node.height + dz),
             fontsize=LABEL_FONTSIZE,
-            ha="left",
+            ha=horizontal,
             va="center",
             color=TREE_EDGE_COLOR,
             bbox=DEFAULT_INK.label_bbox,
             zorder=DEFAULT_INK.zorder_label,
         )
+    join = next(edge for edge in edges if edge.join_level_wb is not None)
+    axes.annotate(
+        _join_label(join),
+        xy=(nodes[1].radius + 0.20, 0.5 * (nodes[1].height + nodes[2].height)),
+        fontsize=LABEL_FONTSIZE,
+        ha="left",
+        va="center",
+        color=TREE_EDGE_COLOR,
+        bbox=DEFAULT_INK.label_bbox,
+        zorder=DEFAULT_INK.zorder_label,
+    )
     return view
 
 
@@ -460,15 +535,28 @@ def main() -> None:
     configure_dtypes()
     exact = _reference()
     wall = _wall(exact)
-    nodes, edges, sigma = _tree(exact, wall)
+    nodes, edges, sigma, contact_level = _tree(exact, wall)
     records = _verify(exact, wall, nodes)
     scale = nodes[0].psi_wb - nodes[1].psi_wb
-    contact_fraction = (nodes[2].psi_wb - nodes[1].psi_wb) / scale
+    contact_fraction = (contact_level - nodes[1].psi_wb) / scale
     _assert_verification(records, contact_fraction)
+    class_read = _class_read(records, nodes[1].psi_wb, contact_level)
+    join = edges[1]
+    edges = [
+        edges[0],
+        Edge(
+            join.first,
+            join.second,
+            join_level_wb=join.join_level_wb,
+            contact_region=class_read["contact_region"],
+            limiter=class_read["limiter"],
+        ),
+    ]
     if len(nodes) - len(edges) != 1:
         raise RuntimeError(
             f"a contour tree does not have one more node than edge: "
-            f"{len(nodes)} nodes, {len(edges)} edges")
+            f"{len(nodes)} nodes, {len(edges)} edges"
+        )
     levels = _levels(exact, wall, nodes[0].psi_wb)
 
     figure_path = arguments.output.with_suffix(".png")
@@ -483,11 +571,13 @@ def main() -> None:
         "version": 1,
         "flux_units": "Wb",
         "flux_note": (
-            "raw poloidal flux at the analytic reference's own value; the "
-            "outside node is a virtual node valued below every interior level "
-            "and its recorded psi is the first wall-contact level"
+            "raw poloidal flux at the analytic reference's own value. The "
+            "outside node is virtual: it has no flux of its own and is valued "
+            "below every interior level; the level at which it joins the tree "
+            "is recorded on its edge, not on the node."
         ),
         "sigma": sigma,
+        "class_read": class_read,
         "nodes": [asdict(node) for node in nodes],
         "edges": [asdict(edge) for edge in edges],
         "node_count": len(nodes),
@@ -495,6 +585,12 @@ def main() -> None:
         "node_count_minus_edge_count": len(nodes) - len(edges),
         "contour_levels_wb": [float(level) for level in levels],
         "separatrix_level_wb": 0.0,
+        "wall_source": (
+            "the certificate fixture carries no wall units; the wall drawn is "
+            "the fixture's own diverted wall, a smooth outward offset of the "
+            "analytic separatrix (scripts.analytic_oracle_fixtures.measure."
+            "offset_wall), and is not a machine wall"
+        ),
         "wall_points": int(wall.shape[0]),
         "wall_clearance_fraction_of_minor_radius": WALL_CLEARANCE_FRACTION,
         "superlevel_census": records,
@@ -508,10 +604,16 @@ def main() -> None:
         f"sigma={receipt['sigma']}"
     )
     for node in nodes:
-        print(
-            f"  {node.kind:8s} R={node.radius:+.5f} Z={node.height:+.5f} "
-            f"psi={node.psi_wb:+.6e} Wb"
+        flux = (
+            "virtual (no psi)"
+            if node.psi_wb is None
+            else _format_flux(node.psi_wb) + " Wb"
         )
+        print(f"  {node.kind:18s} R={node.radius:+.5f} Z={node.height:+.5f} psi={flux}")
+    print(
+        f"  join level={_format_flux(contact_level)} Wb  "
+        f"class={class_read['class']}  region={class_read['contact_region']}"
+    )
 
 
 if __name__ == "__main__":

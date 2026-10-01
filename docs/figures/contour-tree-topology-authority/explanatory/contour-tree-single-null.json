@@ -2,8 +2,16 @@
   "schema": "nova.contour-tree-explanatory-figure",
   "version": 1,
   "flux_units": "Wb",
-  "flux_note": "raw poloidal flux at the analytic reference's own value; the outside node is a virtual node valued below every interior level and its recorded psi is the first wall-contact level",
+  "flux_note": "raw poloidal flux at the analytic reference's own value. The outside node is virtual: it has no flux of its own and is valued below every interior level; the level at which it joins the tree is recorded on its edge, not on the node.",
   "sigma": 1,
+  "class_read": {
+    "probe_level_wb": 0.0005709576080821508,
+    "probe_components": 2,
+    "probe_wall_touching": 1,
+    "contact_region": "private",
+    "limiter": false,
+    "class": "diverted"
+  },
   "nodes": [
     {
       "index": "axis",
@@ -24,20 +32,26 @@
     {
       "index": "outside",
       "critical_type": 0,
-      "kind": "minimum",
+      "kind": "outside (virtual)",
       "radius": 1.5025801649274555,
       "height": -1.2076782703693019,
-      "psi_wb": 0.0009954762478921009
+      "psi_wb": null
     }
   ],
   "edges": [
     {
       "first": "axis",
-      "second": "x_point"
+      "second": "x_point",
+      "join_level_wb": null,
+      "contact_region": null,
+      "limiter": null
     },
     {
       "first": "x_point",
-      "second": "outside"
+      "second": "outside",
+      "join_level_wb": 0.0009954762478921009,
+      "contact_region": "private",
+      "limiter": false
     }
   ],
   "node_count": 3,
@@ -58,6 +72,7 @@
     0.005709576080821866
   ],
   "separatrix_level_wb": 0.0,
+  "wall_source": "the certificate fixture carries no wall units; the wall drawn is the fixture's own diverted wall, a smooth outward offset of the analytic separatrix (scripts.analytic_oracle_fixtures.measure.offset_wall), and is not a machine wall",
   "wall_points": 121,
   "wall_clearance_fraction_of_minor_radius": 0.35,
   "superlevel_census": [

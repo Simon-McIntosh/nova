@@ -1,0 +1,20 @@
+# revision: 707552973b50e4e0ef967555ebf2f50296604657
+# tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher
+# command: scripts/h200_test_lane/run.sh --dry-run --log /tmp/h200-steps.log -- tests/example_target.py -vv
+SOURCE_REVISION=707552973b50e4e0ef967555ebf2f50296604657
+LOG_PATH=/tmp/h200-steps.log
+RUNG=h200 JAX_PLATFORMS=cuda,cpu SUBMIT_COMMAND=sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task=7 --mem=64G --time=01:00:00 --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher --export=ALL --output=/tmp/h200-steps.log --error=/tmp/h200-steps.log --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher/scripts/nova_lane/run.sh --payload -- tests/example_target.py -vv 
+PAYLOAD_PRELUDE=export JAX_PLATFORMS=cuda,cpu
+export JAX_ENABLE_COMPILATION_CACHE=1
+export JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS=0
+export PYTEST_ADDOPTS="${PYTEST_ADDOPTS:-} -p cache_guard"
+export JAX_COMPILATION_CACHE_DIR="$("${NOVA_LANE_SHARED_PYTHON}" -c 'import cache_guard; print(cache_guard.pinned_cache_directory())')"
+"${NOVA_LANE_SHARED_PYTHON}" -c 'import cache_guard; cache_guard.emit_header(cache_guard.pinned_cache_directory())'
+PINNED_REVISION="$("${NOVA_LANE_SHARED_PYTHON}" -c 'import cache_guard; reference = cache_guard.pin_reference() or {}; print(reference.get("source_revision", "none"))')"
+printf 'PINNED_REVISION=%s\n' "${PINNED_REVISION}"
+if [ "${PINNED_REVISION}" != "${NOVA_LANE_EXPECTED_REVISION}" ]; then
+  printf 'PINNED_REVISION_MISMATCH pinned=%s serving=%s\n' "${PINNED_REVISION}" "${NOVA_LANE_EXPECTED_REVISION}"
+  printf 'the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result\n'
+fi
+PAYLOAD_SAMPLER="${NOVA_LANE_SHARED_PYTHON}" -c "import cache_guard; cache_guard.sample_gpu_utilisation()"
+EXIT=0

@@ -1,0 +1,37 @@
+# revision: 707552973b50e4e0ef967555ebf2f50296604657 + mutation (H200 sampler step dropped)
+# tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher
+# mutation: scripts/h200_test_lane/run.sh rendered without --sampler, so the payload drops the GPU utilisation sampling
+# command: TMPDIR=/tmp PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_nova_lane_launcher.py -q
+00:54:40 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+..F.                                                                     [100%]
+=================================== FAILURES ===================================
+______________ test_h200_payload_keeps_sampler_and_pin_diagnostic ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-mcintos/pytest-350/test_h200_payload_keeps_sample0')
+
+    def test_h200_payload_keeps_sampler_and_pin_diagnostic(tmp_path: Path) -> None:
+        result = subprocess.run(
+            [
+                "bash",
+                str(H200_CALLER),
+                "--dry-run",
+                "--log",
+                str(tmp_path / "lane.log"),
+                "--",
+                "tests/example_target.py",
+            ],
+            capture_output=True,
+            text=True,
+            cwd=REPOSITORY_ROOT,
+            env={**os.environ, "TMPDIR": "/tmp"},
+        )
+        assert result.returncode == 0, result.stderr
+>       assert "sample_gpu_utilisation" in result.stdout
+E       assert 'sample_gpu_utilisation' in "SOURCE_REVISION=707552973b50e4e0ef967555ebf2f50296604657\nLOG_PATH=/tmp/pytest-of-mcintos/pytest-350/test_h200_payloa... was compiled for another revision, so a miss is a pin problem rather than a timing result\\n'\nfi\nPAYLOAD_SAMPLER=\n"
+E        +  where "SOURCE_REVISION=707552973b50e4e0ef967555ebf2f50296604657\nLOG_PATH=/tmp/pytest-of-mcintos/pytest-350/test_h200_payloa... was compiled for another revision, so a miss is a pin problem rather than a timing result\\n'\nfi\nPAYLOAD_SAMPLER=\n" = CompletedProcess(args=['bash', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lan... for another revision, so a miss is a pin problem rather than a timing result\\n\'\nfi\nPAYLOAD_SAMPLER=\n', stderr='').stdout
+
+tests/test_nova_lane_launcher.py:93: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_nova_lane_launcher.py::test_h200_payload_keeps_sampler_and_pin_diagnostic
+1 failed, 3 passed in 12.37s
+EXIT=1

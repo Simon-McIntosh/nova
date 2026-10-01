@@ -1,0 +1,67 @@
+<!-- fragment: fsri-one-nova-lane-launcher -->
+<section id="fsri-one-nova-lane-launcher">
+<h3>One nova lane launcher for SLURM placement</h3>
+
+<p><strong>Landed.</strong> <code>scripts/nova_lane/run.sh</code> takes a pytest
+target or a script, a rung preference (default <code>h200,titan,cpu</code>),
+cores, memory and an absolute log path; it applies the repository's SLURM rules
+and records the rung used, the job id and the git revision in the log header.
+<code>scripts/h200_test_lane/run.sh</code> is now a thin caller of it, carrying
+the reserved-H200 pre-warm cache contract in a payload prelude.</p>
+
+<ul>
+  <li><strong>Rungs.</strong> H200 &rarr; <code>--partition=betelgeuse
+    --reservation=gpu_0003_grpA --gres=gpu:1</code>; titan &rarr;
+    <code>--partition=titan --gres=gpu:1</code>; CPU &rarr;
+    <code>--partition=all_debug</code> with <code>JAX_PLATFORMS=cpu</code>.</li>
+  <li><strong>Explicit memory.</strong> <code>--mem=0</code> is refused before
+    it can reach sbatch; the job would otherwise pend on
+    <em>Resources</em> while blocking the queue.</li>
+  <li><strong>Environment.</strong> <code>TMPDIR=/tmp</code> exported at submit
+    and in the payload; <code>UV_NO_SYNC</code> and
+    <code>UV_RUN_RECURSION_DEPTH</code> unset; no <code>uv</code> on the compute
+    node (the shared interpreter runs directly with <code>PYTHONPATH</code>).</li>
+  <li><strong>Admission.</strong> a rung is tried only after a real submission is
+    shown still <em>PENDING</em> on a resource or configuration reason after a
+    bounded wait; the decision is never taken from an
+    <code>sbatch --test-only</code> estimate. A session already inside an
+    allocation runs in place (<code>--force-submit</code> overrides).</li>
+  <li><strong>H200 lane steps.</strong> the thin caller carries the lane's cache
+    contract as a payload prelude (<code>...PINNED_REVISION</code> with the
+    mismatch diagnostic when the served pin was compiled for another revision)
+    and a concurrent sampler (<code>cache_guard.sample_gpu_utilisation</code>),
+    whose output the launcher appends after the target exactly as the pre-change
+    caller did; the dry-run prints the resolved payload steps for each rung.</li>
+  <li><strong>Reason match.</strong> a submission pending on <em>Resources</em>,
+    <em>Configuration</em>, <em>ReqNode*</em> or <em>NodeDown</em> falls to the
+    next rung.</li>
+</ul>
+
+<p>Evidence logs, at revision
+<code>707552973</code>:</p>
+
+<table>
+  <thead><tr><th>measure</th><th>log</th><th>result</th></tr></thead>
+  <tr><th scope="row">syntax / lint</th>
+    <td><code>docs/figures/forward-solver-route-integrity/lane-launcher/shell-syntax.log</code></td>
+    <td><code>bash -n: OK</code> (<code>shellcheck</code> not installed on this host)</td></tr>
+  <tr><th scope="row">dry-run, each rung</th>
+    <td><code>docs/figures/forward-solver-route-integrity/lane-launcher/dry-run-mem-refusal.log</code></td>
+    <td>three <code>RUNG=…</code> sbatch lines; <code>--mem=0</code> refused, <code>EXIT=2</code></td></tr>
+  <tr><th scope="row">real CPU-rung run</th>
+    <td><code>docs/figures/forward-solver-route-integrity/lane-launcher/cpu-rung-run.log</code></td>
+    <td>5 s target wall, <code>EXIT_STATUS=0</code>, header names rung + job + revision</td></tr>
+  <tr><th scope="row">H200 payload steps</th>
+    <td><code>docs/figures/forward-solver-route-integrity/lane-launcher/h200-payload-steps.log</code></td>
+    <td>dry-run shows <code>PAYLOAD_SAMPLER</code> and the pin-diagnostic prelude</td></tr>
+  <tr><th scope="row">launcher tests</th>
+    <td><code>docs/figures/forward-solver-route-integrity/lane-launcher/pytest-lane-launcher.log</code></td>
+    <td><code>4 passed</code>, <code>EXIT=0</code></td></tr>
+  <tr><th scope="row">negative control, mem=0</th>
+    <td><code>docs/figures/forward-solver-route-integrity/lane-launcher/negative-control.log</code></td>
+    <td><code>1 failed, 3 passed</code>, <code>EXIT=1</code> with the <code>--mem=0</code> refusal dropped</td></tr>
+  <tr><th scope="row">negative control, H200 steps</th>
+    <td><code>docs/figures/forward-solver-route-integrity/lane-launcher/negative-control-h200-steps.log</code></td>
+    <td><code>1 failed, 3 passed</code>, <code>EXIT=1</code> with the sampler step dropped</td></tr>
+</table>
+</section>

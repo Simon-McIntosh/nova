@@ -1,0 +1,29 @@
+# revision: 707552973b50e4e0ef967555ebf2f50296604657 + mutation (--mem=0 refusal neutralised)
+# tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher
+# mutation: scripts/nova_lane/run.sh refusal neutralised so the launcher accepts --mem=0
+# command: TMPDIR=/tmp PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_nova_lane_launcher.py -q
+00:54:06 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+.F..                                                                     [100%]
+=================================== FAILURES ===================================
+___________________________ test_mem_zero_is_refused ___________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-mcintos/pytest-349/test_mem_zero_is_refused0')
+
+    def test_mem_zero_is_refused(tmp_path: Path) -> None:
+        result = _launch(
+            "--dry-run",
+            "--mem=0",
+            "--log",
+            str(tmp_path / "lane.log"),
+            "--",
+            "tests/example_target.py",
+        )
+>       assert result.returncode != 0
+E       AssertionError: assert 0 != 0
+E        +  where 0 = CompletedProcess(args=['bash', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lan...ncher/scripts/nova_lane/run.sh --payload -- tests/example_target.py \nPAYLOAD_PRELUDE=\nPAYLOAD_SAMPLER=\n', stderr='').returncode
+
+tests/test_nova_lane_launcher.py:69: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_nova_lane_launcher.py::test_mem_zero_is_refused - Assertion...
+1 failed, 3 passed in 13.93s
+EXIT=1

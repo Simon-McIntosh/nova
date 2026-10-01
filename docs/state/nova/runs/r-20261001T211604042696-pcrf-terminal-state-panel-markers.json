@@ -1,0 +1,350 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "48a40fab18be098a17ea5df6d631c1b153a027f2",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 5602693,
+      "input_tokens_cumulative": 5602693,
+      "output_tokens": 26313,
+      "output_tokens_cumulative": 26313,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 36596,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "0efc4ad0d277c008112231ba1a28ce137999059c"
+  ],
+  "completed_at": "2026-10-01T21:40:21.044Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-01T21:16:22Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/plasma_cell_terminal_state.py --render-only --draw-order reference-last",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T211604042696-pcrf-terminal-state-panel-markers/pcrf-terminal-markers-negative-control.log"
+  },
+  "impl_move": {
+    "at_complete": 0.85,
+    "at_dispatch": 0.85,
+    "plan": "plasma-cell-read-fidelity",
+    "reason": "hygiene item of followup f-pcrf-003; the plan's executable sections s1 and s4 are gated on the S21 map re-measure, so impl stays at 0.85",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-01T22:16:05.987620+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-01T21:16:05Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 23,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 14,
+    "headroom": -5,
+    "mean_context": 134286,
+    "observed_at": "2026-10-01T21:15:42Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 1
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-01T21:40:21.044Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T211604042696-pcrf-terminal-state-panel-markers/manifest.md",
+  "member": "s19f-local-1",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "pcrf-terminal-state-panel-markers",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 3773,
+          "cached_input_tokens": 453693,
+          "input_tokens": 457468,
+          "output_tokens": 1725,
+          "reasoning_output_tokens": 28,
+          "total_tokens": 459193,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "benchmarks/plasma_cell_terminal_state.py's render draws the large analytic reference markers last, so no reference marker is overpainted. If render(draw_order='reference-last') already does this at HEAD, say so with the line numbers and change nothing in source. Evidence: re-render the committed terminal-state figure from its committed receipt (no new solve) in place on the fleet allocation (TMPDIR=/tmp, JAX_PLATFORMS=cpu); the benchmark's own _cluster_pixel_census reports zero overpainted reference markers on the analytic panel; negative control: draw_order reversed reports a nonzero overpaint count, logged. Write the re-rendered PNG and an SVG beside it under docs/figures/plasma-cell-read-fidelity/terminal-state-markers/ (git add -f), never overwriting a committed figure in place.",
+    "estimated_hours": 0.7,
+    "goal": "The analytic panel of the plasma-cell terminal-state figure draws its reference null markers above the small panel-state markers",
+    "id": "pcrf-terminal-state-panel-markers",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-01T21:16:05Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 23,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 14,
+      "headroom": -5,
+      "mean_context": 134286,
+      "observed_at": "2026-10-01T21:15:42Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 1
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T211604042696-pcrf-terminal-state-panel-markers/manifest.md",
+    "negative_control": "reverse draw_order so panel-state markers are drawn last: the pixel census reports overpainted reference markers",
+    "plan": "plasma-cell-read-fidelity",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§1",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/plasma_cell_terminal_state.py",
+      "docs/figures/plasma-cell-read-fidelity/terminal-state-markers",
+      "docs/evidence/fragments/plasma-cell-read-fidelity/pcrf-terminal-state-panel-markers.html",
+      "docs/figures/plasma-cell-read-fidelity/pcrf-terminal-state-panel-markers"
+    ]
+  },
+  "orientation_input_tokens": 3024365.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "pcrf-terminal-state-panel-markers",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-01T21:16:08.480573+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "plasma-cell-read-fidelity",
+  "plan_impl_at_dispatch": 0.85,
+  "plan_link": null,
+  "promoted_revision": "0efc4ad0d277c008112231ba1a28ce137999059c",
+  "resume_waiver": null,
+  "review": {
+    "absent": [
+      "no pytest suite arm exists for this node: the reviewed run declared baseline_suite=null and after_suite=null, and its change touches only a re-rendered figure, a census JSON and an evidence fragment, none of which a test imports",
+      "no automated regression guard exists for the draw-order default: a future edit to render()'s default or the analytic-column branch would not fail any test, only a fresh manual re-render"
+    ],
+    "reviewed_base_sha": "48a40fab18be098a17ea5df6d631c1b153a027f2",
+    "reviewed_head_sha": "0efc4ad0d277c008112231ba1a28ce137999059c",
+    "scores": {
+      "durability": 17,
+      "evidence": 18,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 95
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261001T211604042696-pcrf-terminal-state-panel-markers",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "6ae5bfe0-63cb-48f7-a096-0412d1a95419",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 5602693,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 1429.796,
+    "generated_tokens": 26313,
+    "generation_seconds": 1371.164,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 31.2,
+    "machine_seconds": 58.632,
+    "peak_input_tokens": 149680,
+    "tokens_per_second": 19.19,
+    "wall_tokens_per_second": 18.4
+  },
+  "time_budget": "60m",
+  "tool_steps": 49.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1439,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-01T21:40:23Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-01T21:16:26Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261001T211604042696-pcrf-terminal-state-panel-markers",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 5097,
+    "worker_pid": 3841947
+  },
+  "worker_seconds": 1342,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

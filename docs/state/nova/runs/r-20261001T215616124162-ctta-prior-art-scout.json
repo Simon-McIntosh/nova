@@ -274,6 +274,32 @@
   "plan": "contour-tree-topology-authority",
   "plan_link": null,
   "promoted_revision": "1a9644b0662a81f05e4ed7dcc7fa9d1f01711c0b",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5016,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261001T215616124162-ctta-prior-art-scout",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-prior-art-scout"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

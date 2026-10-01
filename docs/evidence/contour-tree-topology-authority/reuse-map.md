@@ -41,9 +41,9 @@ there, not the pattern failing to match.
 | 2 | True polygon containment over the wall units (§2) | `nova/nova/equilibrium/connectivity_boundary.py:233` `_points_inside_wall_units` (jnp); `nova/nova/equilibrium/wall_mask.py:68` `inside_polygon`; `nova/nova/geometry/pointloop.py:15` `point_in_polygon` (numba) | **reuse** (jnp multi-unit form) / adapt host forms |
 | 3 | Add wall vertices on the polyline, flux linearly interpolated on the containing triangle (§2) | `nova/nova/equilibrium/wall_mask.py:433` `densify_units`; `nova/nova/equilibrium/connectivity_boundary.py:981` `_sample_wall_polyline`, `:2644` `_densify_wall`; triangle-linear flux only via `matplotlib.tricontour` (`nova/nova/imas/equilibrium.py:688`) | **adapt** (resampling exists; the containing-triangle flux lookup does not) |
 | 4 | Join tree, split tree, and their merge into a contour tree (§2) | `imas-efit/src/EFIT/contour_tree.f90:130` `build_contour_tree`, `:1132` `build_contour_tree_with_wall`, `:3389` `merge_tree_decide`; oracle `imas-efit/output/m2-build/mergetree_oracle/merge_tree.py` | **adapt** (port the algorithm; nothing in nova) |
-| 5 | Simulation-of-simplicity tie breaking (§2) | none named as such; closest `imas-efit/.../merge_tree.py:189` born-earlier union tie-break and `nova/.../connectivity_boundary.py:136` `_arg_extreme` first-index tie-break | **fails — absent**, must be built |
+| 5 | Simulation-of-simplicity tie breaking (§2) | none named as such; closest `imas-efit/output/m2-build/mergetree_oracle/merge_tree.py:189` born-earlier union tie-break and `nova/nova/equilibrium/connectivity_boundary.py:136` `_arg_extreme` first-index tie-break | **fails — absent**, must be built |
 | 6 | Fixed-shape `jit`/`vmap` graph construction with stated capacities (§2) | `nova/nova/equilibrium/parallel_components.py:77` `label_parallel_graph_components_with_steps`; `nova/nova/equilibrium/flux_surface_connectivity.py:329` `hex_edge_admissibility`, `:473`/`:495` saddle-aware labelling; `nova/nova/equilibrium/stencil_nulls.py:1743` `critical_point_candidates_batch` | **reuse** the kernels and the fixed-slot/overflow receipt |
-| 7 | Brute-force connectivity count of superlevel sets (§2's done-when) | no counter exists; primitives are `flux_surface_connectivity.py:435` `label_hex_connected_components_with_steps`, `nova/nova/equilibrium/connectivity_boundary.py:721` `_axis_component_before_level`; analytic-region test pattern `tests/test_hex_flood_geometries.py:151` | **fails — absent**, build from the labelling kernel |
+| 7 | Brute-force connectivity count of superlevel sets (§2's done-when) | no counter exists; primitives are `nova/nova/equilibrium/flux_surface_connectivity.py:435` `label_hex_connected_components_with_steps`, `nova/nova/equilibrium/connectivity_boundary.py:721` `_axis_component_before_level`; analytic-region test pattern `nova/tests/test_hex_flood_geometries.py:151` | **fails — absent**, build from the labelling kernel |
 | 8 | Newton polish and Hessian classification of critical points (§3) | `nova/nova/equilibrium/stencil_nulls.py:1803` `_refine_selected_vertices`; `nova/nova/equilibrium/flux_surface_connectivity.py:703` `_polish_stationary_points_in_bounds`; `imas-efit/src/EFIT/null_detection.f90:36` `find_all_nulls` | **reuse** the two nova jax polishes; the Fortran is the accuracy reference |
 | 9 | Private-region and wall-contact reads (§4) | `nova/nova/equilibrium/flux_surface_connectivity.py:509` `private_flux_mask`; `nova/nova/equilibrium/topology.py:69` `private_wall_node_read`, `:621` `_axis_connected_wall_candidates`; `imas-efit/src/EFIT/contour_tree.f90:1673` `mark_private_subtrees` | **adapt** (private by connectivity reuses whole; the raster/height-band wall reads are the ones §5 deletes) |
 
@@ -287,9 +287,9 @@ there, not the pattern failing to match.
 - `nova/nova/equilibrium/connectivity_boundary.py:642` `_linear_flood_fill_core`
   (+ `flux_surface_connectivity.py:193/:231` `flood_fill_core[_with_steps]`) —
   fixed-iteration floods. **Verdict: reuse** as the reference/fallback fill.
-- Fixed capacities stated as module constants: `flux_surface_connectivity.py:685`
-  `EDGE_CROSSING_CAPACITY = 4`, `stencil_mesh.py:518` /
-  `clip_quadrature.py:380` triangle slots. **Verdict: adapt** — the naming
+- Fixed capacities stated as module constants: `nova/nova/equilibrium/flux_surface_connectivity.py:685`
+  `EDGE_CROSSING_CAPACITY = 4`, `nova/nova/equilibrium/stencil_mesh.py:518` /
+  `nova/nova/equilibrium/clip_quadrature.py:380 triangle slots. **Verdict: adapt** — the naming
   precedent for §2's stated node and edge capacities.
 
 ### 7 — Brute-force connectivity count of superlevel sets
@@ -368,14 +368,14 @@ there, not the pattern failing to match.
 - `imas-ambix/imas_ambix/latent/topology.py:121` **`find_critical_points`** —
   grid bracket on the sign change of both partials, Newton on the local
   bilinear gradient/Hessian, classify by Hessian definiteness, `:222` `_dedup`.
-  `imas_ambix/latent/stencil_nulls.py:108` `subnull`, `:195`
+  `imas-ambix/imas_ambix/latent/stencil_nulls.py:108` `subnull`, `:195`
   `magnetic_axis_subgrid`, `:238` `xpoint_candidates` are the same
   fixed-slot design as nova's `stencil_nulls` (ambix's copy/precursor).
   **Verdict: adapt/reference** — a second independent implementation to
   cross-check the census against.
 - `nova/nova/biot/fieldnull.py:16` `DataNull` / `:161` `FieldNull`, `:207`
   `categorize_1d`, `:239` `categorize_2d`, `:99` `_subnull_2d` — the legacy
-  host null finder both ambix's docstring and `hexstencil.py:11` cite.
+  host null finder both ambix's docstring and `nova/nova/geometry/hexstencil.py:11` cite.
   **Verdict: fails for the new read** (host, raster-indexed, `:79` `_unique`
   de-duplicates by rounding to 3 decimals) but it is the historical baseline
   the plan's defects were measured against.

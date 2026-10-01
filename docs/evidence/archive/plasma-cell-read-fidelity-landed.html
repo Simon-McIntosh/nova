@@ -403,4 +403,9 @@
 <p><strong>Coordinator disposition.</strong> No section status or driving followup is closed here. Exact-mode dynamics remain behind an unmet map-fidelity gate for both cases over this ladder. Chord-mode fidelity is established only at the stated passing rungs; this is no claim that a subsequent solve converges. The next concrete investigation is the finite support/profile moment discrepancy in exact mode, preserving the component and current-distribution evidence above.</p>
 </section>
 
+  <section id="terminal-state-markers">
+    <h2>Terminal-state figure: reference null markers drawn last</h2>
+    <p>Run <code>r-20261001T211604042696-pcrf-terminal-state-panel-markers</code> (local lane), merged at <code>2d7c1c02d</code> from <code>0efc4ad0d</code>; review 20/18/20/17/20, no added failure. The fix was already at HEAD as <code>render(draw_order='reference-last')</code> in <code>benchmarks/plasma_cell_terminal_state.py</code>; the node re-rendered the committed figure from its committed receipt with no new solve. The analytic panel's pixel census reads 675 reference pixels and 0 overpainting panel pixels; the reversed-order control reads 300 reference and 333 panel pixels. Figure: <a href="/nova/figures/plasma-cell-read-fidelity/terminal-state-markers/terminal-state-trip-arms.png">terminal-state-trip-arms</a> (SVG beside it). Open follow-on from review: no test defends the zero-overpaint census.</p>
+  </section>
+
 </main></body></html>

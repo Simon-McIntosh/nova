@@ -1,0 +1,9 @@
+# revision: f9603c3be1e2ced6d06bc28bdff8598b6cc153ed
+# tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh
+# cwd: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh
+# module.__file__: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh/nova/equilibrium/contour_tree_mesh.py
+# command: pytest tests/test_contour_tree_mesh.py -q -p no:cacheprovider
+01:45:01 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+........                                                                 [100%]
+8 passed in 5.70s
+EXIT=0

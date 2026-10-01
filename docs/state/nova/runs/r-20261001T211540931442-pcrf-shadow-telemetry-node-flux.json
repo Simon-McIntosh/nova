@@ -289,6 +289,32 @@
   "plan_impl_at_dispatch": 0.85,
   "plan_link": null,
   "promoted_revision": "8fe7445e5959cf2cb793f3a538ec62a5286b7779",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5027,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261001T211540931442-pcrf-shadow-telemetry-node-flux",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-shadow-telemetry-node-flux"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

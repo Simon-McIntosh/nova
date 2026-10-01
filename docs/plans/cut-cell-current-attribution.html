@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="216">
+<meta name="plan-version" content="217">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
 <meta name="plan-impl" content="0.8">
@@ -1776,6 +1776,9 @@ fails all three recorded cells. See the
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261001T220830663071-review-of-cca-map-fidelity-centroid-columns" data-who="reckon-build" data-when="2026-10-01T22:36:03.196Z">
     <div class="r-comment-body"><p>Reviewed the repaired head b80912673 of r-20261001T191318631939-cca-map-fidelity-centroid-columns: the three prior follow-ons are resolved (GPU assert restored behind --cpu-preflight with an enforced centroid-preflight output dir and a preflight row marker; the guard test tests/test_map_fidelity_centroid.py added and both arms reproduced here; the preflight log re-captured with a literal command, absolute output path and revision). One advice item (relocating a canonical-dir file) was verified already satisfied. Review record scores 5 dimensions (goal_fidelity 19, evidence 17, fit 19, durability 18, scope_discipline 18; total 91) and carries added_failure_count 0 with an empty id list because the reviewed run declared no baseline_suite/after_suite arms.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20261002T0040-centroid" data-who="reckon-build" data-when="2026-10-02T00:40:00+02:00">
+    <div class="r-comment-body">centroid column landed at 35bed5a53 (re-review 19/17/19/18/18); the H200 map re-measure in both clip modes is next, once the chord-membership repair's review lands.</div>
 </div>
 </section>
 

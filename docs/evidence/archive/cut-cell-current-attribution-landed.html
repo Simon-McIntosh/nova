@@ -3313,6 +3313,11 @@ No production source under <code>nova/</code> changed. These measurements identi
 booking operation; they do not release the exact-support default or close the section.</p>
 </section>
 
+  <section id="map-fidelity-centroid-columns">
+    <h2>Map fidelity: the support-current centroid offset per row</h2>
+    <p>Run <code>r-20261001T191318631939-cca-map-fidelity-centroid-columns</code> (local lane), merged at <code>35bed5a53</code> from <code>224f17817</code>, <code>725be129c</code>, <code>02a196e94</code>, <code>42b7469eb</code> and <code>b80912673</code>. <code>benchmarks/plasma_cell_map_fidelity.py</code> now writes <code>support_current_centroid_offset_mm</code> (dR, dZ) on every row: the booked minus the analytic support-current centroid at the analytic Solov'ev state. The first review found that the physical gate's GPU assertion had been relaxed. The repair restores it and admits CPU only behind <code>--cpu-preflight</code>, whose rows land under <code>map-fidelity/centroid-preflight/</code>. It also adds <code>tests/test_map_fidelity_centroid.py</code>, an analytic round trip recovering a known centroid; its perturbed-inverse negative control fails. The CPU preflight of the 110-cell weak-rotation chord row reproduces its sup and prints the offset. Re-review 19/17/19/18/18, no added failure. This column feeds the H200 re-measure that settles the 35 mm vertical offset seen at 110 cells.</p>
+  </section>
+
 </main>
 </body>
 </html>

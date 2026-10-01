@@ -15,7 +15,7 @@
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-sprint" content="S19">
+  <meta name="plan-sprint" content="S22">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,solovev,grad-shafranov,active-set">
   <meta name="plan-depends-on" content="">
@@ -23,8 +23,8 @@
   <title>Centroid-constrained oracle solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="27">
+<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-version" content="28">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -86,7 +86,7 @@
     </article>
 <article class="r-fu" data-id="f-fsa-audit-centroid-negative-control" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="solver census-and-certificate-drivers review (codex luna)" data-written-at="2026-09-21" data-recommends-skill="/reckon-build centroid-constrained-oracle-solve" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Make the centroid negative control stay in the displaced basin</h4>
-    <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Promotion run r-20260916T205409901465-cco-bounded-row-step-control, commit 442820bf, benchmarks/centroid_constrained_fixture_receipt.py:1148-1162, uses the same 20 mm displaced seed for the no-row arm, but the receipt shows that arm returning to its own unconstrained fixed point with residual 1.59e-13. The control therefore cannot distinguish row action from the map&#x27;s own relaxation. Repair the negative arm with a displacement or target that the unconstrained map demonstrably does not reach, then rerun the positive/negative pair and record a red refusal for the intended mechanism. recommends_skill=/reckon-ship centroid-constrained-oracle-solve §2.</p></div>
+    <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Promotion run r-20260916T205409901465-cco-bounded-row-step-control, commit 442820bf, benchmarks/centroid_constrained_fixture_receipt.py:1148-1162, uses the same 20 mm displaced seed for the no-row arm, but the receipt shows that arm returning to its own unconstrained fixed point with residual 1.59e-13. The control therefore cannot distinguish row action from the map's own relaxation. Repair the negative arm with a displacement or target that the unconstrained map demonstrably does not reach, then rerun the positive/negative pair and record a red refusal for the intended mechanism. recommends_skill=/reckon-ship centroid-constrained-oracle-solve §2.</p></div>
     <pre class="r-fu-prompt">/reckon-build centroid-constrained-oracle-solve</pre>
     </article>
 </section>

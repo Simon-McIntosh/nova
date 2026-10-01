@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-24T15:26:17",
+  "updated": "2026-10-01T20:31:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -9078,36 +9078,6 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
-      },
-      {
-        "id": "session-337d1d569f61f639eedc",
-        "harness": "clive",
-        "role": "review",
-        "session_id": "c4446ec8-6d1c-44f2-9555-fc84461a35b6",
-        "session_model": "deepseek-v4.1-flash",
-        "sessions": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "c4446ec8-6d1c-44f2-9555-fc84461a35b6",
-          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"read-only\"}": "e7e26909-1d5d-4eae-8544-08e410e835c9"
-        },
-        "created": "2026-09-22",
-        "session_owners": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "s19-codex-20260916",
-          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"read-only\"}": "s19-codex-20260916"
-        }
-      },
-      {
-        "id": "session-71ebec9b1921ac205409",
-        "harness": "clive",
-        "role": "review",
-        "session_id": "82136814-ff1a-46ff-afd3-4f595b6de358",
-        "session_model": "deepseek-v4.1-flash",
-        "sessions": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "82136814-ff1a-46ff-afd3-4f595b6de358"
-        },
-        "created": "2026-09-22",
-        "session_owners": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "s18-fable-20260922"
-        }
       },
       {
         "id": "shadow-haiku-1",
@@ -308016,6 +307986,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3362
+    "_version": 3363
   }
 }

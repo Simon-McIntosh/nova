@@ -1,4 +1,4 @@
-revision=f9603c3be1e2ced6d06bc28bdff8598b6cc153ed tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_contour_tree_merge.py -vv
+revision=cc8883adc tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_contour_tree_merge.py -vv
 measurement_module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree/nova/equilibrium/contour_tree.py
 measurement_cwd=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree
 ============================= test session starts ==============================
@@ -28,5 +28,5 @@ tests/test_contour_tree_merge.py::test_capacity_overflow_is_reported_not_truncat
     warnings.warn(
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================== 6 passed, 4 warnings in 11.68s ========================
+======================== 6 passed, 4 warnings in 14.66s ========================
 EXIT=0

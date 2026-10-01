@@ -1,0 +1,14 @@
+revision: b23118dcd749977b77a987444d3cbc3c5f1808d4
+tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure
+cwd: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure
+module_file: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure/benchmarks/contour_tree_explanatory_figure.py
+jax_platforms: cpu
+tmpdir: /tmp
+command: PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure JAX_PLATFORMS=cpu TMPDIR=/tmp /home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/contour_tree_explanatory_figure.py
+---
+nodes=3 edges=2 difference=1 sigma=1
+  maximum            R=+1.78706 Z=+0.04677 psi=+5.710e-03 Wb
+  saddle             R=+1.50253 Z=-1.01728 psi=+0.000e+00 Wb
+  outside (virtual)  R=+1.50258 Z=-1.20768 psi=virtual (no psi)
+  join level=+9.955e-04 Wb  class=diverted  region=private
+EXIT=0

@@ -1,0 +1,31 @@
+revision=9acda6b6dc38e834b08117e6ea361ac5f8683e51
+tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag
+command=env TMPDIR=/tmp/reckon-crew-scratch/r-20261001T191207055972-cca-chord-membership-applied-flag JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_xpoint_cell_wedge_clip.py -vv
+measurement_module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag/nova/equilibrium/clip_quadrature.py
+measurement_cwd=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 22:55:12 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 14 items
+
+tests/test_xpoint_cell_wedge_clip.py::test_spline_chain_admits_the_supplied_saddle_vertex PASSED [  7%]
+tests/test_xpoint_cell_wedge_clip.py::test_spline_chain_refuses_a_non_finite_supplied_saddle PASSED [ 14%]
+tests/test_xpoint_cell_wedge_clip.py::test_forward_operator_supplies_the_typed_census_saddle_to_the_clip PASSED [ 21%]
+tests/test_xpoint_cell_wedge_clip.py::test_spline_chain_does_not_infer_a_saddle_from_crossing_chords PASSED [ 28%]
+tests/test_xpoint_cell_wedge_clip.py::test_spline_chain_emits_four_profile_owned_wedges PASSED [ 35%]
+tests/test_xpoint_cell_wedge_clip.py::test_spline_chain_retains_two_roots_on_one_edge PASSED [ 42%]
+tests/test_xpoint_cell_wedge_clip.py::test_saddle_cell_emits_core_private_and_two_sol_wedges PASSED [ 50%]
+tests/test_xpoint_cell_wedge_clip.py::test_per_wedge_profiles_integrate_without_cross_region_current PASSED [ 57%]
+tests/test_xpoint_cell_wedge_clip.py::test_non_saddle_rows_and_padding_are_exact_zero_with_static_shapes PASSED [ 64%]
+tests/test_xpoint_cell_wedge_clip.py::test_two_roots_on_one_edge_still_emit_four_wedges PASSED [ 71%]
+tests/test_xpoint_cell_wedge_clip.py::test_edge_coincident_saddle_keeps_one_exact_zero_area_wedge PASSED [ 78%]
+tests/test_xpoint_cell_wedge_clip.py::test_wedge_profile_count_refuses_an_incomplete_region_declaration PASSED [ 85%]
+tests/test_xpoint_cell_wedge_clip.py::test_a_root_fraction_names_a_different_segment_in_each_traversal PASSED [ 92%]
+tests/test_xpoint_cell_wedge_clip.py::test_saddle_wedges_wind_consistently_and_fill_the_cell_interior PASSED [100%]
+
+============================= 14 passed in 53.78s ==============================
+EXIT=0

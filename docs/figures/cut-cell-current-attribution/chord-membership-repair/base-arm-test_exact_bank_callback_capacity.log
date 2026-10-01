@@ -1,0 +1,20 @@
+revision=b0a0676df7a9575e1e1bedcee547236870e1c523
+tree=/tmp/reckon-crew-scratch/r-20261001T191207055972-cca-chord-membership-applied-flag/cca-base-b0a0676df
+command=env TMPDIR=/tmp/reckon-crew-scratch/r-20261001T191207055972-cca-chord-membership-applied-flag JAX_PLATFORMS=cpu PYTHONPATH=/tmp/reckon-crew-scratch/r-20261001T191207055972-cca-chord-membership-applied-flag/cca-base-b0a0676df /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m "not slow" tests/test_exact_bank_callback_capacity.py -vv
+measurement_module=/tmp/reckon-crew-scratch/r-20261001T191207055972-cca-chord-membership-applied-flag/cca-base-b0a0676df/nova/equilibrium/clip_quadrature.py
+measurement_cwd=/tmp/reckon-crew-scratch/r-20261001T191207055972-cca-chord-membership-applied-flag/cca-base-b0a0676df
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /tmp/reckon-crew-scratch/r-20261001T191207055972-cca-chord-membership-applied-flag/cca-base-b0a0676df
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 23:38:14 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 3 items
+
+tests/test_exact_bank_callback_capacity.py::test_quadratic_level_crosses_both_cells PASSED [ 33%]
+tests/test_exact_bank_callback_capacity.py::test_inherited_capacity_one_would_overflow_the_rederived_bank PASSED [ 66%]
+tests/test_exact_bank_callback_capacity.py::test_flux_selected_moments_size_their_own_bank_to_the_moments PASSED [100%]
+
+============================== 3 passed in 36.43s ==============================
+EXIT=0

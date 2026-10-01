@@ -1,0 +1,19 @@
+revision=9acda6b6dc38e834b08117e6ea361ac5f8683e51
+tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag
+command=env TMPDIR=/tmp/reckon-crew-scratch/r-20261001T191207055972-cca-chord-membership-applied-flag JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_clipped_support_quadrature.py -vv
+measurement_module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag/nova/equilibrium/clip_quadrature.py
+measurement_cwd=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 3 items
+
+tests/test_clipped_support_quadrature.py::test_compact_reduction_matches_dense_quadrature[weak-rotation-reactor-static] PASSED [ 33%]
+tests/test_clipped_support_quadrature.py::test_compact_reduction_matches_dense_quadrature[diverted-single-null] PASSED [ 66%]
+tests/test_clipped_support_quadrature.py::test_compact_reduction_work_arrays_stay_below_one_gibibyte PASSED [100%]
+
+======================== 3 passed in 147.32s (0:02:27) =========================
+EXIT=0

@@ -1,0 +1,58 @@
+revision=b0a0676df7a9575e1e1bedcee547236870e1c523 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag command=declared local quadratic membership mutation; env TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_chord_membership_global_separatrix.py
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 1 item
+
+tests/test_chord_membership_global_separatrix.py F                       [100%]
+
+=================================== FAILURES ===================================
+_________________ test_chord_membership_uses_global_separatrix _________________
+
+    def test_chord_membership_uses_global_separatrix() -> None:
+        """Analytic-exterior carriers receive no chord-mode plasma current."""
+        case = "diverted-single-null"
+        carrier, source, exact = certificate._case(case)
+        machine = certificate._case_machine(case, carrier, exact, -500)
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
+        )
+        analytic = certificate._exact_state(case, exact, coordinates)
+        operator = fixture.forward_operator(source, machine)
+    
+        exterior_cells = np.asarray([7, 64], dtype=np.int32)
+        analytic_boundary = PolygonPath(fixture._analytic_separatrix(exact))
+        np.testing.assert_array_equal(
+            analytic_boundary.contains_points(machine.node[exterior_cells]),
+            np.zeros(len(exterior_cells), dtype=bool),
+        )
+    
+        set_support_clip_mode("chord")
+        partition = operator._support_partition(jnp.asarray(analytic))
+        moments = operator._partitioned_current_moments(partition)
+        current = np.asarray(jax.device_get(moments.cell_current))
+    
+        assert len(current) == 550
+        assert np.count_nonzero(current) > 0
+>       np.testing.assert_array_equal(current[exterior_cells], np.zeros(2))
+E       AssertionError: 
+E       Arrays are not equal
+E       
+E       Mismatched elements: 1 / 2 (50%)
+E       Mismatch at index:
+E        [1]: 92.62382759441515 (ACTUAL), 0.0 (DESIRED)
+E       Max absolute difference among violations: 92.62382759
+E       Max relative difference among violations: inf
+E        ACTUAL: array([ 0.      , 92.623828])
+E        DESIRED: array([0., 0.])
+
+tests/test_chord_membership_global_separatrix.py:46: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+21:20:19 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+=========================== short test summary info ============================
+FAILED tests/test_chord_membership_global_separatrix.py::test_chord_membership_uses_global_separatrix
+========================= 1 failed in 66.20s (0:01:06) =========================
+EXIT=1

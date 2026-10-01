@@ -1,0 +1,13 @@
+revision=3ba7f6b00e43966dd3dd93f381f6d442c95267e1+working-tree tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-membership-from-the-global-separatrix command=srun --partition=all_debug --time=00:30:00 --cpus-per-task=4 --mem=64G --chdir=<tree> python -m pytest -p no:cacheprovider tests/test_chord_membership_global_separatrix.py -vv
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-membership-from-the-global-separatrix
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+tests/test_chord_membership_global_separatrix.py::test_chord_membership_uses_global_separatrix PASSED [100%]
+
+============================== 1 passed in 50.14s ==============================
+EXIT=0

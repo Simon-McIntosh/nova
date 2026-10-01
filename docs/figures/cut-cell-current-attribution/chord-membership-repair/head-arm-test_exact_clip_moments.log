@@ -1,0 +1,29 @@
+revision=9acda6b6dc38e834b08117e6ea361ac5f8683e51
+tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag
+command=env TMPDIR=/tmp/reckon-crew-scratch/r-20261001T191207055972-cca-chord-membership-applied-flag JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m "not slow" tests/test_exact_clip_moments.py -vv
+measurement_module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag/nova/equilibrium/clip_quadrature.py
+measurement_cwd=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-membership-applied-flag
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 13 items
+
+tests/test_exact_clip_moments.py::test_quadratic_boundary_moments_reach_the_fan_refinement_floor PASSED [  7%]
+tests/test_exact_clip_moments.py::test_default_cut_moments_match_the_fan_to_roundoff PASSED [ 15%]
+tests/test_exact_clip_moments.py::test_shifted_first_moment_paths_set_the_required_per_edge_order PASSED [ 23%]
+tests/test_exact_clip_moments.py::test_order_study_receipt_carries_the_map_the_record_is_transcribed_from PASSED [ 30%]
+tests/test_exact_clip_moments.py::test_arc_route_carries_the_fixed_edge_and_point_bound PASSED [ 38%]
+tests/test_exact_clip_moments.py::test_endpoint_recurrence_integrates_every_monomial_through_degree_six PASSED [ 46%]
+tests/test_exact_clip_moments.py::test_endpoint_moments_ignore_padding_and_match_a_translated_rectangle[False] PASSED [ 53%]
+tests/test_exact_clip_moments.py::test_endpoint_moments_ignore_padding_and_match_a_translated_rectangle[True] PASSED [ 61%]
+tests/test_exact_clip_moments.py::test_sampled_density_moments_and_vertex_tangent_match_independent_fan PASSED [ 69%]
+tests/test_exact_clip_moments.py::test_weak_cut_cells_resolve_the_fixed_arc_layout PASSED [ 76%]
+tests/test_exact_clip_moments.py::test_empty_sampled_arc_refuses_with_nonfinite_moments PASSED [ 84%]
+tests/test_exact_clip_moments.py::test_cut_cell_bank_overflow_remains_fail_closed PASSED [ 92%]
+tests/test_exact_clip_moments.py::test_exact_clip_level_maps_host_geometry_without_array_conversion PASSED [100%]
+
+======================== 13 passed in 86.51s (0:01:26) =========================
+EXIT=0

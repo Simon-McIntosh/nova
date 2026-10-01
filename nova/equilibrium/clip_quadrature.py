@@ -34,6 +34,7 @@ _WHOLE_CELL_VERTEX_CAPACITY = 24
 _ROW_CROSSING_CAPACITY = 4
 _SPLINE_ARC_SEGMENTS = 128
 _MAX_CURVED_ARCS = _WHOLE_CELL_VERTEX_CAPACITY // 2
+_GLOBAL_MEMBERSHIP_RAY_SAMPLES = 33
 _QUADRATIC_POWERS = ((0, 0), (1, 0), (0, 1), (2, 0), (1, 1), (0, 2))
 _QUADRATIC_SAMPLE_LOCAL = np.asarray(
     ((0.0, 0.0), (0.5, 0.0), (-0.5, 0.0), (0.0, 0.5), (0.0, -0.5), (0.5, 0.5)),
@@ -617,9 +618,18 @@ def _integrate_current_points(
     cell_index,
     moment_centres,
     profile,
+    membership=None,
+    membership_sign=1.0,
+    membership_applied=True,
 ) -> ClippedCurrentMoments:
     psi_norm, _radial_gradient, _vertical_gradient = field.sample(points, cell_index)
     density = profile.current_density(points[..., 0], psi_norm)
+    if membership is not None:
+        confined = membership(points, cell_index)
+        selected = confined if membership_sign > 0.0 else ~confined
+        density = jnp.where(
+            membership_applied, jnp.where(selected, density, 0.0), density
+        )
     weighted = density * weights
     first = jnp.sum(
         weighted[..., None] * (points - jnp.asarray(moment_centres)[:, None, :]),
@@ -639,12 +649,21 @@ def _integrate_current_polynomial(
     cell_index,
     moment_centres,
     profile,
+    membership=None,
+    membership_sign=1.0,
+    membership_applied=True,
 ) -> ClippedCurrentMoments:
     """Integrate a profile's density image over the clip's own sampled arc."""
     points, psi_norm, _radial, _vertical, polynomial_centre, coordinate_scale = (
         _density_sample_field(field, cell_index)
     )
     density = profile.current_density(points[..., 0], psi_norm)
+    if membership is not None:
+        confined = membership(points, cell_index)
+        selected = confined if membership_sign > 0.0 else ~confined
+        density = jnp.where(
+            membership_applied, jnp.where(selected, density, 0.0), density
+        )
     coefficients = _density_coefficients(density)
     return _sampled_arc_polynomial_moments(
         vertices,
@@ -719,6 +738,9 @@ def clipped_support_current_moments(
     *,
     cut_cell_capacity: int,
     boundary_reduction: bool = False,
+    membership=None,
+    membership_sign=1.0,
+    membership_applied=True,
 ) -> ClippedCurrentMoments:
     """Reduce current moments with an opt-in sampled-arc boundary route."""
     from nova.equilibrium.source import _FluxSelectedProfile
@@ -748,6 +770,9 @@ def clipped_support_current_moments(
         jnp.arange(len(vertices), dtype=jnp.int32),
         centroids,
         profile,
+        membership,
+        membership_sign,
+        membership_applied,
     )
 
     capacity = int(cut_cell_capacity)
@@ -774,6 +799,9 @@ def clipped_support_current_moments(
                     jnp.asarray([index], dtype=jnp.int32),
                     carried_centroid[None, ...],
                     profile,
+                    membership,
+                    membership_sign,
+                    membership_applied,
                 )
             else:
                 point, weight = _quadrature_from_arrays(
@@ -789,6 +817,9 @@ def clipped_support_current_moments(
                     jnp.asarray([index], dtype=jnp.int32),
                     carried_centroid[None, ...],
                     profile,
+                    membership,
+                    membership_sign,
+                    membership_applied,
                 )
             return (
                 value.cell_current[0],
@@ -848,6 +879,58 @@ def _quadratic_support(vertices, count, centres, coefficient, origin, scale, sel
     )
 
 
+def _global_separatrix_membership(field, support_vertices, vertex_count):
+    """Return axis-connected shared-spline membership for arbitrary points."""
+    from nova.linalg.split_spline import fit_split_spline
+
+    coordinate = jnp.asarray(field.centre)
+    psi_norm = jnp.asarray(field.coefficient)[:, 0][None, :]
+    surface = fit_split_spline(
+        coordinate[None, :, 0],
+        coordinate[None, :, 1],
+        psi_norm,
+        psi_norm - 1.0,
+        valid=jnp.asarray(field.active)[None, :],
+        order=6,
+        regularization=1.0e-14,
+    )
+    vertices = jnp.asarray(support_vertices)[:, :_WHOLE_CELL_VERTEX_CAPACITY]
+    count = jnp.minimum(
+        jnp.asarray(vertex_count),
+        jnp.asarray(_WHOLE_CELL_VERTEX_CAPACITY, dtype=jnp.int32),
+    )
+    candidate = jnp.concatenate((coordinate[:, None, :], vertices), axis=1)
+    slot = jnp.arange(candidate.shape[1])
+    candidate_valid = (slot[None, :] == 0) | (slot[None, :] <= count[:, None])
+    axis_index = jnp.argmin(jnp.where(jnp.asarray(field.active), psi_norm[0], jnp.inf))
+    axis = coordinate[axis_index]
+    fraction = jnp.linspace(
+        0.0, 1.0, _GLOBAL_MEMBERSHIP_RAY_SAMPLES, dtype=coordinate.dtype
+    )
+    ray = axis + fraction[None, None, :, None] * (candidate[:, :, None, :] - axis)
+    ray_level = -surface._patch_evaluation(
+        surface.level_set_coefficients,
+        ray[..., 0],
+        ray[..., 1],
+    ).value
+    level_scale = jnp.maximum(jnp.max(jnp.abs(ray_level)), 1.0)
+    tolerance = 256.0 * jnp.finfo(ray_level.dtype).eps * level_scale
+    path_inside = jnp.all(ray_level >= -tolerance, axis=-1)
+    core_cell = jnp.any(candidate_valid & path_inside, axis=1)
+
+    def membership(points, cell_index):
+        shared = -surface._patch_evaluation(
+            surface.level_set_coefficients,
+            points[..., 0],
+            points[..., 1],
+        ).value
+        connected = core_cell[jnp.asarray(cell_index, dtype=jnp.int32)]
+        shared_membership = connected[:, None] & (shared >= -tolerance)
+        return shared_membership
+
+    return membership, surface.fit_executed
+
+
 @jax.custom_jvp
 def _quadratic_support_vertices(
     coefficient, vertices, count, centres, origin, scale, selected
@@ -889,11 +972,12 @@ def _flux_selected_current_moments(
 ) -> ClippedCurrentMoments:
     """Integrate each closure on the moving level-set region of its cell field.
 
-    The same local polynomial supplies the separatrix and the density's flux
-    coordinate. Differentiating its clipped vertices carries boundary motion
-    into the moments while region membership remains a discrete branch choice.
-    Density is smooth within each region; pointwise level signs exclude cells
-    wholly outside the confined region.
+    The local polynomial supplies the density's flux coordinate and the moving
+    chord support. The shared spline decides which side of the admitted
+    separatrix each density sample belongs to, so independent cell fits cannot
+    admit a globally exterior carrier. Differentiating the clipped vertices
+    carries boundary motion into the moments while membership remains a
+    discrete branch choice.
     """
     vertices = jnp.asarray(support.support_vertices)
     count = jnp.asarray(support.vertex_count)
@@ -902,6 +986,9 @@ def _flux_selected_current_moments(
     coefficient = -jnp.asarray(field.coefficient)
     coefficient = coefficient.at[:, 0].add(1.0)
     cut_cell_capacity = max(int(cut_cell_capacity), int(vertices.shape[0]))
+    membership, membership_applied = _global_separatrix_membership(
+        field, vertices, count
+    )
 
     def integrate(sign, closure):
         clipped = _quadratic_support(
@@ -933,6 +1020,9 @@ def _flux_selected_current_moments(
             closure,
             cut_cell_capacity=cut_cell_capacity,
             boundary_reduction=True,
+            membership=membership,
+            membership_sign=sign,
+            membership_applied=membership_applied,
         )
 
     confined = integrate(1.0, profile.confined)

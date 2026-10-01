@@ -30,12 +30,13 @@
 <body>
   <main class="plan-doc">
     <h2 id="s0">Why this plan exists</h2>
-    <p>On 2026-10-01 the lead ruled that nova's topology read is rebuilt as one authority:
-    a contour tree of the poloidal flux, computed on the hex plasma cells, with no raster
+    <p>On 2026-10-01 the lead ruled that nova's topology read is rebuilt as one authority,
+    meaning one module that is the sole source of every topology verdict: a contour tree
+    of the poloidal flux, computed on the hex plasma cells, with no raster
     step, no normalised flux in any topology decision, and the plasma-current sign carried
     explicitly in every definition. The ruling answered the open decision
     <code>shadowed-contact-withdraws-the-wall-or-only-the-candidate</code> on
-    null-identification-authority. That decision asked which of two pinned tests to keep:
+    null-identification-authority. That decision asked which of two pinned tests' verdicts to keep:
     the 9×9 grid fixture in <code>tests/test_forward_operator_axes.py</code>, which needs
     a finite class margin of −0.319, and the MAST row-10 fixture in
     <code>tests/test_limiter_spline_minimum.py</code>, which needs the wall operand
@@ -76,7 +77,8 @@
     (added in 4.0.0, lifecycle alpha) stores <code>node(:)</code> with
     <code>critical_type</code> (0 minimum, 1 saddle, 2 maximum), <code>r</code>,
     <code>z</code>, <code>psi</code> and the saddle <code>levelset</code>, plus
-    <code>edges</code> as pairs of node indices. The authority emits exactly that.</p>
+    <code>edges</code> as pairs of node indices. The authority writes its tree into that
+    structure, against DD 4.1.0, beside the other DD fields listed in §1.</p>
 
     <p>plasma-cell-topology-authority (shipped, S18) already moved the saddle-aware flood,
     the sign-change census and the private mask onto the plasma cells. This plan replaces
@@ -103,15 +105,17 @@
     <ul>
       <li><strong>Sign.</strong> σ is computed from the state's declared COCOS sign tuple and
       the sign of the plasma current through <code>nova.io.cocos</code>, never hard-coded,
-      so that the magnetic axis is a maximum of σψ. Every comparison of levels is a
-      comparison of σψ in webers. The existing <code>polarity</code> arguments in
-      <code>nova/equilibrium/topology.py</code> derive from this same σ.</li>
+      so that the current-carrying magnetic axis is a local maximum of σψ. It need not be
+      the global maximum; §4 selects which local maximum is primary. Every comparison of
+      levels is a comparison of σψ in webers. The existing <code>polarity</code> arguments
+      in <code>nova/equilibrium/topology.py</code> derive from this same σ.</li>
       <li><strong>Units.</strong> Raw poloidal flux in webers. No normalised flux enters
-      any topology decision; normalised flux may be reported, after the boundary is
-      chosen, for consumers that ask for it.</li>
-      <li><strong>Domain.</strong> The interior of the vessel polygon, tested by true
-      polygon containment over the multi-unit wall, never by a bounding box. The wall is
-      the domain boundary.</li>
+      any topology decision. Once §4 has chosen the boundary, normalised flux may be
+      reported, referenced to that boundary level, for consumers that ask for it.</li>
+      <li><strong>Domain.</strong> The closed vessel region, tested by true polygon
+      containment over the multi-unit wall, never by a bounding box. The wall polyline is
+      the domain boundary, and its vertices belong to the domain as boundary
+      vertices.</li>
       <li><strong>Carrier.</strong> The hex plasma cells. Nothing in the read resamples
       onto a raster.</li>
       <li><strong>Output.</strong> A mapping onto DD 4.1.0, written under COCOS 17 as that
@@ -122,7 +126,8 @@
           <li>the class as <code>boundary.type</code> (0 limiter, 1 diverted);</li>
           <li>the boundary level as <code>boundary.psi</code>;</li>
           <li>the axis level as <code>global_quantities.psi_magnetic_axis</code>;</li>
-          <li>the wall clearance as <code>boundary.closest_wall_point</code>.</li>
+          <li>the wall clearance as <code>boundary.closest_wall_point</code>, with its
+          <code>r</code>, <code>z</code> and <code>distance</code>.</li>
         </ul>
       </li>
     </ul>
@@ -131,7 +136,8 @@
     and edges overlaid. The figure follows the repository plotting rules.</p>
     <p><strong>Done when:</strong> the docstring and typed result exist and are cited by
     §2 to §5; σ is derived through <code>nova.io.cocos</code>, and a state whose plasma
-    current is flipped without flipping ψ is refused (negative control); and the figure is
+    current is flipped without flipping ψ raises a named convention error before any tree
+    is built (negative control: the test asserts that exception); and the figure is
     committed under <code>docs/figures/contour-tree-topology-authority/</code> with an SVG
     beside the PNG.</p>
 
@@ -140,16 +146,18 @@
     <ul>
       <li><strong>Mesh.</strong> Hex cell centres form a triangular lattice. Triangulate
       the adjacent centres (the three-direction mesh), clipped to the vessel polygon, and
-      add wall vertices on the polyline with flux evaluated from the field representation
-      chosen in §3.</li>
+      add wall vertices on the polyline. Each wall vertex's flux is interpolated linearly
+      on the triangle that contains it, from the same piecewise-linear field the tree is
+      built on, so §2 needs no smooth field. §3's smooth representation refines node
+      positions and values; it never changes the tree's topology.</li>
       <li><strong>Trees.</strong> Compute the join tree of σψ (superlevel sets, descending
       from the axis) and the split tree on that piecewise-linear field, then merge them
       into the contour tree. Break ties by simulation of simplicity, so that no two values
       are ever equal.</li>
       <li><strong>The wall.</strong> Connect every wall vertex to one virtual outside node
       valued below every interior level. The moment a region first meets the wall then
-      appears in the join tree as its join with the outside node, at that wall vertex's
-      level.</li>
+      appears in the join tree as its join with the outside node, at the level of the
+      highest wall vertex in that region: the first one met as the level descends.</li>
       <li><strong>Tracing.</strong> The construction is fixed-shape and traceable under
       <code>jit</code> and <code>vmap</code>, with the node and edge capacities stated
       and any overflow refused visibly on the receipt.</li>
@@ -169,11 +177,13 @@
     <p>Each interior tree node is located and valued on a smooth field representation:
     Newton-polished, Hessian-classified, and contained in the vessel polygon. The node's
     polished type must agree with its combinatorial type, and the polished levels must
-    keep the tree's order; any disagreement is reported, not repaired silently. This
+    keep the tree's order. A disagreement is never repaired silently: it is written as a
+    named receipt field, and the state's topology is marked unqualified. This
     replaces the sign-change census and the raster census as the source of critical points.
-    The own-node quadratic polish remains available as a method, because on the hex
-    carriers it admitted the saddle on 9 of 9 rungs and the axis on 15 of 15. The field
-    representation itself is the open decision below.</p>
+    The own-node quadratic polish stays one of the candidate representations, because on
+    the hex carriers it admitted the saddle on 9 of 9 rungs and the axis on 15 of 15. The
+    choice of representation is the open decision below, and the one chosen is the only
+    route in production.</p>
     <p><strong>Done when:</strong></p>
     <ul>
       <li>on the Solov'ev fixtures, the axis and every X-point sit within the certificate
@@ -189,15 +199,19 @@
     <h2 id="s4">§4 — Primary selection, regions, class and margin</h2>
     <p>Everything below is read off the tree:</p>
     <ul>
-      <li><strong>Primary O-point:</strong> the in-vessel maximum of σψ whose region
-      carries the plasma current.</li>
+      <li><strong>Primary O-point:</strong> among all in-vessel local maxima of σψ (not
+      necessarily the global maximum), the one whose tree branch holds the largest share
+      of the plasma current, summed over the hex cells of that branch down to its first
+      join. A tie is a refusal.</li>
       <li><strong>Plasma region:</strong> the axis component of the superlevel set of σψ,
       followed down the tree from the primary O-point.</li>
-      <li><strong>The first event</strong> on that path is the larger of two levels:
+      <li><strong>The first event</strong> is read only along the primary O-point's own
+      path down the join tree. "First" always means the highest σψ level, the first one
+      met as the level descends from the axis. It is the larger of two levels:
         <ul>
-          <li>the first interior join saddle (the primary X-point);</li>
-          <li>the first wall contact made without passing through a saddle (the
-          limiter).</li>
+          <li>the first interior join saddle on that path (the primary X-point);</li>
+          <li>the first join of that path with the outside node, i.e. a wall contact
+          reached without passing through any saddle (the limiter).</li>
         </ul>
       If the first event is the saddle, the class is diverted and the boundary passes
       through the X-point. If it is the wall contact, the class is limited and the
@@ -205,21 +219,26 @@
       <li><strong>Private regions:</strong> the other branches that join at the primary
       X-point. A wall contact inside a private region can never be a limiter, which is the
       precise meaning of "shadowed".</li>
-      <li><strong>Margin:</strong> <code>σψ_x − σψ_lim</code> in webers, where
-      <code>ψ_lim</code> is the level of the first wall contact that is not in a private
-      region. It is positive for diverted states and negative for limited ones, finite on
-      both sides, and independent of the solve box.</li>
+      <li><strong>Margin:</strong> <code>σψ_x − σψ_lim</code> in webers.
+      <code>σψ_lim</code> is the highest σψ over the wall vertices that do not lie in a
+      private region of the primary X-point. For a limited state this is the limiter
+      level itself. For a diverted state it is the level at which the plasma would first
+      touch the wall outside the divertor's private flux. The margin is positive for
+      diverted states and negative for limited ones, finite on both sides, and
+      independent of the solve box.</li>
     </ul>
     <p><strong>Done when:</strong></p>
     <ul>
       <li>the 9×9 grid fixture reads limited with a finite negative margin;</li>
       <li>MAST row 10 reads diverted with a finite positive margin, and its gap to the
       centre column is reported in millimetres;</li>
-      <li>MAST 27079 row 16 reads limited, with the traced boundary within one pitch of the
-      wall and the boundary flux equal to the field sampled at the contact point;</li>
+      <li>MAST 27079 row 16 reads limited, with the traced boundary within one hex-cell
+      pitch (the centre spacing at the contact) of the wall, and the boundary flux equal
+      to the field sampled at the contact point;</li>
       <li>every Solov'ev certificate row reads its analytic class;</li>
       <li>one reversed-current MAST shot from the 22475–22626 block gives the same tree and
-      class as its σ-mirrored state;</li>
+      class as the same state mirrored synthetically (ψ negated, plasma current
+      flipped);</li>
       <li>each fixture writes the DD 4 fields of §1 and survives an IDS round trip through
       <code>validate()</code>.</li>
     </ul>
@@ -239,7 +258,10 @@
     </ul>
     <p>The following are deleted: <code>_axis_component_before_level</code>, the sightline
     test, the raster hex partition built from the solve raster, the census contact
-    polishing path, and every normalised-flux classification quantity.</p>
+    polishing path, and every normalised-flux quantity that feeds a classification
+    (<code>u</code>, <code>u_x</code>, <code>u_wall</code>, <code>class_margin</code>
+    and their inputs). Normalised flux reported after the boundary is chosen, as §1
+    permits, stays.</p>
     <p>The two pinned tests are rewritten from §4's definitions: the grid fixture asserts a
     finite negative margin in webers, and the MAST row-10 test asserts diverted with a
     finite positive margin and its private-region contact declined. Neither is deleted.
@@ -253,8 +275,8 @@
       processes against a stated base;</li>
       <li>the topology figures of null-identification-authority and cut-cell-current-attribution
       that drew raster-read classes are regenerated or retracted;</li>
-      <li>a search of the touched modules finds no classification read of normalised
-      flux.</li>
+      <li>a search of the touched modules finds no normalised-flux value feeding a
+      classification; reporting reads permitted by §1 are excluded from the search.</li>
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">

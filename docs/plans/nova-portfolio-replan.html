@@ -15,10 +15,10 @@
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S21">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-09-26">
+<meta name="plan-modified" content="2026-10-01">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="6">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
 <meta name="plan-capability-version" content="1.0">
@@ -26,7 +26,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="moderate">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 </head>
 <body>
 <main class="plan-doc">
@@ -57,8 +57,7 @@
 <li>imas-python data access;</li>
 <li>hard-coded GPFS paths.</li>
 </ul>
-<p>For each coupling, the report names the files and the refactor that reduces it to a thin interface, with a one-line done-when. Read-only: no source changes.</p>
-<p><strong>Done when.</strong> <code>docs/evidence/replan-2026-09-24/thin-interfaces.md</code> lists each coupling with its files and line counts, the refactor, and its done-when. The counts come from a bounded search: named subtrees, no whole-tree walks.</p>
+<p class="landed-summary"><span class="badge badge-shipped">✓ landed 2026-10-01</span> The census found 119 files (177 lines) of hard-coded GPFS paths, 63 source files and 413 receipts carrying worktree paths, 49 crew-directory readers, one h5py read of IMAS data, and no local-lane coupling. Each coupling is listed with its refactor and done-when. Owned refactors stay with their plans, and the unowned ones are §5 nodes. Full record: <a href="/nova/evidence/archive/nova-portfolio-replan-landed#thin-interfaces">§2 landed</a> (merge <code>f24792a21</code>).</p>
 </section>
 
 <section id="s3"><h2>§3 Re-plan, sprint consolidation and session handoff</h2>
@@ -80,6 +79,10 @@
 
 
 
+<h2 id="s5">§5 — Land the thin-interface refactors the census found unowned</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="implementable" data-links=""></section>
+<p>The §2 census (<a href="/nova/evidence/replan-2026-09-24/thin-interfaces">thin-interfaces.md</a>) named five nova couplings with no owning followup. Each is one local-lane node, sequenced away from files held by S21 and S22 nodes:</p><ul><li><strong>replan-imas-hdf5-read</strong> (census 4.2): <code>nova/imas/hdf5_read.py</code> reads IMAS-written HDF5 through h5py; route it through <code>imas.DBEntry</code> or delete it. Done when no module under <code>nova/</code> imports h5py on IMAS data and its callers' tests show no added failure.</li><li><strong>replan-dbentry-constructor</strong> (census 4.1): the imas DBEntry constructor is called from 15 modules; one owned opener carries the DD-version and backend policy. Done when the 15 call sites use it and no added failure appears in their test modules.</li><li><strong>replan-gpfs-data-root</strong> (census 5.1): product code under <code>nova/</code> hard-codes GPFS and home paths; one data-root resolver replaces them. Done when the census grep over <code>nova/</code> returns zero literal paths outside the resolver.</li><li><strong>replan-evidence-tooling-paths</strong> (census 5.2 and 1.3): benchmarks and scripts read crew run directories and worktree paths by absolute literal; route them through one resolver with repo-relative receipt paths. Done when the census greps over <code>benchmarks/</code> and <code>scripts/</code> return zero absolute crew or worktree literals in source.</li></ul><p>The committed crew-state mirror under <code>docs/state/nova/</code> (census 1.1) is reckon's to retire and is reported upstream, not built here.</p>
+
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-replan-001" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
@@ -97,7 +100,7 @@
     <div class="r-fu-body">S21 is the one active sprint; S10, S11, S12, S15, S16, S17, S18 and S19 remain open with pending members, and S20 is an unrelated planned sprint with no items (forward-solve seam). After f-replan-002 decides each member: move live members into S21, or into S20 if the forward-solve seam work is taken up. Record closed or superseded members, then set each stale sprint to done. Completed plans stay closed and are never reopened. Done when: roadmap lists S21 active, no stale sprint open, every pending plan in S21 or S20, and no error-level wiring finding.</div>
     <pre class="r-fu-prompt">/reckon-build nova-portfolio-replan</pre>
     </article>
-<article class="r-fu" data-id="f-replan-004" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-replan-004" data-status="resolved" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="2026-10-01T20:58:32+00:00" data-resolved-by="s21-nova coordinator">
     <h4 class="r-fu-title">Thin interfaces to shared infrastructure</h4>
     <div class="r-fu-body">Node replan-thin-interfaces (§2) writes docs/evidence/replan-2026-09-24/thin-interfaces.md. Refactors already named at the handoff, each owned by a plan followup:
 (1) Clip mode becomes an explicit solve-request and receipt field instead of the module global _SUPPORT_CLIP_MODE (forward-solve-api, f-fsapi-clip-mode-is-a-request-field). Exact mode then gets a production caller, and this must precede any cutover.
@@ -107,7 +110,13 @@
 (5) imas-python and the local lane have no nova-specific coupling found.
 Done when: the report lists each coupling with files, line counts, refactor and done-when, and each refactor is owned by a live plan followup.</div>
     <pre class="r-fu-prompt">/reckon-build nova-portfolio-replan</pre>
+    <p class="r-fu-outcome">Landed at f24792a21: thin-interfaces.md lists every coupling with files, line counts, refactor and done-when (review 18/18/20/19/19). Owned refactors stay on forward-solve-api, forward-solver-route-integrity and cut-cell-current-attribution; the four unowned nova couplings are now §5 nodes on this plan, and the crew-state mirror is reckon's.</p>
     </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20261001T2300-thin" data-who="reckon-build" data-when="2026-10-01T23:00:00+02:00">
+    <div class="r-comment-body">gate review passed (18/18/20/19/19, no added failure); section closed at f24792a21; unowned refactors moved to §5.</div>
+</div>
 </section>
 </main>
 </body>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="contour-tree-topology-authority">
+<title>Prior-art reuse map for sections 2 to 4 | nova</title>
+</head>
+<body>
+<main class="plan-doc">
+<h2 id="ctta-prior-art-scout">Prior-art reuse map for §2 to §4</h2>
+
+<p>The reuse map is <a href="/nova/evidence/contour-tree-topology-authority/reuse-map.md"><code>docs/evidence/contour-tree-topology-authority/reuse-map.md</code></a>.
+Read-only survey of nova (<code>b2cc96f4</code>), imas-efit
+(<code>a1028cda</code>), imas-ambix (<code>2cede036</code>) and imas-codex
+(<code>ddec2385</code>), by bounded greps over the named subtrees recorded in
+the map's own header; no source was edited, no GPU and no SLURM job was used.</p>
+
+<p><strong>Measure.</strong> Nine capability rows, one per capability the
+plan's §2 to §4 need, each with candidate implementations carrying
+<code>file:line</code>, what it does, jit traceability and a verdict. Verdict
+tally: <strong>5 reuse</strong>, <strong>3 adapt</strong>,
+<strong>1 absent-and-build</strong> capability classes across the rows (rows
+carry mixed verdicts; the row-level summary table is the authority).</p>
+
+<h3>What the map found that changes the dispatch</h3>
+<ul>
+  <li><strong>§4 already exists as working prior art.</strong>
+  <code>imas-efit/src/EFIT/contour_tree.f90</code> is a 4131-line contour-tree
+  module: Kruskal union-find over the critical-point graph
+  (<code>build_contour_tree</code>, line 130), a wall-attached variant
+  (<code>build_contour_tree_with_wall</code>, line 1132), and the production
+  limited-vs-diverted merge-tree decision <code>merge_tree_decide</code>
+  (line 3389) whose own header states §4's first-event rule: "the axis
+  component's FIRST event (interior saddle-merge ⇒ DIVERTED, direct wall touch
+  ⇒ LIMITED) is the boundary". <code>mark_private_subtrees</code> (line 1673)
+  is the polarity-aware private-flux classifier. A readable Python oracle
+  (<code>output/m2-build/mergetree_oracle/merge_tree.py</code>)
+  reimplements the same five steps and agrees with truth to ≈5e-6 Wb on TCV
+  and HL-3. Nothing of this lives in nova.</li>
+  <li><strong>§2's carriers are already jit-shaped.</strong> The
+  triangulation + ring packing is <code>PlasmaGrid.tessellate</code>
+  (<code>nova/nova/biot/plasmagrid.py:382</code>), the true triangulation-to-
+  polygon clip is <code>_covered_triangles</code>
+  (<code>nova/nova/biot/sectionaverage.py:120</code>), multi-unit containment
+  is already jnp (<code>connectivity_boundary._points_inside_wall_units:233</code>,
+  <code>connectivity_boundary._points_inside_polygon:169</code>), and the
+  fixed-shape labelling and link-admissibility
+  kernels are <code>parallel_components.label_parallel_graph_components_with_steps:77</code>
+  and <code>flux_surface_connectivity.hex_edge_admissibility:329</code>.</li>
+  <li><strong>Two §2 capabilities are genuinely missing.</strong> The
+  containing-triangle flux lookup for a wall vertex (row 3) and
+  simulation-of-simplicity tie breaking have no implementation in any searched
+  tree; the nearest tie handling is ad hoc (union by rank with a born-earlier
+  root in the imas-efit oracle, first-index <code>_arg_extreme</code> in nova).
+  The imas-efit battery's case A4 is a ready-made degenerate fixture
+  (<code>A4sym</code> twin identical-ψ saddles, <code>A4pert</code> proving the
+  break follows genuine outward ψ).</li>
+  <li><strong>§3's open decision has measured candidates in-repo.</strong>
+  <code>stencil_nulls._refine_selected_vertices:1803</code> (Hessian
+  determinant sign → min/max/saddle; the 9/9-saddle, 15/15-axis own-node
+  quadratic) and <code>flux_surface_connectivity._polish_stationary_points_in_bounds:703</code>
+  (fixed-slot Newton on ∂ψ=0 with in-vessel bounds) are both jax; the accuracy
+  reference is Fortran <code>null_detection.f90</code> (8-neighbour cyclic
+  sign-change census, quadratic patch, <code>DGELS</code>, then Newton on ∇ψ=0
+  against a bicubic spline with a Hessian re-test).</li>
+</ul>
+
+<h3>Caveats</h3>
+<ul>
+  <li>Absence verdicts carry a positive control: the same patterns matched
+  <code>contour_tree.f90</code> in the same session, so a null result is the
+  pattern finding nothing there.</li>
+  <li>Rows were read in this worktree at <code>b2cc96f4</code>; the nova main
+  checkout has since moved to <code>5fcfc53f</code> and was not read.</li>
+  <li>No figure: the done-when names the reuse map as the artifact, so this
+  node produces that artifact and no other.</li>
+</ul>
+</main>
+</body>
+</html>

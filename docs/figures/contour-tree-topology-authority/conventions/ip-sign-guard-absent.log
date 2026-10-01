@@ -1,4 +1,5 @@
-revision=483b11902fec4231c3af4a066214b269566b4e86 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-conventions-contract command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-conventions-contract/tests/test_contour_tree_conventions.py -q
+revision=e403c009f32bc0e798c953f99be911ff04668890 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-conventions-contract command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-conventions-contract/tests/test_contour_tree_conventions.py -q
+mutation=remove the Ip-sign consistency guard: the flipped-Ip-unflipped-psi state is accepted and the refusal test fails
 ....F.                                                                   [100%]
 =================================== FAILURES ===================================
 ______________ test_sigma_refuses_current_flux_sign_disagreement _______________
@@ -11,8 +12,8 @@ ______________ test_sigma_refuses_current_flux_sign_disagreement _______________
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 E       Failed: DID NOT RAISE FluxCurrentSignError
 
-tests/test_contour_tree_conventions.py:40: Failed
+tests/test_contour_tree_conventions.py:44: Failed
 =========================== short test summary info ============================
 FAILED tests/test_contour_tree_conventions.py::test_sigma_refuses_current_flux_sign_disagreement
-1 failed, 5 passed in 14.82s
+1 failed, 5 passed in 6.75s
 EXIT=1

@@ -1,0 +1,32 @@
+revision=f9603c3be1e2ced6d06bc28bdff8598b6cc153ed tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_contour_tree_merge.py -vv
+measurement_module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree/nova/equilibrium/contour_tree.py
+measurement_cwd=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 6 items
+
+tests/test_contour_tree_merge.py::test_single_maximum_has_one_contour_arc PASSED [ 16%]
+tests/test_contour_tree_merge.py::test_join_saddle_matches_superlevel_component_event PASSED [ 33%]
+tests/test_contour_tree_merge.py::test_plateau_uses_vertex_order_as_simulation_of_simplicity PASSED [ 50%]
+tests/test_contour_tree_merge.py::test_first_wall_vertex_is_a_join_with_outside PASSED [ 66%]
+tests/test_contour_tree_merge.py::test_batched_tree_is_identical_to_per_field_tree PASSED [ 83%]
+tests/test_contour_tree_merge.py::test_capacity_overflow_is_reported_not_truncated PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_contour_tree_merge.py::test_single_maximum_has_one_contour_arc
+tests/test_contour_tree_merge.py::test_join_saddle_matches_superlevel_component_event
+tests/test_contour_tree_merge.py::test_batched_tree_is_identical_to_per_field_tree
+tests/test_contour_tree_merge.py::test_capacity_overflow_is_reported_not_truncated
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 6 passed, 4 warnings in 11.68s ========================
+EXIT=0

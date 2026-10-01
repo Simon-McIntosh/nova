@@ -22,6 +22,9 @@ from dataclasses import dataclass
 from math import isfinite
 from typing import ClassVar, Protocol, TypeAlias
 
+import jax
+import jax.numpy as jnp
+
 from nova.io.cocos import convention
 
 ContourTreeNode: TypeAlias = tuple[int, float, float, float]
@@ -42,6 +45,280 @@ class ContourTreeState(Protocol):
     plasma_current: float
     psi_magnetic_axis: float
     boundary_psi: float
+
+
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True, slots=True)
+class ContourTreeArrays:
+    """Fixed-capacity, accelerator-native contour-tree receipt.
+
+    Node rows retain their carrier-vertex slots: ``node_vertex`` identifies the
+    piecewise-linear vertex, ``node_psi`` is raw flux in webers, and
+    ``critical_type`` uses the DD convention (minimum 0, saddle 1, maximum 2).
+    ``node_valid`` and ``edge_valid`` make every array fixed shaped.  Edges
+    refer to vertex slots, which are also the node slots.  ``overflow`` means
+    that a candidate could not fit in the declared DD capacities; callers must
+    refuse that receipt instead of treating the prefix as a tree.
+    """
+
+    node_vertex: jax.Array
+    node_psi: jax.Array
+    node_valid: jax.Array
+    critical_type: jax.Array
+    edges: jax.Array
+    edge_valid: jax.Array
+    overflow: jax.Array
+
+
+def _roots(parents: jax.Array) -> jax.Array:
+    """Pointer-jump a fixed-size union-find forest to canonical roots."""
+
+    return jax.lax.fori_loop(0, parents.size, lambda _i, tree: tree[tree], parents)
+
+
+def _append_edges(
+    edges: jax.Array,
+    edge_valid: jax.Array,
+    overflow: jax.Array,
+    sources: jax.Array,
+    source_valid: jax.Array,
+    target: jax.Array,
+) -> tuple[jax.Array, jax.Array, jax.Array]:
+    """Append distinct undirected arcs in bounded slots without truncation."""
+
+    capacity = edges.shape[0]
+
+    def append(index, state):
+        table, valid, overflow_bit = state
+        source = sources[index]
+        destination = target if target.ndim == 0 else target[index]
+        requested = source_valid[index] & (source != destination)
+        arc = jnp.sort(jnp.stack((source, destination)))
+        duplicate = jnp.any(valid & jnp.all(table == arc, axis=1))
+        slot = jnp.argmin(jnp.where(valid, capacity, jnp.arange(capacity)))
+        has_slot = jnp.any(~valid)
+        write = requested & ~duplicate & has_slot
+        table = table.at[slot].set(jnp.where(write, arc, table[slot]))
+        valid = valid.at[slot].set(valid[slot] | write)
+        return table, valid, overflow_bit | (requested & ~duplicate & ~has_slot)
+
+    return jax.lax.fori_loop(0, sources.size, append, (edges, edge_valid, overflow))
+
+
+def _sweep_tree(
+    values: jax.Array,
+    vertex_valid: jax.Array,
+    vertex_is_wall: jax.Array,
+    edges: jax.Array,
+    edge_valid: jax.Array,
+    descending: bool,
+    node_capacity: int,
+    edge_capacity: int,
+) -> tuple[jax.Array, jax.Array, jax.Array, jax.Array, jax.Array, jax.Array]:
+    """Sweep one merge tree and emit extrema, saddles, and bounded arcs.
+
+    A lexicographic ordering of value then carrier index is simulation of
+    simplicity: values can be exactly equal without creating an ambiguous
+    union.  The first wall vertex encountered while descending is a join with
+    the virtual outside component.  It is represented by that real wall slot;
+    the virtual node is deliberately not emitted as a DD critical point.
+    """
+
+    vertex_count = values.size
+    edge_count = edges.shape[0]
+    index = jnp.arange(vertex_count, dtype=jnp.int32)
+    order = jnp.lexsort((index, -values if descending else values))
+    parents = index
+    active = jnp.zeros(vertex_count, dtype=bool)
+    births = index
+    node_valid = jnp.zeros(node_capacity, dtype=bool)
+    node_type = jnp.full(node_capacity, -1, dtype=jnp.int32)
+    output_edges = jnp.zeros((edge_capacity, 2), dtype=jnp.int32)
+    output_valid = jnp.zeros(edge_capacity, dtype=bool)
+    overflow = jnp.asarray(vertex_count > node_capacity, dtype=bool)
+    wall_seen = jnp.asarray(False)
+
+    def visit(rank, state):
+        (
+            parents,
+            active,
+            births,
+            node_valid,
+            node_type,
+            output_edges,
+            output_valid,
+            overflow,
+            wall_seen,
+        ) = state
+        vertex = order[rank]
+        usable = vertex_valid[vertex]
+        roots = _roots(parents)
+        first = edges[:, 0]
+        second = edges[:, 1]
+        is_first = edge_valid & (first == vertex)
+        is_second = edge_valid & (second == vertex)
+        neighbour = jnp.where(is_first, second, first)
+        adjacent = is_first | is_second
+        neighbour_root = roots[neighbour]
+        root_active = adjacent & active[neighbour]
+        earlier = jnp.arange(edge_count)[:, None] < jnp.arange(edge_count)
+        repeated = jnp.any(
+            earlier
+            & root_active[:, None]
+            & root_active[None, :]
+            & (neighbour_root[:, None] == neighbour_root[None, :]),
+            axis=0,
+        )
+        representative = root_active & ~repeated
+        component_count = jnp.sum(representative, dtype=jnp.int32)
+        first_wall = usable & descending & vertex_is_wall[vertex] & ~wall_seen
+        final_vertex = usable & (rank == vertex_count - 1)
+        extremum = component_count == 0
+        saddle = component_count >= 2
+        terminal = final_vertex & (component_count == 1)
+        event = usable & (extremum | saddle | terminal | first_wall)
+        signed_maximum = (descending & extremum) | ((not descending) & terminal)
+        signed_minimum = ((not descending) & extremum) | (descending & terminal)
+        critical = jnp.where(
+            saddle | first_wall,
+            1,
+            jnp.where(signed_maximum, 2, jnp.where(signed_minimum, 0, 1)),
+        ).astype(jnp.int32)
+        node_slot = vertex
+        fits_node = node_slot < node_capacity
+        node_valid = node_valid.at[jnp.minimum(node_slot, node_capacity - 1)].set(
+            node_valid[jnp.minimum(node_slot, node_capacity - 1)] | (event & fits_node)
+        )
+        node_type = node_type.at[jnp.minimum(node_slot, node_capacity - 1)].set(
+            jnp.where(
+                event & fits_node,
+                critical,
+                node_type[jnp.minimum(node_slot, node_capacity - 1)],
+            )
+        )
+        overflow = overflow | (event & ~fits_node)
+        connect = usable & (saddle | terminal | first_wall)
+        sources = births[neighbour_root]
+        output_edges, output_valid, overflow = _append_edges(
+            output_edges,
+            output_valid,
+            overflow,
+            sources,
+            representative & connect,
+            vertex,
+        )
+        parent_update = jnp.where(representative, vertex, parents[neighbour_root])
+        parents = parents.at[neighbour_root].set(
+            jnp.where(usable, parent_update, parents[neighbour_root])
+        )
+        parents = parents.at[vertex].set(vertex)
+        first_root = jnp.argmax(representative).astype(jnp.int32)
+        inherited = births[neighbour_root[first_root]]
+        births = births.at[vertex].set(
+            jnp.where(extremum | saddle | first_wall, vertex, inherited)
+        )
+        active = active.at[vertex].set(usable)
+        return (
+            parents,
+            active,
+            births,
+            node_valid,
+            node_type,
+            output_edges,
+            output_valid,
+            overflow,
+            wall_seen | (usable & descending & vertex_is_wall[vertex]),
+        )
+
+    result = jax.lax.fori_loop(
+        0,
+        vertex_count,
+        visit,
+        (
+            parents,
+            active,
+            births,
+            node_valid,
+            node_type,
+            output_edges,
+            output_valid,
+            overflow,
+            wall_seen,
+        ),
+    )
+    return result[3], result[4], result[5], result[6], result[7], order
+
+
+@jax.jit
+def build_contour_tree(
+    vertex_psi: jax.Array,
+    vertex_valid: jax.Array,
+    vertex_is_wall: jax.Array,
+    edges: jax.Array,
+    edge_valid: jax.Array,
+    sigma: jax.Array,
+) -> ContourTreeArrays:
+    """Build a contour tree from a fixed-capacity piecewise-linear edge graph.
+
+    The join sweep is over descending ``sigma * psi`` and the split sweep is
+    ascending.  Their critical slots and arcs are merged into one acyclic
+    receipt.  Equal raw values are ordered by vertex index, the required
+    simulation-of-simplicity rule, so this function has no value tolerance and
+    remains traceable through both :func:`jax.jit` and :func:`jax.vmap`.
+    """
+
+    node_capacity = ContourTreeResult.node_capacity
+    edge_capacity = ContourTreeResult.edge_capacity
+    signed = jnp.asarray(sigma, dtype=vertex_psi.dtype) * vertex_psi
+    join = _sweep_tree(
+        signed,
+        vertex_valid,
+        vertex_is_wall,
+        edges,
+        edge_valid,
+        True,
+        node_capacity,
+        edge_capacity,
+    )
+    split = _sweep_tree(
+        signed,
+        vertex_valid,
+        vertex_is_wall,
+        edges,
+        edge_valid,
+        False,
+        node_capacity,
+        edge_capacity,
+    )
+    join_nodes, join_types, join_edges, join_valid, join_overflow, _ = join
+    split_nodes, split_types, split_edges, split_valid, split_overflow, _ = split
+    node_valid = join_nodes | split_nodes
+    critical_type = jnp.where(join_nodes, join_types, split_types)
+    critical_type = jnp.where(
+        critical_type == 1,
+        critical_type,
+        jnp.where(sigma > 0, critical_type, 2 - critical_type),
+    )
+    merged_edges, merged_valid, overflow = _append_edges(
+        join_edges,
+        join_valid,
+        join_overflow | split_overflow,
+        split_edges[:, 0],
+        split_valid & ~join_nodes[split_edges[:, 0]],
+        split_edges[:, 1],
+    )
+    slots = jnp.arange(node_capacity, dtype=jnp.int32)
+    return ContourTreeArrays(
+        node_vertex=slots,
+        node_psi=jnp.where(
+            node_valid, vertex_psi[slots], jnp.zeros((), vertex_psi.dtype)
+        ),
+        node_valid=node_valid,
+        critical_type=critical_type,
+        edges=merged_edges,
+        edge_valid=merged_valid,
+        overflow=overflow,
+    )
 
 
 def _require_flux_current_consistency(
@@ -126,9 +403,11 @@ def sigma_for_state(state: ContourTreeState) -> int:
 
 __all__ = [
     "ContourTreeEdge",
+    "ContourTreeArrays",
     "ContourTreeNode",
     "ContourTreeResult",
     "ContourTreeState",
     "FluxCurrentSignError",
+    "build_contour_tree",
     "sigma_for_state",
 ]

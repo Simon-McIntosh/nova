@@ -32,8 +32,19 @@
   the up-down symmetry of the case. Log:
   <a href="/nova/figures/plasma-cell-read-fidelity/map-fidelity/centroid-preflight/weak-chord-smallest.log">centroid-preflight/weak-chord-smallest.log</a>.
   No committed receipt was regenerated or overwritten.</p>
-  <p>Scope: the backend guard admits the CPU preflight lane; the row still
-  records its <code>jax_backend</code> and device. This gate measures only this
-  node's own additive change; verifying the merged result belongs to a
-  separately dispatched test node.</p>
+  <p>Guard: every receipt row keeps the exact GPU assert; the CPU witness is
+  admitted only behind <code>--cpu-preflight</code>, which refuses any output
+  outside <code>centroid-preflight/</code> and marks each row
+  <code>preflight: true</code>, so a physical receipt cannot silently become a
+  CPU measurement. The centroid column is covered by
+  <code>tests/test_map_fidelity_centroid.py</code>: a linear-density rectangle
+  whose exact integral centroid is recovered through the benchmark coupling
+  inverse to <code>1e-12 m</code>, with a perturbed inverse moving it past
+  tolerance as the negative control
+  (<a href="/nova/figures/plasma-cell-read-fidelity/map-fidelity/centroid-preflight/test-map-fidelity-centroid.log">head log</a>,
+  <a href="/nova/figures/plasma-cell-read-fidelity/map-fidelity/centroid-preflight/test-map-fidelity-centroid-negative.log">red log</a>).
+  The preflight log names its literal command and absolute output path and was
+  re-captured at the guard commit. This gate measures only this node's own
+  additive change; verifying the merged result belongs to a separately
+  dispatched test node.</p>
 </section>

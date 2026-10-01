@@ -42,6 +42,8 @@ usage: scripts/nova_lane/run.sh --log PATH [options] [--] TARGET [TARGET_ARGS...
   --env KEY=VALUE   export KEY=VALUE in the payload (repeatable)
   --pythonpath DIR  append DIR to the payload PYTHONPATH (repeatable)
   --prelude CMD     bash command run in the payload before TARGET
+  --sampler CMD     bash command run concurrently with TARGET; its output is
+                    appended to the log after TARGET completes
   --target TARGET   TARGET as an option instead of the first positional
   --wait            foreground; return the target's status
   --dry-run         print the sbatch line for every rung; submit nothing
@@ -130,10 +132,21 @@ run_payload() {
     fi
   fi
 
+  local sampler_log="${TMPDIR}/nova-lane-sampler-${SLURM_JOB_ID:-local}.txt"
+  local sampler_pid=''
+  if [[ -n "${sampler}" ]]; then
+    bash -euo pipefail -c "${sampler}" >"${sampler_log}" 2>&1 &
+    sampler_pid=$!
+  fi
+
   set +e
   "${command[@]}" >>"${resolved_log}" 2>&1
   status=$?
   set -e
+  if [[ -n "${sampler_pid}" ]]; then
+    wait "${sampler_pid}" || true
+    cat "${sampler_log}" >>"${resolved_log}"
+  fi
   printf 'EXIT_STATUS=%s\n' "${status}" >>"${resolved_log}"
   printf 'NOVA_LANE_END=%(%Y-%m-%dT%H:%M:%S%z)T\n' -1 >>"${resolved_log}"
   printf 'NOVA_LANE_EXIT_STATUS=%s\n' "${status}"
@@ -159,6 +172,7 @@ if [[ "${1:-}" == '--payload' ]]; then
   placement=${NOVA_LANE_PLACEMENT:-submit}
   rung=${NOVA_LANE_RUNG:?missing rung}
   prelude=${NOVA_LANE_PRELUDE:-}
+  sampler=${NOVA_LANE_SAMPLER:-}
   pythonpath_extra=()
   if [[ -n "${NOVA_LANE_PYTHONPATH:-}" ]]; then
     IFS=':' read -r -a pythonpath_extra <<<"${NOVA_LANE_PYTHONPATH}"
@@ -189,6 +203,7 @@ dry_run=false
 force_in_place=false
 force_submit=false
 prelude=''
+sampler=''
 declare -a env_pairs=() pythonpath_extra=() target_args=() rung_array=()
 
 opt() {
@@ -209,6 +224,7 @@ while (($#)); do
     --env) env_pairs+=("$(opt "$@")"); shift 2 ;;
     --pythonpath) pythonpath_extra+=("$(opt "$@")"); shift 2 ;;
     --prelude) prelude="$(opt "$@")"; shift 2 ;;
+    --sampler) sampler="$(opt "$@")"; shift 2 ;;
     --target) target="$(opt "$@")"; shift 2 ;;
     --wait) foreground=true; shift ;;
     --dry-run) dry_run=true; shift ;;
@@ -259,6 +275,8 @@ if [[ "${dry_run}" == true ]]; then
     submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${cores}" --mem="${mem}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${target_args[@]}")
     printf '%q ' "${submit[@]}"
     printf '\n'
+    printf 'PAYLOAD_PRELUDE=%s\n' "${prelude}"
+    printf 'PAYLOAD_SAMPLER=%s\n' "${sampler}"
   done
   exit 0
 fi
@@ -283,6 +301,7 @@ export NOVA_LANE_LOG="${resolved_log}"
 export NOVA_LANE_MODE="${mode}"
 export NOVA_LANE_PLACEMENT=submit
 export NOVA_LANE_PRELUDE="${prelude}"
+export NOVA_LANE_SAMPLER="${sampler}"
 NOVA_LANE_PYTHONPATH=""
 if ((${#pythonpath_extra[@]})); then NOVA_LANE_PYTHONPATH="$(join_by ":" "${pythonpath_extra[@]}")"; fi
 export NOVA_LANE_PYTHONPATH
@@ -300,7 +319,10 @@ admission_refused() {
     sleep "${PENDING_POLL_SECONDS}"
     waited=$((waited + PENDING_POLL_SECONDS))
   done
-  case "${reason}" in *Resources*|*Configuration*|*Partition*) return 0 ;; *) return 1 ;; esac
+  case "${reason}" in
+    *Resources* | *Configuration* | *Partition* | *ReqNode* | *NodeDown*) return 0 ;;
+    *) return 1 ;;
+  esac
 }
 
 wait_for_job() {

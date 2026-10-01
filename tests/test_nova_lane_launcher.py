@@ -68,3 +68,90 @@ def test_mem_zero_is_refused(tmp_path: Path) -> None:
     )
     assert result.returncode != 0
     assert "--mem=0" in (result.stderr + result.stdout)
+
+
+H200_CALLER = REPOSITORY_ROOT / "scripts" / "h200_test_lane" / "run.sh"
+
+
+def test_h200_payload_keeps_sampler_and_pin_diagnostic(tmp_path: Path) -> None:
+    result = subprocess.run(
+        [
+            "bash",
+            str(H200_CALLER),
+            "--dry-run",
+            "--log",
+            str(tmp_path / "lane.log"),
+            "--",
+            "tests/example_target.py",
+        ],
+        capture_output=True,
+        text=True,
+        cwd=REPOSITORY_ROOT,
+        env={**os.environ, "TMPDIR": "/tmp"},
+    )
+    assert result.returncode == 0, result.stderr
+    assert "sample_gpu_utilisation" in result.stdout
+    assert "PINNED_REVISION" in result.stdout
+
+
+def _write_executable(path: Path, body: str) -> None:
+    path.write_text(body)
+    path.chmod(0o755)
+
+
+SBATCH_FAKE = "\n".join(
+    [
+        "#!/usr/bin/env bash",
+        'count=$(cat "${FAKE_LANE_STATE}" 2>/dev/null || echo 12344)',
+        "next=$((count + 1))",
+        'printf "%s" "${next}" > "${FAKE_LANE_STATE}"',
+        'printf "%s;fakecluster\\n" "${next}"',
+    ]
+)
+
+SQUEUE_FAKE = "\n".join(
+    [
+        "#!/usr/bin/env bash",
+        'job=""',
+        'while [ $# -gt 0 ]; do case "$1" in -j) job=$2; shift 2 ;;',
+        '*) shift ;; esac; done',
+        'if [ "$job" = "12345" ]; then printf "PENDING ReqNodeNotAvail\\n"; fi',
+    ]
+)
+
+SCANCEL_FAKE = "#!/usr/bin/env bash\nexit 0\n"
+
+
+def test_pending_resource_reason_falls_to_next_rung(tmp_path: Path) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    _write_executable(fake_bin / "sbatch", SBATCH_FAKE)
+    _write_executable(fake_bin / "squeue", SQUEUE_FAKE)
+    _write_executable(fake_bin / "scancel", SCANCEL_FAKE)
+    environment = {
+        **os.environ,
+        "TMPDIR": "/tmp",
+        "PATH": f"{fake_bin}{os.pathsep}{os.environ['PATH']}",
+        "NOVA_LANE_PENDING_WAIT_SECONDS": "5",
+        "FAKE_LANE_STATE": str(tmp_path / "job-counter"),
+    }
+    environment.pop("SLURM_JOB_ID", None)
+    result = subprocess.run(
+        [
+            "bash",
+            str(LAUNCHER),
+            "--rungs",
+            "h200,titan",
+            "--log",
+            str(tmp_path / "lane.log"),
+            "--",
+            "tests/example_target.py",
+        ],
+        capture_output=True,
+        text=True,
+        cwd=REPOSITORY_ROOT,
+        env=environment,
+    )
+    assert "RUNG_REFUSED rung=h200 job=12345" in result.stdout
+    assert "SLURM_JOB_ID=12346 RUNG=titan" in result.stdout
+    assert result.returncode == 0, result.stderr

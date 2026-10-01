@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="plasma-cell-read-fidelity">
+<meta name="plan-evidence-for" content="plasma-cell-read-fidelity">
+<title>Shadow-telemetry node-flux oracle — re-verification (landing record)</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Shadow-telemetry node-flux oracle — re-verification</h1></header>
+<section id="landing">
+<p>Read-only re-verification at HEAD <code>48a40fab18be098a17ea5df6d631c1b153a027f2</code> of node <code>pcrf-shadow-telemetry-node-flux</code>. The node's done-when is already satisfied in the base tree: <code>tests/test_plasma_cell_shadow_telemetry.py</code> asserts the wall-node private shadow read from the node's own flux, and the retired label-owned rule is present only as the discriminating comparator, never as the oracle. The migration landed at commit <code>2bf422abe</code> ("read the wall-node private shadow from node flux"), merged at <code>c6a723f1d</code>, and is recorded in the plan's <em>Shadow-telemetry oracle migration</em> record (review 97). No test-file edit was required; the file was left unchanged.</p>
+<p><strong>Measure.</strong> Head gate at the base revision, run in place on the fleet allocation (job 1277272, <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>), fresh process: <strong>3 passed in 66.89s, exit 0</strong>. Collected ids under the default fast lane (the file carries no slow marker): all three selected. Logs: <a href="/nova/figures/plasma-cell-read-fidelity/shadow-telemetry/shadow-telemetry-gate.log">shadow-telemetry-gate.log</a> and <a href="/nova/figures/plasma-cell-read-fidelity/shadow-telemetry/shadow-telemetry-collect.log">shadow-telemetry-collect.log</a>.</p>
+<p><strong>Negative control.</strong> In a scratch copy under <code>/tmp</code>, the node-flux read in the code under test is substituted with the retired label-owned rule (the nearest-cell label on the retired carrier index): the migrated oracle <code>test_carrier_private_wall_follows_the_node_flux_rule</code> fails on the discriminating diverted fixture, <strong>1 failed, 2 passed, exit 1</strong> (<a href="/nova/figures/plasma-cell-read-fidelity/shadow-telemetry/shadow-telemetry-negative-control.log">shadow-telemetry-negative-control.log</a>). This reproduces the plan's recorded receipt ("the declared negative control failing on the discriminating fixture at one of 92 wall nodes").</p>
+<p><strong>Currency finding.</strong> Followup <code>f-pcrf-003</code>'s first item ("migrate tests/test_plasma_cell_shadow_telemetry.py from the retired label-owned wall rule to the node-flux rule and put it in a lane") is stale: both the migration and the lane selection are satisfied at base and the plan already records them. No further work belongs on this item; the followup's remaining hygiene items (diagnostic-column retirement, receipt renames, record corrections) are untouched and unowned.</p>
+</section>
+</main></body>
+</html>

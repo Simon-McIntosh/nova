@@ -1,6 +1,72 @@
-revision=de29a1a303098542006dfe1b96575fce86ba535a tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-map-fidelity-at-the-analytic-state command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-map-fidelity-at-the-analytic-state/benchmarks/plasma_cell_map_fidelity.py', '--case', 'weak-rotation-reactor-static', '--cells', '-500', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-map-fidelity-at-the-analytic-state/docs/figures/plasma-cell-read-fidelity/map-fidelity']
+revision=fa8af260e8adb154a7df4191d0c5308e6b675911 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-h200-remeasure command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-h200-remeasure/benchmarks/plasma_cell_map_fidelity.py', '--case', 'weak-rotation-reactor-static', '--cells', '-500', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-h200-remeasure/docs/figures/plasma-cell-read-fidelity/map-fidelity']
+E1002 01:25:12.369175 1381866 cuda_executor.cc:1176] [0] Failed to allocate device memory of 104.85GiB (112585605120 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E1002 01:25:12.369664 1381866 cuda_executor.cc:1176] [0] Failed to allocate device memory of 94.37GiB (101327044608 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E1002 01:25:12.369980 1381866 cuda_executor.cc:1176] [0] Failed to allocate device memory of 84.93GiB (91194335232 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E1002 01:25:12.370284 1381866 cuda_executor.cc:1176] [0] Failed to allocate device memory of 76.44GiB (82074902528 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E1002 01:25:12.370625 1381866 cuda_executor.cc:1176] [0] Failed to allocate device memory of 68.79GiB (73867411456 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E1002 01:25:12.370913 1381866 cuda_executor.cc:1176] [0] Failed to allocate device memory of 61.91GiB (66480668672 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E1002 01:25:12.371201 1381866 cuda_executor.cc:1176] [0] Failed to allocate device memory of 55.72GiB (59832598528 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E1002 01:25:12.371504 1381866 cuda_executor.cc:1176] [0] Failed to allocate device memory of 50.15GiB (53849337856 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E1002 01:25:12.371796 1381866 cuda_executor.cc:1176] [0] Failed to allocate device memory of 45.14GiB (48464404480 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E1002 01:25:12.373192 1381866 cuda_executor.cc:1176] [0] Failed to allocate device memory of 40.62GiB (43617964032 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E1002 01:25:12.373539 1381866 cuda_executor.cc:1176] [0] Failed to allocate device memory of 36.56GiB (39256166400 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
 BUILD case=weak-rotation-reactor-static requested=-500
 MAP case=weak-rotation-reactor-static requested=-500 mode=exact
-ROW weak-rotation-reactor-static-cells-500-exact mismatch={'sup_relative': 0.020950313769883114, 'rms_relative': 0.02873439832143918, 'sup_wb': 1.0461083469970411, 'rms_wb': 0.6398891616076146, 'sup_over_reference_span': 0.016251435540131958, 'rms_over_reference_span': 0.009940765210933398, 'reference_sup_wb': 49.932824800975645, 'reference_rms_wb': 22.269099023736416, 'finite': True} control={'sup_relative': 0.16907641934812062, 'rms_relative': 0.2248272499351738}
+ROW weak-rotation-reactor-static-cells-500-exact mismatch={'sup_relative': 5.936610182437632e-05, 'rms_relative': 8.569862784095851e-05, 'sup_wb': 0.0029643171615134634, 'rms_wb': 0.0019084312295886397, 'sup_over_reference_span': 4.605107053120497e-05, 'rms_over_reference_span': 2.9647738878544936e-05, 'reference_sup_wb': 49.932824800975645, 'reference_rms_wb': 22.269099023736416, 'finite': True} control={'sup_relative': 0.19173151336145705, 'rms_relative': 0.22469464768156258} centroid_offset_mm={'dR': -0.003993129090495984, 'dZ': 1.4749698999450673e-12, 'booked_centroid_m': [6.0635043299288975, 7.307972579418687e-13], 'analytic_centroid_m': [6.063508323057988, 7.293222880419236e-13], 'support_cell_count': 492, 'amplitude_lambda': 1.0000256732467958}
 MAP case=weak-rotation-reactor-static requested=-500 mode=chord
-ROW weak-rotation-reactor-static-cells-500-chord mismatch={'sup_relative': 4.845887297315645e-05, 'rms_relative': 7.558488565361146e-05, 'sup_wb': 0.002419688414221355, 'rms_wb': 0.0016832073033180674, 'sup_over_reference_span': 3.7590188821076e-05, 'rms_over_reference_span': 2.6148854532206773e-05, 'reference_sup_wb': 49.932824800975645, 'reference_rms_wb': 22.269099023736416, 'finite': True} control={'sup_relative': 0.19150152184950922, 'rms_relative': 0.22457163912459846}
+ROW weak-rotation-reactor-static-cells-500-chord mismatch={'sup_relative': 0.02586837837105549, 'rms_relative': 0.028774619217872187, 'sup_wb': 1.2916812050872615, 'rms_wb': 0.6407848447331046, 'sup_over_reference_span': 0.0200664433116649, 'rms_over_reference_span': 0.009954679770185382, 'reference_sup_wb': 49.932824800975645, 'reference_rms_wb': 22.269099023736416, 'finite': True} control={'sup_relative': 0.1828031819873248, 'rms_relative': 0.21023538799434657} centroid_offset_mm={'dR': -12.825034225939724, 'dZ': -1.606129114344045e-10, 'booked_centroid_m': [6.0530082678247235, 5.706178245888861e-13], 'analytic_centroid_m': [6.065833302050663, 7.312307360232906e-13], 'support_cell_count': 484, 'amplitude_lambda': 0.986723091397108}

@@ -30,6 +30,11 @@
     <p>Run <code>r-20261001T191408548548-replan-currency-depth-a</code> (local lane), merged at <code>3f67851e4</code> from <code>958ff2e3e</code>. <a href="/nova/evidence/replan-2026-09-24/plan-currency-and-depth-a">plan-currency-and-depth-a.md</a> carries seven rows (ensemble-forward-seam, forward-profile-validator-set, separatrix-spline-extraction, profile-owned-solve-domain, mast-nonaxisymmetric-physics, plasma-cell-read-fidelity, single-grid-solver-cutover), audited at <code>a71934910</code>, each claim cited to file:line or sha. Review 19 goal, 16 evidence, 20 scope, 18 fit; durability 6 against a floor of 10, because nothing re-verifies the citations once the code moves. Exempted: this is a dated point-in-time audit under <code>replan-2026-09-24/</code>, consumed by §3's status writes, not a standing contract.</p>
   </section>
 
+  <section id="fast-lane-dependencies">
+    <h2>§4 — fast lane: pytest-timeout and pytest-xdist declared</h2>
+    <p>Run <code>r-20261001T191537244113-replan-pytest-timeout-and-xdist</code> (local lane), merged at <code>d9c5d4215</code> from <code>56ee52a8d</code> and <code>96b6e8c1e</code>. pytest-timeout and pytest-xdist join the dev group and <code>timeout = 300</code> joins <code>[tool.pytest.ini_options]</code>; <code>uv lock --check</code> exits 0 (<a href="/nova/evidence/replan-2026-09-24/fast-lane/dependency-change.log">dependency-change.log</a>). The first review blocked on the gitignored evidence log, repaired in <code>96b6e8c1e</code>; the re-review scored 20/17/19/19/19. Carried to the fast-lane run: the 300 s default also applies to the slow lane, so slow runs pass their own bound; evidence logs under <code>docs/</code> are gitignored by <code>*.log</code> and need a repository-level exception.</p>
+  </section>
+
 </main>
 </body>
 </html>

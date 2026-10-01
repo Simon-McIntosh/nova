@@ -620,13 +620,16 @@ def _integrate_current_points(
     profile,
     membership=None,
     membership_sign=1.0,
+    membership_applied=True,
 ) -> ClippedCurrentMoments:
     psi_norm, _radial_gradient, _vertical_gradient = field.sample(points, cell_index)
     density = profile.current_density(points[..., 0], psi_norm)
     if membership is not None:
         confined = membership(points, cell_index)
         selected = confined if membership_sign > 0.0 else ~confined
-        density = jnp.where(selected, density, 0.0)
+        density = jnp.where(
+            membership_applied, jnp.where(selected, density, 0.0), density
+        )
     weighted = density * weights
     first = jnp.sum(
         weighted[..., None] * (points - jnp.asarray(moment_centres)[:, None, :]),
@@ -648,6 +651,7 @@ def _integrate_current_polynomial(
     profile,
     membership=None,
     membership_sign=1.0,
+    membership_applied=True,
 ) -> ClippedCurrentMoments:
     """Integrate a profile's density image over the clip's own sampled arc."""
     points, psi_norm, _radial, _vertical, polynomial_centre, coordinate_scale = (
@@ -657,7 +661,9 @@ def _integrate_current_polynomial(
     if membership is not None:
         confined = membership(points, cell_index)
         selected = confined if membership_sign > 0.0 else ~confined
-        density = jnp.where(selected, density, 0.0)
+        density = jnp.where(
+            membership_applied, jnp.where(selected, density, 0.0), density
+        )
     coefficients = _density_coefficients(density)
     return _sampled_arc_polynomial_moments(
         vertices,
@@ -734,6 +740,7 @@ def clipped_support_current_moments(
     boundary_reduction: bool = False,
     membership=None,
     membership_sign=1.0,
+    membership_applied=True,
 ) -> ClippedCurrentMoments:
     """Reduce current moments with an opt-in sampled-arc boundary route."""
     from nova.equilibrium.source import _FluxSelectedProfile
@@ -765,6 +772,7 @@ def clipped_support_current_moments(
         profile,
         membership,
         membership_sign,
+        membership_applied,
     )
 
     capacity = int(cut_cell_capacity)
@@ -793,6 +801,7 @@ def clipped_support_current_moments(
                     profile,
                     membership,
                     membership_sign,
+                    membership_applied,
                 )
             else:
                 point, weight = _quadrature_from_arrays(
@@ -810,6 +819,7 @@ def clipped_support_current_moments(
                     profile,
                     membership,
                     membership_sign,
+                    membership_applied,
                 )
             return (
                 value.cell_current[0],
@@ -914,12 +924,11 @@ def _global_separatrix_membership(field, support_vertices, vertex_count):
             points[..., 0],
             points[..., 1],
         ).value
-        local = 1.0 - field.sample(points, cell_index)[0]
         connected = core_cell[jnp.asarray(cell_index, dtype=jnp.int32)]
         shared_membership = connected[:, None] & (shared >= -tolerance)
-        return jnp.where(surface.fit_executed, shared_membership, local >= 0.0)
+        return shared_membership
 
-    return membership
+    return membership, surface.fit_executed
 
 
 @jax.custom_jvp
@@ -977,7 +986,9 @@ def _flux_selected_current_moments(
     coefficient = -jnp.asarray(field.coefficient)
     coefficient = coefficient.at[:, 0].add(1.0)
     cut_cell_capacity = max(int(cut_cell_capacity), int(vertices.shape[0]))
-    membership = _global_separatrix_membership(field, vertices, count)
+    membership, membership_applied = _global_separatrix_membership(
+        field, vertices, count
+    )
 
     def integrate(sign, closure):
         clipped = _quadratic_support(
@@ -1011,6 +1022,7 @@ def _flux_selected_current_moments(
             boundary_reduction=True,
             membership=membership,
             membership_sign=sign,
+            membership_applied=membership_applied,
         )
 
     confined = integrate(1.0, profile.confined)

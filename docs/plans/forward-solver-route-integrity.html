@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="41">
+<meta name="plan-version" content="42">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -617,6 +617,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261002T0120-launcher" data-who="reckon-build" data-when="2026-10-02T01:20:00+02:00">
     <div class="r-comment-body">lane launcher landed at 8b5e5f33b; f-fsri-one-nova-lane-launcher resolved.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261001T211450582325-fsri-one-nova-lane-launcher" data-who="reckon-build" data-when="2026-10-01T22:58:21.398Z">
+    <div class="r-comment-body"><p>scripts/nova_lane/run.sh generalises the reserved-H200 lane into one launcher and scripts/h200_test_lane/run.sh is a thin caller; the H200 payload keeps the cache-guard header, the PINNED_REVISION mismatch diagnostic and the concurrent GPU utilisation sampling (10/30/60 s), the dry-run prints the resolved payload steps per rung, and the pending-reason match now covers Resources/Configuration/ReqNode*/NodeDown; tests 4 passed.</p></div>
 </div>
 </section>
 </main>

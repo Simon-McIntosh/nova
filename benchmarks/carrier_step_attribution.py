@@ -77,6 +77,11 @@ def stamp_source_revision(payload: dict) -> dict:
     return payload
 
 
+def receipt_payload(record: dict) -> dict:
+    """Return the attribution receipt payload stamped with its source revision."""
+    return stamp_source_revision(dict(record))
+
+
 def _angle_and_norm(reference, compared) -> dict[str, float]:
     """Measure directional agreement between two exact-space steps."""
 
@@ -532,7 +537,7 @@ def measure() -> dict[str, Any]:
             ),
         },
     }
-    return stamp_source_revision(receipt)
+    return receipt_payload(receipt)
 
 
 def main() -> None:

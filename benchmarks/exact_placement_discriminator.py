@@ -69,6 +69,11 @@ def stamp_source_revision(payload: dict) -> dict:
     return payload
 
 
+def receipt_payload(record: dict) -> dict:
+    """Return the discriminator receipt payload stamped with its source revision."""
+    return stamp_source_revision(dict(record))
+
+
 def arm_label(arm: str, relaxation: float) -> str:
     tag = f"{int(relaxation * 100):03d}" if relaxation != 1.0 else "100"
     return arm if arm != "c" else f"c-r{tag}"
@@ -130,7 +135,7 @@ def measure_one(label: str, clip_mode: str, relaxation: float) -> dict[str, obje
     summary = _read_terminal_row(label)
     summary["completed_at_unix_seconds"] = time()
     summary["exit_status"] = 0
-    stamp_source_revision(summary)
+    summary = receipt_payload(summary)
     receipt_dir = OUTPUT_ROOT / "receipts"
     receipt_dir.mkdir(parents=True, exist_ok=True)
     receipt_path = receipt_dir / f"{label}.json"
@@ -193,7 +198,7 @@ def run_all() -> int:
             print("DISCRIMINATOR_END " + json.dumps(record, sort_keys=True), flush=True)
     best = best_of(landed)
     best["banked_weak_110_residual"] = BANKED_WEAK_110_RESIDUAL
-    stamp_source_revision(best)
+    best = receipt_payload(best)
     RECEIPT.write_text(
         json.dumps(best, indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",

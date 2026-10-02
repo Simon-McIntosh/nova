@@ -1,0 +1,51 @@
+NOVA_LANE_START=2026-10-02T21:20:11+0200
+PLACEMENT=submit
+RUNG=cpu
+SLURM_JOB_ID=1280473
+SLURM_JOB_PARTITION=all_debug
+SOURCE_REVISION=bd439c315c5ec9db523d22e0eb5addc164be7a33
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+JAX_PLATFORMS=cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=3600
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_equilibrium_forward_solve.py::test_the_host_iteration_reproduces_the_traced_ladder tests/test_equilibrium_forward_solve.py::test_the_flux_resolution_is_a_magnitude_on_either_axis_flux_sign tests/test_equilibrium_forward_solve.py::test_the_relaxed_iteration_floors_at_the_flux_resolution tests/test_equilibrium_forward_solve.py::test_the_host_iteration_exits_early_on_the_shared_residual tests/test_equilibrium_forward_solve.py::test_the_host_root_find_holds_the_equilibrium_it_is_seeded_on -v --durations=0 --timeout 3600 
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 3600.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 21:20:20 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 6 items
+
+tests/test_equilibrium_forward_solve.py::test_the_host_iteration_reproduces_the_traced_ladder PASSED [ 16%]
+tests/test_equilibrium_forward_solve.py::test_the_flux_resolution_is_a_magnitude_on_either_axis_flux_sign[float32] PASSED [ 33%]
+tests/test_equilibrium_forward_solve.py::test_the_flux_resolution_is_a_magnitude_on_either_axis_flux_sign[float64] PASSED [ 50%]
+tests/test_equilibrium_forward_solve.py::test_the_relaxed_iteration_floors_at_the_flux_resolution PASSED [ 66%]
+tests/test_equilibrium_forward_solve.py::test_the_host_iteration_exits_early_on_the_shared_residual PASSED [ 83%]
+tests/test_equilibrium_forward_solve.py::test_the_host_root_find_holds_the_equilibrium_it_is_seeded_on PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_equilibrium_forward_solve.py::test_the_host_root_find_holds_the_equilibrium_it_is_seeded_on
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/scipy/optimize/_nonlin.py:376: RuntimeWarning: invalid value encountered in scalar divide
+    and dx_norm/self.x_rtol <= x_norm))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================== slowest durations ===============================
+637.08s setup    tests/test_equilibrium_forward_solve.py::test_the_host_iteration_reproduces_the_traced_ladder
+167.28s setup    tests/test_equilibrium_forward_solve.py::test_the_relaxed_iteration_floors_at_the_flux_resolution
+133.31s call     tests/test_equilibrium_forward_solve.py::test_the_host_iteration_reproduces_the_traced_ladder
+31.62s call     tests/test_equilibrium_forward_solve.py::test_the_host_iteration_exits_early_on_the_shared_residual
+16.42s call     tests/test_equilibrium_forward_solve.py::test_the_host_root_find_holds_the_equilibrium_it_is_seeded_on
+
+(13 durations < 0.005s hidden.  Use -vv to show these durations.)
+=================== 6 passed, 1 warning in 994.06s (0:16:34) ===================
+EXIT_STATUS=0
+NOVA_LANE_END=2026-10-02T21:36:50+0200
+NOVA_LANE_EXIT_STATUS=0

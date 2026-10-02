@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 </head>
 <body>
   <main class="plan-doc">
@@ -356,6 +356,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261001T235505519264-review-of-ctta-hex-contour-mesh" data-who="reckon-build" data-when="2026-10-02T00:17:48.636Z">
     <div class="r-comment-body"><p>Attached an independent parsed review (74/100, verdict fail) to run r-20261001T230318372995-ctta-hex-contour-mesh at head fcc5f34ba: one blocking mesh defect (over-capacity build truncates arrays so valid triangles index beyond the truncated vertex array), one blocking missing-guard test, one blocking empty baseline/after arm, one follow-on receipt-revision defect; independent gate 8 passed EXIT=0</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T002038975664-review-of-ctta-join-split-contour-tree" data-who="reckon-build" data-when="2026-10-02T00:42:08.821Z">
+    <div class="r-comment-body"><p>Independent review of r-20261001T230257338103-ctta-join-split-contour-tree at head a70aa0cb0 stored as a parsed record (goal_fidelity 18, evidence 18, scope_discipline 20, durability 15, fit 20; total 91; verdict pass) with three follow-on findings; added_failure_count 0 from the reviewed run&#x27;s own baseline (a126966ff, 12 passed EXIT=0) and after (a70aa0cb0, 13 passed EXIT=0) gate arms.</p></div>
 </div>
 </section>
 </main>

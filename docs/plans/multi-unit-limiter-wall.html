@@ -24,8 +24,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-impl" content="0.97">
-<meta name="plan-modified" content="2026-10-01">
-<meta name="plan-version" content="32">
+<meta name="plan-modified" content="2026-10-02">
+<meta name="plan-version" content="33">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;}">
 </head>
@@ -109,10 +109,11 @@
     <pre class="r-fu-prompt">/reckon-build multi-unit-limiter-wall</pre>
     <p class="r-fu-outcome">The lead locked the limiter-anchor reading (limiter units are admissible anchors and cast shadows, unit index on the receipt) in the 2026-09-09 decision batch; the consumers node then landed at 04cb76c4 with MAST and Solovev identity measured. What remains (DIII-D identity, lead review of the merged solver change) carries in the next followup.</p>
     </article>
-<article class="r-fu" data-id="f-20260909T201444769610" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="s19-review coordinator" data-written-at="2026-09-09" data-recommends-skill="/reckon-build multi-unit-limiter-wall" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-20260909T201444769610" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="s19-review coordinator" data-written-at="2026-09-09" data-recommends-skill="/reckon-build multi-unit-limiter-wall" data-resolved-at="2026-10-02T06:31:40+00:00" data-resolved-by="reckon-build s22-nova">
     <h4 class="r-fu-title">Close the unit-aware consumers: DIII-D gate-frame identity, the diverted zero residual, and the lead&#x27;s review of the merged solver change</h4>
     <div class="r-fu-body">Three things were left open when 04cb76c4 merged. First, the done-when names DIII-D gate frames beside MAST and Solovev and the paired node deferred them; run the DIII-D strict-exit frames at main against the committed batched artifact in one H200 job with the persistent cache and record identity or the device-qualified difference. Second, the Solovev diverted-single-null -110 CPU row returned a terminal residual of exactly 0.0 where the bank holds 5.3e-15; an exactly zero residual has previously meant an empty identity set, so assert the identity row count is non-zero on that row before reading it as within drift. Third, the section rule says solver changes return to the lead before merging and this one was merged by the coordinator on the identity evidence; the lead reviews the three commits and either confirms or reverses.</div>
     <pre class="r-fu-prompt">/reckon-build multi-unit-limiter-wall</pre>
+    <p class="r-fu-outcome">All three items are discharged on the committed record. (1) DIII-D gate-frame identity: job 1273398 ran all five frames at main against the batched artifact. Four agree at machine precision; frame 179 differs by 9.937e-02, which is recorded as route-qualified. (2) The diverted zero residual is a genuine identity: run r-20260916T205150200621 landed the EmptyIdentitySetError guard and re-read the diverted -110 row with identity_row_count 730 and a 0.0 difference. (3) The lead confirmed the merged solver change on 2026-09-16 (4a). Frame 179's route-qualified disagreement remains open under f-mulw-gate-frame-record-repairs. Evidence: S22 wave-2 triage (review pass 94/100).</p>
     </article>
 <article class="r-fu" data-id="f-mulw-gate-frame-record-repairs" data-status="open" data-written-by="nova S19 coordinator" data-written-at="2026-09-18T15:40:00Z" data-recommends-skill="/reckon-build" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Persist the DIII-D frames&#x27; terminal arrays and per-frame solve walls so the record can carry its contour panels</h4>

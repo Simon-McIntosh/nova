@@ -8,7 +8,15 @@
       <tr><td>MAST 22475 row 50</td><td>644</td><td>1737</td><td>69</td><td>68</td><td>644</td><td>0</td><td>false</td></tr>
     </tbody>
   </table>
-  <p>The 340, 550, and 1074 certificate inputs exist as realised 340, 550, and 1074-cell states; no persisted 2616-cell input was found. Their full-resolution comparator remains follow-on work.</p>
+  <table>
+    <thead><tr><th>certificate rung</th><th>live vertices</th><th>carrier edges</th><th>node − edge</th><th>mismatches</th><th>overflow</th><th>compile [s]</th><th>execute [s]</th></tr></thead>
+    <tbody>
+      <tr><td>340 cells</td><td>353</td><td>1004</td><td>1</td><td>0</td><td>false</td><td>0.966</td><td>3.322</td></tr>
+      <tr><td>550 cells</td><td>558</td><td>1611</td><td>1</td><td>0</td><td>false</td><td>0.764</td><td>11.848</td></tr>
+      <tr><td>1074 cells</td><td>1089</td><td>3186</td><td>1</td><td>0</td><td>false</td><td>1.195</td><td>75.771</td></tr>
+      <tr><td>2616 cells</td><td colspan="7">No persisted terminal input was found.</td></tr>
+    </tbody>
+  </table>
   <figure>
     <img src="/nova/figures/contour-tree-topology-authority/capacity-on-critical-nodes/mast-27079-row-16-components.png" alt="Tree and brute-force component counts for MAST 27079 row 16">
     <figcaption>MAST 27079 row 16: tree and independent superlevel component counts coincide at every sampled level.</figcaption>
@@ -16,5 +24,17 @@
   <figure>
     <img src="/nova/figures/contour-tree-topology-authority/capacity-on-critical-nodes/mast-22475-row-50-components.png" alt="Tree and brute-force component counts for MAST 22475 row 50">
     <figcaption>MAST 22475 row 50: tree and independent superlevel component counts coincide at every sampled level.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/contour-tree-topology-authority/capacity-on-critical-nodes/diverted-single-null-340-cells-components.png" alt="Tree and brute-force component counts for the 340-cell certificate">
+    <figcaption>340-cell certificate: every tree count equals the independent superlevel component count.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/contour-tree-topology-authority/capacity-on-critical-nodes/diverted-single-null-550-cells-components.png" alt="Tree and brute-force component counts for the 550-cell certificate">
+    <figcaption>550-cell certificate: every tree count equals the independent superlevel component count.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/contour-tree-topology-authority/capacity-on-critical-nodes/diverted-single-null-1074-cells-components.png" alt="Tree and brute-force component counts for the 1074-cell certificate">
+    <figcaption>1074-cell certificate: every tree count equals the independent superlevel component count.</figcaption>
   </figure>
 </section>

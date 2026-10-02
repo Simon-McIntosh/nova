@@ -55,8 +55,9 @@ def _child(programs: int, start_size: int, size_step: int) -> int:
         left = jnp.full((size, size), 0.125, dtype=jnp.float32)
         right = jnp.eye(size, dtype=jnp.float32)
         executable = jax.jit(kernel).lower(left, right).compile()
-        result = executable(left, right)
-        result.block_until_ready()
+        for _ in range(3):
+            result = executable(left, right)
+            result.block_until_ready()
         executables.append(executable)
         _event(kind="program", programs_compiled=index + 1, shape=[size, size])
 
@@ -103,11 +104,15 @@ def _run_arm(
 ) -> dict[str, object]:
     env = os.environ.copy()
     env["TF_CPP_MIN_LOG_LEVEL"] = "0"
-    env["TF_CPP_VMODULE"] = "gpu_command_buffer=3"
+    env["TF_CPP_VMODULE"] = (
+        "command_buffer_thunk=5,cuda_command_buffer=5,gpu_command_buffer=5"
+    )
     if arm == "command_buffers_disabled":
-        env["XLA_FLAGS"] = "--xla_gpu_enable_command_buffer="
+        env["XLA_FLAGS"] = (
+            "--xla_gpu_graph_min_graph_size=1 --xla_gpu_enable_command_buffer="
+        )
     else:
-        env.pop("XLA_FLAGS", None)
+        env["XLA_FLAGS"] = "--xla_gpu_graph_min_graph_size=1"
 
     command = [
         sys.executable,

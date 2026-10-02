@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="161">
+<meta name="plan-version" content="162">
 </head>
 <body>
 <main class="plan-doc">
@@ -520,6 +520,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T170249718910-mcs-alive-graph-count-series" data-who="reckon-build" data-when="2026-10-02T21:28:06Z">
     <div class="r-comment-body"><p>Regenerated the 20-program enabled-arm graph from job 1280456 only (all 20 markers equal 1; PNG 53,274 bytes and SVG 12,053 bytes), omitted every post-drop and disabled-arm data point, recorded that the flat ladder is not process-cumulative while release remains unmeasured, and made the SVG repeatable under a rerender.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T212842805439-review-of-mcs-alive-graph-count-series" data-who="reckon-build" data-when="2026-10-02T21:38:34.737Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261002T170249718910-mcs-alive-graph-count-series at head 183e51ab5 (base 8cbd46f3f) and stored a parsed record scoring all five dimensions (goal_fidelity 16, evidence 17, scope_discipline 20, durability 15, fit 16; total 84) with one follow-on finding on the regime gap; the two prior blocking findings (stale figure, report not stating the answer) are resolved.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T163422200795" data-who="coordinator" data-when="2026-09-04T16:36:00Z">
     <div class="r-comment-body"><p>§2 first restructure landed on solver-convergence-regression at <code>72ae8431</code>: one topology read per active-set trip (receipt <code>docs/figures/millisecond-converged-solve/trip-quantum/one-read/profile.json</code>, H200 job 1262715). It is behaviour-preserving and removes the redundant reads, but it does not move the per-trip wall: 5.83 s against 5.85 s on 22086/43 pure. The trip-quantum picture changes accordingly: the isolated components (84 residual evaluations, 144 Jacobian-vector products, one read, GMRES, line search) sum to 0.20 s per trip, and 5.63 s (96.6 percent) is a fused-device or synchronisation remainder the isolated probes cannot see; the earlier 63 percent topology attribution is withdrawn. The closed jaxpr has zero host callbacks, the static census gives an 0.09 s scan floor, and the CUPTI replay dies inside the Jacobi SVD, so the candidates are recompilation per trip, dynamic while loops far beyond the static count, and the 126 SVDs per trip. <code>msc-trip-remainder-attribution</code> measures which with an nsys device trace, an ablation ladder (condition estimates, line-search grades, flood and reachability loops) and a recompile count, so the repair toward one millisecond per fixed point is aimed by measurement.</p></div>

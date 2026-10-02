@@ -307,6 +307,32 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "d7e48acc0a8a8bdcaff42615b4e56a4294bc960f",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 15102,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T170335406068-ecq-production-diverted-one-arc-census",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-production-diverted-one-arc-census"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

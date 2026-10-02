@@ -10,12 +10,25 @@
     </tbody>
   </table>
   <p>CPU execution rises from 3.322 s at 353 live vertices to 75.771 s at 1089 because each sweep visit forms a repeated-neighbour matrix over the fixed edge buffer before the vertex loop. This is an implementation choice in the current vectorised union-find sweep, not an inherent requirement of contour-tree topology; its dominant fixed-buffer work grows with the product of carrier vertices and squared edge capacity.</p>
+  <figure>
+    <img src="/nova/figures/contour-tree-topology-authority/capacity-on-critical-nodes/certificate-execute-scaling.png" alt="Certificate warm execution wall against carrier vertices">
+    <figcaption>All twelve persisted terminal fields: execution grows sharply with carrier vertex and edge-buffer capacity under the current repeated-neighbour sweep.</figcaption>
+  </figure>
   <table>
     <thead><tr><th>certificate rung</th><th>live vertices</th><th>carrier edges</th><th>node − edge</th><th>mismatches</th><th>overflow</th><th>compile [s]</th><th>execute [s]</th></tr></thead>
     <tbody>
-      <tr><td>340 cells</td><td>353</td><td>1004</td><td>1</td><td>0</td><td>false</td><td>0.966</td><td>3.322</td></tr>
-      <tr><td>550 cells</td><td>558</td><td>1611</td><td>1</td><td>0</td><td>false</td><td>0.764</td><td>11.848</td></tr>
-      <tr><td>1074 cells</td><td>1089</td><td>3186</td><td>1</td><td>0</td><td>false</td><td>1.195</td><td>75.771</td></tr>
+      <tr><td>diverted, 340</td><td>353</td><td>1004</td><td>13 − 12</td><td>0</td><td>false</td><td>1.418</td><td>6.413</td></tr>
+      <tr><td>moderate, 340</td><td>341</td><td>977</td><td>20 − 19</td><td>0</td><td>false</td><td>1.580</td><td>6.624</td></tr>
+      <tr><td>strong, 340</td><td>341</td><td>976</td><td>20 − 19</td><td>0</td><td>false</td><td>1.412</td><td>6.654</td></tr>
+      <tr><td>weak, 340</td><td>342</td><td>979</td><td>24 − 23</td><td>0</td><td>false</td><td>1.223</td><td>7.257</td></tr>
+      <tr><td>diverted, 550</td><td>558</td><td>1611</td><td>13 − 12</td><td>0</td><td>false</td><td>1.270</td><td>20.062</td></tr>
+      <tr><td>moderate, 550</td><td>548</td><td>1584</td><td>22 − 21</td><td>0</td><td>false</td><td>1.200</td><td>18.243</td></tr>
+      <tr><td>strong, 550</td><td>551</td><td>1594</td><td>18 − 17</td><td>0</td><td>false</td><td>1.272</td><td>18.171</td></tr>
+      <tr><td>weak, 550</td><td>555</td><td>1606</td><td>14 − 13</td><td>0</td><td>false</td><td>1.067</td><td>19.330</td></tr>
+      <tr><td>diverted, 1074</td><td>1089</td><td>3186</td><td>15 − 14</td><td>0</td><td>false</td><td>1.977</td><td>99.380</td></tr>
+      <tr><td>moderate, 1074</td><td>1070</td><td>3149</td><td>32 − 31</td><td>0</td><td>false</td><td>2.424</td><td>99.378</td></tr>
+      <tr><td>strong, 1074</td><td>1069</td><td>3130</td><td>26 − 25</td><td>0</td><td>false</td><td>1.491</td><td>90.846</td></tr>
+      <tr><td>weak, 1074</td><td>1072</td><td>3142</td><td>24 − 23</td><td>0</td><td>false</td><td>1.193</td><td>88.927</td></tr>
       <tr><td>2616 cells</td><td colspan="7">No persisted terminal input was found.</td></tr>
     </tbody>
   </table>

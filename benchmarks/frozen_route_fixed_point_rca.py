@@ -18,12 +18,10 @@ from nova.jax.config import configure_dtypes
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = (
+DEFAULT_OUTPUT = (
     ROOT
     / "docs/figures/millisecond-converged-solve/newton-krylov-route/fixed-point-rca"
 )
-REPORT = OUTPUT / "report.md"
-RECEIPT = OUTPUT / "receipt.json"
 
 
 def _fixture_machine():
@@ -51,6 +49,8 @@ def _route_diagnostics(result: Any) -> dict[str, Any]:
         "termination_reason_name": reason.name,
         "converged": bool(fixed.converged),
         "active_set_iterations": int(fixed.active_set_iterations),
+        "live_partition_reads": int(fixed.live_partition_reads),
+        "live_read_steps": int(fixed.live_read_steps),
         "active_set_residuals": [
             float(value) for value in np.asarray(fixed.active_set_residuals).ravel()
         ],
@@ -441,11 +441,15 @@ def measure(refresh_newton_steps: int) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--refresh-newton-steps", type=int, default=8)
+    parser.add_argument("--output-directory", type=Path, default=DEFAULT_OUTPUT)
     arguments = parser.parse_args()
-    OUTPUT.mkdir(parents=True, exist_ok=True)
+    output = arguments.output_directory.resolve()
+    output.mkdir(parents=True, exist_ok=True)
     receipt = measure(arguments.refresh_newton_steps)
-    RECEIPT.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
-    REPORT.write_text(_markdown(receipt))
+    (output / "receipt.json").write_text(
+        json.dumps(receipt, indent=2, sort_keys=True) + "\n"
+    )
+    (output / "report.md").write_text(_markdown(receipt))
     print(json.dumps(receipt, sort_keys=True))
 
 

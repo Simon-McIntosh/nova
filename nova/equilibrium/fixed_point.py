@@ -2997,16 +2997,9 @@ def picard(
             return terminal_linear((value, shadow_tangent))
 
         def implicit_tangent(_):
-            def relax(_, value):
-                residual = parameter_tangent - (value - state_linear(value))
-                return value + relaxation * residual
-
-            return jax.lax.fori_loop(
-                0,
-                max(4 * evaluations, 160),
-                relax,
-                jnp.zeros_like(parameter_tangent),
-            )
+            identity = jnp.eye(result.state.size, dtype=result.state.dtype)
+            jacobian = jax.vmap(state_linear)(identity).T
+            return jnp.linalg.solve(identity - jacobian, parameter_tangent)
 
         state_tangent = jax.lax.cond(
             result.converged,

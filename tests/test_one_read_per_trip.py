@@ -70,6 +70,7 @@ def test_a_hooked_map_refreezes_after_its_terminal_partition_changes():
     np.testing.assert_array_equal(result.active_set_mask_differences, [1, 0, -1])
     assert int(result.active_set_iterations) == 2
     assert int(result.frozen_partition_reads) == 3
+    assert int(result.live_partition_reads) == 3
     assert int(result.frozen_partition_refreezes) == 1
     assert counts == {"initial": 1, "boundary": 2}
 
@@ -85,6 +86,7 @@ def test_the_warmed_route_reads_the_partition_once_after_its_warmup():
 
     assert int(result.active_set_iterations) == 1
     assert int(result.frozen_partition_reads) == 2
+    assert int(result.live_partition_reads) == 2
     assert int(result.frozen_partition_refreezes) == 0
     assert counts == {"initial": 1, "boundary": 1}
 
@@ -92,7 +94,11 @@ def test_the_warmed_route_reads_the_partition_once_after_its_warmup():
 def test_frozen_partition_is_bit_identical_when_the_mask_never_changes():
     configure_dtypes()
     frozen, _counts = _partitioned_solver(changing_mask=False, active_set_steps=1)
-    frozen = frozen._replace(frozen_partition_reads=0, frozen_partition_refreezes=0)
+    frozen = frozen._replace(
+        frozen_partition_reads=0,
+        frozen_partition_refreezes=0,
+        live_partition_reads=0,
+    )
 
     def stable_mask(state):
         return jnp.zeros_like(state, dtype=bool)

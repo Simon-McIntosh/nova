@@ -400,9 +400,11 @@ class FixedPointResult(NamedTuple):
     residuals and re-evaluated mask differences are recorded in the two
     corresponding fixed-length arrays.  ``active_set_cycle_damping_activations``
     marks the midpoint transition attempted when a mask repeats.
-    ``frozen_partition_reads`` counts the initial frozen read and each terminal
-    requalification. ``frozen_partition_refreezes`` counts the bounded retries
-    prompted by a changed discrete partition.
+    ``frozen_partition_reads`` and ``live_partition_reads`` count the initial
+    live partition read and one terminal live requalification per frozen pass.
+    ``frozen_partition_refreezes`` counts the bounded retries prompted by a
+    changed discrete partition. ``live_read_steps`` counts the direct live-map
+    Newton promotions used after frozen passes do not establish convergence.
     The ``inner_iteration_*`` arrays retain one row per attempted Newton
     promotion.  They record the nonlinear residual transition, bounded proposal
     norm, acceptance route, exact Krylov qualification, applied damping or
@@ -452,6 +454,7 @@ class FixedPointResult(NamedTuple):
     active_set_cycle_damping_activations: jax.Array | int = -1
     frozen_partition_reads: jax.Array | int = 0
     frozen_partition_refreezes: jax.Array | int = 0
+    live_partition_reads: jax.Array | int = 0
     live_read_steps: jax.Array | int = 0
     inner_iteration_residuals_before: jax.Array | float = float("nan")
     inner_iteration_residuals_after: jax.Array | float = float("nan")
@@ -4888,6 +4891,7 @@ def _active_set_newton_krylov(
         frozen_partition_refreezes=jnp.where(
             freeze_topology, jnp.maximum(outer.iterations - 1, 0), 0
         ),
+        live_partition_reads=jnp.where(freeze_topology, outer.iterations + 1, 0),
     )
     if not freeze_topology:
         return frozen_result

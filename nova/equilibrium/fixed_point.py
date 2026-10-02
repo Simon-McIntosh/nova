@@ -2971,19 +2971,24 @@ def picard(
         _state_tangent, *argument_tangents = tangents
         result, terminal_shadow = iterate(state, tuple(arguments))
 
-        def terminal_map(value, *dynamic_arguments):
+        def terminal_map(value, shadow, *dynamic_arguments):
             if carry_shadows:
-                return shadowed_map_fn(value, terminal_shadow, *dynamic_arguments)
+                return shadowed_map_fn(value, shadow, *dynamic_arguments)
             return map_fn(value, *dynamic_arguments)
 
+        shadow_tangent = jnp.zeros_like(terminal_shadow, dtype=jax.dtypes.float0)
         _, parameter_tangent = jax.jvp(
-            lambda dynamic_arguments: terminal_map(result.state, *dynamic_arguments),
-            (tuple(arguments),),
-            (tuple(argument_tangents),),
+            lambda values: terminal_map(result.state, values[0], *values[1]),
+            ((terminal_shadow, tuple(arguments)),),
+            ((shadow_tangent, tuple(argument_tangents)),),
         )
-        _, state_linear = jax.linearize(
-            lambda value: terminal_map(value, *arguments), result.state
+        _, terminal_linear = jax.linearize(
+            lambda values: terminal_map(values[0], values[1], *arguments),
+            (result.state, terminal_shadow),
         )
+
+        def state_linear(value):
+            return terminal_linear((value, shadow_tangent))
 
         def implicit_tangent(_):
             def linear_map(value):

@@ -128,6 +128,14 @@ def response(context, centroid_receipt):
         row = profile.current_moment_observation(
             psi,
             support=MomentIntegralSupport.ALL_DOMAIN,
+            target_current=target,
+        )
+        return jnp.stack((row.centroid_r, row.centroid_z))
+
+    def observed_requested(psi):
+        row = profile.current_moment_observation(
+            psi,
+            support=MomentIntegralSupport.ALL_DOMAIN,
             requested_class=REQUESTED_CLASS,
             target_current=target,
         )
@@ -137,8 +145,10 @@ def response(context, centroid_receipt):
     print("linearizing map and centroid observation", flush=True)
     base_map, tangent_map = jax.linearize(mapped, state)
     base_centroid, tangent_centroid = jax.linearize(observed, state)
+    _, tangent_requested = jax.linearize(observed_requested, state)
     tangent_map = jax.jit(tangent_map)
     tangent_centroid = jax.jit(tangent_centroid)
+    tangent_requested = jax.jit(tangent_requested)
     columns = _array(operator.prescribed_current_field.response)
     if columns.shape != (state.size, 3):
         raise RuntimeError(f"unexpected compensator columns {columns.shape}")
@@ -189,6 +199,114 @@ def response(context, centroid_receipt):
 
     # The direct arm is the declared negative control for the inverse response.
     direct = np.column_stack([centroid_product(columns[:, i]) for i in range(3)])
+    requested_direct = np.column_stack(
+        [_array(tangent_requested(jnp.asarray(columns[:, i]))) for i in range(3)]
+    )
+    step_t = 1.0e-6
+    finite = np.column_stack(
+        [
+            (
+                _array(observed(state + step_t * columns[:, i]))
+                - _array(observed(state - step_t * columns[:, i]))
+            )
+            / (2 * step_t)
+            for i in range(3)
+        ]
+    )
+    requested_finite = np.column_stack(
+        [
+            (
+                _array(observed_requested(state + step_t * columns[:, i]))
+                - _array(observed_requested(state - step_t * columns[:, i]))
+            )
+            / (2 * step_t)
+            for i in range(3)
+        ]
+    )
+
+    def support_read(psi, requested_class):
+        moments, amplitude = operator.normalised_current_moments(
+            psi, target, requested_class
+        )
+        mask = _array(moments.cell_current) != 0.0
+        return {
+            "active_cell_indices": np.flatnonzero(mask).tolist(),
+            "active_cell_count": int(np.count_nonzero(mask)),
+            "normalisation_amplitude": float(amplitude),
+            "normalised_current_a": float(np.sum(_array(moments.cell_current))),
+        }
+
+    support = {}
+    for name, requested_class in (
+        ("row_native", None),
+        ("requested_limited", REQUESTED_CLASS),
+    ):
+        support[name] = {"base": support_read(state, requested_class), "columns": []}
+        for index in range(3):
+            support[name]["columns"].append(
+                {
+                    "minus": support_read(
+                        state - step_t * columns[:, index], requested_class
+                    ),
+                    "plus": support_read(
+                        state + step_t * columns[:, index], requested_class
+                    ),
+                }
+            )
+    diagnostics_receipt = {
+        "state_digest": _digest(np.asarray(state)),
+        "column_order": ["vertical_t", "radial_t", "level_wb"],
+        "field_column_units": (
+            "Wb per tesla for vertical and radial; Wb per weber for level"
+        ),
+        "closed_form_column_sup_error_wb_per_unit": [
+            float(
+                np.max(
+                    np.abs(
+                        columns[:, 0]
+                        - np.pi * (context["coordinates"][:, 0] ** 2 - 6.2**2)
+                    )
+                )
+            ),
+            float(
+                np.max(
+                    np.abs(
+                        columns[:, 1]
+                        + 2
+                        * np.pi
+                        * context["coordinates"][:, 0]
+                        * context["coordinates"][:, 1]
+                    )
+                )
+            ),
+            float(np.max(np.abs(columns[:, 2] - 1.0))),
+        ],
+        "finite_difference_step": step_t,
+        "row_native_centroid_m": _array(base_centroid).tolist(),
+        "row_native_jvp_m_per_unit": direct.tolist(),
+        "row_native_central_m_per_unit": finite.tolist(),
+        "requested_limited_jvp_m_per_unit": requested_direct.tolist(),
+        "requested_limited_central_m_per_unit": requested_finite.tolist(),
+        "historical_radial_response_m_per_t": 1.62922526181,
+        "active_support_and_normalisation": support,
+        "row_source": (
+            "nova/equilibrium/constraint.py::CurrentCentroidConstraint.observed"
+        ),
+    }
+    diagnostics_path = OUTPUT / "derivatives.json"
+    diagnostics_path.write_text(
+        json.dumps(diagnostics_receipt, indent=2, allow_nan=False) + "\n"
+    )
+    print(
+        f"wrote {diagnostics_path}; {direct.tolist()} versus {finite.tolist()}",
+        flush=True,
+    )
+    print("waiting for committed derivative receipt before inverse", flush=True)
+    deadline = time.time() + 8 * 60
+    while not (OUTPUT / "continue-response").exists():
+        if (OUTPUT / "stop-response").exists() or time.time() > deadline:
+            raise SystemExit(2)
+        time.sleep(1)
     zero_states = np.linalg.solve(np.eye(n), columns).T
     zero_jacobian_control = np.column_stack(
         [centroid_product(value) for value in zero_states]

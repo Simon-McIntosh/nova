@@ -75,7 +75,14 @@ def test_batched_certificate_trees_match_independent_builds(fixtures):
 def test_production_certificate_rungs_match_independent_components():
     """Every persisted production-resolution certificate stays qualified."""
 
-    for fixture in certificate_rung_fixtures():
+    selected = os.environ.get("CONTOUR_TREE_CERTIFICATE")
+    fixtures = tuple(
+        fixture
+        for fixture in certificate_rung_fixtures()
+        if selected is None or fixture.name == selected
+    )
+    assert fixtures
+    for fixture in fixtures:
         result = compare(fixture.mesh, corrupt=_corrupt())
         assert not bool(np.asarray(result["tree"].overflow))
         assert result["node_count"] - result["edge_count"] == 1

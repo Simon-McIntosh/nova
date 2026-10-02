@@ -1,0 +1,292 @@
+{
+  "context_arm": {
+    "arm": "context",
+    "file": "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-large-buffers-300.json",
+    "numeric_changed": {},
+    "numeric_fields_before": 171,
+    "provenance_paths": [
+      "/dimensions_provenance"
+    ]
+  },
+  "json": [
+    {
+      "arm": "context",
+      "file": "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-large-buffers-300.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 171,
+      "provenance_paths": [
+        "/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300-gathered.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 156,
+      "provenance_paths": [
+        "/rows[0]/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300-scan.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 5106,
+      "provenance_paths": [
+        "/rows[0]/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 144,
+      "provenance_paths": [
+        "/rows[0]/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/base-memory.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 13490,
+      "provenance_paths": [
+        "/rows[0]/dimensions_provenance",
+        "/rows[1]/dimensions_provenance",
+        "/rows[2]/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-110.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 4894,
+      "provenance_paths": [
+        "/row/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-300.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 4921,
+      "provenance_paths": [
+        "/row/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-500.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 4925,
+      "provenance_paths": [
+        "/row/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 14750,
+      "provenance_paths": [
+        "/rows[0]/dimensions_provenance",
+        "/rows[1]/dimensions_provenance",
+        "/rows[2]/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory-parts/requested-110.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 4894,
+      "provenance_paths": [
+        "/row/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory-parts/requested-300.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 4921,
+      "provenance_paths": [
+        "/row/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory-parts/requested-500.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 4925,
+      "provenance_paths": [
+        "/row/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 14750,
+      "provenance_paths": [
+        "/rows[0]/dimensions_provenance",
+        "/rows[1]/dimensions_provenance",
+        "/rows[2]/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-bounded-parts/requested-1000.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 32,
+      "provenance_paths": [
+        "/row/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-bounded.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 32,
+      "provenance_paths": [
+        "/rows[0]/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-implicit-parts/requested-1000.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 32,
+      "provenance_paths": [
+        "/row/dimensions_provenance"
+      ]
+    },
+    {
+      "arm": "dimensions",
+      "file": "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-implicit.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 32,
+      "provenance_paths": [
+        "/rows[0]/dimensions_provenance"
+      ]
+    }
+  ],
+  "sweep": {
+    "marked": [
+      "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-large-buffers-300.json",
+      "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300-gathered.json",
+      "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300-scan.json",
+      "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/production-1000.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/production-110.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/production-300.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-cost/receipt.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/base-memory.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-110.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-300.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-500.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory-parts/requested-110.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory-parts/requested-300.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory-parts/requested-500.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-bounded-parts/requested-1000.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-bounded.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-implicit-parts/requested-1000.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-implicit.json",
+      "docs/figures/cut-cell-current-attribution/reposed-fixture/certificate/solve-memory-identification.json",
+      "docs/figures/exact-clip-capacity/memory-base.json",
+      "docs/figures/exact-clip-capacity/memory-current.json",
+      "docs/figures/exact-clip-moment-quadrature/ecq-mark-swept-capacity-receipts/mark_swept_capacity_receipts.py",
+      "docs/figures/figure-and-solver-audit/low-state-amplitude-nan/report.md",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-comparison.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-production-census.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-production-execution.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-scanned-census.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-scanned-execution.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-comparison.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-production-census.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-production-execution.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-scanned-census.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-scanned-execution.json"
+    ],
+    "per_value": {
+      "2560": {
+        "marked": [
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/base-memory.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-500.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory-parts/requested-500.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory.json"
+        ],
+        "marked_count": 5,
+        "unmarked": [],
+        "unmarked_count": 0
+      },
+      "2816": {
+        "marked": [
+          "docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/production-1000.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-cost/receipt.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-bounded-parts/requested-1000.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-bounded.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-implicit-parts/requested-1000.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-implicit.json",
+          "docs/figures/exact-clip-capacity/memory-base.json",
+          "docs/figures/exact-clip-capacity/memory-current.json"
+        ],
+        "marked_count": 8,
+        "unmarked": [],
+        "unmarked_count": 0
+      },
+      "3072": {
+        "marked": [
+          "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-large-buffers-300.json",
+          "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300-gathered.json",
+          "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300-scan.json",
+          "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/production-300.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-cost/receipt.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/base-memory.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-300.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory-parts/requested-300.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory.json",
+          "docs/figures/cut-cell-current-attribution/reposed-fixture/certificate/solve-memory-identification.json",
+          "docs/figures/exact-clip-capacity/memory-base.json",
+          "docs/figures/exact-clip-capacity/memory-current.json",
+          "docs/figures/exact-clip-moment-quadrature/ecq-mark-swept-capacity-receipts/mark_swept_capacity_receipts.py",
+          "docs/figures/figure-and-solver-audit/low-state-amplitude-nan/report.md",
+          "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-comparison.json",
+          "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-production-census.json",
+          "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-production-execution.json",
+          "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-scanned-census.json",
+          "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-scanned-execution.json",
+          "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-comparison.json",
+          "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-production-census.json",
+          "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-production-execution.json",
+          "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-scanned-census.json",
+          "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-scanned-execution.json"
+        ],
+        "marked_count": 26,
+        "unmarked": [],
+        "unmarked_count": 0
+      },
+      "3840": {
+        "marked": [
+          "docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/production-110.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-cost/receipt.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/base-memory.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-110.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory-parts/requested-110.json",
+          "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory.json",
+          "docs/figures/exact-clip-capacity/memory-base.json",
+          "docs/figures/exact-clip-capacity/memory-current.json"
+        ],
+        "marked_count": 9,
+        "unmarked": [],
+        "unmarked_count": 0
+      }
+    },
+    "target_value_files": 36,
+    "unmarked": []
+  }
+}

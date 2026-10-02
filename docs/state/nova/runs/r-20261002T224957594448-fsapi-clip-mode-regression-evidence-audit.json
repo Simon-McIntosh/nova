@@ -282,6 +282,32 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "19a76002e866e4c514f108ff8155aa52704c406a",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5037,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T224957594448-fsapi-clip-mode-regression-evidence-audit",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-regression-evidence-audit"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "none",

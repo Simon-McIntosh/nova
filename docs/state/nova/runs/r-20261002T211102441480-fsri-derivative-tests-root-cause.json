@@ -1,0 +1,618 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex-terra",
+  "base_sha": "e53e1141d23dd38f5e72b72dfc2c05bf283aa9c9",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 11579136,
+      "cached_input_tokens_cumulative": 11579136,
+      "input_tokens": 11831790,
+      "input_tokens_cumulative": 11831790,
+      "output_tokens": 44888,
+      "output_tokens_cumulative": 44888,
+      "reasoning_output_tokens": 16207,
+      "reasoning_output_tokens_cumulative": 16207
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 363,
+    "files": 6,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "010bdb2106139c9d53fa2062f57ff9c9e1ad6b03",
+    "70e2c563b27b5fc38ffab936629c7c4630f9cdcb",
+    "6482210f5a457eb45aac7724a1f0e7be053209fe"
+  ],
+  "completed_at": "2026-10-02T21:39:04Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T21:11:42Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "plus/minus"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 3.6712589073634208,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-terra' is projected to exhaust at 2026-10-04T16:04:43Z, which is after this node's 3600s horizon ending 2026-10-02T22:11:06.209802+00:00",
+    "horizon_ends_at": "2026-10-02T22:11:06.209802+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T21:11:05Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-04T16:04:43Z",
+    "resets_at": "2026-10-09T10:39:36Z",
+    "seconds_until_reset": 566910,
+    "state": "quiet",
+    "utilisation_pct": 23.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T21:11:05Z",
+    "read_at": "2026-10-02T21:11:06Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 23.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T21:39:04Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T211102441480-fsri-derivative-tests-root-cause/manifest.md",
+  "member": "disposable-r-20261002T211102441480-fsri-derivative-tests-root-cause",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsri-derivative-tests-root-cause",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 956,
+          "cached_input_tokens": 874285,
+          "input_tokens": 875243,
+          "output_tokens": 2615,
+          "reasoning_output_tokens": 1105,
+          "total_tokens": 877858,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "(1) Attribution: run the three tests on the H200, one job per revision through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh (H200 rung, betelgeuse gpu_0003_grpA, one card, explicit --mem, JAX_PLATFORMS=cuda, the shared interpreter, no uv on the compute node; the coordinator authorises this launch path, and the general srun/sbatch/salloc fence does not forbid it), each from a detached scratch checkout under /tmp (git worktree add --detach, the shared .venv symlinked in, removed afterwards without --force), at exactly these revisions: the parent and the merge of the frozen-Newton lineage (db580bec8^1, db580bec8), the parent and the merge of the clip-mode request field (af7403bc0^1, af7403bc0), and main e53e1141d. Commit one log per revision under docs/figures/forward-solver-route-integrity/derivative-tests-root-cause/ with a table of revision, test and measured value. (2) Mechanism: for each test that changes between a parent and its merge, name the function and computation responsible from that diff, measured, not inferred (for example whether the derivative now passes through the frozen partition, the live fallback program or a stop_gradient, and what the custom derivative rule does at the terminal state). For a test that fails at every revision, say so and report what it compares and how far it is from passing. Fix nothing; the fix is a separate node. Write the findings into docs/evidence/fragments/forward-solver-route-integrity/fsri-derivative-tests-root-cause.html. While jobs run write status: blocked with wait_probe [\"sacct\",\"-n\",\"-X\",\"-j\",\"<comma-separated ids>\",\"--format=State\"] and wait_terminal COMPLETED. Every uv command carries --no-sync and nothing runs uv sync. The manifest status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Find the root cause of three derivative tests in tests/test_equilibrium_forward_solve.py failing at main on both CPU and H200 (run r-20261002T184908677651-fsri-forward-solve-file-verification): test_the_solve_is_differentiable_in_the_conductor_current (63.478750929152035 against < 0.001), test_the_plasma_current_is_differentiable_in_the_conductor_current (11.313969220440912 against < 0.001) and test_the_moment_map_is_differentiable_against_finite_differences (coarse-step relative error 0.7598863825266692 against > 1.0). First establish whether today's merges caused them, then name the mechanism.",
+    "id": "fsri-derivative-tests-root-cause",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T21:11:05Z",
+      "read_at": "2026-10-02T21:11:06Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 23.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T211102441480-fsri-derivative-tests-root-cause/manifest.md",
+    "negative_control": "none: a diagnosis node that changes no source",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§1",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/forward-solver-route-integrity/derivative-tests-root-cause",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-derivative-tests-root-cause.html",
+      "docs/figures/forward-solver-route-integrity/fsri-derivative-tests-root-cause"
+    ]
+  },
+  "orientation_input_tokens": 1328463.0,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 3.67074590972365,
+      "derived": 0.06892332136904758,
+      "drain_hours": 168.0,
+      "effective_limit": 0.06892332136904758,
+      "elapsed_fraction": 0.06265756488095234,
+      "elapsed_hours": 10.526470899999993,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-02T21:11:11+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.77,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T10:39:36Z",
+      "state": "observed",
+      "utilisation": 0.23,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.134366,
+      "decided_by": "window",
+      "margin": 0.678134,
+      "name": "fsri-derivative-tests-root-cause",
+      "score": 0.8125,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.23
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.29524,
+        "observed_at": "2026-10-02T21:11:11+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T10:39:36Z",
+        "state": "observed",
+        "utilisation": 0.23,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "fsri-derivative-tests-root-cause",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-02T21:11:11.295240+00:00",
+    "score": 0.8125,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "claude-opus",
+    "comment": "",
+    "confidence": 0.04,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "unavailable",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 1.3673570341435186,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 12,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 22,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 0
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 15,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "claude",
+    "jev_latency_ms": 467.048,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2050.501,
+    "model": "claude-opus-5-5",
+    "offered": [
+      {
+        "availability": "served",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 1.3673570341435186,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude-opus": 0.52,
+      "hold": 0.48
+    },
+    "rendered_token_estimate": 801,
+    "usage": {
+      "cost": 7.161e-05,
+      "input_tokens": 1705,
+      "output_tokens": 37
+    }
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "6482210f5a457eb45aac7724a1f0e7be053209fe",
+  "resume_waiver": null,
+  "review": {
+    "absent": [
+      "No committed probe records the residual-shadow mask at the plus and minus conductor perturbations, or the resulting map difference. The five H200 arms prove that the failures predate both candidate merges, but they do not directly demonstrate that a discrete shadow-selection crossing produces the reported reverse/finite-difference disagreement.",
+      "The reviewed manifest declares baseline_suite: null and after_suite: null. This diagnosis node changed no product source or test file, so there is no reviewable suite delta; added_failure_count is therefore 0 rather than an unobserved comparison.",
+      "Each durable log invokes /work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/measure_derivatives.py. That measurement helper is not among the six committed changed paths, so the exact five-arm command cannot be reconstructed solely from the reviewed revision."
+    ],
+    "reviewed_base_sha": "e53e1141d23dd38f5e72b72dfc2c05bf283aa9c9",
+    "reviewed_head_sha": "6482210f5a457eb45aac7724a1f0e7be053209fe",
+    "scores": {
+      "durability": 18,
+      "evidence": 18,
+      "fit": 20,
+      "goal_fidelity": 17,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 93
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T211102441480-fsri-derivative-tests-root-cause",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fe75-a388-70d3-b20f-1cb823d1ca15",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 11579136,
+    "cumulative_input_tokens": 23410926,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 61095
+  },
+  "time_budget": "60m",
+  "tool_steps": 16.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1642,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T21:39:06Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T21:16:39Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T211102441480-fsri-derivative-tests-root-cause",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 269,
+    "worker_pid": 244314
+  },
+  "worker_seconds": 1642,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

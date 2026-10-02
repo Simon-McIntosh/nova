@@ -53,6 +53,21 @@
     </table>
     <p>All four repaired trees have one more node than edges, no overflow and zero component-count mismatches against the brute force. The four contour-tree test files pass, 25 tests. The independent review re-ran them at the reviewed head and scored 89 of 100. The extrema beyond one magnetic axis and one X-point are piecewise-linear extrema of the 132-cell certificate field. §2 builds topology from that field by contract; the persistence and primary-selection sections must show by measurement that they absorb them. The virtual outside node's padded slot is still emitted as a minimum, although the contract says it is not a critical point. §2 stays open for the MAST fixtures (EFIT <code>psirz</code> sampled onto the hex carrier) and the figure regenerated from the computed tree. Logs: <code>docs/figures/contour-tree-topology-authority/edge-invariant-repair/</code>.</p>
   </section>
+  <section id="end-to-end-brute-force">
+    <h2>§2 — the brute-force control on the Solov'ev and MAST fixtures</h2>
+    <p>Run <code>r-20261002T075725216430-ctta-end-to-end-brute-force</code> (codex-terra, then the local lane), merged at <code>c592c4e1c</code> from <code>72b14996b</code>, <code>84374f8da</code>, <code>84d95c330</code> and <code>c2b7fd136</code>. Its gate, <code>tests/test_contour_tree_brute_force.py</code>, compares the tree with the independent brute force at every sampled level on six fixtures. It passed, 6 tests, at a virtual merge of main with the run. The declared negative control drops the virtual-outside joins or swaps a merge edge, and it now fails at the comparison assertion (2 failed) rather than at overflow.</p>
+    <table>
+      <thead><tr><th>fixture</th><th>sampled levels</th><th>nodes / edges</th><th>mismatches</th></tr></thead>
+      <tr><td>diverted single null (Solov'ev)</td><td>140</td><td>13 / 12</td><td>0</td></tr>
+      <tr><td>moderate rotation, conventional (Solov'ev)</td><td>136</td><td>16 / 15</td><td>0</td></tr>
+      <tr><td>strong rotation, compact (Solov'ev)</td><td>135</td><td>22 / 21</td><td>0</td></tr>
+      <tr><td>weak rotation, reactor (Solov'ev)</td><td>70</td><td>18 / 17</td><td>0</td></tr>
+      <tr><td>MAST 27079 row 16 (limited)</td><td>236</td><td>52 / 51</td><td>0</td></tr>
+      <tr><td>MAST 22475 row 50 (reversed current, Ip = &minus;7.342e5 A)</td><td>236</td><td>52 / 51</td><td>0</td></tr>
+    </table>
+    <p>Each MAST field is the stored EFIT reconstruction (<code>efm/psirz</code>, in total webers) sampled at the hex-cell centres with a bicubic spline. It is a reconstruction on the carrier, not a forward state. &sigma; = +1 for 27079 and &minus;1 for 22475, so the axis is a maximum of &sigma;&psi; in both. Figures: <code>/nova/figures/contour-tree-topology-authority/brute-force/</code>.</p>
+    <p><strong>Resolution limit.</strong> The MAST carrier is 90 requested cells, 236 valid vertices, not the 464-cell, 644-vertex carrier the fixtures were first built on. <code>build_contour_tree</code> sets overflow whenever the mesh vertex count exceeds its 256-node capacity (<code>contour_tree.py</code>, the vertex-count comparison at the top of the sweep), even though the trees themselves need only 13 to 52 nodes. Every production rung from 340 cells up is therefore refused today. The control is valid at the resolution it ran; a repair that sizes the overflow on critical nodes is the next node. The review (91 of 100) also found that the gate log's revision label cannot reproduce its 6-test count, because the scratch run carried the worker's later test commits. The gate is being re-run at the merged head.</p>
+  </section>
 </main>
 </body>
 </html>

@@ -1,0 +1,562 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "a83018126c9e2a92a00690ccf3ccc80316d6b4fe",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 2030107,
+      "input_tokens_cumulative": 2030107,
+      "output_tokens": 20784,
+      "output_tokens_cumulative": 20784,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 167,
+    "files": 8,
+    "removed": 5
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "test_dry_run_prints_a_submission_line_for_every_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_keeps_the_callers_equals_form_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 102
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_dry_run_pytest_uses_a_long_default_per_test_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_keeps_the_callers_equals_form_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 102
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_dry_run_pytest_keeps_the_callers_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_keeps_the_callers_equals_form_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 102
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_keeps_the_callers_equals_form_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "test_dry_run_prints_a_submission_line_for_every_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 119,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 123
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_dry_run_pytest_uses_a_long_default_per_test_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 119,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 123
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_dry_run_pytest_keeps_the_callers_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 119,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 123
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_keeps_the_callers_equals_form_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 119,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 120
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 119,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 124
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_dry_run_pytest_uses_a_long_default_per_test_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 135,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 138
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 135,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 138
+    },
+    {
+      "existing_function": {
+        "line": 200,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 135,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 200,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 151,
+        "name": "test_h200_payload_keeps_sampler_and_pin_diagnostic",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 156
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 200,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 218
+    },
+    {
+      "existing_function": {
+        "line": 151,
+        "name": "test_h200_payload_keeps_sampler_and_pin_diagnostic",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 200,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 219
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "5f967cc3d8f6d627fe72aec5371e793b51c5ae38",
+    "1830dbd6ce2d17b213ae280f75e8d2e3e1e2222e",
+    "1d30b46fafdf4350691f314e39d7e68ed5b6ca18",
+    "4af94d32676cf04437f57c9d61639e6bf2829301",
+    "10946c5974bb97765b1e3a4f0a0091818bf1414a"
+  ],
+  "completed_at": "2026-10-02T08:57:01.000Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T08:05:24Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "pytest tests/test_nova_lane_launcher.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T08:35:07.616959+00:00",
+    "horizon_seconds": 1800,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T08:05:07Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 28,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 8,
+    "headroom": 6,
+    "mean_context": 160000,
+    "observed_at": "2026-10-02T08:04:39Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T08:57:01.000Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/manifest.md",
+  "member": "disposable-r-20261002T080506940179-fsri-lane-timeout-equals-form-test",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_nova_lane_launcher.py::test_dry_run_pytest_keeps_the_callers_equals_form_timeout"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_nova_lane_launcher.py::test_dry_run_pytest_keeps_the_callers_equals_form_timeout"
+    ],
+    "declaration": "remove the --timeout=* case from pytest_timeout_argument; the equals-form test must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-timeout-equals-form-test/docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/equals-form/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-timeout-equals-form-test/docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/equals-form/negative-control.log",
+    "test_paths": [
+      "tests/test_nova_lane_launcher.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fsri-lane-timeout-equals-form-test",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1912,
+          "cached_input_tokens": 260249,
+          "input_tokens": 262163,
+          "output_tokens": 1013,
+          "reasoning_output_tokens": 129,
+          "total_tokens": 263176,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "tests/test_nova_lane_launcher.py passes with the new equals-form case (dry run with NOVA_LANE_TEST_TIMEOUT=7200 and --timeout=45 keeps 45 and carries exactly one timeout argument). The negative control removes the --timeout=* branch of pytest_timeout_argument in a scratch copy and the new case fails; its failing log is committed under docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/equals-form/. git diff of the four .log files shows only whitespace-at-end-of-line removals (git diff --ignore-space-at-eol on them is empty). Run the gate in place and write its log once to a file. Every uv command carries --no-sync and nothing runs uv sync. The manifest status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Close followup f-fsri-lane-timeout-equals-form-test: add a committed test that scripts/nova_lane/run.sh keeps a caller's --timeout=value (equals spelling) and injects no second bound, beside the existing split-form --timeout 45 test in tests/test_nova_lane_launcher.py; and strip the trailing whitespace from docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/*.log without changing any other byte.",
+    "id": "fsri-lane-timeout-equals-form-test",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T08:05:07Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 28,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 8,
+      "headroom": 6,
+      "mean_context": 160000,
+      "observed_at": "2026-10-02T08:04:39Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/manifest.md",
+    "negative_control": "remove the --timeout=* case from pytest_timeout_argument; the equals-form test must fail",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "30m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/test_nova_lane_launcher.py",
+      "docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-lane-timeout-equals-form-test.html",
+      "docs/figures/forward-solver-route-integrity/fsri-lane-timeout-equals-form-test"
+    ]
+  },
+  "orientation_input_tokens": 726941.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsri-lane-timeout-equals-form-test",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T08:05:11.016012+00:00",
+    "score": 0.49375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_revision": "10946c5974bb97765b1e3a4f0a0091818bf1414a",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a83018126c9e2a92a00690ccf3ccc80316d6b4fe",
+    "reviewed_head_sha": "10946c5974bb97765b1e3a4f0a0091818bf1414a",
+    "scores": {
+      "durability": 20,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 96
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T080506940179-fsri-lane-timeout-equals-form-test",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "54958e63-88d7-4094-93b0-75035b2844c1",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 6887536,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 824.261,
+    "generated_tokens": 46435,
+    "generation_seconds": 731.263,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 32.5,
+    "machine_seconds": 92.998,
+    "peak_input_tokens": 155939,
+    "tokens_per_second": 63.5,
+    "wall_tokens_per_second": 56.34
+  },
+  "time_budget": "30m",
+  "tool_steps": 49.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3097,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T08:57:04Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T08:43:10Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T080506940179-fsri-lane-timeout-equals-form-test",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 10616,
+    "worker_pid": 2235609
+  },
+  "worker_seconds": 3057,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

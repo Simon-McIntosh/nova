@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="55">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -656,6 +656,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261002T082859261387-review-of-fsri-lane-timeout-equals-form-test" data-who="reckon-build" data-when="2026-10-02T08:41:22Z">
     <div class="r-comment-body"><p>Reviewed r-20261002T080506940179-fsri-lane-timeout-equals-form-test at a83018126..1d30b46f: the equals-form regression test and its exact mutation control are valid, but the review rejects the head because git diff --check finds committed trailing whitespace at negative-control.log lines 40, 47, and 50 and the source manifest has no measurable baseline_suite/after_suite pair; it also records ambiguous final-head gate provenance.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261002T080506940179-fsri-lane-timeout-equals-form-test" data-who="reckon-build" data-when="2026-10-02T08:57:01.000Z">
+    <div class="r-comment-body"><p>Added tests/test_nova_lane_launcher.py::test_dry_run_pytest_keeps_the_callers_equals_form_timeout (a caller&#x27;s --timeout=45 is kept with no second bound injected under NOVA_LANE_TEST_TIMEOUT=7200); gate 8 passed EXIT=0, negative control 1 failed 7 passed EXIT=1, base arm 7 passed and after arm 8 passed EXIT=0, and git diff --check a83018126..HEAD is empty.</p></div>
 </div>
 </section>
 </main>

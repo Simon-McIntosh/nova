@@ -51,40 +51,66 @@ def _partition_map(shadowed_map, state, partition, external, operator):
 
 
 def _changed(left: Any, right: Any) -> dict[str, Any]:
-    """Summarise scalar and array changes in one frozen partition field."""
+    """Summarise a retained quantity at the warmed and terminal reads."""
     left_array = np.asarray(left)
     right_array = np.asarray(right)
-    difference = right_array - left_array
+    is_numeric = np.issubdtype(left_array.dtype, np.number)
+    difference = right_array - left_array if is_numeric else None
+
+    def summary(value: np.ndarray) -> Any:
+        if value.ndim == 0:
+            return value.item()
+        result: dict[str, Any] = {
+            "minimum": value.min().item(),
+            "maximum": value.max().item(),
+        }
+        if is_numeric:
+            result["l2_norm"] = float(np.linalg.norm(value.ravel()))
+        return result
+
     return {
         "shape": list(left_array.shape),
         "changed_entries": int(np.count_nonzero(left_array != right_array)),
-        "maximum_absolute_difference": float(np.max(np.abs(difference))),
-        "warm_value": float(left_array) if left_array.ndim == 0 else None,
-        "terminal_value": float(right_array) if right_array.ndim == 0 else None,
+        "maximum_absolute_difference": (
+            float(np.max(np.abs(difference))) if is_numeric else None
+        ),
+        "warm_value": summary(left_array),
+        "terminal_value": summary(right_array),
     }
+
+
+def _field_changes(
+    prefix: str, warmed: Any, terminal: Any
+) -> dict[str, dict[str, Any]]:
+    """Flatten all partition leaves without hiding continuous frozen values."""
+    if warmed is None:
+        return {prefix: {"status": "not present in this fixture"}}
+    if hasattr(warmed, "_fields"):
+        result: dict[str, dict[str, Any]] = {}
+        for name in warmed._fields:
+            result.update(
+                _field_changes(
+                    f"{prefix}.{name}", getattr(warmed, name), getattr(terminal, name)
+                )
+            )
+        return result
+    if is_dataclass(warmed):
+        result = {}
+        for field in fields(warmed):
+            result.update(
+                _field_changes(
+                    f"{prefix}.{field.name}",
+                    getattr(warmed, field.name),
+                    getattr(terminal, field.name),
+                )
+            )
+        return result
+    return {prefix: _changed(warmed, terminal)}
 
 
 def _partition_fields(warmed, terminal) -> dict[str, dict[str, Any]]:
-    """Expose all state-dependent values retained by the frozen map."""
-    result: dict[str, dict[str, Any]] = {
-        "label": _changed(warmed.label, terminal.label),
-        "residual_shadow": _changed(warmed.residual_shadow, terminal.residual_shadow),
-    }
-    for name in warmed.topology._fields:
-        result[f"topology.{name}"] = _changed(
-            getattr(warmed.topology, name), getattr(terminal.topology, name)
-        )
-    warm_support = warmed.profile_support
-    terminal_support = terminal.profile_support
-    if warm_support is not None:
-        names = warm_support._fields if hasattr(warm_support, "_fields") else ()
-        if is_dataclass(warm_support):
-            names = tuple(field.name for field in fields(warm_support))
-        for name in names:
-            result[f"profile_support.{name}"] = _changed(
-                getattr(warm_support, name), getattr(terminal_support, name)
-            )
-    return result
+    """Expose every state-dependent leaf retained by the frozen map."""
+    return _field_changes("partition", warmed, terminal)
 
 
 def _residual_terms(live, frozen, state, coordinate, physical_count: int):
@@ -108,9 +134,22 @@ def _residual_terms(live, frozen, state, coordinate, physical_count: int):
                 "live_minus_frozen": float(mismatch[index]),
             }
         )
+    components = {
+        "grid": {
+            "maximum_absolute_residual": float(
+                np.max(np.abs(live_term[:physical_count]))
+            ),
+            "l2_residual": float(np.linalg.norm(live_term[:physical_count])),
+        },
+        "wall_and_sample": {
+            "maximum_absolute_residual": float(
+                np.max(np.abs(live_term[physical_count:]))
+            ),
+            "l2_residual": float(np.linalg.norm(live_term[physical_count:])),
+        },
+    }
     return {
-        "grid": float(np.max(np.abs(live_term[:physical_count]))),
-        "wall": float(np.max(np.abs(live_term[physical_count:]))),
+        "components": components,
         "terms": terms,
     }
 
@@ -118,6 +157,7 @@ def _residual_terms(live, frozen, state, coordinate, physical_count: int):
 def _markdown(receipt: dict[str, Any]) -> str:
     partition = receipt["partition_fields"]
     largest = receipt["residual_terms"]["terms"]
+    components = receipt["residual_terms"]["components"]
     supported = receipt["refreshed_live_residual"] < receipt["live_residual"]
     lines = [
         "# Frozen Newton fixed-point RCA",
@@ -132,9 +172,10 @@ def _markdown(receipt: dict[str, Any]) -> str:
         "## Residual at the frozen terminal state",
         "",
         f"The frozen map residual is {receipt['frozen_residual']:.12e}; the live-map "
-        f"residual is {receipt['live_residual']:.12e}. The live residual is carried "
-        f"by grid entries up to {receipt['residual_terms']['grid']:.12e} and wall "
-        f"entries up to {receipt['residual_terms']['wall']:.12e}.",
+        f"residual is {receipt['live_residual']:.12e}. The grid component reaches "
+        f"{components['grid']['maximum_absolute_residual']:.12e}; "
+        "the remaining wall/sample component reaches "
+        f"{components['wall_and_sample']['maximum_absolute_residual']:.12e}.",
         "",
         "| entry | live map − state | frozen map − state | live − frozen |",
         "| --- | ---: | ---: | ---: |",
@@ -151,18 +192,21 @@ def _markdown(receipt: dict[str, Any]) -> str:
             "",
             "The terminal label comparison is not a complete map comparison. The "
             "frozen partition also retains topology coordinates and fluxes, residual "
-            "domain masking, and clipped support geometry/moments. There is no "
+            "domain masking, and clipped support geometry/moments. The operator "
+            "geometry is static rather than copied into the partition. There is no "
             "net-current normalisation scalar in this absolute-current fixture.",
             "",
             "| retained quantity | changed entries | maximum absolute "
-            "warm-to-terminal difference |",
-            "| --- | ---: | ---: |",
+            "warm-to-terminal difference | warm value | terminal value |",
+            "| --- | ---: | ---: | --- | --- |",
         ]
     )
     for name, value in partition.items():
         lines.append(
-            f"| {name} | {value['changed_entries']} | "
-            f"{value['maximum_absolute_difference']:.12e} |"
+            f"| {name} | {value.get('changed_entries', 'n/a')} | "
+            f"{value.get('maximum_absolute_difference', 'n/a')} | "
+            f"{value.get('warm_value', value.get('status', 'n/a'))} | "
+            f"{value.get('terminal_value', value.get('status', 'n/a'))} |"
         )
     lines.extend(
         [
@@ -224,6 +268,7 @@ def measure(refresh_newton_steps: int) -> dict[str, Any]:
     live = live_map(terminal, external, operator, None)
     jax.block_until_ready((frozen, live))
 
+    refresh_started = time.monotonic()
     refreshed = profile.solve(
         terminal,
         route="newton_krylov",
@@ -247,6 +292,12 @@ def measure(refresh_newton_steps: int) -> dict[str, Any]:
         "frozen_residual": _relative(frozen, terminal),
         "live_residual": _relative(live, terminal),
         "refreshed_live_residual": _relative(refreshed_live, refreshed.flux),
+        "refreshed_frozen_partition_reads": int(
+            refreshed.fixed_point.frozen_partition_reads
+        ),
+        "refreshed_frozen_partition_refreezes": int(
+            refreshed.fixed_point.frozen_partition_refreezes
+        ),
         "refresh_newton_steps": refresh_newton_steps,
         "partition_fields": _partition_fields(warmed_partition, terminal_partition),
         "residual_terms": _residual_terms(
@@ -256,7 +307,8 @@ def measure(refresh_newton_steps: int) -> dict[str, Any]:
             operator.grid.coordinate,
             operator.physical_node_number,
         ),
-        "wall_seconds": time.monotonic() - started,
+        "initial_route_wall_seconds": refresh_started - started,
+        "refreshed_route_wall_seconds": time.monotonic() - refresh_started,
     }
 
 

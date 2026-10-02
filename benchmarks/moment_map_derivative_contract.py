@@ -146,6 +146,14 @@ def measure(test_path: Path, figure_path: Path) -> dict:
             (topology.axis_flux, topology.boundary_flux, topology.flux_span)
         )
 
+    def axis_flux(state):
+        _current, _integrals, _masks, topology, _amplitude = integral_state(state)
+        return jnp.atleast_1d(topology.axis_flux)
+
+    def boundary_flux(state):
+        _current, _integrals, _masks, topology, _amplitude = integral_state(state)
+        return jnp.atleast_1d(topology.boundary_flux)
+
     def support_partition(state):
         _current, _integrals, masks, _topology, _amplitude = integral_state(state)
         return _flatten((masks.core, masks.profile_participation, masks.psi_norm))
@@ -166,6 +174,8 @@ def measure(test_path: Path, figure_path: Path) -> dict:
 
     stages = [
         _measure_stage("topology flux levels", topology_values, flux, direction),
+        _measure_stage("axis flux", axis_flux, flux, direction),
+        _measure_stage("boundary flux", boundary_flux, flux, direction),
         _measure_stage(
             "support partition and clip weights", support_partition, flux, direction
         ),

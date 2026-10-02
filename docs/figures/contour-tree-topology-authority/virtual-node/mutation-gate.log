@@ -1,0 +1,59 @@
+# mutation: virtual outside slot typed minimum again (0); revision working tree with mutation; tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-virtual-node-not-a-critical-point
+# command: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu uv run --no-sync pytest --timeout 0 -p no:cacheprovider tests/test_contour_tree_merge.py::test_virtual_slot_is_typed_outside_and_excluded_from_dd -q
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_virtual_slot_is_typed_outside_and_excluded_from_dd ____________
+
+    def test_virtual_slot_is_typed_outside_and_excluded_from_dd():
+        """The padded outside slot is typed outside and never a DD critical point.
+    
+        A padded carrier values its spare slots below every interior level and the
+        sweep keeps one as the outside node.  That node is bookkeeping, not a
+        critical point: it must carry CRITICAL_TYPE_OUTSIDE rather than a minimum,
+        and dd_emittable_nodes must drop it.  Each wall-bearing region must still
+        record its outside contact as its own wall-join saddle.  The diverted
+        single-null certificate and the full MAST EFIT carrier.
+        """
+    
+        from benchmarks.contour_tree_brute_force import (
+            certificate_rung_fixtures,
+            mast_fixtures,
+        )
+    
+        certificate = next(
+            fixture
+            for fixture in certificate_rung_fixtures()
+            if fixture.name.endswith("diverted-single-null-340-cells")
+        )
+        for fixture in (certificate, mast_fixtures()[0]):
+            mesh = fixture.mesh
+            vertex_valid = np.asarray(mesh.vertex_valid)
+            vertex_is_wall = np.asarray(mesh.vertex_is_wall)
+            mesh_edges = np.asarray(mesh.edges)[np.asarray(mesh.edge_valid)]
+            result = build_contour_tree(
+                mesh.vertex_psi,
+                mesh.vertex_valid,
+                mesh.vertex_is_wall,
+                mesh.edges,
+                mesh.edge_valid,
+                jnp.asarray(1, dtype=jnp.int32),
+            )
+            node_valid = np.asarray(result.node_valid)
+            critical_type = np.asarray(result.critical_type)
+            node_vertex = np.asarray(result.node_vertex)
+            emitted = node_vertex[node_valid]
+            emitted_type = critical_type[node_valid]
+    
+            virtual_rows = np.nonzero(node_valid & ~vertex_valid[node_vertex])[0]
+            assert virtual_rows.size == 1, fixture.name
+>           assert int(critical_type[virtual_rows[0]]) == CRITICAL_TYPE_OUTSIDE
+E           assert 0 == 3
+E            +  where 0 = int(np.int32(0))
+
+tests/test_contour_tree_merge.py:263: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+20:09:30 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_merge.py::test_virtual_slot_is_typed_outside_and_excluded_from_dd
+1 failed in 26.20s
+EXIT=1

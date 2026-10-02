@@ -1,7 +1,5 @@
+# revision: 222867e6e84d5a5e5a90b4a680e8049f1c1b2948 | tree: /tmp/reckon-crew-scratch/ctta-bf-merged (git archive extraction) | command: CONTOUR_TREE_CORRUPT=drop-wall-joins JAX_PLATFORMS=cpu PYTHONPATH=/tmp/reckon-crew-scratch/ctta-bf-merged python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_brute_force.py -q
 # negative control: drop the virtual-outside (wall-contact) joins from the computed tree
-# revision: 222867e6e84d5a5e5a90b4a680e8049f1c1b2948
-# tree: /tmp/reckon-crew-scratch/ctta-bf-merged (git archive extraction)
-# command: CONTOUR_TREE_CORRUPT=drop-wall-joins JAX_PLATFORMS=cpu PYTHONPATH=/tmp/reckon-crew-scratch/ctta-bf-merged python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_brute_force.py -q
 F..F..                                                                   [100%]
 =================================== FAILURES ===================================
 _______ test_certificate_tree_matches_independent_superlevel_components ________

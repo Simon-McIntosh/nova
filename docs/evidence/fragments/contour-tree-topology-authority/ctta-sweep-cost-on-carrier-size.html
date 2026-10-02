@@ -6,16 +6,16 @@
   linear in carrier vertices for bounded-degree carriers, with a visible
   overflow refusal if the fixed adjacency width is exceeded.</p>
   <table>
-    <thead><tr><th>live vertices</th><th>before execute [s]</th><th>after execute [s]</th><th>after compile [s]</th></tr></thead>
+    <thead><tr><th>live vertices</th><th>before CPU execute [s]</th><th>after CPU execute [s]</th><th>after H200 execute [s]</th><th>after H200 compile [s]</th></tr></thead>
     <tbody>
-      <tr><td>353</td><td>6.105</td><td>0.084</td><td>1.412</td></tr>
-      <tr><td>558</td><td>19.320</td><td>0.198</td><td>1.198</td></tr>
-      <tr><td>1089</td><td>100.381</td><td>0.490</td><td>1.553</td></tr>
+      <tr><td>353</td><td>6.105</td><td>0.084</td><td>0.603</td><td>1.964</td></tr>
+      <tr><td>558</td><td>19.320</td><td>0.198</td><td>1.140</td><td>1.405</td></tr>
+      <tr><td>1089</td><td>100.381</td><td>0.490</td><td>2.772</td><td>1.182</td></tr>
     </tbody>
   </table>
   <figure>
-    <img src="/nova/figures/contour-tree-topology-authority/sweep-cost/cpu-execute-seconds.png" alt="CPU contour-tree execute seconds before and after carrier adjacency indexing">
-    <figcaption>Warm CPU execution on the diverted single-null certificate carriers. The indexed sweep rises from 0.084 s at 353 vertices to 0.490 s at 1089 vertices, while the repeated full-edge scan rises from 6.105 s to 100.381 s.</figcaption>
+    <img src="/nova/figures/contour-tree-topology-authority/sweep-cost/cpu-execute-seconds.png" alt="CPU baseline and indexed CPU and H200 contour-tree execute seconds by carrier size">
+    <figcaption>Warm execution on the diverted single-null certificate carriers. The indexed CPU sweep rises from 0.084 s at 353 vertices to 0.490 s at 1089 vertices, while the repeated full-edge CPU scan rises from 6.105 s to 100.381 s. The H200 arm used one CUDA card and records 0.603 s, 1.140 s, and 2.772 s at the same rungs.</figcaption>
   </figure>
   <p>The CPU topology gate passes all 33 merge, mesh, conventions and
   brute-force tests; it covers all twelve certificate rungs, both MAST

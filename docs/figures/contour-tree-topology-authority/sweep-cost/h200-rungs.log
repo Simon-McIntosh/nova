@@ -1,0 +1,20 @@
+NOVA_LANE_START=2026-10-02T23:07:55+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1280486
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=cae331a085faea1433405ddd9d5c335f85b8c8d1
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size
+JAX_PLATFORMS=cuda
+TMPDIR=/tmp
+MODE=python-c
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -c $'import json, time, numpy as np, jax, jax.numpy as jnp; from benchmarks.contour_tree_brute_force import certificate_rung_fixtures; from nova.equilibrium.contour_tree import build_contour_tree; print("DEVICES=" + repr(jax.devices())); fixtures=certificate_rung_fixtures();\nfor rung in (340, 550, 1074):\n    fixture=next(item for item in fixtures if item.name.endswith(f"{rung}-cells")); mesh=fixture.mesh; arguments=(mesh.vertex_psi,mesh.vertex_valid,mesh.vertex_is_wall,mesh.edges,mesh.edge_valid,jnp.asarray(1,dtype=jnp.int32)); started=time.perf_counter(); result=build_contour_tree(*arguments); result.overflow.block_until_ready(); cold=time.perf_counter()-started; started=time.perf_counter(); result=build_contour_tree(*arguments); result.overflow.block_until_ready(); execute=time.perf_counter()-started; print(json.dumps({"rung":rung,"name":fixture.name,"vertices":int(np.count_nonzero(np.asarray(mesh.vertex_valid))),"compile_seconds":cold-execute,"execute_seconds":execute,"overflow":bool(result.overflow)}))' 
+DEVICES=[CudaDevice(id=0)]
+{"rung": 340, "name": "diverted-single-null-340-cells", "vertices": 353, "compile_seconds": 1.964436262845993, "execute_seconds": 0.6027237679809332, "overflow": false}
+{"rung": 550, "name": "diverted-single-null-550-cells", "vertices": 558, "compile_seconds": 1.4047190342098475, "execute_seconds": 1.1398933697491884, "overflow": false}
+{"rung": 1074, "name": "diverted-single-null-1074-cells", "vertices": 1089, "compile_seconds": 1.1820410024374723, "execute_seconds": 2.771809818223119, "overflow": false}
+EXIT_STATUS=0
+NOVA_LANE_END=2026-10-02T23:09:01+0200
+NOVA_LANE_EXIT_STATUS=0

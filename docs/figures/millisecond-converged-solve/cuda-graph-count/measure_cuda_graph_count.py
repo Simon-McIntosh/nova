@@ -2,11 +2,11 @@
 """Measure CUDA executable-graph lifetime across distinct JAX programs.
 
 The parent process runs two fresh child processes so the command-buffer XLA
-flag is fixed before JAX loads.  Each child compiles a ladder of matrix shapes,
-executes every compiled program, drops half of the executable handles, clears
-JAX's compilation caches, and executes one retained handle again.  XLA's
-``gpu_command_buffer`` VLOG is the count instrument; child markers associate
-each runtime count with the number of programs compiled.
+flag is fixed before JAX loads. Each child compiles a ladder of matrix shapes,
+executes every compiled program, then drops executable handles and clears JAX's
+compilation caches. XLA's ``gpu_command_buffer`` VLOG is the count instrument.
+The post-drop marker is emitted only after synchronization with no intervening
+program execution, so its count is a settled re-read rather than execution churn.
 """
 
 from __future__ import annotations
@@ -72,15 +72,12 @@ def _child(programs: int, start_size: int, size_step: int) -> int:
     gc.collect()
     jax.effects_barrier()
     time.sleep(0.5)
-    retained_size = start_size + (programs - 1) * size_step
-    retained_left = jnp.full((retained_size, retained_size), 0.125, dtype=jnp.float32)
-    retained_right = jnp.eye(retained_size, dtype=jnp.float32)
-    executables[-1](retained_left, retained_right).block_until_ready()
     _event(
-        kind="after_drop",
+        kind="settled_reread",
         programs_compiled=programs,
         executable_handles=len(executables),
         dropped_handles=drop_count,
+        programs_executed_after_drop=0,
     )
     return 0
 
@@ -103,12 +100,16 @@ def _parse_arm_output(
     exit_status: int,
 ) -> dict[str, object]:
     latest_count: int | None = None
+    last_count_after_drop: int | None = None
+    drop_started = False
     count_events: list[dict[str, object]] = []
     rows: list[dict[str, object]] = []
     for line_number, line in enumerate(text.splitlines(), start=1):
         count = _count_from_line(line)
         if count is not None:
             latest_count = count
+            if drop_started:
+                last_count_after_drop = count
             if "Destroying GPU command buffer executable graph" in line:
                 action = "destroy"
             elif "Instantiated executable graph" in line:
@@ -121,9 +122,23 @@ def _parse_arm_output(
         if not line.startswith(EVENT_PREFIX):
             continue
         event = json.loads(line.removeprefix(EVENT_PREFIX))
-        if event["kind"] in {"program", "before_drop", "after_drop"}:
+        if event["kind"] == "before_drop":
+            drop_started = True
+            last_count_after_drop = None
+        if event["kind"] in {"program", "before_drop", "settled_reread"}:
             event["alive_executable_graphs"] = latest_count
             event["log_line"] = line_number
+            if event["kind"] == "settled_reread":
+                if last_count_after_drop is None:
+                    raise RuntimeError(
+                        "no XLA graph count was emitted between before_drop and "
+                        "the settled reread marker"
+                    )
+                event["alive_executable_graphs"] = last_count_after_drop
+                event["count_source"] = (
+                    "last XLA count emitted after before_drop and before "
+                    "settled_reread, with no program executed in that interval"
+                )
             rows.append(event)
 
     arm_receipt: dict[str, object] = {
@@ -136,31 +151,6 @@ def _parse_arm_output(
         "count_events": count_events,
         "rows": rows,
     }
-    if arm == "command_buffers_enabled" and count_events:
-        before_drop = next(row for row in rows if row["kind"] == "before_drop")
-        after_drop = next(row for row in rows if row["kind"] == "after_drop")
-        release_events = [
-            event
-            for event in count_events
-            if before_drop["log_line"] < event["log_line"] < after_drop["log_line"]
-            and event["action"] == "destroy"
-        ]
-        settled_events = [
-            event
-            for event in count_events
-            if event["log_line"] > after_drop["log_line"]
-            and event["action"] == "destroy"
-        ]
-        if not release_events:
-            raise RuntimeError(
-                "enabled arm emitted no destruction count after cache clear"
-            )
-        arm_receipt["alive_executable_graphs_after_cache_clear"] = release_events[0][
-            "count"
-        ]
-        arm_receipt["alive_executable_graphs_after_process_settle"] = (
-            settled_events[-1]["count"] if settled_events else None
-        )
     return arm_receipt
 
 
@@ -234,11 +224,13 @@ def _classify(
     enabled: dict[str, object], disabled: dict[str, object]
 ) -> dict[str, object]:
     program_rows = [row for row in enabled["rows"] if row["kind"] == "program"]
-    after_drop = next(row for row in enabled["rows"] if row["kind"] == "after_drop")
+    settled_reread = next(
+        row for row in enabled["rows"] if row["kind"] == "settled_reread"
+    )
     counts = [row["alive_executable_graphs"] for row in program_rows]
     if (
         any(count is None for count in counts)
-        or after_drop["alive_executable_graphs"] is None
+        or settled_reread["alive_executable_graphs"] is None
     ):
         raise RuntimeError(
             "enabled arm did not expose a count at every required marker"
@@ -246,19 +238,19 @@ def _classify(
     initial = int(counts[0])
     peak = max(int(count) for count in counts)
     final = int(counts[-1])
-    post_drop = int(enabled["alive_executable_graphs_after_cache_clear"])
+    post_drop = int(settled_reread["alive_executable_graphs"])
     growth = final - initial
     release = final - post_drop
     control_rows = [row for row in disabled["rows"] if row["kind"] == "program"]
     control_counts = [row["alive_executable_graphs"] or 0 for row in control_rows]
     if growth == 0 and release > 0:
-        verdict = "executable_scoped_not_process_cumulative"
-    elif growth > 0 and release > 0:
-        verdict = "per_compiled_executable_and_released_when_executables_are_dropped"
-    elif growth > 0:
-        verdict = "process_cumulative_across_dropped_executables"
+        verdict = "no_growth_with_demonstrated_release"
+    elif growth == 0:
+        verdict = "no_growth_without_demonstrated_release"
+    elif release > 0:
+        verdict = "growth_with_demonstrated_release"
     else:
-        verdict = "no_growth_observed"
+        verdict = "growth_without_demonstrated_release"
     return {
         "verdict": verdict,
         "initial_alive_executable_graphs": initial,
@@ -298,10 +290,12 @@ def _plot(receipt: dict[str, object], output: Path) -> None:
     y_enabled = [row["alive_executable_graphs"] for row in enabled_rows]
     x_disabled = [row["programs_compiled"] for row in disabled_rows]
     y_disabled = [row["alive_executable_graphs"] or 0 for row in disabled_rows]
-    after_drop = next(row for row in enabled["rows"] if row["kind"] == "after_drop")
+    settled_reread = next(
+        row for row in enabled["rows"] if row["kind"] == "settled_reread"
+    )
     post_drop = {
-        "programs_compiled": after_drop["programs_compiled"],
-        "dropped_handles": after_drop["dropped_handles"],
+        "programs_compiled": settled_reread["programs_compiled"],
+        "dropped_handles": settled_reread["dropped_handles"],
         "alive_executable_graphs": receipt["summary"][
             "alive_executable_graphs_after_drop"
         ],
@@ -320,7 +314,7 @@ def _plot(receipt: dict[str, object], output: Path) -> None:
         zorder=3,
     )
     axis.annotate(
-        f"after dropping {post_drop['dropped_handles']} handles",
+        f"settled reread after dropping {post_drop['dropped_handles']} handles",
         (post_drop["programs_compiled"], post_drop["alive_executable_graphs"]),
         xytext=(-30, 35),
         textcoords="offset points",
@@ -359,7 +353,6 @@ def _plot(receipt: dict[str, object], output: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--child", action="store_true")
-    parser.add_argument("--analyze-existing", action="store_true")
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--log-dir", type=Path)
     parser.add_argument("--programs", type=int, default=20)
@@ -377,9 +370,6 @@ def main() -> int:
     log_dir.mkdir(parents=True, exist_ok=True)
     script = Path(__file__).resolve()
     receipt_path = output_dir / "receipt.json"
-    prior_receipt = {}
-    if receipt_path.exists():
-        prior_receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     current_revision = subprocess.check_output(
         ["git", "-C", str(script.parents[4]), "rev-parse", "HEAD"], text=True
     ).strip()
@@ -388,37 +378,22 @@ def main() -> int:
         "measurement": (
             "CUDA executable-graph lifetime across distinct compiled programs"
         ),
-        "revision": prior_receipt.get("revision", current_revision),
-        "analysis_revision": current_revision,
+        "revision": current_revision,
         "instrument": str(script),
         "working_directory": str(Path.cwd().resolve()),
         "programs": arguments.programs,
         "arms": [],
     }
     for arm in ("command_buffers_enabled", "command_buffers_disabled"):
-        if arguments.analyze_existing:
-            log_path = log_dir / f"{arm}.log"
-            xla_flags = "--xla_gpu_graph_min_graph_size=1"
-            if arm == "command_buffers_disabled":
-                xla_flags += " --xla_gpu_enable_command_buffer="
-            arm_receipt = _parse_arm_output(
-                log_path.read_text(encoding="utf-8"),
-                arm=arm,
-                command=prior_receipt["arms"][len(receipt["arms"])]["command"],
-                xla_flags=xla_flags,
-                log_path=log_path,
-                exit_status=0,
-            )
-        else:
-            arm_receipt = _run_arm(
-                script,
-                output_dir,
-                log_dir,
-                arm=arm,
-                programs=arguments.programs,
-                start_size=arguments.start_size,
-                size_step=arguments.size_step,
-            )
+        arm_receipt = _run_arm(
+            script,
+            output_dir,
+            log_dir,
+            arm=arm,
+            programs=arguments.programs,
+            start_size=arguments.start_size,
+            size_step=arguments.size_step,
+        )
         receipt["arms"].append(arm_receipt)
         receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     receipt["summary"] = _classify(*receipt["arms"])

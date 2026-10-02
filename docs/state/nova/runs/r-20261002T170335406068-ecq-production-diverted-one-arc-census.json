@@ -1,0 +1,374 @@
+{
+  "agent": {
+    "alias": "luna6",
+    "backend": "codex-luna",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-luna",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "lane-change",
+  "backend": "codex-luna",
+  "base_sha": "f863867a8e6151993e851f55ea54d85ac8ec4064",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 30989696,
+      "cached_input_tokens_cumulative": 30989696,
+      "input_tokens": 31232104,
+      "input_tokens_cumulative": 31232104,
+      "output_tokens": 54043,
+      "output_tokens_cumulative": 54043,
+      "reasoning_output_tokens": 15402,
+      "reasoning_output_tokens_cumulative": 15402
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1111,
+    "files": 14,
+    "removed": 3
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "measured",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "run_function": {
+        "line": 348,
+        "name": "aggregate_production",
+        "path": "docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/one_arc_census.py"
+      },
+      "window_line": 358
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "1024be47a91cf1c466c3e1c643dc0b2f5717351c",
+    "80d20b80ce841928eb9dc163086ea9d1f8eb787c",
+    "06a15267be81085122695599b44b20001ecaeae7",
+    "d7e48acc0a8a8bdcaff42615b4e56a4294bc960f"
+  ],
+  "completed_at": "2026-10-02T18:12:47Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T17:04:00Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-production-diverted-one-arc-census /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-production-diverted-one-arc-census/docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/one_arc_census.py --aggregate-production",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170335406068-ecq-production-diverted-one-arc-census/aggregate-production.log"
+  },
+  "impl_move": {
+    "at_complete": 0.99,
+    "at_dispatch": 0.99,
+    "plan": "exact-clip-moment-quadrature",
+    "reason": "a census that retires a held wiring; the plan's authored impl is unchanged",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 3.4119076549210208,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T18:03:40.331469+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T17:03:39Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T10:39:36Z",
+    "seconds_until_reset": 581756,
+    "state": "quiet",
+    "utilisation_pct": 13.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T17:03:39Z",
+    "read_at": "2026-10-02T17:03:40Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 13.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T18:12:47Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 3,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-02T18:06:56Z",
+        "detail": "continued session '01a0fd92-c99f-7f70-956d-bc1eadb191c8' on harness 'codex'",
+        "from_backend": "codex",
+        "from_harness": "codex",
+        "reason": "the measurement and report completed but the deadline arrived before the generated receipts and fragment were committed; the remaining step is a commit",
+        "session": "continued",
+        "session_id": "01a0fd92-c99f-7f70-956d-bc1eadb191c8",
+        "session_source": "stream",
+        "to_backend": "codex-luna",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261002T170335406068-ecq-production-diverted-one-arc-census"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170335406068-ecq-production-diverted-one-arc-census/manifest.md",
+  "member": "disposable-r-20261002T170335406068-ecq-production-diverted-one-arc-census",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "ecq-production-diverted-one-arc-census",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2413,
+          "cached_input_tokens": 487476,
+          "input_tokens": 489891,
+          "output_tokens": 2275,
+          "reasoning_output_tokens": 551,
+          "total_tokens": 492166,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Per followup f-ecq-production-diverted-one-arc-census: docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/one_arc_census.py is extended, with a revision, tree and command header on every log, to build the production diverted rows the forward lanes solve (MAST and DIII-D diverted slices from the bank, named in the report with how each was chosen) at their production cell counts under the one-run bound, and one receipt under docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/production/ records per row the realised maximum live vertices, the saddle-wedge maxima built by _expand_spline_saddle_wedges, the one-arc capacity and the refused-cell count with the refused cell indices. Each row runs in a fresh process in place on the fleet allocation with JAX_PLATFORMS=cpu. The report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/ecq-production-diverted-one-arc-census.md states whether any row refuses a cell and the smallest saddle-wedge margin, and applies the rule: a refusing row lands 61b291089 from refs/held/ecq-level-run-wiring with that row as its positive control (the coordinator merges), none deletes the ref.",
+    "estimated_hours": 0.3,
+    "goal": "census the production diverted layouts against the one-arc traced bound",
+    "id": "ecq-production-diverted-one-arc-census",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T17:03:39Z",
+      "read_at": "2026-10-02T17:03:40Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 13.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170335406068-ecq-production-diverted-one-arc-census/manifest.md",
+    "negative_control": "the forced-bound control (refusal_detector_control.py, bound 100) still names refused cells on a production row",
+    "plan": "exact-clip-moment-quadrature",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/ecq-production-diverted-one-arc-census.md",
+      "docs/evidence/fragments/exact-clip-moment-quadrature/ecq-production-diverted-one-arc-census.html",
+      "docs/figures/exact-clip-moment-quadrature/ecq-production-diverted-one-arc-census"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex",
+    "member": null,
+    "node": "ecq-production-diverted-one-arc-census",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T17:03:44.570770+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": null,
+  "plan": "exact-clip-moment-quadrature",
+  "plan_impl_at_dispatch": 0.99,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "d7e48acc0a8a8bdcaff42615b4e56a4294bc960f",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "f863867a8e6151993e851f55ea54d85ac8ec4064",
+    "reviewed_head_sha": "d7e48acc0a8a8bdcaff42615b4e56a4294bc960f",
+    "scores": {
+      "durability": 16,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 91
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "run_id": "r-20261002T170335406068-ecq-production-diverted-one-arc-census",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fd92-c99f-7f70-956d-bc1eadb191c8",
+  "session_model": "gpt-6-luna",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 30989696,
+    "cumulative_input_tokens": 62221800,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 69445
+  },
+  "time_budget": "60m",
+  "tool_steps": 57.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 4127,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T18:12:51Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T18:07:00Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T170335406068-ecq-production-diverted-one-arc-census",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 451,
+    "worker_pid": 3136023
+  },
+  "worker_seconds": 4127,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

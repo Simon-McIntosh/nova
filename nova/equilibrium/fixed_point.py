@@ -4614,11 +4614,7 @@ def _active_set_newton_krylov(
         selected_finite = jnp.where(retain_incoming, True, selected_finite)
         selected_difference = jnp.where(retain_incoming, 0, selected_difference)
         trajectory_mapped = (
-            jax.lax.cond(
-                usable_partition(partition),
-                lambda: partitioned_map(trajectory_state, partition),
-                lambda: shadowed_map_fn(trajectory_state, mask),
-            )
+            shadowed_map_fn(trajectory_state, trajectory_mask)
             if freeze_topology
             else selected_mapped
         )

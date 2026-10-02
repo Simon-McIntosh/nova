@@ -266,6 +266,32 @@
   "plan_impl_at_dispatch": 0.996,
   "plan_link": null,
   "promoted_revision": "b957d30bd9fd0fdf61fd8fda63c1e1035242d324",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5048,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T124241643226-review-of-pfs-figure-renderers-assert-their-receipts",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/review-of-pfs-figure-renderers-assert-their-receipts"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "none",

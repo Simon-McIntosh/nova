@@ -104,12 +104,8 @@
       "maximum_absolute_state_difference_measure": "unmeasured: the baseline arm carries a binary64 digest rather than the state array, so the two arms cannot be differenced element-wise",
       "panel": {
         "bit_identical": false,
-        "filesystem_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/panels/weak-rotation-reactor-static-cells-300-across-revisions.png",
-        "project_absolute_src": "/nova/figures/millisecond-converged-solve/program-size/process-per-row/panels/weak-rotation-reactor-static-cells-300-across-revisions.png",
         "sha256": "be051fcd045c4c091cca2d4ac5b9691443bb2f72964d740884e6e07e3721e575",
         "terminal_residual": 2.4295437383158535e-15,
-        "vector_filesystem_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/panels/weak-rotation-reactor-static-cells-300-across-revisions.svg",
-        "vector_project_absolute_src": "/nova/figures/millisecond-converged-solve/program-size/process-per-row/panels/weak-rotation-reactor-static-cells-300-across-revisions.svg",
         "vector_sha256": "10a1566e20e3a277b643f02a03ce17bd0a28201f01307cb84ea7a499ef9cc9f5"
       },
       "realised_state_values": 1529,

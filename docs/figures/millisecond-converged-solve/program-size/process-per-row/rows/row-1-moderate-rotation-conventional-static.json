@@ -104,12 +104,8 @@
       "maximum_absolute_state_difference_measure": "unmeasured: the baseline arm carries a binary64 digest rather than the state array, so the two arms cannot be differenced element-wise",
       "panel": {
         "bit_identical": false,
-        "filesystem_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/panels/moderate-rotation-conventional-static-cells-300-across-revisions.png",
-        "project_absolute_src": "/nova/figures/millisecond-converged-solve/program-size/process-per-row/panels/moderate-rotation-conventional-static-cells-300-across-revisions.png",
         "sha256": "78257f624e7b5e5f18919c5710c5b6e0799f18074dc97730bc2083915efd58f7",
         "terminal_residual": 1.1753019756383131e-15,
-        "vector_filesystem_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/panels/moderate-rotation-conventional-static-cells-300-across-revisions.svg",
-        "vector_project_absolute_src": "/nova/figures/millisecond-converged-solve/program-size/process-per-row/panels/moderate-rotation-conventional-static-cells-300-across-revisions.svg",
         "vector_sha256": "1bd61f48333217c76f9f6d4cc6a3e3a192a28f3478f19ba86b723ad1ba69e25e"
       },
       "realised_state_values": 1535,

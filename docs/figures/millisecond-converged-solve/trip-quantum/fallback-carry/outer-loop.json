@@ -1,7 +1,6 @@
 {
   "artifacts": {
     "event_log": "docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/outer-events.jsonl",
-    "figure": "docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/per-trip-after.png",
     "receipt": "docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/outer-loop.json",
     "report": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T030415109839-msc-unchanged-state-fallback-carry/outer-loop.md",
     "table": "docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/per-trip-after.csv"

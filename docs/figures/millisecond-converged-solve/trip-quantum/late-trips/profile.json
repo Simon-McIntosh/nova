@@ -1,7 +1,6 @@
 {
   "artifacts": {
     "event_log": "docs/figures/millisecond-converged-solve/trip-quantum/late-trips/promotion-events.jsonl",
-    "figure": "docs/figures/millisecond-converged-solve/trip-quantum/late-trips/promotion-wall-by-trip.png",
     "receipt": "docs/figures/millisecond-converged-solve/trip-quantum/late-trips/profile.json",
     "report": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/late-trip-promotion-timing.md",
     "table": "docs/figures/millisecond-converged-solve/trip-quantum/late-trips/promotions.csv",

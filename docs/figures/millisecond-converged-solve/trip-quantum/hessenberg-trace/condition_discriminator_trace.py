@@ -48,7 +48,7 @@ OUTPUT_ROOT = (
     ROOT / "docs/figures/millisecond-converged-solve/trip-quantum/hessenberg-trace"
 )
 DEFAULT_OUTPUT = OUTPUT_ROOT / "profile.json"
-DEFAULT_FIGURE = OUTPUT_ROOT / "condition-trace.png"
+DEFAULT_FIGURE = OUTPUT_ROOT / "jacobi-ratio-vs-constant-discriminator.png"
 DEFAULT_REPORT = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/"
     "condition-discriminator-trace.md"

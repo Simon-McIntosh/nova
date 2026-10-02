@@ -1,7 +1,6 @@
 {
   "artifacts": {
     "event_log": "docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/outer-events.jsonl",
-    "figure": "docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/per-trip.png",
     "receipt": "docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/outer-loop.json",
     "report": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T005158501971-msc-recovery-scoring-on-frozen-partition/outer-loop.md",
     "table": "docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/per-trip.csv"

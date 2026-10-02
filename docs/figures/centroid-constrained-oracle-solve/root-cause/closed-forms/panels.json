@@ -1,0 +1,47 @@
+{
+  "map_shared_levels_wb": [
+    42.807317819477475,
+    35.67276484956456,
+    28.538211879651648,
+    21.403658909738738,
+    14.269105939825828,
+    7.13455296991291
+  ],
+  "residual_levels_wb": [
+    -0.0065969400900996785,
+    -0.004947705067574759,
+    -0.00329847004504984,
+    -0.00164923502252492,
+    0.0,
+    0.0016492350225249183,
+    0.0032984700450498384,
+    0.0049477050675747584,
+    0.0065969400900996785
+  ],
+  "unit_field_levels_wb": [
+    [
+      -63.89856433469485,
+      -45.64119861529549,
+      -27.38383289589612,
+      -9.12646717649676,
+      9.1308985429026,
+      27.388264262301973,
+      45.64562998170133,
+      63.90299570110069
+    ],
+    [
+      -121.98327388522668,
+      -87.13090991801907,
+      -52.27854595081146,
+      -17.42618198360384,
+      17.426181983603783,
+      52.27854595081138,
+      87.130909918019,
+      121.98327388522662
+    ]
+  ],
+  "interpolation": "linear triangulation of persisted samples; triangles masked against wall units",
+  "unit_field_nulls": "No stationary points at R>0: vertical gradient 2*pi*R; radial gradient (-2*pi*Z,-2*pi*R).",
+  "map_null_markers": "Black large triangle/cross: reference; blue small triangle/cross: one-map field; both sets in both flux panels.",
+  "map_caption": "135 cells, exact clipping, analytic start, one map application; no terminal solve. Sup residual and prior comparison are in map-residual.json. The residual panel is a difference field, not equilibrium flux; dashed contours are negative."
+}

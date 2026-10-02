@@ -1,9 +1,0 @@
-restore the cell-local quadratic psi_N=1 membership test
-revision=7e6c01b010f3dace56f6aa85751268b4bfc14d72
-tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-membership-from-the-global-separatrix
-command=python -m pytest -p no:cacheprovider tests/test_chord_membership_global_separatrix.py -vv
-FAILED test_chord_membership_uses_global_separatrix
-cell 7 booked 0.21867395093922562 A instead of 0 A
-cell 64 booked 43.154621678048336 A instead of 0 A
-EXIT=1
-full_log=docs/figures/cut-cell-current-attribution/chord-membership-repair/baseline-test.log

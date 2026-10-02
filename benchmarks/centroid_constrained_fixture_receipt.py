@@ -1833,13 +1833,64 @@ def _gauge_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-DEFAULT_SPAN_OFFSET_RECEIPT = Path(
-    "/home/ITER/mcintos/Code/nova/docs/figures/centroid-constrained-oracle-solve"
-    "/cap-factor-repair/control-positive.json"
+DEFAULT_SPAN_OFFSET_RECEIPT = ROOT / (
+    "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair"
+    "/control-positive.json"
 )
 DEFAULT_SPAN_OFFSET_ROOT = ROOT / (
     "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/span-offset"
 )
+
+
+def _landing_merge(revision: str | None) -> str | None:
+    """The merge that first landed *revision* on the current branch.
+
+    A receipt records the code revision that generated it, so a reader
+    reconciling the receipt against the merge named in the plan's done-when sees
+    two hashes with nothing tying them together.  The earliest merge on the
+    revision's ancestry path to the current tip is that landing merge; when the
+    revision is unknown to the checkout or git is unavailable the field is left
+    unset rather than failing the read.
+    """
+    if not revision:
+        return None
+    try:
+        completed = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(ROOT),
+                "rev-list",
+                "--merges",
+                "--ancestry-path",
+                "--reverse",
+                f"{revision}..HEAD",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except OSError:
+        return None
+    except subprocess.CalledProcessError:
+        return None
+    merges = completed.stdout.split()
+    return merges[0] if merges else None
+
+
+def _root_relative(path: Path) -> str:
+    """Render *path* relative to the module root when it lies under it.
+
+    A committed receipt must not name the checkout it was generated from, or a
+    path from a removed worktree outlives the tree it points at; the committed
+    source receipt is therefore recorded ROOT-relative and only the caller's
+    resolved path for anything outside the tree.
+    """
+    resolved = Path(path).resolve()
+    try:
+        return str(resolved.relative_to(ROOT))
+    except ValueError:
+        return str(resolved)
 
 
 def span_offset_receipt(
@@ -1910,8 +1961,9 @@ def span_offset_receipt(
     analytic_span = abs(float(reading["analytic_span_wb"]))
     report = {
         "schema": "nova.centroid-converged-span-offset",
-        "source_receipt": str(source_receipt),
+        "source_receipt": _root_relative(source_receipt),
         "source_revision": control.get("source_revision"),
+        "landing_merge": _landing_merge(control.get("source_revision")),
         "terminal_state_path": control["terminal_state_path"],
         "terminal_state_sha256_binary64": control["terminal_state_sha256_binary64"],
         "level_tolerance_of_span": LEVEL_TOLERANCE_OF_SPAN,

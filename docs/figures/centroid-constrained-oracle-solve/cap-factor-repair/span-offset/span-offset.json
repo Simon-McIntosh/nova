@@ -40,9 +40,10 @@
     ]
   },
   "compensator_predicted_of_span": 0.0032,
+  "landing_merge": "b470e1fbb9adb013a1c034218cd086556d8182ad",
   "level_tolerance_of_span": 0.001,
   "schema": "nova.centroid-converged-span-offset",
-  "source_receipt": "/home/ITER/mcintos/Code/nova/docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json",
+  "source_receipt": "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json",
   "source_revision": "211d75798c58c167bbb66b177147f7d0ce62ef6b",
   "span": {
     "analytic_axis_flux_wb": 49.93316836557825,

@@ -104,8 +104,14 @@ def _render(report: dict, output: Path) -> None:
     colours = plt.get_cmap("viridis")(np.linspace(0.12, 0.88, len(report["stages"])))
     for colour, stage in zip(colours, report["stages"], strict=True):
         errors = [stage["steps"][str(step)]["forward_relative_error"] for step in STEPS]
-        axis.loglog(STEPS, errors, marker="o", linewidth=2.6, color=colour)
-        axis.annotate(stage["name"], (STEPS[-1], errors[-1]), color=colour, fontsize=12)
+        axis.loglog(
+            STEPS,
+            errors,
+            marker="o",
+            linewidth=2.6,
+            color=colour,
+            label=stage["name"],
+        )
     axis.axhline(1.0e-10, color="0.45", linestyle=":", linewidth=1.2)
     axis.annotate(
         "no-selection control requirement",
@@ -118,6 +124,9 @@ def _render(report: dict, output: Path) -> None:
     axis.tick_params(labelsize=14, width=1.2)
     axis.spines["top"].set_visible(False)
     axis.spines["right"].set_visible(False)
+    axis.legend(
+        frameon=False, fontsize=12, loc="center left", bbox_to_anchor=(1.0, 0.5)
+    )
     figure.tight_layout()
     figure.savefig(output)
     plt.close(figure)

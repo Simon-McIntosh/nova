@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 </head>
 <body>
   <main class="plan-doc">
@@ -365,6 +365,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261001T230257338103-ctta-join-split-contour-tree" data-who="reckon-build" data-when="2026-10-02T00:17:52.550Z">
     <div class="r-comment-body"><p>Added a JAX-traceable, fixed-capacity join/split contour-tree receipt in nova/equilibrium/contour_tree.py; wall contact is recorded once per wall-bearing region at its own highest wall vertex, guarded by a two-region test in tests/test_contour_tree_merge.py (head gate 13 passed).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T230318372995-ctta-hex-contour-mesh" data-who="reckon-build" data-when="2026-10-02T00:30:57.776Z">
+    <div class="r-comment-body"><p>built the piecewise-linear contour mesh on the hex carrier (nova/equilibrium/contour_tree_mesh.py): ContourMesh, a fixed-capacity jax pytree of the three-direction hex-centre triangulation clipped to the multi-unit vessel polygon, wall vertices valued by linear interpolation on the containing triangle; an over-capacity build refuses visibly (overflow flag set, every validity mask empty, indices blanked); gate 8 passed, head suite 14 passed, wall-vertex linear-field error 4.4e-16 Wb</p></div>
 </div>
 </section>
 </main>

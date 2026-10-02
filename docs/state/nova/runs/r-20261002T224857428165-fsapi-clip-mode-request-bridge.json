@@ -1,0 +1,1149 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 7015848,
+      "input_tokens_cumulative": 7015848,
+      "output_tokens": 30563,
+      "output_tokens_cumulative": 30563,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 124,
+    "files": 3,
+    "removed": 4
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "_sampled_flux_with_edges",
+        "path": "tests/test_sampled_flux_batching.py"
+      },
+      "run_function": {
+        "line": 47,
+        "name": "_evaluate_sampled_flux_function",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 70
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 134,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_structured_read_consumes_retained_rows_without_repolishing",
+        "path": "tests/test_structured_read_census_rows.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 284
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 263,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 267
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 605,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 609
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 605,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 609
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 605,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 608
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 605,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 609
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 605,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 609
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_seeding_leaves_the_physical_configuration_identical",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 605,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 609
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 605,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 609
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 605,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 609
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 605,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 609
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_request_clip_mode_builds_each_operator_and_records_each_receipt",
+        "path": "tests/test_forward_solve_clip_mode_request.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "test_omitted_request_clip_mode_follows_the_process_mode",
+        "path": "tests/test_forward_solve_clip_mode_bridge.py"
+      },
+      "window_line": 23
+    },
+    {
+      "existing_function": {
+        "line": 82,
+        "name": "test_request_path_is_bit_identical_and_defaults_round_trip_through_json",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "test_omitted_request_clip_mode_follows_the_process_mode",
+        "path": "tests/test_forward_solve_clip_mode_bridge.py"
+      },
+      "window_line": 35
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_cold_portfolio_seed_policy_solves_and_records_its_selected_branch",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "test_omitted_request_clip_mode_follows_the_process_mode",
+        "path": "tests/test_forward_solve_clip_mode_bridge.py"
+      },
+      "window_line": 35
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_compilation_cache_receipt_observes_reuse_not_the_request_field",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "test_omitted_request_clip_mode_follows_the_process_mode",
+        "path": "tests/test_forward_solve_clip_mode_bridge.py"
+      },
+      "window_line": 35
+    },
+    {
+      "existing_function": {
+        "line": 126,
+        "name": "test_request_execution_is_bit_identical_to_the_keyword_fixture",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "test_omitted_request_clip_mode_follows_the_process_mode",
+        "path": "tests/test_forward_solve_clip_mode_bridge.py"
+      },
+      "window_line": 35
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "6de4568a1f81894c5576feb0475074353ad00075"
+  ],
+  "completed_at": "2026-10-02T23:13:01.119Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T22:49:25Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest process",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture",
+    "nova/equilibrium/forward_operator.py:2627",
+    "self.grid.null",
+    "/",
+    "tests/test_forward_solve_clip_mode_request.py)."
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider -q tests/test_forward_solve_clip_mode_bridge.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T224857428165-fsapi-clip-mode-request-bridge/gate-bridge-head.log"
+  },
+  "impl_move": {
+    "at_complete": 0.985,
+    "at_dispatch": 0.985,
+    "plan": "forward-solve-api",
+    "reason": "repair of a regression in an open followup; plan impl unchanged",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T23:34:01.660340+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T22:49:01Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 27,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 3,
+    "headroom": 9,
+    "mean_context": 140000,
+    "observed_at": "2026-10-02T22:48:34Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 3
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T23:13:01.119Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T224857428165-fsapi-clip-mode-request-bridge/manifest.md",
+  "member": "disposable-r-20261002T224857428165-fsapi-clip-mode-request-bridge",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_forward_solve_clip_mode_bridge.py::test_omitted_request_clip_mode_follows_the_process_mode"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_forward_solve_clip_mode_bridge.py::test_omitted_request_clip_mode_follows_the_process_mode"
+    ],
+    "declaration": "default an omitted request clip mode to chord again; the bridge test must fail",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T224857428165-fsapi-clip-mode-request-bridge/negative-control-bridge-mutated.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T224857428165-fsapi-clip-mode-request-bridge/negative-control-bridge-mutated.log",
+    "test_paths": [
+      "tests/test_forward_solve_clip_mode_bridge.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fsapi-clip-mode-request-bridge",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1235,
+          "cached_input_tokens": 167622,
+          "input_tokens": 168859,
+          "output_tokens": 1146,
+          "reasoning_output_tokens": 121,
+          "total_tokens": 170005,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Defect being repaired: since the request-field merge, ForwardSolveRequest.clip_mode defaults to chord (nova/equilibrium/solve_request.py:491, also the from_policy default at :548), and ForwardProfile._with_source (nova/equilibrium/forward.py:2586) applies it to the operator, so a caller that sets set_support_clip_mode('exact') and then solves through a request built with no mode (for example benchmarks/plasma_cell_terminal_state.py:461 through benchmarks/solovev_certificate.py:2189 _certificate_solve_request) solves in chord. Repair: an omitted clip mode on every request construction route in solve_request.py (the dataclass field, from_defaults, from_policy) resolves to forward_operator.support_clip_mode() when the request is built, so the request, its resolved defaults and its receipt always hold a concrete mode and never None; an explicit mode still wins. Import the getter lazily if a module-level import cycles. The docstring states the mechanism: an omitted mode follows the process mode until every caller passes one. Gate: (1) a new test file tests/test_forward_solve_clip_mode_bridge.py sets the global to exact, builds a request through from_defaults with no mode, solves it on the smallest fixture tests/test_forward_solve_clip_mode_request.py already uses, and asserts that the request, the receipt and the solving operator all carry exact; it also asserts that an explicit chord request under an exact global stays chord, and restores the global in a finally; it fails at the dispatch base with the log kept in the run directory. (2) tests/test_forward_solve_clip_mode_request.py, tests/test_forward_support_clip_mode.py and tests/test_route_solve_requests.py pass with no added failure against the dispatch base. Run the gates in place on this fleet allocation with JAX_PLATFORMS=cpu, one fresh pytest process per file, logs under the run directory. Every uv command carries --no-sync and nothing runs uv sync. Write the manifest before any long step; its status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Make a ForwardSolveRequest built without an explicit clip mode take its mode from the process global at construction",
+    "id": "fsapi-clip-mode-request-bridge",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T22:49:01Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 27,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 3,
+      "headroom": 9,
+      "mean_context": 140000,
+      "observed_at": "2026-10-02T22:48:34Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 3
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T224857428165-fsapi-clip-mode-request-bridge/manifest.md",
+    "negative_control": "default an omitted request clip mode to chord again; the bridge test must fail",
+    "plan": "forward-solve-api",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/solve_request.py",
+      "tests/test_forward_solve_clip_mode_bridge.py",
+      "docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-request-bridge.html",
+      "docs/figures/forward-solve-api/fsapi-clip-mode-request-bridge"
+    ]
+  },
+  "orientation_input_tokens": 1243181.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsapi-clip-mode-request-bridge",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T22:49:05.483856+00:00",
+    "score": 0.49375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5008.588,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solve-api",
+  "plan_impl_at_dispatch": 0.985,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "6de4568a1f81894c5576feb0475074353ad00075",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+    "reviewed_head_sha": "6de4568a1f81894c5576feb0475074353ad00075",
+    "scores": {
+      "durability": 17,
+      "evidence": 13,
+      "fit": 14,
+      "goal_fidelity": 14,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 76
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T224857428165-fsapi-clip-mode-request-bridge",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "84a7ec4d-424f-4e71-9ae5-44e4c54b9d83",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 7015848,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1406.925,
+    "generated_tokens": 30563,
+    "generation_seconds": 905.304,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 60.3,
+    "machine_seconds": 501.621,
+    "peak_input_tokens": 138861,
+    "tokens_per_second": 33.76,
+    "wall_tokens_per_second": 21.72
+  },
+  "time_budget": "45m",
+  "tool_steps": 67.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1416,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T23:13:03Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T22:49:29Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T224857428165-fsapi-clip-mode-request-bridge",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 6111,
+    "worker_pid": 1844320
+  },
+  "worker_seconds": 1378,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

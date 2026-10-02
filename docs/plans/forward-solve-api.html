@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="112">
+<meta name="plan-version" content="113">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -455,6 +455,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20261002T224957594448-fsapi-clip-mode-regression-evidence-audit" data-who="reckon-build" data-when="2026-10-02T23:20:43.139Z">
     <div class="r-comment-body"><p>Audit lists all eight required rows; none claims an exact solve that actually ran chord — rows 1-2 ran exact through eager operator paths (residual match 2.6e-13), rows 3-8 make no exact/chord_cells claim and ran under the plain chord default; the swept surface is the request-solve helper at benchmarks/centroid_constrained_fixture_receipt.py:487-507.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20261002T224857428165-fsapi-clip-mode-request-bridge" data-who="reckon-build" data-when="2026-10-02T23:13:01.119Z">
+    <div class="r-comment-body"><p>An omitted ForwardSolveRequest clip mode now resolves from forward_operator.support_clip_mode() at build time on the dataclass field, from_defaults and from_policy in nova/equilibrium/solve_request.py; the bridge gate passes 1/1 at head, the three required files pass with 1 pre-existing failure (tests/test_route_solve_requests.py, reproduced identically at the dispatch base), and the negative control (an omitted mode defaulting to chord again) fails the bridge test with EXIT=1.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260915T082752949902-fsa-transport-shim-delta-gate" data-who="fsa-transport-shim-delta-gate" data-when="2026-09-15T11:35:00+02:00">
     <div class="r-comment-body"><p>Transport test delta gate did not complete in its single exact scheduler allocation. Job <code>1271211</code> on <code>all_debug</code> ran the base archive <code>0f872fd6</code> through seven modules: 35 passed, 0 failed and 1 xfailed; it reached <code>tests/test_transport_geometry_reference.py</code> at the 59-minute wall and exited <code>143</code> before a terminal receipt. The shim-removal revision <code>fb402f8f</code> was not run, so the added-failure set is <strong>NOT MEASURABLE</strong>, not assumed empty. Full per-module logs and JUnit receipts are under <code>~/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/</code>; the next action is a fresh allocation with sufficient time or an exact plan-approved test selection.</p></div>

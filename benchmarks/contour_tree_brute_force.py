@@ -34,9 +34,9 @@ MAST_EDGE_CAPACITY = 2048
 MAST_TRIANGLE_CAPACITY = 2048
 MAST_ROWS = ((27079, 16), (22475, 50))
 CERTIFICATE_RUNG_PATHS = (
-    (340, "diverted-single-null-production-route-cells-300.json"),
-    (550, "diverted-single-null-production-route-cells-500.json"),
-    (1074, "diverted-single-null-production-route-cells-1000.json"),
+    (340, "diverted-single-null-production-route-cells-300.json", (354, 1024, 768)),
+    (550, "diverted-single-null-production-route-cells-500.json", (560, 1664, 1088)),
+    (1074, "diverted-single-null-production-route-cells-1000.json", (1100, 3200, 2112)),
 )
 
 
@@ -79,7 +79,7 @@ def certificate_rung_fixtures() -> tuple[Fixture, ...]:
     """Read persisted certificate carriers at the available production rungs."""
 
     fixtures = []
-    for rung, filename in CERTIFICATE_RUNG_PATHS:
+    for rung, filename, capacity in CERTIFICATE_RUNG_PATHS:
         path = PART_ROOT / filename
         payload = json.loads(path.read_text(encoding="utf-8"))
         render = payload["render_data"]
@@ -95,9 +95,9 @@ def certificate_rung_fixtures() -> tuple[Fixture, ...]:
             coordinate,
             flux,
             [vessel_unit(wall[:, 0], wall[:, 1], name=payload["case"])],
-            vertex_capacity=2 * count,
-            edge_capacity=6 * count,
-            triangle_capacity=4 * count,
+            vertex_capacity=capacity[0],
+            edge_capacity=capacity[1],
+            triangle_capacity=capacity[2],
         )
         if mesh.overflow:
             raise RuntimeError(f"certificate mesh capacity refused: {path.name}")

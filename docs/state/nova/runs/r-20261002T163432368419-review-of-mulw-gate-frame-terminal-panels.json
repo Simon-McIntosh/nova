@@ -291,6 +291,32 @@
   "plan_impl_at_dispatch": 0.97,
   "plan_link": null,
   "promoted_revision": "fbba99cc277acec3c8dd893d91cfcfade4e9b65b",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5037,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T163432368419-review-of-mulw-gate-frame-terminal-panels",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/review-of-mulw-gate-frame-terminal-panels"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "none",

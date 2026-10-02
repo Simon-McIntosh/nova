@@ -264,28 +264,41 @@
   "release": {
     "process_signalled": false,
     "process_withheld": "process is not alive",
-    "scratch_bytes": 5027,
+    "scratch_bytes": null,
     "scratch_path": "/tmp/reckon-crew-scratch/r-20261001T235505519264-review-of-ctta-hex-contour-mesh",
-    "scratch_removed": true,
-    "scratch_withheld": "",
+    "scratch_removed": false,
+    "scratch_withheld": "scratch directory is no longer present",
     "worktree_audit": {
       "counts": {
         "dirty": 0,
         "disposable": 0,
         "integrated": 0,
-        "live-referenced": 0,
+        "live-referenced": 1,
         "retained-for-resume": 0,
         "unintegrated": 0
       },
       "worktrees": [
         {
-          "available": false,
-          "detail": "tree is no longer available",
-          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-ctta-hex-contour-mesh"
+          "available": true,
+          "claimed_by_live_runs": [
+            "r-20261002T003152788581-review-of-ctta-hex-contour-mesh"
+          ],
+          "classification": "live-referenced",
+          "dirty": [],
+          "head": "0ae2a44059d7b3ab2ecb67983a7f861e4713a95a",
+          "integrated_into": "HEAD",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-ctta-hex-contour-mesh",
+          "reclaimable": false,
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "a live run pointer still claims this worktree; reconcile or stop that run first"
         }
       ]
     },
-    "worktree_released": true
+    "worktree_released": false,
+    "worktree_withheld": "a live run pointer still claims this worktree; reconcile or stop that run first"
   },
   "resume_waiver": null,
   "review": null,

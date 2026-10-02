@@ -22,20 +22,24 @@
   <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
   <meta name="plan-blocks" content="null-identification-authority">
   <meta name="plan-informs" content="cut-cell-current-attribution,dual-branch-selection,topology-read-containment-and-rebank,single-grid-solver-cutover,mast-catalog-gpu-solve,gs-absolute-accuracy-gates">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
   <title>Contour-tree topology authority | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-10-02">
+<meta name="plan-version" content="19">
 </head>
 <body>
   <main class="plan-doc">
     <h2 id="s0">Why this plan exists</h2>
-    <p>On 2026-10-01 the lead ruled that nova's topology read is rebuilt as one authority:
-    a contour tree of the poloidal flux, computed on the hex plasma cells, with no raster
+    <p>On 2026-10-01 the lead ruled that nova's topology read is rebuilt as one authority,
+    meaning one module that is the sole source of every topology verdict: a contour tree
+    of the poloidal flux, computed on the hex plasma cells, with no raster
     step, no normalised flux in any topology decision, and the plasma-current sign carried
     explicitly in every definition. The ruling answered the open decision
     <code>shadowed-contact-withdraws-the-wall-or-only-the-candidate</code> on
-    null-identification-authority. That decision asked which of two pinned tests to keep:
+    null-identification-authority. That decision asked which of two pinned tests' verdicts
+    to keep, with the other test's assertion rewritten to match:
     the 9×9 grid fixture in <code>tests/test_forward_operator_axes.py</code>, which needs
     a finite class margin of −0.319, and the MAST row-10 fixture in
     <code>tests/test_limiter_spline_minimum.py</code>, which needs the wall operand
@@ -76,7 +80,9 @@
     (added in 4.0.0, lifecycle alpha) stores <code>node(:)</code> with
     <code>critical_type</code> (0 minimum, 1 saddle, 2 maximum), <code>r</code>,
     <code>z</code>, <code>psi</code> and the saddle <code>levelset</code>, plus
-    <code>edges</code> as pairs of node indices. The authority emits exactly that.</p>
+    <code>edges</code> as pairs of node indices. The authority writes its tree into that
+    structure against DD 4.1.0 exactly (the structure itself dates from 4.0.0), beside the
+    other DD fields listed in §1.</p>
 
     <p>plasma-cell-topology-authority (shipped, S18) already moved the saddle-aware flood,
     the sign-change census and the private mask onto the plasma cells. This plan replaces
@@ -98,22 +104,24 @@
     </table>
 
     <h2 id="s1">§1 — Conventions and definitions</h2>
-    <p>A module docstring and one typed result carry the contract every later section
-    implements. They state:</p>
+    <p>A module docstring and one result type (a dataclass returned by the read) carry
+    the contract every later section implements. They state:</p>
     <ul>
       <li><strong>Sign.</strong> σ is computed from the state's declared COCOS sign tuple and
       the sign of the plasma current through <code>nova.io.cocos</code>, never hard-coded,
-      so that the magnetic axis is a maximum of σψ. Every comparison of levels is a
-      comparison of σψ in webers. The existing <code>polarity</code> arguments in
-      <code>nova/equilibrium/topology.py</code> derive from this same σ.</li>
+      so that the current-carrying magnetic axis is a local maximum of σψ. It need not be
+      the global maximum; §4 selects which local maximum is primary. Every comparison of
+      levels is a comparison of σψ in webers. The existing <code>polarity</code> arguments
+      in <code>nova/equilibrium/topology.py</code> derive from this same σ.</li>
       <li><strong>Units.</strong> Raw poloidal flux in webers. No normalised flux enters
-      any topology decision; normalised flux may be reported, after the boundary is
-      chosen, for consumers that ask for it.</li>
-      <li><strong>Domain.</strong> The interior of the vessel polygon, tested by true
-      polygon containment over the multi-unit wall, never by a bounding box. The wall is
-      the domain boundary.</li>
-      <li><strong>Carrier.</strong> The hex plasma cells. Nothing in the read resamples
-      onto a raster.</li>
+      any topology decision. Once §4 has chosen the boundary, normalised flux may be
+      reported, referenced to that boundary level, for consumers that ask for it.</li>
+      <li><strong>Domain.</strong> The closed vessel region, tested by true polygon
+      containment over the multi-unit wall, never by a bounding box. The wall polyline is
+      the domain boundary, and its vertices belong to the domain as boundary
+      vertices.</li>
+      <li><strong>Carrier.</strong> The hex plasma cells, with the flux valued at their
+      centres. Nothing in the read resamples onto a raster.</li>
       <li><strong>Output.</strong> A mapping onto DD 4.1.0, written under COCOS 17 as that
       version declares:
         <ul>
@@ -122,7 +130,8 @@
           <li>the class as <code>boundary.type</code> (0 limiter, 1 diverted);</li>
           <li>the boundary level as <code>boundary.psi</code>;</li>
           <li>the axis level as <code>global_quantities.psi_magnetic_axis</code>;</li>
-          <li>the wall clearance as <code>boundary.closest_wall_point</code>.</li>
+          <li>the wall clearance as <code>boundary.closest_wall_point</code>, with its
+          <code>r</code>, <code>z</code> and <code>distance</code>.</li>
         </ul>
       </li>
     </ul>
@@ -131,7 +140,8 @@
     and edges overlaid. The figure follows the repository plotting rules.</p>
     <p><strong>Done when:</strong> the docstring and typed result exist and are cited by
     §2 to §5; σ is derived through <code>nova.io.cocos</code>, and a state whose plasma
-    current is flipped without flipping ψ is refused (negative control); and the figure is
+    current is flipped without flipping ψ raises a named convention error before any tree
+    is built (negative control: the test asserts that exception); and the figure is
     committed under <code>docs/figures/contour-tree-topology-authority/</code> with an SVG
     beside the PNG.</p>
 
@@ -139,17 +149,19 @@
     <p>The tree is built combinatorially, so its topology cannot depend on a tolerance:</p>
     <ul>
       <li><strong>Mesh.</strong> Hex cell centres form a triangular lattice. Triangulate
-      the adjacent centres (the three-direction mesh), clipped to the vessel polygon, and
-      add wall vertices on the polyline with flux evaluated from the field representation
-      chosen in §3.</li>
+      the adjacent centres (the three-direction mesh), clip that triangulation to the
+      vessel polygon, and add wall vertices on the polyline. Each wall vertex's flux is interpolated linearly
+      on the triangle that contains it, from the same piecewise-linear field the tree is
+      built on, so §2 needs no smooth field. §3's smooth representation refines node
+      positions and values; it never changes the tree's topology.</li>
       <li><strong>Trees.</strong> Compute the join tree of σψ (superlevel sets, descending
       from the axis) and the split tree on that piecewise-linear field, then merge them
       into the contour tree. Break ties by simulation of simplicity, so that no two values
       are ever equal.</li>
       <li><strong>The wall.</strong> Connect every wall vertex to one virtual outside node
       valued below every interior level. The moment a region first meets the wall then
-      appears in the join tree as its join with the outside node, at that wall vertex's
-      level.</li>
+      appears in the join tree as its join with the outside node, at the level of the
+      highest wall vertex in that region: the first one met as the level descends.</li>
       <li><strong>Tracing.</strong> The construction is fixed-shape and traceable under
       <code>jit</code> and <code>vmap</code>, with the node and edge capacities stated
       and any overflow refused visibly on the receipt.</li>
@@ -169,11 +181,13 @@
     <p>Each interior tree node is located and valued on a smooth field representation:
     Newton-polished, Hessian-classified, and contained in the vessel polygon. The node's
     polished type must agree with its combinatorial type, and the polished levels must
-    keep the tree's order; any disagreement is reported, not repaired silently. This
+    keep the tree's order. A disagreement is never repaired silently: it is written as a
+    named receipt field, and the state's topology is marked unqualified. This
     replaces the sign-change census and the raster census as the source of critical points.
-    The own-node quadratic polish remains available as a method, because on the hex
-    carriers it admitted the saddle on 9 of 9 rungs and the axis on 15 of 15. The field
-    representation itself is the open decision below.</p>
+    The own-node quadratic polish stays one of the candidate representations, because on
+    the hex carriers it admitted the saddle on 9 of 9 rungs and the axis on 15 of 15. The
+    choice of representation is the open decision below, and the one chosen is the only
+    route in production.</p>
     <p><strong>Done when:</strong></p>
     <ul>
       <li>on the Solov'ev fixtures, the axis and every X-point sit within the certificate
@@ -189,15 +203,22 @@
     <h2 id="s4">§4 — Primary selection, regions, class and margin</h2>
     <p>Everything below is read off the tree:</p>
     <ul>
-      <li><strong>Primary O-point:</strong> the in-vessel maximum of σψ whose region
-      carries the plasma current.</li>
+      <li><strong>Primary O-point:</strong> among all in-vessel local maxima of σψ (not
+      necessarily the global maximum), the one whose tree branch holds the largest share
+      of the plasma current. The current is summed over the hex cells of that branch down
+      to its first event, which is the higher of its first interior saddle and its first
+      join with the outside node. A tie raises the same named error as §1's convention
+      check.</li>
       <li><strong>Plasma region:</strong> the axis component of the superlevel set of σψ,
       followed down the tree from the primary O-point.</li>
-      <li><strong>The first event</strong> on that path is the larger of two levels:
+      <li><strong>The first event</strong> is read only along the primary O-point's own
+      path down the join tree. "First" always means the highest σψ level, the first one
+      met as the level descends from the axis. It is the larger of two levels:
         <ul>
-          <li>the first interior join saddle (the primary X-point);</li>
-          <li>the first wall contact made without passing through a saddle (the
-          limiter).</li>
+          <li>the highest in-vessel join saddle on that path (the primary X-point),
+          whether it lies above or below the wall contact;</li>
+          <li>the first join of that path with the outside node, i.e. a wall contact
+          reached without passing through any saddle (the limiter).</li>
         </ul>
       If the first event is the saddle, the class is diverted and the boundary passes
       through the X-point. If it is the wall contact, the class is limited and the
@@ -205,21 +226,33 @@
       <li><strong>Private regions:</strong> the other branches that join at the primary
       X-point. A wall contact inside a private region can never be a limiter, which is the
       precise meaning of "shadowed".</li>
-      <li><strong>Margin:</strong> <code>σψ_x − σψ_lim</code> in webers, where
-      <code>ψ_lim</code> is the level of the first wall contact that is not in a private
-      region. It is positive for diverted states and negative for limited ones, finite on
-      both sides, and independent of the solve box.</li>
+      <li><strong>Margin:</strong> <code>σψ_x − σψ_lim</code> in webers.
+      <code>σψ_lim</code> is the highest σψ over the wall vertices that do not lie in a
+      private region of the primary X-point. For a limited state this is the limiter
+      level itself. For a diverted state it is the level at which the plasma would first
+      touch the wall outside the divertor's private flux. <code>σψ_x</code> is the
+      primary X-point's level as defined above, so a limited state with an in-vessel
+      saddle on its path still has one. The margin is positive for diverted states and
+      negative for limited ones, finite on both sides, and independent of the solve box.
+      A state whose path carries no in-vessel saddle at all is limited and has no
+      margin: the receipt records <code>margin: none (no in-vessel saddle)</code>
+      instead of an infinity.</li>
     </ul>
     <p><strong>Done when:</strong></p>
     <ul>
       <li>the 9×9 grid fixture reads limited with a finite negative margin;</li>
       <li>MAST row 10 reads diverted with a finite positive margin, and its gap to the
       centre column is reported in millimetres;</li>
-      <li>MAST 27079 row 16 reads limited, with the traced boundary within one pitch of the
-      wall and the boundary flux equal to the field sampled at the contact point;</li>
+      <li>MAST 27079 row 16 reads limited, with the traced boundary within one hex-cell
+      pitch (the centre spacing at the contact) of the wall, and the boundary flux equal
+      to the field sampled at the contact point;</li>
       <li>every Solov'ev certificate row reads its analytic class;</li>
+      <li>a limited state whose path carries no in-vessel saddle records
+      <code>margin: none (no in-vessel saddle)</code> rather than a number or an
+      infinity;</li>
       <li>one reversed-current MAST shot from the 22475–22626 block gives the same tree and
-      class as its σ-mirrored state;</li>
+      class as its own state mirrored synthetically (ψ negated, plasma current flipped),
+      a self-consistency check on that one state;</li>
       <li>each fixture writes the DD 4 fields of §1 and survives an IDS round trip through
       <code>validate()</code>.</li>
     </ul>
@@ -239,7 +272,10 @@
     </ul>
     <p>The following are deleted: <code>_axis_component_before_level</code>, the sightline
     test, the raster hex partition built from the solve raster, the census contact
-    polishing path, and every normalised-flux classification quantity.</p>
+    polishing path, and every normalised-flux quantity that feeds a classification
+    (<code>u</code>, <code>u_x</code>, <code>u_wall</code>, <code>class_margin</code>
+    and their inputs). Normalised flux reported after the boundary is chosen, as §1
+    permits, stays.</p>
     <p>The two pinned tests are rewritten from §4's definitions: the grid fixture asserts a
     finite negative margin in webers, and the MAST row-10 test asserts diverted with a
     finite positive margin and its private-region contact declined. Neither is deleted.
@@ -253,31 +289,90 @@
       processes against a stated base;</li>
       <li>the topology figures of null-identification-authority and cut-cell-current-attribution
       that drew raster-read classes are regenerated or retracted;</li>
-      <li>a search of the touched modules finds no classification read of normalised
-      flux.</li>
+      <li>a search of the touched modules finds no normalised-flux value feeding a
+      classification; reporting reads permitted by §1 are excluded from the search.</li>
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="field-representation-on-hex-cells" data-sections="s3,s4" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which smooth field representation locates and values the tree's critical points, and traces the saddle level sets, on the hex carrier?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="three-direction-box-spline">a global C² quartic box spline on the three-direction mesh of hex centres: global and smooth like the tensor spline, and native to the hex lattice</button>
-          <button class="r-opt" data-value="own-node-quadratic">the per-cell own-node quadratic already used by the clip: measured 9/9 saddles and 15/15 axes on hex carriers, but only C⁰ across cells, and refuted twice for separatrix shape</button>
-          <button class="r-opt" data-value="tensor-spline-on-raster">the existing global tensor spline on the solve raster: proven, but it keeps a raster in the topology read, against the ruling</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="field-representation-on-hex-cells" data-choice="" data-by="" data-when="" data-sections="s3,s4">
+    <p class="r-dec-q">Which smooth field representation locates and values the tree&#x27;s critical points, and traces the saddle level sets, on the hex carrier?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="three-direction-box-spline">a global C² quartic box spline on the three-direction mesh of hex centres: global and smooth like the tensor spline, and native to the hex lattice</button>
+      <button class="r-opt" data-value="own-node-quadratic">the per-cell own-node quadratic already used by the clip: measured 9/9 saddles and 15/15 axes on hex carriers, but only C⁰ across cells, and refuted twice for separatrix shape</button>
+      <button class="r-opt" data-value="tensor-spline-on-raster">the existing global tensor spline on the solve raster: proven, but it keeps a raster in the topology read, against the ruling</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-ctta-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-fd" data-written-at="2026-10-01">
-        <h4 class="r-fu-title">Land §1 and §2, then lock the field representation before §3</h4>
-        <div class="r-fu-body"><p>§1 and §2 need no smooth field and can run first. §2's brute-force check is the positive control for the tree. Lock <code>field-representation-on-hex-cells</code> from §2's fixtures before §3 is dispatched, because §3 and §4's saddle level sets depend on it.</p></div>
-        <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority §1</pre>
-      </article>
-    </section>
-  </main>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ctta-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land §1 and §2, then lock the field representation before §3</h4>
+    <div class="r-fu-body"><p>§1 and §2 need no smooth field and can run first. §2's brute-force check is the positive control for the tree. Lock <code>field-representation-on-hex-cells</code> from §2's fixtures before §3 is dispatched, because §3 and §4's saddle level sets depend on it.</p></div>
+    <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority §1</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T205214115813-review-of-contour-tree-topology-authority" data-who="reckon-build" data-when="2026-10-01T21:32:29.777Z">
+    <div class="r-comment-body"><p>Restated nova:contour-tree-topology-authority (revision 5bc144e47, body digest sha256:22fde66196d8b6c61858f4a62c41d461393592ccef31c4bb595557f44247a6f1) in report.md: intent in the reviewer's own words, the one open decision field-representation-on-hex-cells with all three options, and all five done-whens; no plan file edited.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T212716706471-review-of-ctta-conventions-contract" data-who="reckon-build" data-when="2026-10-01T21:53:29.991Z">
+    <div class="r-comment-body"><p>Independent review of r-20261001T210753112544-ctta-conventions-contract stored as a parsed record scoring all five dimensions (goal_fidelity 19, evidence 15, fit 19, durability 14, scope_discipline 20; total 87) with verdict pass.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T213349463123-review-2-of-contour-tree-topology-authority" data-who="reckon-build" data-when="2026-10-01T21:53:43.010Z">
+    <div class="r-comment-body"><p>Review-2 restates nova:contour-tree-topology-authority (revision b65fcbf70, plan digest sha256:9640bc1a…) at its revised definitions and enumerates all 122 prose sentences, flagging 9 with two-or-more readings — the material one being §4's margin (id 093), whose σψ_x is undefined for a limited state whose path carries no interior saddle.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T222457612023-review-of-ctta-conventions-contract" data-who="reckon-build" data-when="2026-10-01T22:51:24.692Z">
+    <div class="r-comment-body"><p>Independent review of r-20261001T210753112544-ctta-conventions-contract at head fb98795f stored as a parsed record scoring all five dimensions (goal_fidelity 19, evidence 18, fit 19, durability 17, scope_discipline 20; total 93) with verdict pass, added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20261002T0055-contract" data-who="reckon-build" data-when="2026-10-02T00:55:00+02:00">
+    <div class="r-comment-body">§1 contract landed at d22c2a2d1 (re-review 19/18/20/17/19); §1 stays open for its explanatory figure, which is being repaired on four visual findings.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T210753112544-ctta-conventions-contract" data-who="reckon-build" data-when="2026-10-01T22:22:31.881Z">
+    <div class="r-comment-body"><p>Replaced the circular sigma assertion with an analytic Solov'ev axis anchor: sigma*psi is a strict local maximum at the magnetic axis for COCOS 11 and 17 at both Ip signs, measured (6 passed; flipped-sign control 4 failed).</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20261002T0140-s1-done" data-who="reckon-build" data-when="2026-10-02T01:40:00+02:00">
+    <div class="r-comment-body">§1 done: the contract (d22c2a2d1) and the explanatory figure (46627a98d) landed. Regenerating the figure from the computed tree, with the private-region wall maximum as its own node, joins the §2 DAG.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T211429585244-ctta-explanatory-figure" data-who="reckon-build" data-when="2026-10-01T23:08:23.429Z">
+    <div class="r-comment-body"><p>Rendered and committed (b23118dcd, repaired c36d828f2) the plan's explanatory figure from the diverted single-null Solovev reference; 3 nodes (magnetic-axis maximum, X-point saddle, virtual outside node at the first wall contact with no flux of its own), 2 edges, node count minus edge count = 1; the joining edge carries its wall-contact level and the private-region contact that makes the class diverted; PNG, SVG, JSON receipt and run log under docs/figures/contour-tree-topology-authority/explanatory/.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T230837840318-review-of-ctta-explanatory-figure" data-who="reckon-build" data-when="2026-10-01T23:53:31.564Z">
+    <div class="r-comment-body"><p>independent review of r-20261001T211429585244-ctta-explanatory-figure stored as a parsed record scoring all five dimensions (19/14/19/12/20, total 84, verdict pass) with three follow-on findings, at reviewed_base_sha 48a40fab18be098a17ea5df6d631c1b153a027f2 and reviewed_head_sha c36d828f225ebb5fc127a4d4b8af9f1a10a39f00; added_failure_count 0 and added_failure_ids [] because the reviewed run's manifest carries no baseline_suite/after_suite gate-log arms (a figure node).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T223737459474-review-of-ctta-prior-art-scout" data-who="reckon-build" data-when="2026-10-01T22:54:50.785Z">
+    <div class="r-comment-body"><p>reviewed run r-20261001T215616124162-ctta-prior-art-scout (base b2cc96f4 -&gt; head 1a9644b06, 2 commits, docs-only). Independent review stored at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261001T215616124162-ctta-prior-art-scout.json and its .at-1a9644b06 twin. Scores goal_fidelity 17, evidence 18, scope_discipline 20, durability 9, fit 18, total 82, verdict pass. One defect (headline verdict tally 5/3/1 is not reproducible from the row table's 3/4/2), one note (two symbol-line precision misses), one follow-on (gate skips shorthand citations and is not committed).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261002T0105-reuse" data-who="reckon-build" data-when="2026-10-02T01:05:00+02:00">
+    <div class="r-comment-body">reuse map landed at c94c95408; §2 dispatches as a mesh node and a tree node sharing a vertex/edge interface, then the brute-force positive control.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T215616124162-ctta-prior-art-scout" data-who="reckon-build" data-when="2026-10-01T22:36:13.349Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/contour-tree-topology-authority/ctta-prior-art-scout.html — reuse map for sections 2 to 4: nine capability rows carrying 74 path:line citations, each verified to resolve to an existing line; imas-efit already holds a 4131-line Fortran contour tree with a wall variant, the production merge-tree limited-vs-diverted decision and a polarity-aware private-flux classifier, plus a Python oracle agreeing with truth to about 5e-6 Wb; nova holds the jitted multi-unit containment, component-labelling, link-admissibility and two critical-point polish kernels, and no join tree; simulation-of-simplicity tie breaking and the containing-triangle wall-vertex flux lookup are absent in every searched tree.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T233317235818-review-of-ctta-join-split-contour-tree" data-who="reckon-build" data-when="2026-10-01T23:43:34Z">
+    <div class="r-comment-body"><p>Stored a parsed fail review (63/100) against a126966ff; the record identifies two blocking defects and the reviewed run's missing baseline arm.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T235505519264-review-of-ctta-hex-contour-mesh" data-who="reckon-build" data-when="2026-10-02T00:17:48.636Z">
+    <div class="r-comment-body"><p>Attached an independent parsed review (74/100, verdict fail) to run r-20261001T230318372995-ctta-hex-contour-mesh at head fcc5f34ba: one blocking mesh defect (over-capacity build truncates arrays so valid triangles index beyond the truncated vertex array), one blocking missing-guard test, one blocking empty baseline/after arm, one follow-on receipt-revision defect; independent gate 8 passed EXIT=0</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T002038975664-review-of-ctta-join-split-contour-tree" data-who="reckon-build" data-when="2026-10-02T00:42:08.821Z">
+    <div class="r-comment-body"><p>Independent review of r-20261001T230257338103-ctta-join-split-contour-tree at head a70aa0cb0 stored as a parsed record (goal_fidelity 18, evidence 18, scope_discipline 20, durability 15, fit 20; total 91; verdict pass) with three follow-on findings; added_failure_count 0 from the reviewed run's own baseline (a126966ff, 12 passed EXIT=0) and after (a70aa0cb0, 13 passed EXIT=0) gate arms.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261002T0725-tree-mesh" data-who="reckon-build" data-when="2026-10-02T07:25:00+02:00">
+    <div class="r-comment-body">tree (b187b46d4) and mesh (068e57e53) landed; §2 stays open for the end-to-end brute-force check on the Solov'ev and MAST fixtures and the figure regenerated from the computed tree.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T230257338103-ctta-join-split-contour-tree" data-who="reckon-build" data-when="2026-10-02T00:17:52.550Z">
+    <div class="r-comment-body"><p>Added a JAX-traceable, fixed-capacity join/split contour-tree receipt in nova/equilibrium/contour_tree.py; wall contact is recorded once per wall-bearing region at its own highest wall vertex, guarded by a two-region test in tests/test_contour_tree_merge.py (head gate 13 passed).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T230318372995-ctta-hex-contour-mesh" data-who="reckon-build" data-when="2026-10-02T00:30:57.776Z">
+    <div class="r-comment-body"><p>built the piecewise-linear contour mesh on the hex carrier (nova/equilibrium/contour_tree_mesh.py): ContourMesh, a fixed-capacity jax pytree of the three-direction hex-centre triangulation clipped to the multi-unit vessel polygon, wall vertices valued by linear interpolation on the containing triangle; an over-capacity build refuses visibly (overflow flag set, every validity mask empty, indices blanked); gate 8 passed, head suite 14 passed, wall-vertex linear-field error 4.4e-16 Wb</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T003152788581-review-of-ctta-hex-contour-mesh" data-who="reckon-build" data-when="2026-10-02T00:43:53.092Z">
+    <div class="r-comment-body"><p>stored an independent review record for run r-20261001T230318372995-ctta-hex-contour-mesh at reviewed head b9658be0 (base f9603c3b); scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 17, fit 18, total 90, verdict pass; the prior review&#x27;s three blocking defects (truncating overflow path, unobservable capacity test, empty baseline/after arms) are repaired and independently verified — over-capacity build refuses visibly, the guard is falsified red by mutation, and both gate arms are present with 0 added failures</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

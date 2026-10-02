@@ -1830,6 +1830,11 @@ Receipt: <code>/nova/figures/forward-solver-route-integrity/single-site-krylov/b
     59-minute limit and the census runs as one job per row, each recording its row
     as it lands.</p>
   </section>
+  <section id="one-nova-lane-launcher">
+    <h2>One nova lane launcher</h2>
+    <p>Run <code>r-20261001T211450582325-fsri-one-nova-lane-launcher</code> (local lane), merged at <code>8b5e5f33b</code> from <code>737dfc022</code>, <code>707552973</code> and <code>99282e743</code>. <code>scripts/nova_lane/run.sh</code> takes a script or pytest target, a rung preference (H200, then titan, then CPU), cores, memory and an absolute log path. It applies the repository's SLURM rules: a real submission rather than a <code>--test-only</code> decision; an explicit <code>--mem</code>, refusing <code>--mem=0</code>; TMPDIR at submit and in the payload; no uv on the compute node; and a fall to the next rung only when squeue shows a real submission pending on a resource or configuration reason. It records the rung, job id and revision in the log header. <code>scripts/h200_test_lane/run.sh</code> is now a thin caller. The first review found it had dropped the H200 cache sampler and the pin diagnostic; both are restored. <code>tests/test_nova_lane_launcher.py</code> asserts the dry-run lines, the <code>--mem=0</code> refusal (its negative control fails) and the rung fallback against a stubbed scheduler. Re-review 19/16/19/17/19. Not yet exercised: a real pending submission falling to titan, because the worker ran inside the fleet allocation, where sbatch is reckon's nested-launch shim.</p>
+  </section>
+
 </main>
 </body>
 </html>

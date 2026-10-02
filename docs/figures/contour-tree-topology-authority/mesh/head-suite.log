@@ -1,0 +1,8 @@
+# revision: 2dce6bb3b112fe874b8ba97835640a5597cd87ae
+# tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh (in place)
+# cwd: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh
+# module.__file__: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh/nova/equilibrium/contour_tree_mesh.py
+# command: PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh TMPDIR=/tmp JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest tests/test_contour_tree_mesh.py tests/test_contour_tree_conventions.py -q -p no:cacheprovider
+..............                                                           [100%]
+14 passed in 8.21s
+EXIT=0

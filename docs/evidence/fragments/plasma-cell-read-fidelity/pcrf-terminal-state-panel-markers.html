@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="plasma-cell-read-fidelity">
+<meta name="plan-evidence-for" content="plasma-cell-read-fidelity">
+<title>Terminal-state analytic panel markers (landing record)</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Terminal-state analytic panel markers</h1></header>
+<section id="landing">
+<p>The analytic panel already draws its reference null set once and last at HEAD <code>48a40fab18be098a17ea5df6d631c1b153a027f2</code>; no source change was needed. The draw-order fix was landed earlier at <code>e8b613cef78def96918b95c9eb1dd424e4af76ad</code> (ancestor of HEAD).</p>
+<p>In <code>benchmarks/plasma_cell_terminal_state.py</code>: the default <code>draw_order=&quot;reference-last&quot;</code> is declared at line 307 and line 596; the analytic column is drawn once in the reference style (lines 376&ndash;382); every other column draws the panel-state markers first and the reference markers after, so the reference set stays visible where the two coincide (lines 383&ndash;389). The original ordering is reachable as the declared negative control (<code>panel-last</code>, lines 365&ndash;375). The pixel census <code>_cluster_pixel_census</code> is at lines 248&ndash;301.</p>
+<p><strong>Measure (fleet allocation job 1277272, <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>, no solve &mdash; re-render from the committed receipt only).</strong> The census counts style-coloured pixels inside the box (halfwidth 16 px) centred on the analytic saddle cluster. On the analytic panel of case 0 (<code>diverted-single-null</code>), the census reports <code>reference_pixels=675, panel_pixels=0</code> under <code>reference-last</code>: the large reference markers are present and detected (675 px, a positive control that the box is not empty) and no panel-state markers are overpainted onto them. The declared negative control, <code>draw_order=panel-last</code>, reports <code>reference_pixels=300, panel_pixels=333</code> on the same panel: the small panel-state markers overpaint the large reference markers and the reference pixels fall by 375.</p>
+<p>Re-rendered PNG and SVG: <a href="/nova/figures/plasma-cell-read-fidelity/terminal-state-markers/terminal-state-trip-arms.png">terminal-state-trip-arms.png</a> (<a href="/nova/figures/plasma-cell-read-fidelity/terminal-state-markers/terminal-state-trip-arms.svg">SVG companion</a>), with the census for both arms in <a href="/nova/figures/plasma-cell-read-fidelity/terminal-state-markers/terminal-state-markers-census.json">terminal-state-markers-census.json</a>.</p>
+</section>
+</main></body>
+</html>

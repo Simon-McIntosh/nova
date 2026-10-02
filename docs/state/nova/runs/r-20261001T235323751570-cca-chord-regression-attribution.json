@@ -1,0 +1,377 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "20da3b290955d0479d94be9601c77ef819ca5189",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 13000153,
+      "input_tokens_cumulative": 13000153,
+      "output_tokens": 59655,
+      "output_tokens_cumulative": 59655,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 2442,
+    "files": 22,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "8ba46fa50069d4cf99946a0b1b2cde0dc3bc227c",
+    "6cd83e2e7cdc857b70f238ba320b3811b1d45edb",
+    "6297324c6f9b053d25b6c3fba667162c849ba04b"
+  ],
+  "completed_at": "2026-10-02T00:42:15.446Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-01T23:53:42Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "0.65"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/plasma_cell_map_fidelity.py --cpu-preflight",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T235323751570-cca-chord-regression-attribution/docs/figures/cut-cell-current-attribution/chord-regression-attribution/logs/de29a1a30/run.log"
+  },
+  "impl_move": {
+    "at_complete": 0.8,
+    "at_dispatch": 0.8,
+    "plan": "cut-cell-current-attribution",
+    "reason": "an attribution measurement; section 6 and section 11 move with the reimplementation",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T00:53:25.828423+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-01T23:53:25Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 5,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 13,
+    "headroom": 2,
+    "mean_context": 148000,
+    "observed_at": "2026-10-01T23:53:20Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T00:42:15.446Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T235323751570-cca-chord-regression-attribution/manifest.md",
+  "member": "s19f-local-5",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "cca-chord-regression-attribution",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 4105,
+          "cached_input_tokens": 742279,
+          "input_tokens": 746386,
+          "output_tokens": 1431,
+          "reasoning_output_tokens": 423,
+          "total_tokens": 747817,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Using benchmarks/plasma_cell_map_fidelity.py with --cpu-preflight where that flag exists (older revisions assert a GPU, so for those run the row through the benchmark's measure function in a short driver that skips only the backend assertion; say which), with no source edits, in place on the fleet allocation (TMPDIR=/tmp, JAX_PLATFORMS=cpu), measure two rows, weak-rotation-reactor-static chord at requested -110 and diverted-single-null chord at requested -110, at six revisions, each from a git archive extraction under /tmp with PYTHONPATH at that extraction: de29a1a30 (the committed receipt's revision), 427f05e10^1 and 427f05e10 (either side of the exact-moment repair), 92613fd3d^1 (fc13e55fb, just before the chord-membership merge), b0a0676df (the chord lineage with a59529f20 but before the applied flag) and 92613fd3d (after the merge). Each log header records the revision, the extraction path and the imported nova.equilibrium.clip_quadrature.__file__, so the arm provably measured that revision. Write docs/figures/cut-cell-current-attribution/chord-regression-attribution/attribution.md with one row per (revision, case): sup_relative and centroid dR, dZ. Name the first revision where weak chord sup leaves about 1e-4, and the commit(s) between the last good and the first bad revision. Force-add the logs; status complete.",
+    "estimated_hours": 0.8,
+    "goal": "Attribute the chord-mode map-fidelity regression to a revision by measuring one weak-rotation and one diverted chord row at six revisions",
+    "id": "cca-chord-regression-attribution",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-01T23:53:25Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 5,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 13,
+      "headroom": 2,
+      "mean_context": 148000,
+      "observed_at": "2026-10-01T23:53:20Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T235323751570-cca-chord-regression-attribution/manifest.md",
+    "negative_control": "",
+    "plan": "cut-cell-current-attribution",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/cut-cell-current-attribution/chord-regression-attribution",
+      "docs/evidence/fragments/cut-cell-current-attribution/cca-chord-regression-attribution.html",
+      "docs/figures/cut-cell-current-attribution/cca-chord-regression-attribution"
+    ]
+  },
+  "orientation_input_tokens": 9417806.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "cca-chord-regression-attribution",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-01T23:53:28.199723+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "cut-cell-current-attribution",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_revision": "6297324c6f9b053d25b6c3fba667162c849ba04b",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 7571212878,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution",
+    "scratch_removed": true,
+    "scratch_warning": "run scratch /tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution is 7571212878 bytes, above the 2147483648 byte budget",
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-regression-attribution"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "20da3b290955d0479d94be9601c77ef819ca5189",
+    "reviewed_head_sha": "6297324c6f9b053d25b6c3fba667162c849ba04b",
+    "scores": {
+      "durability": 18,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 92
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261001T235323751570-cca-chord-regression-attribution",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "f27f003c-b1de-4a1c-9773-765e67cfb5a5",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 13000153,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 2902.403,
+    "generated_tokens": 59655,
+    "generation_seconds": 2057.724,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 38.8,
+    "machine_seconds": 844.679,
+    "peak_input_tokens": 186005,
+    "tokens_per_second": 28.99,
+    "wall_tokens_per_second": 20.55
+  },
+  "time_budget": "60m",
+  "tool_steps": 95.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 2913,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T00:42:16Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-01T23:53:47Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261001T235323751570-cca-chord-regression-attribution",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 13535,
+    "worker_pid": 402115
+  },
+  "worker_seconds": 2874,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

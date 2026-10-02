@@ -1,0 +1,6 @@
+# revision: 707552973b50e4e0ef967555ebf2f50296604657
+# tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher
+# command: bash -n scripts/nova_lane/run.sh scripts/h200_test_lane/run.sh; shellcheck if present
+bash -n scripts/nova_lane/run.sh: OK
+bash -n scripts/h200_test_lane/run.sh: OK
+shellcheck: not installed on this host - syntax checked with bash -n only

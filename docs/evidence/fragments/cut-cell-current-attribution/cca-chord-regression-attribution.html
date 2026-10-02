@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>cca-chord-regression-attribution — chord map-fidelity regression attribution</title>
+</head>
+<body>
+<section id="cca-chord-regression-attribution">
+<h2>Chord map-fidelity regression attribution</h2>
+
+<p><strong>Node</strong>: <strong>Plan</strong>:
+<code>nova:cut-cell-current-attribution</code> §6 ·
+<strong>Base</strong>: <code>20da3b290</code>.</p>
+
+<p><strong>Measure.</strong> Two chord rows of
+<code>benchmarks/plasma_cell_map_fidelity.py</code> at requested &minus;110
+cells (weak-rotation-reactor-static and diverted-single-null), analytic-state
+map, no solve, on the CPU witness, at six revisions each extracted with
+<code>git archive</code> under the run scratch and imported by
+<code>PYTHONPATH</code>. Each log header records the revision, the extraction
+path and the imported <code>nova.equilibrium.clip_quadrature.__file__</code>.
+The four revisions whose benchmark asserts a GPU inline were run through that
+revision's own <code>measure_pair</code> from a driver that removes only the
+backend-assertion line; the two carrying <code>--cpu-preflight</code> were run
+through that flag.</p>
+
+<p><strong>Result.</strong> Weak-rotation chord <code>sup_relative</code> is
+9.54029e-05 at <code>de29a1a30</code>, at both sides of the exact-moment repair
+(<code>6c519684e</code>, <code>427f05e10</code>) and at <code>fc13e55fb</code>
+(<code>92613fd3d^1</code>), then 1.86063e-02 at <code>b0a0676df</code> and
+<code>92613fd3d</code>. The first revision where weak chord sup leaves
+&asymp;1e-4 is <code>b0a0676df</code>; the commits between the last good
+(<code>fc13e55fb</code>) and the first bad are the chord-membership lineage
+<code>3ba7f6b00</code>, <code>a59529f20</code> (the functional change) and
+<code>c8260b44c</code>.</p>
+
+<p><strong>Artifact</strong>:
+<code>docs/figures/cut-cell-current-attribution/chord-regression-attribution/attribution.md</code>
+with the twelve row receipts under <code>.../logs/</code>.</p>
+</section>
+</body>
+</html>

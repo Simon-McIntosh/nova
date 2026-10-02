@@ -18,8 +18,8 @@
   <title>MAST Non-axisymmetric Physics | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="4">
+<meta name="plan-modified" content="2026-10-02">
+<meta name="plan-version" content="5">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -132,6 +132,9 @@ Done when
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-20260826T085002040281" data-who="sprint-review" data-when="2026-08-26">
     <div class="r-comment-body"><p><strong>Scope rescope (2026-08-26 review):</strong> roughly half the scope declared here and in f-mnap-vacuum-refinement was delivered under shipped S5/S6 siblings and must not be re-executed: the evidence-backed nominal parameter model (<code>nova/imas/mast_seed_parameters.py</code>), the vacuum cohort (<code>nova/imas/mast_vacuum_cohort.py</code>), the fitted parameters (<code>nova/imas/mast_fitted_parameters.py</code>) and the error-field screen (<code>nova/imas/mast_error_field_screen.py</code>), plus most of the diagnostic adjudication via the flux-loop and corrected-read-layer plans. What genuinely remains: passive R/L identification (only the nominal seed exists - <code>mast_seed_parameters.py</code> records pf_passive loop resistance as absent), admission of the 36 saddle loops as the n-resolving constraint set (geometry is written into the magnetics IDS but nothing in <code>nova/calibrate/</code> consumes it), the unsourced saddle traversal sign, TF ripple / error-field structure, and productization with the ambix 3D donor cutover - plus the localised-tail-width deliverable owed back to mast-misfit-toroidal-harmonics (f-mth-007). Effort recalibrated 4h to 16h; the plan moved from the closed ordering-artifact sprint S3 to S17, scheduled after the S16 EFIT baseline demonstration per the pinned-axisymmetric-artifact decision.</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-20261001-currency" data-who="s21-nova coordinator" data-when="2026-10-01T23:59:00+02:00">
+    <div class="r-comment-body">Currency audit 2026-10-01 (docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md): status active with no impl line agrees with the code; the remaining scope is real. The next critical node is f-mnap-vacuum-refinement steps 1 and 2 (the evidence manifest and the nominal model, starting with passive R/L identification); that followup already carries a done-when, so no new followup is added.</div>
 </div>
 </section>
 </main>

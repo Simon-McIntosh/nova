@@ -403,4 +403,14 @@
 <p><strong>Coordinator disposition.</strong> No section status or driving followup is closed here. Exact-mode dynamics remain behind an unmet map-fidelity gate for both cases over this ladder. Chord-mode fidelity is established only at the stated passing rungs; this is no claim that a subsequent solve converges. The next concrete investigation is the finite support/profile moment discrepancy in exact mode, preserving the component and current-distribution evidence above.</p>
 </section>
 
+  <section id="terminal-state-markers">
+    <h2>Terminal-state figure: reference null markers drawn last</h2>
+    <p>Run <code>r-20261001T211604042696-pcrf-terminal-state-panel-markers</code> (local lane), merged at <code>2d7c1c02d</code> from <code>0efc4ad0d</code>; review 20/18/20/17/20, no added failure. The fix was already at HEAD as <code>render(draw_order='reference-last')</code> in <code>benchmarks/plasma_cell_terminal_state.py</code>; the node re-rendered the committed figure from its committed receipt with no new solve. The analytic panel's pixel census reads 675 reference pixels and 0 overpainting panel pixels; the reversed-order control reads 300 reference and 333 panel pixels. Figure: <a href="/nova/figures/plasma-cell-read-fidelity/terminal-state-markers/terminal-state-trip-arms.png">terminal-state-trip-arms</a> (SVG beside it). Open follow-on from review: no test defends the zero-overpaint census.</p>
+  </section>
+
+  <section id="shadow-telemetry-node-flux">
+    <h2>Shadow telemetry: the node-flux oracle re-verified</h2>
+    <p>Run <code>r-20261001T211540931442-pcrf-shadow-telemetry-node-flux</code> (local lane), merged at <code>68d3f260f</code> from <code>8fe7445e5</code>; review 18/16/19/19/19, no added failure. <code>tests/test_plasma_cell_shadow_telemetry.py</code> already asserts the wall-node private shadow read from the node's own flux (the §2 rule) at HEAD, so no test change was needed. The run records that the default fast lane collects it, that its gate is green, and that substituting the retired label-owned rule makes it fail (logs under <a href="/nova/figures/plasma-cell-read-fidelity/shadow-telemetry/shadow-telemetry-gate.log">shadow-telemetry/</a>). Review follow-on: the test reads the private <code>operator._wall_carrier_index</code>, so retiring the carrier index needs a companion edit here.</p>
+  </section>
+
 </main></body></html>

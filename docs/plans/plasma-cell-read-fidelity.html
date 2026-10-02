@@ -15,10 +15,10 @@
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S21">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-09-24">
+<meta name="plan-modified" content="2026-10-02">
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-impl" content="0.85">
-<meta name="plan-version" content="53">
+<meta name="plan-version" content="60">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -303,6 +303,15 @@
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260923T034949217912-pcrf-production-route-ladder" data-who="reckon-ship" data-when="2026-09-23T08:10:23Z">
     <div class="r-comment-body"><p>accepted partial ladder: measured rungs identical, decisive rungs not built, chord fails at main; standing only as a record of an invalid 132-cell footing per the map-fidelity gate; review 79</p></div>
 </div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T214117983903-review-of-pcrf-terminal-state-panel-markers" data-who="reckon-build" data-when="2026-10-01T22:03:46.440Z">
+    <div class="r-comment-body"><p>review of r-20261001T211604042696-pcrf-terminal-state-panel-markers stored at 95 of 100 (goal_fidelity 20, evidence 18, fit 20, durability 17, scope_discipline 20), status parsed, reviewed_base_sha 48a40fab1 reviewed_head_sha 0efc4ad0d, added_failure_count 0 added_failure_ids [] (both suites null); the node's source-unchanged claim (fix at ancestor e8b613cef, lines 307/596) is true, and the re-rendered figure reproduced byte-identical with the analytic-panel census panel_pixels=0 (reference_pixels=675) under reference-last and 333 over 300 under the panel-last control; two non-blocking follow-ons (no automated draw-order guard; the census JSON is a hand-assembled derivative of the receipt key).</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20261002T0010-markers" data-who="reckon-build" data-when="2026-10-02T00:10:00+02:00">
+    <div class="r-comment-body">f-pcrf-003 marker item landed at 2d7c1c02d (review 20/18/20/17/20); a census-guard test is the remaining follow-on.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T211604042696-pcrf-terminal-state-panel-markers" data-who="reckon-build" data-when="2026-10-01T21:40:21.044Z">
+    <div class="r-comment-body"><p>benchmarks/plasma_cell_terminal_state.py already draws the analytic reference null set once and in the reference style, with every other column drawing the reference markers after the panel-state ones (default draw_order="reference-last" at lines 307/596, analytic column lines 376-382, other columns lines 383-389), so no reference marker is overpainted; source unchanged per the node's direction. Re-rendered the committed terminal-state figure from its committed receipt with no solve (fleet allocation, TMPDIR=/tmp, JAX_PLATFORMS=cpu); _cluster_pixel_census reports panel_pixels=0 (zero overpainted reference markers, reference_pixels=675) on the analytic panel under reference-last, and the reversed control: docs/figures/plasma-cell-read-fidelity/terminal-state-markers/terminal-state-trip-arms.png (+SVG), census terminal-state-markers-census.json, fragment pcrf-terminal-state-panel-markers.html.</p></div>
+</div>
 <div class="r-comment" data-section="_top" data-id="c-20260923-one-trip-refuted-and-cluster-measured" data-who="" data-when="">
     <div class="r-comment-body">§1 measurement landed in worktree pcrf-terminal-state-is-one-trip (tip 3d2222f9e, H200 job 1276138): the one-trip explanation is refuted. With the certificate default policy the diverted case sits at residual 0.15210 from trip 1 through trip 7 (X-point 8.2 cm off in both arms) and the reactor-static case at 0.0471 flat over 3 trips; the receipt names the solver route as owner, no panel is described as converged, and the figure docs/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.png draws analytic, one-trip and default-policy panels per case under the plotting rules. The saddle cluster is measured too: the three analytic-state saddle candidates sit 2.0 to 2.8 cm apart (0.13 to 0.18 of the 0.151 m pitch) while _root_uncertainty gives each a radius of 1.7e-13 m and the active merge radius is 8.6e-15 m, so the merge criterion can never fold neighbouring cells' roots of one physical saddle: the uncertainty is a roundoff floor where a discretisation-scale radius is what the merge needs. The exact-clip seed receipt for the reactor-static case committed at 14:35 on 09-22 (b43714114) reads converged in two trips at this rung, so the fixed point moved in the landings between that revision and main; pcrf-attribute-the-exact-mode-fixed-point runs the ladder b43714114, 08dd0dda1, ee17f9570, 2e38dc877, 337eb81ee, 23a8522b6, 450bab78a, a17431153, f5af729a9 with the cut-cell capacity overflow flag recorded per arm (S19's lead: an overflow that silently shrinks the support reads as flat non-convergence).</div>
 </div>
@@ -323,6 +332,15 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260923T011648399230-review-of-pcrf-wall-node-shadow-from-the-node" data-who="reckon-ship" data-when="2026-09-23T02:43:12.743Z">
     <div class="r-comment-body"><p>review of the wall-node shadow repair stored, 95 of 100, three non-blocking findings (stale done-when wording, a green oracle for the retired label rule outside every lane, no owner for retiring the diagnostic column)</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261002T0035-shadow" data-who="reckon-build" data-when="2026-10-02T00:35:00+02:00">
+    <div class="r-comment-body">f-pcrf-003 telemetry item verified at 68d3f260f (review 18/16/19/19/19): the test already carries the node-flux rule; the carrier-index retirement needs a companion edit to it.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T211540931442-pcrf-shadow-telemetry-node-flux" data-who="reckon-build" data-when="2026-10-01T22:04:49.012Z">
+    <div class="r-comment-body"><p>The node-flux oracle migration already landed at base (2bf422abe, merged c6a723f1d, recorded in plan section 2's shadow-telemetry oracle migration record) and was re-verified rather than reimplemented: head gate 3 passed in 66.89s exit 0 on the fast lane, and substituting the retired label-owned rule in the code under test makes the migrated oracle fail on the discriminating diverted fixture (1 failed, 2 passed, exit 1) — the test file is unchanged.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T220641056226-review-of-pcrf-shadow-telemetry-node-flux" data-who="reckon-build" data-when="2026-10-01T22:32:38.920Z">
+    <div class="r-comment-body"><p>Review of r-20261001T211540931442-pcrf-shadow-telemetry-node-flux stored: verdict pass, total 91 over goal_fidelity 18 / evidence 16 / scope_discipline 19 / durability 19 / fit 19, reading base 48a40fab1 -&gt; head 8fe7445e5; the node's subject is correct (the migrated node-flux oracle is an ancestor of head, the oracle reddens 1/92 under the retired rule while the head gate is 3 passed), with three follow-on findings and no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260923T025855016553-pcrf-merge-radius-carries-the-pitch" data-who="reckon-ship" data-when="2026-09-23T03:33:15Z">
     <div class="r-comment-body"><p>the saddle merge radius adds a tenth of the source pitch to the roundoff floor; the analytic diverted case at 132 cells reads one representative saddle, the snowflake and secondary-null families keep their counts, the twelve-row replay reads 0 differing cells and wall nodes with unchanged primaries (H200 job 1276216), the nineteen-file CPU lane adds no failures; merged at 626290a19, review 99</p></div>
@@ -395,6 +413,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260924-handoff" data-who="reckon-ship" data-when="2026-09-24T13:50:00+00:00">
     <div class="r-comment-body">Fleet handoff. The 2026-09-23 day's nodes are all merged and promoted: trip panels, first step, seed policy, ladder, map-fidelity gate, markers fix and telemetry test. There are no live runs. impl is set to 0.85: §2 and §3 are done, and §1 and §4 are open behind the map. The next work is f-pcrf-004 (vertical constraint, gated on the S21 map re-measure) and f-pcrf-005 (live certificate test). f-pcrf-001 and f-pcrf-002 are superseded by the map-fidelity finding and by those two followups. The single-grid cutover remains blocked until map fidelity passes at its footing. The plan moves to sprint S21.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20261002T0230-vertical" data-who="reckon-build" data-when="2026-10-02T02:30:00+02:00">
+    <div class="r-comment-body">f-pcrf-004 read against the S21 re-measure (cut-cell-current-attribution, anchor map-fidelity-remeasure-2026-10-02, merge be13ced0d). Weak-rotation exact passes at every rung with the support-current centroid within 0.6 mm vertically, so the weak case needs no vertical constraint. Diverted exact still fails the map at every rung (0.066 to 0.18), with the centroid 11.1 mm low at 132 cells (35 mm before the exact repair), falling to 3.2 mm at 2616. Neither branch of the followup is met for the diverted case: the displacement is not gone, and there is no passing map to run the constraint on. pcrf-vertical-constraint-on-the-certificate-route therefore stays held until a diverted rung passes the map. f-pcrf-005 (the live certificate test) can target the weak-rotation exact rungs, which now pass.</div>
 </div>
 </section>
 </main>

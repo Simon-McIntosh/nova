@@ -1,0 +1,59 @@
+revision 48a40fab18be098a17ea5df6d631c1b153a027f2 (scratch copy, label-owned mutation) tree /tmp/pcrf-shadow-negctl command /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest tests/test_plasma_cell_shadow_telemetry.py module /tmp/pcrf-shadow-negctl/nova/equilibrium/forward_operator.py cwd /tmp/pcrf-shadow-negctl
+revision /tmp/pcrf-shadow-negctl tree  command  module  cwd 
+23:36:28 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_carrier_private_wall_follows_the_node_flux_rule _____________
+
+    def test_carrier_private_wall_follows_the_node_flux_rule():
+        """A wall node is private by its own flux and height band, not its nearest cell."""
+        configure_dtypes()
+        disagreeing = {}
+        for fixture_name, flux, requested_class in (
+            ("limited", _limited_flux, TopologyClass.LIMITED),
+            ("single_null", _single_null_flux, TopologyClass.DIVERTED),
+        ):
+            operator, physical, masks, topology = _fixture_read(flux, requested_class)
+            carrier = np.asarray(
+                operator._carrier_shadow_read(physical, masks)["private_wall_node_mask"]
+            )
+            coordinate = np.asarray(operator.wall.coordinate)
+            wall_flux = np.asarray(
+                physical[operator.grid.node_number : operator.physical_node_number]
+            )
+            labels = np.asarray(masks.label)
+            owner_label = labels[np.asarray(operator._wall_carrier_index)]
+            label_owned = owner_label == int(PlasmaDomain.PRIVATE_FLUX)
+            axis_height = float(np.asarray(topology.axis)[1])
+            x_point = np.asarray(topology.x_point)
+            saddle_height = float(x_point[1])
+            saddle_flux = float(np.asarray(topology.x_point_flux))
+            expected = _node_flux_private_mask(
+                wall_flux,
+                coordinate[:, 1],
+                axis_height,
+                saddle_height,
+                saddle_flux,
+                operator.polarity,
+            )
+>           np.testing.assert_array_equal(carrier, expected)
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 1 / 92 (1.09%)
+E           Mismatch at index:
+E            [69]: False (ACTUAL), True (DESIRED)
+E            ACTUAL: array([False, False, False, False, False, False, False, False, False,
+E                  False, False, False, False, False, False, False, False, False,
+E                  False, False, False, False, False, False, False, False, False,...
+E            DESIRED: array([False, False, False, False, False, False, False, False, False,
+E                  False, False, False, False, False, False, False, False, False,
+E                  False, False, False, False, False, False, False, False, False,...
+
+/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-shadow-telemetry-node-flux/tests/test_plasma_cell_shadow_telemetry.py:170: AssertionError
+----------------------------- Captured stdout call -----------------------------
+node_flux_wall_census={"axis_m": [1.7, 3.659182332138577e-17], "carrier_private": 0, "fixture": "limited", "label_owned_private": 0, "nearest_cell_disagreements": 0, "saddle_flux": NaN, "wall_nodes": 96, "x_point_m": [NaN, NaN]}
+=========================== short test summary info ============================
+FAILED tests/test_plasma_cell_shadow_telemetry.py::test_carrier_private_wall_follows_the_node_flux_rule
+1 failed, 2 passed in 68.90s (0:01:08)
+EXIT=1

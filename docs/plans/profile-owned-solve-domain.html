@@ -24,10 +24,10 @@
   <title>Profile-Owned Solve Domain | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-28">
-<meta name="plan-version" content="93">
+<meta name="plan-modified" content="2026-10-02">
+<meta name="plan-version" content="94">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-impl" content="0.83">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
 </head>
 <body>
@@ -251,6 +251,11 @@
         the limited-configuration-normalization decision locked; §5 and §6 are independent of §4 and
         may run in parallel lanes. The §2 X-point polish dependency arrives from
         separatrix-spline-extraction.</div>
+    <pre class="r-fu-prompt">/reckon-build profile-owned-solve-domain</pre>
+    </article>
+<article class="r-fu" data-id="f-pod-currency-2026-10-01" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build profile-owned-solve-domain" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close or re-scope §5, the isolated wall-resolution ladder</h4>
+    <div class="r-fu-body">Currency audit 2026-10-01 (plan-currency-and-depth-a.md, profile-owned-solve-domain row): impl 0.5 understated the tree. §4 is delivered on its second done-when branch (cutover and point-cell routing landed with zero new failures), and §6 landed (a85b597f). impl is restated to 0.83: five of six sections have landed and §5 is held. §5 is a scientific hold: both resolution stop counts are unmet on a terminal that later active-set work superseded (144 to 288 boundary-flux movement 4.606e-05 Wb before repair, 0.0 Wb after). Authority-required: the lead decides. Done when: §5 is closed with its negative result recorded, or re-scoped against the current active-set terminal with a new done-when, and impl moves to match.</div>
     <pre class="r-fu-prompt">/reckon-build profile-owned-solve-domain</pre>
     </article>
 </section>

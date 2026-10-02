@@ -1,0 +1,76 @@
+{
+  "instrument": "_cluster_pixel_census pixel counts inside the box (halfwidth 16 px) centred on the analytic saddle cluster, per panel",
+  "panel_order": [
+    "analytic",
+    "one_trip",
+    "default_policy"
+  ],
+  "source_receipt": "docs/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.json",
+  "render_command": "benchmarks/plasma_cell_terminal_state.py --output <dir> --render-only --draw-order <order>",
+  "arms": {
+    "reference-last": {
+      "case_0_diverted_single_null": {
+        "status": "measured",
+        "box_halfwidth_px": 16.0,
+        "panels": [
+          {
+            "reference_pixels": 675,
+            "panel_pixels": 0
+          },
+          {
+            "reference_pixels": 674,
+            "panel_pixels": 88
+          },
+          {
+            "reference_pixels": 674,
+            "panel_pixels": 88
+          }
+        ]
+      },
+      "case_1_weak_analytic": {
+        "status": "no_admitted_reference_saddle"
+      }
+    },
+    "panel-last-negative-control": {
+      "case_0_diverted_single_null": {
+        "status": "measured",
+        "box_halfwidth_px": 16.0,
+        "panels": [
+          {
+            "reference_pixels": 300,
+            "panel_pixels": 333
+          },
+          {
+            "reference_pixels": 654,
+            "panel_pixels": 115
+          },
+          {
+            "reference_pixels": 654,
+            "panel_pixels": 115
+          }
+        ]
+      },
+      "case_1_weak_analytic": {
+        "status": "no_admitted_reference_saddle"
+      }
+    }
+  },
+  "overpaint_on_analytic_panel": {
+    "reference-last": {
+      "analytic_panel": {
+        "reference_pixels": 675,
+        "panel_pixels": 0
+      },
+      "reference_markers_overpainted": 0,
+      "note": "panel_pixels=0: no panel-state (small red) paint over the analytic reference cluster"
+    },
+    "panel-last-negative-control": {
+      "analytic_panel": {
+        "reference_pixels": 300,
+        "panel_pixels": 333
+      },
+      "reference_markers_overpainted": 1,
+      "note": "panel_pixels=333 and reference_pixels fell 675->300: the small panel-state markers overpaint the large reference markers"
+    }
+  }
+}

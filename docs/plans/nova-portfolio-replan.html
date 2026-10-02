@@ -15,10 +15,10 @@
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S21">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-modified" content="2026-10-02">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="19">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
 <meta name="plan-capability-version" content="1.0">
@@ -130,10 +130,31 @@ Done when: the report lists each coupling with files, line counts, refactor and 
     <div class="r-comment-body"><p>Seven-plan currency-and-depth audit landed at docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md (one row per assigned plan, every claim citing file:line or sha); headline readings — ensemble-forward-seam nova-complete pending an unregistered ambix gate, forward-profile-validator-set docs-only (draft truthful), separatrix-spline-extraction deep but impl 0.95 contested by the unadjudicated polish-termination reversal (a251914a), profile-owned-solve-domain §3/§4/§6 landed with impl 0.5 understating, mast-nonaxisymmetric-physics remaining scope unimplemented, plasma-cell-read-fidelity §2/§3 deep and promoted with §1/§4 waiting on S19's map re-measure, single-grid-solver-cutover correctly blocked (gate g-s19-clip-mode-lands-first open: _SUPPORT_CLIP_MODE="chord" at nova/equilibrium/forward_operator.py:107); measure = seven rows, seven cited, gate PASS.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261001T203829027643-review-of-replan-currency-depth-a" data-who="reckon-build" data-when="2026-10-01T21:05:08.853Z">
-    <div class="r-comment-body"><p>Independent review of run r-20261001T191408548548-replan-currency-depth-a stored as a parsed five-dimension record at reviews/nova/r-20261001T191408548548-replan-currency-depth-a.at-958ff2e3e1ce339f8e430920c25ed2ea087621db.json (and the legacy path beside it); scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 6, fit 18, total 79, against reviewed_base_sha a71934910d2a0835dd9f6ab35576eef5c2f44754 and reviewed_head_sha 958ff2e3e1ce339f8e430920c25ed2ea087621db; one follow-on finding (no committed guard re-derives the report&#x27;s citation accuracy); the report itself is sound — 7 rows, 22 file:line citations all resolve, 31 cited shas all commits and ancestors of the base.</p></div>
+    <div class="r-comment-body"><p>Independent review of run r-20261001T191408548548-replan-currency-depth-a stored as a parsed five-dimension record at reviews/nova/r-20261001T191408548548-replan-currency-depth-a.at-958ff2e3e1ce339f8e430920c25ed2ea087621db.json (and the legacy path beside it); scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 6, fit 18, total 79, against reviewed_base_sha a71934910d2a0835dd9f6ab35576eef5c2f44754 and reviewed_head_sha 958ff2e3e1ce339f8e430920c25ed2ea087621db; one follow-on finding (no committed guard re-derives the report's citation accuracy); the report itself is sound — 7 rows, 22 file:line citations all resolve, 31 cited shas all commits and ancestors of the base.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T203848067558-review-of-replan-currency-depth-b" data-who="reckon-build" data-when="2026-10-01T21:09:59.516Z">
+    <div class="r-comment-body"><p>review of run r-20261001T191426544316-replan-currency-depth-b stored at reviewed base a71934910 head 84854497: total 80 (goal_fidelity 18, evidence 12, scope_discipline 20, durability 12, fit 18), one blocking finding (the efit row reports the closed-boundary RMS gate PASS where the cited receipt records it FAIL / passes=false) and two follow-on citation defects.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20261002T0015-depth-b" data-who="reckon-build" data-when="2026-10-02T00:15:00+02:00">
+    <div class="r-comment-body">group B report landed at aac2bae7e after one blocking repair; both reports are in, and the status writes they drive on the thirteen plans remain (f-replan-002).</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T191426544316-replan-currency-depth-b" data-who="reckon-build" data-when="2026-10-01T21:36:46.752Z">
+    <div class="r-comment-body"><p>docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md carries exactly six rows (diiid-forward-onboarding, machine-description-retirement, diiid-pulse-replay, dual-branch-selection, efit-baseline-demonstration, mast-catalog-gpu-solve), each with landed commits and files, status/impl versus code, depth with a named call site and test evidence, its open followups' done-when status, and the next critical node; audit read-only at a71934910, 35 sha citations and 23 file:line citations inside the table.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261001T213722627131-review-of-replan-currency-depth-b" data-who="reckon-build" data-when="2026-10-01T22:25:28.806Z">
+    <div class="r-comment-body"><p>independent review of run r-20261001T191426544316-replan-currency-depth-b at head 4f1bfbdda (base a71934910): parsed record stored with 5 dimensions scored and total 89; verifies the head commit&#x27;s correction is sound and every citation resolves, and records one follow-on (the reviewed manifest cites an unresolvable third commit sha).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261001T204040669316-review-of-replan-pytest-timeout-and-xdist" data-who="reckon-build" data-when="2026-10-01T21:03:10.573Z">
     <div class="r-comment-body"><p>review-of-replan-pytest-timeout-and-xdist -- read the landed change 56ee52a8d against its base a71934910 and stored the verdict; scores goal_fidelity 20, evidence 12, scope_discipline 20, durability 12, fit 16, total 80, with three findings (1 blocking, 2 follow-on).</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261001T210714745578-review-of-replan-pytest-timeout-and-xdist" data-who="reckon-build" data-when="2026-10-01T21:24:11.856Z">
+    <div class="r-comment-body"><p>review-of-replan-pytest-timeout-and-xdist - independent review of r-20261001T191537244113 at 96b6e8c1e: pass, 5 dimensions scored (20/17/19/19/19), total 94; node gate re-verified independently (uv lock --check exit 0); added_failure_count 0 because the reviewed run declared no suite arms.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20261001T2330-deps" data-who="reckon-build" data-when="2026-10-01T23:30:00+02:00">
+    <div class="r-comment-body">pytest-timeout and pytest-xdist landed at d9c5d4215 (re-review 20/17/19/19/19); the shared environment is synced inexactly from main next; the default-lane census run follows.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261001T191537244113-replan-pytest-timeout-and-xdist" data-who="reckon-build" data-when="2026-10-01T21:03:21.262Z">
+    <div class="r-comment-body"><p>replan-pytest-timeout-and-xdist - nova declares pytest-timeout&gt;=2.4.0 and pytest-xdist&gt;=3.8.0 in [dependency-groups].dev and sets timeout = 300 under [tool.pytest.ini_options]; uv.lock regenerated by uv add --dev --no-sync; the evidence log is now tracked; uv lock --check exits 0.</p></div>
 </div>
 </section>
 </main>

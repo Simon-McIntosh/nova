@@ -24,8 +24,8 @@
   <title>EFIT Baseline Demonstration | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-07">
-<meta name="plan-version" content="54">
+<meta name="plan-modified" content="2026-10-02">
+<meta name="plan-version" content="55">
 <meta name="plan-commits" content="ba1f73013873fd2d7434db1b744d742a1b4b042c">
 <meta name="plan-artifacts" content="docs/evidence/archive/efit-baseline-demonstration-landed.html,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json">
 </head>
@@ -240,6 +240,11 @@
 <article class="r-fu" data-id="f-ebd-solver-rate" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-d8-s16-landing" data-written-at="2026-08-27T01:30:00+00:00" data-recommends-skill="/reckon-build efit-baseline-demonstration" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Clear the demonstration gate by fixing solver rate, not thresholds</h4>
     <div class="r-fu-body">The measured stall verdict (crew/reports/s16-landing-20260826/residual-stall-characterization.md): the corrected solver converges monotonically with tail contraction q~0.970 per promotion, needing ~425 further promotions to 1e-8 — a rate-and-budget problem, not a stationary floor. Remediation order per the ranked verdict: land the locked profile-owned residual-domain cutover (profile-owned-solve-domain), repeat the exact trace and a matched mesh ladder, then continuation/globalization or preconditioning if the tail rate stands. The locked thresholds are not to be relaxed; the H200 batched receipt's convergence shortfall (230/600, 140/600) is the same finding at scale.</div>
+    <pre class="r-fu-prompt">/reckon-build efit-baseline-demonstration</pre>
+    </article>
+<article class="r-fu" data-id="f-ebd-currency-2026-10-01" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build efit-baseline-demonstration" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The demonstration measured FAIL on two of three gates; clear it through the solve-domain cutover, not the thresholds</h4>
+    <div class="r-fu-body">Currency audit 2026-10-01 (plan-currency-and-depth-b.md, efit-baseline-demonstration row, repaired after review): the instrument is implemented and was run, with a measured verdict of FAIL on two of three gates. Class agreement is 9/12 and passes (threshold 7). The closed-boundary symmetric RMS gate fails by disqualifying exclusion: 16 of 17 declared rows are non-converged or missing the predicted boundary, so passes is false at eligible_row_count 1. The worst declared-row saddle distance, 2.621706915 m, fails the 0.04 bound. The failing quantity is solver convergence, not topology. The meta impl of 0.6667 differs from the 2026-08-26 recalibration to 0.5, and the coordinator records both rather than choosing. Sharpens f-ebd-solver-rate. Done when: profile-owned-solve-domain's residual-domain cutover has landed, the exact stall trace and a matched mesh ladder are re-run, and the three gates are re-scored with thresholds unrelaxed.</div>
     <pre class="r-fu-prompt">/reckon-build efit-baseline-demonstration</pre>
     </article>
 </section>

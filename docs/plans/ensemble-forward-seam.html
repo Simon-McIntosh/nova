@@ -22,9 +22,9 @@
   <title>Ensemble Forward Seam | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-26">
+<meta name="plan-modified" content="2026-10-02">
 <meta name="plan-impl" content="0.9">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-commits" content="072dc102,d6a5fbf1,ba7c6ff4,060b2c5d,aef15cea,5c448153,2f5bae34,87dd7358,912fde52,010f1d5f,bd3cca1f,11a9d70f">
 <meta name="plan-artifacts" content="docs/evidence/archive/ensemble-forward-seam-landed.html">
 </head>
@@ -153,6 +153,11 @@
     <h4 class="r-fu-title">Run and score the joint twin feasibility gate from ambix over the banked nova package (foreign-owner)</h4>
     <div class="r-fu-body"><p><strong>Exemption: foreign-owner.</strong> The concrete owner is the imas-ambix estimator lane — the locked estimator-placement decision assigns the filter run and its scoring to ambix's existing estimators, and the twin-truth receipt records joint_recovery_gate_run=false with owner ambix. Nova's half is complete and banked: docs/figures/ensemble-forward-seam/twin-truth/ carries the receipted marched truth, counterfactual forwards, synthetic Thomson + net-current observations, recoverable coupling states, and consumption.md describing the coupling-state handoff. The gate: the existing ambix estimator recovers the windowed low-dimensional state from synthetic Thomson plus net current within stated coverage, run and scored ambix-side. When its coverage lands, this plan records the outcome and ships.</p></div>
     <pre class="r-fu-prompt">/reckon-build imas-ambix:flux-function-state-interface</pre>
+    </article>
+<article class="r-fu" data-id="f-efs-currency-2026-10-01" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build ensemble-forward-seam" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Register the joint twin gate on a live imas-ambix plan before shipping</h4>
+    <div class="r-fu-body">Currency audit 2026-10-01 (docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md, ensemble-forward-seam row): status active and impl 0.9 agree with the code, and the nova half is deep (scripts/ensemble_window_throughput/benchmark.py:67, tests/test_transport_window_batch.py). The only open clause is the ambix joint twin gate, whose recorded owner imas-ambix:flux-function-state-interface shipped carrying no record of it. Do not close this plan. Foreign-owner: imas-ambix. Done when: a live imas-ambix plan carries an open followup for the joint twin gate naming this plan, and f-efs-joint-gate cites that plan's slug; the plan then ships with the gate carried foreign-owner.</div>
+    <pre class="r-fu-prompt">/reckon-build ensemble-forward-seam</pre>
     </article>
 </section>
   

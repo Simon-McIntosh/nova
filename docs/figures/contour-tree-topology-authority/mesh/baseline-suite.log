@@ -1,0 +1,10 @@
+# revision: f9603c3b
+# tree: scratch extraction /tmp/reckon-crew-scratch/r-20261001T230318372995-ctta-hex-contour-mesh/base_arm_f9603c3b (git archive of base f9603c3b); tests/test_contour_tree_mesh.py does not exist at base
+# cwd: /tmp/reckon-crew-scratch/r-20261001T230318372995-ctta-hex-contour-mesh/base_arm_f9603c3b
+# nova.__file__: /tmp/reckon-crew-scratch/r-20261001T230318372995-ctta-hex-contour-mesh/base_arm_f9603c3b/nova/__init__.py
+# command: env -C /tmp/reckon-crew-scratch/r-20261001T230318372995-ctta-hex-contour-mesh/base_arm_f9603c3b TMPDIR=/tmp JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest tests/test_contour_tree_mesh.py tests/test_contour_tree_conventions.py -q -p no:cacheprovider
+ERROR: file or directory not found: tests/test_contour_tree_mesh.py
+
+
+no tests ran in 0.00s
+EXIT=4

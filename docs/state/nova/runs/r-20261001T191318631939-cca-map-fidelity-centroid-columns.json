@@ -1,0 +1,385 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 18372499,
+      "input_tokens_cumulative": 18372499,
+      "output_tokens": 58795,
+      "output_tokens_cumulative": 58795,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 581,
+    "files": 8,
+    "removed": 6
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "224f1781778448785daeff727483d3011f69cc4b",
+    "725be129c3dd53956ce8d752c46b61f9428fc0b4",
+    "02a196e94d3b9d0cd133e78972ec3134a58da0f3",
+    "42b7469eb783bf702a2fab6aa81c709a40fdbc29",
+    "b80912673c4915206e6df20934da23ae8b16a450"
+  ],
+  "completed_at": "2026-10-01T22:07:18.057Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-01T19:13:36Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "weak-rotation-reactor-static-cells-110-exact.json",
+    "0.093"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_map_fidelity_centroid.py -q",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T191318631939-cca-map-fidelity-centroid-columns/docs/figures/plasma-cell-read-fidelity/map-fidelity/centroid-preflight/weak-chord-smallest.log docs/figures/plasma-cell-read-fidelity/map-fidelity/centroid-preflight/test-map-fidelity-centroid.log docs/figures/plasma-cell-read-fidelity/map-fidelity/centroid-preflight/test-map-fidelity-centroid-negative.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8,
+    "plan": "cut-cell-current-attribution",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-01T20:13:20.861175+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-01T19:13:20Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 7,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 0,
+    "headroom": 16,
+    "mean_context": 180000,
+    "observed_at": "2026-10-01T19:13:13Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-01T22:07:18.057Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T191318631939-cca-map-fidelity-centroid-columns/manifest.md",
+  "member": "s19n-imp-1",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "cca-map-fidelity-centroid-columns",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 3900,
+          "cached_input_tokens": 286970,
+          "input_tokens": 290872,
+          "output_tokens": 1492,
+          "reasoning_output_tokens": 505,
+          "total_tokens": 292364,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Each row the benchmark writes carries support_current_centroid_offset_mm with keys dR and dZ: the centroid of the support current booked by the lambda-normalised map at the analytic Solovev state minus the centroid of the analytic Solovev current over the same support, both as current-weighted means of (R, Z). Reuse an existing centroid computation if one exists in nova/equilibrium/moment.py or benchmarks/ (search first and name what you reused). Evidence: one CPU run of the weak-rotation-reactor-static row at its smallest certificate rung in chord mode, in place on the fleet allocation (SLURM_JOB_ID set, TMPDIR=/tmp, JAX_PLATFORMS=cpu, configure_dtypes before any array), logged to docs/figures/plasma-cell-read-fidelity/map-fidelity/centroid-preflight/weak-chord-smallest.log. The log shows the row's mismatch sup equal to the committed receipt for that row within 1e-9 relative (the column is additive and changes no existing number) and prints dR and dZ. Do not regenerate or overwrite any committed receipt.",
+    "estimated_hours": 1.0,
+    "goal": "benchmarks/plasma_cell_map_fidelity.py records, per row, the booked-minus-analytic support-current centroid in millimetres",
+    "id": "cca-map-fidelity-centroid-columns",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-01T19:13:20Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 7,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 0,
+      "headroom": 16,
+      "mean_context": 180000,
+      "observed_at": "2026-10-01T19:13:13Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T191318631939-cca-map-fidelity-centroid-columns/manifest.md",
+    "negative_control": "",
+    "plan": "cut-cell-current-attribution",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/plasma_cell_map_fidelity.py",
+      "docs/figures/plasma-cell-read-fidelity/map-fidelity/centroid-preflight",
+      "docs/evidence/fragments/cut-cell-current-attribution/cca-map-fidelity-centroid-columns.html",
+      "docs/figures/cut-cell-current-attribution/cca-map-fidelity-centroid-columns"
+    ]
+  },
+  "orientation_input_tokens": 4064465.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "cca-map-fidelity-centroid-columns",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-01T19:13:21.935394+00:00",
+    "score": 0.8125,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "cut-cell-current-attribution",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_revision": "b80912673c4915206e6df20934da23ae8b16a450",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 10058,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261001T191318631939-cca-map-fidelity-centroid-columns",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-centroid-columns"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [
+      "the reviewed run declares no baseline_suite/after_suite gate arms, so added_failure_count is 0 by absence of arms rather than by a measured zero",
+      "the weak-rotation row is up-down symmetric so dZ ~ 0 and settles nothing about the diverted-case 35 mm vertical offset the column was introduced for",
+      "the committed exact-mode receipt weak-rotation-reactor-static-cells-110-exact.json still reads sup 0.093 while the current tree reads 1.66e-04; the committed exact receipts are stale (disclosed by the run under follow_ons)"
+    ],
+    "reviewed_base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+    "reviewed_head_sha": "b80912673c4915206e6df20934da23ae8b16a450",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 91
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261001T191318631939-cca-map-fidelity-centroid-columns",
+  "scope_acceptances": [
+    {
+      "path": "tests/test_map_fidelity_centroid.py",
+      "reason": "the coordinator's repair advice asked for this round-trip guard after the review"
+    }
+  ],
+  "scope_changed": true,
+  "section": "§6",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "266903d2-f0c2-4243-9319-e4fd5b67d7b2",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 1,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 27165322,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 3249.379,
+    "generated_tokens": 96059,
+    "generation_seconds": 2719.727,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 50.3,
+    "machine_seconds": 529.652,
+    "peak_input_tokens": 241232,
+    "tokens_per_second": 35.32,
+    "wall_tokens_per_second": 29.56
+  },
+  "time_budget": "60m",
+  "tool_steps": 71.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 10422,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-01T22:07:20Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-01T21:13:03Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261001T191318631939-cca-map-fidelity-centroid-columns",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 19862,
+    "worker_pid": 3781732
+  },
+  "worker_seconds": 10390,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

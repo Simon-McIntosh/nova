@@ -1,0 +1,427 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-terra",
+  "base_sha": "71c7b3a98fad52ee649e73b58c16172101401e36",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 4184320,
+      "cached_input_tokens_cumulative": 4184320,
+      "input_tokens": 4361580,
+      "input_tokens_cumulative": 4361580,
+      "output_tokens": 23271,
+      "output_tokens_cumulative": 23271,
+      "reasoning_output_tokens": 7799,
+      "reasoning_output_tokens_cumulative": 7799
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-01T23:43:34Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-01T23:33:34Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "contour-tree-topology-authority",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T00:33:18.468737+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": null,
+    "metered": true,
+    "observed_at": null,
+    "read_at": "2026-10-01T23:33:18Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-01T23:43:34Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T233317235818-review-of-ctta-join-split-contour-tree/manifest.md",
+  "member": "disposable-r-20261001T233317235818-review-of-ctta-join-split-contour-tree",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "review run: its deliverable is the stored review record",
+  "node": "review-of-ctta-join-split-contour-tree",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 976,
+          "cached_input_tokens": 713708,
+          "input_tokens": 714686,
+          "output_tokens": 1066,
+          "reasoning_output_tokens": 172,
+          "total_tokens": 715752,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the review for r-20261001T230257338103-ctta-join-split-contour-tree stores a parsed record scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete with status: complete (recognised statuses are complete, blocked and failed only). Check the algorithm against the semantics of /home/ITER/mcintos/Code/imas-efit/src/EFIT/contour_tree.f90 and the plan's sections 1, 2 and 4 at main: join and split trees of sigma*psi, the merge, simulation-of-simplicity tie breaking, and the virtual outside node joined at the highest wall vertex of each region.",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261001T230257338103-ctta-join-split-contour-tree",
+    "id": "review-of-ctta-join-split-contour-tree",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": null,
+      "metered": true,
+      "observed_at": null,
+      "read_at": "2026-10-01T23:33:18Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T233317235818-review-of-ctta-join-split-contour-tree/manifest.md",
+    "negative_control": "",
+    "plan": "contour-tree-topology-authority",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261001T230257338103-ctta-join-split-contour-tree.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261001T230257338103-ctta-join-split-contour-tree.at-a126966ffcdc60671c5a750e3090e3e80ba0e854.json"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex-terra",
+    "member": null,
+    "node": "review-of-ctta-join-split-contour-tree",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-01T23:33:20.947080+00:00",
+    "score": 0.625,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "contour-tree-topology-authority",
+  "plan_link": null,
+  "promoted_revision": "71c7b3a98fad52ee649e73b58c16172101401e36",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": null,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261001T233317235818-review-of-ctta-join-split-contour-tree",
+    "scratch_removed": false,
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 1,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": true,
+          "claimed_by_live_runs": [
+            "r-20261002T002038975664-review-of-ctta-join-split-contour-tree"
+          ],
+          "classification": "live-referenced",
+          "dirty": [],
+          "head": "be13ced0d016123275f311addc8f20a5d164b588",
+          "integrated_into": "HEAD",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-ctta-join-split-contour-tree",
+          "reclaimable": false,
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "a live run pointer still claims this worktree; reconcile or stop that run first"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "a live run pointer still claims this worktree; reconcile or stop that run first"
+  },
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "role": "review",
+  "run_id": "r-20261001T233317235818-review-of-ctta-join-split-contour-tree",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0f9d1-0e6b-7192-9c62-7ba93ed29fc7",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 4184320,
+    "cumulative_input_tokens": 8545900,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 31070
+  },
+  "time_budget": "60m",
+  "tool_steps": 40.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 2879,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-01T23:08:24Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-01T22:45:41Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261001T211429585244-ctta-explanatory-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 26254,
+          "worker_pid": 146217
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1495,
+        "log_fresh": false,
+        "manifest_commits": [
+          "b23118dcd749977b77a987444d3cbc3c5f1808d4",
+          "c36d828f225ebb5fc127a4d4b8af9f1a10a39f00"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "f6ebaf8da5f0266ecd9d4ebc7a9bc0c22ae3f2c2eb4cce7a58afa1768cc32805",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T211429585244-ctta-explanatory-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --plan contour-tree-topology-authority --section '§1' --role review --spec-level exact --node review-of-ctta-explanatory-figure --goal 'attach an independent review to run r-20261001T211429585244-ctta-explanatory-figure' --done-when 'the review for r-20261001T211429585244-ctta-explanatory-figure stores a parsed record scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261001T211429585244-ctta-explanatory-figure.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261001T211429585244-ctta-explanatory-figure.at-c36d828f225ebb5fc127a4d4b8af9f1a10a39f00.json --time-budget 60m --session s21-nova --allow-unreconciled-runs --local",
+        "node": "ctta-explanatory-figure",
+        "phase": "complete",
+        "plan": "contour-tree-topology-authority",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261001T211429585244-ctta-explanatory-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1747,
+        "terminal_at": "2026-10-01T23:04:12Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure"
+      }
+    ]
+  },
+  "wall_seconds": 600,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-01T23:43:36Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-01T23:33:39Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261001T233317235818-review-of-ctta-join-split-contour-tree",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 132,
+    "worker_pid": 330141
+  },
+  "worker_seconds": 600,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

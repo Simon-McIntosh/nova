@@ -20,8 +20,8 @@
   <title>Retire the Bespoke Machine-Description Layer | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-01">
-<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-10-02">
+<meta name="plan-version" content="4">
 <meta name="plan-effort-hours" content="12.0">
 </head>
 <body>
@@ -158,6 +158,11 @@
         what turns the §3 inventory from a deletion into a migration. Nothing is removed under
         this followup.</p></div>
     <pre class="r-fu-prompt">/reckon-build machine-description-retirement §4</pre>
+    </article>
+<article class="r-fu" data-id="f-mdr-currency-2026-10-01" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build machine-description-retirement" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Equivalence demonstration first: no deletion while imas-ambix imports nova.imas.machine_artifact</h4>
+    <div class="r-fu-body">Currency audit 2026-10-01 (plan-currency-and-depth-b.md, machine-description-retirement row): draft with no retirement landed agrees with the code. imas-ambix imports nova.imas.machine_artifact (imas_ambix/gs/artifact_resolution.py:171,268), so a deletion here breaks imas-ambix the same day. Removal style is locked to clean-deletion. Sharpens f-mdr-001. Done when: the producer path reproduces the 44 unique loop positions and the 43-of-46 solve-input join numerically, with a committed receipt, and imas-ambix has migrated off nova.imas.machine_artifact before any file is deleted.</div>
+    <pre class="r-fu-prompt">/reckon-build machine-description-retirement</pre>
     </article>
 </section>
   </main>

@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="39">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -151,6 +151,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T124830964561-cco-nonfinite-krylov-action" data-who="reckon-build" data-when="2026-10-02T14:01:00Z">
     <div class="r-comment-body"><p>Commits edf04ca11 and 808b2551f add the banked-state linear-action diagnostic and make its evidence boundary explicit: reconstructed terminal step-rule measurement, not a live production Krylov pass; active-set pass ordinal null; every-pass table false; source job 1280166 has no active-set history. The repair and fresh every-pass H200 receipt remain a separate follow-on, after coordinator integration.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T140124781507-review-of-cco-nonfinite-krylov-action" data-who="reckon-build" data-when="2026-10-02T14:17:20Z">
+    <div class="r-comment-body"><p>Independent review of r-20261002T124830964561-cco-nonfinite-krylov-action at base 4f171b4f / head 808b2551f stored parsed: goal_fidelity 17, evidence 18, scope_discipline 19, durability 15, fit 18, total 87; exact-zero level step-rule JVP [1,-1,NaN] reproduced against finite central difference [1,-1,0.1], with the live every-pass H200 receipt and primary-branch integration retained as follow-ons.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T053656352101-review-of-cco-bounded-row-step-control" data-who="s19c-review-cco-c" data-when="2026-09-17T06:45:40.145Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T205409901465-cco-bounded-row-step-control stored at the fence path, total 84, findings recorded on the reviewed run's completion</p></div>

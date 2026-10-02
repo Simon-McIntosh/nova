@@ -28,7 +28,7 @@
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.99">
-<meta name="plan-version" content="67">
+<meta name="plan-version" content="68">
 </head>
 <body>
   <main class="plan-doc">
@@ -418,6 +418,9 @@ matrix. Record: <a href="/nova/evidence/archive/exact-clip-moment-quadrature-lan
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261001T212425544685-ecq-per-layout-vertex-capacity" data-who="reckon-build" data-when="2026-10-02T10:24:28.305Z">
     <div class="r-comment-body"><p>ecq-per-layout-vertex-capacity: traced_polygon_vertex_capacity(straight, level_run_count=1) now returns level_run_count*128+straight and the count is threaded as a Python int through AtomicCellMesh.traced_clip to the capacity call, with forward_operator._profile_support declaring it from the admitted saddle vertex where concrete (2 with a saddle, 1 without, 1 when traced); a two-run layout declared with two runs is admitted at vertex_count 260, area 0.75, refused_cells 0, vertex_capacity 264, and under the one-arc bound is refused visibly (refused_cells 1, vertex_capacity 136, TracedCapacityRefusalError); module gate 28 passed in 125.88 s, forward_operator module 7 passed head and base, importers arm adds no failure; the diverted single-null row clause is unmet because the recorded defect does not reproduce at base - the row reports refused_cell_count 0 and max 134 vertices under the one-arc bound 162, cell 9 carrying 8 vertices, and its support is bit-identical base to head apart from the declared capacity 162 to 290.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261002T130139281918-review-2-of-ecq-per-layout-vertex-capacity" data-who="reckon-build" data-when="2026-10-02T13:24:07.738Z">
+    <div class="r-comment-body"><p>review-2 of ecq-per-layout-vertex-capacity at revision 7cac2452606e (commits 5b84f5bcb and 7cac2452606e only; wiring commit 61b291089 excluded as instructed) scores goal_fidelity 16, evidence 14, scope_discipline 20, durability 15, fit 18, total 83, verdict pass; the parsed record is stored at reviews/nova/r-20261001T212425544685-ecq-per-layout-vertex-capacity.json and its revision-pinned twin .at-7cac2452606e4fa8c8483f96b5f186955cf93a31.json.</p></div>
 </div>
 </section>
 </main>

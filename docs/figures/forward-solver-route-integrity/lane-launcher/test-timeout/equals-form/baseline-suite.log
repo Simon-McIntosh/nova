@@ -1,0 +1,15 @@
+# arm=base revision=a83018126 tree=/tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-baseline-arm
+# cwd=/tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-baseline-arm
+# cmd=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest /tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-baseline-arm/tests/test_nova_lane_launcher.py -p no:cacheprovider
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-baseline-arm/tests
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 7 items
+
+../../../../../../../../tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-baseline-arm/tests/test_nova_lane_launcher.py . [ 14%]
+......                                                                   [100%]
+
+============================== 7 passed in 13.01s ==============================
+EXIT=0

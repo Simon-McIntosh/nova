@@ -1,0 +1,57 @@
+# negative control: remove the --timeout=* case from pytest_timeout_argument
+# rev=a83018126 (worktree under test)
+# launcher_under_test=/tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/scripts/nova_lane/run.sh (scratch copy, mutated)
+# cwd=/tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl
+# cmd=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest /tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/tests/test_nova_lane_launcher.py -p no:cacheprovider -v
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/tests
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 8 items
+
+../../../../../../../../tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/tests/test_nova_lane_launcher.py::test_dry_run_prints_a_submission_line_for_every_rung PASSED [ 12%]
+../../../../../../../../tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/tests/test_nova_lane_launcher.py::test_dry_run_pytest_uses_a_long_default_per_test_timeout PASSED [ 25%]
+../../../../../../../../tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/tests/test_nova_lane_launcher.py::test_dry_run_pytest_keeps_the_callers_timeout PASSED [ 37%]
+../../../../../../../../tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/tests/test_nova_lane_launcher.py::test_dry_run_pytest_keeps_the_callers_equals_form_timeout FAILED [ 50%]
+../../../../../../../../tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/tests/test_nova_lane_launcher.py::test_dry_run_pytest_reads_the_timeout_environment_override PASSED [ 62%]
+../../../../../../../../tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/tests/test_nova_lane_launcher.py::test_mem_zero_is_refused PASSED [ 75%]
+../../../../../../../../tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/tests/test_nova_lane_launcher.py::test_h200_payload_keeps_sampler_and_pin_diagnostic PASSED [ 87%]
+../../../../../../../../tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/tests/test_nova_lane_launcher.py::test_pending_resource_reason_falls_to_next_rung PASSED [100%]
+
+=================================== FAILURES ===================================
+__________ test_dry_run_pytest_keeps_the_callers_equals_form_timeout ___________
+
+tmp_path = PosixPath('/tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/pytest-of-mcintos/pytest-2/test_dry_run_pytest_keeps_the_1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f36b7313ce0>
+
+    def test_dry_run_pytest_keeps_the_callers_equals_form_timeout(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setenv("NOVA_LANE_TEST_TIMEOUT", "7200")
+        result = _launch(
+            "--dry-run",
+            "--log",
+            str(tmp_path / "lane.log"),
+            "--",
+            "tests/example_target.py",
+            "--timeout=45",
+        )
+
+        assert result.returncode == 0, result.stderr
+        line = _h200_submission_line(result)
+        assert "--timeout=45" in line
+        assert "--timeout 3600" not in line
+>       assert "--timeout 7200" not in line
+E       AssertionError: assert '--timeout 7200' not in 'RUNG=h200 J...imeout 7200 '
+E
+E         '--timeout 7200' is contained here:
+E         ?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ...
+E
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+/tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/tests/test_nova_lane_launcher.py:115: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../../../../tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test/fsri-equals-negctl/tests/test_nova_lane_launcher.py::test_dry_run_pytest_keeps_the_callers_equals_form_timeout
+========================= 1 failed, 7 passed in 13.10s =========================
+EXIT=1

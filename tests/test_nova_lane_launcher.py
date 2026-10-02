@@ -95,6 +95,27 @@ def test_dry_run_pytest_keeps_the_callers_timeout(tmp_path: Path) -> None:
     assert "--timeout 3600" not in line
 
 
+def test_dry_run_pytest_keeps_the_callers_equals_form_timeout(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("NOVA_LANE_TEST_TIMEOUT", "7200")
+    result = _launch(
+        "--dry-run",
+        "--log",
+        str(tmp_path / "lane.log"),
+        "--",
+        "tests/example_target.py",
+        "--timeout=45",
+    )
+
+    assert result.returncode == 0, result.stderr
+    line = _h200_submission_line(result)
+    assert "--timeout=45" in line
+    assert "--timeout 3600" not in line
+    assert "--timeout 7200" not in line
+    assert line.count("--timeout") == 1
+
+
 def test_dry_run_pytest_reads_the_timeout_environment_override(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

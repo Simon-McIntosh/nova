@@ -1,0 +1,18 @@
+<section id="cank-shape-and-thomson-figures">
+  <h3>Shape-control and Thomson figures regenerated to show their receipts states</h3>
+  <p><strong>Followups:</strong> <code>f-fsa-figrepair-shape-control</code> and <code>f-fsa-figrepair-thomson-forward</code>.</p>
+  <p>Each defect was re-verified at the base revision <code>9ac842a600</code> before editing; each figure was then re-rendered from the committed receipt, with no solve run and every plotted number read from a receipt already in the tree.</p>
+  <figure>
+    <img src="/nova/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png" width="1400" alt="Two poloidal panels with the MAST first wall, the previous boundary, the turning points, and both achieved boundaries dashed because neither arm converged.">
+    <figcaption>Shape steering on 22086/43 from two-arms.json. Axes off; the scale comes from the MAST first wall drawn from the machine catalogue. Neither arm converged, so both achieved boundaries are dashed and named in the legend: the upper-point arm by active_set_cycle_detected (residual 1.4195e-03, 2 trips) and the elongation arm by active_set_settled (residual 2.8466e-03, 4 trips).</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png" width="1400" alt="Four poloidal panels, one per route and arm family; every non-converged arm is dashed and named in the legend, and the reduced-route arms draw no achieved boundary.">
+    <figcaption>Steering authority on 22086/43 from steering-authority.json. The Newton-Krylov arms are non-converged, dashed and named: elongation by active_set_iteration_budget_exhausted at residual 2.8466e-03 over 20 trips, and the five, ten and twenty millimetre upper scans by active_set_cycle_detected. The reduced-route arms carry no achieved boundary, so the panel draws none and the legend reads no qualified boundary rather than presenting the previous boundary as the reached state.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/constraint-augmented-newton-krylov/thomson-forward/chord-comparison.png" width="1400" alt="Four panels: electron temperature and density against scattering radius, each beside its per-chord residual of prediction minus measurement, with the residual rms and maximum in the title.">
+    <figcaption>Thomson chord prediction on MAST 22086/43 from the thomson-forward receipt, whose verdict is a measured disagreement reported without tuning. The added residual panels carry the per-chord prediction minus measurement, and the title carries the receipt rms and maximum: temperature rms 33.6 eV, maximum 98.2 eV; density rms 0.241, maximum 0.467, in units of 1e19 per cubic metre. The density maximum is persisted into the receipt disagreement block beside the rms, so the plotted numbers re-derive from the receipt fields.</figcaption>
+  </figure>
+  <p><strong>Result.</strong> shape-steering.png and steering-authority.png now draw with the axes off and the wall present, and every non-converged arm is dashed and named; chord-comparison.png now carries a per-chord residual panel and the receipt rms and maximum in its title, so the drawn state reads as the measured disagreement rather than as agreement.</p>
+</section>

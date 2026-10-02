@@ -11,13 +11,14 @@ unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH XLA_FLAGS
 
 worktree=${NOVA_MEASUREMENT_WORKTREE:?set NOVA_MEASUREMENT_WORKTREE}
 output_dir=${NOVA_MEASUREMENT_OUTPUT:?set NOVA_MEASUREMENT_OUTPUT}
+log_dir=${NOVA_MEASUREMENT_LOG_DIR:?set NOVA_MEASUREMENT_LOG_DIR}
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 instrument="$worktree/docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py"
 
 printf 'REVISION=%s\n' "$(git -C "$worktree" rev-parse HEAD)"
 printf 'TREE=%s\n' "$worktree"
-printf 'COMMAND=%q %q --output-dir %q --programs 20\n' "$python" "$instrument" "$output_dir"
+printf 'COMMAND=%q %q --output-dir %q --log-dir %q --programs 20\n' "$python" "$instrument" "$output_dir" "$log_dir"
 printf 'MEASUREMENT_MODULE=%s\n' "$instrument"
 printf 'MEASUREMENT_CWD=%s\n' "$(pwd -P)"
 printf 'GPU=%s\n' "$(nvidia-smi --query-gpu=name --format=csv,noheader | head -1)"
-PYTHONPATH="$worktree" "$python" "$instrument" --output-dir "$output_dir" --programs 20
+PYTHONPATH="$worktree" "$python" "$instrument" --output-dir "$output_dir" --log-dir "$log_dir" --programs 20

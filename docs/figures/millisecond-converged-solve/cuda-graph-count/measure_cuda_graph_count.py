@@ -131,7 +131,7 @@ def _parse_arm_output(
         "command": command,
         "xla_flags": xla_flags,
         "exit_status": exit_status,
-        "log": log_path.name,
+        "log": str(log_path.resolve()),
         "count_observations": len(count_events),
         "count_events": count_events,
         "rows": rows,
@@ -167,6 +167,7 @@ def _parse_arm_output(
 def _run_arm(
     script: Path,
     output_dir: Path,
+    log_dir: Path,
     *,
     arm: str,
     programs: int,
@@ -204,7 +205,7 @@ def _run_arm(
         stderr=subprocess.STDOUT,
         text=True,
     )
-    log_path = output_dir / f"{arm}.log"
+    log_path = log_dir / f"{arm}.log"
     log_path.write_text(completed.stdout, encoding="utf-8")
     arm_receipt = _parse_arm_output(
         completed.stdout,
@@ -321,9 +322,10 @@ def _plot(receipt: dict[str, object], output: Path) -> None:
     axis.annotate(
         f"after dropping {post_drop['dropped_handles']} handles",
         (post_drop["programs_compiled"], post_drop["alive_executable_graphs"]),
-        xytext=(-16, -30),
+        xytext=(-30, 35),
         textcoords="offset points",
         ha="right",
+        va="bottom",
         color=enabled_colour,
         fontsize=20,
     )
@@ -335,10 +337,11 @@ def _plot(receipt: dict[str, object], output: Path) -> None:
         fontsize=20,
         va="center",
     )
-    axis.text(
-        x_disabled[-1],
-        y_disabled[-1],
+    axis.annotate(
         "  command buffers disabled",
+        (x_disabled[-1], y_disabled[-1]),
+        xytext=(8, 12),
+        textcoords="offset points",
         color=neutral,
         fontsize=20,
         va="center",
@@ -358,6 +361,7 @@ def main() -> int:
     parser.add_argument("--child", action="store_true")
     parser.add_argument("--analyze-existing", action="store_true")
     parser.add_argument("--output-dir", type=Path)
+    parser.add_argument("--log-dir", type=Path)
     parser.add_argument("--programs", type=int, default=20)
     parser.add_argument("--start-size", type=int, default=64)
     parser.add_argument("--size-step", type=int, default=16)
@@ -369,6 +373,8 @@ def main() -> int:
 
     output_dir = arguments.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
+    log_dir = (arguments.log_dir or output_dir).resolve()
+    log_dir.mkdir(parents=True, exist_ok=True)
     script = Path(__file__).resolve()
     receipt_path = output_dir / "receipt.json"
     prior_receipt = {}
@@ -391,7 +397,7 @@ def main() -> int:
     }
     for arm in ("command_buffers_enabled", "command_buffers_disabled"):
         if arguments.analyze_existing:
-            log_path = output_dir / f"{arm}.log"
+            log_path = log_dir / f"{arm}.log"
             xla_flags = "--xla_gpu_graph_min_graph_size=1"
             if arm == "command_buffers_disabled":
                 xla_flags += " --xla_gpu_enable_command_buffer="
@@ -407,6 +413,7 @@ def main() -> int:
             arm_receipt = _run_arm(
                 script,
                 output_dir,
+                log_dir,
                 arm=arm,
                 programs=arguments.programs,
                 start_size=arguments.start_size,

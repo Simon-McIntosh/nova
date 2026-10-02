@@ -527,6 +527,60 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "d0e8f17e44aa6eb6f05cc94141ed513e1fa18d04",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 10070,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T205538048023-cco-root-cause-centroid-moment-contract",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "dirty": [],
+          "head": "d0e8f17e44aa6eb6f05cc94141ed513e1fa18d04",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": [],
+          "patch_equivalent_commits": [],
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-centroid-moment-contract",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-02T21:55:30Z",
+            "session_id": "01a0fe67-287f-7593-be8b-93c7bea27376",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-centroid-moment-contract"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a0fe67-287f-7593-be8b-93c7bea27376"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-02T21:55:30Z",
+      "session_id": "01a0fe67-287f-7593-be8b-93c7bea27376",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-centroid-moment-contract"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 01a0fe67-287f-7593-be8b-93c7bea27376"
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "none",

@@ -1,14 +1,14 @@
-# revision 3a28b398cb83c7b2128fae9d551e6776b009d596
+# revision 8b39a96f2c090b1bef3bb55f3e01020f8f9049f4
 # worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-terminal-state-draw-order-guard
 # module benchmarks.plasma_cell_terminal_state from /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-terminal-state-draw-order-guard/benchmarks/plasma_cell_terminal_state.py
 # command PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-terminal-state-draw-order-guard JAX_PLATFORMS=cpu NOVA_TERMINAL_STATE_DRAW_ORDER=panel-last /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -s -q tests/test_plasma_cell_terminal_state_draw_order.py
-10:17:48 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+10:23:32 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
 draw_order=panel-last analytic panel: reference_pixels=300 panel_pixels=333
 F
 =================================== FAILURES ===================================
 ____________ test_analytic_panel_reference_markers_not_overpainted _____________
 
-tmp_path = PosixPath('/tmp/pytest-of-mcintos/pytest-490/test_analytic_panel_reference_0')
+tmp_path = PosixPath('/tmp/pytest-of-mcintos/pytest-492/test_analytic_panel_reference_0')
 
     def test_analytic_panel_reference_markers_not_overpainted(tmp_path: Path) -> None:
         census = _render_census(tmp_path)
@@ -34,5 +34,5 @@ E           assert 333 == 0
 tests/test_plasma_cell_terminal_state_draw_order.py:63: AssertionError
 =========================== short test summary info ============================
 FAILED tests/test_plasma_cell_terminal_state_draw_order.py::test_analytic_panel_reference_markers_not_overpainted
-1 failed in 11.41s
+1 failed in 10.13s
 EXIT=1

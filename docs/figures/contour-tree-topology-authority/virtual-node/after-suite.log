@@ -1,0 +1,5 @@
+# revision f6c3b5de8 (fix applied) tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-virtual-node-not-a-critical-point (stopped at deadline before summary)
+/bin/bash: line 14: UV_PROJECT_ENVIRONMENT:-x: command not found
+# module 
+# command: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu uv run --no... ; pytest --timeout 0 -p no:cacheprovider tests/test_contour_tree_merge.py tests/test_contour_tree_brute_force.py tests/test_contour_tree_mesh.py tests/test_contour_tree_conventions.py
+..........F.F..F

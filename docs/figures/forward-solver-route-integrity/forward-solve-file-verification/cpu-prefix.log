@@ -1,0 +1,120 @@
+NOVA_LANE_START=2026-10-02T21:20:05+0200
+PLACEMENT=submit
+RUNG=cpu
+SLURM_JOB_ID=1280472
+SLURM_JOB_PARTITION=all_debug
+SOURCE_REVISION=bd439c315c5ec9db523d22e0eb5addc164be7a33
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+JAX_PLATFORMS=cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=3600
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_equilibrium_forward_solve.py::test_solve_path_current_moments_match_profile_owned_support tests/test_equilibrium_forward_solve.py::test_unclipped_support_uses_the_own_node_profile_for_every_cell tests/test_equilibrium_forward_solve.py::test_linear_moment_construction_requires_direct_sample_targets tests/test_equilibrium_forward_solve.py::test_receipts_and_integral_observation_share_solve_current_moments tests/test_equilibrium_forward_solve.py::test_prescribed_current_field_is_explicit_and_additive tests/test_equilibrium_forward_solve.py::test_the_accelerated_solve_reaches_its_fixed_point tests/test_equilibrium_forward_solve.py::test_forward_equilibrium_names_the_public_topology_state_type tests/test_equilibrium_forward_solve.py::test_the_receipt_records_an_untouched_absolute_source tests/test_equilibrium_forward_solve.py::test_current_uses_profile_support_and_pointwise_open_selection tests/test_equilibrium_forward_solve.py::test_the_topology_read_publishes_every_domain tests/test_equilibrium_forward_solve.py::test_a_terminal_class_contradiction_stays_in_its_branch_receipt tests/test_equilibrium_forward_solve.py::test_an_unavailable_requested_class_is_explicitly_non_converged tests/test_equilibrium_forward_solve.py::test_the_conservation_receipt_meets_its_registered_tolerances -v --durations=0 --timeout 3600 
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 3600.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 21:20:20 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 13 items
+
+tests/test_equilibrium_forward_solve.py::test_solve_path_current_moments_match_profile_owned_support FAILED [  7%]
+tests/test_equilibrium_forward_solve.py::test_unclipped_support_uses_the_own_node_profile_for_every_cell PASSED [ 15%]
+tests/test_equilibrium_forward_solve.py::test_linear_moment_construction_requires_direct_sample_targets PASSED [ 23%]
+tests/test_equilibrium_forward_solve.py::test_receipts_and_integral_observation_share_solve_current_moments PASSED [ 30%]
+tests/test_equilibrium_forward_solve.py::test_prescribed_current_field_is_explicit_and_additive PASSED [ 38%]
+tests/test_equilibrium_forward_solve.py::test_the_accelerated_solve_reaches_its_fixed_point PASSED [ 46%]
+tests/test_equilibrium_forward_solve.py::test_forward_equilibrium_names_the_public_topology_state_type PASSED [ 53%]
+tests/test_equilibrium_forward_solve.py::test_the_receipt_records_an_untouched_absolute_source PASSED [ 61%]
+tests/test_equilibrium_forward_solve.py::test_current_uses_profile_support_and_pointwise_open_selection PASSED [ 69%]
+tests/test_equilibrium_forward_solve.py::test_the_topology_read_publishes_every_domain PASSED [ 76%]
+tests/test_equilibrium_forward_solve.py::test_a_terminal_class_contradiction_stays_in_its_branch_receipt PASSED [ 84%]
+tests/test_equilibrium_forward_solve.py::test_an_unavailable_requested_class_is_explicitly_non_converged PASSED [ 92%]
+tests/test_equilibrium_forward_solve.py::test_the_conservation_receipt_meets_its_registered_tolerances PASSED [100%]
+
+=================================== FAILURES ===================================
+_________ test_solve_path_current_moments_match_profile_owned_support __________
+
+machine = (ForwardProfile(operator=ForwardFluxOperator(grid=FluxTarget(null=Null2D(maxsize=5, precision=<Precision.DOUBLE: 'floa....26096842,
+        0.23558035,  0.21166023,  0.19052074,  0.17335953,  0.1609408 ,
+        0.1535261 ], dtype=float64))
+
+    def test_solve_path_current_moments_match_profile_owned_support(machine):
+        """Solve moments equal direct integration on profile-owned support."""
+        profile, seed, _vacuum = machine
+        operator, seed = _with_direct_samples(profile, seed)
+        masks, topology = operator.read(seed)
+        geometry = operator.moment_geometry
+        profile_support = geometry.atomic_mesh.traced_clip(
+            jnp.ones(
+                len(geometry.atomic_mesh.node_coordinates),
+                dtype=jnp.asarray(seed).dtype,
+            )
+        ).qualify(masks.profile_participation)
+        sample_flux = operator.sample_node_flux(seed)
+        sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+        direct = operator.support_current_moments(
+            operator.source.core,
+            masks.psi_norm,
+            sample_psi_norm,
+            profile_support,
+        )
+        radial_second, vertical_second, cross_second = geometry.second_moment.T
+        determinant = radial_second * vertical_second - cross_second**2
+        expected = (
+            direct.cell_current,
+            (vertical_second * direct.radial_moment - cross_second * direct.vertical_moment)
+            / determinant,
+            (radial_second * direct.vertical_moment - cross_second * direct.radial_moment)
+            / determinant,
+        )
+        actual = operator.cell_current_moments(seed)
+        for observed, direct in zip(actual, expected, strict=True):
+>           np.testing.assert_allclose(observed, direct, rtol=2e-13, atol=2e-13)
+E           AssertionError: 
+E           Not equal to tolerance rtol=2e-13, atol=2e-13
+E           
+E           Mismatched elements: 31 / 625 (4.96%)
+E           First 5 mismatches are at indices:
+E            [135]: 660.3190282571816 (ACTUAL), 641.0264597007683 (DESIRED)
+E            [136]: 1085.1895644790413 (ACTUAL), 1084.8968784517697 (DESIRED)
+E            [138]: 1085.1895644790368 (ACTUAL), 1085.0439036442885 (DESIRED)
+E            [139]: 660.3190282571824 (ACTUAL), 640.3322973446873 (DESIRED)
+E            [158]: 782.9392001726037 (ACTUAL), 723.3399426656298 (DESIRED)
+E           Max absolute difference among violations: 173.43143606
+E           Max relative difference among violations: 0.31223999
+E            ACTUAL: array([    0.      ,     0.      ,     0.      ,     0.      ,
+E                      0.      ,     0.      ,     0.      ,     0.      ,
+E                      0.      ,     0.      ,     0.      ,     0.      ,...
+E            DESIRED: array([    0.      ,     0.      ,     0.      ,     0.      ,
+E                      0.      ,     0.      ,     0.      ,     0.      ,
+E                      0.      ,     0.      ,     0.      ,     0.      ,...
+
+tests/test_equilibrium_forward_solve.py:338: AssertionError
+============================== slowest durations ===============================
+566.31s setup    tests/test_equilibrium_forward_solve.py::test_the_accelerated_solve_reaches_its_fixed_point
+36.86s call     tests/test_equilibrium_forward_solve.py::test_solve_path_current_moments_match_profile_owned_support
+23.31s call     tests/test_equilibrium_forward_solve.py::test_receipts_and_integral_observation_share_solve_current_moments
+23.21s call     tests/test_equilibrium_forward_solve.py::test_an_unavailable_requested_class_is_explicitly_non_converged
+21.56s setup    tests/test_equilibrium_forward_solve.py::test_solve_path_current_moments_match_profile_owned_support
+13.37s call     tests/test_equilibrium_forward_solve.py::test_the_topology_read_publishes_every_domain
+8.27s setup    tests/test_equilibrium_forward_solve.py::test_a_terminal_class_contradiction_stays_in_its_branch_receipt
+2.10s call     tests/test_equilibrium_forward_solve.py::test_prescribed_current_field_is_explicit_and_additive
+0.95s call     tests/test_equilibrium_forward_solve.py::test_unclipped_support_uses_the_own_node_profile_for_every_cell
+0.67s call     tests/test_equilibrium_forward_solve.py::test_a_terminal_class_contradiction_stays_in_its_branch_receipt
+0.25s call     tests/test_equilibrium_forward_solve.py::test_linear_moment_construction_requires_direct_sample_targets
+0.04s call     tests/test_equilibrium_forward_solve.py::test_current_uses_profile_support_and_pointwise_open_selection
+
+(27 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+FAILED tests/test_equilibrium_forward_solve.py::test_solve_path_current_moments_match_profile_owned_support
+=================== 1 failed, 12 passed in 708.64s (0:11:48) ===================
+EXIT_STATUS=1
+NOVA_LANE_END=2026-10-02T21:32:06+0200
+NOVA_LANE_EXIT_STATUS=1

@@ -1,0 +1,53 @@
+<!-- node: fsri-forward-solve-file-verification | plan: forward-solver-route-integrity §1 -->
+<section id="fsri-forward-solve-file-verification">
+<h3>Whole-file forward-solve measurement at the frozen-Newton + clip-mode head</h3>
+
+<p>This node measures <code>tests/test_equilibrium_forward_solve.py</code>
+(29 collected node ids: 28 functions, one parametrised twice) at revision
+<code>bd439c315c5ec9db523d22e0eb5addc164be7a33</code>, on the H200 whole-file
+and on CPU in per-shard jobs, now that the frozen-Newton route
+(<code>db580bec8</code>) and the clip-mode request field (<code>af7403bc0</code>)
+are merged. It changes no source and fixes nothing.</p>
+
+<table>
+  <thead><tr><th>job</th><th>partition / rung</th><th>tests</th><th>outcome</th><th>wall</th></tr></thead>
+  <tbody>
+  <tr><th scope="row">1280471</th><td>betelgeuse, H200, one card, <code>JAX_PLATFORMS=cuda,cpu</code></td>
+    <td>whole file, 29 ids</td><td><code>4 failed, 25 passed</code>; <code>EXIT=1</code></td><td>905.35&nbsp;s (0:15:05)</td></tr>
+  <tr><th scope="row">1280472</th><td>all_debug, CPU, <code>JAX_PLATFORMS=cpu</code></td>
+    <td>ids 1&ndash;13</td><td><code>1 failed, 12 passed</code>; <code>EXIT=1</code></td><td>708.64&nbsp;s (0:11:48)</td></tr>
+  <tr><th scope="row">1280473</th><td>all_debug, CPU</td><td>ids 14&ndash;19 (host iteration, flux resolution, relaxed, early exit, root find)</td><td>running at handoff</td><td>&mdash;</td></tr>
+  <tr><th scope="row">1280474</th><td>all_debug, CPU</td><td>ids 20&ndash;23 (vacuum, seeds, ensemble, portfolio)</td><td>running at handoff</td><td>&mdash;</td></tr>
+  <tr><th scope="row">1280476</th><td>all_debug, CPU</td><td>ids 24&ndash;28 (moment map, solve/plasma-current gradients, refusal, external flux)</td><td>running at handoff</td><td>&mdash;</td></tr>
+  <tr><th scope="row">1280477</th><td>sirius, CPU, <code>--timeout 10000</code></td><td><code>test_the_accelerator_routes_agree_on_the_fixed_point</code></td><td>running at handoff</td><td>&mdash;</td></tr>
+  </tbody>
+</table>
+
+<p>Every job ran at <code>SOURCE_REVISION=bd439c315c5ec9db523d22e0eb5addc164be7a33</code>;
+the launcher and plain-sbatch headers carry it in each log. Logs are the
+gate records under
+<code>docs/figures/forward-solver-route-integrity/forward-solve-file-verification/</code>.</p>
+
+<p><strong>Failures so far, with first error line.</strong></p>
+
+<ul>
+  <li><code>test_solve_path_current_moments_match_profile_owned_support</code>
+    (H200 and CPU): <code>AssertionError: Not equal to tolerance rtol=2e-13,
+    atol=2e-13</code>; 31/625 mismatched elements, max absolute difference
+    <code>173.43</code>. Device-independent &mdash; the same test and the same
+    mismatch count fail on both rungs.</li>
+  <li><code>test_the_moment_map_is_differentiable_against_finite_differences</code>
+    (H200): <code>assert 0.7598863825264144 &gt; 1.0</code> (the coarse-step
+    relative error, which the registered contract expects above
+    <code>1e-2</code>; the measured value orders below the fine steps). CPU
+    confirmation is in shard 1280476.</li>
+  <li><code>test_the_solve_is_differentiable_in_the_conductor_current</code>
+    (H200): <code>assert 63.47875092912272 &lt; 0.001</code>.</li>
+  <li><code>test_the_plasma_current_is_differentiable_in_the_conductor_current</code>
+    (H200): <code>assert 11.313969220454661 &lt; 0.001</code>.</li>
+</ul>
+
+<p>The three gradient/derivative failures appear H200-only at handoff and are
+the ones the CPU shards 1280476 (all_debug) and 1280477 (sirius) exist to
+confirm or separate; their CPU result is pending.</p>
+</section>

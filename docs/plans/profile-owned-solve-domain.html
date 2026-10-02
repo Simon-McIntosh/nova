@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="94">
+<meta name="plan-version" content="95">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
 <meta name="plan-impl" content="0.83">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
@@ -241,6 +241,14 @@
       </p>
     <p class="r-dec-rat">The observed signature is a betrayed model under stable conditioning: rebuild the local linearization at the current iterate and take a Levenberg-damped step on the fresh model rather than re-scaling the stale direction. Measurable by the same 650-ceiling ladder; pseudo-arclength stays the fallback if the rebuilt model also exhausts.</p>
     </div>
+<div class="r-dec" data-key="wall-resolution-ladder-disposition" data-choice="" data-by="" data-when="" data-sections="s5">
+    <p class="r-dec-q">Section 5 (the isolated wall-resolution ladder) is a scientific hold. Both resolution stop counts are unmet (144 to 288 boundary-flux movement 4.606e-05 Wb before the repair, 0.0 Wb after), measured on a terminal state that the later active-set work superseded. Is the section closed with that negative result recorded, or re-scoped against the current active-set terminal?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="close-with-negative-result">close section 5 and record the unmet stop counts as its negative result</button>
+      <button class="r-opt" data-value="rescope-to-active-set-terminal">re-scope section 5 to the current active-set terminal, with a new done-when</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -253,10 +261,11 @@
         separatrix-spline-extraction.</div>
     <pre class="r-fu-prompt">/reckon-build profile-owned-solve-domain</pre>
     </article>
-<article class="r-fu" data-id="f-pod-currency-2026-10-01" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build profile-owned-solve-domain" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pod-currency-2026-10-01" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build profile-owned-solve-domain" data-resolved-at="2026-10-02T06:27:49+00:00" data-resolved-by="s21-nova coordinator">
     <h4 class="r-fu-title">Close or re-scope §5, the isolated wall-resolution ladder</h4>
     <div class="r-fu-body">Currency audit 2026-10-01 (plan-currency-and-depth-a.md, profile-owned-solve-domain row): impl 0.5 understated the tree. §4 is delivered on its second done-when branch (cutover and point-cell routing landed with zero new failures), and §6 landed (a85b597f). impl is restated to 0.83: five of six sections have landed and §5 is held. §5 is a scientific hold: both resolution stop counts are unmet on a terminal that later active-set work superseded (144 to 288 boundary-flux movement 4.606e-05 Wb before repair, 0.0 Wb after). Authority-required: the lead decides. Done when: §5 is closed with its negative result recorded, or re-scoped against the current active-set terminal with a new done-when, and impl moves to match.</div>
     <pre class="r-fu-prompt">/reckon-build profile-owned-solve-domain</pre>
+    <p class="r-fu-outcome">Converted to the open decision wall-resolution-ladder-disposition, scoped to section 5, so the roadmap gates on the lead's choice; the impl restatement to 0.83 stands.</p>
     </article>
 </section>
 

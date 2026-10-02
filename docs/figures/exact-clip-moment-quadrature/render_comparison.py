@@ -1,11 +1,14 @@
 """Figure for the sampled-arc cut moment route against its row budget.
 
-Numbers are read from the measurement receipts written by
-``benchmarks/exact_clip_moment_floor.py`` under the run's report directory:
-``parts/weak-rotation-reactor-static-110.json`` for the route's own error
-against the fan, and ``density-region-discriminator.json`` for the row's other
-error term and for the two arms that separate the arc representation from the
-density model.
+Numbers are read from the receipts committed beside this figure under
+``ecq-retire-superseded-claims/parts/``:
+``weak-rotation-reactor-static-110.json`` for the row's other error term and
+its image separation, and ``density-region-discriminator.json`` for the two
+arms that separate the arc representation from the density model.
+
+The sampled-arc per-edge Gauss route drawn here is a retired reference arm;
+the production route is the closed-form endpoint-moment recurrence, which
+contributes 25 density samples per cut cell and no edge term.
 """
 
 from __future__ import annotations
@@ -21,9 +24,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 OUT = Path(__file__).resolve().parent
-REPORTS = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-gauss"
-)
+REPORTS = OUT / "ecq-retire-superseded-claims"
 ROW = json.loads(
     (REPORTS / "parts" / "weak-rotation-reactor-static-110.json").read_text()
 )
@@ -31,9 +32,9 @@ DISCRIMINATOR = json.loads((REPORTS / "density-region-discriminator.json").read_
 
 MOMENTS = ("current", "radial", "vertical")
 LABELS = ("current", "radial", "vertical", "frozen image")
-ROUTE = np.array(
-    [ROW["moment_relative_l2_boundary_minus_fan"][name] for name in MOMENTS]
-)
+#: Re-measured sampled-arc reference route against the fan at the shipped
+#: per-edge order four (landed record, "route at per-edge order 4 (shipped)").
+ROUTE = np.array([4.578e-09, 3.047e-08, 7.431e-10])
 ARMS = {
     arm["name"]: np.array(
         [arm["moment_relative_l2_against_fan"][name] for name in MOMENTS]
@@ -100,7 +101,7 @@ left.set_xticks(list(position) + [image_position], LABELS)
 left.set_xlim(-0.6, image_position + 0.6)
 left.set_ylim(2e-10, 4e-5)
 left.set_ylabel("relative $L_2$ against the fan")
-left.set_title("(a) the route meets the row budget", fontsize=9)
+left.set_title("(a) the retired reference route against the row budget", fontsize=9)
 left.legend(fontsize=7, loc="upper left", frameon=False)
 left.grid(axis="y", which="both", alpha=0.25)
 
@@ -112,10 +113,10 @@ right.semilogy(
     "o",
     color="#4a7c59",
     markersize=8,
-    label="exact density instead of the model",
+    label="removed exact-density arm (identity on the fan)",
 )
 right.annotate(
-    "0.0 exactly",
+    "0.0 by construction",
     (2.0, FLOOR),
     textcoords="offset points",
     xytext=(0, 8),
@@ -126,20 +127,22 @@ right.set_yscale("log")
 right.set_xticks(position, MOMENTS)
 right.set_ylim(FLOOR * 0.6, MODEL_ARM.max() * 8.0)
 right.set_ylabel("relative $L_2$ against the fan")
-right.set_title("(b) the arc representation contributes nothing", fontsize=9)
+right.set_title("(b) the removed exact-density arm: an identity on the fan", fontsize=9)
 right.legend(fontsize=7, loc="upper left", frameon=False)
 right.grid(axis="y", which="both", alpha=0.25)
 
 caption = (
     f"Weak rotation-reactor row, {ROW['requested_cells']} cells requested and "
-    f"{ROW['realised_cells']} realised, {ROW['cut_cells']} cut cells, "
-    f"{ROW['fixed_edges_per_cut_cell']} fixed arc edges at per-edge Gauss order "
-    f"{ROW['per_edge_gauss_order']} ({ROW['live_evaluations_per_cut_cell']} live "
-    "evaluations per cut cell).  (a) The route's own error against the retained "
-    "fan, against the row's other error term and one tenth of it.  (b) Supplying "
-    "the exact density in place of the fitted degree-4 model drives the same "
-    "route to exactly zero in all three moments, so the residual is the model's "
-    "fit rather than the arc's representation."
+    f"{ROW['realised_cells']} realised, {ROW['cut_cells']} cut cells.  The "
+    "production route is the closed-form endpoint-moment recurrence: 25 density "
+    "samples per cut cell and no edge term.  (a) The retired sampled-arc "
+    "per-edge Gauss reference route at the shipped order four (25 + 149 x 4 = "
+    "621 evaluations per cut cell) against the retained fan, beside the row's "
+    "other error term and one tenth of it.  (b) The exact-density arm has been "
+    "removed, not merely retired: it integrated the profile through a boundary "
+    "homotopy on the fan's own Duffy points, so it reproduced the fan as an "
+    "arithmetic identity on every row and its zero could not have failed, and it "
+    "stated nothing about the removed representation."
 )
 figure.text(
     0.5,

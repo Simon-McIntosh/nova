@@ -1,0 +1,103 @@
+{
+  "arms": [
+    {
+      "description": "Boundary homotopy over every live sampled vertex with pointwise profile density.",
+      "frozen_image_delta_sup_over_span": 0.0,
+      "moment_relative_l2_against_fan": {
+        "current": 0.0,
+        "radial": 0.0,
+        "vertical": 0.0
+      },
+      "name": "sampled_polygon_exact_density_boundary"
+    },
+    {
+      "description": "Retained fan region with the production six-sample quadratic density fit.",
+      "frozen_image_delta_sup_over_span": 4.6622335696852e-07,
+      "moment_relative_l2_against_fan": {
+        "current": 1.1693910794921578e-06,
+        "radial": 9.432656549758488e-06,
+        "vertical": 1.1231467775583494e-06
+      },
+      "name": "sampled_polygon_quadratic_density_fan"
+    }
+  ],
+  "case": "weak-rotation-reactor-static",
+  "created_at": "2026-09-17T03:56:10.545495+00:00",
+  "cut_cells": 43,
+  "fan_allocation": {
+    "actual_fixed_evaluations_per_cut_cell": 245632,
+    "actual_support_capacity": 3840,
+    "census": [
+      {
+        "cut_cells": 4,
+        "exact_zero_padding_per_cut_cell": 237440,
+        "live_evaluations_per_cut_cell": 8192,
+        "plan_reference_zero_padding_per_cut_cell": 188288,
+        "vertex_count": 130
+      },
+      {
+        "cut_cells": 14,
+        "exact_zero_padding_per_cut_cell": 237376,
+        "live_evaluations_per_cut_cell": 8256,
+        "plan_reference_zero_padding_per_cut_cell": 188224,
+        "vertex_count": 131
+      },
+      {
+        "cut_cells": 13,
+        "exact_zero_padding_per_cut_cell": 237312,
+        "live_evaluations_per_cut_cell": 8320,
+        "plan_reference_zero_padding_per_cut_cell": 188160,
+        "vertex_count": 132
+      },
+      {
+        "cut_cells": 8,
+        "exact_zero_padding_per_cut_cell": 237248,
+        "live_evaluations_per_cut_cell": 8384,
+        "plan_reference_zero_padding_per_cut_cell": 188096,
+        "vertex_count": 133
+      },
+      {
+        "cut_cells": 4,
+        "exact_zero_padding_per_cut_cell": 237184,
+        "live_evaluations_per_cut_cell": 8448,
+        "plan_reference_zero_padding_per_cut_cell": 188032,
+        "vertex_count": 134
+      }
+    ],
+    "live_fraction": 0.03383545208866052,
+    "plan_reference_fixed_evaluations_per_cut_cell": 196480,
+    "plan_reference_total_exact_zero_padding": 8091264,
+    "total_exact_zero_padding": 10204800,
+    "total_live_evaluations": 357376
+  },
+  "fan_order": 8,
+  "lane": {
+    "host": "98dci4-clu-3141.iter.org",
+    "jax_enable_x64": true,
+    "jax_platform": "cpu",
+    "job_id": "1272521",
+    "partition": "all_debug"
+  },
+  "production_context": {
+    "description": "Production sampled-arc boundary route: the clip's own 128-segment arc region carrying a per-edge Gauss rule of the local degree-four density model.",
+    "frozen_image_delta_sup_over_span": 1.8542529876458346e-09,
+    "moment_relative_l2_against_fan": {
+      "current": 4.5775563228780105e-09,
+      "radial": 3.044019465205358e-08,
+      "vertical": 7.328540159864547e-10
+    },
+    "name": "sampled_arc_density_model"
+  },
+  "realised_cells": 135,
+  "region_increment_at_quadratic_density": {
+    "frozen_image_delta_sup_over_span": 4.643691039808742e-07,
+    "moment_relative_l2_over_exact_fan_norm": {
+      "current": 1.1650253849094439e-06,
+      "radial": 9.402679575905163e-06,
+      "vertical": 1.1227558907193865e-06
+    }
+  },
+  "requested_cells": -110,
+  "schema": "nova.exact-clip-density-region-discriminator.v1",
+  "source_revision": "d9b594b29be63302832faf0097ae60b983e20295"
+}

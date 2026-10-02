@@ -1,0 +1,91 @@
+<section id="ecq-retire-superseded-claims">
+  <h3>Retiring the superseded exact-clip quadrature claims</h3>
+
+  <p><strong>Node</strong> <code>ecq-retire-superseded-claims</code> ·
+  <strong>Plan</strong> <code>nova:exact-clip-moment-quadrature</code> §3 ·
+  <strong>Base</strong> <code>9ac842a60</code>. Discharges, in one edit session,
+  followups <code>f-ecq-repair-retracted-comparison-figure</code>,
+  <code>f-ecq-arc-order-evidence</code>,
+  <code>f-ecq-repair-rows-svg-captions</code> and
+  <code>f-ecq-memory-identification-swept-product</code>. No product source and
+  no test is touched; the writes are the comparison figure and its renderer, the
+  landed evidence record, and one receipt JSON.</p>
+
+  <p><strong>Defects re-verified at HEAD before editing.</strong> The committed
+  <code>comparison.svg</code> carried the refuted in-figure text
+  (<code>order 3</code> ×1, <code>472</code> ×6, <code>contributes nothing</code>
+  ×1, <code>0.0 exactly</code> ×1); the evidence record's rows.svg citation
+  (alt and figcaption) still read <em>every measured row clears its budget</em> /
+  <em>Every mark sits between 23 and about 1000</em>; the landed record's
+  §2-sampled-arc paragraph still stated the order-three <code>25 + 149 × 3 = 472</code>
+  bound and the exact-density arm's <code>0.0</code> as live findings; and
+  <code>solve-memory-identification.json</code> carried
+  <code>arms[0|1].dimensions.exact_support_capacity = 3072</code> with no
+  provenance marker.</p>
+
+  <p><strong>Comparison figure regenerated.</strong>
+  <code>render_comparison.py</code> now reads its receipts from committed parts
+  committed beside the figure (<code>ecq-retire-superseded-claims/parts/</code>)
+  and draws the re-measured order-four reference route; panel (b) is retitled
+  <em>the removed exact-density arm: an identity on the fan</em> and annotated
+  <em>0.0 by construction</em>; the caption states the endpoint-moment production
+  route (<code>25 density samples, no edge term</code>) and the retired
+  reference arm at order four (<code>25 + 149 x 4 = 621</code> evaluations per
+  cut cell, above the declared 500). Re-rendered on the login node
+  (<code>EXIT=0</code>). Grep of the new
+  <code>comparison.svg</code> for the refuted markers returns
+  <code>order 3 = 0</code> and <code>contributes nothing = 0</code>; the digit
+  string <code>472</code> survives only inside floating-point coordinate data
+  (<code>135.547201</code>, <code>4723.359375</code>, …), not as a claim.</p>
+
+  <p><strong>Evidence record.</strong> In
+  <code>docs/evidence/archive/exact-clip-moment-quadrature-landed.html</code> the
+  retained <code>472</code> statements (the §2-sampled-arc bound paragraph, the
+  nine-row table's retained Order/Evals-per-cell/Exact-density-arm columns, and
+  the row-matrix paragraph) are each marked superseded in place by the
+  shifted-path record's order-four <code>621</code> result; the retained numbers
+  are kept, not deleted. The two passages that presented the exact-density arm
+  as independent (the density/region-separation table row and the row-matrix
+  paragraph) now state that the arm is removed and that its <code>0.0</code> was
+  an arithmetic identity on the fan. The rows.svg alt and figcaption now carry
+  the rows.png figcaption wording: the four coupling rows cross the unit line
+  and the five fallback rows, drawn as diamonds, do not at any swept count — no
+  caption claims every row clears its budget.</p>
+
+  <p><strong>Receipt marked; sweep recorded.</strong> Both
+  <code>exact_support_capacity</code> fields (and the companion
+  <code>exact_*,</code> quadrature-point field) in
+  <code>solve-memory-identification.json</code> now carry a
+  <code>dimensions_provenance</code> block marking the value historical, naming
+  the retiring revision <code>f7fefbd7</code>, and giving the current derived
+  bound <code>152 = 128 + 24</code> for the same realised layout (measurement
+  fields unchanged; <code>40 insertions, 0 deletions</code>). The declared sweep
+  over committed receipts under <code>docs/figures/</code> (output on disk at
+  <code>capacity-sweep.txt</code> in the run directory) finds
+  <strong>32 files</strong> carrying capacity in {3072, 3840, 2816}:
+  <strong>5 marked</strong> (the four <code>exact-clip-cost</code> receipts and
+  this one) and <strong>27 unmarked</strong>. The 27 unmarked receipts lie
+  <em>outside this node's exclusive write paths</em> — under
+  <code>cut-cell-current-attribution/clip-quadrature/</code>,
+  <code>cut-cell-current-attribution/exact-clip-memory/</code>,
+  <code>exact-clip-capacity/</code> and
+  <code>millisecond-converged-solve/scan-prototype/parts/</code> — and are
+  returned under <code>follow_ons</code> rather than marked here.</p>
+
+  <p><strong>Plan-text citations the coordinator must correct (plan file is
+  coordinator-owned: not edited by this node).</strong>
+  <code>docs/plans/exact-clip-moment-quadrature.html</code>:</p>
+  <ul>
+    <li><strong>line 51</strong> still states the fixed live bound as
+    <code>25 + 149 × 3 = 472</code> at order three as current; it should be
+    marked superseded by the order-four <code>621</code> bound (as line 111
+    already states).</li>
+    <li><strong>lines 71–72</strong> cite <code>rows.svg</code> with the stale
+    alt/caption (<em>Every mark lies between 23 and about 1000</em>, <em>Every
+    measured row clears its budget</em>, and the exact-density-arm claim); they
+    should carry the <code>rows.png</code> figcaption wording applied to the same
+    citation in the evidence record.</li>
+  </ul>
+  <p>Plan line 74 and line 111 already carry their supersessions and need no
+  correction.</p>
+</section>

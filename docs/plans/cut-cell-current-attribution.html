@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="225">
+<meta name="plan-version" content="226">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
 <meta name="plan-impl" content="0.8">
@@ -1802,7 +1802,10 @@ fails all three recorded cells. See the
     <div class="r-comment-body"><p>Stored a parsed pass review (81/100) of run r-20261001T225921130998-cca-map-fidelity-h200-remeasure at head 515f74714045f0380502960867cca1044788c451 (base fa8af260e8adb154a7df4191d0c5308e6b675911); the refreshed certificate map-fidelity receipt is goal-faithful, in-scope and independently audited; two follow-on findings: the in-scope audit.log still attests the superseded revision de29a1a3 beside the refreshed receipts, and the fragment's single-cause chord-regression attribution is unisolated across 309 commits.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261002T052014995925-cca-chord-private-flux-rca" data-who="reckon-build" data-when="2026-10-02T05:21:01.706Z">
-    <div class="r-comment-body"><p>claude-opus worker exited at launch with &#x27;Not logged in · Please run /login&#x27;; redispatched unfenced as cca-chord-private-flux-root-cause</p></div>
+    <div class="r-comment-body"><p>claude-opus worker exited at launch with 'Not logged in · Please run /login'; redispatched unfenced as cca-chord-private-flux-root-cause</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261002T004302713354-review-of-cca-chord-regression-attribution" data-who="reckon-build" data-when="2026-10-02T01:03:38.011Z">
+    <div class="r-comment-body"><p>Independent review of the chord map-fidelity regression attribution: verdict pass (92/100; goal_fidelity 18, evidence 18, scope_discipline 20, durability 18, fit 18). Confirmed the culprit a59529f20 by git ancestry and reproduced four of the twelve benchmark rows to full float precision; three follow-on findings (branch-merge vs mainline first-bad framing; &quot;all 12 EXIT=0&quot; not legible from the committed logs; commit type/subject mismatch).</p></div>
 </div>
 </section>
 

@@ -461,6 +461,32 @@
   "plan_impl_at_dispatch": 0.96,
   "plan_link": null,
   "promoted_revision": "2e2000428bff0be8c9871e74047467cee6e29440",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5029,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T140840326701-cank-discriminator-and-fit-panels",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cank-discriminator-and-fit-panels"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

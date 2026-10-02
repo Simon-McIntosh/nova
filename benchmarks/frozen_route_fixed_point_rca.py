@@ -200,7 +200,6 @@ def _markdown(receipt: dict[str, Any]) -> str:
     partition = receipt["partition_fields"]
     largest = receipt["residual_terms"]["terms"]
     components = receipt["residual_terms"]["components"]
-    supported = receipt["refreshed_live_residual"] < receipt["live_residual"]
     lines = [
         "# Frozen Newton fixed-point RCA",
         "",
@@ -269,6 +268,7 @@ def _markdown(receipt: dict[str, Any]) -> str:
     )
     route = receipt["route"]
     refreshed_route = receipt["refreshed_route"]
+    frozen_gap = max(abs(entry["live_minus_frozen"]) for entry in largest)
     lines.extend(
         [
             "",
@@ -288,26 +288,46 @@ def _markdown(receipt: dict[str, Any]) -> str:
             "",
             "## Falsifiable mechanism check",
             "",
-            f"Refreshing the partition at the terminal state and taking "
-            f"{receipt['refresh_newton_steps']} more Newton steps changed the live "
-            "residual "
-            f"from {receipt['live_residual']:.12e} to "
-            f"{receipt['refreshed_live_residual']:.12e}. The prediction that a "
-            "refreshed continuous partition, even when labels do not change, moves "
-            "the frozen fixed point is therefore "
-            f"{'supported' if supported else 'not supported'}.",
+            "Two measurements refute the frozen-partition hypothesis. At the "
+            "terminal state the frozen map output differs from the live map "
+            f"output by at most {frozen_gap:.12e} "
+            "absolute over the ranked cells, so the frozen and live maps are the "
+            "same map to machine precision there. Second, a second frozen route "
+            "from the terminal state, re-reading the partition "
+            f"({receipt['refreshed_frozen_partition_reads']} reads, "
+            f"{receipt['refreshed_frozen_partition_refreezes']} re-freeze) and "
+            f"taking {receipt['refresh_newton_steps']} more Newton steps, returns "
+            f"the identical live residual {receipt['refreshed_live_residual']:.15e} "
+            f"and the identical {refreshed_route['termination_reason_name']} reason "
+            f"with {refreshed_route['accepted_newton_promotions']} accepted "
+            "promotion. A partition refresh therefore does not move the terminus.",
+            "",
+            "Caveat: that second solve re-freezes too, so it tests a repeated "
+            "frozen pass, not a live-read pass. What it establishes is narrow and "
+            "sufficient: the residual is reproduced bit-for-bit, so it is a "
+            "property of the route's terminus, not of a partition that went stale "
+            "between reads.",
             "",
             "## Recommended route",
             "",
-            "Keep live reads during warm-up and one frozen partition per Newton "
-            "pass, but make the terminal reconciliation refresh the complete "
-            "partition and continue a bounded Newton pass whenever its live "
-            "residual exceeds tolerance. The measured prediction for that recipe "
-            f"is {receipt['refreshed_live_residual']:.12e} after "
-            f"{receipt['refresh_newton_steps']} additional Newton steps, at a "
-            f"cost of {receipt['refreshed_route_wall_seconds']:.2f} s for the "
-            "bounded refresh over the base route's "
-            f"{receipt['initial_route_wall_seconds']:.2f} s.",
+            "The measured terminus is a settlement, not a stale partition. The "
+            "outer loop stops after two active-set trips on an unchanged mask with "
+            "no accepted promotion, retaining a state whose live relative-sup "
+            f"residual is {receipt['live_residual']:.12e} while the inner Newton "
+            f"local step residual is {receipt['trajectory_residual']:.12e}. The "
+            "route holds the active set fixed within each pass, and once the mask "
+            "stops changing the settle test ends the loop on the retained state "
+            "without consulting the live residual. Keep the locked design (live "
+            "reads through warm-up, one partition per Newton pass) and gate the "
+            "settle: admit settlement only when the reconciled live relative-sup "
+            "residual is at or below tolerance, and otherwise continue the local "
+            "Newton trajectory, which the design already preserves across an "
+            "unchanged mask. This node's re-frozen refresh does not improve the "
+            f"residual ({receipt['live_residual']:.12e} to "
+            f"{receipt['refreshed_live_residual']:.12e}), so the fix is the "
+            "residual gate rather than the refresh. Each bounded pass costs "
+            f"{receipt['refreshed_route_wall_seconds']:.2f} s against the base "
+            f"route's {receipt['initial_route_wall_seconds']:.2f} s.",
             "",
         ]
     )

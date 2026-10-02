@@ -328,6 +328,9 @@ def _newton_history(history: Any) -> dict[str, Any]:
     that decided the promotion.  ``trace`` is the relative residual at every map
     evaluation, with NaN where the evaluation was a tangent pass.  Unexecuted
     rows keep their NaN and -1 padding, so a reader sees the budget unspent.
+    The per-promotion rows describe the last frozen-mask pass only; the
+    ``active_set_*`` arrays carry one entry per pass and are the record of the
+    passes before it, and the two promotion counters accumulate over all passes.
     """
 
     def array(value: Any) -> np.ndarray:
@@ -359,6 +362,12 @@ def _newton_history(history: Any) -> dict[str, Any]:
         "promotion_backtrack_counts": array(history.promotion_backtrack_counts),
         "promotion_recovery_activations": array(history.promotion_recovery_activations),
         "row_jvp_projections": array(history.row_jvp_projections),
+        "active_set_iterations": int(array(history.active_set_iterations)),
+        "active_set_residuals": array(history.active_set_residuals),
+        "active_set_mask_differences": array(history.active_set_mask_differences),
+        "active_set_cycle_damping_activations": array(
+            history.active_set_cycle_damping_activations
+        ),
         "trace": array(history.trace),
     }
 

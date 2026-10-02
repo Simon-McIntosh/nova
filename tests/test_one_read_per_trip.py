@@ -16,7 +16,9 @@ with skip_import("jax"):
     from nova.jax.config import configure_dtypes
 
 
-def _partitioned_solver(*, count_reads=False, changing_mask=True):
+def _partitioned_solver(
+    *, count_reads=False, changing_mask=True, warmup=0, active_set_steps=3
+):
     counts = defaultdict(int)
 
     def mask(state):
@@ -44,29 +46,53 @@ def _partitioned_solver(*, count_reads=False, changing_mask=True):
         jnp.zeros(1),
         newton_steps=1,
         gmres_iterations=1,
-        warmup=0,
+        warmup=warmup,
         shadow_mask_fn=mask,
         promoted_shadow_mask_fn=lambda state, _previous: mask(state),
         shadowed_map_fn=shadowed_map,
-        active_set_steps=3,
+        active_set_steps=active_set_steps,
         model_trust_selection=False,
     )
     jax.block_until_ready(result.state)
     return result, counts
 
 
-def test_topology_is_read_once_at_each_trip_boundary():
+def test_a_hooked_map_refreezes_after_its_terminal_partition_changes():
+    """A changed terminal partition starts one further frozen Newton pass.
+
+    Each pass reads its partition once, then requalifies its terminal state.
+    The first terminal read changes the partition; the bounded second pass
+    confirms that its terminal partition is stable.
+    """
     configure_dtypes()
     result, counts = _partitioned_solver(count_reads=True)
 
     np.testing.assert_array_equal(result.active_set_mask_differences, [1, 0, -1])
     assert int(result.active_set_iterations) == 2
+    assert int(result.frozen_partition_reads) == 3
+    assert int(result.frozen_partition_refreezes) == 1
     assert counts == {"initial": 1, "boundary": 2}
+
+
+def test_the_warmed_route_reads_the_partition_once_after_its_warmup():
+    """The warmup advances the state live; one partition is then taken.
+
+    The warmup pre-pass runs with no Newton budget, so the route must still
+    take exactly one partition for the frozen solve that follows it.
+    """
+    configure_dtypes()
+    result, counts = _partitioned_solver(count_reads=True, warmup=3)
+
+    assert int(result.active_set_iterations) == 1
+    assert int(result.frozen_partition_reads) == 2
+    assert int(result.frozen_partition_refreezes) == 0
+    assert counts == {"initial": 1, "boundary": 1}
 
 
 def test_frozen_partition_is_bit_identical_when_the_mask_never_changes():
     configure_dtypes()
-    frozen, _counts = _partitioned_solver(changing_mask=False)
+    frozen, _counts = _partitioned_solver(changing_mask=False, active_set_steps=1)
+    frozen = frozen._replace(frozen_partition_reads=0, frozen_partition_refreezes=0)
 
     def stable_mask(state):
         return jnp.zeros_like(state, dtype=bool)
@@ -83,7 +109,7 @@ def test_frozen_partition_is_bit_identical_when_the_mask_never_changes():
         shadow_mask_fn=stable_mask,
         promoted_shadow_mask_fn=lambda state, _previous: stable_mask(state),
         shadowed_map_fn=stable_map,
-        active_set_steps=3,
+        active_set_steps=1,
         model_trust_selection=False,
     )
 

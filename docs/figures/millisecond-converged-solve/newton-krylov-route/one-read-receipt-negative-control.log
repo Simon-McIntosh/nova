@@ -1,0 +1,71 @@
+revision=c9618e83a-mutation with trip_limit forced to active_set_steps (the frozen route re-reads the partition at every Newton trip boundary instead of holding one)
+tree=/tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/negctl-one-read
+command=timeout 900 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_one_read_per_trip.py -q
+module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton/nova/equilibrium/fixed_point.py
+cwd=/tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/negctl-one-read
+01:26:29 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_______ test_a_hooked_map_takes_one_partition_for_the_whole_newton_solve _______
+
+    def test_a_hooked_map_takes_one_partition_for_the_whole_newton_solve():
+        """A map carrying the frozen-partition protocol freezes after one read.
+    
+        The parked topology cannot react to a state change inside the solve, so
+        the route takes a single trip and reads the partition once on entry and
+        once more when it re-qualifies the terminal state.
+        """
+        configure_dtypes()
+        result, counts = _partitioned_solver(count_reads=True)
+    
+>       np.testing.assert_array_equal(result.active_set_mask_differences, [1])
+E       AssertionError: 
+E       Arrays are not equal
+E       
+E       (shapes (3,), (1,) mismatch)
+E        ACTUAL: array([ 1,  0, -1], dtype=int32)
+E        DESIRED: array([1])
+
+tests/test_one_read_per_trip.py:70: AssertionError
+______ test_frozen_partition_is_bit_identical_when_the_mask_never_changes ______
+
+    def test_frozen_partition_is_bit_identical_when_the_mask_never_changes():
+        configure_dtypes()
+        frozen, _counts = _partitioned_solver(changing_mask=False)
+    
+        def stable_mask(state):
+            return jnp.zeros_like(state, dtype=bool)
+    
+        def stable_map(state, _mask):
+            return 0.25 * state + 0.75
+    
+        current = newton_krylov(
+            lambda state: stable_map(state, stable_mask(state)),
+            jnp.zeros(1),
+            newton_steps=1,
+            gmres_iterations=1,
+            warmup=0,
+            shadow_mask_fn=stable_mask,
+            promoted_shadow_mask_fn=lambda state, _previous: stable_mask(state),
+            shadowed_map_fn=stable_map,
+            active_set_steps=1,
+            model_trust_selection=False,
+        )
+    
+        for frozen_leaf, current_leaf in zip(
+            jax.tree.leaves(frozen), jax.tree.leaves(current), strict=True
+        ):
+>           np.testing.assert_array_equal(frozen_leaf, current_leaf)
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           (shapes (3,), (1,) mismatch)
+E            ACTUAL: array([ 0., nan, nan])
+E            DESIRED: array([0.])
+
+tests/test_one_read_per_trip.py:114: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_one_read_per_trip.py::test_a_hooked_map_takes_one_partition_for_the_whole_newton_solve
+FAILED tests/test_one_read_per_trip.py::test_frozen_partition_is_bit_identical_when_the_mask_never_changes
+2 failed, 1 passed in 25.14s
+EXIT=1

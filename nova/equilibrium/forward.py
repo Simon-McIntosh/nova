@@ -202,6 +202,24 @@ _REDUCED: tuple[str, ...] = ("reduced_newton",)
 _CONSTRAINABLE: tuple[str, ...] = ("newton_krylov", *_REDUCED)
 
 
+def _shared_shadowed_map(shadowed_map: Callable) -> Callable:
+    """Retain the map and its optional warmed-partition protocol together."""
+
+    def mapped(*arguments):
+        return shadowed_map(*arguments)
+
+    for name in (
+        "_read_frozen_partition",
+        "_map_frozen_partition",
+        "_frozen_partition_shadow",
+        "_frozen_partition_usable",
+    ):
+        value = getattr(shadowed_map, name, None)
+        if value is not None:
+            setattr(mapped, name, value)
+    return mapped
+
+
 def _lattice_cells(lattice: FluxLattice) -> tuple[np.ndarray, ...]:
     """Return rectangular control polygons centred on a structured lattice."""
     half_radial = 0.5 * lattice.radial_step
@@ -2014,6 +2032,7 @@ class ForwardProfile:
             )
 
         if route == "newton_krylov":
+            newton_shadowed_map = _shared_shadowed_map(shadowed_map)
 
             def solve(
                 initial_flux,
@@ -2026,7 +2045,7 @@ class ForwardProfile:
                     initial_flux,
                     shadow_mask_fn=shadow_mask,
                     promoted_shadow_mask_fn=promoted_shadow_mask,
-                    shadowed_map_fn=shadowed_map,
+                    shadowed_map_fn=newton_shadowed_map,
                     map_arguments=(external, operator, target_value),
                     callback_arguments=(operator,),
                     **{"newton_steps": self.newton_steps, **options},

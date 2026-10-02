@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -16,7 +17,7 @@ from nova.equilibrium.observation import MomentIntegralSupport
 from nova.jax.config import configure_dtypes
 
 
-OUTPUT = Path(__file__).resolve().parent / "derivative-factors.json"
+OUTPUT_DIR = Path(__file__).resolve().parent
 
 
 def _host(tree):
@@ -32,6 +33,9 @@ def _metrics(values):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("mode", choices=("sweep", "factor", "control"))
+    mode = parser.parse_args().mode
     configure_dtypes()
     assert jax.config.jax_enable_x64
     set_support_clip_mode("exact")
@@ -41,8 +45,9 @@ def main():
     target = context["target_current"]
     state = jnp.asarray(context["analytic"], dtype=jnp.float64)
     columns = jnp.asarray(operator.prescribed_current_field.response)
-    base_partition = operator._support_partition(state, 0)
-    base_support = base_partition[3]
+    base_support = None
+    if mode != "sweep":
+        base_support = operator._support_partition(state, 0)[3]
     point = jnp.asarray(operator.grid.coordinate)
 
     def factors(psi, *, frozen=False):
@@ -85,10 +90,11 @@ def main():
         return jnp.stack((row.centroid_r, row.centroid_z))
 
     digest = hashlib.sha256(np.asarray(state, dtype="<f8").tobytes()).hexdigest()
-    base = _host(factors(state))
     control = _host(production(state))
-    if not np.allclose(base["centroid"], control, rtol=0, atol=2e-12):
-        raise RuntimeError("factor reconstruction misses the production centroid")
+    if mode != "sweep":
+        base = _host(factors(state))
+        if not np.allclose(base["centroid"], control, rtol=0, atol=2e-12):
+            raise RuntimeError("factor reconstruction misses the production centroid")
     result = {
         "revision": "b4103b477e2807790996fbc9b7edeb07778cd433",
         "analytic_state_digest": digest,
@@ -102,10 +108,35 @@ def main():
     if digest != "d2c980a88374751bb6e4af9305ae9ad39bc0f19bb7f954654c08d6fa8862f8f2":
         raise RuntimeError("analytic state differs from prior receipt")
 
-    for name, column, steps in (
-        ("vertical_t", columns[:, 0], [1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4]),
-        ("level_wb", columns[:, 2], [1e-4]),
-    ):
+    if mode == "sweep":
+        read = jax.jit(production)
+        _, tangent = jax.jvp(read, (state,), (columns[:, 0],))
+        result["radial_jvp_m_per_t"] = float(tangent[0])
+        result["sweep"] = []
+        for step in (1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4):
+            plus = _host(read(state + step * columns[:, 0]))
+            minus = _host(read(state - step * columns[:, 0]))
+            result["sweep"].append(
+                {
+                    "step_t": step,
+                    "central_m_per_t": ((plus - minus) / (2 * step)).tolist(),
+                }
+            )
+            (OUTPUT_DIR / "step-sweep.json").write_text(
+                json.dumps(result, indent=2, allow_nan=False) + "\n"
+            )
+            print(f"step {step}: {result['sweep'][-1]}", flush=True)
+        return
+
+    name, column, steps = (
+        ("vertical_t", columns[:, 0], [1e-6])
+        if mode == "factor"
+        else ("level_wb", columns[:, 2], [1e-4])
+    )
+    output = OUTPUT_DIR / (
+        "derivative-factors.json" if mode == "factor" else "control.json"
+    )
+    for name, column, steps in ((name, column, steps),):
         print(f"direction {name}: JVP", flush=True)
         _, tangent = jax.jvp(factors, (state,), (column,))
         _, frozen_tangent = jax.jvp(
@@ -194,8 +225,8 @@ def main():
             "total_jvp": float(tangent["total"]),
             "steps": rows,
         }
-        OUTPUT.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
-    print(f"wrote {OUTPUT}", flush=True)
+        output.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
+    print(f"wrote {output}", flush=True)
 
 
 if __name__ == "__main__":

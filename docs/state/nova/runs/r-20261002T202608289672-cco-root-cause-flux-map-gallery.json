@@ -1,0 +1,768 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "11985735c020a39df74f76c75cbe6354e0e67d36",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 16241408,
+      "cached_input_tokens_cumulative": 16241408,
+      "input_tokens": 16433582,
+      "input_tokens_cumulative": 16433582,
+      "output_tokens": 65466,
+      "output_tokens_cumulative": 65466,
+      "reasoning_output_tokens": 28522,
+      "reasoning_output_tokens_cumulative": 28522
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 752,
+    "files": 5,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "b3d8ee15275188512b0614dc08e792099365c997",
+    "d64a5b27b0d4ed9fd126e1d0843b789447537336",
+    "6f7fa4f53da71b12d8ee32ebd587d123449fefba"
+  ],
+  "completed_at": "2026-10-02T21:13:12Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T20:26:35Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "22.197"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T202608289672-cco-root-cause-flux-map-gallery/panel_check.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T202608289672-cco-root-cause-flux-map-gallery/panel-check.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8,
+    "plan": "centroid-constrained-oracle-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 3.436656533227264,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-04T18:28:34Z, which is after this node's 3600s horizon ending 2026-10-02T21:26:12.745539+00:00",
+    "horizon_ends_at": "2026-10-02T21:26:12.745539+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T20:26:11Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-04T18:28:34Z",
+    "resets_at": "2026-10-09T10:39:35Z",
+    "seconds_until_reset": 569603,
+    "state": "quiet",
+    "utilisation_pct": 20.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T20:26:11Z",
+    "read_at": "2026-10-02T20:26:12Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 20.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T21:13:12Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T202608289672-cco-root-cause-flux-map-gallery/manifest.md",
+  "member": "disposable-r-20261002T202608289672-cco-root-cause-flux-map-gallery",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "cco-root-cause-flux-map-gallery",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 463,
+          "cached_input_tokens": 604249,
+          "input_tokens": 604714,
+          "output_tokens": 2869,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 607583,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Lead ruling 2026-10-02: the centroid-constrained solve is suspected of producing bogus flux maps; plot examples, examine them, find clear errors; no fix and no resolution ladder in this node. Render with the committed nova.media painters, from persisted arrays only, CPU in place with JAX_PLATFORMS=cpu, obeying the AGENTS.md plotting rules (axes off, unfilled line contours on one shared level array, both null sets via draw_nulls, the wall via draw_wall, residual and converged flag in each caption). One panel each for the weak-rotation-reactor-static -110 row at 135 cells: (a) the analytic Solovev reference; (b) the seed state; (c) the converged H200 terminal state /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T133233397975-cco-cap-factor-finite-tangent/h200-receipt/control-positive-state.npy (receipt docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json); (d) the earlier unconverged positive-control state under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T094100739066-cco-unit-leverage-positive-control/receipt/; (e) the flux of the compensating field alone at its converged amplitudes; (f) terminal minus reference on a diverging line-contour level set. Save PNG and SVG with a receipt under docs/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/. Then open and examine every PNG yourself and list each clear error you see: axis or X-point displaced from the analytic one, closed surfaces outside the wall, a reversed gradient or sign, transposed R and Z, discontinuities at cell or mesh boundaries, a boundary that neither touches the wall nor passes through the X-point, flux where the plasma should be empty, or a compensator flux whose shape is not that of a uniform field. Give each error its numeric confirmation from the arrays. The report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-flux-map-gallery.md ranks the errors and names the code each implicates (forward map, compensator response, seed or fixture construction, or painter).",
+    "estimated_hours": null,
+    "goal": "render the centroid-constrained flux maps and find any clear error in them by looking at the plots",
+    "id": "cco-root-cause-flux-map-gallery",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T20:26:11Z",
+      "read_at": "2026-10-02T20:26:12Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 20.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T202608289672-cco-root-cause-flux-map-gallery/manifest.md",
+    "negative_control": "panel (a) drawn from the analytic Solovev closed form must show the analytic axis and X-point at their closed-form coordinates, so the painters and the reading are validated before any solved state is judged",
+    "plan": "centroid-constrained-oracle-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "open",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/centroid-constrained-oracle-solve/root-cause/flux-maps",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-flux-map-gallery.md",
+      "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-root-cause-flux-map-gallery.html",
+      "docs/figures/centroid-constrained-oracle-solve/cco-root-cause-flux-map-gallery"
+    ]
+  },
+  "orientation_input_tokens": 7712953.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex",
+    "member": null,
+    "node": "cco-root-cause-flux-map-gallery",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T20:26:17.414118+00:00",
+    "score": 0.83125,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "hold",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": null,
+    "comment": "",
+    "confidence": 0.08,
+    "decision_source": "jev",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "unavailable",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 1.398539151388889,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 9,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 39
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 3,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 1.0,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 1.0,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 1.0,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": null,
+    "jev_latency_ms": 321.361,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2035.967,
+    "model": null,
+    "offered": [
+      {
+        "availability": "served",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 1.398539151388889,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 3,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude-opus": 0.46,
+      "hold": 0.54
+    },
+    "rendered_token_estimate": 741,
+    "usage": {
+      "cost": 6.7158e-05,
+      "input_tokens": 1599,
+      "output_tokens": 34
+    }
+  },
+  "plan": "centroid-constrained-oracle-solve",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "6f7fa4f53da71b12d8ee32ebd587d123449fefba",
+  "resume_waiver": null,
+  "review": {
+    "absent": [
+      "baseline_suite",
+      "after_suite"
+    ],
+    "reviewed_base_sha": "d64a5b27b0d4ed9fd126e1d0843b789447537336",
+    "reviewed_head_sha": "6f7fa4f53da71b12d8ee32ebd587d123449fefba",
+    "scores": {
+      "durability": 16,
+      "evidence": 18,
+      "fit": 17,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 90
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "run_id": "r-20261002T202608289672-cco-root-cause-flux-map-gallery",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fe4c-3c6e-79d2-9512-a57dae318271",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "open",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 16241408,
+    "cumulative_input_tokens": 32674990,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 93988
+  },
+  "time_budget": "60m",
+  "tool_steps": 95.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "budget_overrun": true,
+        "budget_overrun_seconds": 9401,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 13001,
+        "exit_record": {
+          "attempt": 5,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-02T18:36:08Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-02T16:49:38Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261002T134659485416-mulw-gate-frame-terminal-panels",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 1340,
+          "worker_pid": 2169035
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 6609,
+        "log_fresh": false,
+        "manifest_commits": [
+          "60fb6c5cba45da1b7a2f1f6c32fa447d3db77a69",
+          "3e98097edfd7114a1601a37cf24c6cfff970b058",
+          "37290e840839390655fea67991509312f5d039bc",
+          "6e6c93b00a57d31ea320616651ab45a7c4fe5f72",
+          "0a36644409e2dec21a825370b1b4ee001e259f89",
+          "79c9ce89e530663dc851c40705e288d7689c35bd",
+          "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+          "16d59153d53521838ddbc6becca875379a6e1a80",
+          "471afc8bc72f94fc1f0d8a2f02293c1d481e03d4"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "cbfc479afd758d1f54178bf98c88bc7438358fecfe4f16f1de79636cf6820a80",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --plan multi-unit-limiter-wall --section '§3' --role review --spec-level exact --node review-of-mulw-gate-frame-terminal-panels --goal 'attach an independent review to run r-20261002T134659485416-mulw-gate-frame-terminal-panels' --done-when 'the review for r-20261002T134659485416-mulw-gate-frame-terminal-panels stores a parsed record scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T134659485416-mulw-gate-frame-terminal-panels.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T134659485416-mulw-gate-frame-terminal-panels.at-471afc8bc72f94fc1f0d8a2f02293c1d481e03d4.json --time-budget 60m --session s22-nova --allow-unreconciled-runs --backend codex-astra",
+        "node": "mulw-gate-frame-terminal-panels",
+        "phase": "complete",
+        "plan": "multi-unit-limiter-wall",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261002T134659485416-mulw-gate-frame-terminal-panels",
+        "session": "s22-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 6896,
+        "terminal_at": "2026-10-02T18:31:18Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels"
+      },
+      {
+        "budget_overrun": true,
+        "budget_overrun_seconds": 6040,
+        "budget_seconds": 1800,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 7840,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-02T18:58:00Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-02T18:15:45Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261002T181517700608-cco-span-offset-record-repairs",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 7774,
+          "worker_pid": 3192616
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 5296,
+        "log_fresh": false,
+        "manifest_commits": [
+          "e40342d3a",
+          "8647f5e2d",
+          "6b8d62e94"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "7663525eace46fa5a6da96e66018aacd6d0ab9a62f69c0b22f25c3192f847eae",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181517700608-cco-span-offset-record-repairs/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --plan centroid-constrained-oracle-solve --section '§2' --role review --spec-level exact --node review-of-cco-span-offset-record-repairs --goal 'attach an independent review to run r-20261002T181517700608-cco-span-offset-record-repairs' --done-when 'the review for r-20261002T181517700608-cco-span-offset-record-repairs stores a parsed record scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T181517700608-cco-span-offset-record-repairs.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T181517700608-cco-span-offset-record-repairs.at-6b8d62e94851645122537da00d1dd8c1be749802.json --time-budget 30m --session s22-nova --allow-unreconciled-runs --local",
+        "node": "cco-span-offset-record-repairs",
+        "phase": "complete",
+        "plan": "centroid-constrained-oracle-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261002T181517700608-cco-span-offset-record-repairs",
+        "session": "s22-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 5376,
+        "terminal_at": "2026-10-02T18:56:38Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-span-offset-record-repairs"
+      }
+    ]
+  },
+  "wall_seconds": 2797,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T21:13:15Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T20:58:33Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T202608289672-cco-root-cause-flux-map-gallery",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 435,
+    "worker_pid": 115055
+  },
+  "worker_seconds": 2797,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

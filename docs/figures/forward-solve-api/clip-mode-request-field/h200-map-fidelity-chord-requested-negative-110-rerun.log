@@ -1,0 +1,21 @@
+NOVA_LANE_START=2026-10-02T19:51:14+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1280464
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=09a0b9b9022073b1b69562af8a53f2e22007ff37
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core
+JAX_PLATFORMS=cuda
+TMPDIR=/tmp
+MODE=script
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core/benchmarks/plasma_cell_map_fidelity.py --case weak-rotation-reactor-static --cells -110 --output /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core/docs/figures/forward-solve-api/clip-mode-request-field/map-fidelity-chord-requested-negative-110
+BUILD case=weak-rotation-reactor-static requested=-110
+MAP case=weak-rotation-reactor-static requested=-110 mode=exact
+ROW weak-rotation-reactor-static-cells-110-exact mismatch={'sup_relative': 0.00016592289257223025, 'rms_relative': 0.00018302474404574613, 'sup_wb': 0.008246175112880394, 'rms_wb': 0.003503238641049072, 'sup_over_reference_span': 0.00011895681472381766, 'rms_over_reference_span': 5.053665538895253e-05, 'reference_sup_wb': 49.698838930804165, 'reference_rms_wb': 19.140792461228383, 'finite': True} control={'sup_relative': 0.4172510245618181, 'rms_relative': 0.605003611468926} centroid_offset_mm={'dR': -0.05552085088211811, 'dZ': -2.708526743550008e-11, 'booked_centroid_m': [6.06345279830004, 6.951764573672923e-13], 'analytic_centroid_m': [6.063508319150922, 7.222617248027924e-13], 'support_cell_count': 121, 'amplitude_lambda': 1.000135313893548}
+MAP case=weak-rotation-reactor-static requested=-110 mode=chord
+ROW weak-rotation-reactor-static-cells-110-chord mismatch={'sup_relative': 9.540289289876033e-05, 'rms_relative': 0.00012270193811786875, 'sup_wb': 0.004741413007708251, 'rms_wb': 0.0023486123321046137, 'sup_over_reference_span': 6.839818230467285e-05, 'rms_over_reference_span': 3.388036734896029e-05, 'reference_sup_wb': 49.698838930804165, 'reference_rms_wb': 19.140792461228383, 'finite': True} control={'sup_relative': 0.41432438499774277, 'rms_relative': 0.6022496449491676} centroid_offset_mm={'dR': -0.06981943764028387, 'dZ': -7.178216119907872e-10, 'booked_centroid_m': [6.063438499713282, 4.440112812005232e-15], 'analytic_centroid_m': [6.063508319150922, 7.222617248027924e-13], 'support_cell_count': 121, 'amplitude_lambda': 1.0000713103852796}
+EXIT_STATUS=0
+NOVA_LANE_END=2026-10-02T19:52:28+0200
+NOVA_LANE_EXIT_STATUS=0

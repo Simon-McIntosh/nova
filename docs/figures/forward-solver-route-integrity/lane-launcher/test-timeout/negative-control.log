@@ -27,7 +27,7 @@ tmp_path = PosixPath('/tmp/pytest-of-mcintos/pytest-476/test_dry_run_pytest_uses
             "--",
             "tests/example_target.py",
         )
-    
+
         assert result.returncode == 0, result.stderr
 >       assert "--timeout 3600" in _h200_submission_line(result)
 E       AssertionError: assert '--timeout 3600' in 'RUNG=h200 JAX_PLATFORMS=cuda,cpu SUBMIT_COMMAND=sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-pe...a-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout/scripts/nova_lane/run.sh --payload -- tests/example_target.py '
@@ -50,7 +50,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3fe4570d60>
             "--",
             "tests/example_target.py",
         )
-    
+
         assert result.returncode == 0, result.stderr
 >       assert "--timeout 7200" in _h200_submission_line(result)
 E       AssertionError: assert '--timeout 7200' in 'RUNG=h200 JAX_PLATFORMS=cuda,cpu SUBMIT_COMMAND=sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-pe...a-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout/scripts/nova_lane/run.sh --payload -- tests/example_target.py '

@@ -266,7 +266,7 @@ def _classify(
     }
 
 
-def _plot(receipt: dict[str, object], output: Path) -> None:
+def _plot(receipt: dict[str, object], png_output: Path, svg_output: Path) -> None:
     import matplotlib.pyplot as plt
 
     try:
@@ -283,76 +283,66 @@ def _plot(receipt: dict[str, object], output: Path) -> None:
                 "lines.linewidth": 2.6,
             }
         )
-    enabled, disabled = receipt["arms"]
-    enabled_rows = [row for row in enabled["rows"] if row["kind"] == "program"]
-    disabled_rows = [row for row in disabled["rows"] if row["kind"] == "program"]
+    enabled = next(
+        arm for arm in receipt["arms"] if arm["arm"] == "command_buffers_enabled"
+    )
+    enabled_rows = [
+        row
+        for row in enabled["rows"]
+        if row["kind"] == "program" and row["alive_executable_graphs"] is not None
+    ]
+    if not enabled_rows:
+        raise RuntimeError("no enabled-arm program markers carried an XLA graph count")
     x_enabled = [row["programs_compiled"] for row in enabled_rows]
     y_enabled = [row["alive_executable_graphs"] for row in enabled_rows]
-    x_disabled = [row["programs_compiled"] for row in disabled_rows]
-    y_disabled = [row["alive_executable_graphs"] or 0 for row in disabled_rows]
-    settled_reread = next(
-        row for row in enabled["rows"] if row["kind"] == "settled_reread"
-    )
-    post_drop = {
-        "programs_compiled": settled_reread["programs_compiled"],
-        "dropped_handles": settled_reread["dropped_handles"],
-        "alive_executable_graphs": receipt["summary"][
-            "alive_executable_graphs_after_drop"
-        ],
-    }
 
     figure, axis = plt.subplots(figsize=(14, 7), dpi=100)
     enabled_colour = "#31688e"
     neutral = "#777777"
-    axis.plot(x_enabled, y_enabled, color=enabled_colour, linewidth=3.0)
-    axis.plot(x_disabled, y_disabled, color=neutral, linewidth=2.4, linestyle="--")
-    axis.scatter(
-        [post_drop["programs_compiled"]],
-        [post_drop["alive_executable_graphs"]],
+    axis.plot(
+        x_enabled,
+        y_enabled,
         color=enabled_colour,
-        s=110,
-        zorder=3,
-    )
-    axis.annotate(
-        f"settled reread after dropping {post_drop['dropped_handles']} handles",
-        (post_drop["programs_compiled"], post_drop["alive_executable_graphs"]),
-        xytext=(-30, 35),
-        textcoords="offset points",
-        ha="right",
-        va="bottom",
-        color=enabled_colour,
-        fontsize=20,
+        linewidth=3.0,
+        marker="o",
+        markersize=6,
     )
     axis.text(
         x_enabled[-1],
         y_enabled[-1],
-        "  command buffers enabled",
+        "  enabled: 1 at every program marker",
         color=enabled_colour,
         fontsize=20,
         va="center",
     )
-    axis.annotate(
-        "  command buffers disabled",
-        (x_disabled[-1], y_disabled[-1]),
-        xytext=(8, 12),
-        textcoords="offset points",
+    axis.text(
+        0.02,
+        0.07,
+        "disabled arm: no lifecycle count events; no measured zero",
+        transform=axis.transAxes,
         color=neutral,
         fontsize=20,
-        va="center",
+        va="bottom",
     )
     axis.set_xlabel("distinct programs compiled")
     axis.set_ylabel("alive executable CUDA graphs")
+    axis.set_xlim(min(x_enabled), max(x_enabled) + 12)
+    axis.set_ylim(0.75, 1.25)
+    axis.set_yticks([0.8, 1.0, 1.2])
     axis.spines["left"].set_linewidth(1.2)
     axis.spines["bottom"].set_linewidth(1.2)
     axis.tick_params(width=1.2)
     figure.tight_layout()
-    figure.savefig(output)
+    figure.savefig(png_output)
+    plt.rcParams["svg.fonttype"] = "none"
+    figure.savefig(svg_output)
     plt.close(figure)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--child", action="store_true")
+    parser.add_argument("--render-receipt", action="store_true")
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--log-dir", type=Path)
     parser.add_argument("--programs", type=int, default=20)
@@ -366,6 +356,16 @@ def main() -> int:
 
     output_dir = arguments.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
+    if arguments.render_receipt:
+        receipt_path = output_dir / "receipt.json"
+        with receipt_path.open(encoding="utf-8") as receipt_file:
+            stored_receipt = json.load(receipt_file)
+        _plot(
+            stored_receipt,
+            output_dir / "alive-graph-count.png",
+            output_dir / "alive-graph-count.svg",
+        )
+        return 0
     log_dir = (arguments.log_dir or output_dir).resolve()
     log_dir.mkdir(parents=True, exist_ok=True)
     script = Path(__file__).resolve()
@@ -398,7 +398,11 @@ def main() -> int:
         receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     receipt["summary"] = _classify(*receipt["arms"])
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
-    _plot(receipt, output_dir / "alive-graph-count.png")
+    _plot(
+        receipt,
+        output_dir / "alive-graph-count.png",
+        output_dir / "alive-graph-count.svg",
+    )
     print(json.dumps(receipt["summary"], sort_keys=True))
     return 0
 

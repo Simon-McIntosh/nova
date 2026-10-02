@@ -1,14 +1,14 @@
 # revision bf0539550524f0f065eaaf2f8a16b94d69fa3c60 (scratch copy: tests + benchmarks/plasma_cell_terminal_state.py with DEFAULT_DRAW_ORDER flipped to panel-last)
-# worktree /tmp/nc2flip.NWya (scratch tree, cwd for the run)
-# module benchmarks.plasma_cell_terminal_state from /tmp/nc2flip.NWya/benchmarks/plasma_cell_terminal_state.py
+# worktree /tmp/nc2flip.JSwH (scratch tree, cwd for the run)
+# module benchmarks.plasma_cell_terminal_state from /tmp/nc2flip.JSwH/benchmarks/plasma_cell_terminal_state.py
 # mutation 304:DEFAULT_DRAW_ORDER = "panel-last"
-# command (cd /tmp/nc2flip.NWya) PYTHONPATH=/tmp/nc2flip.NWya:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-terminal-state-draw-order-guard JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider -s -q tests/test_plasma_cell_terminal_state_draw_order.py
+# command (cd /tmp/nc2flip.JSwH) PYTHONPATH=/tmp/nc2flip.JSwH:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-terminal-state-draw-order-guard JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider -s -q --timeout=300 tests/test_plasma_cell_terminal_state_draw_order.py
 .analytic panel: reference_pixels=300 panel_pixels=333
 F
 =================================== FAILURES ===================================
 ____________ test_analytic_panel_reference_markers_not_overpainted _____________
 
-tmp_path = PosixPath('/tmp/pytest-of-mcintos/pytest-520/test_analytic_panel_reference_0')
+tmp_path = PosixPath('/tmp/pytest-of-mcintos/pytest-530/test_analytic_panel_reference_0')
 
     def test_analytic_panel_reference_markers_not_overpainted(tmp_path: Path) -> None:
         census = _render_census(tmp_path, **_draw_order_override())
@@ -41,5 +41,5 @@ E           assert 333 == 0
 tests/test_plasma_cell_terminal_state_draw_order.py:63: AssertionError
 =========================== short test summary info ============================
 FAILED tests/test_plasma_cell_terminal_state_draw_order.py::test_analytic_panel_reference_markers_not_overpainted
-1 failed, 1 passed in 10.06s
+1 failed, 1 passed in 10.23s
 EXIT=1

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>pfs-anchor-and-panel-repairs — landing record</title>
+</head>
+<body>
+<section id="pfs-anchor-and-panel-repairs">
+<h2>Limited-anchor census, centroid-attribution, batched-labeller and early-frame panels draw their receipt</h2>
+<p>Repairs three figure followups at <code>9ac842a60</code> by re-rendering every panel from its
+committed receipt through <code>nova.media.ink.poloidal_axes</code>. No solve runs; the census
+panels draw the persisted public-read flux raster committed beside the atlas supplement, and
+the placement, attribution and throughput panels read only their own receipts.</p>
+
+<h3>Commits</h3>
+<ul>
+<li><code>3581cf133</code> — seven limited-anchor census panels and the early-frame-placement grid.</li>
+<li><code>ef65f0881</code> — centroid-attribution class panel, batched-labeller throughput and parity.</li>
+</ul>
+
+<h3>f-fsaudit-repair-limited-anchor-census-panels</h3>
+<p>All seven census panels redrawn as poloidal scenes with the governed wall, the axis and the
+admitted X drawn through <code>draw_nulls</code>, the sampled wall candidates as diamonds, and
+the selected anchor marked. Rows 11 to 14 render an explicit refusal: the census receipt records
+<code>converged=False</code> and <code>contour_closed=False</code> with the centred-bracket
+<code>SurfaceGeometryError</code>, so no solved contour is drawn and the panel states it. Rows 15
+to 17 draw the public-read boundary level from the committed raster and state its normalised flux
+of the axis-to-X span (row 15: <code>psi_N = 0.0138</code>, reproduced from the followup) and the
+anchor-to-boundary separation. The atlas supplement captions are qualified and the seven
+playable-panel captions in <code>docs/evidence/poloidal-convergence-atlas.html</code> now name the
+census states, so no row is called converged or boundary-limited against the census receipt.</p>
+
+<h3>f-fsaudit-repair-empty-and-invalid-data-panels</h3>
+<p>The centroid-attribution class panel, previously empty, is drawn from the per-row requested and
+emergent class fields as the 2x2 counts (6/7 agree); the account fractions carry direct labels.
+The batched-labeller throughput panel is redrawn from the receipt's measured arms. Discovery: the
+followup's premise is stale at the head — the shipped figure was rendered on 2026-09-07 from the
+failed receipt; the receipt was replaced on 2026-09-09 by a complete run (<code>complete-selected</code>,
+arms 1.06/2.34/3.18 slices/s at 16/64/256 elements per device). The panel therefore shows the
+measured series, not a refusal; drawing a refusal over a valid receipt would misstate it. The parity
+panel is redrawn from the verified corpus fractions over the 48-slice denominator, replacing the
+elementwise figure whose element-0 legend entry plotted no points.</p>
+
+<h3>f-fsaudit-repair-early-frame-placement-panel</h3>
+<p>The placement grid is sorted by frame row (11..17), carries no panel frame or grey background,
+and draws every unconverged arm in a refused dashed style, with the unconverged arms named in each
+panel title — including the conditioned arms at rows 16 (ratio 1.370) and 17 (1.544) whose boundary
+crosses the first wall inboard.</p>
+
+<h3>Deviations and out-of-scope</h3>
+<ul>
+<li><code>compensator-authority</code> is named in the followup but is outside this node's write
+scope; the compensator line was not split. Recorded under follow_ons.</li>
+<li>The throughput panel shows the measured series rather than a refusal, because the receipt at the
+head is valid (see the discovery above).</li>
+</ul>
+</section>
+</body>
+</html>

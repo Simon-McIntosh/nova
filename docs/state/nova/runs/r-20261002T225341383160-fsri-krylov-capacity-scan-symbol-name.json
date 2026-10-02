@@ -1,0 +1,361 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3276190,
+      "input_tokens_cumulative": 3276190,
+      "output_tokens": 19660,
+      "output_tokens_cumulative": 19660,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 34,
+    "files": 2,
+    "removed": 5
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "3236cac961a4bd546f54ab76e16be611f3607cb3",
+    "c6604c8d6684b00c2820d82e1299f3ad5e19fbeb"
+  ],
+  "completed_at": "2026-10-02T23:05:36.145Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T22:54:24Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "bash /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name/gate.sh",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name/gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.65,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "hygiene item of an open followup; section impl unchanged",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T23:13:42.841714+00:00",
+    "horizon_seconds": 1200,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T22:53:42Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 6,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 13,
+    "headroom": 2,
+    "mean_context": 107692,
+    "observed_at": "2026-10-02T22:53:36Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T23:05:36.145Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name/manifest.md",
+  "member": "disposable-r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsri-krylov-capacity-scan-symbol-name",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 753,
+          "cached_input_tokens": 199470,
+          "input_tokens": 200225,
+          "output_tokens": 1660,
+          "reasoning_output_tokens": 270,
+          "total_tokens": 201885,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: review finding (2) of followup f-fsri-krylov-slice-2-review-findings. docs/figures/forward-solver-route-integrity/single-site-krylov/diverted_trace.py defines and uses SLICE1_SOURCE, a plan-stage label. Read what the constant holds and rename it, together with every use in the file, to a name that states the capacity-scan mechanism it selects; the user-global AGENTS.md naming rule bans stage labels in symbols. Gate, logged under the run directory: grep finds no SLICE1 in the repository's benchmarks, tests, nova, scripts and docs/figures trees; the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python compiles the file with py_compile; the pre-stage naming checks 1, 2a, 2b and 3 from the user-global AGENTS.md report no new hit on the file. The manifest's status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Rename the plan-labelled symbol SLICE1_SOURCE in the diverted trace script by the capacity-scan mechanism it names",
+    "id": "fsri-krylov-capacity-scan-symbol-name",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T22:53:42Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 6,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 13,
+      "headroom": 2,
+      "mean_context": 107692,
+      "observed_at": "2026-10-02T22:53:36Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name/manifest.md",
+    "negative_control": "",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "20m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/forward-solver-route-integrity/single-site-krylov/diverted_trace.py",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-krylov-capacity-scan-symbol-name.html",
+      "docs/figures/forward-solver-route-integrity/fsri-krylov-capacity-scan-symbol-name"
+    ]
+  },
+  "orientation_input_tokens": 764433.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsri-krylov-capacity-scan-symbol-name",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T22:53:54.569533+00:00",
+    "score": 0.56875,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.188,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "c6604c8d6684b00c2820d82e1299f3ad5e19fbeb",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+    "reviewed_head_sha": "c6604c8d6684b00c2820d82e1299f3ad5e19fbeb",
+    "scores": {
+      "durability": 13,
+      "evidence": 12,
+      "fit": 19,
+      "goal_fidelity": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 84
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "5d7ab208-3690-4b04-b236-6f2e944ffdac",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 3276190,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 660.391,
+    "generated_tokens": 19660,
+    "generation_seconds": 590.566,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 55.4,
+    "machine_seconds": 69.825,
+    "peak_input_tokens": 127481,
+    "tokens_per_second": 33.29,
+    "wall_tokens_per_second": 29.77
+  },
+  "time_budget": "20m",
+  "tool_steps": 32.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 672,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T23:05:40Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T22:54:30Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 3819,
+    "worker_pid": 1932312
+  },
+  "worker_seconds": 628,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

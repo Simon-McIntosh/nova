@@ -399,6 +399,7 @@ def linear_action_diagnosis(source_root: Path, output_root: Path) -> dict[str, A
     configure_dtypes()
     control = json.loads((source_root / "control-positive.json").read_text())
     solve = control["solve"]
+    history = solve["newton_history"]
     amplitudes = jnp.asarray(solve["compensating_amplitudes"])
     rows = jnp.asarray(
         [
@@ -429,6 +430,16 @@ def linear_action_diagnosis(source_root: Path, output_root: Path) -> dict[str, A
         update(point + 1.0e-5 * direction) - update(point - 1.0e-5 * direction)
     ) / 2.0e-5
     receipt = {
+        "measurement_scope": "reconstructed banked terminal compensator step rule",
+        "live_production_krylov_pass": False,
+        "active_set_pass_ordinal": None,
+        "every_pass_table_produced": False,
+        "source_active_set_history_present": all(
+            key in history
+            for key in ("active_set_residuals", "active_set_mask_differences")
+        ),
+        "source_job_id": control["lane"]["job_id"],
+        "source_revision": control["source_revision"],
         "source_state_sha256_binary64": control["terminal_state_sha256_binary64"],
         "jvp": np.asarray(tangent),
         "central_difference": np.asarray(difference),

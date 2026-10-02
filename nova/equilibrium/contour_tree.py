@@ -369,32 +369,6 @@ def build_contour_tree(
     )
     vertex_count = vertex_valid.size
     slots = jnp.arange(node_capacity, dtype=jnp.int32)
-    join_order = join[-1]
-    terminal_rank = jnp.max(
-        jnp.where(
-            vertex_valid[join_order],
-            jnp.arange(vertex_count, dtype=jnp.int32),
-            jnp.asarray(-1, dtype=jnp.int32),
-        )
-    )
-    terminal = join_order[terminal_rank]
-    virtual = jnp.argmin(
-        jnp.where(vertex_valid, vertex_count, jnp.arange(vertex_count, dtype=jnp.int32))
-    )
-    has_virtual = jnp.any(~vertex_valid)
-    replace_terminal = has_virtual & join_nodes[terminal]
-    node_valid = node_valid.at[terminal].set(
-        jnp.where(replace_terminal, False, node_valid[terminal])
-    )
-    node_valid = node_valid.at[virtual].set(node_valid[virtual] | replace_terminal)
-    critical_type = critical_type.at[virtual].set(
-        jnp.where(replace_terminal, 0, critical_type[virtual])
-    )
-    merged_edges = jnp.where(
-        (merged_edges == terminal) & replace_terminal,
-        virtual,
-        merged_edges,
-    )
     node_count = jnp.sum(node_valid, dtype=jnp.int32)
     node_source = jnp.nonzero(node_valid, size=node_capacity, fill_value=0)[0]
     compact_node_valid = slots < node_count

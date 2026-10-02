@@ -1,0 +1,58 @@
+# revision d0f91aa521b789a900fd5ff425cb712f60114edf base contour_tree.py, new focused test; tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-virtual-node-not-a-critical-point
+# command: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu uv run --no-sync pytest --timeout 0 -p no:cacheprovider tests/test_contour_tree_merge.py::test_virtual_slot_is_not_emitted_and_wall_joins_survive -q
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_virtual_slot_is_not_emitted_and_wall_joins_survive ____________
+
+    def test_virtual_slot_is_not_emitted_and_wall_joins_survive():
+        """The padded virtual outside slot is no critical node; wall joins remain.
+    
+        A padded carrier values its spare slots below every interior level.  Those
+        slots are not critical points of the field, so the receipt must not emit one
+        of them in place of a real terminal node; every emitted node must sit on a
+        live carrier vertex.  Each wall-bearing region must still record its outside
+        contact as its own wall-join saddle.  Diverted single-null certificate and
+        the full MAST EFIT carrier.
+        """
+    
+        from benchmarks.contour_tree_brute_force import (
+            certificate_rung_fixtures,
+            mast_fixtures,
+        )
+    
+        certificate = next(
+            fixture
+            for fixture in certificate_rung_fixtures()
+            if fixture.name.endswith("diverted-single-null-340-cells")
+        )
+        for fixture in (certificate, mast_fixtures()[0]):
+            mesh = fixture.mesh
+            vertex_valid = np.asarray(mesh.vertex_valid)
+            vertex_is_wall = np.asarray(mesh.vertex_is_wall)
+            mesh_edges = np.asarray(mesh.edges)[np.asarray(mesh.edge_valid)]
+            result = build_contour_tree(
+                mesh.vertex_psi,
+                mesh.vertex_valid,
+                mesh.vertex_is_wall,
+                mesh.edges,
+                mesh.edge_valid,
+                jnp.asarray(1, dtype=jnp.int32),
+            )
+            node_valid = np.asarray(result.node_valid)
+            critical_type = np.asarray(result.critical_type)
+            emitted = np.asarray(result.node_vertex)[node_valid]
+            emitted_type = critical_type[node_valid]
+    
+>           assert np.all(vertex_valid[emitted]), fixture.name
+E           AssertionError: diverted-single-null-340-cells
+E           assert np.False_
+E            +  where np.False_ = <function all at 0x7f83e04b5770>(array([ True,  True,  True,  True,  True,  True,  True,  True,  True,\n        True,  True,  True, False]))
+E            +    where <function all at 0x7f83e04b5770> = np.all
+
+tests/test_contour_tree_merge.py:256: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+19:27:02 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_merge.py::test_virtual_slot_is_not_emitted_and_wall_joins_survive
+1 failed in 26.96s
+EXIT=1

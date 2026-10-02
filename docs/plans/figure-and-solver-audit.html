@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 </head>
 <body>
   <main class="plan-doc">
@@ -420,6 +420,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261002T1155-painters" data-who="reckon-build s22-nova" data-when="2026-10-02T11:55:00Z">
     <div class="r-comment-body">S22 node fsa-painters-mask-outside-wall landed at merge 08b802245 (commit d4f4c723f, review pass 87/100). nova/media/poloidal.py gains a wall-masked scattered-contour path that drops triangles whose centroid lies outside the union of the wall units. tests/test_contour_inside_wall.py passes 7, and an all-false mask turns 4 of them red. f-fsa-painters-draw-field-outside-the-wall stays open for its remainder: about 40 benchmark and script call sites, plus about 30 _raster_field callers, still triangulate a scattered field outside nova.media and draw beyond the wall. They are listed by file and line in the node report, ~/.config/reckon/crew/reports/nova/s22/fsa-painters-mask-outside-wall.md. nova/imas/equilibrium.py:698, nova/imas/operate.py:183 and nova/biot/plasmagrid.py:477 triangulate too. The named figure docs/figures/plasma-cell-read-fidelity/exact-mode-construction-comparison.png is S21's to regenerate. Review notes: the raster-path test asserts only that no vertex lands in the slot rectangle, a weaker claim than every vertex inside the wall. tests/test_playable_session.py hit its 540 s bound after 25 passes without a failure.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261002T093145794496-fsa-painters-mask-outside-wall" data-who="reckon-build" data-when="2026-10-02T09:49:19.890Z">
+    <div class="r-comment-body"><p>Added wall-masked draw_scattered_contours and an optional wall= on draw_flux_contours in nova/media/poloidal.py (no media painter triangulated scattered nodes before; the S18 field came from hull-interpolated rasters); tests/test_contour_inside_wall.py 7 passed, 4 of 7 fail with the mask removed; followup f-fsa-painters-draw-field-outside-the-wall.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="155">
+<meta name="plan-version" content="156">
 </head>
 <body>
 <main class="plan-doc">
@@ -508,6 +508,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T163935419624-review-of-msc-figure-cohort-cite-or-retire" data-who="reckon-build" data-when="2026-10-02T17:00:19.786Z">
     <div class="r-comment-body"><p>review of r-20261002T134117794154 at head 986b1a138 scores goal_fidelity 18 evidence 16 scope_discipline 19 durability 13 fit 16 (total 82); the repair answers all three prior findings and both gates reproduce, with two follow-on findings (a commit sha in a generator comment, and the head gate logs naming the pre-repair parent revision).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T172738437395-review-of-mcs-alive-graph-count-series" data-who="reckon-build" data-when="2026-10-02T18:05:19.127Z">
+    <div class="r-comment-body"><p>Independent review of mcs-alive-graph-count-series stored: 5 dimensions scored (goal_fidelity 12, evidence 11, scope_discipline 18, durability 10, fit 15; total 66), reviewed_base_sha 8cbd46f3fdee9a61fbd48fb919cd7c0728d51567 / reviewed_head_sha 37daba9a5d3f2594d182c27312967dd7556ae725, one blocking finding (the post-drop release count is the first destruction event in a churn window, not a settled re-read) and two follow-ons (the receipt summary comes from analysis_revision a9c29fa7 and contradicts the job&#x27;s own no_growth_observed; the report quotes the post-hoc verdict under the job revision without disclosing the reversal).</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T163422200795" data-who="coordinator" data-when="2026-09-04T16:36:00Z">
     <div class="r-comment-body"><p>§2 first restructure landed on solver-convergence-regression at <code>72ae8431</code>: one topology read per active-set trip (receipt <code>docs/figures/millisecond-converged-solve/trip-quantum/one-read/profile.json</code>, H200 job 1262715). It is behaviour-preserving and removes the redundant reads, but it does not move the per-trip wall: 5.83 s against 5.85 s on 22086/43 pure. The trip-quantum picture changes accordingly: the isolated components (84 residual evaluations, 144 Jacobian-vector products, one read, GMRES, line search) sum to 0.20 s per trip, and 5.63 s (96.6 percent) is a fused-device or synchronisation remainder the isolated probes cannot see; the earlier 63 percent topology attribution is withdrawn. The closed jaxpr has zero host callbacks, the static census gives an 0.09 s scan floor, and the CUPTI replay dies inside the Jacobi SVD, so the candidates are recompilation per trip, dynamic while loops far beyond the static count, and the 126 SVDs per trip. <code>msc-trip-remainder-attribution</code> measures which with an nsys device trace, an ablation ladder (condition estimates, line-search grades, flood and reachability loops) and a recompile count, so the repair toward one millisecond per fixed point is aimed by measurement.</p></div>

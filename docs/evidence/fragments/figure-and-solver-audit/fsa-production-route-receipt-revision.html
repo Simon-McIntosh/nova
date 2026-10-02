@@ -40,12 +40,25 @@
   <code>JAX_PLATFORMS=cpu pytest tests/test_production_solver_receipt_trip_alignment.py</code>
   in place on the fleet allocation (shared interpreter, no <code>uv</code> on the
   compute node, worktree on <code>PYTHONPATH</code>). Base arm (HEAD test file)
-  <code>9 passed</code> EXIT=0; after arm <code>12 passed</code> EXIT=0; added
-  failures <code>0</code>. The new assertions require a non-empty 40-hex
-  <code>source_revision</code> on the committed receipt, on the
-  <code>_production_solver_receipt</code> builder, and on every writer stamp.
-  Declared negative control — deleting <code>source_revision</code> from the
-  payload builder — ran red: <code>2 failed, 10 passed</code>, <code>EXIT=1</code>,
-  failing <code>test_production_solver_receipt_builder_stamps_source_revision</code>
-  and <code>test_every_production_route_receipt_writer_stamps_source_revision</code>.</p>
+  <code>9 passed, 5 warnings in 34.52s</code> <code>EXIT=0</code>; after arm
+  <code>15 passed in 33.67s</code> <code>EXIT=0</code>; added failures
+  <code>0</code>. The gate drives each writer's own receipt payload builder on
+  minimal synthetic input — the certificate's
+  <code>_production_solver_receipt</code>, the fieldnull assembler,
+  the plasma-ladder assembler, and the carrier and discriminator receipt
+  builders — so removing the stamp from any one writer fails it.</p>
+
+  <p><strong>Negative control.</strong> Declared mutation: deleting
+  <code>source_revision</code> from the payload builder. Applied one writer at a
+  time in a scratch copy of HEAD (unmutated control <code>15 passed</code>,
+  <code>EXIT=0</code>). Each removal gives <code>EXIT=1</code> with exactly the
+  matching test id failing:
+  <code>solovev_certificate.stamp_source_revision</code> &rarr;
+  <code>test_production_solver_receipt_builder_stamps_source_revision</code>,
+  <code>fieldnull_production_route.assemble</code> &rarr;
+  <code>test_fieldnull_receipt_builder_stamps_source_revision</code>,
+  <code>plasma_cell_production_ladder.assemble</code> &rarr;
+  <code>test_plasma_ladder_receipt_builder_stamps_source_revision</code>,
+  <code>carrier</code> and discriminator <code>receipt_payload</code> &rarr; their
+  own builder tests.</p>
 </section>

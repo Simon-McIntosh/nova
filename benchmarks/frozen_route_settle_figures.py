@@ -8,6 +8,7 @@ evidence fragment for the measured receipts.
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import matplotlib
@@ -95,6 +96,12 @@ def residual_figure():
     plt.close(figure)
 
 
+def _finite_nulls(values):
+    """Return a finite X-point pair, or None when the branch carries no saddle."""
+    points = np.asarray(values, dtype=float).reshape(-1, 2)
+    return points if np.all(np.isfinite(points)) else None
+
+
 def panel_figure():
     data = np.load(NPZ)
     summary = json.loads(SUMMARY.read_text())
@@ -117,12 +124,21 @@ def panel_figure():
         color=style.flux_color, linewidth=style.flux_linewidth, wall=wall,
     )
     poloidal.draw_wall(axes, units=wall, style=style)
-    points = np.asarray(data["newton_xpoint"], dtype=float).reshape(-1, 2)
-    axis_point = data["newton_axis"]
-    if np.all(np.isfinite(points)):
-        poloidal.draw_nulls(axes, magnetic_axis=axis_point, x_points=points, style=style)
-    else:
-        poloidal.draw_nulls(axes, magnetic_axis=axis_point, style=style)
+    reference_style = replace(
+        style, axis_color="#999999", axis_markersize=style.axis_markersize * 2.0
+    )
+    poloidal.draw_nulls(
+        axes,
+        magnetic_axis=data["picard_axis"],
+        x_points=_finite_nulls(data["picard_xpoint"]),
+        style=reference_style,
+    )
+    poloidal.draw_nulls(
+        axes,
+        magnetic_axis=data["newton_axis"],
+        x_points=_finite_nulls(data["newton_xpoint"]),
+        style=style,
+    )
     figure.savefig(
         FIGDIR / "terminal-flux-panel.png", dpi=style.figure_dpi
     )

@@ -44,9 +44,17 @@ panel)</em>.</p>
   committed <code>nova.media</code> painters. Blue: the solved Newton-Krylov
   terminal flux (live residual <code>1.28e-11</code>, <code>converged=True</code>).
   Grey, beneath: the Picard reference on the same physical level array; the two
-  coincide, so the reference is hidden where the maps agree. Solid triangle: the
-  magnetic axis (no X-point on this wall-limited branch). Black: the first wall.
-  H200 solve, job 1280457, revision <code>3a4faa65c</code>.</figcaption>
+  coincide, so the reference is hidden where the maps agree. <strong>Two null
+  sets are drawn, nearly coincident and in distinguishable styles.</strong> The
+  larger grey triangle is the <em>Picard reference</em> magnetic axis at
+  <code>R=1.01381252, Z=1.64e-07</code>; the red triangle is the <em>solved
+  Newton-Krylov</em> magnetic axis at <code>R=1.01381254, Z=-3.8e-15</code>. The
+  two are distinct coordinates &mdash; they differ by <code>1.6e-07</code> in
+  <code>Z</code>, the parity residual of the two routes &mdash; not one shared
+  point, so the panel draws both and they overlap as grey wings around the red
+  centre. Neither set carries a saddle: no X-point is qualified on this
+  wall-limited branch, so the X-point set of each route is empty. Black: the
+  first wall. H200 solve, job 1280457, revision <code>3a4faa65c</code>.</figcaption>
 </figure>
 
 <h4>Negative arms (measured)</h4>

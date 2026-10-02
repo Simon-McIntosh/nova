@@ -1,0 +1,9 @@
+# revision 3a28b398cb83c7b2128fae9d551e6776b009d596
+# worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-terminal-state-draw-order-guard
+# module benchmarks.plasma_cell_terminal_state from /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-terminal-state-draw-order-guard/benchmarks/plasma_cell_terminal_state.py
+# command PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-terminal-state-draw-order-guard JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -s -q tests/test_plasma_cell_terminal_state_draw_order.py
+10:17:32 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+draw_order=reference-last analytic panel: reference_pixels=675 panel_pixels=0
+.
+1 passed in 10.38s
+EXIT=0

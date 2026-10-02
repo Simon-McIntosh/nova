@@ -101,6 +101,19 @@ def test_first_wall_vertex_is_a_join_with_outside():
     assert int(np.sum(result.node_valid) - np.sum(result.edge_valid)) == 1
 
 
+def test_each_wall_region_joins_outside_at_its_own_wall_vertex():
+    """Two disconnected wall-bearing regions give one outside-join each."""
+
+    result = _tree(
+        [3.0, 1.0, 0.0, 3.0, 1.0, 0.0],
+        [(0, 1), (1, 2), (3, 4), (4, 5)],
+        wall=(1, 4),
+    )
+    nodes = _nodes(result)
+
+    assert sorted(v for v, kind in nodes.items() if kind == 1) == [1, 4]
+
+
 def test_batched_tree_is_identical_to_per_field_tree():
     """The fixed-shape receipt is a valid vmap result, not a host fallback."""
 

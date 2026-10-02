@@ -1,0 +1,35 @@
+{
+  "bank": {
+    "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+    "sha256": "4e8f3519936e99705f97e57799adcf9afeed45d63cb62515376da28faafe4537"
+  },
+  "machine": "DIII-D",
+  "member_identity": "d3d_shot_00000c4a7b.parquet frame 179",
+  "one_arc_capacity": 136,
+  "production_cell_count": 1089,
+  "realised_maximum_live_vertices": 132,
+  "refused_cell_count": 0,
+  "refused_cell_indices": [],
+  "saddle_cell_count": 2,
+  "saddle_wedge_margin": 5,
+  "saddle_wedge_maximum_live_vertices": 131,
+  "schema": "nova.exact-clip-production-one-arc-census.v1",
+  "selection": {
+    "bank_member": 1,
+    "bank_width": 5,
+    "frame": 179,
+    "selection": "every frame in the committed DIII-D forward gate bank",
+    "shot": "d3d_shot_00000c4a7b.parquet"
+  },
+  "straight_vertex_capacity": 8,
+  "topology": {
+    "axis": [
+      1.7736438512802126,
+      -0.03092570416629322
+    ],
+    "x_point": [
+      1.5306249856948848,
+      -0.947964429855349
+    ]
+  }
+}

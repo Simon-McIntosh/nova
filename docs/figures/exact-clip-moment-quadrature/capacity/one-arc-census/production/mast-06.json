@@ -1,0 +1,36 @@
+{
+  "bank": {
+    "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+    "sha256": "58a5d895fe7aed0df31bb62083832b9efdfdf945fe4567e552b611cbec356a10"
+  },
+  "machine": "MAST",
+  "member_identity": "22086/43",
+  "one_arc_capacity": 136,
+  "production_cell_count": 1089,
+  "realised_maximum_live_vertices": 132,
+  "refused_cell_count": 0,
+  "refused_cell_indices": [],
+  "saddle_cell_count": 0,
+  "saddle_wedge_margin": 136,
+  "saddle_wedge_maximum_live_vertices": 0,
+  "schema": "nova.exact-clip-production-one-arc-census.v1",
+  "selection": {
+    "bank_member": 6,
+    "bank_width": 6,
+    "identity": "22086/43",
+    "selection": "every unique slice in the committed paired-arm MAST bank; the production moment seed is slice-owned rather than arm-owned",
+    "shot": 22086,
+    "slice_index": 43
+  },
+  "straight_vertex_capacity": 8,
+  "topology": {
+    "axis": [
+      0.8812232888306326,
+      -2.3722481032380663e-05
+    ],
+    "x_point": [
+      0.47850820122708854,
+      1.0733217075612118
+    ]
+  }
+}

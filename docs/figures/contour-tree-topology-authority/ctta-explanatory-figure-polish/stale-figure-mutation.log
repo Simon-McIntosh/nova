@@ -1,0 +1,37 @@
+revision: 11985735c020a39df74f76c75cbe6354e0e67d36
+tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish
+module_file: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish/benchmarks/contour_tree_explanatory_figure.py
+cwd: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish
+mutation: copy the committed receipt+figure to scratch and alter one SVG coordinate, so the committed figure no longer matches the receipt
+command: PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish JAX_PLATFORMS=cpu CONTOUR_TREE_FIGURE_DIR=/tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-stale /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_explanatory_figure.py::test_committed_figure_files_exist
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_committed_figure_files_exist _______________________
+
+    def test_committed_figure_files_exist():
+        """The committed PNG and SVG exist and the SVG agrees with the receipt."""
+    
+        for suffix in (".png", ".svg"):
+            path = figure.FIGURE_STEM.with_suffix(suffix)
+            assert path.is_file(), "the committed figure %s is missing" % path.name
+            assert path.stat().st_size > 1024, "the committed figure %s is empty" % path.name
+        receipt_path = figure.FIGURE_STEM.with_suffix(".json")
+        payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+        assert "svg_sha256" in payload, "the receipt carries no figure digest"
+        committed = figure._svg_sha256(figure.FIGURE_STEM.with_suffix(".svg"))
+>       assert committed == payload["svg_sha256"], (
+            "the committed SVG does not match the receipt that describes it"
+        )
+E       AssertionError: the committed SVG does not match the receipt that describes it
+E       assert '53314300f38a...c6f9a878fa53f' == '211dc2f3e708...465eeec825dca'
+E         
+E         - 211dc2f3e70814d16fcd87f82a7617bd2359c88f3872f190e9b465eeec825dca
+E         + 53314300f38a9d9468ed9bb8a0b42614bc0e99ec11695172fdcc6f9a878fa53f
+
+tests/test_contour_tree_explanatory_figure.py:106: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+23:01:41 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_explanatory_figure.py::test_committed_figure_files_exist
+1 failed in 7.32s
+EXIT=1

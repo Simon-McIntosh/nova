@@ -1,0 +1,518 @@
+revision: 78e721dfb6e592658bb7c37b5183722fa183f4ea (base figure module content)
+tree: /tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-base (scratch, git-extracted); nova from /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish
+module_file: /tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-base/benchmarks/contour_tree_explanatory_figure.py
+cwd: /tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-base
+command: PYTHONPATH=/tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-base:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_explanatory_figure.py
+FFFFFF                                                                   [100%]
+=================================== FAILURES ===================================
+______________ test_figure_draws_exactly_the_receipts_valid_nodes ______________
+
+    def test_figure_draws_exactly_the_receipts_valid_nodes():
+        """Count and carrier vertices of the drawn set equal the receipt's valid nodes."""
+    
+        _, tree = _receipt()
+>       state = figure.build_state()
+                ^^^^^^^^^^^^^^^^^^^^
+
+tests/test_contour_tree_explanatory_figure.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+benchmarks/contour_tree_explanatory_figure.py:530: in build_state
+    nodes = list(_nodes(mesh, tree))
+                 ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mesh = ContourMesh(vertex_rz=Array([[ 1.5092365 , -1.20561769],
+       [ 1.59441691, -1.17076885],
+       [ 1.52901419, -1.15...False, False, False],      dtype=bool), vertex_capacity=468, edge_capacity=1276, triangle_capacity=936, overflow=False)
+tree = ContourTreeArrays(node_vertex=Array([  0,   5,  69,  89,  93, 174, 305, 317, 318, 335, 338, 346, 353,
+         0,   0,... False, False, False, False, False, False,
+       False, False, False], dtype=bool), overflow=Array(False, dtype=bool))
+
+    def _nodes(mesh, tree) -> tuple[Node, ...]:
+        """Return the tree's valid node rows, labelled by analytic role.
+    
+        The roles are read off the tree and the carrier, never placed by hand: the
+        magnetic axis is the greatest valid node of sigma * psi; the admitted
+        X-point is the saddle the tree attaches directly to that axis; the
+        private-region wall maximum is the tree's own node at the highest-flux wall
+        vertex; the outside node is the virtual slot, whose carrier vertex is mesh
+        padding and so carries no position of its own.
+        """
+    
+        carrier = np.asarray(mesh.vertex_rz)
+        psi = np.asarray(mesh.vertex_psi)
+        valid = np.asarray(tree.node_valid)
+        node_vertex = np.asarray(tree.node_vertex)
+        carrier_valid = np.asarray(mesh.vertex_valid)
+        is_wall = np.asarray(mesh.vertex_is_wall)
+        critical_type = np.asarray(tree.critical_type)
+    
+        rows = [int(row) for row in np.flatnonzero(valid)]
+        if not rows:
+            raise RuntimeError("the computed tree emitted no valid nodes")
+        edges = np.asarray(tree.edges)[np.asarray(tree.edge_valid)]
+        neighbours: dict[int, set[int]] = {}
+        for row in rows:
+            neighbours[row] = set()
+        for left, right in edges:
+            neighbours[int(left)].add(int(right))
+            neighbours[int(right)].add(int(left))
+    
+        def psi_of(row: int) -> float:
+            return float(psi[int(node_vertex[row])])
+    
+        axis_row = max(rows, key=psi_of)
+        attached = []
+        for row in rows:
+            if int(critical_type[row]) == SADDLE and axis_row in neighbours[row]:
+                attached.append(row)
+        if not attached:
+            raise RuntimeError("no saddle attaches directly to the computed axis")
+        xpoint_row = max(attached, key=psi_of)
+    
+        wall_rows = [row for row in rows if bool(is_wall[int(node_vertex[row])])]
+        wall_row = max(wall_rows, key=psi_of) if wall_rows else -1
+        join_level = psi_of(wall_row) if wall_row >= 0 else None
+        outside_rows = [row for row in rows if not bool(carrier_valid[int(node_vertex[row])])]
+        if len(outside_rows) != 1:
+            raise RuntimeError("expected one positionless outside node, found %d" % len(outside_rows))
+        outside_row = outside_rows[0]
+    
+        nodes = []
+        for row in rows:
+            vertex = int(node_vertex[row])
+            radius = float(carrier[vertex, 0])
+            height = float(carrier[vertex, 1])
+            if row == outside_row and wall_row >= 0:
+                contact = carrier[int(node_vertex[wall_row])]
+                radius = float(contact[0])
+                height = float(contact[1])
+            role = "piecewise-linear critical point"
+            if row == axis_row:
+                role = "magnetic axis"
+            elif row == xpoint_row:
+                role = "admitted X-point"
+            elif row == wall_row:
+                role = "private-region wall maximum"
+            elif row == outside_row:
+                role = "outside node"
+>           kind = CRITICAL_NAME[int(critical_type[row])]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 3
+
+benchmarks/contour_tree_explanatory_figure.py:232: KeyError
+_______________ test_committed_receipt_matches_the_computed_tree _______________
+
+    def test_committed_receipt_matches_the_computed_tree():
+        """The committed receipt is present and agrees with the tree the figure draws."""
+    
+        receipt_path = figure.FIGURE_STEM.with_suffix(".json")
+        assert receipt_path.is_file(), "the committed receipt is missing"
+        payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+>       state = figure.build_state()
+                ^^^^^^^^^^^^^^^^^^^^
+
+tests/test_contour_tree_explanatory_figure.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+benchmarks/contour_tree_explanatory_figure.py:530: in build_state
+    nodes = list(_nodes(mesh, tree))
+                 ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mesh = ContourMesh(vertex_rz=Array([[ 1.5092365 , -1.20561769],
+       [ 1.59441691, -1.17076885],
+       [ 1.52901419, -1.15...False, False, False],      dtype=bool), vertex_capacity=468, edge_capacity=1276, triangle_capacity=936, overflow=False)
+tree = ContourTreeArrays(node_vertex=Array([  0,   5,  69,  89,  93, 174, 305, 317, 318, 335, 338, 346, 353,
+         0,   0,... False, False, False, False, False, False,
+       False, False, False], dtype=bool), overflow=Array(False, dtype=bool))
+
+    def _nodes(mesh, tree) -> tuple[Node, ...]:
+        """Return the tree's valid node rows, labelled by analytic role.
+    
+        The roles are read off the tree and the carrier, never placed by hand: the
+        magnetic axis is the greatest valid node of sigma * psi; the admitted
+        X-point is the saddle the tree attaches directly to that axis; the
+        private-region wall maximum is the tree's own node at the highest-flux wall
+        vertex; the outside node is the virtual slot, whose carrier vertex is mesh
+        padding and so carries no position of its own.
+        """
+    
+        carrier = np.asarray(mesh.vertex_rz)
+        psi = np.asarray(mesh.vertex_psi)
+        valid = np.asarray(tree.node_valid)
+        node_vertex = np.asarray(tree.node_vertex)
+        carrier_valid = np.asarray(mesh.vertex_valid)
+        is_wall = np.asarray(mesh.vertex_is_wall)
+        critical_type = np.asarray(tree.critical_type)
+    
+        rows = [int(row) for row in np.flatnonzero(valid)]
+        if not rows:
+            raise RuntimeError("the computed tree emitted no valid nodes")
+        edges = np.asarray(tree.edges)[np.asarray(tree.edge_valid)]
+        neighbours: dict[int, set[int]] = {}
+        for row in rows:
+            neighbours[row] = set()
+        for left, right in edges:
+            neighbours[int(left)].add(int(right))
+            neighbours[int(right)].add(int(left))
+    
+        def psi_of(row: int) -> float:
+            return float(psi[int(node_vertex[row])])
+    
+        axis_row = max(rows, key=psi_of)
+        attached = []
+        for row in rows:
+            if int(critical_type[row]) == SADDLE and axis_row in neighbours[row]:
+                attached.append(row)
+        if not attached:
+            raise RuntimeError("no saddle attaches directly to the computed axis")
+        xpoint_row = max(attached, key=psi_of)
+    
+        wall_rows = [row for row in rows if bool(is_wall[int(node_vertex[row])])]
+        wall_row = max(wall_rows, key=psi_of) if wall_rows else -1
+        join_level = psi_of(wall_row) if wall_row >= 0 else None
+        outside_rows = [row for row in rows if not bool(carrier_valid[int(node_vertex[row])])]
+        if len(outside_rows) != 1:
+            raise RuntimeError("expected one positionless outside node, found %d" % len(outside_rows))
+        outside_row = outside_rows[0]
+    
+        nodes = []
+        for row in rows:
+            vertex = int(node_vertex[row])
+            radius = float(carrier[vertex, 0])
+            height = float(carrier[vertex, 1])
+            if row == outside_row and wall_row >= 0:
+                contact = carrier[int(node_vertex[wall_row])]
+                radius = float(contact[0])
+                height = float(contact[1])
+            role = "piecewise-linear critical point"
+            if row == axis_row:
+                role = "magnetic axis"
+            elif row == xpoint_row:
+                role = "admitted X-point"
+            elif row == wall_row:
+                role = "private-region wall maximum"
+            elif row == outside_row:
+                role = "outside node"
+>           kind = CRITICAL_NAME[int(critical_type[row])]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 3
+
+benchmarks/contour_tree_explanatory_figure.py:232: KeyError
+______________________ test_committed_figure_files_exist _______________________
+
+    def test_committed_figure_files_exist():
+        """The committed PNG and SVG exist and the SVG agrees with the receipt."""
+    
+        for suffix in (".png", ".svg"):
+            path = figure.FIGURE_STEM.with_suffix(suffix)
+            assert path.is_file(), "the committed figure %s is missing" % path.name
+            assert path.stat().st_size > 1024, "the committed figure %s is empty" % path.name
+        receipt_path = figure.FIGURE_STEM.with_suffix(".json")
+        payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+        assert "svg_sha256" in payload, "the receipt carries no figure digest"
+>       committed = figure._svg_sha256(figure.FIGURE_STEM.with_suffix(".svg"))
+                    ^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'benchmarks.contour_tree_explanatory_figure' has no attribute '_svg_sha256'
+
+tests/test_contour_tree_explanatory_figure.py:105: AttributeError
+________________ test_graph_omits_the_virtual_outside_sentinel _________________
+
+    def test_graph_omits_the_virtual_outside_sentinel():
+        """The graph's flux axis spans physical levels, not the outside sentinel."""
+    
+>       state, _, graph_panel = _render()
+                                ^^^^^^^^^
+
+tests/test_contour_tree_explanatory_figure.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_contour_tree_explanatory_figure.py:112: in _render
+    state = figure.build_state()
+            ^^^^^^^^^^^^^^^^^^^^
+benchmarks/contour_tree_explanatory_figure.py:530: in build_state
+    nodes = list(_nodes(mesh, tree))
+                 ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mesh = ContourMesh(vertex_rz=Array([[ 1.5092365 , -1.20561769],
+       [ 1.59441691, -1.17076885],
+       [ 1.52901419, -1.15...False, False, False],      dtype=bool), vertex_capacity=468, edge_capacity=1276, triangle_capacity=936, overflow=False)
+tree = ContourTreeArrays(node_vertex=Array([  0,   5,  69,  89,  93, 174, 305, 317, 318, 335, 338, 346, 353,
+         0,   0,... False, False, False, False, False, False,
+       False, False, False], dtype=bool), overflow=Array(False, dtype=bool))
+
+    def _nodes(mesh, tree) -> tuple[Node, ...]:
+        """Return the tree's valid node rows, labelled by analytic role.
+    
+        The roles are read off the tree and the carrier, never placed by hand: the
+        magnetic axis is the greatest valid node of sigma * psi; the admitted
+        X-point is the saddle the tree attaches directly to that axis; the
+        private-region wall maximum is the tree's own node at the highest-flux wall
+        vertex; the outside node is the virtual slot, whose carrier vertex is mesh
+        padding and so carries no position of its own.
+        """
+    
+        carrier = np.asarray(mesh.vertex_rz)
+        psi = np.asarray(mesh.vertex_psi)
+        valid = np.asarray(tree.node_valid)
+        node_vertex = np.asarray(tree.node_vertex)
+        carrier_valid = np.asarray(mesh.vertex_valid)
+        is_wall = np.asarray(mesh.vertex_is_wall)
+        critical_type = np.asarray(tree.critical_type)
+    
+        rows = [int(row) for row in np.flatnonzero(valid)]
+        if not rows:
+            raise RuntimeError("the computed tree emitted no valid nodes")
+        edges = np.asarray(tree.edges)[np.asarray(tree.edge_valid)]
+        neighbours: dict[int, set[int]] = {}
+        for row in rows:
+            neighbours[row] = set()
+        for left, right in edges:
+            neighbours[int(left)].add(int(right))
+            neighbours[int(right)].add(int(left))
+    
+        def psi_of(row: int) -> float:
+            return float(psi[int(node_vertex[row])])
+    
+        axis_row = max(rows, key=psi_of)
+        attached = []
+        for row in rows:
+            if int(critical_type[row]) == SADDLE and axis_row in neighbours[row]:
+                attached.append(row)
+        if not attached:
+            raise RuntimeError("no saddle attaches directly to the computed axis")
+        xpoint_row = max(attached, key=psi_of)
+    
+        wall_rows = [row for row in rows if bool(is_wall[int(node_vertex[row])])]
+        wall_row = max(wall_rows, key=psi_of) if wall_rows else -1
+        join_level = psi_of(wall_row) if wall_row >= 0 else None
+        outside_rows = [row for row in rows if not bool(carrier_valid[int(node_vertex[row])])]
+        if len(outside_rows) != 1:
+            raise RuntimeError("expected one positionless outside node, found %d" % len(outside_rows))
+        outside_row = outside_rows[0]
+    
+        nodes = []
+        for row in rows:
+            vertex = int(node_vertex[row])
+            radius = float(carrier[vertex, 0])
+            height = float(carrier[vertex, 1])
+            if row == outside_row and wall_row >= 0:
+                contact = carrier[int(node_vertex[wall_row])]
+                radius = float(contact[0])
+                height = float(contact[1])
+            role = "piecewise-linear critical point"
+            if row == axis_row:
+                role = "magnetic axis"
+            elif row == xpoint_row:
+                role = "admitted X-point"
+            elif row == wall_row:
+                role = "private-region wall maximum"
+            elif row == outside_row:
+                role = "outside node"
+>           kind = CRITICAL_NAME[int(critical_type[row])]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 3
+
+benchmarks/contour_tree_explanatory_figure.py:232: KeyError
+_______________ test_poloidal_panel_draws_no_lines_between_nodes _______________
+
+    def test_poloidal_panel_draws_no_lines_between_nodes():
+        """Adjacency is carried by the graph, never by a spatial line on the panel."""
+    
+>       _, poloidal_panel, _ = _render()
+                               ^^^^^^^^^
+
+tests/test_contour_tree_explanatory_figure.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_contour_tree_explanatory_figure.py:112: in _render
+    state = figure.build_state()
+            ^^^^^^^^^^^^^^^^^^^^
+benchmarks/contour_tree_explanatory_figure.py:530: in build_state
+    nodes = list(_nodes(mesh, tree))
+                 ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mesh = ContourMesh(vertex_rz=Array([[ 1.5092365 , -1.20561769],
+       [ 1.59441691, -1.17076885],
+       [ 1.52901419, -1.15...False, False, False],      dtype=bool), vertex_capacity=468, edge_capacity=1276, triangle_capacity=936, overflow=False)
+tree = ContourTreeArrays(node_vertex=Array([  0,   5,  69,  89,  93, 174, 305, 317, 318, 335, 338, 346, 353,
+         0,   0,... False, False, False, False, False, False,
+       False, False, False], dtype=bool), overflow=Array(False, dtype=bool))
+
+    def _nodes(mesh, tree) -> tuple[Node, ...]:
+        """Return the tree's valid node rows, labelled by analytic role.
+    
+        The roles are read off the tree and the carrier, never placed by hand: the
+        magnetic axis is the greatest valid node of sigma * psi; the admitted
+        X-point is the saddle the tree attaches directly to that axis; the
+        private-region wall maximum is the tree's own node at the highest-flux wall
+        vertex; the outside node is the virtual slot, whose carrier vertex is mesh
+        padding and so carries no position of its own.
+        """
+    
+        carrier = np.asarray(mesh.vertex_rz)
+        psi = np.asarray(mesh.vertex_psi)
+        valid = np.asarray(tree.node_valid)
+        node_vertex = np.asarray(tree.node_vertex)
+        carrier_valid = np.asarray(mesh.vertex_valid)
+        is_wall = np.asarray(mesh.vertex_is_wall)
+        critical_type = np.asarray(tree.critical_type)
+    
+        rows = [int(row) for row in np.flatnonzero(valid)]
+        if not rows:
+            raise RuntimeError("the computed tree emitted no valid nodes")
+        edges = np.asarray(tree.edges)[np.asarray(tree.edge_valid)]
+        neighbours: dict[int, set[int]] = {}
+        for row in rows:
+            neighbours[row] = set()
+        for left, right in edges:
+            neighbours[int(left)].add(int(right))
+            neighbours[int(right)].add(int(left))
+    
+        def psi_of(row: int) -> float:
+            return float(psi[int(node_vertex[row])])
+    
+        axis_row = max(rows, key=psi_of)
+        attached = []
+        for row in rows:
+            if int(critical_type[row]) == SADDLE and axis_row in neighbours[row]:
+                attached.append(row)
+        if not attached:
+            raise RuntimeError("no saddle attaches directly to the computed axis")
+        xpoint_row = max(attached, key=psi_of)
+    
+        wall_rows = [row for row in rows if bool(is_wall[int(node_vertex[row])])]
+        wall_row = max(wall_rows, key=psi_of) if wall_rows else -1
+        join_level = psi_of(wall_row) if wall_row >= 0 else None
+        outside_rows = [row for row in rows if not bool(carrier_valid[int(node_vertex[row])])]
+        if len(outside_rows) != 1:
+            raise RuntimeError("expected one positionless outside node, found %d" % len(outside_rows))
+        outside_row = outside_rows[0]
+    
+        nodes = []
+        for row in rows:
+            vertex = int(node_vertex[row])
+            radius = float(carrier[vertex, 0])
+            height = float(carrier[vertex, 1])
+            if row == outside_row and wall_row >= 0:
+                contact = carrier[int(node_vertex[wall_row])]
+                radius = float(contact[0])
+                height = float(contact[1])
+            role = "piecewise-linear critical point"
+            if row == axis_row:
+                role = "magnetic axis"
+            elif row == xpoint_row:
+                role = "admitted X-point"
+            elif row == wall_row:
+                role = "private-region wall maximum"
+            elif row == outside_row:
+                role = "outside node"
+>           kind = CRITICAL_NAME[int(critical_type[row])]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 3
+
+benchmarks/contour_tree_explanatory_figure.py:232: KeyError
+_______________________ test_graph_labels_do_not_collide _______________________
+
+    def test_graph_labels_do_not_collide():
+        """No direct graph label overlaps another label or a node marker."""
+    
+>       state = figure.build_state()
+                ^^^^^^^^^^^^^^^^^^^^
+
+tests/test_contour_tree_explanatory_figure.py:176: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+benchmarks/contour_tree_explanatory_figure.py:530: in build_state
+    nodes = list(_nodes(mesh, tree))
+                 ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mesh = ContourMesh(vertex_rz=Array([[ 1.5092365 , -1.20561769],
+       [ 1.59441691, -1.17076885],
+       [ 1.52901419, -1.15...False, False, False],      dtype=bool), vertex_capacity=468, edge_capacity=1276, triangle_capacity=936, overflow=False)
+tree = ContourTreeArrays(node_vertex=Array([  0,   5,  69,  89,  93, 174, 305, 317, 318, 335, 338, 346, 353,
+         0,   0,... False, False, False, False, False, False,
+       False, False, False], dtype=bool), overflow=Array(False, dtype=bool))
+
+    def _nodes(mesh, tree) -> tuple[Node, ...]:
+        """Return the tree's valid node rows, labelled by analytic role.
+    
+        The roles are read off the tree and the carrier, never placed by hand: the
+        magnetic axis is the greatest valid node of sigma * psi; the admitted
+        X-point is the saddle the tree attaches directly to that axis; the
+        private-region wall maximum is the tree's own node at the highest-flux wall
+        vertex; the outside node is the virtual slot, whose carrier vertex is mesh
+        padding and so carries no position of its own.
+        """
+    
+        carrier = np.asarray(mesh.vertex_rz)
+        psi = np.asarray(mesh.vertex_psi)
+        valid = np.asarray(tree.node_valid)
+        node_vertex = np.asarray(tree.node_vertex)
+        carrier_valid = np.asarray(mesh.vertex_valid)
+        is_wall = np.asarray(mesh.vertex_is_wall)
+        critical_type = np.asarray(tree.critical_type)
+    
+        rows = [int(row) for row in np.flatnonzero(valid)]
+        if not rows:
+            raise RuntimeError("the computed tree emitted no valid nodes")
+        edges = np.asarray(tree.edges)[np.asarray(tree.edge_valid)]
+        neighbours: dict[int, set[int]] = {}
+        for row in rows:
+            neighbours[row] = set()
+        for left, right in edges:
+            neighbours[int(left)].add(int(right))
+            neighbours[int(right)].add(int(left))
+    
+        def psi_of(row: int) -> float:
+            return float(psi[int(node_vertex[row])])
+    
+        axis_row = max(rows, key=psi_of)
+        attached = []
+        for row in rows:
+            if int(critical_type[row]) == SADDLE and axis_row in neighbours[row]:
+                attached.append(row)
+        if not attached:
+            raise RuntimeError("no saddle attaches directly to the computed axis")
+        xpoint_row = max(attached, key=psi_of)
+    
+        wall_rows = [row for row in rows if bool(is_wall[int(node_vertex[row])])]
+        wall_row = max(wall_rows, key=psi_of) if wall_rows else -1
+        join_level = psi_of(wall_row) if wall_row >= 0 else None
+        outside_rows = [row for row in rows if not bool(carrier_valid[int(node_vertex[row])])]
+        if len(outside_rows) != 1:
+            raise RuntimeError("expected one positionless outside node, found %d" % len(outside_rows))
+        outside_row = outside_rows[0]
+    
+        nodes = []
+        for row in rows:
+            vertex = int(node_vertex[row])
+            radius = float(carrier[vertex, 0])
+            height = float(carrier[vertex, 1])
+            if row == outside_row and wall_row >= 0:
+                contact = carrier[int(node_vertex[wall_row])]
+                radius = float(contact[0])
+                height = float(contact[1])
+            role = "piecewise-linear critical point"
+            if row == axis_row:
+                role = "magnetic axis"
+            elif row == xpoint_row:
+                role = "admitted X-point"
+            elif row == wall_row:
+                role = "private-region wall maximum"
+            elif row == outside_row:
+                role = "outside node"
+>           kind = CRITICAL_NAME[int(critical_type[row])]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 3
+
+benchmarks/contour_tree_explanatory_figure.py:232: KeyError
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_explanatory_figure.py::test_figure_draws_exactly_the_receipts_valid_nodes
+FAILED tests/test_contour_tree_explanatory_figure.py::test_committed_receipt_matches_the_computed_tree
+FAILED tests/test_contour_tree_explanatory_figure.py::test_committed_figure_files_exist
+FAILED tests/test_contour_tree_explanatory_figure.py::test_graph_omits_the_virtual_outside_sentinel
+FAILED tests/test_contour_tree_explanatory_figure.py::test_poloidal_panel_draws_no_lines_between_nodes
+FAILED tests/test_contour_tree_explanatory_figure.py::test_graph_labels_do_not_collide
+6 failed in 97.33s (0:01:37)
+EXIT=1

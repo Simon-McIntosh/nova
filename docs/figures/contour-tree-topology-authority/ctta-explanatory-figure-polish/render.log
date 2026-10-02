@@ -1,0 +1,9 @@
+revision: 11985735c020a39df74f76c75cbe6354e0e67d36
+tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish
+module_file: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish/benchmarks/contour_tree_explanatory_figure.py
+cwd: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish
+jax_platforms: cpu
+command: PYTHONPATH note
+Diverted single-null Solovev certificate at its persisted 340-cell rung (fixture diverted-single-null-340-cells). The computed contour tree carries 13 nodes and 12 edges so the node count exceeds the edge count by 1. Two nodes are the analytic nulls: the magnetic-axis maximum and the admitted X-point saddle. The other 10 are piecewise-linear critical points beyond them: 5 piecewise-linear extrema (1 maximum, 4 minima) and 5 further saddles, plus the positionless virtual outside node the padded carrier emits, typed outside the critical-point vocabulary. The private-region wall maximum is the tree's own node at the highest-flux wall vertex. These low-persistence piecewise-linear extrema are drawn rather than hidden, and the critical-point geometry and selection sections (§3 and §4) must absorb them by persistence and primary selection. The poloidal panel draws no lines between nodes: the tree's adjacency is a topological relation, not a geometric path, so it is carried only by the graph panel, where every node is placed at its signed flux level and the edges are drawn as arcs. The virtual outside node is drawn at the level where the outside region joins the tree, its wall contact, not at its mesh-padding sentinel, which is omitted from the signed-flux axis.
+nodes=13 edges=12
+EXIT=0

@@ -287,6 +287,7 @@ def measure_cpu_rungs(
         result = build_contour_tree(*arguments)
         result.overflow.block_until_ready()
         execute_seconds = time.perf_counter() - started
+        comparison = compare(fixture.mesh)
         rows.append(
             {
                 "name": fixture.name,
@@ -299,6 +300,12 @@ def measure_cpu_rungs(
                 "compile_seconds": cold_seconds - execute_seconds,
                 "execute_seconds": execute_seconds,
                 "overflow": bool(result.overflow),
+                "node_count": comparison["node_count"],
+                "edge_count": comparison["edge_count"],
+                "mismatches": sum(
+                    row["tree"] != row["brute_force"]
+                    for row in comparison["rows"]
+                ),
             }
         )
     return rows

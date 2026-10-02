@@ -1,0 +1,9 @@
+# revision: f1aab831210947817d3a0363e06ddd0351eff12b
+# tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh (in place)
+# cwd: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh
+# module.__file__: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh/nova/equilibrium/contour_tree_mesh.py
+# command: PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh TMPDIR=/tmp JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest tests/test_contour_tree_mesh.py -q -p no:cacheprovider
+02:20:58 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+........                                                                 [100%]
+8 passed in 7.25s
+EXIT=0

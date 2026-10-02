@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="contour-tree-topology-authority">
+<title>Piecewise-linear contour mesh on the hex carrier | nova</title>
+</head>
+<body>
+<main class="plan-doc">
+<h2 id="ctta-hex-contour-mesh">Piecewise-linear contour mesh on the hex carrier</h2>
+
+<p>The carrier for section 2's tree: the three-direction triangulation of the
+hex cell centres, clipped to the multi-unit vessel polygon, with wall vertices
+placed where the triangulation meets the wall polyline and valued by linear
+interpolation on the containing triangle of the same piecewise field. Module
+<code>nova/equilibrium/contour_tree_mesh.py</code>, tests
+<code>tests/test_contour_tree_mesh.py</code>.</p>
+
+<p><strong>Measure.</strong> Gate <code>pytest
+tests/test_contour_tree_mesh.py -q -p no:cacheprovider</code> at
+<code>f9603c3b</code>: <strong>8 passed</strong>, EXIT=0
+(<code>gate.log</code>). The five named checks and the declared negative
+control:</p>
+<ul>
+  <li><strong>(a)</strong> on a synthetic linear field <code>psi = 0.37 R
+  - 0.21 Z + 1.13</code>, every wall vertex's interpolated flux equals the
+  analytic value to <strong>4.4e-16 Wb</strong> (&lt; 1e-12).</li>
+  <li><strong>(b)</strong> every valid vertex lies inside or on the vessel
+  polygon to within <strong>4.2e-16 m</strong>; the bounding-box control admits
+  <strong>more</strong> cell centres than the polygon (the polygon excludes some
+  the box keeps).</li>
+  <li><strong>(c)</strong> Euler characteristic <code>V - E + T = 1</code> on
+  the simply connected clipped domain.</li>
+  <li><strong>(d)</strong> an over-capacity input sets <code>overflow</code>
+  and leaves every validity mask empty with no valid triangle or edge indexing
+  past the vertex array (refusal, not truncation); a generous capacity on the
+  same input does not overflow.</li>
+  <li><strong>(e)</strong> the mesh is a fixed-capacity jax pytree: a jitted
+  reduction over it traces and matches the eager result.</li>
+</ul>
+
+<figure>
+  <img src="/nova/figures/contour-tree-topology-authority/mesh/hex-contour-mesh.png"
+       alt="Left: hex cell centres with the clipped three-direction triangulation inside the vessel polygon, wall vertices on the boundary. Right: those wall vertices coloured by the nearest-centre valuation error.">
+  <figcaption>Left: hex cell centres (grey), the clipped triangulation, and the
+  wall vertices (red) on the vessel polygon. Right: the same wall vertices
+  coloured by the nearest-centre valuation error the negative control induces
+  (max 0.185 Wb); the committed interpolation is exact on the linear field to
+  4.4e-16 Wb.</figcaption>
+</figure>
+
+<h3>Negative control</h3>
+<p>Declared mutation: <em>value wall vertices from the nearest hex centre
+instead of the containing triangle: the linear-field exactness test fails.</em>
+Applied in place, <code>negative-control-nearest-centre.log</code> records
+<code>EXIT=1</code> with
+<code>test_wall_vertex_flux_is_linear_interpolation</code> failing (max error
+0.185 Wb against the 1e-12 bound) and the other 7 passing; the source was
+restored byte-identical afterwards. A second control restores the truncating
+build (overflow masking disabled): <code>test_over_capacity_sets_overflow_flag</code>
+fails, <code>negative-control-overflow-truncation.log</code>, <code>EXIT=1</code>.</p>
+
+<h3>Reuse</h3>
+<p>Per <a href="/nova/evidence/contour-tree-topology-authority/reuse-map.md">reuse-map</a>
+rows 1 to 3: <code>scipy.spatial.Delaunay</code> (row 1) is the
+<code>PlasmaGrid.tessellate</code> idiom;
+<code>wall_mask.inside_polygon</code> (row 2) is the host containment;
+<code>wall_mask.WallUnit</code> (row 3) carries the multi-unit wall. Row 3's
+missing containing-triangle flux lookup is written here as
+<code>_barycentric_flux</code>.</p>
+
+<h3>Caveats</h3>
+<ul>
+  <li>The clipping is host (scipy + shapely); this node measures its own
+  change, not the merged tree. Verifying the merged result belongs to the
+  separately dispatched test node.</li>
+  <li>Capacities default to V=4096, E=16384, T=8192; the tree's own 256/255
+  capacities are downstream of this carrier.</li>
+</ul>
+</main>
+</body>
+</html>

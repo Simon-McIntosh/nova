@@ -1,0 +1,32 @@
+# revision: fcc5f34ba3f9bcb12fbda753a63dfcb7ed44e7a4
+# tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh (module mutated in place: overflow masking disabled, truncating _pad restored)
+# command: pytest tests/test_contour_tree_mesh.py -q -p no:cacheprovider
+02:14:23 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+.....F..                                                                 [100%]
+=================================== FAILURES ===================================
+____________________ test_over_capacity_sets_overflow_flag _____________________
+
+    def test_over_capacity_sets_overflow_flag():
+        rz = hex_lattice(9, 9)
+        cap = 4
+        mesh = build_contour_mesh(
+            rz, linear_flux(rz), [circle_unit(3.5)], vertex_capacity=cap
+        )
+        assert mesh.overflow is True
+        # an over-capacity build must not hand a consumer a corrupt carrier: the
+        # vertex array is truncated to `cap`, so nothing may be marked valid and no
+        # valid triangle or edge may reference an index at or beyond `cap`.
+>       assert not bool(np.asarray(mesh.vertex_valid).any())
+E       assert not True
+E        +  where True = bool(np.True_)
+E        +    where np.True_ = <built-in method any of numpy.ndarray object at 0x7fed719bf5d0>()
+E        +      where <built-in method any of numpy.ndarray object at 0x7fed719bf5d0> = array([ True,  True,  True,  True]).any
+E        +        where array([ True,  True,  True,  True]) = <built-in function asarray>(Array([ True,  True,  True,  True], dtype=bool))
+E        +          where <built-in function asarray> = np.asarray
+E        +          and   Array([ True,  True,  True,  True], dtype=bool) = ContourMesh(vertex_rz=Array([[0., 0.],\n       [1., 0.],\n       [2., 0.],\n       [3., 0.]], dtype=float64), vertex_psi=... ..., False, False, False], dtype=bool), vertex_capacity=4, edge_capacity=16384, triangle_capacity=8192, overflow=True).vertex_valid
+
+tests/test_contour_tree_mesh.py:142: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_mesh.py::test_over_capacity_sets_overflow_flag
+1 failed, 7 passed in 19.61s
+EXIT=1

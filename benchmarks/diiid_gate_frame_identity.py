@@ -56,6 +56,7 @@ import argparse
 from datetime import UTC, datetime
 import gc
 import hashlib
+import importlib.util
 import json
 import logging
 import numpy as np
@@ -520,6 +521,13 @@ def _measure_frame(member: Any, repeats: int, instrument: Any) -> dict[str, Any]
     }
     memory = sampler.receipt()
     row["host_memory"] = memory
+    row["input_fingerprints"] = {
+        "seed_sha256": _array_sha256(member.state),
+        "coil_current_sha256": _array_sha256(member.current),
+        "target_current": float(member.target_current),
+        "tolerance": float(member.tolerance),
+        "options": member.options,
+    }
     terminal_flux = np.asarray(exited_flux, dtype=np.float64)
     reference_flux = np.asarray(member.state, dtype=np.float64)
     del compiled, state, control_flux, exited_flux
@@ -658,6 +666,11 @@ def _frame_receipt(
             "max_absolute_flux_difference"
         ],
         "main": main_arms,
+        "with_exit_minus_without_exit_terminal_residual": (
+            main_arms["with_exit"]["terminal_residual"]
+            - main_arms["without_exit"]["terminal_residual"]
+        ),
+        "input_fingerprints": row.get("input_fingerprints"),
         "artifact_reference": artifact_reference,
         "maximum_absolute_terminal_state_difference_scope": (
             "between this frame's two strict-exit passes at the driver's device; "
@@ -719,8 +732,9 @@ def run(arguments: argparse.Namespace) -> int:
         "artifact_primary_arm": PRIMARY_ARTIFACT_ARM,
         "artifact_secondary_arm": "base",
         "artifact_revisions": artifact.get("source"),
-        "device_sha": _git("rev-parse", "HEAD"),
-        "device_tree": str(ROOT),
+        "device_sha": arguments.solver_revision or _git("rev-parse", "HEAD"),
+        "device_tree": str(arguments.solver_tree or ROOT),
+        "driver_revision": _git("rev-parse", "HEAD"),
         "driver": str(Path(__file__).relative_to(ROOT)),
         "driver_sha256": _file_sha256(Path(__file__)),
         "machine_cache": str(arguments.machine_cache),
@@ -765,6 +779,28 @@ def run(arguments: argparse.Namespace) -> int:
 
     configure_dtypes()
     import jax
+    from nova.equilibrium import forward
+
+    header["measurement_module"] = str(Path(forward.__file__).resolve())
+    header["measurement_cwd"] = str(Path.cwd().resolve())
+    header["instrument_sha256"] = _file_sha256(Path(instrument.__file__))
+    if arguments.solver_tree:
+        expected = subprocess.check_output(
+            [
+                "git",
+                "-C",
+                str(ROOT),
+                "show",
+                f"{arguments.solver_revision}:nova/equilibrium/forward.py",
+            ]
+        )
+        if (
+            Path(forward.__file__).resolve()
+            != arguments.solver_tree / "nova/equilibrium/forward.py"
+            or _file_sha256(Path(forward.__file__))
+            != hashlib.sha256(expected).hexdigest()
+        ):
+            raise RuntimeError("historical control imported the wrong solver module")
 
     if not jax.config.jax_enable_x64:
         raise RuntimeError("extended precision was not enabled before array build")
@@ -818,6 +854,8 @@ def _measure(
             f"{arguments.member_count} of {len(identities)} frames"
         )
     selected_indices = tuple(arguments.frame_indices)
+    if selected_indices != tuple(range(len(identities))):
+        raise ValueError("a complete aggregate requires all five frames in this job")
     if (
         not selected_indices
         or len(set(selected_indices)) != len(selected_indices)
@@ -838,6 +876,12 @@ def _measure(
         header["previous_run_compile_seconds"] = previous_run.get("summary", {}).get(
             "per_frame_compile_seconds", {}
         )
+        header["historical_cold_compile_seconds"] = {
+            identity: comparison["previous_cold_seconds"]
+            for identity, comparison in previous_run.get(
+                "cold_versus_current_compile_seconds", {}
+            ).items()
+        }
     print(f"COMPARATOR_SELF_CHECK=PASS {header['comparator_self_check']}", flush=True)
     exchange = arguments.exchange or Path(tempfile.mkdtemp(prefix="nova-diiid-frames-"))
     exchange = Path(exchange)
@@ -1226,6 +1270,7 @@ def _render_frame_receipt(receipt_path: Path) -> dict[str, Any]:
         reference.T,
         levels,
         color=reference_color,
+        linewidth=2.4,
         wall=units,
     )
     terminal_contours = poloidal.draw_flux_contours(
@@ -1235,9 +1280,11 @@ def _render_frame_receipt(receipt_path: Path) -> dict[str, Any]:
         terminal.T,
         levels,
         color=terminal_color,
+        linewidth=3.0,
         wall=units,
     )
-    poloidal.draw_wall(axis, units=units)
+    reference_contours.set_linestyle("dashed")
+    poloidal.draw_wall(axis, units=units, linewidth=2.6)
     reference_markers = _draw_topology(
         axis,
         receipt["terminal_flux_artifact"]["reference_topology"],
@@ -1269,8 +1316,29 @@ def _render_frame_receipt(receipt_path: Path) -> dict[str, Any]:
         f"converged={converged}. Triangles mark axes; filled crosses mark "
         "admitted saddles; hollow crosses mark other qualified saddles."
     )
-    figure.text(0.5, 0.025, caption, ha="center", va="bottom", fontsize=15, wrap=True)
-    figure.subplots_adjust(left=0.02, right=0.98, top=0.98, bottom=0.15)
+    direct_labels = []
+    for contours, label, color, fraction in (
+        (reference_contours, "Seed reference", reference_color, 0.25),
+        (terminal_contours, "Terminal", terminal_color, 0.75),
+    ):
+        segments = [
+            segment
+            for collection in contours.allsegs
+            for segment in collection
+            if len(segment) > 1
+        ]
+        segment = max(segments, key=len)
+        point = segment[int(fraction * (len(segment) - 1))]
+        axis.annotate(
+            label,
+            xy=point,
+            xytext=(16, 10 if fraction < 0.5 else -22),
+            textcoords="offset points",
+            color=color,
+            fontsize=20,
+        )
+        direct_labels.append(label)
+    figure.subplots_adjust(left=0.04, right=0.96, top=0.96, bottom=0.04)
     stem = receipt_path.with_suffix("")
     png_path = stem.with_suffix(".png")
     svg_path = stem.with_suffix(".svg")
@@ -1295,6 +1363,10 @@ def _render_frame_receipt(receipt_path: Path) -> dict[str, Any]:
         "reference_markers": reference_markers,
         "terminal_markers": terminal_markers,
         "axis_off": not axis.axison,
+        "reference_linewidth_pt": float(reference_contours.get_linewidths()[0]),
+        "terminal_linewidth_pt": float(terminal_contours.get_linewidths()[0]),
+        "direct_labels": direct_labels,
+        "embedded_caption": bool(figure.texts),
     }
     if (
         not panel["reference_contour_segment_count"]
@@ -1318,6 +1390,35 @@ def _render_run(receipt_dir: Path) -> list[dict[str, Any]]:
     run_receipt["panels"] = panels
     _write_json(run_path, run_receipt)
     return panels
+
+
+def _validate_frame_contract(
+    receipt: dict[str, Any], header: dict[str, Any], identity: str, index: int
+) -> dict[str, Any]:
+    """Refuse a foreign or misidentified frame before aggregate admission."""
+    provenance = receipt.get("header", {})
+    fields = ("job_id", "device_sha", "driver_sha256", "cache_root")
+    for field in fields:
+        expected = header.get(field)
+        if expected in (None, "") or provenance.get(field) != expected:
+            raise RuntimeError(
+                f"frame provenance mismatch for {field}: "
+                f"{provenance.get(field)!r} != {expected!r} ({identity})"
+            )
+    if receipt.get("frame") != {"identity": identity, "index": index} or provenance.get(
+        "member_identities"
+    ) != [identity]:
+        raise RuntimeError(f"frame identity mismatch: expected {index}: {identity}")
+    if (
+        provenance.get("persistent_compilation_cache", {}).get("root")
+        != header["cache_root"]
+    ):
+        raise RuntimeError(f"frame cache root mismatch: {identity}")
+    return {
+        **{field: provenance[field] for field in fields},
+        "identity": identity,
+        "index": index,
+    }
 
 
 def _row_from_frame_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
@@ -1358,20 +1459,29 @@ def _persist(
     refused = [frame for frame in frames if frame["status"] == "refused"]
     failed = [frame for frame in frames if frame["status"] in ("failed", "hung")]
     hung = [frame for frame in frames if frame["status"] == "hung"]
+    identities = header["member_identities"]
+    if (
+        len(frames) != len(identities)
+        or len(measured) != len(identities)
+        or {frame["identity"] for frame in measured} != set(identities)
+    ):
+        raise RuntimeError("aggregate requires five successful children from this job")
     landed_receipts = []
     for frame in measured:
         path = Path(frame["receipt_path"])
         receipt = _read_json(path)
+        _validate_frame_contract(receipt, header, frame["identity"], frame["index"])
         landed_receipts.append((path, receipt))
         print(f"FRAME_RECEIPT={path} {_frame_narrative(receipt)}", flush=True)
     receipts = []
-    for identity in artifact_index:
+    for index, identity in enumerate(identities):
         path = arguments.receipt_dir / f"{_slug(identity)}.json"
         if not path.exists():
             raise RuntimeError(f"the complete run is missing frame receipt {path}")
         receipt = _read_json(path)
         if receipt.get("schema") != "nova.diiid-gate-frame-identity/2":
             raise RuntimeError(f"frame receipt {path} does not carry terminal arrays")
+        _validate_frame_contract(receipt, header, identity, index)
         _load_terminal_flux_artifact(receipt)
         receipts.append((path, receipt))
     rows = [_row_from_frame_receipt(receipt) for _, receipt in receipts]
@@ -1401,6 +1511,12 @@ def _persist(
         "frame_receipts": [_relative(path) for path, _ in receipts],
         "frames": {
             str(receipt["frame"]["identity"]): {
+                "provenance": _validate_frame_contract(
+                    receipt,
+                    header,
+                    receipt["frame"]["identity"],
+                    receipt["frame"]["index"],
+                ),
                 "terminal_state_element_count": receipt["terminal_state_element_count"],
                 "bit_identical_to_artifact": receipt["bit_identical_to_artifact"],
                 "maximum_absolute_terminal_state_difference": (
@@ -1435,9 +1551,9 @@ def _persist(
     }
     previous_compile = header.get("previous_run_compile_seconds", {})
     current_compile = run_receipt["summary"]["per_frame_compile_seconds"]
-    run_receipt["cold_versus_current_compile_seconds"] = {
+    run_receipt["previous_versus_current_compile_seconds"] = {
         identity: {
-            "previous_cold_seconds": previous_compile.get(identity),
+            "previous_seconds": previous_compile.get(identity),
             "current_seconds": current_compile.get(identity),
             "saved_seconds": (
                 float(previous_compile[identity]) - float(current_compile[identity])
@@ -1482,6 +1598,124 @@ def _frame_indices(value: str) -> tuple[int, ...]:
         ) from error
 
 
+def _historical_instrument(tree: Path, revision: str, artifact: Path) -> None:
+    """Keep measurement code fixed while importing historical runtime dependencies."""
+    import benchmarks
+
+    expected = _read_json(artifact)["source"]["head_revision"]
+    if revision != expected:
+        raise RuntimeError(f"historical control revision {revision} != {expected}")
+    if "nova" in sys.modules:
+        raise RuntimeError("historical runtime must be selected before importing nova")
+    sys.path.insert(0, str(tree))
+    benchmarks.__path__.insert(0, str(tree / "benchmarks"))
+    path = ROOT / "benchmarks/strict_exit_incidence.py"
+    spec = importlib.util.spec_from_file_location(
+        "benchmarks.strict_exit_incidence", path
+    )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    benchmarks.strict_exit_incidence = module
+
+
+def _compare_control(
+    receipt_dir: Path, control_path: Path, artifact_path: Path
+) -> None:
+    """Record paired-pass changes separately from differences against the artifact."""
+    run_path = receipt_dir / "run.json"
+    aggregate = _read_json(run_path)
+    artifact = _read_json(artifact_path)
+    control = _read_json(control_path)
+    historical_revision = artifact["source"]["head_revision"]
+    contract = {**aggregate["header"], "device_sha": historical_revision}
+    control_identity = aggregate["header"]["member_identities"][1]
+    _validate_frame_contract(control, contract, control_identity, 1)
+    _load_terminal_flux_artifact(control)
+    comparisons = []
+    artifact_members = {row["identity"]: row["head"] for row in artifact["members"]}
+    current_control = None
+    for index, path in enumerate(aggregate["frame_receipts"]):
+        receipt = _read_json(ROOT / path)
+        identity = aggregate["header"]["member_identities"][index]
+        _validate_frame_contract(receipt, aggregate["header"], identity, index)
+        historical = receipt["artifact_reference"]["head"]
+        current = receipt["main"]
+        comparisons.append(
+            {
+                "identity": identity,
+                "historical_revision": historical_revision,
+                "current_revision": receipt["header"]["device_sha"],
+                "historical_with_exit_minus_without_exit_residual": (
+                    historical["with_exit"]["terminal_residual"]
+                    - historical["without_exit"]["terminal_residual"]
+                ),
+                "current_with_exit_minus_without_exit_residual": (
+                    current["with_exit"]["terminal_residual"]
+                    - current["without_exit"]["terminal_residual"]
+                ),
+                "current_max_absolute_paired_flux_difference": receipt[
+                    "maximum_absolute_terminal_state_difference"
+                ],
+                "historical_max_absolute_paired_flux_difference": artifact_members[
+                    identity
+                ]["terminal_state_difference"]["max_absolute_flux_difference"],
+                "current_against_artifact_residual_difference": {
+                    arm: receipt["main_against_artifact"]["head"][arm][
+                        "absolute_terminal_residual_difference"
+                    ]
+                    for arm in ("without_exit", "with_exit")
+                },
+            }
+        )
+        if index == 1:
+            current_control = receipt
+    historical_errors = [
+        control["main_against_artifact"]["head"][arm][
+            "absolute_terminal_residual_difference"
+        ]
+        for arm in ("without_exit", "with_exit")
+    ]
+    inputs_equal = (
+        control["input_fingerprints"] == current_control["input_fingerprints"]
+    )
+    restored = max(historical_errors) < 1.0e-10
+    verdict = (
+        "historical runtime restores frame 44 artifact residuals "
+        "with the same measurement driver"
+        if restored
+        else "historical per-frame control does not restore artifact residuals; "
+        "attribution remains open"
+    )
+    aggregate["identity_revision_comparison"] = comparisons
+    aggregate["historical_control"] = {
+        "receipt": _relative(control_path),
+        "provenance": _validate_frame_contract(control, contract, control_identity, 1),
+        "measurement_module": control["header"]["measurement_module"],
+        "measurement_cwd": control["header"]["measurement_cwd"],
+        "instrument_sha256": control["header"]["instrument_sha256"],
+        "same_instrument": control["header"]["instrument_sha256"]
+        == current_control["header"]["instrument_sha256"],
+        "same_input_fingerprints": inputs_equal,
+        "historical_against_artifact_max_residual_difference": max(historical_errors),
+        "restores_artifact_residual": restored,
+        "verdict": verdict,
+        "qualification": (
+            "The measurement driver and paired solve instrument are fixed; nova and "
+            "supporting profile builders come from the historical revision. "
+            "Equal seed, "
+            "current and options hashes do not prove equality of every operator leaf. "
+            "One control frame cannot attribute the other four frames."
+        ),
+    }
+    _write_json(run_path, aggregate)
+    print(
+        "HISTORICAL_CONTROL="
+        + json.dumps(aggregate["historical_control"], sort_keys=True),
+        flush=True,
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--receipt-dir", type=Path, default=DEFAULT_RECEIPT_DIR)
@@ -1491,6 +1725,9 @@ def main() -> int:
     parser.add_argument("--cpu-count", type=int, default=SCHEDULED_CORE_COUNT)
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--cache-root", type=Path, default=DEFAULT_CACHE_ROOT)
+    parser.add_argument("--solver-tree", type=Path)
+    parser.add_argument("--solver-revision")
+    parser.add_argument("--compare-control", type=Path)
     parser.add_argument(
         "--frame-indices",
         type=_frame_indices,
@@ -1525,6 +1762,17 @@ def main() -> int:
         help="validate the persisted terminal arrays and regenerate every panel",
     )
     arguments = parser.parse_args()
+    if arguments.solver_tree:
+        arguments.solver_tree = arguments.solver_tree.resolve()
+        _historical_instrument(
+            arguments.solver_tree, arguments.solver_revision, arguments.artifact
+        )
+
+    if arguments.compare_control:
+        _compare_control(
+            arguments.receipt_dir, arguments.compare_control, arguments.artifact
+        )
+        return 0
 
     if arguments.probe:
         from benchmarks import strict_exit_incidence as instrument

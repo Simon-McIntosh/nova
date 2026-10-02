@@ -330,6 +330,32 @@
   "plan_impl_at_dispatch": 0.99,
   "plan_link": null,
   "promoted_revision": "58378064f2f43b296d6ee574f869b0af0fb2fac3",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5028,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T084242862234-ecq-mark-swept-capacity-receipts",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-mark-swept-capacity-receipts"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

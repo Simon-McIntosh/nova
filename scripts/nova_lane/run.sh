@@ -269,6 +269,10 @@ while (($#)); do
 done
 if [[ -z "${target}" && $# -gt 0 ]]; then target=$1; shift; fi
 target_args=("$@")
+payload_target_args=("${target_args[@]}")
+if [[ "${mode}" == pytest ]] && ! pytest_timeout_argument >/dev/null; then
+  payload_target_args+=(--timeout "${NOVA_LANE_TEST_TIMEOUT:-3600}")
+fi
 
 # --- validation ------------------------------------------------------------
 [[ -n "${log_path}" ]] || { usage; die '--log is required'; }
@@ -303,7 +307,7 @@ if [[ "${dry_run}" == true ]]; then
     platforms="$(rung_platforms "${r}")"
     mapfile -t rung_flags < <(rung_sbatch_flags "${r}")
     printf 'RUNG=%s JAX_PLATFORMS=%s SUBMIT_COMMAND=' "${r}" "${platforms}"
-    submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${cores}" --mem="${mem}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${target_args[@]}")
+    submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${cores}" --mem="${mem}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${payload_target_args[@]}")
     printf '%q ' "${submit[@]}"
     printf '\n'
     printf 'PAYLOAD_PRELUDE=%s\n' "${prelude}"
@@ -374,7 +378,7 @@ wait_for_job() {
 for r in "${rung_array[@]}"; do
   export NOVA_LANE_RUNG="${r}"
   mapfile -t rung_flags < <(rung_sbatch_flags "${r}")
-  submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${cores}" --mem="${mem}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${target_args[@]}")
+  submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${cores}" --mem="${mem}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${payload_target_args[@]}")
   if ! out="$("${submit[@]}")"; then
     die "sbatch submission failed for rung ${r}"
   fi

@@ -1,0 +1,68 @@
+NOVA_LANE_START=2026-10-02T23:27:29+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1280492
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=e53e1141d23dd38f5e72b72dfc2c05bf283aa9c9
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-derivative-tests-root-cause
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-derivative-tests-root-cause
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=script
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python /work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/measure_derivatives.py /work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/main e53e1141d23dd38f5e72b72dfc2c05bf283aa9c9
+23:29:49 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+MEASUREMENT_REVISION=e53e1141d23dd38f5e72b72dfc2c05bf283aa9c9
+MEASUREMENT_TREE=/work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/main
+MEASUREMENT_COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python /work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/measure_derivatives.py /work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/main e53e1141d23dd38f5e72b72dfc2c05bf283aa9c9
+MEASUREMENT_MODULE=/work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/main/nova/equilibrium/forward.py
+MEASUREMENT_CWD=/work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/main
+MEASUREMENT test_the_moment_map_is_differentiable_against_finite_differences step=0.001:relative_error=3.1917738199164809 step=3.0000000000000001e-05:relative_error=3.1482329309445314 step=1.0000000000000001e-05:relative_error=3.1474466809893444
+MEASUREMENT test_the_solve_is_differentiable_in_the_conductor_current probe=3 relative_error=63.478750931284061
+MEASUREMENT test_the_plasma_current_is_differentiable_in_the_conductor_current probe=3 relative_error=11.313969220430053
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/main
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collected 3 items
+
+tests/test_equilibrium_forward_solve.py FFF                              [100%]
+
+=================================== FAILURES ===================================
+_______ test_the_moment_map_is_differentiable_against_finite_differences _______
+tests/test_equilibrium_forward_solve.py:905: in test_the_moment_map_is_differentiable_against_finite_differences
+    assert float(jnp.max(jnp.abs(analytic))) > 1.0
+E   assert 0.7598863825258106 > 1.0
+E    +  where 0.7598863825258106 = float(Array(0.75988638, dtype=float64))
+E    +    where Array(0.75988638, dtype=float64) = <function max at 0x7ff3596822a0>(Array([0.27291727, 0.75988638, 0.52667095], dtype=float64))
+E    +      where <function max at 0x7ff3596822a0> = jnp.max
+E    +      and   Array([0.27291727, 0.75988638, 0.52667095], dtype=float64) = <PjitFunction of <function abs at 0x7ff3594fcf60>>(Array([-0.27291727,  0.75988638,  0.52667095], dtype=float64))
+E    +        where <PjitFunction of <function abs at 0x7ff3594fcf60>> = jnp.abs
+__________ test_the_solve_is_differentiable_in_the_conductor_current ___________
+tests/test_equilibrium_forward_solve.py:943: in test_the_solve_is_differentiable_in_the_conductor_current
+    assert error < FLUX_GRADIENT_TOLERANCE
+E   assert 63.47875093150304 < 0.001
+______ test_the_plasma_current_is_differentiable_in_the_conductor_current ______
+tests/test_equilibrium_forward_solve.py:969: in test_the_plasma_current_is_differentiable_in_the_conductor_current
+    assert error < CURRENT_GRADIENT_TOLERANCE
+E   assert 11.313969220458285 < 0.001
+=============================== warnings summary ===============================
+../../../../../../../home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; zarr
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences
+FAILED tests/test_equilibrium_forward_solve.py::test_the_solve_is_differentiable_in_the_conductor_current
+FAILED tests/test_equilibrium_forward_solve.py::test_the_plasma_current_is_differentiable_in_the_conductor_current
+======================== 3 failed, 1 warning in 59.67s =========================
+PYTEST_EXIT=1
+EXIT_STATUS=1
+NOVA_LANE_END=2026-10-02T23:30:57+0200
+NOVA_LANE_EXIT_STATUS=1

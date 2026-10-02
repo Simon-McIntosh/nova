@@ -2997,9 +2997,31 @@ def picard(
             return terminal_linear((value, shadow_tangent))
 
         def implicit_tangent(_):
-            identity = jnp.eye(result.state.size, dtype=result.state.dtype)
-            jacobian = jax.vmap(state_linear)(identity).T
-            return jnp.linalg.solve(identity - jacobian, parameter_tangent)
+            def linear_map(value):
+                return value - state_linear(value)
+
+            _, transpose = jax.vjp(linear_map, jnp.zeros_like(result.state))
+
+            def solve_linear(matvec, rhs):
+                return jax.scipy.sparse.linalg.gmres(
+                    matvec,
+                    rhs,
+                    tol=1.0e-10,
+                    atol=1.0e-12,
+                    restart=min(80, result.state.size),
+                    maxiter=20,
+                )[0]
+
+            def solve_transpose(_, rhs):
+                return solve_linear(lambda value: transpose(value)[0], rhs)
+
+            return jax.lax.custom_linear_solve(
+                linear_map,
+                parameter_tangent,
+                solve=solve_linear,
+                transpose_solve=solve_transpose,
+                symmetric=False,
+            )
 
         state_tangent = jax.lax.cond(
             result.converged,

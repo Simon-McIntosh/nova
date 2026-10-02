@@ -24,6 +24,7 @@ import numpy as np
 from benchmarks import oracle_start_newton_probe as oracle_probe
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import ForwardProfile, fixed_point
+from nova.equilibrium import constraint as constraint_module
 from nova.equilibrium.constraint import (
     ConstraintContext,
     ConstraintPair,
@@ -67,6 +68,7 @@ DEFAULT_GAUGE_ROOT = Path(
 LEVEL_TOLERANCE_OF_SPAN = 1.0e-3
 ROWS = (("weak-rotation-reactor-static", -110),)
 DISPLACEMENT_M = np.asarray((0.020, 0.0), dtype=np.float64)
+UNIT_LEVERAGE_SEED_DIGEST = "062b465a7364914f"
 
 # A constrained solve of this fixture outruns one debug allocation, so the
 # control arm is advanced in chunks: each chunk runs this many Newton trips
@@ -135,6 +137,13 @@ def _lane(required: str) -> dict[str, Any]:
             )
         if os.environ.get("JAX_PLATFORMS") != "cuda,cpu":
             raise RuntimeError("the scientific receipt requires JAX_PLATFORMS=cuda,cpu")
+    elif required == "titan":
+        if os.environ.get("SLURM_JOB_PARTITION") != "titan":
+            raise RuntimeError("the titan rung requires the titan partition")
+        if device.platform != "gpu":
+            raise RuntimeError(f"the titan rung requires one GPU, got {device}")
+        if os.environ.get("JAX_PLATFORMS") != "cuda,cpu":
+            raise RuntimeError("the titan rung requires JAX_PLATFORMS=cuda,cpu")
     else:
         raise ValueError(f"unsupported lane requirement {required!r}")
     if os.environ.get("TMPDIR") != "/tmp":
@@ -251,6 +260,7 @@ def _certificate_pairs(
     level: bool,
     initial_field_t: Any = None,
     initial_level_wb: Any = None,
+    field_scale_t: float = DEFAULT_FIELD_SCALE_T,
 ) -> tuple[ConstraintPair, ...]:
     """Return this fixture's pairs, with or without the flux-level row.
 
@@ -265,6 +275,7 @@ def _certificate_pairs(
         level_point=context["axis_point"],
         level_target=jnp.asarray((context["level_target_wb"],)),
         pitch=context["pitch"],
+        field_scale_t=field_scale_t,
         initial_field_t=initial_field_t,
         initial_level_wb=initial_level_wb,
     )
@@ -303,6 +314,78 @@ def _augmented_system(
     )
 
 
+def _enum_names(enum: type, values: Any) -> list[str | None]:
+    names = {int(member): member.name for member in enum}
+    return [names.get(int(value)) for value in np.asarray(values).reshape(-1)]
+
+
+def _newton_history(history: Any) -> dict[str, Any]:
+    """Read the per-step record the Newton-Krylov solve already returns.
+
+    One row per attempted Newton promotion: the relative residual before and
+    after the accepted step, the Krylov residual reduction achieved beside the
+    tolerance it was asked for, the line-search backtrack count, and the route
+    that decided the promotion.  ``trace`` is the relative residual at every map
+    evaluation, with NaN where the evaluation was a tangent pass.  Unexecuted
+    rows keep their NaN and -1 padding, so a reader sees the budget unspent.
+    """
+
+    def array(value: Any) -> np.ndarray:
+        return np.asarray(value)
+
+    return {
+        "attempted_newton_promotions": int(array(history.attempted_newton_promotions)),
+        "accepted_newton_promotions": int(array(history.accepted_newton_promotions)),
+        "converged": bool(array(history.converged)),
+        "termination_reason": _enum_names(
+            fixed_point.FixedPointTerminationReason, history.termination_reason
+        )[0],
+        "terminal_relative_residual": float(array(history.residual)),
+        "relative_residual_before": array(history.inner_iteration_residuals_before),
+        "relative_residual_after": array(history.inner_iteration_residuals_after),
+        "proposed_step_norm": array(history.inner_iteration_proposed_step_norms),
+        "krylov_residual_achieved": array(history.inner_iteration_krylov_reductions),
+        "krylov_residual_tolerance": array(history.inner_iteration_krylov_tolerances),
+        "krylov_qualification": _enum_names(
+            fixed_point.KrylovActionQualification,
+            history.inner_iteration_krylov_qualifications,
+        ),
+        "decision": _enum_names(
+            fixed_point.InnerIterationDecision, history.inner_iteration_decisions
+        ),
+        "applied_factor": array(history.inner_iteration_applied_factors),
+        "model_error_fraction": array(history.inner_iteration_model_error_fractions),
+        "step_cap_activations": array(history.inner_iteration_step_cap_activations),
+        "promotion_backtrack_counts": array(history.promotion_backtrack_counts),
+        "promotion_recovery_activations": array(history.promotion_recovery_activations),
+        "row_jvp_projections": array(history.row_jvp_projections),
+        "trace": array(history.trace),
+    }
+
+
+def _seed_level_offset_wb(context: dict[str, Any], seed: np.ndarray) -> dict[str, Any]:
+    """Return the level target less the seed's own reading at the level point.
+
+    The level column adds a uniform offset to every target, so starting it at
+    this difference puts the level row inside its per-trip cap from the first
+    step instead of leaving the cap to walk it there.
+    """
+    reading = float(
+        np.asarray(
+            constraint_module._mesh_carried_point_flux(
+                context["profile"],
+                jnp.asarray(seed, dtype=jnp.float64),
+                jnp.asarray(context["axis_point"][0], dtype=jnp.float64),
+            )
+        )
+    )
+    return {
+        "seed_reading_wb": reading,
+        "level_target_wb": context["level_target_wb"],
+        "initial_level_wb": context["level_target_wb"] - reading,
+    }
+
+
 def _solve(
     context: dict[str, Any],
     seed: np.ndarray,
@@ -311,6 +394,7 @@ def _solve(
     trips: int | None = None,
     initial_field_t: Any = None,
     initial_level_wb: Any = None,
+    field_scale_t: float = DEFAULT_FIELD_SCALE_T,
 ) -> tuple[dict[str, Any], np.ndarray]:
     """Solve one control arm and report its readings.
 
@@ -333,6 +417,7 @@ def _solve(
         level=True,
         initial_field_t=initial_field_t,
         initial_level_wb=initial_level_wb,
+        field_scale_t=field_scale_t,
     )
     request = certificate._certificate_solve_request(
         context["profile"],
@@ -428,9 +513,10 @@ def _solve(
             "level_amplitude_wb": level_amplitude,
             "level_target_wb": context["level_target_wb"],
             "field_bound_t": DEFAULT_FIELD_BOUND_T,
-            "field_scale_t": DEFAULT_FIELD_SCALE_T,
+            "field_scale_t": field_scale_t,
             "level_scale_wb": DEFAULT_LEVEL_SCALE_WB,
             "wall_seconds": perf_counter() - started,
+            "newton_history": _newton_history(equilibrium.fixed_point),
             "topology": topology,
             "state_sha256_binary64": _digest(state),
         },
@@ -1160,6 +1246,110 @@ def control_receipt(
     }
 
 
+def unit_leverage_arm(
+    output_root: Path, figure_path: Path, lane_requirement: str = "h200"
+) -> dict[str, Any]:
+    """Solve the three-column positive control with unit-leverage columns.
+
+    Same fixture, exact clip, displaced seed and solver budget as the banked
+    positive control; the only changes are the field columns normalised to the
+    declared bound and the level column started at the seed's own deficit.  The
+    receipt is written before the panel is drawn and before the warm repeat, so
+    a failure after the solve cannot cost the solve.  The warm repeat runs the
+    identical request once more: the difference between the two walls is the
+    compile and trace the first call carried.
+    """
+    configure_dtypes()
+    configure_persistent_compilation_cache(default_forward_compilation_cache_root())
+    lane = _lane(lane_requirement)
+    previous_mode = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        context = _context("weak-rotation-reactor-static", -110)
+        displaced = _translated_state(context)
+        seed_digest = _digest(displaced)
+        if not seed_digest.startswith(UNIT_LEVERAGE_SEED_DIGEST):
+            raise RuntimeError(
+                f"the displaced seed hashes to {seed_digest}, not the banked "
+                f"{UNIT_LEVERAGE_SEED_DIGEST}"
+            )
+        level = _seed_level_offset_wb(context, displaced)
+        print(f"CENTROID_UNIT_LEVERAGE_START {level}", flush=True)
+        arguments = {
+            "constrained": True,
+            "field_scale_t": DEFAULT_FIELD_BOUND_T,
+            "initial_level_wb": level["initial_level_wb"],
+        }
+        result, state = _solve(context, displaced, **arguments)
+        state_path = output_root / "control-positive-state.npy"
+        output_root.mkdir(parents=True, exist_ok=True)
+        np.save(state_path, np.asarray(state, dtype=np.float64))
+        control = control_receipt(
+            context,
+            arm="positive",
+            constrained=True,
+            lane=lane,
+            displaced=displaced,
+            result=result,
+            state=state,
+            figure=None,
+        )
+        control["terminal_state_path"] = str(state_path)
+        control["unit_leverage"] = {
+            **level,
+            "field_scale_t": DEFAULT_FIELD_BOUND_T,
+            "newton_steps": certificate.recovery.NEWTON_STEPS,
+            "gmres_iterations": certificate.recovery.KRYLOV_ITERATIONS,
+            "solve_wall_seconds_first_call": result["wall_seconds"],
+        }
+        _write_json(output_root / "control-positive.json", control)
+        print(
+            "CENTROID_UNIT_LEVERAGE "
+            f"lane={lane['partition']} "
+            f"centroid_error_pitches={result['centroid_error_pitches']:+.9e} "
+            f"row_scaled_residual_sup={result['row_scaled_residual_sup']:+.9e} "
+            f"level_row_scaled_residual={result['level_row_scaled_residual']:+.9e} "
+            f"terminal_residual={result['terminal_residual']:+.9e} "
+            f"field_t={result['compensating_field_t']} "
+            f"bound_refusal={result['bound_refusal']} "
+            f"qualified={result['qualified']} "
+            f"wall_seconds={result['wall_seconds']:.3f}",
+            flush=True,
+        )
+        topology = result["topology"]
+        control["figure"] = _draw_state(
+            context,
+            state,
+            figure_path,
+            title="three unit-leverage columns on a displaced seed",
+            project_src=(
+                "/nova/figures/centroid-constrained-oracle-solve/unit-leverage/"
+                f"{figure_path.name}"
+            ),
+            topology=topology,
+            contact_rz_m=topology.get("wall_contact_rz_m"),
+        )
+        _write_json(output_root / "control-positive.json", control)
+        warm, _ = _solve(context, displaced, **arguments)
+        control["unit_leverage"]["solve_wall_seconds_warm_call"] = warm["wall_seconds"]
+        control["unit_leverage"]["warm_terminal_residual"] = warm["terminal_residual"]
+        control["unit_leverage"]["compile_and_trace_seconds"] = (
+            result["wall_seconds"] - warm["wall_seconds"]
+        )
+        _write_json(output_root / "control-positive.json", control)
+        print(
+            "CENTROID_UNIT_LEVERAGE_WARM "
+            f"warm_wall_seconds={warm['wall_seconds']:.3f} "
+            f"compile_and_trace_seconds="
+            f"{control['unit_leverage']['compile_and_trace_seconds']:.3f} "
+            f"warm_terminal_residual={warm['terminal_residual']:+.9e}",
+            flush=True,
+        )
+    finally:
+        set_support_clip_mode(previous_mode)
+    return control
+
+
 def control_arm_chunked(
     output_root: Path,
     arm: str,
@@ -1587,7 +1777,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--control-arm", choices=("positive", "negative"))
     parser.add_argument(
         "--control-lane",
-        choices=("h200", "cpu"),
+        choices=("h200", "titan", "cpu"),
         default="h200",
         help="lane the control arm must run on; cpu means one all_debug allocation",
     )
@@ -1615,6 +1805,14 @@ def parse_args() -> argparse.Namespace:
         "--render-control",
         choices=("positive", "negative"),
         help="draw a banked terminal state and record its panel in the receipt",
+    )
+    parser.add_argument(
+        "--unit-leverage",
+        action="store_true",
+        help=(
+            "solve the three-column positive control with columns normalised to "
+            "the declared bound and the level started at the seed's deficit"
+        ),
     )
     parser.add_argument("--merge-controls", action="store_true")
     parser.add_argument("--reread-gauge", action="store_true")
@@ -1716,6 +1914,13 @@ def main() -> None:
             f"png={control['figure']['sha256'][:16]} "
             f"svg={control['figure']['vector_sha256'][:16]}",
             flush=True,
+        )
+        return
+    if arguments.unit_leverage:
+        unit_leverage_arm(
+            arguments.output_root,
+            arguments.figure,
+            arguments.control_lane,
         )
         return
     if arguments.chunked and arguments.control_arm is not None:

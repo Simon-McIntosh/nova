@@ -309,6 +309,58 @@
   "plan_impl_at_dispatch": 0.65,
   "plan_link": null,
   "promoted_revision": "dfcda3dbb1f60fdea76d3625186bc7c9c6e17e41",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 25170,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "unintegrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "dirty": [],
+          "head": "dfcda3dbb1f60fdea76d3625186bc7c9c6e17e41",
+          "integrated_into": "HEAD",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-settle-residual-gate",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-02T16:50:14Z",
+            "session_id": "01a0fbc6-e26d-73b1-bfd4-1bb6226f8bc1",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-settle-residual-gate"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a0fbc6-e26d-73b1-bfd4-1bb6226f8bc1"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-02T16:50:14Z",
+      "session_id": "01a0fbc6-e26d-73b1-bfd4-1bb6226f8bc1",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-settle-residual-gate"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 01a0fbc6-e26d-73b1-bfd4-1bb6226f8bc1"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

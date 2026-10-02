@@ -75,6 +75,13 @@
     <p>The first review (79 of 100) blocked the head because the compacted node rows and the uncompacted edge endpoints used different index spaces. A 13-node tree on the 340-cell rung carried an edge endpoint of 353. The component-count comparison cannot see this. A committed invariant test now asserts that every valid edge endpoint is a valid node row and names the carrier vertex the uncompacted edge named. The re-review scored 96 of 100.</p>
     <p><strong>Cost.</strong> CPU execute grows from 3.3 s at 353 live vertices to 75.8 s at 1089, against compile near 1.4 s. Each sweep visit forms a repeated-neighbour matrix over the fixed edge buffer, so the work grows with vertices times the square of the edge capacity. That is an implementation choice of the vectorised union-find sweep, not a property of contour trees. Figures and logs: <code>/nova/figures/contour-tree-topology-authority/capacity-on-critical-nodes/</code>.</p>
   </section>
+  <section id="virtual-node-typed-outside">
+    <h2>§2 — the virtual outside node is typed, not emitted</h2>
+    <p>Run <code>r-20261002T164903995177-ctta-virtual-node-not-a-critical-point</code> (local lane), merged at <code>e7714e3f2</code>, closes part 1 of followup f-ctta-virtual-node-and-persistence. The sweep's virtual outside node is the sink each region joins on first meeting the wall, and it had been emitted with critical type 0, a minimum.</p>
+    <p>A first attempt removed it, which broke the receipt into a forest and changed the brute-force component counts. It now stays with its arcs, so the node count stays one above the edge count. It is typed <code>CRITICAL_TYPE_OUTSIDE</code> (3), outside the DD 0/1/2 vocabulary, and <code>dd_emittable_nodes()</code> gives the rows a DD <code>contour_tree</code> mapping emits.</p>
+    <p>Each fixture loses exactly that one spurious minimum: the diverted single-null 340-cell certificate goes from 5 to 4, and MAST 27079 row 16 from 22 to 21. The four contour-tree test files pass, 32 tests. The focused test fails at the base source and under the declared mutation, and the review scored 97 of 100.</p>
+    <p>Still open on the followup: §3 and §4 must measure how persistence reduces the remaining piecewise-linear extrema to the analytic axis and X-point. A stray trailing whitespace in <code>edge-invariant-repair/baseline-brute-force.log</code> is also left over.</p>
+  </section>
 </main>
 </body>
 </html>

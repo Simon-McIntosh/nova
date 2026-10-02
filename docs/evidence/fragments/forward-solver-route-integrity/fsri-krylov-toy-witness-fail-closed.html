@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="forward-solver-route-integrity">
+<title>Toy identity witnesses fail closed on any bit-pattern difference — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsri-krylov-toy-witness-fail-closed"
+         data-negative-control-log="none: the four witnesses are scripts under docs/figures, not test files">
+
+  <h2>The four toy identity witnesses compare raw bit patterns and exit nonzero on any difference</h2>
+
+  <p>The witnesses <code>toy_identity.py, toy_self_identity.py, rule_toy_identity.py</code>
+  and <code>exit_toy_identity.py</code> compared fields with
+  <code>np.array_equal(..., equal_nan=True)</code>, which accepts a signed zero against an
+  unsigned zero and two NaNs whose payloads differ, and three of the four counted
+  mismatches without ever exiting nonzero. Each now compares the raw bit pattern of every
+  field — an unsigned view of the same width, with shape and dtype checked first — prints
+  the first differing index with both operand patterns, and exits nonzero on any
+  difference.</p>
+
+  <h3>Defect reproduced before the repair</h3>
+  <p>On this tree's interpreter, <code>np.array_equal(np.array([0.0]), np.array([-0.0]),
+  equal_nan=True)</code> is <strong>True</strong> while their patterns are
+  <code>0x0000000000000000</code> and <code>0x8000000000000000</code>, and
+  <code>array_equal</code> on two NaNs at <code>0x7ff8000000000000</code> and
+  <code>0x7ff8000000000001</code> is also <strong>True</strong>. The old predicate cannot
+  see either difference.</p>
+
+  <h3>Gate</h3>
+  <p>Each of the four witnesses' own comparison function is driven from a scratch script
+  under <code>$TMPDIR</code> over four pairs: identical arrays (equal), 1.0 against 2.0,
+  +0.0 against −0.0, and two NaNs with payloads differing in the last bit. All four
+  witnesses report a difference for the last three and equality for the first —
+  <strong>16 of 16 PASS</strong>, <code>GATE_BITWISE_WITNESSES PASS failures=0</code>,
+  <code>EXIT=0</code>. The same run prints the old predicate accepts the signed-zero and
+  NaN-payload pairs (<code>old_equal_nan_accepts=True</code>), the negative control for
+  the check added here.</p>
+
+  <p>Run end to end, the dense arm of <code>toy_identity.py</code> now prints
+  <code>TOY_BASE bit_identical=6/8</code> and <code>TOY_BASE_FENCED bit_identical=8/8</code>
+  and exits <strong>1</strong> (previously it printed the same counts and exited 0). The two
+  base-arm differences are genuine bit differences in the achieved reduction at
+  <code>size=12, iterations=8</code> (<code>0x3fe6d0b6a44caa97</code> against
+  <code>0x3fe6d0b6a44caa96</code>) and <code>size=3, iterations=8</code>
+  (<code>0x0000000000000000</code> against <code>0x3c81c475d5e81a26</code>).</p>
+
+  <h3>Changed paths</h3>
+  <ul>
+    <li><code>docs/figures/forward-solver-route-integrity/single-site-krylov/toy_identity.py</code></li>
+    <li><code>docs/figures/forward-solver-route-integrity/single-site-krylov/toy_self_identity.py</code></li>
+    <li><code>docs/figures/forward-solver-route-integrity/single-site-krylov/rule_toy_identity.py</code></li>
+    <li><code>docs/figures/forward-solver-route-integrity/single-site-krylov/exit_toy_identity.py</code></li>
+  </ul>
+</article>
+</main>
+</body>
+</html>

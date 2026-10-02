@@ -1,0 +1,27 @@
+mutation: CONTOUR_TREE_FIGURE_POLOIDAL_EDGES=1
+....F                                                                    [100%]
+=================================== FAILURES ===================================
+_______________ test_poloidal_panel_draws_no_lines_between_nodes _______________
+
+    def test_poloidal_panel_draws_no_lines_between_nodes():
+        """Adjacency is carried by the graph, never by a spatial line on the panel."""
+    
+        _, poloidal_panel, _ = _render()
+        dashed = (0.0, (1.0, 1.0))
+        offenders = [
+            line
+            for line in poloidal_panel.lines
+            if line.get_linestyle() in (dashed, "--", "dashed")
+        ]
+>       assert offenders == [], "the panel drew topological adjacency as a spatial line"
+E       AssertionError: the panel drew topological adjacency as a spatial line
+E       assert [<matplotlib....c3dd550>, ...] == []
+E         
+E         Left contains 12 more items, first extra item: <matplotlib.lines.Line2D object at 0x7f4dbc3dcec0>
+E         Use -v to get more diff
+
+tests/test_contour_tree_explanatory_figure.py:127: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_explanatory_figure.py::test_poloidal_panel_draws_no_lines_between_nodes
+1 failed, 4 passed in 79.15s (0:01:19)
+EXIT=1

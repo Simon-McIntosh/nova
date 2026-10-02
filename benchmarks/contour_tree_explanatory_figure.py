@@ -13,10 +13,15 @@ emits for the state's own piecewise-linear hex carrier:
 * the two analytic nulls via the media ``draw_nulls`` vocabulary -- the magnetic
   axis as an O-point and the axis's own saddle as the admitted X-point;
 * every critical node the tree emits, overlaid at its carrier vertex position
-  and marked by critical type, with the tree's edges drawn between them and the
-  private-region wall maximum singled out as its own node;
-* beside the panel, the tree itself as a graph against signed flux level, the
-  critical type carried by the marker and the edges drawn as arcs.
+  and marked by critical type, with the private-region wall maximum singled out
+  as its own node.  No line is drawn between nodes on this panel: the tree's
+  adjacency is a topological relation, not a geometric path, so a straight line
+  between two critical points would read as a field line or a sightline;
+* beside the panel, the tree itself as a graph against signed flux level, which
+  is where the adjacency is carried: the critical type by marker and the edges
+  drawn as arcs.  The virtual outside node is drawn at the level where the
+  outside region joins the tree, so its mesh-padding sentinel never enters the
+  signed-flux axis.
 
 The field is piecewise-linear, so beyond the analytic axis and X-point the tree
 also emits low-persistence maxima, minima and saddles: the discretisation's own
@@ -60,7 +65,14 @@ from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.sources.frame import inside_wall_units
 
 ROOT = Path(__file__).resolve().parents[1]
-FIGURE_ROOT = ROOT / "docs/figures/contour-tree-topology-authority/explanatory"
+FIGURE_DIR_ENV = "CONTOUR_TREE_FIGURE_DIR"
+PLOT_SENTINEL_ENV = "CONTOUR_TREE_FIGURE_SENTINEL"
+POLOIDAL_EDGES_ENV = "CONTOUR_TREE_FIGURE_POLOIDAL_EDGES"
+FIGURE_ROOT = Path(
+    os.environ.get(
+        FIGURE_DIR_ENV, ROOT / "docs/figures/contour-tree-topology-authority/explanatory"
+    )
+)
 FIGURE_STEM = FIGURE_ROOT / "contour-tree-computed"
 FIXTURE = "diverted-single-null-340-cells"
 
@@ -93,8 +105,10 @@ class Node:
     radius: float
     height: float
     psi_wb: float
+    drawn_psi_wb: float
     carrier_vertex: int
     role: str
+    join_level_wb: float | None = None
 
 
 @dataclass(frozen=True)
@@ -191,6 +205,7 @@ def _nodes(mesh, tree) -> tuple[Node, ...]:
 
     wall_rows = [row for row in rows if bool(is_wall[int(node_vertex[row])])]
     wall_row = max(wall_rows, key=psi_of) if wall_rows else -1
+    join_level = psi_of(wall_row) if wall_row >= 0 else None
     outside_rows = [row for row in rows if not bool(carrier_valid[int(node_vertex[row])])]
     if len(outside_rows) != 1:
         raise RuntimeError("expected one positionless outside node, found %d" % len(outside_rows))
@@ -217,6 +232,16 @@ def _nodes(mesh, tree) -> tuple[Node, ...]:
         kind = CRITICAL_NAME[int(critical_type[row])]
         if row == outside_row:
             kind = "outside (virtual)"
+        raw_psi = psi_of(row)
+        drawn_psi = raw_psi
+        join_wb = None
+        if row == outside_row:
+            # The virtual slot's carrier vertex is mesh padding, so its stored
+            # raw psi is a sentinel rather than a flux.  Draw it at the level
+            # where the outside region actually joins the tree -- its wall
+            # contact -- so the sentinel never enters the signed-flux axis.
+            drawn_psi = join_level if join_level is not None else raw_psi
+            join_wb = join_level
         nodes.append(
             Node(
                 row=row,
@@ -224,9 +249,11 @@ def _nodes(mesh, tree) -> tuple[Node, ...]:
                 kind=kind,
                 radius=radius,
                 height=height,
-                psi_wb=psi_of(row),
+                psi_wb=raw_psi,
+                drawn_psi_wb=drawn_psi,
                 carrier_vertex=vertex,
                 role=role,
+                join_level_wb=join_wb,
             )
         )
     return tuple(nodes)
@@ -290,7 +317,7 @@ def _node_mark(node):
     return CRITICAL_MARKER[node.critical_type], NODE_COLOR, 5.5
 
 
-def _draw_poloidal(figure, state: State) -> None:
+def _draw_poloidal(figure, state: State):
     wall_units = (state.wall_unit,)
     r_min, r_max, z_min, z_max = _poloidal_extent(state)
     radius = np.linspace(r_min, r_max, CONTOUR_RADIUS_SAMPLES)
@@ -300,17 +327,22 @@ def _draw_poloidal(figure, state: State) -> None:
     poloidal_axes(panel)
     poloidal.draw_flux_contours(panel, radius, height, field, state.levels, style=INK)
     poloidal.draw_wall(panel, units=wall_units, style=INK)
-    for edge in state.edges:
-        first = _by_row(state, edge.first)
-        second = _by_row(state, edge.second)
-        panel.plot(
-            [first.radius, second.radius],
-            [first.height, second.height],
-            color=EDGE_COLOR,
-            linewidth=1.0,
-            linestyle=(0.0, (1.0, 1.0)),
-            zorder=DEFAULT_INK.zorder_separatrix,
-        )
+    # The tree's adjacency is a topological relation, not a geometric path: a
+    # straight line between two critical points would read as a field line or a
+    # sightline.  It is carried only by the graph panel.  The hook restores the
+    # spatial edges for the negative control that shows the guard fires.
+    if os.environ.get(POLOIDAL_EDGES_ENV) == "1":
+        for edge in state.edges:
+            first = _by_row(state, edge.first)
+            second = _by_row(state, edge.second)
+            panel.plot(
+                [first.radius, second.radius],
+                [first.height, second.height],
+                color=EDGE_COLOR,
+                linewidth=1.0,
+                linestyle=(0.0, (1.0, 1.0)),
+                zorder=DEFAULT_INK.zorder_separatrix,
+            )
     for node in state.nodes:
         if node.role == "magnetic axis" or node.role == "admitted X-point":
             continue
@@ -354,10 +386,25 @@ def _draw_poloidal(figure, state: State) -> None:
             bbox=DEFAULT_INK.label_bbox,
             zorder=DEFAULT_INK.zorder_label,
         )
+    return panel
 
 
-def _draw_graph(figure, state: State) -> None:
-    ordered = sorted(state.nodes, key=lambda node: (-node.psi_wb, node.row))
+def _plotted_level(node):
+    """Return the signed-flux level at which a node is drawn.
+
+    The virtual outside node's stored raw psi is mesh-padding sentinel, not a
+    flux, so the node is drawn at the level where the outside region joins the
+    tree, its wall contact.  The hook restores the sentinel for the negative
+    control.
+    """
+
+    if os.environ.get(PLOT_SENTINEL_ENV) == "1":
+        return node.psi_wb
+    return node.drawn_psi_wb
+
+
+def _draw_graph(figure, state: State):
+    ordered = sorted(state.nodes, key=lambda node: (-_plotted_level(node), node.row))
     rank = {}
     for position, node in enumerate(ordered):
         rank[node.row] = float(position)
@@ -368,12 +415,26 @@ def _draw_graph(figure, state: State) -> None:
     panel.tick_params(labelsize=LABEL_FONTSIZE)
     panel.set_xlabel("node rank (descending sigma*psi)", fontsize=LABEL_FONTSIZE)
     panel.set_ylabel("signed flux sigma*psi [Wb]", fontsize=LABEL_FONTSIZE)
+    levels = [_plotted_level(node) for node in state.nodes]
+    span = max(levels) - min(levels)
+    pad = 0.10 * span if span > 0.0 else 1.0e-3
+    x_limits = (-0.5, max(0.5, len(state.nodes) - 0.5))
+    y_limits = (min(levels) - pad, max(levels) + pad)
+    panel.set_xlim(*x_limits)
+    panel.set_ylim(*y_limits)
+
+    def to_fraction(x_value, y_value):
+        x_fraction = (x_value - x_limits[0]) / (x_limits[1] - x_limits[0])
+        y_fraction = (y_value - y_limits[0]) / (y_limits[1] - y_limits[0])
+        return x_fraction, y_fraction
+
     for edge in state.edges:
         first = _by_row(state, edge.first)
         second = _by_row(state, edge.second)
         patch = FancyArrowPatch(
-            (rank[first.row], first.psi_wb),
-            (rank[second.row], second.psi_wb),
+            to_fraction(rank[first.row], _plotted_level(first)),
+            to_fraction(rank[second.row], _plotted_level(second)),
+            transform=panel.transAxes,
             arrowstyle="-",
             connectionstyle="arc3,rad=0.18",
             color=EDGE_COLOR,
@@ -385,7 +446,7 @@ def _draw_graph(figure, state: State) -> None:
         marker, color, size = _node_mark(node)
         panel.plot(
             rank[node.row],
-            node.psi_wb,
+            _plotted_level(node),
             marker=marker,
             markersize=size,
             markerfacecolor="none",
@@ -398,13 +459,13 @@ def _draw_graph(figure, state: State) -> None:
         (state.axis_row, "axis"),
         (state.xpoint_row, "X-point"),
         (state.wall_row, "wall maximum"),
-        (state.outside_row, "outside"),
+        (state.outside_row, "outside (wall contact)"),
     ]
     for row, label in names:
         node = _by_row(state, row)
         panel.annotate(
             label,
-            xy=(rank[node.row], node.psi_wb),
+            xy=(rank[node.row], _plotted_level(node)),
             xytext=(6, 6),
             textcoords="offset points",
             fontsize=LABEL_FONTSIZE,
@@ -412,6 +473,7 @@ def _draw_graph(figure, state: State) -> None:
             bbox=DEFAULT_INK.label_bbox,
             zorder=DEFAULT_INK.zorder_label,
         )
+    return panel
 
 
 def _caption(state: State) -> str:
@@ -441,6 +503,12 @@ def _caption(state: State) -> str:
         "the highest-flux wall vertex. These low-persistence piecewise-linear",
         "extrema are drawn rather than hidden, and the critical-point geometry and",
         "selection sections (§3 and §4) must absorb them by persistence and primary selection.",
+        "The poloidal panel draws no lines between nodes: the tree's adjacency is a",
+        "topological relation, not a geometric path, so it is carried only by the",
+        "graph panel, where every node is placed at its signed flux level and the",
+        "edges are drawn as arcs. The virtual outside node is drawn at the level",
+        "where the outside region joins the tree, its wall contact, not at its",
+        "mesh-padding sentinel, which is omitted from the signed-flux axis.",
     ]
     return " ".join(parts)
 

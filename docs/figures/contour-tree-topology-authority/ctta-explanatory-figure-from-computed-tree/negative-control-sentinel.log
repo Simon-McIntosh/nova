@@ -1,0 +1,22 @@
+mutation: CONTOUR_TREE_FIGURE_SENTINEL=1
+...F.                                                                    [100%]
+=================================== FAILURES ===================================
+________________ test_graph_omits_the_virtual_outside_sentinel _________________
+
+    def test_graph_omits_the_virtual_outside_sentinel():
+        """The graph's flux axis spans physical levels, not the outside sentinel."""
+    
+        state, _, graph_panel = _render()
+        outside = figure._by_row(state, state.outside_row)
+        assert outside.psi_wb < -0.5  # the padded carrier emits a sentinel
+        assert abs(outside.drawn_psi_wb) < 0.02  # the plotted level is a real flux
+        low, high = graph_panel.get_ylim()
+>       assert low > -0.05, "the sentinel entered the signed-flux axis"
+E       AssertionError: the sentinel entered the signed-flux axis
+E       assert np.float64(-1.1082784774243604) > -0.05
+
+tests/test_contour_tree_explanatory_figure.py:114: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_explanatory_figure.py::test_graph_omits_the_virtual_outside_sentinel
+1 failed, 4 passed in 81.42s (0:01:21)
+EXIT=1

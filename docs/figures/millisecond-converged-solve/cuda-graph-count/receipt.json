@@ -3,6 +3,10 @@
   "measurement": "CUDA executable-graph lifetime across distinct compiled programs",
   "revision": "82f26d0ac6984782693e7e48d06926a16664144f",
   "analysis_revision": "a9c29fa75a5a09d12fa6a259bdfa4789c7dda902",
+  "analysis_revision_status": "post-hoc counting result withdrawn",
+  "verdict": "no_growth_observed",
+  "release_established": false,
+  "verdict_source": "job 1280456 stdout at revision 82f26d0ac6984782693e7e48d06926a16664144f",
   "instrument": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series/docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py",
   "working_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series",
   "programs": 20,
@@ -2334,7 +2338,9 @@
         }
       ],
       "alive_executable_graphs_after_cache_clear": 0,
-      "alive_executable_graphs_after_process_settle": 0
+      "alive_executable_graphs_after_process_settle": 0,
+      "post_hoc_release_reading_status": "withdrawn",
+      "post_hoc_release_reading_reason": "The zero is the first destruction event in the drop window, ordinary per-execution churn rather than a settled reread; it conflicts with job 1280456 stdout, which reported 2 alive after drop."
     },
     {
       "arm": "command_buffers_disabled",
@@ -2574,14 +2580,25 @@
     }
   ],
   "summary": {
-    "verdict": "executable_scoped_not_process_cumulative",
+    "verdict": "no_growth_observed",
     "initial_alive_executable_graphs": 1,
     "final_alive_executable_graphs": 1,
     "peak_alive_executable_graphs": 1,
     "transient_peak_alive_executable_graphs": 2,
     "growth_across_program_ladder": 0,
+    "programs_compiled": 20,
+    "alive_executable_graphs_after_drop": 2,
+    "graphs_released_after_drop": -1,
+    "disabled_control_maximum": 0,
+    "release_established": false
+  },
+  "withdrawn_post_hoc_analysis": {
+    "analysis_revision": "a9c29fa75a5a09d12fa6a259bdfa4789c7dda902",
+    "verdict": "executable_scoped_not_process_cumulative",
+    "verdict_status": "withdrawn",
     "alive_executable_graphs_after_drop": 0,
     "graphs_released_after_drop": 1,
-    "disabled_control_maximum": 0
+    "graphs_released_after_drop_status": "withdrawn",
+    "reason": "The --analyze-existing pass changed the counting logic and selected the first destruction event in the before_drop/after_drop window. That event is ordinary per-execution churn, not a settled post-drop count, and its result contradicts job 1280456 stdout."
   }
 }

@@ -6,7 +6,7 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="mcs-alive-graph-count-series">
   <meta name="plan-title" content="CUDA executable-graph lifetime across distinct programs">
-  <meta name="plan-summary" content="The prior release claim is withdrawn: a fresh no-program settled-reread marker observed no XLA count before itself, so release remains unmeasured.">
+  <meta name="plan-summary" content="Job 1280456 observed no growth across twenty programs; its post-drop reading was 2 and release was not established. Later release analysis is withdrawn.">
   <meta name="plan-evidence-for" content="millisecond-converged-solve">
   <title>CUDA executable-graph lifetime | nova</title>
 </head>
@@ -19,18 +19,23 @@
   </header>
 
   <section id="alive-graph-count-series">
-    <h2>Release remains unmeasured</h2>
-    <p>The original twenty-program run held one alive graph at every completed-program marker, but
-    its claimed post-drop zero came from a later parser's first destruction event rather than a
-    settled observation. That release claim is withdrawn.</p>
+    <h2>Twenty-program result and release reading</h2>
+    <p>Titan job <code>1280456</code> at revision <code>82f26d0a</code> reported
+    <code>no_growth_observed</code>: the alive count was 1 at program 1 and 1 at program 20 across
+    20 distinct programs. Its own output reported 2 alive after dropping the handles and
+    <code>graphs_released_after_drop</code> −1. The disabled-command-buffer control reported 0.
+    Release was not established by this job.</p>
+    <p>A later <code>--analyze-existing</code> pass at <code>a9c29fa7</code> changed the counting
+    logic and reported after-drop 0, released 1, and
+    <code>executable_scoped_not_process_cumulative</code>. Those post-hoc values are withdrawn:
+    the pass chose the first destruction event in the drop interval, which was ordinary execution
+    churn, not a settled reading. The receipt preserves these values as withdrawn and uses the
+    Titan job's own <code>no_growth_observed</code> result as its active verdict.</p>
     <p>Fresh Titan job <code>1280468</code>, running commit <code>021e72442</code>, emitted
     <code>before_drop</code>, dropped ten handles, cleared caches, synchronized, executed zero
-    programs, then emitted <code>settled_reread</code>. No XLA count appeared between those markers.
-    The next destruction count came only after the marker at process teardown, so the instrument
-    failed without a fresh receipt or a release verdict. Job <code>1280456</code> itself reported
-    <code>no_growth_observed</code> with after-drop count 2 and released −1; the later analysis
-    reported after-drop 0 and released 1. Those historical results conflict and are not a basis for
-    a production repair.</p>
+    programs, then emitted <code>settled_reread</code>. XLA emitted no count between those markers;
+    the next count was logged at process teardown. The instrument therefore produced no settled
+    count or verdict. In these runs, XLA logs a count only on a graph lifecycle event.</p>
     <p>A successor needs an on-demand runtime count query that can log after synchronization without
     dispatching a graph, followed by a completed two-arm job.</p>
   </section>

@@ -9,10 +9,87 @@
       6.2,
       0.0
     ],
+    "gradient_at_axis_wb_per_m": [
+      0.0,
+      0.0
+    ],
     "passed": true,
     "x_point_count": 0
   },
   "analytic_x_points_rz_m": [],
+  "array_diagnostics": {
+    "contour_crossings_m": {
+      "analytic": {
+        "midplane_level_20_wb": [
+          4.592016013528529,
+          7.465156177166999
+        ],
+        "vertical_at_r_6_2_level_20_wb": [
+          -2.7844945413679265,
+          2.7844945413679265
+        ]
+      },
+      "converged": {
+        "midplane_level_20_wb": [
+          4.735344959086402,
+          7.417543778647776
+        ],
+        "vertical_at_r_6_2_level_20_wb": [
+          -2.2424297313399864,
+          2.242429731391537
+        ]
+      },
+      "earlier": {
+        "midplane_level_20_wb": [
+          4.6351088587015274,
+          7.451422979896934
+        ],
+        "vertical_at_r_6_2_level_20_wb": [
+          -2.593170981351438,
+          2.59317098121258
+        ]
+      }
+    },
+    "converged": {
+      "most_negative_sample_rz_m": [
+        6.493222053721063,
+        3.2553152261114033
+      ],
+      "sample_max_wb": 0.09455298383450383,
+      "sample_min_wb": -21.64092530837032,
+      "sample_rms_wb": 12.634922721788886,
+      "wall_max_wb": -4.5016782914842866,
+      "wall_min_wb": -20.61168195920584,
+      "wall_rms_wb": 14.89750681206374
+    },
+    "converged_contact_difference_wb": -4.5016782914842866,
+    "converged_to_earlier_sample_rms_ratio": 3.4122354987095083,
+    "earlier": {
+      "most_negative_sample_rz_m": [
+        6.348648428944716,
+        -3.5057240896584343
+      ],
+      "sample_max_wb": 0.030058619334631942,
+      "sample_min_wb": -6.936383925996028,
+      "sample_rms_wb": 3.702828461449204,
+      "wall_max_wb": -1.2417666755554964,
+      "wall_min_wb": -6.624405018394082,
+      "wall_rms_wb": 4.497554301451193
+    },
+    "earlier_contact_difference_wb": -1.2417666755554964,
+    "seed": {
+      "most_negative_sample_rz_m": [
+        3.5355060125551305,
+        0.7220621952528967
+      ],
+      "sample_max_wb": 1.6580333515093244,
+      "sample_min_wb": -0.7287497106300691,
+      "sample_rms_wb": 0.691495943994265,
+      "wall_max_wb": 1.3786728915761923,
+      "wall_min_wb": -0.7270575408987927,
+      "wall_rms_wb": 0.7689133176248859
+    }
+  },
   "case": "weak-rotation-reactor-static",
   "compensator": {
     "level_wb": -13.498416329636555,

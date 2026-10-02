@@ -452,6 +452,7 @@ class FixedPointResult(NamedTuple):
     active_set_cycle_damping_activations: jax.Array | int = -1
     frozen_partition_reads: jax.Array | int = 0
     frozen_partition_refreezes: jax.Array | int = 0
+    live_read_steps: jax.Array | int = 0
     inner_iteration_residuals_before: jax.Array | float = float("nan")
     inner_iteration_residuals_after: jax.Array | float = float("nan")
     inner_iteration_proposed_step_norms: jax.Array | float = float("nan")
@@ -4302,6 +4303,7 @@ def _newton_krylov_inner(
 def _active_set_newton_krylov(
     initial: jax.Array,
     *,
+    map_fn: Callable[[jax.Array], jax.Array],
     newton_steps: int,
     gmres_iterations: int,
     warmup: int,
@@ -4613,24 +4615,6 @@ def _active_set_newton_krylov(
         )
         selected_finite = jnp.where(retain_incoming, True, selected_finite)
         selected_difference = jnp.where(retain_incoming, 0, selected_difference)
-        trajectory_mapped = (
-            shadowed_map_fn(trajectory_state, trajectory_mask)
-            if freeze_topology
-            else selected_mapped
-        )
-        trajectory_residual = _relative_residual(trajectory_mapped, trajectory_state)
-        accept_trajectory = (
-            jnp.asarray(freeze_topology)
-            & (selected_difference == 0)
-            & trajectory_finite
-            & jnp.isfinite(trajectory_residual)
-            & (trajectory_residual <= convergence_tolerance)
-        )
-        selected_state = jnp.where(accept_trajectory, trajectory_state, selected_state)
-        selected_residual = jnp.where(
-            accept_trajectory, trajectory_residual, selected_residual
-        )
-        selected_finite = jnp.where(accept_trajectory, True, selected_finite)
         continue_trajectory = (
             continue_newton_trajectory
             & (selected_difference == 0)
@@ -4887,7 +4871,7 @@ def _active_set_newton_krylov(
             ),
         ),
     )
-    return outer.result._replace(
+    frozen_result = outer.result._replace(
         state=outer.state,
         residual=outer.live_residual,
         attempted_newton_promotions=outer.attempted_promotions,
@@ -4903,6 +4887,42 @@ def _active_set_newton_krylov(
         frozen_partition_reads=jnp.where(freeze_topology, outer.iterations + 1, 0),
         frozen_partition_refreezes=jnp.where(
             freeze_topology, jnp.maximum(outer.iterations - 1, 0), 0
+        ),
+    )
+    if not freeze_topology:
+        return frozen_result
+
+    live_result = _newton_krylov_inner(
+        map_fn,
+        outer.state,
+        newton_steps=newton_steps,
+        gmres_iterations=gmres_iterations,
+        warmup=warmup,
+        relaxation=relaxation,
+        step_cap=step_cap,
+        krylov_condition_limit=krylov_condition_limit,
+        convergence_tolerance=convergence_tolerance,
+        stream_inner_iterations=stream_inner_iterations,
+        model_trust_selection=model_trust_selection,
+        precision=precision,
+    )
+    use_live_fallback = ~outer.converged
+    return frozen_result._replace(
+        state=jnp.where(use_live_fallback, live_result.state, frozen_result.state),
+        residual=jnp.where(
+            use_live_fallback, live_result.residual, frozen_result.residual
+        ),
+        trace=jnp.where(use_live_fallback, live_result.trace, frozen_result.trace),
+        converged=jnp.where(
+            use_live_fallback, live_result.converged, frozen_result.converged
+        ),
+        termination_reason=jnp.where(
+            use_live_fallback,
+            live_result.termination_reason,
+            frozen_result.termination_reason,
+        ),
+        live_read_steps=jnp.where(
+            use_live_fallback, live_result.attempted_newton_promotions, 0
         ),
     )
 
@@ -5054,6 +5074,7 @@ def newton_krylov(
     else:
         result = _active_set_newton_krylov(
             initial,
+            map_fn=map_fn,
             newton_steps=newton_steps,
             gmres_iterations=gmres_iterations,
             warmup=warmup,

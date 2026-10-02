@@ -487,6 +487,32 @@
   "plan_impl_at_dispatch": 0.65,
   "plan_link": null,
   "promoted_revision": "10946c5974bb97765b1e3a4f0a0091818bf1414a",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 42479941,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T080506940179-fsri-lane-timeout-equals-form-test",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-timeout-equals-form-test"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

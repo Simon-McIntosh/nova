@@ -1,0 +1,27 @@
+{
+  "revision": "3a4faa65c247e908edc68305bf252b8a3180b1b1",
+  "residual_tolerance": 1e-06,
+  "wall_flux": 1.5103766005723585,
+  "picard": {
+    "residual": 2.1256680256235924e-08,
+    "converged": false,
+    "axis": [
+      1.0138125242670817,
+      1.6391910425447234e-07
+    ],
+    "axis_flux": 2.0784759132715243,
+    "boundary_flux": 1.5405746725581593,
+    "trace_points": 480
+  },
+  "newton_krylov": {
+    "residual": 1.2828487222983532e-11,
+    "converged": true,
+    "axis": [
+      1.0138125413840287,
+      -3.8369757568922906e-15
+    ],
+    "axis_flux": 2.0784759944150086,
+    "boundary_flux": 1.5405747196561959,
+    "trace_points": 80
+  }
+}

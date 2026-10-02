@@ -1,0 +1,29 @@
+<!-- fragment: fsri-krylov-capacity-scan-symbol-name -->
+<section id="fsri-krylov-capacity-scan-symbol-name">
+<h3>Capacity-scan source constant named by its mechanism</h3>
+
+<p><code>diverted_trace.py</code> held <code>SLICE1_SOURCE</code>, a
+stage-numbered constant whose value is the path to the capacity-scan revision
+of <code>nova.equilibrium.fixed_point</code>. It is renamed to
+<code>CAPACITY_SCAN_SOURCE</code> at its definition and both uses (the
+<code>PREMERGE_ROOT</code> derivation and the <code>served</code> mapping for
+the <code>slice1</code> arm), together with the adjacent comment, so the symbol
+states the mechanism the arm selects. The path, the served module and the arm
+labels are unchanged.</p>
+
+<table>
+  <thead><tr><th>measure</th><th>result</th></tr></thead>
+  <tr><th scope="row">SLICE1 census</th>
+    <td><code>grep -rn SLICE1 benchmarks/ tests/ nova/ scripts/ docs/figures/</code>
+      returns nothing (<code>grep_exit=1</code>)</td></tr>
+  <tr><th scope="row">compile</th>
+    <td><code>py_compile diverted_trace.py</code> under the shared interpreter
+      exits 0</td></tr>
+  <tr><th scope="row">naming checks 1, 2a, 2b, 3</th>
+    <td>all report no hit on the file (<code>check*_exit=1</code> each)</td></tr>
+</table>
+
+<p>Commit <code>3236cac961a4bd546f54ab76e16be611f3607cb3</code> carries the
+rename (5 insertions, 5 deletions; one file). Gate log:
+<code>runs/r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name/gate.log</code>.</p>
+</section>

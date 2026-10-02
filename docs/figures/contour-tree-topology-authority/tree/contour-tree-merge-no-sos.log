@@ -1,0 +1,70 @@
+revision=mutated-no-simulation-of-simplicity tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_contour_tree_merge.py::test_plateau_uses_vertex_order_as_simulation_of_simplicity -vv
+measurement_module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree/nova/equilibrium/contour_tree.py
+measurement_cwd=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 1 item
+
+tests/test_contour_tree_merge.py::test_plateau_uses_vertex_order_as_simulation_of_simplicity FAILED [100%]
+
+=================================== FAILURES ===================================
+__________ test_plateau_uses_vertex_order_as_simulation_of_simplicity __________
+
+    def test_plateau_uses_vertex_order_as_simulation_of_simplicity():
+        """Equal-valued adjacent vertices retain one deterministic maximum."""
+    
+        result = _tree([3.0, 3.0, 1.0], [(0, 1), (1, 2)])
+    
+>       assert _nodes(result) == {0: 2, 1: 1, 2: 0}
+E       assert {0: 2, 1: 2, 2: 0} == {0: 2, 1: 1, 2: 0}
+E         
+E         Common items:
+E         {0: 2, 2: 0}
+E         Differing items:
+E         {1: 2} != {1: 1}
+E         
+E         Full diff:
+E           {
+E               0: 2,
+E         -     1: 1,
+E         ?        ^
+E         +     1: 2,
+E         ?        ^
+E               2: 0,
+E           }
+
+tests/test_contour_tree_merge.py:91: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+01:13:15 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+=============================== warnings summary ===============================
+tests/test_contour_tree_merge.py::test_plateau_uses_vertex_order_as_simulation_of_simplicity
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/ops/scatter.py:105: FutureWarning: scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_merge.py::test_plateau_uses_vertex_order_as_simulation_of_simplicity - assert {0: 2, 1: 2, 2: 0} == {0: 2, 1: 1, 2: 0}
+  
+  Common items:
+  {0: 2, 2: 0}
+  Differing items:
+  {1: 2} != {1: 1}
+  
+  Full diff:
+    {
+        0: 2,
+  -     1: 1,
+  ?        ^
+  +     1: 2,
+  ?        ^
+        2: 0,
+    }
+========================= 1 failed, 1 warning in 8.35s =========================
+EXIT=1

@@ -1,0 +1,64 @@
+<section id="fsa-production-route-receipt-revision">
+  <h3>Production-route receipts now stamp their source revision</h3>
+  <p><strong>2026-10-02 worker landing.</strong> Every benchmark that writes a
+  production-route receipt now records a <code>source_revision</code> field —
+  the 40-hex <code>git rev-parse HEAD</code> of the tree that produced it — in
+  the shape used by
+  <code>benchmarks/centroid_constrained_fixture_receipt.py:_revision</code>.
+  Each writer exposes a cheap, testable
+  <code>stamp_source_revision(payload)</code> seam (the pattern of
+  <code>benchmarks/sol_ledger_current_census.py:stamp_revision</code>) and its
+  payload builder routes through it. This answers the triage sweep that found
+  four drivers mentioning production-route receipts but carrying no revision at
+  all.</p>
+
+  <p><strong>Per driver.</strong>
+  <code>benchmarks/solovev_certificate.py</code> already stamped its certificate
+  writers but not the <code>_production_solver_receipt</code> payload builder;
+  it now does. <code>benchmarks/fieldnull_production_route.py</code> (schema
+  <code>nova.fieldnull-production-route</code>) stamps both its
+  <code>measure()</code> and <code>assemble()</code> receipts.
+  <code>benchmarks/plasma_cell_production_ladder.py</code> stamps its assembled
+  <code>production-route-ladder</code> receipt.
+  <code>benchmarks/exact_placement_discriminator.py</code> stamps each arm
+  summary and the final <code>discriminator-receipt.json</code>, and
+  <code>benchmarks/carrier_step_attribution.py</code> (receipt carries
+  <code>verdict.production_route</code>) stamps its receipt alongside the
+  existing <code>source_commit</code>.</p>
+
+  <p><strong>The committed receipt.</strong> The triage row claimed
+  <code>docs/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json</code>
+  already carried <code>source_revision</code>. It did not: at the base revision
+  it carried <code>revision</code> and no <code>source_revision</code>
+  (<code>grep -l</code> over the directory matched sibling receipts only). Its
+  writer <code>measure.py</code> is outside this node's scope and no receipt was
+  regenerated, so the provenance field was added to the committed artifact
+  carrying the same revision it already records
+  (<code>8977ecd3b76367e334bf24b33d5b9e3a27640c32</code>).</p>
+
+  <p><strong>Gate.</strong>
+  <code>JAX_PLATFORMS=cpu pytest tests/test_production_solver_receipt_trip_alignment.py</code>
+  in place on the fleet allocation (shared interpreter, no <code>uv</code> on the
+  compute node, worktree on <code>PYTHONPATH</code>). Base arm (HEAD test file)
+  <code>9 passed, 5 warnings in 34.52s</code> <code>EXIT=0</code>; after arm
+  <code>15 passed in 33.67s</code> <code>EXIT=0</code>; added failures
+  <code>0</code>. The gate drives each writer's own receipt payload builder on
+  minimal synthetic input — the certificate's
+  <code>_production_solver_receipt</code>, the fieldnull assembler,
+  the plasma-ladder assembler, and the carrier and discriminator receipt
+  builders — so removing the stamp from any one writer fails it.</p>
+
+  <p><strong>Negative control.</strong> Declared mutation: deleting
+  <code>source_revision</code> from the payload builder. Applied one writer at a
+  time in a scratch copy of HEAD (unmutated control <code>15 passed</code>,
+  <code>EXIT=0</code>). Each removal gives <code>EXIT=1</code> with exactly the
+  matching test id failing:
+  <code>solovev_certificate.stamp_source_revision</code> &rarr;
+  <code>test_production_solver_receipt_builder_stamps_source_revision</code>,
+  <code>fieldnull_production_route.assemble</code> &rarr;
+  <code>test_fieldnull_receipt_builder_stamps_source_revision</code>,
+  <code>plasma_cell_production_ladder.assemble</code> &rarr;
+  <code>test_plasma_ladder_receipt_builder_stamps_source_revision</code>,
+  <code>carrier</code> and discriminator <code>receipt_payload</code> &rarr; their
+  own builder tests.</p>
+</section>

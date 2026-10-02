@@ -224,35 +224,6 @@ def response(context, centroid_receipt):
         ]
     )
 
-    def support_read(psi, requested_class):
-        moments, amplitude = operator.normalised_current_moments(
-            psi, target, requested_class
-        )
-        mask = _array(moments.cell_current) != 0.0
-        return {
-            "active_cell_indices": np.flatnonzero(mask).tolist(),
-            "active_cell_count": int(np.count_nonzero(mask)),
-            "normalisation_amplitude": float(amplitude),
-            "normalised_current_a": float(np.sum(_array(moments.cell_current))),
-        }
-
-    support = {}
-    for name, requested_class in (
-        ("row_native", None),
-        ("requested_limited", REQUESTED_CLASS),
-    ):
-        support[name] = {"base": support_read(state, requested_class), "columns": []}
-        for index in range(3):
-            support[name]["columns"].append(
-                {
-                    "minus": support_read(
-                        state - step_t * columns[:, index], requested_class
-                    ),
-                    "plus": support_read(
-                        state + step_t * columns[:, index], requested_class
-                    ),
-                }
-            )
     diagnostics_receipt = {
         "state_digest": _digest(np.asarray(state)),
         "column_order": ["vertical_t", "radial_t", "level_wb"],
@@ -288,7 +259,7 @@ def response(context, centroid_receipt):
         "requested_limited_jvp_m_per_unit": requested_direct.tolist(),
         "requested_limited_central_m_per_unit": requested_finite.tolist(),
         "historical_radial_response_m_per_t": 1.62922526181,
-        "active_support_and_normalisation": support,
+        "active_support_and_normalisation": "pending",
         "row_source": (
             "nova/equilibrium/constraint.py::CurrentCentroidConstraint.observed"
         ),
@@ -301,6 +272,54 @@ def response(context, centroid_receipt):
         f"wrote {diagnostics_path}; {direct.tolist()} versus {finite.tolist()}",
         flush=True,
     )
+    print("waiting for committed derivative values before support census", flush=True)
+    deadline = time.time() + 8 * 60
+    while not (OUTPUT / "continue-support").exists():
+        if (OUTPUT / "stop-response").exists() or time.time() > deadline:
+            raise SystemExit(2)
+        time.sleep(1)
+
+    def support_values(requested_class):
+        def read(psi):
+            moments, amplitude = operator.normalised_current_moments(
+                psi, target, requested_class
+            )
+            return moments.cell_current, amplitude
+
+        return jax.jit(read)
+
+    support = {}
+    for name, requested_class in (
+        ("row_native", None),
+        ("requested_limited", REQUESTED_CLASS),
+    ):
+        read = support_values(requested_class)
+
+        def support_read(psi):
+            current, amplitude = read(psi)
+            current = _array(current)
+            mask = current != 0.0
+            return {
+                "active_cell_indices": np.flatnonzero(mask).tolist(),
+                "active_cell_count": int(np.count_nonzero(mask)),
+                "normalisation_amplitude": float(amplitude),
+                "normalised_current_a": float(np.sum(current)),
+            }
+
+        support[name] = {"base": support_read(state), "columns": []}
+        for index in range(3):
+            support[name]["columns"].append(
+                {
+                    "minus": support_read(state - step_t * columns[:, index]),
+                    "plus": support_read(state + step_t * columns[:, index]),
+                }
+            )
+        print(f"support census completed for {name}", flush=True)
+    diagnostics_receipt["active_support_and_normalisation"] = support
+    diagnostics_path.write_text(
+        json.dumps(diagnostics_receipt, indent=2, allow_nan=False) + "\n"
+    )
+    print("wrote completed derivative receipt", flush=True)
     print("waiting for committed derivative receipt before inverse", flush=True)
     deadline = time.time() + 8 * 60
     while not (OUTPUT / "continue-response").exists():

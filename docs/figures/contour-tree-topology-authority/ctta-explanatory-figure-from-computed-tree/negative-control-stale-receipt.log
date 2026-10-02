@@ -1,0 +1,38 @@
+mutation: stale receipt
+.FF..                                                                    [100%]
+=================================== FAILURES ===================================
+_______________ test_committed_receipt_matches_the_computed_tree _______________
+
+    def test_committed_receipt_matches_the_computed_tree():
+        """The committed receipt is present and agrees with the tree the figure draws."""
+    
+        receipt_path = figure.FIGURE_STEM.with_suffix(".json")
+        assert receipt_path.is_file(), "the committed receipt is missing"
+        payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+        state = figure.build_state()
+        assert payload["fixture"] == state.fixture
+>       assert payload["node_count"] == len(state.nodes)
+E       AssertionError: assert 99 == 13
+E        +  where 13 = len((Node(row=0, critical_type=2, kind='maximum', radius=1.5092364983201616, height=-1.2056176907721234, psi_wb=0.00095729...awn_psi_wb=-0.002665267778667643, carrier_vertex=174, role='piecewise-linear critical point', join_level_wb=None), ...))
+E        +    where (Node(row=0, critical_type=2, kind='maximum', radius=1.5092364983201616, height=-1.2056176907721234, psi_wb=0.00095729...awn_psi_wb=-0.002665267778667643, carrier_vertex=174, role='piecewise-linear critical point', join_level_wb=None), ...) = State(fixture='diverted-single-null-340-cells', sigma=1, wall=array([[ 1.33884987, -1.11455091],\n       [ 1.31362975, ...7 ,\n        0.00276829,  0.00374588,  0.00472347,  0.00570106]), axis_row=2, xpoint_row=1, wall_row=11, outside_row=12).nodes
+
+tests/test_contour_tree_explanatory_figure.py:83: AssertionError
+______________________ test_committed_figure_files_exist _______________________
+
+    def test_committed_figure_files_exist():
+        """The rendered PNG and SVG are present and non-empty."""
+    
+        for suffix in (".png", ".svg"):
+            path = figure.FIGURE_STEM.with_suffix(suffix)
+>           assert path.is_file(), "the committed figure %s is missing" % path.name
+E           AssertionError: the committed figure contour-tree-computed.png is missing
+E           assert False
+E            +  where False = is_file()
+E            +    where is_file = PosixPath('/tmp/reckon-crew-scratch/r-20261002T164824351467-ctta-explanatory-figure-from-computed-tree/stale-receipt-3426709/contour-tree-computed.png').is_file
+
+tests/test_contour_tree_explanatory_figure.py:94: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_explanatory_figure.py::test_committed_receipt_matches_the_computed_tree
+FAILED tests/test_contour_tree_explanatory_figure.py::test_committed_figure_files_exist
+2 failed, 3 passed in 78.15s (0:01:18)
+EXIT=1

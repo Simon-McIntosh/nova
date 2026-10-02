@@ -1,0 +1,252 @@
+{
+  "schema": "nova.contour-tree-explanatory-figure",
+  "version": 2,
+  "fixture": "diverted-single-null-340-cells",
+  "sigma": 1,
+  "flux_units": "Wb",
+  "caption": "Diverted single-null Solovev certificate at its persisted 340-cell rung (fixture diverted-single-null-340-cells). The computed contour tree carries 13 nodes and 12 edges so the node count exceeds the edge count by 1. Two nodes are the analytic nulls: the magnetic-axis maximum and the admitted X-point saddle. The other 11 are piecewise-linear critical points beyond them: 6 piecewise-linear extrema (1 maximum, 5 minima) and 5 further saddles. One of the minima is the positionless virtual outside node the padded carrier emits; the private-region wall maximum is the tree's own node at the highest-flux wall vertex. These low-persistence piecewise-linear extrema are drawn rather than hidden, and the critical-point geometry and selection sections (\u00a73 and \u00a74) must absorb them by persistence and primary selection. The poloidal panel draws no lines between nodes: the tree's adjacency is a topological relation, not a geometric path, so it is carried only by the graph panel, where every node is placed at its signed flux level and the edges are drawn as arcs. The virtual outside node is drawn at the level where the outside region joins the tree, its wall contact, not at its mesh-padding sentinel, which is omitted from the signed-flux axis.",
+  "node_count": 13,
+  "edge_count": 12,
+  "node_count_minus_edge_count": 1,
+  "drawn_carrier_vertices": [
+    0,
+    5,
+    69,
+    89,
+    93,
+    174,
+    305,
+    317,
+    318,
+    335,
+    338,
+    346,
+    353
+  ],
+  "nodes": [
+    {
+      "row": 0,
+      "critical_type": 2,
+      "kind": "maximum",
+      "radius": 1.5092364983201616,
+      "height": -1.2056176907721234,
+      "psi_wb": 0.0009572982203530228,
+      "drawn_psi_wb": 0.0009572982203530228,
+      "carrier_vertex": 0,
+      "role": "piecewise-linear critical point",
+      "join_level_wb": null
+    },
+    {
+      "row": 1,
+      "critical_type": 1,
+      "kind": "saddle",
+      "radius": 1.5292083397583118,
+      "height": -1.0566152705705434,
+      "psi_wb": -9.28600803500046e-06,
+      "drawn_psi_wb": -9.28600803500046e-06,
+      "carrier_vertex": 5,
+      "role": "admitted X-point",
+      "join_level_wb": null
+    },
+    {
+      "row": 2,
+      "critical_type": 2,
+      "kind": "maximum",
+      "radius": 1.785245303894824,
+      "height": 0.07669447404089746,
+      "psi_wb": 0.0057010557384265526,
+      "drawn_psi_wb": 0.0057010557384265526,
+      "carrier_vertex": 69,
+      "role": "magnetic axis",
+      "join_level_wb": null
+    },
+    {
+      "row": 3,
+      "critical_type": 0,
+      "kind": "minimum",
+      "radius": 2.182888438414192,
+      "height": -0.6159677105151242,
+      "psi_wb": -0.006135727633131027,
+      "drawn_psi_wb": -0.006135727633131027,
+      "carrier_vertex": 89,
+      "role": "piecewise-linear critical point",
+      "join_level_wb": null
+    },
+    {
+      "row": 4,
+      "critical_type": 1,
+      "kind": "saddle",
+      "radius": 2.3505045161560387,
+      "height": -0.35159468789012993,
+      "psi_wb": -0.0055685867680650425,
+      "drawn_psi_wb": -0.0055685867680650425,
+      "carrier_vertex": 93,
+      "role": "piecewise-linear critical point",
+      "join_level_wb": null
+    },
+    {
+      "row": 5,
+      "critical_type": 0,
+      "kind": "minimum",
+      "radius": 0.9756170910612476,
+      "height": 0.17379135001703708,
+      "psi_wb": -0.002665267778667643,
+      "drawn_psi_wb": -0.002665267778667643,
+      "carrier_vertex": 174,
+      "role": "piecewise-linear critical point",
+      "join_level_wb": null
+    },
+    {
+      "row": 6,
+      "critical_type": 1,
+      "kind": "saddle",
+      "radius": 1.12423146927194,
+      "height": 0.852225631549496,
+      "psi_wb": -0.0015425436271126747,
+      "drawn_psi_wb": -0.0015425436271126747,
+      "carrier_vertex": 305,
+      "role": "piecewise-linear critical point",
+      "join_level_wb": null
+    },
+    {
+      "row": 7,
+      "critical_type": 0,
+      "kind": "minimum",
+      "radius": 1.2158020611822244,
+      "height": 0.9846965064156045,
+      "psi_wb": -0.0015561411890481769,
+      "drawn_psi_wb": -0.0015561411890481769,
+      "carrier_vertex": 317,
+      "role": "piecewise-linear critical point",
+      "join_level_wb": null
+    },
+    {
+      "row": 8,
+      "critical_type": 1,
+      "kind": "saddle",
+      "radius": 1.2902312140023149,
+      "height": 1.0349458708312338,
+      "psi_wb": -0.0014950808620880912,
+      "drawn_psi_wb": -0.0014950808620880912,
+      "carrier_vertex": 318,
+      "role": "piecewise-linear critical point",
+      "join_level_wb": null
+    },
+    {
+      "row": 9,
+      "critical_type": 1,
+      "kind": "saddle",
+      "radius": 2.187690289193077,
+      "height": 0.6989952828641232,
+      "psi_wb": -0.0051927031173871485,
+      "drawn_psi_wb": -0.0051927031173871485,
+      "carrier_vertex": 335,
+      "role": "piecewise-linear critical point",
+      "join_level_wb": null
+    },
+    {
+      "row": 10,
+      "critical_type": 0,
+      "kind": "minimum",
+      "radius": 2.097214148472903,
+      "height": 0.822869183685854,
+      "psi_wb": -0.005283960526992398,
+      "drawn_psi_wb": -0.005283960526992398,
+      "carrier_vertex": 338,
+      "role": "piecewise-linear critical point",
+      "join_level_wb": null
+    },
+    {
+      "row": 11,
+      "critical_type": 1,
+      "kind": "saddle",
+      "radius": 1.685844039552596,
+      "height": -1.097041507759206,
+      "psi_wb": -0.0016316845707354925,
+      "drawn_psi_wb": -0.0016316845707354925,
+      "carrier_vertex": 346,
+      "role": "private-region wall maximum",
+      "join_level_wb": null
+    },
+    {
+      "row": 12,
+      "critical_type": 0,
+      "kind": "outside (virtual)",
+      "radius": 1.685844039552596,
+      "height": -1.097041507759206,
+      "psi_wb": -1.007007610773198,
+      "drawn_psi_wb": -0.0016316845707354925,
+      "carrier_vertex": 353,
+      "role": "outside node",
+      "join_level_wb": -0.0016316845707354925
+    }
+  ],
+  "edges": [
+    {
+      "first": 1,
+      "second": 2
+    },
+    {
+      "first": 0,
+      "second": 1
+    },
+    {
+      "first": 1,
+      "second": 8
+    },
+    {
+      "first": 12,
+      "second": 3
+    },
+    {
+      "first": 3,
+      "second": 4
+    },
+    {
+      "first": 4,
+      "second": 10
+    },
+    {
+      "first": 5,
+      "second": 11
+    },
+    {
+      "first": 6,
+      "second": 7
+    },
+    {
+      "first": 7,
+      "second": 11
+    },
+    {
+      "first": 8,
+      "second": 6
+    },
+    {
+      "first": 9,
+      "second": 5
+    },
+    {
+      "first": 10,
+      "second": 9
+    }
+  ],
+  "contour_levels_wb": [
+    -0.007007610773198114,
+    -0.0060300210415346785,
+    -0.005052431309871243,
+    -0.004074841578207806,
+    -0.0030972518465443707,
+    -0.002119662114880935,
+    -0.0011420723832174986,
+    0.0,
+    0.0008131070801093727,
+    0.0017906968117728083,
+    0.002768286543436244,
+    0.0037458762750996796,
+    0.004723466006763117,
+    0.0057010557384265526
+  ],
+  "wall_points": 121,
+  "figure": "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png"
+}

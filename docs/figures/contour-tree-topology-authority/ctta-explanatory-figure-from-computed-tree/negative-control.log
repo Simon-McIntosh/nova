@@ -1,0 +1,30 @@
+revision: 5666c8bcc8afc1483a7a7b8fca4ef446a2529b1f
+tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-from-computed-tree
+command: CONTOUR_TREE_FIGURE_DROP_NODE=0 PYTHONPATH=$PWD JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider tests/test_contour_tree_explanatory_figure.py -q
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+______________ test_figure_draws_exactly_the_receipts_valid_nodes ______________
+
+    def test_figure_draws_exactly_the_receipts_valid_nodes():
+        """Count and carrier vertices of the drawn set equal the receipt's valid nodes."""
+    
+        _, tree = _receipt()
+        state = build_state()
+    
+        valid = np.asarray(tree.node_valid)
+        node_vertex = np.asarray(tree.node_vertex)
+        expected = sorted(int(node_vertex[row]) for row in np.flatnonzero(valid))
+        drawn = sorted(int(node.carrier_vertex) for node in state.nodes)
+    
+>       assert len(drawn) == len(expected)
+E       assert 12 == 13
+E        +  where 12 = len([5, 69, 89, 93, 174, 305, ...])
+E        +  and   13 = len([0, 5, 69, 89, 93, 174, ...])
+
+tests/test_contour_tree_explanatory_figure.py:51: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+20:07:30 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_explanatory_figure.py::test_figure_draws_exactly_the_receipts_valid_nodes
+1 failed, 1 passed in 45.01s
+EXIT=1

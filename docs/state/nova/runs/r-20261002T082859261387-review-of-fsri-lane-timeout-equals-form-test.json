@@ -1,0 +1,314 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-terra",
+  "base_sha": "8eece104ab9fe5b2f12652d24b6ab81ab803492b",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 2719232,
+      "cached_input_tokens_cumulative": 2719232,
+      "input_tokens": 2835720,
+      "input_tokens_cumulative": 2835720,
+      "output_tokens": 28134,
+      "output_tokens_cumulative": 28134,
+      "reasoning_output_tokens": 7571,
+      "reasoning_output_tokens_cumulative": 7571
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-02T08:41:22Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T08:29:18Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "gate.log"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T08:59:00.625579+00:00",
+    "horizon_seconds": 1800,
+    "metered": true,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": null,
+    "metered": true,
+    "observed_at": null,
+    "read_at": "2026-10-02T08:29:00Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T08:41:22Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T082859261387-review-of-fsri-lane-timeout-equals-form-test/manifest.md",
+  "member": "disposable-r-20261002T082859261387-review-of-fsri-lane-timeout-equals-form-test",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-fsri-lane-timeout-equals-form-test",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 979,
+          "cached_input_tokens": 295377,
+          "input_tokens": 296358,
+          "output_tokens": 970,
+          "reasoning_output_tokens": 247,
+          "total_tokens": 297328,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the review for r-20261002T080506940179-fsri-lane-timeout-equals-form-test stores a parsed record scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete with status: complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261002T080506940179-fsri-lane-timeout-equals-form-test",
+    "id": "review-of-fsri-lane-timeout-equals-form-test",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": null,
+      "metered": true,
+      "observed_at": null,
+      "read_at": "2026-10-02T08:29:00Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T082859261387-review-of-fsri-lane-timeout-equals-form-test/manifest.md",
+    "negative_control": "",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "30m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T080506940179-fsri-lane-timeout-equals-form-test.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T080506940179-fsri-lane-timeout-equals-form-test.at-1d30b46fafdf4350691f314e39d7e68ed5b6ca18.json"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex-terra",
+    "member": null,
+    "node": "review-of-fsri-lane-timeout-equals-form-test",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T08:29:03.816361+00:00",
+    "score": 0.55,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_revision": "8eece104ab9fe5b2f12652d24b6ab81ab803492b",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "role": "review",
+  "run_id": "r-20261002T082859261387-review-of-fsri-lane-timeout-equals-form-test",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fbbb-8003-7162-9e17-5390262750d0",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 2719232,
+    "cumulative_input_tokens": 5554952,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 35705
+  },
+  "time_budget": "30m",
+  "tool_steps": 36.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 724,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T08:41:26Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T08:29:22Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T082859261387-review-of-fsri-lane-timeout-equals-form-test",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 123,
+    "worker_pid": 1915244
+  },
+  "worker_seconds": 724,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-evidence-for" content="forward-solver-route-integrity">
+  <title>Picard derivative contract — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsri-picard-derivative-contract-rca">
+  <h2>The Picard route differentiates its finite loop, not the converged fixed point</h2>
+  <p>On the conductor-current fixture, reverse mode gives <code>-0.04295874784868</code>
+  for the linked-flux derivative at conductor 3. The forward JVP is
+  <code>-0.04295874784865</code>, an agreement to 2.6e-14. The three central
+  differences are <code>-0.00066624658866</code>, <code>-0.00054037660070</code>,
+  and <code>-0.00078498361220</code> at 293.1863, 87.9559, and 29.3186 A,
+  respectively; the first therefore reproduces the 63.47875093 relative error.</p>
+  <p>At the same terminal state, the explicit solve of
+  <code>(I - dG/dpsi)x = dG/dtheta v</code> converges (GMRES information 0,
+  maximum linear residual 7.31e-19). It gives <code>-0.00031562281753</code>
+  for the linked-flux tangent and <code>-0.94109098052</code> for plasma current.
+  The latter is within 0.00448010 relative error of the 293.1863 A central
+  difference (<code>-0.93689359987</code>), where the route's unrolled JVP is
+  <code>-11.53687895156</code> with relative error 11.31396922. The flux
+  fixed-point tangent is also much closer than the unrolled derivative, though
+  its finite-difference error remains 0.52626727 because this functional retains
+  a separate local nonsmooth response.</p>
+  <figure>
+    <img src="/nova/figures/forward-solver-route-integrity/fsri-picard-derivative-contract-rca/derivative-estimates.png" alt="Reverse, fixed-point, and central-difference derivative estimates across three conductor-current steps">
+    <figcaption>Derivative estimates from the completed H200 receipt. The blue
+    reverse/forward line is the derivative of the 80-step route; magenta is the
+    explicit terminal fixed-point derivative; violet points are central differences.</figcaption>
+  </figure>
+  <h3>The actual rule</h3>
+  <p><code>ForwardProfile._solve_accelerated</code> computes the exterior flux
+  from the conductor current and passes it as a traced program operand
+  (<code>nova/equilibrium/forward.py:1951-1962</code>). Its Picard branch selects
+  <code>fixed_point.picard</code> and passes the traced map and shadow callbacks
+  (<code>forward.py:2093-2112</code>). That implementation has no custom VJP:
+  <code>fixed_point.picard</code> updates the state in the body at
+  <code>fixed_point.py:2918-2928</code> and returns the result of
+  <code>jax.lax.fori_loop</code> at <code>2930-2942</code>. Reverse and forward
+  mode therefore both differentiate exactly 80 relaxed updates, including their
+  transient sensitivity, whereas the IFT arm replaces that finite-loop rule with
+  the terminal fixed-point response.</p>
+  <h3>Controls and the moment ladder</h3>
+  <p>A no-selection scalar control gives reverse 1.2499999999999993, forward
+  1.25, implicit 1.25, and finite difference 1.2500000000015277; its maximum
+  relative disagreement is 1.22e-12. Holding or exposing the null-coordinate
+  stop-gradient in <code>stencil_nulls.py</code> leaves the map-tangent error
+  unchanged at 0.18544 / 0.18618 / 0.18619. Thus the current defect is not the
+  previously excluded residual-shadow crossing and not that null-coordinate
+  stop-gradient substitution.</p>
+  <p>The moment ladder is separate: it calls <code>ForwardProfile.moment_jacobian</code>
+  directly, rather than entering the Picard loop, and independently reproduces
+  3.1917738194, 3.1482329130, and 3.1474466265 relative errors. It does not
+  share the finite-loop derivative rule. Its static moment/support derivative
+  mismatch remains a follow-on.</p>
+  <p>Receipt: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T221031289251-fsri-picard-derivative-contract-rca/h200-corrected-picard-derivative-contract.log</code>.</p>
+</article>
+</main>
+</body>
+</html>

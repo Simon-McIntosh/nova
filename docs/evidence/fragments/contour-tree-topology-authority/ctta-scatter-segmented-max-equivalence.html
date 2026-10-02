@@ -1,0 +1,29 @@
+<section id="scatter-segmented-max-equivalence">
+  <h3>Carrier neighbour combine: a duplicate-index scatter equals a segmented maximum</h3>
+  <p>The carrier sweep folds one contribution per edge endpoint into a per-vertex
+  key. A vertex named by several edges supplies that key more than once, so the
+  combine sees duplicate indices. A last-write-wins combine would make the
+  reduction depend on the order the carrier happens to store its edges, and a
+  receipt could change without the graph changing. Combining duplicates with a
+  maximum removes that dependence. This node names the equivalence the sweep
+  relies on, which the near-linear sweep's review argued but no test pinned.</p>
+  <p><code>tests/test_contour_tree_scatter_equivalence.py</code> builds carrier
+  graphs whose edge endpoints repeat and asserts the scatter's result equals
+  <code>jax.ops.segment_max</code> and a NumPy <code>np.maximum.at</code>
+  reference, bit for bit, at fixed seeds. The named cases are a vertex at the
+  carrier's full neighbour width (sixteen edges on one vertex, its neighbour row
+  full), a vertex no edge names (an empty segment that must keep the reduction's
+  identity), and an edge stored three times.</p>
+  <table>
+    <thead><tr><th>arm</th><th>command</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td>gate</td><td><code>JAX_PLATFORMS=cpu ... pytest tests/test_contour_tree_scatter_equivalence.py</code></td><td>8 passed, EXIT=0</td></tr>
+      <tr><td>negative control</td><td>scatter combine <code>.max</code> replaced by last-write-wins <code>.set</code>, scratch copy</td><td>6 failed, EXIT=1</td></tr>
+    </tbody>
+  </table>
+  <p>The negative control replaces the scatter's maximum combine with
+  last-write-wins; the saturated-vertex case and all five random-carrier seeds
+  then disagree with <code>segment_max</code>, while the empty-segment and
+  single-endpoint cases are unchanged. The hazard is therefore measured, not
+  restated: the equivalence holds because the combine is a maximum.</p>
+</section>

@@ -1,0 +1,406 @@
+{
+  "any_row_refuses_a_cell": false,
+  "bound": "one traced level run plus the production mesh straight chain",
+  "refusing_rows": [],
+  "row_count": 11,
+  "row_selection": {
+    "diiid": "all five committed DIII-D forward gate frames",
+    "mast": "all six unique committed MAST slices, each rebuilt through the production moment-seed route shared by its paired bank arms"
+  },
+  "rows": [
+    {
+      "bank": {
+        "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+        "sha256": "58a5d895fe7aed0df31bb62083832b9efdfdf945fe4567e552b611cbec356a10"
+      },
+      "machine": "MAST",
+      "member_identity": "21978/35",
+      "one_arc_capacity": 136,
+      "production_cell_count": 1089,
+      "realised_maximum_live_vertices": 132,
+      "refused_cell_count": 0,
+      "refused_cell_indices": [],
+      "saddle_cell_count": 1,
+      "saddle_wedge_margin": 5,
+      "saddle_wedge_maximum_live_vertices": 131,
+      "schema": "nova.exact-clip-production-one-arc-census.v1",
+      "selection": {
+        "bank_member": 1,
+        "bank_width": 6,
+        "identity": "21978/35",
+        "selection": "every unique slice in the committed paired-arm MAST bank; the production moment seed is slice-owned rather than arm-owned",
+        "shot": 21978,
+        "slice_index": 35
+      },
+      "straight_vertex_capacity": 8,
+      "topology": {
+        "axis": [
+          0.8769150459025821,
+          -0.010885668984740922
+        ],
+        "x_point": [
+          0.4379676901752857,
+          -1.1048621569010935
+        ]
+      }
+    },
+    {
+      "bank": {
+        "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+        "sha256": "58a5d895fe7aed0df31bb62083832b9efdfdf945fe4567e552b611cbec356a10"
+      },
+      "machine": "MAST",
+      "member_identity": "21983/35",
+      "one_arc_capacity": 136,
+      "production_cell_count": 1089,
+      "realised_maximum_live_vertices": 132,
+      "refused_cell_count": 0,
+      "refused_cell_indices": [],
+      "saddle_cell_count": 2,
+      "saddle_wedge_margin": 5,
+      "saddle_wedge_maximum_live_vertices": 131,
+      "schema": "nova.exact-clip-production-one-arc-census.v1",
+      "selection": {
+        "bank_member": 2,
+        "bank_width": 6,
+        "identity": "21983/35",
+        "selection": "every unique slice in the committed paired-arm MAST bank; the production moment seed is slice-owned rather than arm-owned",
+        "shot": 21983,
+        "slice_index": 35
+      },
+      "straight_vertex_capacity": 8,
+      "topology": {
+        "axis": [
+          0.8641942871879258,
+          0.0004661895017852753
+        ],
+        "x_point": [
+          0.41559020238647487,
+          1.089297628770243
+        ]
+      }
+    },
+    {
+      "bank": {
+        "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+        "sha256": "58a5d895fe7aed0df31bb62083832b9efdfdf945fe4567e552b611cbec356a10"
+      },
+      "machine": "MAST",
+      "member_identity": "21985/51",
+      "one_arc_capacity": 136,
+      "production_cell_count": 1089,
+      "realised_maximum_live_vertices": 132,
+      "refused_cell_count": 0,
+      "refused_cell_indices": [],
+      "saddle_cell_count": 2,
+      "saddle_wedge_margin": 5,
+      "saddle_wedge_maximum_live_vertices": 131,
+      "schema": "nova.exact-clip-production-one-arc-census.v1",
+      "selection": {
+        "bank_member": 3,
+        "bank_width": 6,
+        "identity": "21985/51",
+        "selection": "every unique slice in the committed paired-arm MAST bank; the production moment seed is slice-owned rather than arm-owned",
+        "shot": 21985,
+        "slice_index": 51
+      },
+      "straight_vertex_capacity": 8,
+      "topology": {
+        "axis": [
+          0.8651463311726041,
+          0.0006176738601967927
+        ],
+        "x_point": [
+          0.46949728149972364,
+          1.0320522088216804
+        ]
+      }
+    },
+    {
+      "bank": {
+        "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+        "sha256": "58a5d895fe7aed0df31bb62083832b9efdfdf945fe4567e552b611cbec356a10"
+      },
+      "machine": "MAST",
+      "member_identity": "21986/46",
+      "one_arc_capacity": 136,
+      "production_cell_count": 1089,
+      "realised_maximum_live_vertices": 132,
+      "refused_cell_count": 0,
+      "refused_cell_indices": [],
+      "saddle_cell_count": 1,
+      "saddle_wedge_margin": 5,
+      "saddle_wedge_maximum_live_vertices": 131,
+      "schema": "nova.exact-clip-production-one-arc-census.v1",
+      "selection": {
+        "bank_member": 4,
+        "bank_width": 6,
+        "identity": "21986/46",
+        "selection": "every unique slice in the committed paired-arm MAST bank; the production moment seed is slice-owned rather than arm-owned",
+        "shot": 21986,
+        "slice_index": 46
+      },
+      "straight_vertex_capacity": 8,
+      "topology": {
+        "axis": [
+          0.91534605101602,
+          0.13819298054197388
+        ],
+        "x_point": [
+          0.5908386172668508,
+          1.1300354806216235
+        ]
+      }
+    },
+    {
+      "bank": {
+        "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+        "sha256": "58a5d895fe7aed0df31bb62083832b9efdfdf945fe4567e552b611cbec356a10"
+      },
+      "machine": "MAST",
+      "member_identity": "21989/55",
+      "one_arc_capacity": 136,
+      "production_cell_count": 1089,
+      "realised_maximum_live_vertices": 132,
+      "refused_cell_count": 0,
+      "refused_cell_indices": [],
+      "saddle_cell_count": 1,
+      "saddle_wedge_margin": 5,
+      "saddle_wedge_maximum_live_vertices": 131,
+      "schema": "nova.exact-clip-production-one-arc-census.v1",
+      "selection": {
+        "bank_member": 5,
+        "bank_width": 6,
+        "identity": "21989/55",
+        "selection": "every unique slice in the committed paired-arm MAST bank; the production moment seed is slice-owned rather than arm-owned",
+        "shot": 21989,
+        "slice_index": 55
+      },
+      "straight_vertex_capacity": 8,
+      "topology": {
+        "axis": [
+          0.8883167003957828,
+          -0.0034322843720662375
+        ],
+        "x_point": [
+          0.504060902719321,
+          1.046376003311853
+        ]
+      }
+    },
+    {
+      "bank": {
+        "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+        "sha256": "58a5d895fe7aed0df31bb62083832b9efdfdf945fe4567e552b611cbec356a10"
+      },
+      "machine": "MAST",
+      "member_identity": "22086/43",
+      "one_arc_capacity": 136,
+      "production_cell_count": 1089,
+      "realised_maximum_live_vertices": 132,
+      "refused_cell_count": 0,
+      "refused_cell_indices": [],
+      "saddle_cell_count": 0,
+      "saddle_wedge_margin": 136,
+      "saddle_wedge_maximum_live_vertices": 0,
+      "schema": "nova.exact-clip-production-one-arc-census.v1",
+      "selection": {
+        "bank_member": 6,
+        "bank_width": 6,
+        "identity": "22086/43",
+        "selection": "every unique slice in the committed paired-arm MAST bank; the production moment seed is slice-owned rather than arm-owned",
+        "shot": 22086,
+        "slice_index": 43
+      },
+      "straight_vertex_capacity": 8,
+      "topology": {
+        "axis": [
+          0.8812232888306326,
+          -2.3722481032380663e-05
+        ],
+        "x_point": [
+          0.47850820122708854,
+          1.0733217075612118
+        ]
+      }
+    },
+    {
+      "bank": {
+        "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+        "sha256": "4e8f3519936e99705f97e57799adcf9afeed45d63cb62515376da28faafe4537"
+      },
+      "machine": "DIII-D",
+      "member_identity": "d3d_shot_00000c4a7b.parquet frame 179",
+      "one_arc_capacity": 136,
+      "production_cell_count": 1089,
+      "realised_maximum_live_vertices": 132,
+      "refused_cell_count": 0,
+      "refused_cell_indices": [],
+      "saddle_cell_count": 2,
+      "saddle_wedge_margin": 5,
+      "saddle_wedge_maximum_live_vertices": 131,
+      "schema": "nova.exact-clip-production-one-arc-census.v1",
+      "selection": {
+        "bank_member": 1,
+        "bank_width": 5,
+        "frame": 179,
+        "selection": "every frame in the committed DIII-D forward gate bank",
+        "shot": "d3d_shot_00000c4a7b.parquet"
+      },
+      "straight_vertex_capacity": 8,
+      "topology": {
+        "axis": [
+          1.7736438512802126,
+          -0.03092570416629322
+        ],
+        "x_point": [
+          1.5306249856948848,
+          -0.947964429855349
+        ]
+      }
+    },
+    {
+      "bank": {
+        "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+        "sha256": "4e8f3519936e99705f97e57799adcf9afeed45d63cb62515376da28faafe4537"
+      },
+      "machine": "DIII-D",
+      "member_identity": "d3d_shot_0003ff34e7.parquet frame 44",
+      "one_arc_capacity": 136,
+      "production_cell_count": 1089,
+      "realised_maximum_live_vertices": 132,
+      "refused_cell_count": 0,
+      "refused_cell_indices": [],
+      "saddle_cell_count": 2,
+      "saddle_wedge_margin": 5,
+      "saddle_wedge_maximum_live_vertices": 131,
+      "schema": "nova.exact-clip-production-one-arc-census.v1",
+      "selection": {
+        "bank_member": 2,
+        "bank_width": 5,
+        "frame": 44,
+        "selection": "every frame in the committed DIII-D forward gate bank",
+        "shot": "d3d_shot_0003ff34e7.parquet"
+      },
+      "straight_vertex_capacity": 8,
+      "topology": {
+        "axis": [
+          1.7179585695266724,
+          -0.050308577716350306
+        ],
+        "x_point": [
+          1.5306249856948846,
+          -1.0527421236038208
+        ]
+      }
+    },
+    {
+      "bank": {
+        "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+        "sha256": "4e8f3519936e99705f97e57799adcf9afeed45d63cb62515376da28faafe4537"
+      },
+      "machine": "DIII-D",
+      "member_identity": "d3d_shot_001554e054.parquet frame 144",
+      "one_arc_capacity": 136,
+      "production_cell_count": 1089,
+      "realised_maximum_live_vertices": 132,
+      "refused_cell_count": 0,
+      "refused_cell_indices": [],
+      "saddle_cell_count": 2,
+      "saddle_wedge_margin": 5,
+      "saddle_wedge_maximum_live_vertices": 131,
+      "schema": "nova.exact-clip-production-one-arc-census.v1",
+      "selection": {
+        "bank_member": 3,
+        "bank_width": 5,
+        "frame": 144,
+        "selection": "every frame in the committed DIII-D forward gate bank",
+        "shot": "d3d_shot_001554e054.parquet"
+      },
+      "straight_vertex_capacity": 8,
+      "topology": {
+        "axis": [
+          1.75946307182312,
+          0.013277635909617261
+        ],
+        "x_point": [
+          1.3818272352218635,
+          -1.0605466365814211
+        ]
+      }
+    },
+    {
+      "bank": {
+        "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+        "sha256": "4e8f3519936e99705f97e57799adcf9afeed45d63cb62515376da28faafe4537"
+      },
+      "machine": "DIII-D",
+      "member_identity": "d3d_shot_002495e835.parquet frame 146",
+      "one_arc_capacity": 136,
+      "production_cell_count": 1089,
+      "realised_maximum_live_vertices": 132,
+      "refused_cell_count": 0,
+      "refused_cell_indices": [],
+      "saddle_cell_count": 2,
+      "saddle_wedge_margin": 5,
+      "saddle_wedge_maximum_live_vertices": 131,
+      "schema": "nova.exact-clip-production-one-arc-census.v1",
+      "selection": {
+        "bank_member": 4,
+        "bank_width": 5,
+        "frame": 146,
+        "selection": "every frame in the committed DIII-D forward gate bank",
+        "shot": "d3d_shot_002495e835.parquet"
+      },
+      "straight_vertex_capacity": 8,
+      "topology": {
+        "axis": [
+          1.7180236577987693,
+          -0.0013271856587381329
+        ],
+        "x_point": [
+          1.2929953336715692,
+          -1.1911089420318604
+        ]
+      }
+    },
+    {
+      "bank": {
+        "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+        "sha256": "4e8f3519936e99705f97e57799adcf9afeed45d63cb62515376da28faafe4537"
+      },
+      "machine": "DIII-D",
+      "member_identity": "d3d_shot_0040ca9bdc.parquet frame 137",
+      "one_arc_capacity": 136,
+      "production_cell_count": 1089,
+      "realised_maximum_live_vertices": 132,
+      "refused_cell_count": 0,
+      "refused_cell_indices": [],
+      "saddle_cell_count": 2,
+      "saddle_wedge_margin": 5,
+      "saddle_wedge_maximum_live_vertices": 131,
+      "schema": "nova.exact-clip-production-one-arc-census.v1",
+      "selection": {
+        "bank_member": 5,
+        "bank_width": 5,
+        "frame": 137,
+        "selection": "every frame in the committed DIII-D forward gate bank",
+        "shot": "d3d_shot_0040ca9bdc.parquet"
+      },
+      "straight_vertex_capacity": 8,
+      "topology": {
+        "axis": [
+          1.7231301069259646,
+          0.001690587610937585
+        ],
+        "x_point": [
+          1.2897911071777355,
+          -1.1884135007858294
+        ]
+      }
+    }
+  ],
+  "schema": "nova.exact-clip-production-one-arc-census-receipt.v1",
+  "smallest_saddle_wedge_margin": 5,
+  "verdict": "no production diverted row refuses the one-arc bound"
+}

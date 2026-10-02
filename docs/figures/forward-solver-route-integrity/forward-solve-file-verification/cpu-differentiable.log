@@ -1,0 +1,160 @@
+NOVA_LANE_START=2026-10-02T21:21:12+0200
+PLACEMENT=submit
+RUNG=cpu
+SLURM_JOB_ID=1280476
+SLURM_JOB_PARTITION=all_debug
+SOURCE_REVISION=bd439c315c5ec9db523d22e0eb5addc164be7a33
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+JAX_PLATFORMS=cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=3600
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences tests/test_equilibrium_forward_solve.py::test_the_solve_is_differentiable_in_the_conductor_current tests/test_equilibrium_forward_solve.py::test_the_plasma_current_is_differentiable_in_the_conductor_current tests/test_equilibrium_forward_solve.py::test_the_solve_refuses_to_enforce_a_moment tests/test_equilibrium_forward_solve.py::test_an_externally_supplied_flux_map_is_qualified_by_the_same_receipt -v --durations=0 --timeout 3600 
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 3600.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 21:21:19 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 5 items
+
+tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences FAILED [ 20%]
+tests/test_equilibrium_forward_solve.py::test_the_solve_is_differentiable_in_the_conductor_current FAILED [ 40%]
+tests/test_equilibrium_forward_solve.py::test_the_plasma_current_is_differentiable_in_the_conductor_current FAILED [ 60%]
+tests/test_equilibrium_forward_solve.py::test_the_solve_refuses_to_enforce_a_moment PASSED [ 80%]
+tests/test_equilibrium_forward_solve.py::test_an_externally_supplied_flux_map_is_qualified_by_the_same_receipt PASSED [100%]
+
+=================================== FAILURES ===================================
+_______ test_the_moment_map_is_differentiable_against_finite_differences _______
+
+converged = ForwardEquilibrium(flux=Array([0.9870836 , 1.00168895, 1.02343175, 1.05400143, 1.08782948,
+       1.12020859, 1.147977..., 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+       2, 2, 2, 2, 2, 2, 2, 2, 2], dtype=int8)), constraints=(), constraint_outer=None)
+machine = (ForwardProfile(operator=ForwardFluxOperator(grid=FluxTarget(null=Null2D(maxsize=5, precision=<Precision.DOUBLE: 'floa....26096842,
+        0.23558035,  0.21166023,  0.19052074,  0.17335953,  0.1609408 ,
+        0.1535261 ], dtype=float64))
+
+    def test_the_moment_map_is_differentiable_against_finite_differences(
+        converged, machine
+    ):
+        """Small central-difference steps converge to the moment Jacobian.
+    
+        The 1e-3 Wb interval crosses a local selection change and must remain
+        outside the 1e-2 derivative tolerance. The 3e-5 Wb and 1e-5 Wb steps stay
+        local, enter that tolerance in sequence, and decrease the normalised error.
+        """
+        profile, _seed, _vacuum = machine
+        targets = MomentTargets(
+            plasma_current=0.9 * float(converged.moments.plasma_current),
+            poloidal_beta=0.5,
+            internal_inductance=0.8,
+        )
+        residual = np.asarray(profile.moment_residual(converged.flux, targets))
+        assert np.all(np.isfinite(residual))
+        assert np.max(np.abs(residual)) > 1.0e-3
+    
+        jacobian = profile.moment_jacobian(converged.flux, targets)
+        assert jacobian.shape == (3, converged.flux.size)
+        rng = np.random.default_rng(11)
+        direction = jnp.asarray(rng.standard_normal(converged.flux.shape))
+        direction = direction / jnp.max(jnp.abs(direction))
+        analytic = jacobian @ direction
+>       assert float(jnp.max(jnp.abs(analytic))) > 1.0
+E       assert 0.7598863825266692 > 1.0
+E        +  where 0.7598863825266692 = float(Array(0.75988638, dtype=float64))
+E        +    where Array(0.75988638, dtype=float64) = <function max at 0x7fa674afab90>(Array([0.27291727, 0.75988638, 0.52667095], dtype=float64))
+E        +      where <function max at 0x7fa674afab90> = jnp.max
+E        +      and   Array([0.27291727, 0.75988638, 0.52667095], dtype=float64) = <PjitFunction of <function abs at 0x7fa674985850>>(Array([-0.27291727,  0.75988638,  0.52667095], dtype=float64))
+E        +        where <PjitFunction of <function abs at 0x7fa674985850>> = jnp.abs
+
+tests/test_equilibrium_forward_solve.py:905: AssertionError
+__________ test_the_solve_is_differentiable_in_the_conductor_current ___________
+
+machine = (ForwardProfile(operator=ForwardFluxOperator(grid=FluxTarget(null=Null2D(maxsize=5, precision=<Precision.DOUBLE: 'floa....26096842,
+        0.23558035,  0.21166023,  0.19052074,  0.17335953,  0.1609408 ,
+        0.1535261 ], dtype=float64))
+
+    def test_the_solve_is_differentiable_in_the_conductor_current(machine):
+        """A functional of the converged flux differentiates through the ladder."""
+        profile, seed, _vacuum = machine
+        conductor = profile.operator.external_current
+    
+        def linked_flux(current):
+            """Return a smooth scalar of the equilibrium the conductors support."""
+            state = profile.solve(
+                seed, route="picard", current=current, evaluations=80, relaxation=0.7
+            )
+            return jnp.sum(state.flux**2)
+    
+        gradient = jax.grad(linked_flux)(conductor)
+        assert np.all(np.isfinite(np.asarray(gradient)))
+        probe = int(np.argmax(np.abs(np.asarray(gradient))))
+        delta = GRADIENT_STEP * float(jnp.abs(conductor[probe]))
+        numeric = float(
+            (
+                linked_flux(conductor.at[probe].add(delta))
+                - linked_flux(conductor.at[probe].add(-delta))
+            )
+            / (2.0 * delta)
+        )
+        error = abs(float(gradient[probe]) - numeric) / max(abs(numeric), 1.0e-30)
+>       assert error < FLUX_GRADIENT_TOLERANCE
+E       assert 63.478750929152035 < 0.001
+
+tests/test_equilibrium_forward_solve.py:943: AssertionError
+______ test_the_plasma_current_is_differentiable_in_the_conductor_current ______
+
+machine = (ForwardProfile(operator=ForwardFluxOperator(grid=FluxTarget(null=Null2D(maxsize=5, precision=<Precision.DOUBLE: 'floa....26096842,
+        0.23558035,  0.21166023,  0.19052074,  0.17335953,  0.1609408 ,
+        0.1535261 ], dtype=float64))
+
+    def test_the_plasma_current_is_differentiable_in_the_conductor_current(machine):
+        """The observed plasma current carries a derivative through the solve."""
+        profile, seed, _vacuum = machine
+        conductor = profile.operator.external_current
+    
+        def observed_current(current):
+            """Return the plasma current the conductors support."""
+            return profile.solve(
+                seed, route="picard", current=current, evaluations=80, relaxation=0.7
+            ).moments.plasma_current
+    
+        gradient = jax.grad(observed_current)(conductor)
+        probe = int(np.argmax(np.abs(np.asarray(gradient))))
+        assert abs(float(gradient[probe])) > 0.0
+        delta = GRADIENT_STEP * float(jnp.abs(conductor[probe]))
+        numeric = float(
+            (
+                observed_current(conductor.at[probe].add(delta))
+                - observed_current(conductor.at[probe].add(-delta))
+            )
+            / (2.0 * delta)
+        )
+        error = abs(float(gradient[probe]) - numeric) / max(abs(numeric), 1.0e-30)
+>       assert error < CURRENT_GRADIENT_TOLERANCE
+E       assert 11.313969220440912 < 0.001
+
+tests/test_equilibrium_forward_solve.py:969: AssertionError
+============================== slowest durations ===============================
+900.30s call     tests/test_equilibrium_forward_solve.py::test_the_solve_is_differentiable_in_the_conductor_current
+779.48s call     tests/test_equilibrium_forward_solve.py::test_the_plasma_current_is_differentiable_in_the_conductor_current
+640.65s setup    tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences
+551.80s call     tests/test_equilibrium_forward_solve.py::test_the_solve_refuses_to_enforce_a_moment
+26.85s call     tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences
+2.21s call     tests/test_equilibrium_forward_solve.py::test_an_externally_supplied_flux_map_is_qualified_by_the_same_receipt
+
+(9 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+FAILED tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences
+FAILED tests/test_equilibrium_forward_solve.py::test_the_solve_is_differentiable_in_the_conductor_current
+FAILED tests/test_equilibrium_forward_solve.py::test_the_plasma_current_is_differentiable_in_the_conductor_current
+=================== 3 failed, 2 passed in 2907.47s (0:48:27) ===================
+EXIT_STATUS=1
+NOVA_LANE_END=2026-10-02T22:09:50+0200
+NOVA_LANE_EXIT_STATUS=1

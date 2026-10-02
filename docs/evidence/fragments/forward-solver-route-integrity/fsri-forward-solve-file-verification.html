@@ -16,38 +16,50 @@ are merged. It changes no source and fixes nothing.</p>
     <td>whole file, 29 ids</td><td><code>4 failed, 25 passed</code>; <code>EXIT=1</code></td><td>905.35&nbsp;s (0:15:05)</td></tr>
   <tr><th scope="row">1280472</th><td>all_debug, CPU, <code>JAX_PLATFORMS=cpu</code></td>
     <td>ids 1&ndash;13</td><td><code>1 failed, 12 passed</code>; <code>EXIT=1</code></td><td>708.64&nbsp;s (0:11:48)</td></tr>
-  <tr><th scope="row">1280473</th><td>all_debug, CPU</td><td>ids 14&ndash;19 (host iteration, flux resolution, relaxed, early exit, root find)</td><td><code>6 passed</code>; <code>EXIT=0</code></td><td>994.06&nbsp;s (0:16:34)</td></tr>
-  <tr><th scope="row">1280474</th><td>all_debug, CPU</td><td>ids 20&ndash;23 (vacuum, seeds, ensemble, portfolio)</td><td>running at handoff</td><td>&mdash;</td></tr>
-  <tr><th scope="row">1280476</th><td>all_debug, CPU</td><td>ids 24&ndash;28 (moment map, solve/plasma-current gradients, refusal, external flux)</td><td>running at handoff</td><td>&mdash;</td></tr>
-  <tr><th scope="row">1280477</th><td>sirius, CPU, <code>--timeout 10000</code></td><td><code>test_the_accelerator_routes_agree_on_the_fixed_point</code></td><td>running at handoff</td><td>&mdash;</td></tr>
+  <tr><th scope="row">1280473</th><td>all_debug, CPU</td><td>host iteration, flux resolution &times;2, relaxed floor, early exit, root find (6 ids)</td><td><code>6 passed</code>; <code>EXIT=0</code></td><td>994.06&nbsp;s (0:16:34)</td></tr>
+  <tr><th scope="row">1280477</th><td>sirius, CPU, <code>--timeout 10000</code></td><td><code>test_the_accelerator_routes_agree_on_the_fixed_point</code></td><td><code>1 passed</code>; <code>EXIT=0</code></td><td>2344.83&nbsp;s (0:39:04)</td></tr>
+  <tr><th scope="row">1280474</th><td>all_debug, CPU</td><td>vacuum field, several seeds, batched ensemble, topology portfolio</td><td><code>2 passed</code> (vacuum, several seeds); <code>2 not run</code> (batched ensemble killed mid-test, portfolio never started); TIMEOUT at the 59&nbsp;min limit</td><td>3548&nbsp;s (0:59:08)</td></tr>
+  <tr><th scope="row">1280476</th><td>all_debug, CPU</td><td>moment map, solve/plasma-current gradients, moment refusal, external flux map</td><td><code>3 failed, 2 passed</code>; <code>EXIT=1</code></td><td>2907.47&nbsp;s (0:48:27)</td></tr>
+  <tr><th scope="row">1280481</th><td>sirius, CPU</td><td><code>test_the_batched_ensemble_solve_matches_the_per_slice_solve</code></td><td>running at handoff</td><td>&mdash;</td></tr>
+  <tr><th scope="row">1280482</th><td>sirius, CPU</td><td><code>test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap</code></td><td>running at handoff</td><td>&mdash;</td></tr>
   </tbody>
 </table>
 
 <p>Every job ran at <code>SOURCE_REVISION=bd439c315c5ec9db523d22e0eb5addc164be7a33</code>;
-the launcher and plain-sbatch headers carry it in each log. Logs are the
-gate records under
+each log header carries it. The gate logs are under
 <code>docs/figures/forward-solver-route-integrity/forward-solve-file-verification/</code>.</p>
 
-<p><strong>Failures so far, with first error line.</strong></p>
+<p><strong>Failures common to CPU and H200 (no device separates them).</strong>
+Four tests fail on both rungs with the same assertion and the same measured
+value to the printed digits, so none is a device artefact of the CUDA lane:</p>
 
 <ul>
   <li><code>test_solve_path_current_moments_match_profile_owned_support</code>
-    (H200 and CPU): <code>AssertionError: Not equal to tolerance rtol=2e-13,
-    atol=2e-13</code>; 31/625 mismatched elements, max absolute difference
-    <code>173.43</code>. Device-independent &mdash; the same test and the same
-    mismatch count fail on both rungs.</li>
+    &mdash; H200 (<code>h200-whole-file.log</code>) and CPU
+    (<code>cpu-prefix.log</code>): <code>AssertionError: Not equal to tolerance
+    rtol=2e-13, atol=2e-13</code>; <strong>31 / 625</strong> mismatched
+    elements, max absolute difference <strong>173.4314</strong>, max relative
+    difference 0.3122.</li>
   <li><code>test_the_moment_map_is_differentiable_against_finite_differences</code>
-    (H200): <code>assert 0.7598863825264144 &gt; 1.0</code> (the coarse-step
-    relative error, which the registered contract expects above
-    <code>1e-2</code>; the measured value orders below the fine steps). CPU
-    confirmation is in shard 1280476.</li>
+    &mdash; H200 and CPU (<code>cpu-differentiable.log</code>):
+    <code>assert 0.7598863825266692 &gt; 1.0</code> (H200 prints
+    <code>0.7598863825264144</code>). The coarse-step relative error sits below
+    the <code>1.0</code> the ladder ordering requires, on either rung.</li>
   <li><code>test_the_solve_is_differentiable_in_the_conductor_current</code>
-    (H200): <code>assert 63.47875092912272 &lt; 0.001</code>.</li>
+    &mdash; H200 and CPU: <code>assert 63.478750929152035 &lt; 0.001</code>
+    (H200 prints <code>63.47875092912272</code>).</li>
   <li><code>test_the_plasma_current_is_differentiable_in_the_conductor_current</code>
-    (H200): <code>assert 11.313969220454661 &lt; 0.001</code>.</li>
+    &mdash; H200 and CPU: <code>assert 11.313969220440912 &lt; 0.001</code>
+    (H200 prints <code>11.313969220454661</code>).</li>
 </ul>
 
-<p>The three gradient/derivative failures appear H200-only at handoff and are
-the ones the CPU shards 1280476 (all_debug) and 1280477 (sirius) exist to
-confirm or separate; their CPU result is pending.</p>
+<p><strong>Failures seen on the H200 alone: none.</strong> Every failure the H200
+whole-file job reports is reproduced by a CPU shard, so the device is not the
+separating factor for any of the four.</p>
+
+<p><strong>Outstanding.</strong> The batched-ensemble and topology-portfolio
+tests did not complete on the 59-minute CPU partition; jobs
+<code>1280481</code> and <code>1280482</code> re-run each alone on
+<code>sirius</code> with an explicit <code>--time</code> and <code>--mem</code>.
+Their outcome is pending and will be appended here.</p>
 </section>

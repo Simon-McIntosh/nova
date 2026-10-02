@@ -269,6 +269,51 @@
   "plan_impl_at_dispatch": 1.0,
   "plan_link": null,
   "promoted_revision": "0e5e34157bf39041cd1b2d53539602fda659e995",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5023,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T090417250576-msc-reference-lane-full-run",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "dirty": [],
+          "head": "0e5e34157bf39041cd1b2d53539602fda659e995",
+          "integrated_into": "HEAD",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-reference-lane-full-run",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-02T10:01:17.601Z",
+            "session_id": "cb884c87-3a38-4cd9-acc4-7505f29a000c",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-reference-lane-full-run"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session cb884c87-3a38-4cd9-acc4-7505f29a000c"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [

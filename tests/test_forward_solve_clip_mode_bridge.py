@@ -15,6 +15,8 @@ from nova.equilibrium.forward_operator import (
 from nova.equilibrium.solve_request import (
     ExplicitSolveSeed,
     ForwardSolveRequest,
+    ResolvedForwardSolveDefaults,
+    declared_forward_solve_policy,
 )
 from tests.test_prescribed_current_solve import _profile
 
@@ -88,3 +90,52 @@ def test_omitted_request_clip_mode_follows_the_process_mode(
     assert receipts[0].clip_mode == "exact"
     assert receipts[1].clip_mode == "chord"
     assert observed_modes == ["exact", "chord"]
+
+
+def test_directly_constructed_request_carries_the_process_mode_when_underfilled() -> (
+    None
+):
+    """A request built field-by-field takes the process mode; an explicit mode wins."""
+
+    previous_mode = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        policy = declared_forward_solve_policy()
+        omitted = ForwardSolveRequest(
+            carrier_identity="clip-mode-bridge-direct",
+            source_profile=object(),
+            seed_policy=ExplicitSolveSeed(np.zeros(4)),
+            policy=policy,
+            route=policy.route,
+        )
+        explicit_chord = ForwardSolveRequest(
+            carrier_identity="clip-mode-bridge-direct",
+            source_profile=object(),
+            seed_policy=ExplicitSolveSeed(np.zeros(4)),
+            policy=policy,
+            route=policy.route,
+            clip_mode="chord",
+        )
+    finally:
+        set_support_clip_mode(previous_mode)
+
+    assert omitted.clip_mode == "exact"
+    assert explicit_chord.clip_mode == "chord"
+
+
+def test_from_policy_records_the_process_mode_when_underfilled() -> None:
+    """An omitted from_policy mode records the process mode; an explicit one wins."""
+
+    policy = declared_forward_solve_policy()
+    previous_mode = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        omitted = ResolvedForwardSolveDefaults.from_policy(policy)
+        explicit_chord = ResolvedForwardSolveDefaults.from_policy(
+            policy, clip_mode="chord"
+        )
+    finally:
+        set_support_clip_mode(previous_mode)
+
+    assert omitted.clip_mode == "exact"
+    assert explicit_chord.clip_mode == "chord"

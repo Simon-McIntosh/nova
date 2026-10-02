@@ -9,10 +9,14 @@ from pathlib import Path
 import jax
 import jax.numpy as jnp
 import numpy as np
+from scipy.interpolate import RectBivariateSpline
 
-from nova.equilibrium.contour_tree import build_contour_tree
+from nova.equilibrium.contour_tree import ContourTreeResult, build_contour_tree
 from nova.equilibrium.contour_tree_mesh import ContourMesh, build_contour_mesh
 from nova.equilibrium.wall_mask import vessel_unit
+from nova.imas.mast_vacuum_cohort import SHOT_STORE
+from nova.media.sources.mast_efit import read_frame, read_geometry
+from nova.media.sources.plasma_mesh import hex_mesh
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,6 +25,12 @@ FIGURE_ROOT = ROOT / "docs/figures/contour-tree-topology-authority/brute-force"
 VERTEX_CAPACITY = 256
 EDGE_CAPACITY = 2048
 TRIANGLE_CAPACITY = 1024
+
+MAST_CELLS = 90
+MAST_VERTEX_CAPACITY = VERTEX_CAPACITY
+MAST_EDGE_CAPACITY = EDGE_CAPACITY
+MAST_TRIANGLE_CAPACITY = TRIANGLE_CAPACITY
+MAST_ROWS = ((27079, 16), (22475, 50))
 
 
 @dataclass(frozen=True)
@@ -56,6 +66,69 @@ def certificate_fixtures() -> tuple[Fixture, ...]:
             raise RuntimeError(f"certificate mesh capacity refused: {path.name}")
         fixtures.append(Fixture(payload["case"], mesh))
     return tuple(fixtures)
+
+
+def _mast_mesh(shot: int, row: int) -> ContourMesh:
+    """Build one MAST hex carrier with the stored EFIT flux on its centres.
+
+    The field is the stored EFIT reconstruction (``efm/psirz``, converted to
+    total webers at the read) sampled at the hex-cell centres with a bicubic
+    spline; it is a reconstruction, not a forward state.  ``sigma`` is chosen
+    so the reconstructed magnetic axis is a maximum of ``sigma * psi``.
+    """
+    import zarr
+
+    group = zarr.open_group(str(Path(SHOT_STORE) / f"{shot}.zarr"), mode="r")["efm"]
+    geometry = read_geometry(group)
+    frame = read_frame(group, row)
+    outlines, _ = hex_mesh(geometry.limiter, cells=MAST_CELLS)
+    centres = np.array([[np.mean(o[:, 0]), np.mean(o[:, 1])] for o in outlines])
+    spline = RectBivariateSpline(
+        np.asarray(frame.height, dtype=float),
+        np.asarray(frame.radius, dtype=float),
+        np.asarray(frame.flux, dtype=float),
+        kx=3,
+        ky=3,
+    )
+    psi = spline.ev(centres[:, 1], centres[:, 0])
+    sigma = 1 if frame.flux_axis > frame.flux_boundary else -1
+    wall = (
+        vessel_unit(geometry.limiter[:, 0], geometry.limiter[:, 1], name=str(shot)),
+    )
+    return build_contour_mesh(
+        centres,
+        sigma * psi,
+        wall,
+        vertex_capacity=MAST_VERTEX_CAPACITY,
+        edge_capacity=MAST_EDGE_CAPACITY,
+        triangle_capacity=MAST_TRIANGLE_CAPACITY,
+    )
+
+
+def tree_fits(mesh: ContourMesh) -> bool:
+    """Whether the carrier fits the tree's declared fixed node capacity."""
+
+    return int(np.sum(np.asarray(mesh.vertex_valid))) <= ContourTreeResult.node_capacity
+
+
+def mast_fixtures() -> tuple[Fixture, ...]:
+    """Read the MAST rows named in the plan's primary-selection section."""
+
+    return tuple(
+        Fixture(f"mast-{shot}-row-{row}", _mast_mesh(shot, row))
+        for shot, row in MAST_ROWS
+    )
+
+
+def standalone_rows(mesh: ContourMesh) -> list[dict[str, float | int]]:
+    """Count superlevel components by plain host graph search, with no tree."""
+
+    values = np.asarray(mesh.vertex_psi)[np.asarray(mesh.vertex_valid)]
+    levels = np.nextafter(np.unique(values), -np.inf)[::-1]
+    return [
+        {"level": float(level), "brute_force": _component_count(mesh, float(level))}
+        for level in levels
+    ]
 
 
 def _component_count(mesh: ContourMesh, level: float) -> int:
@@ -160,7 +233,12 @@ def batched_identical(fixtures: tuple[Fixture, ...]) -> bool:
 
 
 def render(fixtures: tuple[Fixture, ...], directory: Path = FIGURE_ROOT) -> list[Path]:
-    """Render one data-ink component-count comparison per persisted fixture."""
+    """Render one data-ink component-count comparison per persisted fixture.
+
+    The tree arm is drawn wherever the fixed-capacity receipt returns; on a
+    carrier whose receipt refuses, the figure shows the independent brute-force
+    count alone rather than a truncated tree.
+    """
 
     import matplotlib.pyplot as plt
 
@@ -171,25 +249,33 @@ def render(fixtures: tuple[Fixture, ...], directory: Path = FIGURE_ROOT) -> list
     directory.mkdir(parents=True, exist_ok=True)
     paths = []
     for fixture in fixtures:
-        result = compare(fixture.mesh)
-        rows = result["rows"]
+        rows = None
+        tree = None
+        if tree_fits(fixture.mesh):
+            try:
+                rows = compare(fixture.mesh)["rows"]
+                tree = [row["tree"] for row in rows]
+            except RuntimeError:
+                rows = None
+        if rows is None:
+            rows = standalone_rows(fixture.mesh)
         level = [row["level"] for row in rows]
         brute = [row["brute_force"] for row in rows]
-        tree = [row["tree"] for row in rows]
         figure, axis = plt.subplots(figsize=(14, 5), dpi=100)
         axis.step(level, brute, where="post", color="#356c9b", linewidth=3.0)
-        axis.step(
-            level,
-            tree,
-            where="post",
-            color="#222222",
-            linestyle="--",
-            linewidth=2.6,
-        )
-        axis.text(level[-1], brute[-1], "brute force", color="#356c9b", va="bottom")
-        axis.text(level[-1], tree[-1], "tree", color="#222222", va="top")
         axis.set(xlabel="signed flux level [Wb]", ylabel="components")
         axis.spines[["top", "right"]].set_visible(False)
+        if tree is not None:
+            axis.step(
+                level,
+                tree,
+                where="post",
+                color="#222222",
+                linestyle="--",
+                linewidth=2.6,
+            )
+            axis.text(level[-1], tree[-1], "tree", color="#222222", va="top")
+        axis.text(level[-1], brute[-1], "brute force", color="#356c9b", va="bottom")
         path = directory / f"{fixture.name}-components.png"
         figure.savefig(path, bbox_inches="tight")
         plt.close(figure)

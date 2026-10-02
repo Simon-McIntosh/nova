@@ -1,0 +1,43 @@
+# revision: 222867e6e84d5a5e5a90b4a680e8049f1c1b2948 | tree: /tmp/reckon-crew-scratch/ctta-bf-merged (git archive extraction) | command: CONTOUR_TREE_CORRUPT=drop-wall-joins JAX_PLATFORMS=cpu PYTHONPATH=/tmp/reckon-crew-scratch/ctta-bf-merged python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_brute_force.py -q
+# negative control: drop the virtual-outside (wall-contact) joins from the computed tree
+F..F..                                                                   [100%]
+=================================== FAILURES ===================================
+_______ test_certificate_tree_matches_independent_superlevel_components ________
+
+fixtures = (Fixture(name='diverted-single-null', mesh=ContourMesh(vertex_rz=Array([[ 1.53669204, -1.19443928],
+       [ 1.6485164..., False, False, False], dtype=bool), vertex_capacity=256, edge_capacity=2048, triangle_capacity=1024, overflow=False)))
+
+    def test_certificate_tree_matches_independent_superlevel_components(fixtures):
+        """Every stored certificate field agrees at every vertex-separated level."""
+    
+        for fixture in fixtures:
+            result = compare(fixture.mesh, corrupt=_corrupt())
+            assert result["node_count"] - result["edge_count"] == 1
+>           assert all(row["tree"] == row["brute_force"] for row in result["rows"])
+E           assert False
+E            +  where False = all(<generator object test_certificate_tree_matches_independent_superlevel_components.<locals>.<genexpr> at 0x7f975d16c820>)
+
+tests/test_contour_tree_brute_force.py:65: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+11:29:12 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+___________ test_mast_tree_matches_independent_superlevel_components ___________
+
+mast = (Fixture(name='mast-27079-row-16', mesh=ContourMesh(vertex_rz=Array([[ 1.25539531e+00, -1.80962082e+00],
+       [ 1.02..., False, False, False], dtype=bool), vertex_capacity=256, edge_capacity=2048, triangle_capacity=1024, overflow=False)))
+
+    def test_mast_tree_matches_independent_superlevel_components(mast):
+        """Every MAST carrier's tree agrees with the independent count at each level."""
+    
+        for fixture in mast:
+            result = compare(fixture.mesh, corrupt=_corrupt())
+            assert result["node_count"] - result["edge_count"] == 1
+>           assert all(row["tree"] == row["brute_force"] for row in result["rows"])
+E           assert False
+E            +  where False = all(<generator object test_mast_tree_matches_independent_superlevel_components.<locals>.<genexpr> at 0x7f947ba4eb20>)
+
+tests/test_contour_tree_brute_force.py:109: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_brute_force.py::test_certificate_tree_matches_independent_superlevel_components
+FAILED tests/test_contour_tree_brute_force.py::test_mast_tree_matches_independent_superlevel_components
+2 failed, 4 passed in 142.70s (0:02:22)
+EXIT=1

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="contour-tree-topology-authority">
+<title>End-to-end brute-force control for the contour tree | nova</title>
+</head>
+<body>
+<main class="plan-doc">
+<h2 id="ctta-end-to-end-brute-force">End-to-end brute-force control for the contour tree</h2>
+
+<p><strong>Measure.</strong> An independent positive control for
+<code>nova.equilibrium.contour_tree.build_contour_tree</code> on stored
+fixtures: for each fixture the superlevel components of
+<code>&sigma;&psi;</code> on the clipped hex-centre triangulation are counted
+by a plain host graph search (breadth-first over the carrier's own vertices and
+edges) and compared with the component count the computed tree implies at each
+sampled level. The brute-force side shares no union-find, no merge sweep and no
+tree arc with the receipt; it shares only the mesh and the field values. The
+comparator is <code>benchmarks/contour_tree_brute_force.py</code>; the gate is
+<code>tests/test_contour_tree_brute_force.py</code>.</p>
+
+<h3>Result at the merged revision</h3>
+<p>At the virtual merge of <code>main</code> with this node's fixtures, every
+fixture agrees: the tree-implied and brute-force component counts are equal at
+every sampled level, and the node count minus the edge count is one. The gate
+command is
+<code>JAX_PLATFORMS=cpu
+PYTHONPATH=/tmp/reckon-crew-scratch/ctta-bf-merged /home/ITER/mcintos/Code/nova/.venv/bin/python
+-m pytest -p no:cacheprovider --timeout 0
+tests/test_contour_tree_brute_force.py -q</code>,
+run at the merge commit <code>222867e6e</code> against the extracted tree; it
+returned <strong>6 passed</strong> (<code>EXIT=0</code>).</p>
+
+<table>
+  <thead><tr><th>Fixture</th><th>Sampled levels</th><th>Nodes / edges</th>
+  <th>Max tree = max brute</th><th>Mismatches</th></tr></thead>
+  <tbody>
+    <tr><td>diverted-single-null (Solov&rsquo;ev)</td><td>140</td><td>13 / 12</td><td>2</td><td>0</td></tr>
+    <tr><td>moderate-rotation-conventional-static (Solov&rsquo;ev)</td><td>136</td><td>16 / 15</td><td>2</td><td>0</td></tr>
+    <tr><td>strong-rotation-compact-static (Solov&rsquo;ev)</td><td>135</td><td>22 / 21</td><td>3</td><td>0</td></tr>
+    <tr><td>weak-rotation-reactor-static (Solov&rsquo;ev)</td><td>70</td><td>18 / 17</td><td>2</td><td>0</td></tr>
+    <tr><td>mast-27079-row-16 (limited)</td><td>236</td><td>52 / 51</td><td>5</td><td>0</td></tr>
+    <tr><td>mast-22475-row-50 (reversed current, diverted)</td><td>236</td><td>52 / 51</td><td>7</td><td>0</td></tr>
+  </tbody>
+</table>
+<p>The four Solov&rsquo;ev certificate rows are forward states. Each MAST field
+is the <strong>stored EFIT reconstruction</strong> (<code>efm/psirz</code>,
+converted to total webers at the read) sampled at the hex-cell centres with a
+bicubic spline; it is a reconstruction sampled onto the carrier, <em>not</em> a
+forward state. The MAST carrier is the hex plasma mesh built from the stored
+MAST machine description (<code>hex_mesh</code> over the stored limiter
+polyline, <code>cells=90</code>; 236 valid vertices), so it fits the receipt's
+declared fixed capacity. Shot 22475 row 50 is the mid-pulse slice carrying the
+largest reversed current in that store (<code>Ip = -7.342e5</code> A).
+<code>&sigma; = +1</code> for 27079 (axis flux <code>+3.694e-1</code> Wb) and
+<code>&sigma; = -1</code> for 22475 (axis flux negative), so the axis is a
+maximum of <code>&sigma;&psi;</code> in both.</p>
+
+<figure>
+  <img src="/nova/figures/contour-tree-topology-authority/brute-force/mast-27079-row-16-components.png"
+       alt="MAST 27079 row 16 tree and brute-force component counts against signed flux level">
+  <figcaption>MAST 27079 row 16 (limited): tree-implied and independent
+  brute-force component counts of the strict superlevel sets of
+  &sigma;&psi; on the hex carrier, overlaid; they coincide at every one of the
+  236 sampled levels.</figcaption>
+</figure>
+
+<figure>
+  <img src="/nova/figures/contour-tree-topology-authority/brute-force/mast-22475-row-50-components.png"
+       alt="MAST 22475 row 50 tree and brute-force component counts against signed flux level">
+  <figcaption>MAST 22475 row 50 (reversed current, diverted): tree-implied and
+  independent brute-force component counts, overlaid; they coincide at every
+  sampled level.</figcaption>
+</figure>
+
+<h3>Capacity refusal and the repaired receipt</h3>
+<p>The over-capacity fixture refuses visibly: a 644-vertex / 257-vertex carrier
+raises <code>RuntimeError: contour tree capacity refused</code> and the
+built-in capacity test asserts the <code>overflow</code> bit, rather than a
+truncated tree. Before the repair the receipt was malformed on every carrier: a
+synthetic 9-vertex wall-bearing carrier returned 9 nodes and 17 edges
+(node&minus;edge = &minus;8). After the repair the same 9-vertex probe reads
+<strong>8 nodes and 7 edges</strong>, node&minus;edge = <strong>+1</strong>, and
+zero mismatches against the independent count; the two MAST carriers likewise
+read 52 nodes / 51 edges with zero mismatches.</p>
+
+<h3>Negative control</h3>
+<p>The declared mutation &mdash; dropping the virtual-outside (wall-contact)
+joins from the computed tree &mdash; now fails at a distinct comparison
+assertion rather than at overflow. At the merged revision the corrupt run is
+<strong>2 failed, 4 passed</strong> (<code>EXIT=1</code>), failing
+<code>test_certificate_tree_matches_independent_superlevel_components</code> and
+<code>test_mast_tree_matches_independent_superlevel_components</code> on
+<code>assert all(row["tree"] == row["brute_force"] ...)</code>. The head arm at
+the same revision passes both ids (6 passed, <code>EXIT=0</code>).</p>
+
+<h3>Records</h3>
+<ul>
+  <li>Merged gate log: <code>merged-gate.log</code> (6 passed, EXIT=0).</li>
+  <li>Merged negative-control log: <code>merged-negative-control.log</code>
+  (2 failed, 4 passed, EXIT=1).</li>
+  <li>Baseline arm at <code>84374f8da</code> (before the repair and before the
+  MAST tree arms): 2 failed, 2 passed.</li>
+</ul>
+<p>Both logs are committed beside the per-fixture figures under
+<code>docs/figures/contour-tree-topology-authority/brute-force/</code>.</p>
+</main>
+</body>
+</html>

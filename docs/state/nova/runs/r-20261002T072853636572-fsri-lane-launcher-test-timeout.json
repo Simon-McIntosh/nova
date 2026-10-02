@@ -1,0 +1,617 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-terra",
+  "base_sha": "b6d479a93a1c2047815b9eecb2c1018643615244",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 8645888,
+      "cached_input_tokens_cumulative": 8645888,
+      "input_tokens": 8821203,
+      "input_tokens_cumulative": 8821203,
+      "output_tokens": 28545,
+      "output_tokens_cumulative": 28545,
+      "reasoning_output_tokens": 8522,
+      "reasoning_output_tokens_cumulative": 8522
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 246,
+    "files": 7,
+    "removed": 4
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_dry_run_pytest_uses_a_long_default_per_test_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 34,
+        "name": "test_dry_run_prints_a_submission_line_for_every_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 35
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_dry_run_pytest_keeps_the_callers_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 34,
+        "name": "test_dry_run_prints_a_submission_line_for_every_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 35
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 34,
+        "name": "test_dry_run_prints_a_submission_line_for_every_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 35
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "test_dry_run_prints_a_submission_line_for_every_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "test_dry_run_pytest_uses_a_long_default_per_test_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 69
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_dry_run_pytest_keeps_the_callers_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "test_dry_run_pytest_uses_a_long_default_per_test_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 69
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "test_dry_run_pytest_uses_a_long_default_per_test_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 69
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "test_dry_run_pytest_uses_a_long_default_per_test_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 70
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "test_dry_run_prints_a_submission_line_for_every_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 81,
+        "name": "test_dry_run_pytest_keeps_the_callers_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 82
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_dry_run_pytest_uses_a_long_default_per_test_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 81,
+        "name": "test_dry_run_pytest_keeps_the_callers_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 82
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 81,
+        "name": "test_dry_run_pytest_keeps_the_callers_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 82
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "test_dry_run_prints_a_submission_line_for_every_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 102
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_dry_run_pytest_uses_a_long_default_per_test_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 102
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_dry_run_pytest_keeps_the_callers_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 102
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_dry_run_pytest_uses_a_long_default_per_test_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 117
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_reads_the_timeout_environment_override",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 117
+    },
+    {
+      "existing_function": {
+        "line": 179,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 116
+    },
+    {
+      "existing_function": {
+        "line": 179,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 130,
+        "name": "test_h200_payload_keeps_sampler_and_pin_diagnostic",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 179,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 197
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_h200_payload_keeps_sampler_and_pin_diagnostic",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 179,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 198
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "55bca9b993d56d5f06737271e65d9fd3fa9aaca9",
+    "75495edb0afa05f41d7240b5690878da5cb170aa",
+    "2308e555e4b7fca8f6624057dc1bb36b62a9c465",
+    "e1c48a691bac4ca2cc95ea09530a5d842c51f552"
+  ],
+  "completed_at": "2026-10-02T07:43:56Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T07:29:16Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "pytest tests/test_nova_lane_launcher.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T072853636572-fsri-lane-launcher-test-timeout/gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.65,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "lane-launcher infrastructure filed under §4; the pre-warm done-when of §4 is unchanged",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T08:13:56.416608+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": null,
+    "metered": true,
+    "observed_at": null,
+    "read_at": "2026-10-02T07:28:56Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T07:43:56Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T072853636572-fsri-lane-launcher-test-timeout/manifest.md",
+  "member": "disposable-r-20261002T072853636572-fsri-lane-launcher-test-timeout",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_nova_lane_launcher.py::test_dry_run_pytest_reads_the_timeout_environment_override",
+      "tests/test_nova_lane_launcher.py::test_dry_run_pytest_uses_a_long_default_per_test_timeout"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_nova_lane_launcher.py::test_dry_run_pytest_reads_the_timeout_environment_override",
+      "tests/test_nova_lane_launcher.py::test_dry_run_pytest_uses_a_long_default_per_test_timeout"
+    ],
+    "declaration": "remove the --timeout injection from pytest mode: the default-bound assertion in tests/test_nova_lane_launcher.py fails",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout/docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout/docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/negative-control.log",
+    "test_paths": [
+      "tests/test_nova_lane_launcher.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fsri-lane-launcher-test-timeout",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1247,
+          "cached_input_tokens": 955554,
+          "input_tokens": 956803,
+          "output_tokens": 1654,
+          "reasoning_output_tokens": 385,
+          "total_tokens": 958457,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "pyproject.toml sets timeout = 300 for the fast lane, and lane runs inherit it: test_equilibrium_forward_reference.py on the H200 lane (S22 jobs 1279898 and 1279899; logs ~/.config/reckon/crew/runs/r-20261002T052807496384-msc-fused-route-enforces-axis-qualification/h200_{base,head}_reference.log) loses 18 tests to 'Timeout (>300s) from pytest-timeout', mostly in fixture setup. Change scripts/nova_lane/run.sh so pytest mode appends --timeout ${NOVA_LANE_TEST_TIMEOUT:-3600} unless the caller's target arguments already carry --timeout (an explicit caller value wins), and print the effective per-test bound in the log header. scripts/h200_test_lane/run.sh inherits this as the thin caller. tests/test_nova_lane_launcher.py asserts the dry-run pytest line carries --timeout 3600 by default, carries the caller's value when one is given, and that NOVA_LANE_TEST_TIMEOUT overrides the default. Negative control: remove the injection and the default-bound assertion fails, logged. Run in a fresh process in place (TMPDIR=/tmp; pytest --timeout 120 for this quick file), and force-add the logs under docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/. Status must be exactly complete or blocked; in-progress is not recognised.",
+    "estimated_hours": 0.5,
+    "goal": "The nova lane launcher gives pytest targets a long per-test bound instead of the repository's 300-second fast-lane default",
+    "id": "fsri-lane-launcher-test-timeout",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": null,
+      "metered": true,
+      "observed_at": null,
+      "read_at": "2026-10-02T07:28:56Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T072853636572-fsri-lane-launcher-test-timeout/manifest.md",
+    "negative_control": "remove the --timeout injection from pytest mode: the default-bound assertion in tests/test_nova_lane_launcher.py fails",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/nova_lane/run.sh",
+      "tests/test_nova_lane_launcher.py",
+      "docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-lane-launcher-test-timeout.html",
+      "docs/figures/forward-solver-route-integrity/fsri-lane-launcher-test-timeout"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex-terra",
+    "member": null,
+    "node": "fsri-lane-launcher-test-timeout",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T07:28:59.912616+00:00",
+    "score": 0.56875,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_revision": "e1c48a691bac4ca2cc95ea09530a5d842c51f552",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "b6d479a93a1c2047815b9eecb2c1018643615244",
+    "reviewed_head_sha": "e1c48a691bac4ca2cc95ea09530a5d842c51f552",
+    "scores": {
+      "durability": 17,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 91
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T072853636572-fsri-lane-launcher-test-timeout",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fb84-8be5-7fb3-bc4f-0b5d6c6fc8cd",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 8645888,
+    "cumulative_input_tokens": 17467091,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 37067
+  },
+  "time_budget": "45m",
+  "tool_steps": 98.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 880,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T07:43:59Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T07:29:20Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T072853636572-fsri-lane-launcher-test-timeout",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 285,
+    "worker_pid": 1214926
+  },
+  "worker_seconds": 880,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

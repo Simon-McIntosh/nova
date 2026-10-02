@@ -1,0 +1,81 @@
+{
+  "case": "weak-rotation-reactor-static",
+  "requested_cells": -110,
+  "realised_cells": 135,
+  "state_length": 772,
+  "clip_mode": "exact",
+  "analytic_state_digest": "d2c980a88374751bb6e4af9305ae9ad39bc0f19bb7f954654c08d6fa8862f8f2",
+  "terminal_state_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T133233397975-cco-cap-factor-finite-tangent/h200-receipt/control-positive-state.npy",
+  "terminal_state_digest": "41b9e055fbdcd4b7940e1d799a3f796eeb5116865257e7993c721bf0824cb50e",
+  "analytic": {
+    "production_centroid_m": [
+      6.057360565263933,
+      3.922283986344775e-13
+    ],
+    "first_moment_centroid_m": [
+      6.063452798299985,
+      6.929501573313815e-13
+    ],
+    "continuous_analytic_centroid_m": [
+      6.063530173332898,
+      0.0
+    ],
+    "production_offset_m": [
+      -0.006169608068965715,
+      3.922283986344775e-13
+    ],
+    "first_moment_offset_m": [
+      -7.737503291327386e-05,
+      6.929501573313815e-13
+    ],
+    "within_cell_contribution_m": [
+      0.006092233036052441,
+      3.00721758696904e-13
+    ],
+    "cell_current_sum_a": 16314773.311828371,
+    "normalisation_amplitude": 1.0001353138935536,
+    "radial_first_moment_sum_a_m": 99393.40094600915,
+    "vertical_first_moment_sum_a_m": 4.907356924377382e-06,
+    "nonzero_current_cells": 121,
+    "observation_minus_cell_centre_m": [
+      -1.7763568394002505e-15,
+      7.849134741995781e-17
+    ]
+  },
+  "terminal": {
+    "production_centroid_m": [
+      6.063530173328971,
+      -1.3243630982855303e-14
+    ],
+    "first_moment_centroid_m": [
+      6.067418089945199,
+      1.985402955102187e-13
+    ],
+    "continuous_analytic_centroid_m": [
+      6.063530173332898,
+      0.0
+    ],
+    "production_offset_m": [
+      -3.927524971913954e-12,
+      -1.3243630982855303e-14
+    ],
+    "first_moment_offset_m": [
+      0.0038879166123004794,
+      1.985402955102187e-13
+    ],
+    "within_cell_contribution_m": [
+      0.0038879166162280043,
+      2.11783926493074e-13
+    ],
+    "cell_current_sum_a": 16314773.311828371,
+    "normalisation_amplitude": 1.206936856695566,
+    "radial_first_moment_sum_a_m": 63430.478249063686,
+    "vertical_first_moment_sum_a_m": 3.454129910096526e-06,
+    "nonzero_current_cells": 103,
+    "observation_minus_cell_centre_m": [
+      8.881784197001252e-16,
+      -5.9314484129842e-17
+    ]
+  },
+  "first_moment_source": "benchmarks/plasma_cell_map_fidelity.py::recover_physical_first_moments/current_centroid"
+}

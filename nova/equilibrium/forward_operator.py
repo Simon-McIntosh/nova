@@ -2366,6 +2366,7 @@ class ForwardFluxOperator:
     wall_unit_offsets: object = field(repr=False, default=None)
     wall_unit_closed: object = field(repr=False, default=None)
     wall_unit_kinds: tuple[str, ...] | None = field(repr=False, default=None)
+    clip_mode: str | None = field(repr=False, default=None)
     prescribed_current_field: InitVar[PrescribedCurrentField | None] = None
     prescribed_field: PrescribedCurrentField | None = field(
         init=False, repr=False, default=None
@@ -2378,6 +2379,8 @@ class ForwardFluxOperator:
 
     def __post_init__(self, prescribed_current_field: PrescribedCurrentField | None):
         """Build the topology read and default the material mask."""
+        if self.clip_mode not in {None, "chord", "exact", "chord_cells"}:
+            raise ValueError(f"unknown support clip mode {self.clip_mode!r}")
         self.prescribed_field = prescribed_current_field
         self.external_current = jnp.asarray(self.external_current)
         if type(self.source) is ForwardSource:
@@ -2725,6 +2728,20 @@ class ForwardFluxOperator:
         instance.__dict__ = self.__dict__.copy()
         instance.source = source
         return instance
+
+    def with_clip_mode(self, clip_mode: str) -> ForwardFluxOperator:
+        """Build an operator whose support clip is explicit request state."""
+        if clip_mode not in {"chord", "exact", "chord_cells"}:
+            raise ValueError(f"unknown support clip mode {clip_mode!r}")
+        instance = object.__new__(type(self))
+        instance.__dict__ = self.__dict__.copy()
+        instance.clip_mode = clip_mode
+        return instance
+
+    @property
+    def _active_support_clip_mode(self) -> str:
+        """Resolve legacy global selection only for callers without a request."""
+        return self.clip_mode if self.clip_mode is not None else support_clip_mode()
 
     def tree_flatten(self):
         """Separate traced arithmetic arrays from immutable host metadata."""
@@ -3247,7 +3264,7 @@ class ForwardFluxOperator:
         selected = field.active & (jnp.asarray(support.vertex_count) >= 3)
         moment_integrator = (
             clipped_support_current_moments
-            if _SUPPORT_CLIP_MODE == "chord"
+            if self._active_support_clip_mode == "chord"
             else _cell_banked_current_moments
         )
         moments = moment_integrator(
@@ -3335,10 +3352,9 @@ class ForwardFluxOperator:
         masks = self._moment_support_masks(masks, profile_support)
         return masks, topology, sample_psi_norm, profile_support
 
-    @staticmethod
-    def _moment_support_masks(masks, profile_support):
+    def _moment_support_masks(self, masks, profile_support):
         """Promote every curved cut support into the profile-owned partition."""
-        if _SUPPORT_CLIP_MODE == "chord":
+        if self._active_support_clip_mode == "chord":
             return masks
         promoted_label = jnp.where(
             profile_support.included,
@@ -3383,11 +3399,11 @@ class ForwardFluxOperator:
             raise ValueError("moment geometry is required for current moments")
         atomic_mesh = self.moment_geometry.atomic_mesh
         chord_support = None
-        if _SUPPORT_CLIP_MODE in ("chord", "chord_cells"):
+        if self._active_support_clip_mode in ("chord", "chord_cells"):
             chord_support = atomic_mesh.traced_clip(
                 jnp.ones(len(atomic_mesh.node_coordinates), dtype=physical.dtype)
             ).qualify(masks.profile_participation)
-            if _SUPPORT_CLIP_MODE == "chord":
+            if self._active_support_clip_mode == "chord":
                 return chord_support
         shared_flux = self.shared_node_flux(physical)
         inside_boundary = self.polarity * (shared_flux - topology.boundary_flux)
@@ -3439,7 +3455,7 @@ class ForwardFluxOperator:
             arc_tracer=_implicit_traced_level_arc,
         )
         exact_support = traced_support.qualify(participation)
-        if _SUPPORT_CLIP_MODE == "chord_cells":
+        if self._active_support_clip_mode == "chord_cells":
             return _substitute_chord_cell_supports(
                 exact_support,
                 chord_support,
@@ -3535,7 +3551,7 @@ class ForwardFluxOperator:
         def compact_current_moments(profile, *_args):
             moment_integrator = (
                 clipped_support_current_moments
-                if _SUPPORT_CLIP_MODE == "chord"
+                if self._active_support_clip_mode == "chord"
                 else _cell_banked_current_moments
             )
             return moment_integrator(
@@ -3557,7 +3573,7 @@ class ForwardFluxOperator:
         )
         field_integrator = (
             clipped_support_field_integrals
-            if _SUPPORT_CLIP_MODE == "chord"
+            if self._active_support_clip_mode == "chord"
             else _cell_banked_field_integrals
         )
         field_integrals = field_integrator(

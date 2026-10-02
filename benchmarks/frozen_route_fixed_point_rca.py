@@ -166,8 +166,10 @@ def _markdown(receipt: dict[str, Any]) -> str:
         "",
         f"The route recorded {receipt['frozen_partition_reads']} partition reads and "
         f"{receipt['frozen_partition_refreezes']} re-freezes. The terminal read ran; "
-        f"its label/support partition difference was "
-        f"{receipt['partition_difference_cells']} cells.",
+        f"its partition difference was {receipt['partition_difference_cells']} cells "
+        f"({receipt['label_difference_cells']} labels, "
+        f"{receipt['support_difference_cells']} support inclusions, and "
+        f"{receipt['residual_shadow_difference_entries']} residual-shadow entries).",
         "",
         "## Residual at the frozen terminal state",
         "",
@@ -208,6 +210,18 @@ def _markdown(receipt: dict[str, Any]) -> str:
             f"{value.get('warm_value', value.get('status', 'n/a'))} | "
             f"{value.get('terminal_value', value.get('status', 'n/a'))} |"
         )
+    geometry = receipt["operator_geometry"]
+    lines.extend(
+        [
+            "",
+            "The operator grid is shared static geometry, not a per-solve partition "
+            "copy: its coordinate array has "
+            f"{geometry['grid_coordinate']['changed_entries']} warm-to-terminal "
+            "changes. Its physical-node count is "
+            f"{geometry['physical_node_number']}. Net-current normalisation is "
+            f"{geometry['net_current_normalisation']}.",
+        ]
+    )
     lines.extend(
         [
             "",
@@ -277,17 +291,35 @@ def measure(refresh_newton_steps: int) -> dict[str, Any]:
     )
     refreshed_live = live_map(refreshed.flux, external, operator, None)
     jax.block_until_ready(refreshed_live)
-    partition_difference = int(
+    label_difference = int(
         np.count_nonzero(
             np.asarray(warmed_partition.label) != np.asarray(terminal_partition.label)
         )
     )
+    support_difference = 0
+    if warmed_partition.profile_support is not None:
+        support_difference = int(
+            np.count_nonzero(
+                np.asarray(warmed_partition.profile_support.included)
+                != np.asarray(terminal_partition.profile_support.included)
+            )
+        )
+    shadow_difference = int(
+        np.count_nonzero(
+            np.asarray(warmed_partition.residual_shadow)
+            != np.asarray(terminal_partition.residual_shadow)
+        )
+    )
+    partition_difference = max(label_difference + support_difference, shadow_difference)
     return {
         "frozen_partition_reads": int(result.fixed_point.frozen_partition_reads),
         "frozen_partition_refreezes": int(
             result.fixed_point.frozen_partition_refreezes
         ),
         "partition_difference_cells": partition_difference,
+        "label_difference_cells": label_difference,
+        "support_difference_cells": support_difference,
+        "residual_shadow_difference_entries": shadow_difference,
         "trajectory_residual": _as_float(result.fixed_point.trajectory_residual),
         "frozen_residual": _relative(frozen, terminal),
         "live_residual": _relative(live, terminal),
@@ -300,6 +332,13 @@ def measure(refresh_newton_steps: int) -> dict[str, Any]:
         ),
         "refresh_newton_steps": refresh_newton_steps,
         "partition_fields": _partition_fields(warmed_partition, terminal_partition),
+        "operator_geometry": {
+            "grid_coordinate": _changed(
+                operator.grid.coordinate, operator.grid.coordinate
+            ),
+            "physical_node_number": operator.physical_node_number,
+            "net_current_normalisation": "not applicable: absolute-current fixture",
+        },
         "residual_terms": _residual_terms(
             live,
             frozen,

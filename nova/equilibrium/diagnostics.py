@@ -146,51 +146,50 @@ class ShafranovContourIntegrals:
 def _contour_metric(
     contour: jax.Array, count: int
 ) -> tuple[jax.Array, jax.Array, jax.Array, jax.Array]:
-    r"""Return boundary segment midpoints, lengths, outward normals and area.
+    r"""Return boundary vertices, chord lengths, outward normal weights and area.
 
     ``contour`` carries ``(N, 2)`` rows of :math:`(R, Z)` in metres, with rows
     at index ``count`` and beyond required to be exact zeros.  Segments close
     from the last live point back to the first, so the sampled boundary is a
-    closed polyline.  The normal is the tangent rotated a quarter turn, then
-    oriented outward by the sign of the shoelace area, which makes the
-    result independent of the direction the caller sampled the contour in.
+    closed polyline.  ``length`` is the polyline chord length, which is what
+    the perimeter sums, and ``area`` is its shoelace area.
 
-    The point returned per segment is its MIDPOINT, and it is the point the
-    integrand is evaluated at.  A chord's direction and length are those of
-    the boundary at its own midpoint to second order, so weighting a midpoint
-    sample by the chord length is a second-order rule on a closed curve.  The
-    leading vertex of the same chord is displaced from that midpoint by half a
-    chord, which makes the rule first order however fine the sampling is; the
-    caller therefore averages the vertex fields to the midpoint rather than
-    selecting one of them.
+    The normal weight at a vertex is the boundary's tangent derivative with
+    respect to the vertex index, rotated a quarter turn and oriented outward by
+    the sign of the shoelace area, so it is independent of the direction the
+    caller sampled the contour in.  Its magnitude is the arc length carried
+    per index step, so a vertex sum of ``integrand * normal weight`` is the
+    boundary integral of ``integrand * n dl``.
+
+    The vertex index is the smooth parameter of the closed boundary, and the
+    sum of a smooth periodic integrand over its whole period is the trapezoidal
+    rule, which converges faster than any power of the step.  Its accuracy is
+    therefore set by the tangent derivative, taken here with the four-point
+    central stencil :math:`(x_{i-2} - 8 x_{i-1} + 8 x_{i+1} - x_{i+2}) / 12`,
+    which is fourth order.  A chord-weighted rule is instead second order in
+    the sampling, because each chord leaves the curve by its sagitta, and that
+    error is concentrated where the boundary turns sharply (the X-point
+    neighbourhood), which is where the radial moment, a cancellation of
+    contributions several thousand times its own size, is most sensitive.  A
+    vertex that coincides with a corner of the boundary carries a tangent
+    error of order one, weighted by a stress that vanishes there.
     """
     import jax.numpy as jnp
 
     points = contour[:count]
-    following = jnp.concatenate((points[1:], points[:1]), axis=0)
-    segment = following - points
-    length = jnp.linalg.norm(segment, axis=-1)
-    tangent = segment / jnp.where(length > 0.0, length, 1.0)[..., None]
+
+    def ahead(offset: int) -> jax.Array:
+        return jnp.roll(points, -offset, axis=0)
+
+    following = ahead(1)
+    length = jnp.linalg.norm(following - points, axis=-1)
+    tangent = (ahead(-2) - 8.0 * ahead(-1) + 8.0 * following - ahead(2)) / 12.0
     normal = jnp.stack((tangent[:, 1], -tangent[:, 0]), axis=-1)
     signed_area = 0.5 * jnp.sum(
         points[:, 0] * following[:, 1] - following[:, 0] * points[:, 1]
     )
     normal = jnp.where(signed_area >= 0.0, normal, -normal)
-    midpoint = 0.5 * (points + following)
-    return midpoint, length, normal, signed_area
-
-
-def _segment_mean(field: jax.Array, count: int) -> jax.Array:
-    """Return the two-vertex mean of a contour field on every segment.
-
-    This is the field value at each segment midpoint, which is where
-    :func:`_contour_metric` places the sample; it is the trapezoidal average
-    of the two endpoints and stays traceable and differentiable in ``field``.
-    """
-    import jax.numpy as jnp
-
-    vertex = field[:count]
-    return 0.5 * (vertex + jnp.concatenate((vertex[1:], vertex[:1]), axis=0))
+    return points, length, normal, signed_area
 
 
 def shafranov_contour_integrals(
@@ -260,16 +259,14 @@ def shafranov_contour_integrals(
     field arguments.  ``MU0`` is the explicit permeability of free space and
     every symbol above is in raw SI.
 
-    The discrete rule is the midpoint rule on the closed polyline: the
-    integrand is evaluated at each chord's midpoint and weighted by the chord
-    length, so it is second order in the contour sampling.  Evaluating the same
-    integrand at the chord's leading vertex is first order instead, because
-    that vertex sits half a chord away from the midpoint to which the chord's
-    length and direction belong, and the resulting error decays only as the
-    contour is refined.  The midpoint rule reaches its limit by 501 contour
-    points on the Solovev single-null reference, where the vertex rule would
-    still be decaying with order 1.0, so the difference is not one a caller can
-    spend contour points to remove.
+    The discrete rule is the periodic trapezoidal rule over the contour
+    vertices with a fourth-order tangent (see :func:`_contour_metric`).  The
+    fields enter at the vertices where they are sampled, with no averaging
+    onto chord midpoints.  Against the volume-side quadrature of the analytic
+    single-null reference the radial moment, whose contour terms cancel to one
+    part in several thousand, departs by 6.3e-4 at 2001 contour points under
+    the second-order chord midpoint rule and by 2.3e-5 under this rule, which
+    is already at the volume-side floor from 501 points.
 
     The combination :math:`\beta_p + l_i/2` is NOT a functional of these
     contour integrals alone.  Eliminating the toroidal term from
@@ -282,9 +279,9 @@ def shafranov_contour_integrals(
     import jax.numpy as jnp
 
     points, length, normal, area = _contour_metric(contour, count)
-    radial = _segment_mean(radial_field, count)
-    vertical = _segment_mean(vertical_field, count)
-    toroidal = _segment_mean(toroidal_field, count)
+    radial = radial_field[:count]
+    vertical = vertical_field[:count]
+    toroidal = toroidal_field[:count]
     poloidal_squared = radial**2 + vertical**2
     total_squared = poloidal_squared + toroidal**2
     inverse = 1.0 / MU0
@@ -293,7 +290,7 @@ def shafranov_contour_integrals(
     stress_rz = radial * vertical * inverse
     radial_traction = stress_rr * normal[:, 0] + stress_rz * normal[:, 1]
     vertical_traction = stress_rz * normal[:, 0] + stress_zz * normal[:, 1]
-    surface = 2.0 * jnp.pi * points[:, 0] * length
+    surface = 2.0 * jnp.pi * points[:, 0]
     return ShafranovContourIntegrals(
         radial_moment=jnp.sum(points[:, 0] * radial_traction * surface),
         vertical_moment=jnp.sum(

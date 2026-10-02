@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>pfs-keyframes-and-compensator — landing record</title>
+</head>
+<body>
+<section id="pfs-keyframes-and-compensator">
+<h2>Axis-configuration and compensator panels draw their receipts; the keyframes throughput duplicate is resolved to one measured figure</h2>
+<p>Repairs of the remainder of <code>f-fsaudit-repair-empty-and-invalid-data-panels</code> and the two
+whole followups <code>f-fsaudit-repair-axis-configuration-poloidal-panel</code> and
+<code>f-fsaudit-repair-empty-throughput-keyframe-figures</code>. Every figure is re-rendered from its
+committed receipt on the login node; no solve ran. The render driver is
+<code>docs/figures/playable-forward-solve/pfs-keyframes-and-compensator/render_figures.py</code>, run
+once and recorded at <code>logs/render-gate.log</code> (revision <code>27d6cab12</code>, EXIT=0). The
+command it records is re-runnable as written:</p>
+<pre>PYTHONPATH=&lt;worktree&gt; /home/ITER/mcintos/Code/nova/.venv/bin/python \
+  docs/figures/playable-forward-solve/pfs-keyframes-and-compensator/render_figures.py &lt;worktree&gt;</pre>
+
+<h3>f-fsaudit-repair-axis-configuration-poloidal-panel</h3>
+<p><strong>Defect reproduced before repair.</strong> At the base revision the left panel of
+<code>axis-configuration.png</code> carried full spines, ticks and gridlines and drew no first wall,
+against the repository rule that a poloidal panel carries no axes and shows the vessel; its arm
+labels were addressed at their own coordinates and collided with the markers. The right panel's
+<code>P</code> and <code>W</code> bars read 0.02 cm against <code>L</code>/<code>S</code>/<code>R</code>
+at -4.11 cm and were unlabelled, so a zero read as a missing series.</p>
+<p><strong>Repair.</strong> The arm scatter is now a poloidal panel drawn through
+<code>nova.media.ink.poloidal_axes</code> and <code>nova.media.poloidal.draw_wall</code>, with the EFIT
+axis marked through <code>draw_nulls</code> and every arm labelled directly; the bars carry a printed
+value with the sub-resolution arms (<code>P</code>, <code>W</code> = +0.02 cm) labelled in their own
+tone. The machine wall was not in the receipt, so it is now carried in
+<code>axis-configuration-receipt.json</code> as <code>machine_wall_rz_m</code> with
+<code>machine_wall_source</code> naming its committed origin (the MAST machine-level outline in the
+playable early-frame-placement receipt; the wall is shot-independent). The receipt values are
+unchanged: arms L/S/R at -4.11 cm, P/W at +0.02 cm, EFIT axis at (0.90593, 0.00048) m.</p>
+
+<h3>f-fsaudit-repair-empty-throughput-keyframe-figures</h3>
+<p><strong>Defect reproduced before repair.</strong> At the base revision
+<code>keyframes/h200-press-stage-throughput.png</code> and
+<code>keyframes/h200-playable-axis-continuation-throughput.png</code> were byte-identical (md5
+<code>0957ec23a73a7e8ef13eac7742b18133</code>): two fence lines at 10 and 1 keyframes/s, a legend, and
+no measured series. The measured bar existed but at 1/281 s = 0.0036 keyframes/s it was invisible
+against a 0-to-10 axis, so the figure stated a comparison it never made.</p>
+<p><strong>Repair.</strong> One figure survives. <code>h200-press-stage-throughput.png</code> is
+re-rendered on a logarithmic rate axis so both measured presses are legible and directly labelled:
+prime (cold) 0.0101 keyframes/s, first moved (warm) 0.0036 keyframes/s, against the two fences kept as
+dotted reference lines (10 keyframes/s warm, 1 keyframe/s first-moved). The duplicate
+<code>h200-playable-axis-continuation-throughput.png</code> is deleted; it was cited by no document, so
+no citation needed redirecting, and the two fences it carried are kept here in prose. The
+<code>h200-playable-axis-continuation-keyframes.png</code> figure and its receipt are untouched.</p>
+<p>sha256 of every PNG under <code>keyframes/</code>, all distinct (no duplicate pair):</p>
+<pre>945b57bcd16f71a8  h200-keyframes-paired-after.png
+8bf775177a271a75  h200-keyframes-paired-baseline.png
+c5c4f5b4216c2267  h200-keyframes-paired-stages.png
+4479d399e348a4a1  h200-keyframes.png
+be95ffa48f47f800  h200-playable-axis-continuation-keyframes.png
+d030452bbd663b42  h200-playable-press-stage-breakdown.png
+760052576d2d0c1f  h200-press-stage-throughput.png
+012c806f42d58f78  h200-press-stage-walls.png
+2af9641397942ab4  mast-22086-43-bulk-z-axis-component.png</pre>
+
+<h3>f-fsaudit-repair-empty-and-invalid-data-panels (remainder: compensator)</h3>
+<p><strong>Defect reproduced before repair.</strong> <code>compensator-authority.png</code> drew a single
+straight segment from row 17 to row 95, bridging seventy-seven rows that were never measured, and
+plotted the <em>selected</em> and <em>best drivable</em> series coincident on every row while the landed
+record claimed the solenoid is selected on nine of ten.</p>
+<p><strong>Repair.</strong> The line is broken between the two measured groups, which the receipt names as
+<code>measured_early_rows</code> = [15, 16, 17] and <code>flat_top_rows</code> = [95, 96, 97]; no line
+crosses rows 18 to 94. Because the selection rule chooses the strongest drivable circuit on every
+measured row, <code>selection_matches_best_drivable</code> is true and <code>selected_circuit</code>,
+<code>best_drivable_circuit</code> and <code>best_all_circuit</code> are identical on all ten receipt
+rows, so the figure draws one series rather than two coincident ones; the row-96 point is annotated
+with its <code>p6_upper</code> selection. Across the ten measured rows the selected circuit is the
+solenoid on nine, <code>p6_upper</code> on row 96, which reconciles the landed record's nine-of-ten
+claim with the receipt; both the record's lead sentence and its figure caption now state that
+denominator explicitly. No circuit reaches the 1e-5 m/A target.</p>
+
+<h3>Evidence</h3>
+<ul>
+<li>Render gate: <code>logs/render-gate.log</code> (revision 27d6cab12, EXIT=0, three figures written).</li>
+<li>Receipts read: <code>axis-configuration-receipt.json</code>,
+<code>h200-press-stage-receipt.json</code>, <code>compensator-authority.json</code>.</li>
+<li>Label correction: <code>pfs-anchor-and-panel-repairs.html</code> attributed the placement grid's
+ratios 1.370 and 1.544 to "the conditioned arms"; the receipt holds them on
+<code>conditioned_warm</code>, and the fragment now says so.</li>
+</ul>
+</section>
+</body>
+</html>

@@ -1,3 +1,4 @@
+MEASUREMENT_HEADER revision=db580bec8331d8366242ff840c9f57b442c248c6 tree=/work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/frozen-merge command=/home/ITER/mcintos/Code/nova/.venv/bin/python\ /work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/measure_derivatives.py\ /work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/frozen-merge\ db580bec8331d8366242ff840c9f57b442c248c6
 NOVA_LANE_START=2026-10-02T23:20:47+0200
 PLACEMENT=submit
 RUNG=h200

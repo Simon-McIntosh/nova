@@ -1,0 +1,379 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-terra",
+  "base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 21597696,
+      "cached_input_tokens_cumulative": 21597696,
+      "input_tokens": 21906568,
+      "input_tokens_cumulative": 21906568,
+      "output_tokens": 45146,
+      "output_tokens_cumulative": 45146,
+      "reasoning_output_tokens": 11936,
+      "reasoning_output_tokens_cumulative": 11936
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 279,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "fb71928fa10381853e3536440a75e4ec58547125",
+    "ca149deb7643abc166368d2e22fecac24c38baa4",
+    "57aed8b846c0d7bc772a21129bf5ac837c70fc12",
+    "d255945461ee063747b05e7097fbefb59c6abfdd"
+  ],
+  "completed_at": "2026-10-02T23:24:15Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T22:55:49Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "nova/equilibrium/topology.py;"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 4.955752212389381,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T23:55:16.000788+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T22:55:15Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 598698,
+    "state": "quiet",
+    "utilisation_pct": 5.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T22:55:15Z",
+    "read_at": "2026-10-02T22:55:16Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 5.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T23:24:15Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225511267666-fsri-moment-map-derivative-rca/manifest.md",
+  "member": "disposable-r-20261002T225511267666-fsri-moment-map-derivative-rca",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsri-moment-map-derivative-rca",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 362,
+          "cached_input_tokens": 205119,
+          "input_tokens": 205483,
+          "output_tokens": 1703,
+          "reasoning_output_tokens": 550,
+          "total_tokens": 207186,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences fails at main. The Picard derivative RCA (run r-20261002T221031289251, commit 2799b22a6, benchmarks/picard_derivative_contract.py) showed it is independent of the Picard loop: the test calls ForwardProfile.moment_jacobian directly, and the relative error ladder 3.1917738194 / 3.1482329130 / 3.1474466265 does not shrink with step size, so this is a systematic derivative error, not finite-difference noise. The residual-shadow crossing and the null-coordinate stop-gradient are already excluded. Deliverable: a measurement script benchmarks/moment_map_derivative_contract.py, run on the test's own fixture. It compares reverse mode, forward JVP and central differences at three or more steps. It then decomposes the moment map into its stages (support partition and clip weights, cell moment integrals, normalisation, and whatever else the code path composes), so the error is assigned to the first stage whose derivative disagrees, and that stage is named by file and line. Also state whether the derivative the code returns is the derivative of a different function from the one finite differences probe, for example a stop_gradient, a custom_jvp, a frozen mask or a piecewise selection. Name the correct contract, and test it with a no-selection scalar control that must agree to 1e-10. Evidence: the fragment at docs/evidence/fragments/forward-solver-route-integrity/fsri-moment-map-derivative-rca.html, with one figure of the derivative estimates per stage and the receipt path. No repair to nova/ in this node. Gates run in place on this fleet allocation with JAX_PLATFORMS=cpu. Any step over ten minutes goes through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh --rungs h200 --force-submit; the coordinator authorises this launch path, and the general fence does not forbid it. For a baseline at another revision, use git archive of that revision extracted under /tmp with PYTHONPATH pointing there, because .git/worktrees is read-only in this fence. Every uv command carries --no-sync and nothing runs uv sync. Write the manifest before any long step; its status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Name the term of ForwardProfile.moment_jacobian whose derivative disagrees with central finite differences",
+    "id": "fsri-moment-map-derivative-rca",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T22:55:15Z",
+      "read_at": "2026-10-02T22:55:16Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 5.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225511267666-fsri-moment-map-derivative-rca/manifest.md",
+    "negative_control": "",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§1",
+    "spec_level": "open",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/moment_map_derivative_contract.py",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-moment-map-derivative-rca.html",
+      "docs/figures/forward-solver-route-integrity/fsri-moment-map-derivative-rca"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 4.949532435421309,
+      "derived": 0.011112160737930057,
+      "drain_hours": 168.0,
+      "effective_limit": 0.011112160737930057,
+      "elapsed_fraction": 0.010101964307209142,
+      "elapsed_hours": 1.6971300036111359,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-02T22:55:23+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.95,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.05,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.007250000000000001,
+      "decided_by": "window",
+      "margin": 0.8240000000000001,
+      "name": "fsri-moment-map-derivative-rca",
+      "score": 0.83125,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.05
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.668013,
+        "observed_at": "2026-10-02T22:55:23+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.05,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "fsri-moment-map-derivative-rca",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-02T22:55:23.668013+00:00",
+    "score": 0.83125,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5004.895,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "d255945461ee063747b05e7097fbefb59c6abfdd",
+  "resume_waiver": null,
+  "review": {
+    "absent": [
+      "The reviewed manifest leaves baseline_suite and after_suite empty. Its two completed H200 benchmark receipts are measurement gates, not paired completed suite arms, so no test-failure delta can be calculated.",
+      "The staged finite-difference receipt follows one deterministic fixture direction. It isolates the first divergent observable for the reported failure but does not establish derivative behaviour for every flux direction or topology class."
+    ],
+    "reviewed_base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+    "reviewed_head_sha": "d255945461ee063747b05e7097fbefb59c6abfdd",
+    "scores": {
+      "durability": 18,
+      "evidence": 18,
+      "fit": 16,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 91
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T225511267666-fsri-moment-map-derivative-rca",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fed4-da0e-7923-9ae9-174d0c84302d",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "open",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 21597696,
+    "cumulative_input_tokens": 43504264,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 57082
+  },
+  "time_budget": "60m",
+  "tool_steps": 121.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1706,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T23:24:19Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T22:55:55Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T225511267666-fsri-moment-map-derivative-rca",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 359,
+    "worker_pid": 1952689
+  },
+  "worker_seconds": 1706,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

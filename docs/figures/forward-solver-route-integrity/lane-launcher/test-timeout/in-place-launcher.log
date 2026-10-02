@@ -1,0 +1,28 @@
+REVISION=75495edb0afa05f41d7240b5690878da5cb170aa TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout COMMAND=TMPDIR=/tmp scripts/nova_lane/run.sh --in-place --log /tmp/nova-lane-timeout-head-repaired.log -- tests/test_nova_lane_launcher.py
+NOVA_LANE_START=2026-10-02T09:37:30+0200
+PLACEMENT=in-place
+RUNG=cpu
+SLURM_JOB_ID=1277272
+SLURM_JOB_PARTITION=rigel
+SOURCE_REVISION=75495edb0afa05f41d7240b5690878da5cb170aa
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout
+JAX_PLATFORMS=cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=3600
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_nova_lane_launcher.py --timeout 3600
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout
+configfile: pyproject.toml
+plugins: pytest-timeout-2.4.0
+timeout: 3600.0s
+collected 7 items
+
+tests/test_nova_lane_launcher.py .......                                 [100%]
+
+============================== 7 passed in 14.95s ==============================
+EXIT_STATUS=0
+NOVA_LANE_END=2026-10-02T09:37:49+0200

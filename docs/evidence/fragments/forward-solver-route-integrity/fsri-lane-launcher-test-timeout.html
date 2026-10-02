@@ -1,0 +1,31 @@
+<!-- fragment: fsri-lane-launcher-test-timeout -->
+<section id="fsri-lane-launcher-test-timeout">
+<h3>Lane pytest timeout</h3>
+
+<p><strong>Landed.</strong> Pytest payloads now receive a 3600-second
+per-test timeout by default. An explicit caller value, including
+<code>--timeout=value</code>, remains authoritative; <code>NOVA_LANE_TEST_TIMEOUT</code>
+selects a different default. The dry-run submission argument list is the same
+as the submitted payload argument list, and the in-place log header reports the
+effective bound.</p>
+
+<p>The pre-change reproduction's H200 dry-run line ends with
+<code>-- tests/test_nova_lane_launcher.py</code>, without a timeout argument.
+After the change, the in-place header records <code>PYTEST_TIMEOUT=3600</code>
+and the executed command ends with <code>--timeout 3600</code>.</p>
+
+<table>
+  <thead><tr><th>measure</th><th>result</th></tr></thead>
+  <tr><th scope="row">focused gate</th>
+    <td><code>7 passed in 16.64s</code>; <code>EXIT=0</code></td></tr>
+  <tr><th scope="row">in-place launcher</th>
+    <td><code>PYTEST_TIMEOUT=3600</code>; <code>7 passed in 14.95s</code>;
+      <code>EXIT_STATUS=0</code></td></tr>
+  <tr><th scope="row">negative control</th>
+    <td>removing injection produced two focused assertion failures, including
+      the default-bound assertion; <code>EXIT=1</code></td></tr>
+</table>
+
+<p>Commits: <code>55bca9b99</code> adds the timeout behaviour and tests;
+<code>75495edb0</code> makes dry-run faithfully preview the payload.</p>
+</section>

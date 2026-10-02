@@ -247,6 +247,30 @@ def test_bounded_exterior_step_caps_backtracks_and_refuses() -> None:
     assert bool(np.asarray(unknown.bound_refusal(jnp.asarray([2.5]))).all())
 
 
+def test_bounded_exterior_step_has_finite_zero_residual_tangent() -> None:
+    configure_dtypes()
+    unknown = BoundedExteriorFieldUnknown(
+        direction=jnp.asarray([1.0]),
+        field_scale=jnp.asarray([1.0]),
+        field_bound=jnp.asarray([2.0]),
+        step_limit=1.0,
+    )
+    residual = jnp.asarray([0.0])
+    direction = jnp.asarray([0.1])
+
+    def step(value: jax.Array) -> jax.Array:
+        return unknown.damped_step(jnp.asarray([0.0]), value)[0]
+
+    tangent = jax.jvp(step, (residual,), (direction,))[1]
+    delta = 1.0e-5
+    central_difference = (
+        step(residual + delta * direction) - step(residual - delta * direction)
+    ) / (2.0 * delta)
+
+    assert bool(np.asarray(jnp.isfinite(tangent)).all())
+    np.testing.assert_allclose(tangent, central_difference, rtol=1.0e-10, atol=0.0)
+
+
 def test_residual_row_actions_match_central_differences() -> None:
     configure_dtypes()
     profile = _profile()

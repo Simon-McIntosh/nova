@@ -690,15 +690,45 @@ def test_traced_clip_jits_once_and_vmaps_over_moving_separatrices():
 
 
 def test_traced_polygon_capacity_is_the_arc_plus_the_straight_chain():
-    """The per-polygon capacity is the derived layout bound, not a product."""
+    """The per-layout capacity is the arc per level run plus the straight chain."""
     capacity = traced_polygon_vertex_capacity(30)
     assert capacity == 128 + 30
+    assert traced_polygon_vertex_capacity(34, 1) == 128 + 34
+    assert traced_polygon_vertex_capacity(34, 2) == 2 * 128 + 34
     with pytest.raises(ValueError):
         traced_polygon_vertex_capacity(2)
+    with pytest.raises(ValueError):
+        traced_polygon_vertex_capacity(30, 0)
+
+
+def test_spline_clip_admits_a_two_run_layout_at_the_two_run_bound():
+    """Declaring the layout's two level runs admits both arcs, not one."""
+    configure_dtypes()
+    cell = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+    mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.5, 0.5]]))
+    capacity = traced_polygon_vertex_capacity(int(mesh.support_capacity), 2)
+
+    def saddle_level(points):
+        radial, vertical = points[..., 0], points[..., 1]
+        return (radial - 0.5) * (vertical - 0.5)
+
+    signed = saddle_level(jnp.asarray(mesh.node_coordinates))
+    support = mesh.traced_clip(signed, curve_evaluator=saddle_level, level_run_count=2)
+
+    assert int(support.refused_cells()) == 0, "the two-run layout must be admitted"
+    assert int(np.asarray(support.vertex_capacity)) == capacity
+    assert int(support.vertex_count[0]) == 260, "both 128-sample arcs are realised"
+    np.testing.assert_allclose(float(support.area[0]), 0.75, rtol=1.0e-12)
+    support.assert_no_refusal()
 
 
 def test_spline_clip_refuses_a_polygon_above_the_derived_capacity():
-    """A two-arc layout is refused, counted on the result (not silently dropped)."""
+    """A two-run layout is refused under the one-arc bound, counted (not dropped).
+
+    This is the declared negative control at its own default: the same layout
+    ``level_run_count=2`` admits presents 260 live vertices against the
+    one-arc bound derived for a single run, and the refusal is on the receipt.
+    """
     configure_dtypes()
     cell = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
     mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.5, 0.5]]))

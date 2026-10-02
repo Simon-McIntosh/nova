@@ -1,0 +1,456 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 6,
+  "attempt_kind": "resume",
+  "backend": "codex-terra",
+  "base_sha": "8cbd46f3fdee9a61fbd48fb919cd7c0728d51567",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 24071552,
+      "cached_input_tokens_cumulative": 24071552,
+      "input_tokens": 25286417,
+      "input_tokens_cumulative": 25286417,
+      "output_tokens": 84222,
+      "output_tokens_cumulative": 84222,
+      "reasoning_output_tokens": 26752,
+      "reasoning_output_tokens_cumulative": 26752
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 3322,
+    "files": 6,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_omissions_and_grid_margins_are_quantified",
+        "path": "tests/imas/test_diiid_geometry_corroboration.py"
+      },
+      "run_function": {
+        "line": 269,
+        "name": "_plot",
+        "path": "docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py"
+      },
+      "window_line": 280
+    },
+    {
+      "existing_function": {
+        "line": 127,
+        "name": "test_named_controls_and_prior_rows_are_strict",
+        "path": "tests/test_equilibrium_profile.py"
+      },
+      "run_function": {
+        "line": 269,
+        "name": "_plot",
+        "path": "docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py"
+      },
+      "window_line": 280
+    },
+    {
+      "existing_function": {
+        "line": 187,
+        "name": "test_picard_is_jittable_and_uses_boundary_push_core",
+        "path": "tests/test_equilibrium_profile.py"
+      },
+      "run_function": {
+        "line": 269,
+        "name": "_plot",
+        "path": "docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py"
+      },
+      "window_line": 280
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_control_points_build_the_bounding_box_from_the_shape_figures",
+        "path": "tests/test_shape_constraints.py"
+      },
+      "run_function": {
+        "line": 269,
+        "name": "_plot",
+        "path": "docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py"
+      },
+      "window_line": 280
+    },
+    {
+      "existing_function": {
+        "line": 350,
+        "name": "render_wall_height_safety_evidence",
+        "path": "tests/test_wall_height_exclusion.py"
+      },
+      "run_function": {
+        "line": 269,
+        "name": "_plot",
+        "path": "docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py"
+      },
+      "window_line": 317
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "6b9fa435011793b757ec0506d7784be50ff1a005",
+    "82f26d0ac6984782693e7e48d06926a16664144f",
+    "217b698411ac47506df01d45d359be4a4950de58",
+    "a9c29fa75a5a09d12fa6a259bdfa4789c7dda902",
+    "37daba9a5d3f2594d182c27312967dd7556ae725",
+    "021e72442bdf0f4e81a807f9cabbe28c146931f8",
+    "993888eb40a9e6f103db2bf473087abe6311f1ff",
+    "0aac33c2dedddbe2b89139008f0e933af0766250",
+    "e43904110702c79ab73827f7876007674a9f20e9",
+    "183e51ab57aa42df62946d1595e18f6c26f658ed"
+  ],
+  "completed_at": "2026-10-02T21:28:06Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T17:03:30Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "sbatch /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series/docs/figures/millisecond-converged-solve/cuda-graph-count/run_measurement.sbatch",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170249718910-mcs-alive-graph-count-series/analysis.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 1.0,
+    "plan": "millisecond-converged-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 3.41828616147124,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T18:02:56.592316+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T17:02:55Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T10:39:35Z",
+    "seconds_until_reset": 581799,
+    "state": "quiet",
+    "utilisation_pct": 13.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T17:02:55Z",
+    "read_at": "2026-10-02T17:02:56Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 13.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T21:28:06Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 5,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-02T18:04:15Z",
+        "detail": "continued session '01a0fd92-4555-7811-bdf5-f8662a7cddad' on harness 'codex'",
+        "from_backend": "codex",
+        "from_harness": "codex",
+        "reason": "the review repair could not start before the run's original deadline; it needs one fresh titan job",
+        "session": "continued",
+        "session_id": "01a0fd92-4555-7811-bdf5-f8662a7cddad",
+        "session_source": "stream",
+        "to_backend": "codex-terra",
+        "to_harness": "codex"
+      },
+      {
+        "changed_at": "2026-10-02T20:46:05Z",
+        "detail": "continued session '01a0fd92-4555-7811-bdf5-f8662a7cddad' on harness 'codex'",
+        "from_backend": "codex-terra",
+        "from_harness": "codex",
+        "reason": "the review of the final head finds the withdrawn verdict still presented as the measurement in the report body and the committed receipt; the repair is a record-only correction",
+        "session": "continued",
+        "session_id": "01a0fd92-4555-7811-bdf5-f8662a7cddad",
+        "session_source": "pointer",
+        "to_backend": "codex-luna",
+        "to_harness": "codex"
+      },
+      {
+        "changed_at": "2026-10-02T21:12:53Z",
+        "detail": "continued session '01a0fd92-4555-7811-bdf5-f8662a7cddad' on harness 'codex'",
+        "from_backend": "codex-luna",
+        "from_harness": "codex",
+        "reason": "the second record review still finds a stale figure and an unanswered done-when question; record-only repair, no job",
+        "session": "continued",
+        "session_id": "01a0fd92-4555-7811-bdf5-f8662a7cddad",
+        "session_source": "pointer",
+        "to_backend": "codex-terra",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261002T170249718910-mcs-alive-graph-count-series"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170249718910-mcs-alive-graph-count-series/manifest.md",
+  "member": "disposable-r-20261002T170249718910-mcs-alive-graph-count-series",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "mcs-alive-graph-count-series",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2413,
+          "cached_input_tokens": 487476,
+          "input_tokens": 489891,
+          "output_tokens": 2275,
+          "reasoning_output_tokens": 551,
+          "total_tokens": 492166,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Per followup f-mcs-alive-graph-count-across-many-programs: one titan job (--partition=titan --gres=gpu:1, explicit --mem, TMPDIR=/tmp in submit and payload, the shared interpreter without uv, RECKON_ALLOW_NESTED_LAUNCH=1 sbatch because it is a separate job, not a step of the fleet allocation) compiles a ladder of distinct programs (the twenty-edit sweep resumed from edit 18, or a synthetic ladder of distinct shapes) and records the alive CUDA graph count against programs compiled, with a control arm under XLA_FLAGS=--xla_gpu_enable_command_buffer= beside it, and a step that drops executables the run no longer needs and re-reads the count. The series is persisted as a receipt under docs/figures/millisecond-converged-solve/cuda-graph-count/ with a line figure drawn to the AGENTS.md data-ink rules, the instrument script beside it, and the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md states which of the two it is, with the evidence that decides it. No repair is written in this node. Commit the instrument and write the manifest before waiting on the job.",
+    "estimated_hours": 0.4,
+    "goal": "measure whether the alive CUDA graph count accumulates per compiled executable or for the process",
+    "id": "mcs-alive-graph-count-series",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T17:02:55Z",
+      "read_at": "2026-10-02T17:02:56Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 13.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170249718910-mcs-alive-graph-count-series/manifest.md",
+    "negative_control": "the control arm with command buffers disabled must show no growth in the count, so the instrument can distinguish the two",
+    "plan": "millisecond-converged-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "open",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/millisecond-converged-solve/cuda-graph-count",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md",
+      "docs/evidence/fragments/millisecond-converged-solve/mcs-alive-graph-count-series.html",
+      "docs/figures/millisecond-converged-solve/mcs-alive-graph-count-series"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex",
+    "member": null,
+    "node": "mcs-alive-graph-count-series",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T17:03:06.412035+00:00",
+    "score": 0.83125,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": null,
+  "plan": "millisecond-converged-solve",
+  "plan_impl_at_dispatch": 1.0,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "183e51ab57aa42df62946d1595e18f6c26f658ed",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "8cbd46f3fdee9a61fbd48fb919cd7c0728d51567",
+    "reviewed_head_sha": "183e51ab57aa42df62946d1595e18f6c26f658ed",
+    "scores": {
+      "durability": 15,
+      "evidence": 17,
+      "fit": 16,
+      "goal_fidelity": 16,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 84
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "run_id": "r-20261002T170249718910-mcs-alive-graph-count-series",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fd92-4555-7811-bdf5-f8662a7cddad",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "open",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 24071552,
+    "cumulative_input_tokens": 49357969,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 110974
+  },
+  "time_budget": "60m",
+  "tool_steps": 78.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 15876,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 6,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T21:28:17Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T21:17:11Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T170249718910-mcs-alive-graph-count-series",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 587,
+    "worker_pid": 253001
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}

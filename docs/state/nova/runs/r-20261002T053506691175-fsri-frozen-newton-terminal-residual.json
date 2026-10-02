@@ -1,0 +1,377 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 2,
+  "attempt_kind": "lane-change",
+  "backend": "clive",
+  "base_sha": "0ee93bdb44f5337100bd847753933133f90bf983",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 4057924,
+      "input_tokens_cumulative": 4057924,
+      "output_tokens": 18747,
+      "output_tokens_cumulative": 18747,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 44,
+    "files": 2,
+    "removed": 12
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 158,
+        "name": "promotion_stub",
+        "path": "tests/test_measured_candidate_acceptance.py"
+      },
+      "run_function": {
+        "line": 1378,
+        "name": "accept_newton_ladder",
+        "path": "nova/equilibrium/fixed_point.py"
+      },
+      "window_line": 1389
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "5095e04a1d87e1b413b4cd660c239f836f1f4218"
+  ],
+  "completed_at": "2026-10-02T06:30:24.586Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T05:35:25Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "negative-result",
+  "follow_on_paths": [],
+  "gate": "failed",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "failure-classification:negative-result",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T06:35:08.490621+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": null,
+    "metered": true,
+    "observed_at": null,
+    "read_at": "2026-10-02T05:35:08Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T06:30:24.586Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-02T06:17:24Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'codex' to 'claude'",
+        "from_backend": "codex-terra",
+        "from_harness": "codex",
+        "reason": "both gate jobs were killed by the new pytest-timeout 300 s default, not by the route; resubmitting with an explicit bound is mechanical, and codex-terra resumes are budget-held",
+        "session": "fresh",
+        "session_id": "01a0fb1c-52a4-7770-a832-ee4f106db147",
+        "session_source": "stream",
+        "to_backend": "clive",
+        "to_harness": "claude"
+      }
+    ],
+    "root_run_id": "r-20261002T053506691175-fsri-frozen-newton-terminal-residual"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T053506691175-fsri-frozen-newton-terminal-residual/manifest.md",
+  "member": "disposable-r-20261002T053506691175-fsri-frozen-newton-terminal-residual",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/test_forward_operator_arguments.py",
+      "tests/test_one_read_per_trip.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsri-frozen-newton-terminal-residual",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1164,
+          "cached_input_tokens": 855893,
+          "input_tokens": 857059,
+          "output_tokens": 1647,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 858706,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Base 0ee93bdb44f5337100bd847753933133f90bf983 carries the locked live-warmup frozen-Newton repair (b6d110cf6 to 85444e645). Its exact-route gate, tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point, now runs inside the all_debug hour (CPU job 1279828: 37 min) and in 7.5 min on the H200 (job 1279826). Both runs fail the same assertion: residual 2.3728714792e-06 against RESIDUAL_TOLERANCE 1e-06 at tests/test_equilibrium_forward_solve.py:600, while the trajectory residual on the frozen partition is 7.97e-13. Logs: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton/docs/figures/millisecond-converged-solve/newton-krylov-route/exact-route-gate-cpu.log and /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton/docs/figures/millisecond-converged-solve/newton-krylov-route/exact-route-gate-h200.log. So Newton converges on the partition frozen from the warmed state, and that state is not the fixed point of the live map. (1) Measure why: record the warmed and terminal partitions (cells whose label or support membership differs), and the live-map residual at the frozen-Newton terminal state. (2) Fix the route within the locked design: one partition read during each Newton pass, and requalification at the terminal state. If requalification finds a different partition, take a new frozen partition from the terminal state and run Newton again, with a stated bound on re-freezes, recorded in the receipt as re-freeze count and partition reads per solve. (3) Evidence: the exact-route gate passes on the H200 lane and passes inside the all_debug hour, as two real jobs submitted with RECKON_ALLOW_NESTED_LAUNCH=1 (sbatch inside the fleet allocation is reckon's nested-launch shim), each with --output to an absolute log under docs/figures/millisecond-converged-solve/newton-krylov-route/terminal-residual/. Write the manifest with status: waiting and a valid wait_probe on the two job ids and wait_terminal exit:0, then end the turn without polling. tests/test_one_read_per_trip.py and tests/test_forward_operator_arguments.py stay green; record their base and head arms. Negative control: with the re-freeze disabled the gate fails at 2.37e-6, logged. Status must be exactly complete or blocked; in-progress is not recognised.",
+    "estimated_hours": 2.0,
+    "goal": "The frozen-Newton certificate route reaches the shared live fixed point: its terminal residual on the live map is below 1e-6",
+    "id": "fsri-frozen-newton-terminal-residual",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": null,
+      "metered": true,
+      "observed_at": null,
+      "read_at": "2026-10-02T05:35:08Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T053506691175-fsri-frozen-newton-terminal-residual/manifest.md",
+    "negative_control": "disable the terminal re-freeze: the exact-route gate fails with residual 2.37e-06 against 1e-06",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§1",
+    "spec_level": "open",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/fixed_point.py",
+      "nova/equilibrium/forward.py",
+      "tests/test_one_read_per_trip.py",
+      "tests/test_forward_operator_arguments.py",
+      "docs/figures/millisecond-converged-solve/newton-krylov-route/terminal-residual",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-frozen-newton-terminal-residual.html",
+      "docs/figures/forward-solver-route-integrity/fsri-frozen-newton-terminal-residual"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex-terra",
+    "member": null,
+    "node": "fsri-frozen-newton-terminal-residual",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T05:35:10.130390+00:00",
+    "score": 0.75625,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_revision": "5095e04a1d87e1b413b4cd660c239f836f1f4218",
+  "resume_waiver": {
+    "reason": "codex-terra resumes are budget-held; the hypothesis this run tested is falsified and the follow-on is a separate diagnosis node on a lineage carrying its commit",
+    "session_id": "73334d0c-7519-4a9c-9bb7-24d3110095b7",
+    "source": "stream"
+  },
+  "review": null,
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T053506691175-fsri-frozen-newton-terminal-residual",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "73334d0c-7519-4a9c-9bb7-24d3110095b7",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "open",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 4057924,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 778.218,
+    "generated_tokens": 18747,
+    "generation_seconds": 681.708,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 25.3,
+    "machine_seconds": 96.51,
+    "peak_input_tokens": 121455,
+    "tokens_per_second": 27.5,
+    "wall_tokens_per_second": 24.09
+  },
+  "time_budget": "60m",
+  "tool_steps": 42.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3299,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T06:30:30Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T06:17:26Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T053506691175-fsri-frozen-newton-terminal-residual",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 3289,
+    "worker_pid": 3843452
+  },
+  "worker_seconds": 730,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-02T06:30:24.586Z",
+    "session_id": "73334d0c-7519-4a9c-9bb7-24d3110095b7",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-newton-terminal-residual"
+  }
+}

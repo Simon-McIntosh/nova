@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="45">
+<meta name="plan-version" content="46">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -530,6 +530,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261002T064655427735-fsri-frozen-route-fixed-point-rca" data-who="reckon-build" data-when="2026-10-02T06:56:02Z">
     <div class="r-comment-body"><p>Pending H200 measurement at job 1279892; the committed diagnostic will write the residual decomposition and refresh result to its assigned report.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261002T053506691175-fsri-frozen-newton-terminal-residual" data-who="reckon-build" data-when="2026-10-02T06:30:24.586Z">
+    <div class="r-comment-body"><p>terminal re-freeze (5095e04a1) changed nothing: exact-route residual 2.3728714768e-06 on CPU (37:29, inside the all_debug hour) and 2.372871479e-06 on the H200 (6:59) against 1e-06, identical to the pre-change route; the partition does not change at the terminal state, so the frozen map&#x27;s fixed point differs from the live map&#x27;s for another reason, under diagnosis in fsri-frozen-route-fixed-point-diagnosis on a lineage carrying this commit; not merged</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-fsri-compile-blocks-a-cpu-control" data-who="coordinator" data-when="2026-09-19T16:55:00Z">
     <div class="r-comment-body"><p>The program size this section owns now blocks another plan's evidence, measured 2026-09-19 on the centroid-constrained positive control. Two all_debug jobs aborted inside LLVM compiling <code>jit_scan</code>, the first at 64G and the second at 180G, both with <code>allocateMappedMemory failed</code> and a core dump at exit 134, the second after a slow-compile alarm and 38 minutes. Tripling the allocation changed nothing, so the constraint is the compiled module rather than the job's memory request. Two things follow for this section. The gate for section 2 should include a CPU arm, since an executable that cannot be compiled on a 180G node is a failure a device-only budget would not catch. And the scheduler signal is not trustworthy here: <code>sacct</code> reported <code>COMPLETED 0:0</code> for both jobs and for every sub-step while the payload aborted, so the payload log is the only evidence of what happened. The centroid plan's positive control waits on this section rather than on its own node.</p></div>

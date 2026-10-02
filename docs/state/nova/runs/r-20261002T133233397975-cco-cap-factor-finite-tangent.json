@@ -1,0 +1,496 @@
+{
+  "agent": {
+    "alias": "sol5.6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "edf04ca11ba3c2ba08585ea32644a9310b00e8cf",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 21517440,
+      "cached_input_tokens_cumulative": 21517440,
+      "input_tokens": 21864128,
+      "input_tokens_cumulative": 21864128,
+      "output_tokens": 41163,
+      "output_tokens_cumulative": 41163,
+      "reasoning_output_tokens": 9940,
+      "reasoning_output_tokens_cumulative": 9940
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 722,
+    "files": 4,
+    "removed": 4
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 705,
+        "name": "receipt",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "run_function": {
+        "line": 103,
+        "name": "receipt",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 214,
+        "name": "test_bounded_exterior_step_caps_backtracks_and_refuses",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "run_function": {
+        "line": 250,
+        "name": "test_bounded_exterior_step_has_finite_zero_residual_tangent",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "window_line": 251
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "_system",
+        "path": "tests/test_constraint_active_set.py"
+      },
+      "run_function": {
+        "line": 370,
+        "name": "test_typed_request_and_receipt_carry_constraint_rows",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "window_line": 372
+    },
+    {
+      "existing_function": {
+        "line": 492,
+        "name": "test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "run_function": {
+        "line": 417,
+        "name": "test_eliminated_constraint_runs_through_typed_solve_with_outer_trace",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "window_line": 424
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_eliminated_constraint_runs_through_typed_solve_with_outer_trace",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "run_function": {
+        "line": 492,
+        "name": "test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "window_line": 499
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "receipt",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "run_function": {
+        "line": 705,
+        "name": "receipt",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "window_line": 705
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_krylov_constraints_refuse_without_a_prescribed_field",
+        "path": "tests/test_forward_constraints.py"
+      },
+      "run_function": {
+        "line": 779,
+        "name": "test_shafranov_row_converges_to_the_imposed_profile_amplitude",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "window_line": 805
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_krylov_constraints_reach_solver_with_an_operator_prescribed_field",
+        "path": "tests/test_forward_constraints.py"
+      },
+      "run_function": {
+        "line": 779,
+        "name": "test_shafranov_row_converges_to_the_imposed_profile_amplitude",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "window_line": 805
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_vertical_centroid_reports_physical_circuit_compensation",
+        "path": "tests/test_vertical_position_constraint.py"
+      },
+      "run_function": {
+        "line": 779,
+        "name": "test_shafranov_row_converges_to_the_imposed_profile_amplitude",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "window_line": 805
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "sample_flux_field",
+        "path": "tests/test_centroid_constraint_lattice_guard.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "sample_flux_field",
+        "path": "tests/test_equilibrium_constraint_protocol.py"
+      },
+      "window_line": 1003
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "211d75798c58c167bbb66b177147f7d0ce62ef6b",
+    "b17968fe1ad04122140c08935a1df54fac7610c1"
+  ],
+  "completed_at": "2026-10-02T14:27:51Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T13:32:59Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest of",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "0.001"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-cap-factor-finite-tangent /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_equilibrium_constraint_protocol.py tests/test_centroid_constrained_fixture.py -q",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T133233397975-cco-cap-factor-finite-tangent/after-suite.log"
+  },
+  "impl_move": {
+    "at_complete": 0.8,
+    "at_dispatch": 0.8,
+    "plan": "centroid-constrained-oracle-solve",
+    "reason": "repairs a derivative defect; the section's qualified centroid-constrained solve is not yet met (8.42e-12 pitches against 1e-12), pending the tolerance decision",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.912172573189522,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T14:32:40.324126+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T13:32:39Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T10:39:36Z",
+    "seconds_until_reset": 594416,
+    "state": "quiet",
+    "utilisation_pct": 5.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T13:32:39Z",
+    "read_at": "2026-10-02T13:32:40Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 5.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T14:27:51Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T133233397975-cco-cap-factor-finite-tangent/manifest.md",
+  "member": "disposable-r-20261002T133233397975-cco-cap-factor-finite-tangent",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_equilibrium_constraint_protocol.py::test_bounded_exterior_step_has_finite_zero_residual_tangent"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_equilibrium_constraint_protocol.py::test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows",
+      "tests/test_equilibrium_constraint_protocol.py::test_eliminated_constraint_runs_through_typed_solve_with_outer_trace"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_equilibrium_constraint_protocol.py::test_bounded_exterior_step_has_finite_zero_residual_tangent"
+    ],
+    "declaration": "restoring the minimum(1, step_limit / maximum(abs(raw), tiny)) cap makes the new finiteness test fail",
+    "head_failure_ids": [
+      "tests/test_equilibrium_constraint_protocol.py::test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows",
+      "tests/test_equilibrium_constraint_protocol.py::test_eliminated_constraint_runs_through_typed_solve_with_outer_trace"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T133233397975-cco-cap-factor-finite-tangent/negative-control-restored-cap.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T133233397975-cco-cap-factor-finite-tangent/negative-control-restored-cap.log",
+    "test_paths": [
+      "tests/test_equilibrium_constraint_protocol.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cco-cap-factor-finite-tangent",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 3026,
+          "cached_input_tokens": 140911,
+          "input_tokens": 143939,
+          "output_tokens": 1463,
+          "reasoning_output_tokens": 58,
+          "total_tokens": 145402,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "In nova/equilibrium/constraint.py the damped_step cap factor becomes step_limit / maximum(step_limit, abs(raw)) (algebraically the same cap, finite tangent at raw == 0; no bound, tolerance or solver default changes), per /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-nonfinite-krylov-action.md. (1) A test in tests/test_equilibrium_constraint_protocol.py asserts jax.jvp of damped_step at row_residual == 0 is finite and equals the central difference, and fails on the parent edf04ca11. (2) python -m benchmarks.centroid_constrained_fixture_receipt --diagnose-linear-action on the banked state digest f1097ebdb78a3886 reports the level entry finite and within 1e-6 relative of its central difference (+0.1), field entries unchanged; receipt under docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/. (3) The weak-rotation-reactor-static -110 three-column unit-leverage positive control, inputs unchanged from H200 job 1280166 (field_scale_t 0.25 T, seed digest prefix 062b465a7364914f, 10 Newton steps, 30 GMRES iterations), runs as ONE job on H200 rung 1 (betelgeuse, reservation gpu_0003_grpA, one card, explicit --mem, TMPDIR=/tmp in submit and payload, the shared interpreter without uv), submitted with RECKON_ALLOW_NESTED_LAUNCH=1 sbatch because it is a separate job, not a step of the fleet allocation; its receipt in the same directory carries every active_set pass and its inner history. Commit the repair, test and diagnostic receipt and write the manifest BEFORE waiting on the H200 job. The report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-cap-factor-finite-tangent.md states whether any pass reports NONFINITE_LINEAR_ACTION and gives the terminal qualification and relative residual against 1e-12 as measured, without asserting convergence. Gate: JAX_PLATFORMS=cpu pytest of tests/test_equilibrium_constraint_protocol.py and tests/test_centroid_constrained_fixture.py, delta against the parent.",
+    "estimated_hours": null,
+    "goal": "make the compensator step cap differentiable at a zero row residual and confirm the repair on the H200 positive control",
+    "id": "cco-cap-factor-finite-tangent",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T13:32:39Z",
+      "read_at": "2026-10-02T13:32:40Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 5.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T133233397975-cco-cap-factor-finite-tangent/manifest.md",
+    "negative_control": "restoring the minimum(1, step_limit / maximum(abs(raw), tiny)) cap makes the new finiteness test fail",
+    "plan": "centroid-constrained-oracle-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/constraint.py",
+      "tests/test_equilibrium_constraint_protocol.py",
+      "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-cap-factor-finite-tangent.md",
+      "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-cap-factor-finite-tangent.html",
+      "docs/figures/centroid-constrained-oracle-solve/cco-cap-factor-finite-tangent"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex",
+    "member": null,
+    "node": "cco-cap-factor-finite-tangent",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T13:32:43.894723+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "centroid-constrained-oracle-solve",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_revision": "b17968fe1ad04122140c08935a1df54fac7610c1",
+  "resume_waiver": null,
+  "review": {
+    "absent": [
+      "per-active-set-pass inner Newton/Krylov qualification histories"
+    ],
+    "reviewed_base_sha": "edf04ca11ba3c2ba08585ea32644a9310b00e8cf",
+    "reviewed_head_sha": "b17968fe1ad04122140c08935a1df54fac7610c1",
+    "scores": {
+      "durability": 17,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 91
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T133233397975-cco-cap-factor-finite-tangent",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fcd1-8622-7451-b90e-36cc04131c82",
+  "session_model": "gpt-5.6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 1,
+  "throughput": {
+    "cumulative_cached_input_tokens": 21517440,
+    "cumulative_input_tokens": 43381568,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 51103
+  },
+  "time_budget": "60m",
+  "tool_steps": 114.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3292,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T14:27:58Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T13:33:02Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T133233397975-cco-cap-factor-finite-tangent",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 344,
+    "worker_pid": 723777
+  },
+  "worker_seconds": 3292,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

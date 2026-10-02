@@ -1,0 +1,45 @@
+{
+  "arms": [
+    {
+      "analytic_axis_flux_wb": 49.94047719090434,
+      "analytic_boundary_flux_wb": 6.328903683935724e-08,
+      "analytic_span_wb": 49.9404771276153,
+      "arm": "positive",
+      "case": "weak-rotation-reactor-static",
+      "compensating_field_t": [
+        -0.008127881552383495,
+        1.7778050907834746e-11
+      ],
+      "compensator_flux_at_axis_wb": -0.0012669848568852148,
+      "compensator_flux_at_boundary_wb": -0.5725286880539711,
+      "compensator_flux_at_contact_radius_wb": -0.5725286880539711,
+      "compensator_span_contribution_wb": 0.5712617031970858,
+      "constrained": true,
+      "contact_radius_m": 7.801395788396821,
+      "fixed_point_clause_at_or_below_1e-12": false,
+      "fixed_point_verdict": "fails",
+      "gauge_free_flux_offset_less_compensator_wb": 0.6710026673392114,
+      "gauge_free_flux_offset_of_span": 0.02487489992059706,
+      "gauge_free_flux_offset_wb": 1.2422643705362972,
+      "level_clause_within_1e-3_of_span": false,
+      "reference_radius_m": 6.2,
+      "row_scaled_residual_sup": 0.006452979645873655,
+      "solved_axis_flux_wb": 49.94097482259611,
+      "solved_boundary_flux_wb": -1.2417666755554908,
+      "solved_span_wb": 51.1827414981516,
+      "source_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T094100739066-cco-unit-leverage-positive-control/receipt/control-positive.json",
+      "source_revision": "8289cdb9ca89652e13b9e1203aac2d3e11375d37"
+    }
+  ],
+  "gauge": "solved and analytic flux levels are compared only as the span between the magnetic axis and the boundary; the compensator columns are anchored at the magnetic axis, so a level read against the authored zero is confounded by an additive constant",
+  "level_tolerance_of_span": 0.001,
+  "row_tolerance": 1e-12,
+  "schema": "nova.centroid-gauge-free-offset",
+  "skipped_arms": [
+    {
+      "arm": "negative",
+      "reason": "banked control receipt absent: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T094100739066-cco-unit-leverage-positive-control/receipt/control-negative.json"
+    }
+  ],
+  "source_root": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T094100739066-cco-unit-leverage-positive-control/receipt"
+}

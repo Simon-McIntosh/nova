@@ -1173,11 +1173,12 @@ def _draw_topology(
 ) -> Any:
     from nova.media import poloidal
 
+    other_x_points = topology.get("other_qualified_x_points_rz_m") or None
     return poloidal.draw_nulls(
         axis,
         magnetic_axis=topology.get("axis_rz_m"),
         x_points=topology.get("x_point_rz_m"),
-        other_x_points=topology.get("other_qualified_x_points_rz_m", ()),
+        other_x_points=other_x_points,
         contain=units,
         style=style,
     )

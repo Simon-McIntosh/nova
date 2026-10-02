@@ -169,7 +169,7 @@ def aggregate() -> dict:
     return receipt
 
 
-def _production_member(machine: str, member_number: int):
+def _production_member(machine: str, member_number: int, diiid_machine_cache: Path):
     if machine == "mast":
         shot, slice_index, _bank_row = mast_forward._case_rows(mast_forward.SHOT_STORE)[
             member_number - 1
@@ -206,7 +206,7 @@ def _production_member(machine: str, member_number: int):
         }
         return member, selection, evidence
     member, evidence = production.build_diiid_member(
-        production.DEFAULT_DIIID_MACHINE_CACHE,
+        diiid_machine_cache,
         member_number,
         member_count=PRODUCTION_MEMBER_COUNTS[machine],
     )
@@ -302,9 +302,13 @@ def _production_refused_cells(profile, state, base) -> list[int]:
     ]
 
 
-def production_case(machine: str, member_number: int) -> dict:
+def production_case(
+    machine: str, member_number: int, diiid_machine_cache: Path
+) -> dict:
     set_support_clip_mode("exact")
-    member, selection, evidence = _production_member(machine, member_number)
+    member, selection, evidence = _production_member(
+        machine, member_number, diiid_machine_cache
+    )
     operator = member.profile.operator
     masks, topology, sample_psi_norm, support = _profile_support(
         member.profile, member.state
@@ -383,6 +387,11 @@ def main() -> None:
         "--production-machine", choices=sorted(PRODUCTION_MEMBER_COUNTS)
     )
     parser.add_argument("--member", type=int)
+    parser.add_argument(
+        "--diiid-machine-cache",
+        type=Path,
+        default=production.DEFAULT_DIIID_MACHINE_CACHE,
+    )
     parser.add_argument("--aggregate-production", action="store_true")
     arguments = parser.parse_args()
     if arguments.aggregate_production:
@@ -410,7 +419,11 @@ def main() -> None:
             parser.error(f"--member must be in [1, {member_count}]")
         configure_dtypes()
         PRODUCTION_OUT.mkdir(parents=True, exist_ok=True)
-        row = production_case(arguments.production_machine, arguments.member)
+        row = production_case(
+            arguments.production_machine,
+            arguments.member,
+            arguments.diiid_machine_cache,
+        )
         path = (
             PRODUCTION_OUT
             / f"{arguments.production_machine}-{arguments.member:02d}.json"

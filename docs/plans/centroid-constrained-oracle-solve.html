@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="31">
+<meta name="plan-version" content="32">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -130,6 +130,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T074241635954-review-of-cco-control-figures-from-persisted-state" data-who="reckon-build" data-when="2026-10-02T08:05:20.482Z">
     <div class="r-comment-body"><p>Reviewed r-20261002T063538147071-cco-control-figures-from-persisted-state at base 9ac842a6 / head cf9b6e78: stored a parsed review (goal_fidelity 17, evidence 15, scope_discipline 20, durability 17, fit 18; total 87; verdict pass) recording added_failure_count 0 (head gate logs/gate-fixture.log 10 passed EXIT=0) and two follow-on findings — the positive panel is drawn from its committed receipt rather than a persisted state (no state exists) and its render is recorded only in the run stream, not in logs/render-both.log.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T092942806602-cco-fixed-point-attribution" data-who="reckon-build" data-when="2026-10-02T09:39:47.826Z">
+    <div class="r-comment-body"><p>Attribution: the 1e-12 row clause fails because the 10-step/30-GMRES Newton-Krylov budget ends with the whole augmented iterate unconverged (flux-block residual exceeds the row residual in both positive arms), most likely through the compensator column scaling (1e-3 T per unit = 3.49e-3 row leverage, 1/286) and the level cap (1.238 Wb needed against 1 Wb per trip); the target is reachable for the row clause, but the 1e-3-of-span clause is unreachable at 135 cells because the 2.39e-3 T compensator alone contributes 3.2e-3 of span; repair = field_scale_t 0.25 T plus a seeded initial_level_wb plus a per-step trace, confirmed by one GPU-class three-column positive control reaching 1e-12 within the unchanged budget; the CPU jit_scan abort blocks only the CPU rung and belongs to forward-solver-route-integrity §2 (size lever) and cpu-compile-abort (mechanism).</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T053656352101-review-of-cco-bounded-row-step-control" data-who="s19c-review-cco-c" data-when="2026-09-17T06:45:40.145Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T205409901465-cco-bounded-row-step-control stored at the fence path, total 84, findings recorded on the reviewed run's completion</p></div>

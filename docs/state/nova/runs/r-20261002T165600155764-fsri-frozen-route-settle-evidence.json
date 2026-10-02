@@ -1,0 +1,352 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "3a4faa65c247e908edc68305bf252b8a3180b1b1",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 6377935,
+      "input_tokens_cumulative": 6377935,
+      "output_tokens": 15173,
+      "output_tokens_cumulative": 15173,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 3939,
+    "files": 8,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "f64973a5f74ae2786b54d5b0a5271a554a7ad142",
+    "142d608e89bfc86ea539eef7051217ebf05fb505",
+    "87c4954d97103f1b184e419adb08616e6ac44817"
+  ],
+  "completed_at": "2026-10-02T18:13:01.293Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T16:56:42Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "scripts/nova_lane/run.sh -- benchmarks/frozen_route_settle_figures.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T165600155764-fsri-frozen-route-settle-evidence/route-figures-h200.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T17:56:05.031710+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T16:56:05Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 24,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 12,
+    "headroom": 3,
+    "mean_context": 144000,
+    "observed_at": "2026-10-02T16:55:41Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T18:13:01.293Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T165600155764-fsri-frozen-route-settle-evidence/manifest.md",
+  "member": "disposable-r-20261002T165600155764-fsri-frozen-route-settle-evidence",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsri-frozen-route-settle-evidence",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 371,
+          "cached_input_tokens": 646795,
+          "input_tokens": 647168,
+          "output_tokens": 1645,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 648813,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Committed under docs/figures/forward-solver-route-integrity/frozen-route-settle-evidence/: (1) a data-ink figure of residual against step for the picard and newton_krylov routes, before and after, from the receipts and logs; (2) one poloidal flux contour panel of the terminal state rendered with the committed nova.media painters (solved contours beside the picard reference on shared levels, both null sets, the wall, terminal residual and converged flag in the caption), produced by one H200 solve through scripts/nova_lane/run.sh (betelgeuse, gpu_0003_grpA, one card, explicit --mem, RECKON_ALLOW_NESTED_LAUNCH=1, JAX_PLATFORMS=cuda); (3) a timing table with compile and execute seconds separately for the frozen-pass and live-fallback programs on H200 and CPU, beside the base route and the combined-graph attempt, read from the logs, stating any figure the logs cannot give as unmeasured, never estimated. Then the evidence fragment docs/evidence/fragments/forward-solver-route-integrity/fsri-frozen-route-settle-evidence.html with the three measured negative arms, the passing arms, the per-solve passes/reads/steps and the figures with project-absolute src (/nova/figures/forward-solver-route-integrity/frozen-route-settle-evidence/...). Change no source under nova/. Write the manifest before the H200 job; while it runs write status: blocked with wait_probe [\"sacct\",\"-n\",\"-X\",\"-j\",\"<id>\",\"--format=State\"] and wait_terminal COMPLETED. Every uv command carries --no-sync and nothing runs uv sync. The manifest status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Produce the evidence for the frozen-Newton settle repair, whose code is complete and committed on this base (commits fd671f3dc to dfcda3dbb of run r-20261002T084121851662-fsri-frozen-route-settle-residual-gate). Under the rule that freezing must not limit convergence, the route freezes the partition within each Newton pass, re-reads it live between passes, terminates on the live residual only, and falls back to separately compiled live-read Newton steps. Its gates passed: the accelerator-routes test at 1e-6 with Picard flux parity on the H200 in 749.31 s (job 1280379) and on CPU in 4649.01 s, and the after RCA receipt (docs/figures/forward-solver-route-integrity/frozen-route-settle-gate/rca-after/, job 1280440) reads live residual 1.282728063088e-11 with 2 passes, 3 live partition reads and 1 live-read step, against the before receipt's 2.37e-6 ACTIVE_SET_SETTLED (docs/figures/millisecond-converged-solve/newton-krylov-route/fixed-point-rca/). The run's logs are in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate (accelerator-h200*.log, accelerator-cpu*.log, rca-after-h200.log, focused-*.log).",
+    "id": "fsri-frozen-route-settle-evidence",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T16:56:05Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 24,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 12,
+      "headroom": 3,
+      "mean_context": 144000,
+      "observed_at": "2026-10-02T16:55:41Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T165600155764-fsri-frozen-route-settle-evidence/manifest.md",
+    "negative_control": "none: a figure and documentation node that changes no solver source",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§1",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/forward-solver-route-integrity/frozen-route-settle-evidence",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-frozen-route-settle-evidence.html",
+      "benchmarks/frozen_route_settle_figures.py",
+      "docs/figures/forward-solver-route-integrity/fsri-frozen-route-settle-evidence"
+    ]
+  },
+  "orientation_input_tokens": 3493285.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsri-frozen-route-settle-evidence",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T16:56:16.958150+00:00",
+    "score": 0.8125,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "87c4954d97103f1b184e419adb08616e6ac44817",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "3a4faa65c247e908edc68305bf252b8a3180b1b1",
+    "reviewed_head_sha": "87c4954d97103f1b184e419adb08616e6ac44817",
+    "scores": {
+      "durability": 17,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 89
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T165600155764-fsri-frozen-route-settle-evidence",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "e65cb8d0-0d0a-4eff-ba5d-3190769a9a1e",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 22955931,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 540.315,
+    "generated_tokens": 93313,
+    "generation_seconds": 493.771,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 53.2,
+    "machine_seconds": 46.544,
+    "peak_input_tokens": 255336,
+    "tokens_per_second": 188.98,
+    "wall_tokens_per_second": 172.7
+  },
+  "time_budget": "60m",
+  "tool_steps": 111.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 4579,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T18:13:03Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T18:03:56Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T165600155764-fsri-frozen-route-settle-evidence",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 14772,
+    "worker_pid": 3116468
+  },
+  "worker_seconds": 4530,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

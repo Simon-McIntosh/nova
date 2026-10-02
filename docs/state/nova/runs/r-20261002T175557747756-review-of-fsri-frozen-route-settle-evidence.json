@@ -1,0 +1,312 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-terra",
+  "base_sha": "5baef21a458b90e0b2f53c2dd96b57d15f910669",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "no events yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": null,
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-02T18:03:33Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T17:56:23Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 3.926672777268561,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T18:41:00.658480+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": "2026-10-02T17:55:59Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T10:39:36Z",
+    "seconds_until_reset": 578616,
+    "state": "quiet",
+    "utilisation_pct": 17.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T17:55:59Z",
+    "read_at": "2026-10-02T17:56:00Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 17.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T18:03:33Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T175557747756-review-of-fsri-frozen-route-settle-evidence/manifest.md",
+  "member": "disposable-r-20261002T175557747756-review-of-fsri-frozen-route-settle-evidence",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-fsri-frozen-route-settle-evidence",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1386,
+          "cached_input_tokens": 715564,
+          "input_tokens": 716952,
+          "output_tokens": 1385,
+          "reasoning_output_tokens": 355,
+          "total_tokens": 718337,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the review for r-20261002T165600155764-fsri-frozen-route-settle-evidence stores a parsed record at head 142d608e89bfc86ea539eef7051217ebf05fb505 scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own gate logs. It checks the two figures against the repository plotting rules in AGENTS.md: the terminal flux panel must draw the solved contours and the picard reference contours on shared levels, both null sets, and the wall, with the residual and converged flag in the caption; state whether both contour sets and both null sets are actually drawn or coincide, and whether the caption says so. It checks every number in the fragment against the receipts and logs it cites (the settle run's logs under ~/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/ and job 1280457), and that the unmeasured compile/execute split is stated as unmeasured rather than estimated; the turn ends once that record is stored and the manifest reads complete with status: complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261002T165600155764-fsri-frozen-route-settle-evidence",
+    "id": "review-of-fsri-frozen-route-settle-evidence",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T17:55:59Z",
+      "read_at": "2026-10-02T17:56:00Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 17.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T175557747756-review-of-fsri-frozen-route-settle-evidence/manifest.md",
+    "negative_control": "",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§1",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T165600155764-fsri-frozen-route-settle-evidence.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T165600155764-fsri-frozen-route-settle-evidence.at-142d608e89bfc86ea539eef7051217ebf05fb505.json"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 3.925970664555652,
+      "derived": 0.04763153267757925,
+      "drain_hours": 168.0,
+      "effective_limit": 0.04763153267757925,
+      "elapsed_fraction": 0.043301393343253856,
+      "elapsed_hours": 7.2746340816666475,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-02T17:56:04+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.83,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T10:39:36Z",
+      "state": "observed",
+      "utilisation": 0.17,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.07687400000000003,
+      "decided_by": "window",
+      "margin": 0.548126,
+      "name": "review-of-fsri-frozen-route-settle-evidence",
+      "score": 0.625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.17
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.682694,
+        "observed_at": "2026-10-02T17:56:04+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T10:39:36Z",
+        "state": "observed",
+        "utilisation": 0.17,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "review-of-fsri-frozen-route-settle-evidence",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-02T17:56:04.682694+00:00",
+    "score": 0.625,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "5baef21a458b90e0b2f53c2dd96b57d15f910669",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "role": "review",
+  "run_id": "r-20261002T175557747756-review-of-fsri-frozen-route-settle-evidence",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fdc2-acfc-7553-8dc8-420e98832b3a",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "time_budget": "45m",
+  "tool_steps": 19.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 430,
+  "watch_override": null,
+  "worker_seconds": 430,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

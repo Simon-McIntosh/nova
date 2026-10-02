@@ -1,0 +1,460 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "ecf7090ba80a454e03c57c00b83c5f237dec24ed",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 7975005,
+      "input_tokens_cumulative": 7975005,
+      "output_tokens": 59964,
+      "output_tokens_cumulative": 59964,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 608,
+    "files": 14,
+    "removed": 36
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_structured_read_consumes_retained_rows_without_repolishing",
+        "path": "tests/test_structured_read_census_rows.py"
+      },
+      "run_function": {
+        "line": 205,
+        "name": "_shared_shadowed_map",
+        "path": "nova/equilibrium/forward.py"
+      },
+      "window_line": 211
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "b6d110cf61fe27ab542dbdf47c952324e0e73232",
+    "3763af81dcdf19491b4534a60889158ea51f01c3",
+    "27a20aa82f76630429e589e2b4e051688ebd693f",
+    "9a38d10481b8cb0828c7438a0c6c26a8f0494b7f",
+    "c9618e83ad68c3e983a7d003f16a428b62d6a9a6",
+    "67cc71c25533b7c488625fe16a282690141a7e54",
+    "85444e645ab71753995e9f97312703ee3522ba8e"
+  ],
+  "completed_at": "2026-10-02T00:29:00.085Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-01T21:11:02Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "negative-result",
+  "follow_on_paths": [],
+  "gate": "failed",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "failure-classification:negative-result",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-01T22:10:44.712541+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": null,
+    "metered": true,
+    "observed_at": null,
+    "read_at": "2026-10-01T21:10:44Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T00:29:00.085Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-01T22:06:00Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'codex' to 'claude'",
+        "from_backend": "codex-terra",
+        "from_harness": "codex",
+        "reason": "codex-terra resumes are held at the free-plan window; the remaining work is gate execution on committed code",
+        "session": "fresh",
+        "session_id": "01a0f94e-8c0a-7581-be01-3efa158fa66f",
+        "session_source": "stream",
+        "to_backend": "clive",
+        "to_harness": "claude"
+      }
+    ],
+    "root_run_id": "r-20261001T211043363832-fsri-live-warmup-frozen-newton"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T211043363832-fsri-live-warmup-frozen-newton/manifest.md",
+  "member": "disposable-r-20261001T211043363832-fsri-live-warmup-frozen-newton",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/test_forward_operator_arguments.py",
+      "tests/test_one_read_per_trip.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsri-live-warmup-frozen-newton",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1182,
+          "cached_input_tokens": 436460,
+          "input_tokens": 437644,
+          "output_tokens": 1890,
+          "reasoning_output_tokens": 599,
+          "total_tokens": 439534,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Builds on the six attempt-two commits (1b54057a to 8e0f3bbc) already in base ecf7090ba. Keep live topology and domain reads only through the Picard warmup; take the Newton partition once from the warmed state, hold it fixed for every Newton step, and re-qualify it at the terminal state. Evidence, each log under docs/figures/millisecond-converged-solve/newton-krylov-route/ and force-added (*.log is gitignored): (1) the exact route test completes inside its existing performance fence (attempt two timed out at 59:25 in job 1273996), run once in the foreground in place on the fleet allocation (SLURM_JOB_ID set; TMPDIR=/tmp; JAX_PLATFORMS=cpu; configure_dtypes before any array; timeout 3600); (2) the focused refusal test passes; (3) the NoQualifiedAxisError of attempt one (job 1273977) does not recur; (4) the route receipt records partition reads per solve, one during Newton; (5) tests/test_fixed_point.py and tests/test_reduced_newton.py show no added failure, run as fresh processes at base ecf7090ba first and then at head, with both outcomes recorded. Negative control: re-reading the partition on every Newton step brings the timeout back, logged.",
+    "estimated_hours": 1.5,
+    "goal": "The certificate Newton-Krylov route reads topology live only through the Picard warmup and holds one Newton partition taken from the warmed state",
+    "id": "fsri-live-warmup-frozen-newton",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": null,
+      "metered": true,
+      "observed_at": null,
+      "read_at": "2026-10-01T21:10:44Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T211043363832-fsri-live-warmup-frozen-newton/manifest.md",
+    "negative_control": "re-read the topology partition on every Newton step instead of holding the warmed partition: the exact route test times out again",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§1",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/forward.py",
+      "nova/equilibrium/fixed_point.py",
+      "tests/test_forward_operator_arguments.py",
+      "docs/figures/millisecond-converged-solve/newton-krylov-route",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-live-warmup-frozen-newton.html",
+      "docs/figures/forward-solver-route-integrity/fsri-live-warmup-frozen-newton",
+      "tests/test_one_read_per_trip.py"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex-terra",
+    "member": null,
+    "node": "fsri-live-warmup-frozen-newton",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-01T21:10:46.875652+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_revision": "85444e645ab71753995e9f97312703ee3522ba8e",
+  "resume_waiver": {
+    "reason": "the remaining work is a new design step (terminal re-freeze) routed to codex-terra as a fresh node on a lineage base that carries all seven commits; this local-lane session's context is not needed",
+    "session_id": "55bef747-53f0-4046-8870-ca9d1d4d5aea",
+    "source": "stream"
+  },
+  "review": null,
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261001T211043363832-fsri-live-warmup-frozen-newton",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "55bef747-53f0-4046-8870-ca9d1d4d5aea",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 7975005,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 3378.4,
+    "generated_tokens": 59964,
+    "generation_seconds": 2615.932,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 37.3,
+    "machine_seconds": 762.468,
+    "peak_input_tokens": 178988,
+    "tokens_per_second": 22.92,
+    "wall_tokens_per_second": 17.75
+  },
+  "time_budget": "60m",
+  "tool_steps": 92.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "budget_overrun": true,
+        "budget_overrun_seconds": 3434,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but the attached review is parsed; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 7034,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-01T19:37:11Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-01T19:13:38Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261001T191318631939-cca-map-fidelity-centroid-columns",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 8998,
+          "worker_pid": 2395911
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 5614,
+        "log_fresh": false,
+        "manifest_commits": [
+          "224f17817",
+          "725be129c"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "d468d22b04d3d7341f2c23057f0a719dde2e309b3d1809d6112c2ffa7b75c140",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T191318631939-cca-map-fidelity-centroid-columns/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --plan cut-cell-current-attribution --section '§6' --role review --spec-level exact --node review-of-cca-map-fidelity-centroid-columns --goal 'attach an independent review to run r-20261001T191318631939-cca-map-fidelity-centroid-columns' --done-when 'the review for r-20261001T191318631939-cca-map-fidelity-centroid-columns stores a parsed record scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261001T191318631939-cca-map-fidelity-centroid-columns.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261001T191318631939-cca-map-fidelity-centroid-columns.at-725be129c3dd53956ce8d752c46b61f9428fc0b4.json --time-budget 60m --session s21-nova --allow-unreconciled-runs --local",
+        "node": "cca-map-fidelity-centroid-columns",
+        "phase": "complete",
+        "plan": "cut-cell-current-attribution",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_status": "parsed",
+        "run_id": "r-20261001T191318631939-cca-map-fidelity-centroid-columns",
+        "session": "s21-nova",
+        "stored_phase": "starting",
+        "terminal_age_seconds": 5638,
+        "terminal_at": "2026-10-01T19:36:48Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-centroid-columns"
+      }
+    ]
+  },
+  "wall_seconds": 11878,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T00:29:01Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T00:19:31Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261001T211043363832-fsri-live-warmup-frozen-newton",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 25115,
+    "worker_pid": 652456
+  },
+  "worker_seconds": 8494,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-02T00:29:00.085Z",
+    "session_id": "55bef747-53f0-4046-8870-ca9d1d4d5aea",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton"
+  }
+}

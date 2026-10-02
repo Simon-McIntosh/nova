@@ -1878,6 +1878,21 @@ def _landing_merge(revision: str | None) -> str | None:
     return merges[0] if merges else None
 
 
+def _root_relative(path: Path) -> str:
+    """Render *path* relative to the module root when it lies under it.
+
+    A committed receipt must not name the checkout it was generated from, or a
+    path from a removed worktree outlives the tree it points at; the committed
+    source receipt is therefore recorded ROOT-relative and only the caller's
+    resolved path for anything outside the tree.
+    """
+    resolved = Path(path).resolve()
+    try:
+        return str(resolved.relative_to(ROOT))
+    except ValueError:
+        return str(resolved)
+
+
 def span_offset_receipt(
     source_receipt: Path = DEFAULT_SPAN_OFFSET_RECEIPT,
     output_root: Path = DEFAULT_SPAN_OFFSET_ROOT,
@@ -1946,7 +1961,7 @@ def span_offset_receipt(
     analytic_span = abs(float(reading["analytic_span_wb"]))
     report = {
         "schema": "nova.centroid-converged-span-offset",
-        "source_receipt": str(source_receipt),
+        "source_receipt": _root_relative(source_receipt),
         "source_revision": control.get("source_revision"),
         "landing_merge": _landing_merge(control.get("source_revision")),
         "terminal_state_path": control["terminal_state_path"],

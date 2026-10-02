@@ -25,8 +25,8 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="38">
-<meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;implementable&quot;}">
+<meta name="plan-version" content="39">
+<meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -187,9 +187,12 @@
     with one row per class of work carrying the counts behind it, and the reckon plan cites that
     anchor as its evidence input.</p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-02</span>
     <h2 id="s5">§5 — The eight further promotion rows that read passed beside a nonzero exit</h2>
-<section data-reckon="section" data-id="s5" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-attempts="0" data-status="implementable" data-links=""></section>
-<p>S22's ledger repair corrected the two rows the audit named, merged at <code>93d6d9540</code>. Its review then counted eight more rows in <code>docs/state/nova/crew.json</code> carrying <code>gate: passed</code> while <code>gate_check.exit_status</code> is nonzero, the same defect class. Each is reported as reckon wrote it, and none has been read against its log: <code>r-20260908T031258319849-pfs-centroid-radius-report</code>, <code>r-20260915T055602091466-cca-newton-krylov-iteration-count</code>, <code>r-20260916T100817051632-msc-executable-remainder-census-3</code>, <code>r-20260919T071103282439-review-of-nia-limited-boundary-touches-wall-2</code>, <code>r-20260919T115006363350-review-of-sos-grid-route-order</code>, <code>r-20260919T125709902038-msc-census-gate-and-unit-node</code>, <code>r-20260919T200510357550-nia-promotion-fallback-nan</code> and <code>r-20260920T153733162419-cca-repair-the-independent-oracle-reconstruction</code>. The write-path guard that would refuse such a promotion belongs to reckon, at <code>crew-runtime-positive-controls</code> followup <code>f-crpc-a-passed-verdict-agrees-with-its-exit-status</code>.</p><p><strong>Done when:</strong> each of the eight rows is read against the log its <code>gate_check.log_path</code> names. A row whose log shows the gate failed reads <code>gate: failed</code>, with its failing ids under <code>suite_delta.after_suite.failure_ids</code>. A row whose nonzero exit has another cause, such as a review run or a wrapper status, keeps its verdict, with the cause recorded on the row. Every corrected row round-trips through <code>reckon.ledger._normalized_gate_check</code> unchanged, the file is edited textually with the diff confined to those rows, and a recount finds no row reading <code>passed</code> beside a nonzero exit without its recorded cause.</p>
+<section data-reckon="section" data-id="s5" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-attempts="0" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">All eight promotion rows that read passed beside a nonzero exit were read against their own gate logs (merge <code>a275644a0</code>, review 93/100). <code>cca-newton-krylov-iteration-count</code> genuinely failed: its only gated test achieved classes [1, 1] instead of [0, 1]. It now reads failed, with its failing id under <code>suite_delta.after_suite</code>. The seven others keep passed, each with its recorded cause: two review runs whose red suite was their subject, one census exercising a refusal, two measurement reports whose guard was the reported result, and two runs whose single failure is identical at base. A recount finds no passed-beside-nonzero row without a cause. The write-path guard remains reckon's (<code>f-crpc-a-passed-verdict-agrees-with-its-exit-status</code>). <a href="fsa-eight-ledger-rows-read-against-logs">full record</a></p>
+</section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

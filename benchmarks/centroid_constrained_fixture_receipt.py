@@ -1833,6 +1833,134 @@ def _gauge_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+DEFAULT_SPAN_OFFSET_RECEIPT = Path(
+    "/home/ITER/mcintos/Code/nova/docs/figures/centroid-constrained-oracle-solve"
+    "/cap-factor-repair/control-positive.json"
+)
+DEFAULT_SPAN_OFFSET_ROOT = ROOT / (
+    "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/span-offset"
+)
+
+
+def span_offset_receipt(
+    source_receipt: Path = DEFAULT_SPAN_OFFSET_RECEIPT,
+    output_root: Path = DEFAULT_SPAN_OFFSET_ROOT,
+    *,
+    case_name: str = "weak-rotation-reactor-static",
+    requested_cells: int = -110,
+) -> dict[str, Any]:
+    """Re-read a converged control's span offset and the floor its row reaches.
+
+    The gauge-free axis-to-boundary span offset is the same closed-form
+    comparison ``reread_gauge_readings`` applies.  The row's centroid is
+    re-evaluated on the receipt's persisted terminal state under the exact clip
+    the solve used, so its error is expressed in the last place of the centroid
+    radius and the state is re-read after a one-ulp perturbation of the flux.
+    The compensating field's own span is tabled against the converged-state
+    prediction.  No forward solve runs.
+    """
+    output_root.mkdir(parents=True, exist_ok=True)
+    control = json.loads(source_receipt.read_text(encoding="utf-8"))
+    solve = control["solve"]
+    topology = control["solve"]["topology"]
+    field = np.asarray(solve["compensating_field_t"], dtype=np.float64)
+    _carrier, _source, exact = certificate._case(case_name)
+    reading = oracle_fixture.gauge_free_flux_read(
+        exact,
+        np.asarray(topology["axis_rz_m"], dtype=np.float64),
+        np.asarray(topology["boundary_rz_m"], dtype=np.float64),
+        float(topology["axis_flux_wb"]),
+        float(topology["boundary_flux_wb"]),
+        field,
+    )
+    state = np.asarray(np.load(control["terminal_state_path"]), dtype=np.float64)
+    if _digest(state) != control["terminal_state_sha256_binary64"]:
+        raise ValueError("the banked state does not hash to its receipt digest")
+    configure_dtypes()
+    previous_mode = support_clip_mode()
+    try:
+        set_support_clip_mode("exact")
+        context = _context(case_name, requested_cells)
+        profile = context["profile"]
+        target_current = context["target_current"]
+
+        def observe(flux: np.ndarray) -> np.ndarray:
+            observation = profile.current_moment_observation(
+                jnp.asarray(flux),
+                support=MomentIntegralSupport.ALL_DOMAIN,
+                target_current=target_current,
+            )
+            return np.asarray(
+                (observation.centroid_r, observation.centroid_z), dtype=np.float64
+            )
+
+        observed = observe(state)
+        perturbed = observe(np.nextafter(state, np.inf))
+        single = state.copy()
+        index = int(np.argmax(np.abs(state)))
+        single[index] = np.nextafter(single[index], np.inf)
+        single_perturbed = observe(single)
+    finally:
+        set_support_clip_mode(previous_mode)
+    pitch = float(control["characteristic_pitch_m"])
+    target = np.asarray(solve["centroid_target_m"], dtype=np.float64)
+    error = observed - target
+    radius_ulp = float(np.spacing(abs(float(observed[0]))))
+    solved_span = abs(float(reading["solved_span_wb"]))
+    analytic_span = abs(float(reading["analytic_span_wb"]))
+    report = {
+        "schema": "nova.centroid-converged-span-offset",
+        "source_receipt": str(source_receipt),
+        "source_revision": control.get("source_revision"),
+        "terminal_state_path": control["terminal_state_path"],
+        "terminal_state_sha256_binary64": control["terminal_state_sha256_binary64"],
+        "level_tolerance_of_span": LEVEL_TOLERANCE_OF_SPAN,
+        "compensator_predicted_of_span": 3.2e-3,
+        "span": {
+            **reading,
+            "gauge_free_flux_offset_of_solved_span": reading[
+                "gauge_free_flux_offset_wb"
+            ]
+            / solved_span,
+            "compensator_span_of_solved_span": reading[
+                "compensator_span_contribution_wb"
+            ]
+            / solved_span,
+            "compensator_span_of_analytic_span": reading[
+                "compensator_span_contribution_wb"
+            ]
+            / analytic_span,
+            "level_clause_within_1e-3_of_span": bool(
+                abs(reading["gauge_free_flux_offset_of_span"])
+                <= LEVEL_TOLERANCE_OF_SPAN
+            ),
+        },
+        "centroid": {
+            "receipt_observed_m": solve["centroid_observed_m"],
+            "recomputed_observed_m": observed.tolist(),
+            "recompute_delta_m": (
+                observed - np.asarray(solve["centroid_observed_m"], dtype=np.float64)
+            ).tolist(),
+            "target_m": target.tolist(),
+            "error_m": error.tolist(),
+            "error_norm_m": float(np.linalg.norm(error)),
+            "pitch_m": pitch,
+            "error_pitches": float(np.linalg.norm(error) / pitch),
+            "radius_m": float(observed[0]),
+            "radius_ulp_m": radius_ulp,
+            "error_radius_ulps": float(np.linalg.norm(error) / radius_ulp),
+            "one_ulp_radius_pitches": float(radius_ulp / pitch),
+            "all_up_delta_m": (perturbed - observed).tolist(),
+            "all_up_norm_m": float(np.linalg.norm(perturbed - observed)),
+            "single_index": index,
+            "single_delta_m": (single_perturbed - observed).tolist(),
+            "single_norm_m": float(np.linalg.norm(single_perturbed - observed)),
+        },
+    }
+    _write_json(output_root / "span-offset.json", report)
+    return report
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
@@ -1882,6 +2010,23 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--diagnose-linear-action", action="store_true")
     parser.add_argument("--merge-controls", action="store_true")
     parser.add_argument("--reread-gauge", action="store_true")
+    parser.add_argument(
+        "--span-offset-receipt",
+        action="store_true",
+        help="re-read a converged control's span offset and centroid floor",
+    )
+    parser.add_argument(
+        "--span-offset-source",
+        type=Path,
+        default=DEFAULT_SPAN_OFFSET_RECEIPT,
+        help="banked converged-control receipt the span-offset read consumes",
+    )
+    parser.add_argument(
+        "--span-offset-root",
+        type=Path,
+        default=DEFAULT_SPAN_OFFSET_ROOT,
+        help="directory the span-offset receipt is written to",
+    )
     parser.add_argument(
         "--reader-facts",
         action="store_true",
@@ -1938,6 +2083,26 @@ def main() -> None:
             f"compile_s_without_level_row="
             f"{cost['compile_seconds_without_level_row']:.3f} "
             f"stablehlo_instruction_delta={cost['stablehlo_instruction_delta']}",
+            flush=True,
+        )
+        return
+    if arguments.span_offset_receipt:
+        report = span_offset_receipt(
+            arguments.span_offset_source, arguments.span_offset_root
+        )
+        span = report["span"]
+        centroid = report["centroid"]
+        print(
+            "CENTROID_SPAN_OFFSET "
+            f"offset_wb={span['gauge_free_flux_offset_wb']:+.9e} "
+            f"of_solved_span={span['gauge_free_flux_offset_of_solved_span']:+.9e} "
+            f"of_analytic_span={span['gauge_free_flux_offset_of_span']:+.9e} "
+            f"compensator_span_wb={span['compensator_span_contribution_wb']:+.9e} "
+            f"error_pitches={centroid['error_pitches']:+.9e} "
+            f"error_radius_ulps={centroid['error_radius_ulps']:+.6f} "
+            f"one_ulp_radius_pitches={centroid['one_ulp_radius_pitches']:+.9e} "
+            f"perturb_up_norm_m={centroid['all_up_norm_m']:+.9e} "
+            f"clause={span['level_clause_within_1e-3_of_span']}",
             flush=True,
         )
         return

@@ -1,0 +1,70 @@
+{
+  "centroid": {
+    "all_up_delta_m": [
+      -8.881784197001252e-16,
+      -3.881753908767938e-15
+    ],
+    "all_up_norm_m": 3.982069099533078e-15,
+    "error_m": [
+      -3.927524971913954e-12,
+      -1.3243630982855303e-14
+    ],
+    "error_norm_m": 3.927547300640607e-12,
+    "error_pitches": 8.4270663891465e-12,
+    "error_radius_ulps": 4422.0251399112585,
+    "one_ulp_radius_pitches": 1.905702957924752e-15,
+    "pitch_m": 0.46606341035820315,
+    "radius_m": 6.063530173328971,
+    "radius_ulp_m": 8.881784197001252e-16,
+    "receipt_observed_m": [
+      6.063530173328973,
+      -1.3236495405817127e-15
+    ],
+    "recompute_delta_m": [
+      -1.7763568394002505e-15,
+      -1.191998144227359e-14
+    ],
+    "recomputed_observed_m": [
+      6.063530173328971,
+      -1.3243630982855303e-14
+    ],
+    "single_delta_m": [
+      1.7763568394002505e-15,
+      -1.955148108460317e-15
+    ],
+    "single_index": 602,
+    "single_norm_m": 2.6415994675385598e-15,
+    "target_m": [
+      6.063530173332898,
+      0.0
+    ]
+  },
+  "compensator_predicted_of_span": 0.0032,
+  "level_tolerance_of_span": 0.001,
+  "schema": "nova.centroid-converged-span-offset",
+  "source_receipt": "/home/ITER/mcintos/Code/nova/docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json",
+  "source_revision": "211d75798c58c167bbb66b177147f7d0ce62ef6b",
+  "span": {
+    "analytic_axis_flux_wb": 49.93316836557825,
+    "analytic_boundary_flux_wb": 5.998498745470786e-08,
+    "analytic_span_wb": 49.93316830559326,
+    "compensator_flux_at_axis_wb": -0.01841305396213866,
+    "compensator_flux_at_boundary_wb": -1.4972611544177705,
+    "compensator_flux_at_contact_radius_wb": -1.4972611544177705,
+    "compensator_span_contribution_wb": 1.478848100455632,
+    "compensator_span_of_analytic_span": 0.029616548491475932,
+    "compensator_span_of_solved_span": 0.02715932775388238,
+    "contact_radius_m": 7.801395788444358,
+    "gauge_free_flux_offset_less_compensator_wb": 3.0388195592939167,
+    "gauge_free_flux_offset_of_solved_span": 0.08296782922901276,
+    "gauge_free_flux_offset_of_span": 0.09047428418924305,
+    "gauge_free_flux_offset_wb": 4.517667659749549,
+    "level_clause_within_1e-3_of_span": false,
+    "reference_radius_m": 6.2,
+    "solved_axis_flux_wb": 49.949157673858544,
+    "solved_boundary_flux_wb": -4.50167829148427,
+    "solved_span_wb": 54.45083596534281
+  },
+  "terminal_state_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T133233397975-cco-cap-factor-finite-tangent/h200-receipt/control-positive-state.npy",
+  "terminal_state_sha256_binary64": "41b9e055fbdcd4b7940e1d799a3f796eeb5116865257e7993c721bf0824cb50e"
+}

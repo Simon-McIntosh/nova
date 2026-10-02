@@ -40,7 +40,9 @@ from nova.equilibrium.separatrix_clip import (
     _SPLINE_BOUNDARY_SEGMENTS,
     traced_polygon_vertex_capacity,
 )
+from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.equilibrium.topology import TopologyClass
+from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import configure_dtypes
 from nova.linalg.split_spline import fit_split_spline
 
@@ -219,19 +221,31 @@ def _production_member(machine: str, member_number: int):
     return member, selection, evidence
 
 
-def _profile_support(operator, state):
-    return jax.block_until_ready(
-        operator._support_partition(state, TopologyClass.DIVERTED)
-    )
-
-
-def _saddle_wedges(operator, state):
+def _profile_support(profile, state):
+    operator = profile.operator
     physical = jnp.asarray(state)
     masks, topology, _connected, _admitted = jax.block_until_ready(
         operator._fixed_design_read(physical, TopologyClass.DIVERTED)
     )
-    sample_flux = operator.sample_node_flux(physical)
+    if not hasattr(operator, "_support_moment_stencils"):
+        operator._build_support_moment_stencils()
+    lattice = profile.lattice
+    mesh = StencilMesh(
+        coordinate=lattice.coordinate,
+        stencil=hex_stencil(lattice.shape),
+        area=lattice.cell_area,
+    )
+    grid_flux = physical[: operator.grid.node_number]
+    sample_flux = mesh.shared_node_flux_stencil(
+        operator.moment_geometry.sample_node_coordinates
+    )(grid_flux)
     sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+    support = operator._profile_support(masks, topology, physical, sample_psi_norm)
+    return jax.block_until_ready((masks, topology, sample_psi_norm, support))
+
+
+def _saddle_wedges(operator, state, masks, topology, sample_psi_norm):
+    physical = jnp.asarray(state)
     flux_coefficient = operator.support_flux_coefficients(
         masks.psi_norm, sample_psi_norm
     )
@@ -265,7 +279,7 @@ def _saddle_wedges(operator, state):
     )
 
 
-def _production_refused_cells(operator, state, base) -> list[int]:
+def _production_refused_cells(profile, state, base) -> list[int]:
     if int(base.refused_cells()) == 0:
         return []
     base_count = np.asarray(base.vertex_count, dtype=np.intp)
@@ -275,7 +289,7 @@ def _production_refused_cells(operator, state, base) -> list[int]:
         RAISED_CAPACITY
     )
     try:
-        _masks, _topology, _sample, raised = _profile_support(operator, state)
+        _masks, _topology, _sample, raised = _profile_support(profile, state)
     finally:
         sc.traced_polygon_vertex_capacity = original
     raised_count = np.asarray(raised.vertex_count, dtype=np.intp)
@@ -292,13 +306,15 @@ def production_case(machine: str, member_number: int) -> dict:
     set_support_clip_mode("exact")
     member, selection, evidence = _production_member(machine, member_number)
     operator = member.profile.operator
-    _masks, topology, _sample, support = _profile_support(operator, member.state)
-    wedges = _saddle_wedges(operator, member.state)
+    masks, topology, sample_psi_norm, support = _profile_support(
+        member.profile, member.state
+    )
+    wedges = _saddle_wedges(operator, member.state, masks, topology, sample_psi_norm)
     count = np.asarray(support.vertex_count, dtype=np.intp)
     wedge_count = np.asarray(wedges.vertex_count, dtype=np.intp)
     straight = int(operator.moment_geometry.atomic_mesh.support_capacity)
     capacity = traced_polygon_vertex_capacity(straight)
-    refused = _production_refused_cells(operator, member.state, support)
+    refused = _production_refused_cells(member.profile, member.state, support)
     return {
         "schema": "nova.exact-clip-production-one-arc-census.v1",
         "machine": machine.upper() if machine == "mast" else "DIII-D",

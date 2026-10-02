@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="profile-owned-solve-domain">
   <meta name="plan-title" content="Profile-Owned Solve Domain — the Newton solve stops consuming the boundary">
   <meta name="plan-summary" content="Remove the boundary definition from the residual: psi_norm from the O/X pair, shadow-only masking, profile-decayed exterior current, seed repair, wall ladder.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="18.0">
   <meta name="plan-capability-version" content="1.0">
@@ -25,10 +25,11 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="97">
+<meta name="plan-version" content="98">
 <meta name="plan-artifacts" content="docs/evidence/archive/profile-owned-solve-domain-landed.html,nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,nova/equilibrium/forward_operator.py,nova/equilibrium/topology.py,tests/test_equilibrium_forward_solve.py">
-<meta name="plan-impl" content="0.83">
+<meta name="plan-impl" content="1.0">
 <meta name="plan-commits" content="a251914a1904e3f63afb63bc55dc598213ff0de6,a85b597fd35f7ea6c0e4465b9f0e103c2e7f67af,4476dbf8">
+<meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -140,22 +141,11 @@
     reference remains converged with geometric agreement preserved; conservation acceptance rescored
     with no widened envelope; achieved classes read through the saddle-aware partition.</p>
 
-    <h2 id="s5">§5 — The isolated wall-resolution ladder</h2>
-
-    <p>Inherited from <a href="/nova/mast-catalog-gpu-solve">mast-catalog-gpu-solve</a> with its
-    isolation requirement, and scoped by the wall machinery map
-    (<code>docs/figures/efit-baseline-demonstration/wall-machinery-map.md</code>, commit
-    <code>c11fe7a2</code>): MAST carries 37 stored limiter rows, 36 unique physical segments; the
-    wall enters as FluxTarget images <code>Gs@Is + Gc@Ic + Gp@J(psi)</code>; no interpolation-order
-    knob exists today (geometry hard-coded piecewise-linear, extremum fit hard-coded quadratic).
-    Under the §2 design the wall no longer enters the residual, so the ladder measures what the wall
-    still owns: the limiter operand, the post-hoc class margin, and contact location. Run counts
-    36/72/144/288 with an exact 37-row reproduction control, holding plasma carrier, source
-    treatment, and seed fixed; an order sweep requires the wall-only selector policy the map
-    specifies. <strong>Done when:</strong> per-rung boundary flux, contact coordinate, achieved
-    class/margin, and residual trajectory are banked with fixed-carrier digests, and the count at
-    which the limiter operand stops moving is stated against plasma-equivalent resolution. The
-    confounded 165-to-330 comparison is never cited.</p>
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-02</span>
+    <h2 id="s5">§5 — The isolated wall-resolution ladder</h2></header>
+  <p class="landed-summary">Closed with its negative result (lead decision 2026-10-02): both resolution stop counts unmet; the post-repair 0.0 Wb does not show wall independence, because the wall was not re-evaluated in the fixed-terminal ladder. The question moves to contour-tree-topology-authority §4. <a href="s5-closed">full record</a></p>
+</section>
 
     <h2 id="s6">§6 — Retire the legacy diverted label</h2>
 
@@ -241,25 +231,26 @@
       </p>
     <p class="r-dec-rat">The observed signature is a betrayed model under stable conditioning: rebuild the local linearization at the current iterate and take a Levenberg-damped step on the fresh model rather than re-scaling the stale direction. Measurable by the same 650-ceiling ladder; pseudo-arclength stays the fallback if the rebuilt model also exhausts.</p>
     </div>
-<div class="r-dec" data-key="wall-resolution-ladder-disposition" data-choice="" data-by="" data-when="" data-sections="s5">
+<div class="r-dec" data-key="wall-resolution-ladder-disposition" data-choice="close-with-negative-result" data-by="Simon McIntosh" data-when="2026-10-02T20:21:18+00:00" data-sections="s5">
     <p class="r-dec-q">Section 5 (the isolated wall-resolution ladder) is a scientific hold. Both resolution stop counts are unmet (144 to 288 boundary-flux movement 4.606e-05 Wb before the repair, 0.0 Wb after), measured on a terminal state that the later active-set work superseded. Is the section closed with that negative result recorded, or re-scoped against the current active-set terminal?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="close-with-negative-result">close section 5 and record the unmet stop counts as its negative result</button>
+      <button class="r-opt chosen" data-value="close-with-negative-result">close section 5 and record the unmet stop counts as its negative result</button>
       <button class="r-opt" data-value="rescope-to-active-set-terminal">re-scope section 5 to the current active-set terminal, with a new done-when</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-10-02. The ladder measured the boundary-flux sensitivity to wall resolution of a terminal read that contour-tree-topology-authority §5 deletes (raster reachability and the wall-target limited level). It ran on a terminal state later superseded by the active-set work. Its post-repair 0.0 Wb is a non-measurement, because the committed receipt records wall_not_reevaluated_in_fixed_terminal_ladder=true. Re-scoping it to today&#x27;s active-set terminal would measure a read the single-grid cutover and the contour tree replace again. Closing it ships this plan, the other five sections having landed, and clears one of efit-baseline-demonstration&#x27;s two prerequisites. Accepted cost: no wall-resolution answer for the current read. The science question moves to contour-tree-topology-authority §4 as a wall-sampling convergence check on the tree&#x27;s limiter level (followup f-ctta-limiter-level-wall-sampling).</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-pod-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-26" data-recommends-skill="/reckon-build profile-owned-solve-domain" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pod-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-26" data-recommends-skill="/reckon-build profile-owned-solve-domain" data-resolved-at="2026-10-02T20:21:18+00:00" data-resolved-by="Simon McIntosh">
     <h4 class="r-fu-title">Repair the seed, cut over the residual domain, run the ladder</h4>
     <div class="r-fu-body">Execution order: §3 seed/material-mask repair gates §4; §4 requires
         the limited-configuration-normalization decision locked; §5 and §6 are independent of §4 and
         may run in parallel lanes. The §2 X-point polish dependency arrives from
         separatrix-spline-extraction.</div>
     <pre class="r-fu-prompt">/reckon-build profile-owned-solve-domain</pre>
+    <p class="r-fu-outcome">Delivered and closed. §3 (seed and material-mask repair) and §4 (residual cutover and point-cell routing, landed on its second done-when branch with zero new failures) are landed, as is §6 (legacy diverted label retired, a85b597f). §5 (the ladder) is closed with its negative result under decision <code>wall-resolution-ladder-disposition</code>. The ladder question moves to contour-tree-topology-authority §4. Done — no followup on this plan.</p>
     </article>
 <article class="r-fu" data-id="f-pod-currency-2026-10-01" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build profile-owned-solve-domain" data-resolved-at="2026-10-02T06:27:49+00:00" data-resolved-by="s21-nova coordinator">
     <h4 class="r-fu-title">Close or re-scope §5, the isolated wall-resolution ladder</h4>

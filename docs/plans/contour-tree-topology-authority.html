@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 </head>
 <body>
   <main class="plan-doc">
@@ -342,6 +342,11 @@
     <div class="r-fu-body"><p>The computed-tree figure merged at 78e721dfb (record contour-tree-topology-authority-landed#explanatory-figure-from-computed-tree) passed re-review at 76/100 with three follow-ons. (1) In the graph panel the private-region wall-maximum label and the outside-node label sit at the same flux level on adjacent ranks with the same fixed offset, so they overlap and hide the word maximum; place them so neither collides. (2) The fragment docs/evidence/fragments/contour-tree-topology-authority/ctta-explanatory-figure-from-computed-tree.html still describes dashed poloidal edges and a 2-test gate; bring it in line with the delivered figure and its 5-test guard. (3) test_committed_figure_files_exist checks only that the PNG and SVG exist; compare their content to the receipt so a stale render fails.</p></div>
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
     </article>
+<article class="r-fu" data-id="f-ctta-limiter-level-wall-sampling" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Show that the tree&#x27;s limiter level converges as the wall polyline is sampled more finely</h4>
+    <div class="r-fu-body"><p>Carried from profile-owned-solve-domain §5, which the lead closed on 2026-10-02 with its negative result: that ladder probed a read this plan deletes, and its post-repair 0.0 Wb was a non-measurement. The question it asked still stands for the tree: does the limited boundary level <code>σψ_lim</code> converge as wall vertices are added?</p><p><strong>Done when:</strong> on MAST 27079 row 16 (limited) and the 9×9 grid fixture, <code>σψ_lim</code> and the limiter contact position are tabled while the wall polyline sampling doubles at least three times. The successive differences fall, and the receipt states the observed order and the finest-pair difference in webers and millimetres. A diverted control (MAST row 10) shows the class and the primary X-point unchanged across the same ladder.</p></div>
+    <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority §4</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261001T205214115813-review-of-contour-tree-topology-authority" data-who="reckon-build" data-when="2026-10-01T21:32:29.777Z">
@@ -435,7 +440,7 @@
     <div class="r-comment-body"><p>Regenerated the plan's explanatory figure from the computed tree (benchmarks/contour_tree_explanatory_figure.py): the diverted single-null certificate at its persisted 340-cell rung yields a tree of 13 nodes and 12 edges, of which 11 are piecewise-linear critical points beyond the analytic axis and X-point (6 piecewise-linear extrema -- 1 maximum, 5 minima -- and 5 saddles); the poloidal panel draws the state's own field, the wall, both analytic nulls via draw_nulls and every emitted node at its carrier vertex, with the tree beside it as a signed-flux graph.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T184827657323-review-2-of-ctta-explanatory-figure-from-computed-tree" data-who="reckon-build" data-when="2026-10-02T19:23:54.818Z">
-    <div class="r-comment-body"><p>Re-review of r-20261002T164824351467 at head 4c86a9f83 (base d0f91aa52) scores 76/100 pass: all three prior blocking findings are resolved and each repair is falsified by a committed negative control; residual defects are a graph label collision and a stale landing evidence fragment, both recorded as follow-ons (the fragment lies outside the corrective round&#x27;s write scope).</p></div>
+    <div class="r-comment-body"><p>Re-review of r-20261002T164824351467 at head 4c86a9f83 (base d0f91aa52) scores 76/100 pass: all three prior blocking findings are resolved and each repair is falsified by a committed negative control; residual defects are a graph label collision and a stale landing evidence fragment, both recorded as follow-ons (the fragment lies outside the corrective round's write scope).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261001T215539964290-review-3-of-contour-tree-topology-authority" data-who="reckon-build" data-when="2026-10-01T22:36:28.181Z">
     <div class="r-comment-body"><p>review-3 restates nova:contour-tree-topology-authority (revision e4fedfd80 / HEAD b2cc96f45, plan blob 1b01505b8, plan digest sha256:9ad6ead9...) at its margin revision: intent in the reviewer's own words, the one open decision field-representation-on-hex-cells with all three options, and all five done-whens; 125 prose sentences enumerated, 5 flagged with two-or-more readings (040, 043, 065, 088, 097); no plan file edited.</p></div>

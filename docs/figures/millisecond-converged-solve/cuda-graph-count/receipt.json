@@ -1,0 +1,2587 @@
+{
+  "schema_version": 1,
+  "measurement": "CUDA executable-graph lifetime across distinct compiled programs",
+  "revision": "82f26d0ac6984782693e7e48d06926a16664144f",
+  "analysis_revision": "a9c29fa75a5a09d12fa6a259bdfa4789c7dda902",
+  "instrument": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series/docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py",
+  "working_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series",
+  "programs": 20,
+  "arms": [
+    {
+      "arm": "command_buffers_enabled",
+      "command": [
+        "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series/docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py",
+        "--child",
+        "--programs",
+        "20",
+        "--start-size",
+        "64",
+        "--size-step",
+        "16"
+      ],
+      "xla_flags": "--xla_gpu_graph_min_graph_size=1",
+      "exit_status": 0,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170249718910-mcs-alive-graph-count-series/command_buffers_enabled.log",
+      "count_observations": 418,
+      "count_events": [
+        {
+          "log_line": 27,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 36,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 47,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 56,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 67,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 76,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 87,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 96,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 107,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 116,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 127,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 136,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 147,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 156,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 167,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 176,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 187,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 194,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 201,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 214,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 223,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 225,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 236,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 248,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 257,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 259,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 270,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 279,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 290,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 299,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 310,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 319,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 330,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 339,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 350,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 359,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 370,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 377,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 384,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 397,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 406,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 408,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 419,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 431,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 440,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 442,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 453,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 462,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 473,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 482,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 493,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 502,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 513,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 522,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 533,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 542,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 553,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 560,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 567,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 580,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 589,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 591,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 602,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 614,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 623,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 625,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 636,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 645,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 656,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 665,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 676,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 685,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 696,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 705,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 716,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 725,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 736,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 743,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 750,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 763,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 772,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 774,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 785,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 797,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 806,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 808,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 819,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 828,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 839,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 848,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 859,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 868,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 879,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 888,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 899,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 908,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 919,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 926,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 933,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 946,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 955,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 957,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 968,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 980,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 989,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 991,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1002,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1011,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1022,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1031,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1042,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1051,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1062,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1071,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1082,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1091,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1102,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1109,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 1116,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 1129,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 1138,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 1140,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1151,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1163,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 1172,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 1174,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1185,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1194,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1205,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1214,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1225,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1234,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1245,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1254,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1265,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1274,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1285,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1292,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 1299,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 1312,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 1321,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 1323,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1334,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1346,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 1355,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 1357,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1368,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1377,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1388,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1397,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1408,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1417,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1428,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1437,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1448,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1457,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1468,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1475,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 1482,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 1495,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 1504,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 1506,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1517,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1529,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 1538,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 1540,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1551,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1560,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1571,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1580,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1591,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1600,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1611,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1620,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1631,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1640,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1651,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1658,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 1665,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 1678,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 1687,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 1689,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1700,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1712,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 1721,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 1723,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1734,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1743,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1754,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1763,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1774,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1783,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1794,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1803,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1814,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1823,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1834,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1841,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 1848,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 1861,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 1870,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 1872,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1883,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1895,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 1904,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 1906,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1917,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1926,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1937,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1946,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1957,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1966,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1977,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 1986,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 1997,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2006,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2017,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2024,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 2031,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 2044,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 2053,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 2055,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2066,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2078,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 2087,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 2089,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2100,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2109,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2120,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2129,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2140,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2149,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2160,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2169,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2180,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2189,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2200,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2207,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 2214,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 2227,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 2236,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 2238,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2249,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2261,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 2270,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 2272,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2283,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2292,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2303,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2312,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2323,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2332,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2343,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2352,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2363,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2372,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2383,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2390,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 2397,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 2410,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 2419,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 2421,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2432,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2444,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 2453,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 2455,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2466,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2475,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2486,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2495,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2506,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2515,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2526,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2535,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2546,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2555,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2566,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2573,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 2580,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 2593,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 2602,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 2604,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2615,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2627,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 2636,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 2638,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2649,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2658,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2669,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2678,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2689,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2698,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2709,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2718,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2729,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2738,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2749,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2756,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 2763,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 2776,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 2785,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 2787,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2798,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2810,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 2819,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 2821,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2832,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2841,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2852,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2861,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2872,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2881,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2892,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2901,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2912,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2921,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2932,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2939,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 2946,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 2959,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 2968,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 2970,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 2981,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 2993,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 3002,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 3004,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3015,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3024,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3035,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3044,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3055,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3064,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3075,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3084,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3095,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3104,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3115,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3122,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 3129,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 3142,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 3151,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 3153,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3164,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3176,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 3185,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 3187,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3198,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3207,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3218,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3227,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3238,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3247,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3258,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3267,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3278,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3287,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3298,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3305,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 3312,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 3325,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 3334,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 3336,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3347,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3359,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 3368,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 3370,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3381,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3390,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3401,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3410,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3421,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3430,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3441,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3450,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3461,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3470,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3481,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3488,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 3495,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 3508,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 3517,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 3519,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3530,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3542,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 3551,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 3553,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3564,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3573,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3584,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3593,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3604,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3613,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3624,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3633,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3644,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3653,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3664,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3671,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 3678,
+          "action": "update",
+          "count": 1
+        },
+        {
+          "log_line": 3689,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3700,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3709,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3720,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3729,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3740,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3749,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3760,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3769,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3780,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3789,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3800,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3809,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3820,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3829,
+          "action": "destroy",
+          "count": 0
+        },
+        {
+          "log_line": 3840,
+          "action": "instantiate",
+          "count": 1
+        },
+        {
+          "log_line": 3852,
+          "action": "instantiate",
+          "count": 2
+        },
+        {
+          "log_line": 3857,
+          "action": "destroy",
+          "count": 1
+        },
+        {
+          "log_line": 3859,
+          "action": "destroy",
+          "count": 0
+        }
+      ],
+      "rows": [
+        {
+          "kind": "program",
+          "programs_compiled": 1,
+          "shape": [
+            64,
+            64
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 205
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 2,
+          "shape": [
+            80,
+            80
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 388
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 3,
+          "shape": [
+            96,
+            96
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 571
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 4,
+          "shape": [
+            112,
+            112
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 754
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 5,
+          "shape": [
+            128,
+            128
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 937
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 6,
+          "shape": [
+            144,
+            144
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 1120
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 7,
+          "shape": [
+            160,
+            160
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 1303
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 8,
+          "shape": [
+            176,
+            176
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 1486
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 9,
+          "shape": [
+            192,
+            192
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 1669
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 10,
+          "shape": [
+            208,
+            208
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 1852
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 11,
+          "shape": [
+            224,
+            224
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 2035
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 12,
+          "shape": [
+            240,
+            240
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 2218
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 13,
+          "shape": [
+            256,
+            256
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 2401
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 14,
+          "shape": [
+            272,
+            272
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 2584
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 15,
+          "shape": [
+            288,
+            288
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 2767
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 16,
+          "shape": [
+            304,
+            304
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 2950
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 17,
+          "shape": [
+            320,
+            320
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 3133
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 18,
+          "shape": [
+            336,
+            336
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 3316
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 19,
+          "shape": [
+            352,
+            352
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 3499
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 20,
+          "shape": [
+            368,
+            368
+          ],
+          "alive_executable_graphs": 1,
+          "log_line": 3682
+        },
+        {
+          "executable_handles": 20,
+          "kind": "before_drop",
+          "programs_compiled": 20,
+          "alive_executable_graphs": 1,
+          "log_line": 3683
+        },
+        {
+          "dropped_handles": 10,
+          "executable_handles": 10,
+          "kind": "after_drop",
+          "programs_compiled": 20,
+          "alive_executable_graphs": 2,
+          "log_line": 3856
+        }
+      ],
+      "alive_executable_graphs_after_cache_clear": 0,
+      "alive_executable_graphs_after_process_settle": 0
+    },
+    {
+      "arm": "command_buffers_disabled",
+      "command": [
+        "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series/docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py",
+        "--child",
+        "--programs",
+        "20",
+        "--start-size",
+        "64",
+        "--size-step",
+        "16"
+      ],
+      "xla_flags": "--xla_gpu_graph_min_graph_size=1 --xla_gpu_enable_command_buffer=",
+      "exit_status": 0,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170249718910-mcs-alive-graph-count-series/command_buffers_disabled.log",
+      "count_observations": 0,
+      "count_events": [],
+      "rows": [
+        {
+          "kind": "program",
+          "programs_compiled": 1,
+          "shape": [
+            64,
+            64
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 14
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 2,
+          "shape": [
+            80,
+            80
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 15
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 3,
+          "shape": [
+            96,
+            96
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 16
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 4,
+          "shape": [
+            112,
+            112
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 17
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 5,
+          "shape": [
+            128,
+            128
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 18
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 6,
+          "shape": [
+            144,
+            144
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 19
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 7,
+          "shape": [
+            160,
+            160
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 20
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 8,
+          "shape": [
+            176,
+            176
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 21
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 9,
+          "shape": [
+            192,
+            192
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 22
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 10,
+          "shape": [
+            208,
+            208
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 23
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 11,
+          "shape": [
+            224,
+            224
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 24
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 12,
+          "shape": [
+            240,
+            240
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 25
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 13,
+          "shape": [
+            256,
+            256
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 26
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 14,
+          "shape": [
+            272,
+            272
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 27
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 15,
+          "shape": [
+            288,
+            288
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 28
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 16,
+          "shape": [
+            304,
+            304
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 29
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 17,
+          "shape": [
+            320,
+            320
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 30
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 18,
+          "shape": [
+            336,
+            336
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 31
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 19,
+          "shape": [
+            352,
+            352
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 32
+        },
+        {
+          "kind": "program",
+          "programs_compiled": 20,
+          "shape": [
+            368,
+            368
+          ],
+          "alive_executable_graphs": null,
+          "log_line": 33
+        },
+        {
+          "executable_handles": 20,
+          "kind": "before_drop",
+          "programs_compiled": 20,
+          "alive_executable_graphs": null,
+          "log_line": 34
+        },
+        {
+          "dropped_handles": 10,
+          "executable_handles": 10,
+          "kind": "after_drop",
+          "programs_compiled": 20,
+          "alive_executable_graphs": null,
+          "log_line": 35
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "verdict": "executable_scoped_not_process_cumulative",
+    "initial_alive_executable_graphs": 1,
+    "final_alive_executable_graphs": 1,
+    "peak_alive_executable_graphs": 1,
+    "transient_peak_alive_executable_graphs": 2,
+    "growth_across_program_ladder": 0,
+    "alive_executable_graphs_after_drop": 0,
+    "graphs_released_after_drop": 1,
+    "disabled_control_maximum": 0
+  }
+}

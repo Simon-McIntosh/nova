@@ -42,6 +42,39 @@ def _relative(mapped: jax.Array, state: jax.Array) -> float:
     return _as_float(fixed_point._relative_residual(mapped, state))
 
 
+def _route_diagnostics(result: Any) -> dict[str, Any]:
+    """Expose the termination state that decides where the route stops."""
+    fixed = result.fixed_point
+    reason = fixed_point.FixedPointTerminationReason(int(fixed.termination_reason))
+    return {
+        "termination_reason": int(fixed.termination_reason),
+        "termination_reason_name": reason.name,
+        "converged": bool(fixed.converged),
+        "active_set_iterations": int(fixed.active_set_iterations),
+        "active_set_residuals": [
+            float(value) for value in np.asarray(fixed.active_set_residuals).ravel()
+        ],
+        "active_set_mask_differences": [
+            int(value)
+            for value in np.asarray(fixed.active_set_mask_differences).ravel()
+        ],
+        "attempted_newton_promotions": int(fixed.attempted_newton_promotions),
+        "accepted_newton_promotions": int(fixed.accepted_newton_promotions),
+        "trajectory_residual": float(fixed.trajectory_residual),
+        "inner_iteration_residuals_before": [
+            float(value)
+            for value in np.asarray(fixed.inner_iteration_residuals_before).ravel()
+        ],
+        "inner_iteration_residuals_after": [
+            float(value)
+            for value in np.asarray(fixed.inner_iteration_residuals_after).ravel()
+        ],
+        "inner_iteration_accepted": [
+            int(value) for value in np.asarray(fixed.inner_iteration_accepted).ravel()
+        ],
+    }
+
+
 def _partition_read(shadowed_map, state, previous, external, operator):
     return shadowed_map._read_frozen_partition(state, previous, external, operator)
 
@@ -234,8 +267,24 @@ def _markdown(receipt: dict[str, Any]) -> str:
             f"{geometry['net_current_normalisation']}.",
         ]
     )
+    route = receipt["route"]
+    refreshed_route = receipt["refreshed_route"]
     lines.extend(
         [
+            "",
+            "## Route termination",
+            "",
+            f"The terminal route converged={route['converged']} with reason "
+            f"{route['termination_reason_name']} after "
+            f"{route['active_set_iterations']} active-set trips, attempting "
+            f"{route['attempted_newton_promotions']} and accepting "
+            f"{route['accepted_newton_promotions']} Newton promotions. Its "
+            f"per-trip live residuals were {route['active_set_residuals']} and "
+            f"its per-trip mask differences were "
+            f"{route['active_set_mask_differences']}. The retry route "
+            f"converged={refreshed_route['converged']} with reason "
+            f"{refreshed_route['termination_reason_name']} and accepted "
+            f"{refreshed_route['accepted_newton_promotions']} Newton promotions.",
             "",
             "## Falsifiable mechanism check",
             "",
@@ -337,6 +386,8 @@ def measure(refresh_newton_steps: int) -> dict[str, Any]:
         "support_difference_cells": support_difference,
         "residual_shadow_difference_entries": shadow_difference,
         "trajectory_residual": _as_float(result.fixed_point.trajectory_residual),
+        "route": _route_diagnostics(result),
+        "refreshed_route": _route_diagnostics(refreshed),
         "frozen_residual": _relative(frozen, terminal),
         "live_residual": _relative(live, terminal),
         "refreshed_live_residual": _relative(refreshed_live, refreshed.flux),

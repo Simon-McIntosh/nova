@@ -6,6 +6,7 @@
   },
   "completion": {
     "declared_member_count": 17,
+    "figure_disclosure": "3 of 17 declared members missing (d3d_shot_001554e054.parquet frame 144, d3d_shot_002495e835.parquet frame 146, d3d_shot_0040ca9bdc.parquet frame 137); no strict-exit incidence value was persisted for any member, so the figure draws no incidence panel.",
     "incomplete_attempts": [
       {
         "compile_start_rss_mib": 67459.191,

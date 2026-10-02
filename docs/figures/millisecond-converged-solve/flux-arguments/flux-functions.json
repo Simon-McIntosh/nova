@@ -1,0 +1,26 @@
+{
+  "coefficients": {
+    "diamagnetic_gradient_ff_prime": {
+      "closure_scalar_definition": "scripts/analytic_oracle_fixtures/measure.py:159",
+      "committed": -0.1952180958410202,
+      "dynamic_definition": "nova/equilibrium/source.py:286",
+      "scale": 1.1,
+      "scaled": -0.21473990542512225
+    },
+    "pressure_gradient_p_prime": {
+      "closure_scalar_definition": "scripts/analytic_oracle_fixtures/measure.py:158",
+      "committed": -16018.991541361902,
+      "dynamic_definition": "nova/equilibrium/source.py:285",
+      "scale": 0.9,
+      "scaled": -14417.092387225712
+    }
+  },
+  "figure": {
+    "filesystem_path": "docs/figures/millisecond-converged-solve/flux-arguments/flux-functions.png",
+    "project_absolute_src": "/nova/figures/millisecond-converged-solve/flux-arguments/flux-functions.png"
+  },
+  "generator": "benchmarks/profile_coefficients_recompile_audit.py",
+  "note": "Only these two gradient scalars move between the committed and the coefficient-scaled profile; every other leaf of the pair is identical.",
+  "schema": "nova.flux-function-coefficients/1",
+  "source_measurement_receipt": "benchmarks/profile-coefficients-recompile.json (the run that produced the figure)"
+}

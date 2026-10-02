@@ -1,0 +1,343 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-terra",
+  "base_sha": "a0e5ee3550121b970e2dcb7774cb08aa83ecbc68",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 2481408,
+      "cached_input_tokens_cumulative": 2481408,
+      "input_tokens": 2613070,
+      "input_tokens_cumulative": 2613070,
+      "output_tokens": 21046,
+      "output_tokens_cumulative": 21046,
+      "reasoning_output_tokens": 6302,
+      "reasoning_output_tokens_cumulative": 6302
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-02T18:29:17Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T18:20:05Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.0,
+    "plan": "nova-portfolio-replan",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 4.162271805273834,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T19:04:44.433914+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": "2026-10-02T18:19:43Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T10:39:36Z",
+    "seconds_until_reset": 577192,
+    "state": "quiet",
+    "utilisation_pct": 19.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T18:19:43Z",
+    "read_at": "2026-10-02T18:19:44Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 19.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T18:29:17Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181941558895-review-of-nova-standing-suite-declaration/manifest.md",
+  "member": "disposable-r-20261002T181941558895-review-of-nova-standing-suite-declaration",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-nova-standing-suite-declaration",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2338,
+          "cached_input_tokens": 761201,
+          "input_tokens": 763541,
+          "output_tokens": 1067,
+          "reasoning_output_tokens": 90,
+          "total_tokens": 764608,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the review for r-20261002T173610463076-nova-standing-suite-declaration stores a parsed record at head 90529c613d19c93132b471d699cf2fcfe2b4d001 scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own gate logs. It reads scripts/nova_lane/standing_suite.sh against reckon/crew/standing_suite.py's parser and against the draft at ~/.config/reckon/crew/reports/reckon/s25-coord/nova-standing-suite-draft.md, confirming that the summary line carries every category the parser reads, that an unrunnable file surfaces as an ERROR counted in collection errors, that routed files reach scripts/nova_lane/run.sh with an explicit timeout argument, and that nothing in the wrapper cancels or kills SLURM jobs by pattern or by user; the turn ends once that record is stored and the manifest reads complete with status: complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261002T173610463076-nova-standing-suite-declaration",
+    "id": "review-of-nova-standing-suite-declaration",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T18:19:43Z",
+      "read_at": "2026-10-02T18:19:44Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 19.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181941558895-review-of-nova-standing-suite-declaration/manifest.md",
+    "negative_control": "",
+    "plan": "nova-portfolio-replan",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T173610463076-nova-standing-suite-declaration.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T173610463076-nova-standing-suite-declaration.at-90529c613d19c93132b471d699cf2fcfe2b4d001.json"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 4.161314887944314,
+      "derived": 0.050224509710978846,
+      "drain_hours": 168.0,
+      "effective_limit": 0.050224509710978846,
+      "elapsed_fraction": 0.04565864519179895,
+      "elapsed_hours": 7.670652392222223,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-02T18:19:49+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.81,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T10:39:35Z",
+      "state": "observed",
+      "utilisation": 0.19,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.094582,
+      "decided_by": "window",
+      "margin": 0.5304180000000001,
+      "name": "review-of-nova-standing-suite-declaration",
+      "score": 0.625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.19
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.348612,
+        "observed_at": "2026-10-02T18:19:49+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T10:39:35Z",
+        "state": "observed",
+        "utilisation": 0.19,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "review-of-nova-standing-suite-declaration",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-02T18:19:49.348612+00:00",
+    "score": 0.625,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "plan": "nova-portfolio-replan",
+  "plan_impl_at_dispatch": 0.0,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "a0e5ee3550121b970e2dcb7774cb08aa83ecbc68",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "none",
+  "role": "review",
+  "run_id": "r-20261002T181941558895-review-of-nova-standing-suite-declaration",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fdd8-61af-7ab1-a4ba-98de18ffb002",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 2481408,
+    "cumulative_input_tokens": 5094478,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 27348
+  },
+  "time_budget": "45m",
+  "tool_steps": 27.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 552,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T18:29:18Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T18:20:09Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T181941558895-review-of-nova-standing-suite-declaration",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 97,
+    "worker_pid": 3225757
+  },
+  "worker_seconds": 552,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

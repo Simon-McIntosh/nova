@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="66">
+<meta name="plan-version" content="67">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -575,6 +575,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261002T211226552427-review-of-fsri-forward-solve-file-verification" data-who="reckon-build" data-when="2026-10-02T21:20:05Z">
     <div class="r-comment-body"><p>Parsed pass review at reviewed head 4f53fa908cc9b0d35083d4230171efd206fef532, total 93/100; one evidence-provenance follow-on is recorded.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261002T205931224043-fsri-moment-identity-test-arm" data-who="reckon-build" data-when="2026-10-02T21:19:13.435Z">
+    <div class="r-comment-body"><p>test_solve_path_current_moments_match_profile_owned_support now builds its direct arm from the same _FluxSelectedProfile(core, common_sol) that ForwardSource.current_moments builds, so both arms integrate the flux-selected profile (no current above the separatrix without a declared scrape-off layer); test passes rtol 2e-13 unchanged (1 passed in 90.51s), negative control (bare source.core) fails 31/625 with maxabs 173.43143596.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-fsri-compile-blocks-a-cpu-control" data-who="coordinator" data-when="2026-09-19T16:55:00Z">
     <div class="r-comment-body"><p>The program size this section owns now blocks another plan's evidence, measured 2026-09-19 on the centroid-constrained positive control. Two all_debug jobs aborted inside LLVM compiling <code>jit_scan</code>, the first at 64G and the second at 180G, both with <code>allocateMappedMemory failed</code> and a core dump at exit 134, the second after a slow-compile alarm and 38 minutes. Tripling the allocation changed nothing, so the constraint is the compiled module rather than the job's memory request. Two things follow for this section. The gate for section 2 should include a CPU arm, since an executable that cannot be compiled on a 180G node is a failure a device-only budget would not catch. And the scheduler signal is not trustworthy here: <code>sacct</code> reported <code>COMPLETED 0:0</code> for both jobs and for every sub-step while the payload aborted, so the payload log is the only evidence of what happened. The centroid plan's positive control waits on this section rather than on its own node.</p></div>

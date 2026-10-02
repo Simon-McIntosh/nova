@@ -1,0 +1,394 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "c00300b91596dc94060c074ebe9bf735b5892174",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 11678282,
+      "input_tokens_cumulative": 11678282,
+      "output_tokens": 72137,
+      "output_tokens_cumulative": 72137,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 84,
+    "files": 3,
+    "removed": 20
+  },
+  "clone_matches": [],
+  "commit_list_shortfall": {
+    "declared": 3,
+    "kind": "presented_commits_subset_of_manifest",
+    "message": "run 'r-20261001T212425544685-ecq-per-layout-vertex-capacity' has a passing gate presenting 2 commit(s) of the 3 its manifest declares; missing: 61b2910890cea4b5f0528dd2c2c036f8dd39ad89. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal — present the full list, or the boundary check may not cover the node's work",
+    "missing": [
+      "61b2910890cea4b5f0528dd2c2c036f8dd39ad89"
+    ],
+    "presented": 2
+  },
+  "commit_resolution": null,
+  "commits": [
+    "5b84f5bcb7dbc2e1d7451f49440996d61cafd480",
+    "7cac2452606e4fa8c8483f96b5f186955cf93a31"
+  ],
+  "completed_at": "2026-10-02T10:24:28.305Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-01T21:24:44Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests/test_exact_clip_memory.py"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q --timeout 0 tests/test_equilibrium_separatrix_clip.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/gate-module-after.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.99,
+    "plan": "exact-clip-moment-quadrature",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "claude",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'claude'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-01T22:24:27.531487+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-09-23T10:36:09.044Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-09-23T14:20:00Z",
+    "seconds_until_reset": 0,
+    "state": "quiet",
+    "utilisation_pct": 44.0
+  },
+  "lane_declaration": {
+    "backend": "claude",
+    "headroom": "unknown",
+    "metered": true,
+    "observed_at": "2026-09-23T10:36:09.044Z",
+    "read_at": "2026-10-01T21:24:27Z",
+    "resolved_backend": "claude",
+    "utilisation_pct": 44.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T10:24:28.305Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-02T05:20:23Z",
+        "detail": "continued session 'cd41481d-f7a6-4c2a-a110-9ff7b328886e' on harness 'claude'",
+        "from_backend": "claude",
+        "from_harness": "claude",
+        "reason": "claude lane cannot authenticate under the fence (no credential bound into the per-run harness home); the local lane reopened at 05:18Z with 78 worker slots, and the node is exact-spec",
+        "session": "continued",
+        "session_id": "cd41481d-f7a6-4c2a-a110-9ff7b328886e",
+        "session_source": "stream",
+        "to_backend": "clive",
+        "to_harness": "claude"
+      }
+    ],
+    "root_run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/manifest.md",
+  "member": "parity-tolerances",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_equilibrium_separatrix_clip.py::test_spline_clip_admits_a_two_run_layout_at_the_two_run_bound"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_equilibrium_separatrix_clip.py::test_spline_clip_admits_a_two_run_layout_at_the_two_run_bound"
+    ],
+    "declaration": "force the one-arc bound on the diverted row and observe cell 9 refused again",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/negative-control-one-arc-bound.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/negative-control-one-arc-bound.log",
+    "test_paths": [
+      "tests/test_equilibrium_separatrix_clip.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "ecq-per-layout-vertex-capacity",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1462,
+          "cached_input_tokens": 320137,
+          "input_tokens": 321601,
+          "output_tokens": 865,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 322466,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Reuse: extend traced_polygon_vertex_capacity (nova/equilibrium/separatrix_clip.py:61), TracedCapacityRefusalError and refused_cell_count in place, adding no second capacity authority. Measured, each with its recorded output: on the diverted single-null row at 110 cells, cell 9 is admitted (260 vertices, area 0.00708 as in the 4096-capacity diagnostic) with zero refused cells; every limited row keeps its one-arc bound and a bit-identical clip, asserted against the base; a presented two-run layout above the derived bound is refused visibly, with the bound and the refused count on the receipt, rather than dropped; the declared negative control (force the one-arc bound on the diverted row) is applied, refuses cell 9 again, and its log is recorded; no failure is added, against a stated base, in the test modules importing separatrix_clip, each run in its own fresh process (on the fleet allocation run in place, otherwise one all_debug allocation); the landing fragment cites the followup id",
+    "estimated_hours": null,
+    "goal": "derive traced_polygon_vertex_capacity per layout from its level-run count, with the derived bound and the refused-cell count written on the clip receipt, per followup f-ecq-per-layout-vertex-capacity",
+    "id": "ecq-per-layout-vertex-capacity",
+    "lane_declaration": {
+      "backend": "claude",
+      "headroom": "unknown",
+      "metered": true,
+      "observed_at": "2026-09-23T10:36:09.044Z",
+      "read_at": "2026-10-01T21:24:27Z",
+      "resolved_backend": "claude",
+      "utilisation_pct": 44.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/manifest.md",
+    "negative_control": "force the one-arc bound on the diverted row and observe cell 9 refused again",
+    "plan": "exact-clip-moment-quadrature",
+    "requested_backend": "claude",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/separatrix_clip.py",
+      "tests/test_equilibrium_separatrix_clip.py",
+      "docs/evidence/fragments/exact-clip-moment-quadrature/ecq-per-layout-vertex-capacity.html",
+      "docs/figures/exact-clip-moment-quadrature/ecq-per-layout-vertex-capacity",
+      "nova/equilibrium/forward_operator.py",
+      "docs/figures/exact-clip-moment-quadrature/capacity"
+    ]
+  },
+  "orientation_input_tokens": 2151073.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "claude",
+    "member": null,
+    "node": "ecq-per-layout-vertex-capacity",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-01T21:24:29.528505+00:00",
+    "score": 0.56875,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "exact-clip-moment-quadrature",
+  "plan_impl_at_dispatch": 0.99,
+  "plan_link": null,
+  "promoted_revision": "7cac2452606e4fa8c8483f96b5f186955cf93a31",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "c00300b91596dc94060c074ebe9bf735b5892174",
+    "reviewed_head_sha": "7cac2452606e4fa8c8483f96b5f186955cf93a31",
+    "scores": {
+      "durability": 15,
+      "evidence": 14,
+      "fit": 18,
+      "goal_fidelity": 16,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 83
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+  "scope_acceptances": null,
+  "scope_changed": true,
+  "section": "§4",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "cd41481d-f7a6-4c2a-a110-9ff7b328886e",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 2,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 11678282,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 2550.5,
+    "generated_tokens": 72137,
+    "generation_seconds": 2263.614,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 49.1,
+    "machine_seconds": 286.886,
+    "peak_input_tokens": 235706,
+    "tokens_per_second": 31.87,
+    "wall_tokens_per_second": 28.28
+  },
+  "time_budget": "60m",
+  "tool_steps": 0.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 46784,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T10:24:32Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T09:03:43Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 29549,
+    "worker_pid": 2391613
+  },
+  "worker_seconds": 46758,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-02T10:24:28.305Z",
+    "session_id": "cd41481d-f7a6-4c2a-a110-9ff7b328886e",
+    "session_source": "pointer",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-per-layout-vertex-capacity"
+  }
+}

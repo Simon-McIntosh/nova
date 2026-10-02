@@ -28,7 +28,7 @@
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.99">
-<meta name="plan-version" content="66">
+<meta name="plan-version" content="67">
 </head>
 <body>
   <main class="plan-doc">
@@ -414,7 +414,10 @@ matrix. Record: <a href="/nova/evidence/archive/exact-clip-moment-quadrature-lan
     <div class="r-comment-body"><p>Independent review of ecq-capacity-sizing stored at the fence path, total 93, five findings recorded on the reviewed run's completion</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261002T123708628897-review-of-ecq-per-layout-vertex-capacity" data-who="reckon-build" data-when="2026-10-02T13:00:14.502Z">
-    <div class="r-comment-body"><p>reviewed run r-20261001T212425544685-ecq-per-layout-vertex-capacity (node ecq-per-layout-vertex-capacity, plan nova:exact-clip-moment-quadrature §4) at base c00300b91596dc94060c074ebe9bf735b5892174 -&gt; head 61b2910890cea4b5f0528dd2c2c036f8dd39ad89; parsed review stored scoring goal_fidelity 16, evidence 14, scope_discipline 16, durability 17, fit 18, total 81, verdict pass, added_failure_count 0. The run&#x27;s blocker is independently confirmed (base c00300b91 diverted row refused 0, included 86, max 134) and the code derivation and wiring are sound and guarded; five follow-on record findings recorded, chief among them that the committed head census receipt (derived 162) contradicts the landed head code (independently 290) because the census was not re-run after the production wiring landed.</p></div>
+    <div class="r-comment-body"><p>reviewed run r-20261001T212425544685-ecq-per-layout-vertex-capacity (node ecq-per-layout-vertex-capacity, plan nova:exact-clip-moment-quadrature §4) at base c00300b91596dc94060c074ebe9bf735b5892174 -&gt; head 61b2910890cea4b5f0528dd2c2c036f8dd39ad89; parsed review stored scoring goal_fidelity 16, evidence 14, scope_discipline 16, durability 17, fit 18, total 81, verdict pass, added_failure_count 0. The run's blocker is independently confirmed (base c00300b91 diverted row refused 0, included 86, max 134) and the code derivation and wiring are sound and guarded; five follow-on record findings recorded, chief among them that the committed head census receipt (derived 162) contradicts the landed head code (independently 290) because the census was not re-run after the production wiring landed.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261001T212425544685-ecq-per-layout-vertex-capacity" data-who="reckon-build" data-when="2026-10-02T10:24:28.305Z">
+    <div class="r-comment-body"><p>ecq-per-layout-vertex-capacity: traced_polygon_vertex_capacity(straight, level_run_count=1) now returns level_run_count*128+straight and the count is threaded as a Python int through AtomicCellMesh.traced_clip to the capacity call, with forward_operator._profile_support declaring it from the admitted saddle vertex where concrete (2 with a saddle, 1 without, 1 when traced); a two-run layout declared with two runs is admitted at vertex_count 260, area 0.75, refused_cells 0, vertex_capacity 264, and under the one-arc bound is refused visibly (refused_cells 1, vertex_capacity 136, TracedCapacityRefusalError); module gate 28 passed in 125.88 s, forward_operator module 7 passed head and base, importers arm adds no failure; the diverted single-null row clause is unmet because the recorded defect does not reproduce at base - the row reports refused_cell_count 0 and max 134 vertices under the one-arc bound 162, cell 9 carrying 8 vertices, and its support is bit-identical base to head apart from the declared capacity 162 to 290.</p></div>
 </div>
 </section>
 </main>

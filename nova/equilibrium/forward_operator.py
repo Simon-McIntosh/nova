@@ -3321,9 +3321,10 @@ class ForwardFluxOperator:
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
         physical = jnp.asarray(psi)
-        masks, topology, _connected, _admitted = self._fixed_design_read(
+        masks, topology, _connected, admitted = self._fixed_design_read(
             physical, requested_class
         )
+        require_qualified_axis(admitted)
         if not self.use_linear_moments:
             raise ValueError("clipped support moments are required")
         sample_flux = self.sample_node_flux(psi)

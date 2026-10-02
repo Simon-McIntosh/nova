@@ -16,10 +16,11 @@ pass.  The two arms differ in which moments they form:
 Both are exact substitutions, and the point arm is the one whose second
 qualification is removable: the separate request decomposes into ``read`` plus
 ``cell_current_moments``, and the latter issues its own ``_fixed_design_read``.
-What is asserted here is that the substitution changes no value — the fused
-route is held to the two-read route on the state it returns, and a full host
-solve is held to the same terminal equilibrium with the fused entry point
-replaced by the two-read decomposition.
+What is asserted here is that the substitution changes no value the routes
+serve — the fused route is held to the two-read route on the qualified state it
+returns — and that the fused linear route refuses an unqualified state exactly
+as ``read`` does, because one qualification pass qualifies the axis for both
+requests rather than only the topology request.
 """
 
 from __future__ import annotations
@@ -28,10 +29,14 @@ from dataclasses import replace
 from unittest import mock
 
 import numpy as np
+import pytest
 
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
+    import jax
+    import jax.numpy as jnp
+
     from nova.equilibrium.forward_operator import ForwardFluxOperator
 
 from nova.equilibrium.topology import NoQualifiedAxisError
@@ -91,26 +96,29 @@ def _unfused_point_read(self, psi, requested_class=None):
 
 
 def _unfused_linear_read(self, psi, requested_class=None):
-    """Serve the two requests from the two reads the fusion removes.
-
-    The two requests disagree about unqualified states: ``read`` raises on the
-    host when no axis candidate resolves, while the fused route reaches only
-    ``_support_partition``, which returns the achieved labels either way.  Where
-    the separate request would refuse a state the fused route serves, the
-    substitute takes the partition's own masks and topology, so the comparison
-    runs over the states both routes serve.
-    """
+    """Serve the two requests from the two reads the fusion removes."""
     partition = self._support_partition(psi, requested_class)
-    try:
-        masks, topology = self.read(psi, requested_class)
-    except NoQualifiedAxisError:
-        masks, topology = partition[0], partition[1]
+    masks, topology = self.read(psi, requested_class)
     return (
         self.cell_current_moments(psi, requested_class),
         self._clipped_integral_measure(partition),
         masks,
         topology,
     )
+
+
+def _first_unqualified_map_state(sampled, sampled_seed):
+    """Return the first relaxed-map state with no admitted axis candidate."""
+    operator = sampled.operator
+    admitted = operator._fixed_design_read
+    mapped = sampled.flux_map()
+    state = np.asarray(sampled_seed)
+    for _ in range(HOST_EVALUATIONS):
+        if not bool(np.asarray(jax.device_get(admitted(jnp.asarray(state))[3]))):
+            return jnp.asarray(state)
+        image = np.asarray(mapped(jnp.asarray(state)))
+        state = state + sampled.relaxation * (image - state)
+    raise AssertionError("the relaxed map never left the qualified region")
 
 
 def test_the_point_arm_serves_both_requests_from_one_read(machine):
@@ -197,27 +205,35 @@ def test_the_point_arm_holds_the_terminal_state_of_the_two_read_route(machine):
     )
 
 
-def test_the_linear_arm_holds_the_terminal_state_of_the_two_read_route(machine):
-    """A solve through the fused linear read lands on the two-read terminal state."""
+def test_the_linear_arm_refuses_the_states_the_two_read_route_refuses(machine):
+    """The fused linear read carries the read route's qualified-axis refusal.
+
+    The fused route serves the topology and current-moment requests from one
+    ``_support_partition``; the two-read decomposition takes its topology from
+    ``read``.  A state with no admitted magnetic-axis candidate is refused on
+    the host by ``read``, and the fused route qualifies the same state once, so
+    both routes refuse it from identical inputs rather than serving the
+    unqualified labels.
+    """
     profile, seed, _vacuum = machine
     operator, sampled_seed = _with_direct_samples(profile, seed)
     sampled = replace(profile, operator=operator)
 
-    fused = sampled.solve(sampled_seed, route="host", evaluations=HOST_EVALUATIONS)
+    # The seed is qualified: both routes serve it.
+    operator.current_moments_and_observation(sampled_seed)
+    operator.read(sampled_seed)
 
-    calls = {"unfused": 0}
+    # The relaxed map drives the seed off the qualified region, so the first
+    # unqualified state the host solve reaches is the state every linear route
+    # refuses from the same input.
+    unqualified = _first_unqualified_map_state(sampled, sampled_seed)
+    with pytest.raises(NoQualifiedAxisError):
+        operator.read(unqualified)
+    with pytest.raises(NoQualifiedAxisError):
+        operator.current_moments_and_observation(unqualified)
+    with pytest.raises(NoQualifiedAxisError):
+        _unfused_linear_read(operator, unqualified)
 
-    def counted_unfused(self, psi, requested_class=None):
-        """Serve the requests the pre-fusion way, counting the substitution."""
-        calls["unfused"] += 1
-        return _unfused_linear_read(self, psi, requested_class)
-
-    with mock.patch.object(
-        ForwardFluxOperator, "current_moments_and_observation", counted_unfused
-    ):
-        unfused = sampled.solve(
-            sampled_seed, route="host", evaluations=HOST_EVALUATIONS
-        )
-
-    assert calls["unfused"] >= 1
-    np.testing.assert_array_equal(np.asarray(fused.flux), np.asarray(unfused.flux))
+    # The host solve reaches the same state and refuses rather than serving it.
+    with pytest.raises(NoQualifiedAxisError):
+        sampled.solve(sampled_seed, route="host", evaluations=HOST_EVALUATIONS)

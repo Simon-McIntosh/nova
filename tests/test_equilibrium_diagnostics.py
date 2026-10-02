@@ -289,7 +289,7 @@ def test_decay_index_window_is_the_open_rigid_displacement_interval():
 
 #: The contour/volume identity residuals are quadrature error on the grid, not
 #: an identity residual, so the gate is a bound rather than an equality.  The
-#: value sits above the coarsest grid the gate admits (measured 2.43e-4 of the
+#: value sits above the coarsest grid the gate admits (measured 1.4e-4 of the
 #: vertical moment at resolution 321) and far below the order-units size a wrong
 #: sign or factor produces; the fitted order against the volume side is checked
 #: separately in ``test_shafranov_contour_integral_error_falls_with_resolution``.
@@ -456,6 +456,26 @@ def test_shafranov_contour_integrals_equal_their_volume_side(resolution):
     assert float(integrals.perimeter) == pytest.approx(row.perimeter, rel=1e-6)
 
 
+def test_shafranov_radial_moment_is_resolved_by_the_gate_contour_sampling():
+    """The contour quadrature of the radial moment is converged at 2001 points.
+
+    The radial moment is a cancellation of boundary contributions several
+    thousand times its own size, so a contour rule whose error concentrates
+    near the X-point leaves it unresolved at the sampling the volume-side gate
+    uses, and the gate then reports quadrature error as an identity residual.
+    The departure from the 8001-point value isolates the contour discretisation
+    from the volume-side grid, which this comparison never touches.  A
+    second-order chord rule departs by 5.7e-4 here.
+    """
+    case = cerfon_freidberg_single_null()
+    moments = {}
+    for sampling in (2001, 8001):
+        row = _analytic_row(case, sampling=sampling, resolution=41)
+        moments[sampling] = float(_contour_integrals(row).radial_moment)
+    departure = abs(moments[2001] - moments[8001]) / abs(moments[8001])
+    assert departure < 1.0e-5, f"radial moment departs {departure:.3e} at 2001 points"
+
+
 def test_shafranov_contour_integral_error_falls_with_resolution():
     """The contour/volume mismatch is quadrature error and shrinks with grid size."""
     case = cerfon_freidberg_single_null()
@@ -613,12 +633,15 @@ def test_grid_imaged_biot_field_converges_to_the_volume_definition():
     analytic-row gate above.
 
     The route's error is dominated by the contour quadrature, which is the
-    midpoint rule on the closed polyline and therefore second order in the
-    contour sampling.  The grid interpolation is third order and its
-    contribution to the combination is seven orders down at the grid this
-    ladder runs on, so the fitted order here is the quadrature's and two is
-    what it is expected to be.  The measured order is printed and written to
-    the receipt beside the ladder it was fitted from.
+    periodic trapezoidal rule over the vertices with a fourth-order tangent.
+    The separatrix sample places a vertex on the X-point corner, where the
+    central tangent stencil is off by order one, so the decay of the vertical
+    moment and the toroidal stress is second order in the contour sampling.
+    The grid interpolation is third order and its contribution to the
+    combination is seven orders down at the grid this ladder runs on, so the
+    fitted order here is the quadrature's and two is what it is expected to be.
+    The measured order is printed and written to the receipt beside the ladder
+    it was fitted from.
     """
     case = cerfon_freidberg_single_null()
     row = _analytic_row(case, sampling=501, resolution=401)
@@ -674,10 +697,11 @@ def test_grid_imaged_biot_field_converges_to_the_volume_definition():
         "grid_resolutions": list(GRID_RESOLUTIONS),
         "grid_gap": grid_gaps,
         "mechanism": (
-            "the contour quadrature is the midpoint rule on the closed polyline "
-            "and is second order in the contour sampling; the shared-node "
-            "stencil is third order and the field imaging is exact on this "
-            "positive control, so the fitted order is the quadrature's"
+            "the contour quadrature is the periodic trapezoidal rule with a "
+            "fourth-order tangent, limited to second order in the contour "
+            "sampling by the X-point corner vertex; the shared-node stencil is "
+            "third order and the field imaging is exact on this positive "
+            "control, so the fitted order is the quadrature's"
         ),
     }
     print(json.dumps(receipt, indent=2))

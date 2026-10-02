@@ -1,0 +1,110 @@
+{
+  "interpretation": "formal JVP linearization; central differences disagree with D_c",
+  "direct_centroid_jvp_m_per_unit": [
+    [
+      0.8368701054503016,
+      -6.986375009282954e-10,
+      -4.350489620702227e-33
+    ],
+    [
+      -7.824759610831571e-12,
+      -3.0256044780031215,
+      3.9641200056699575e-33
+    ]
+  ],
+  "zero_map_control_m_per_unit": [
+    [
+      0.8368701054503016,
+      -6.986375009282954e-10,
+      -4.350489620702227e-33
+    ],
+    [
+      -7.824759610831571e-12,
+      -3.0256044780031215,
+      3.9641200056699575e-33
+    ]
+  ],
+  "coupled_centroid_jvp_m_per_unit": [
+    [
+      1.348673519302588,
+      -2.4521092311429975e-08,
+      -4.350489620702227e-33
+    ],
+    [
+      2.719465453096725e-11,
+      -41.798325278933824,
+      3.9641200056699575e-33
+    ]
+  ],
+  "analytic_map_residual_sup_wb": 0.008246175111260357,
+  "analytic_map_residual_centroid_effect_m": [
+    -6.654171403660954e-05,
+    -4.660279647850773e-13
+  ],
+  "field_only_cancellation_t": [
+    0.004574574929117076,
+    1.2360121607987508e-14
+  ],
+  "residual_corrected_cancellation_t": [
+    0.004623913566737112,
+    1.2427810332403255e-15
+  ],
+  "observed_terminal_field_t": -0.021255810528996315,
+  "linear_solve_diagnostics": [
+    {
+      "name": "column_0",
+      "info": 0,
+      "iterations": 9,
+      "relative_residual": 1.9915325423997056e-10
+    },
+    {
+      "name": "column_1",
+      "info": 0,
+      "iterations": 9,
+      "relative_residual": 3.1230078131521765e-10
+    },
+    {
+      "name": "column_2",
+      "info": 0,
+      "iterations": 1,
+      "relative_residual": 4.440892098500626e-16
+    },
+    {
+      "name": "analytic_map_residual",
+      "info": 0,
+      "iterations": 9,
+      "relative_residual": 3.4018213742428616e-10
+    }
+  ],
+  "elapsed_seconds": 208.41030710749328,
+  "fixed_point_matrix_condition_2": 296.70532218355487,
+  "fixed_point_matrix_smallest_singular_value": 0.02501204956820536,
+  "jacobian_spectral_radius": 0.9320602309219298,
+  "jacobian_eigenvalues_nearest_one": [
+    [
+      0.9320602309219298,
+      0.0
+    ],
+    [
+      0.5851006005240798,
+      0.08283466575775789
+    ],
+    [
+      0.5851006005240798,
+      -0.08283466575775789
+    ],
+    [
+      0.3740235428701672,
+      0.0
+    ],
+    [
+      0.2528095403653502,
+      0.0
+    ]
+  ],
+  "dense_solve_residual_relative": [
+    1.9916538753472874e-10,
+    3.123323925747208e-10,
+    5.455648642517789e-14
+  ]
+}

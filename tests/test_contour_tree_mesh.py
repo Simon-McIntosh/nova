@@ -131,10 +131,23 @@ def test_euler_characteristic_of_clipped_domain():
 
 def test_over_capacity_sets_overflow_flag():
     rz = hex_lattice(9, 9)
+    cap = 4
     mesh = build_contour_mesh(
-        rz, linear_flux(rz), [circle_unit(3.5)], vertex_capacity=4
+        rz, linear_flux(rz), [circle_unit(3.5)], vertex_capacity=cap
     )
     assert mesh.overflow is True
+    # an over-capacity build must not hand a consumer a corrupt carrier: the
+    # vertex array is truncated to `cap`, so nothing may be marked valid and no
+    # valid triangle or edge may reference an index at or beyond `cap`.
+    assert not bool(np.asarray(mesh.vertex_valid).any())
+    assert not bool(np.asarray(mesh.vertex_is_wall).any())
+    assert not bool(np.asarray(mesh.edge_valid).any())
+    assert not bool(np.asarray(mesh.triangle_valid).any())
+    v_cap = mesh.vertex_capacity
+    edges = np.asarray(mesh.edges)[np.asarray(mesh.edge_valid)]
+    tris = np.asarray(mesh.triangles)[np.asarray(mesh.triangle_valid)]
+    for index in np.concatenate([edges.ravel(), tris.ravel()], dtype=int):
+        assert 0 <= index < v_cap
     # a generous capacity on the same input is not an overflow
     ok = build(rz, [circle_unit(3.5)])
     assert ok.overflow is False

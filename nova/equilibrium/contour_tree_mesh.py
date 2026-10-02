@@ -281,7 +281,6 @@ def build_contour_mesh(
     )
 
     vertex_rz_arr = _pad(vertices, vertex_capacity, (0.0, 0.0))
-    vertex_psi_arr = _pad(vertex_psi, vertex_capacity, 0.0)
     vertex_valid_arr = _pad(vertex_valid, vertex_capacity, False)
     vertex_is_wall_arr = _pad(vertex_is_wall, vertex_capacity, False)
     edges_arr = _pad(edges, edge_capacity, (-1, -1)).astype(np.int32)
@@ -290,6 +289,19 @@ def build_contour_mesh(
     edge_valid_arr[: min(len(edges), edge_capacity)] = True
     triangle_valid_arr = np.zeros(triangle_capacity, dtype=bool)
     triangle_valid_arr[: min(len(triangles), triangle_capacity)] = True
+    vertex_psi_arr = _pad(vertex_psi, vertex_capacity, 0.0)
+    if overflow:
+        # A truncated mesh would carry triangle or edge indices past the vertex
+        # array. Refuse visibly: mark nothing valid and blank every index, so no
+        # consumer can read a corrupt carrier.
+        vertex_rz_arr = np.zeros_like(vertex_rz_arr)
+        vertex_psi_arr = np.zeros(vertex_capacity, dtype=np.float64)
+        vertex_valid_arr = np.zeros(vertex_capacity, dtype=bool)
+        vertex_is_wall_arr = np.zeros(vertex_capacity, dtype=bool)
+        edges_arr = np.full((edge_capacity, 2), -1, dtype=np.int32)
+        edge_valid_arr = np.zeros(edge_capacity, dtype=bool)
+        triangle_arr = np.full((triangle_capacity, 3), -1, dtype=np.int32)
+        triangle_valid_arr = np.zeros(triangle_capacity, dtype=bool)
 
     return ContourMesh(
         vertex_rz=jnp.asarray(vertex_rz_arr),

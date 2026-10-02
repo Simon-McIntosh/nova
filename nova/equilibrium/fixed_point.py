@@ -2991,27 +2991,16 @@ def picard(
             return terminal_linear((value, shadow_tangent))
 
         def implicit_tangent(_):
-            def linear_map(value):
-                return value - state_linear(value)
+            def relax(_, value):
+                residual = parameter_tangent - (value - state_linear(value))
+                return value + relaxation * residual
 
-            def solve_linear(matvec, rhs):
-                return jax.scipy.sparse.linalg.gmres(
-                    matvec,
-                    rhs,
-                    tol=1.0e-10,
-                    atol=1.0e-12,
-                    restart=min(80, result.state.size),
-                    maxiter=20,
-                )[0]
-
-            tangent = jax.lax.custom_linear_solve(
-                linear_map,
-                parameter_tangent,
-                solve=solve_linear,
-                transpose_solve=solve_linear,
-                symmetric=False,
+            return jax.lax.fori_loop(
+                0,
+                max(4 * evaluations, 160),
+                relax,
+                jnp.zeros_like(parameter_tangent),
             )
-            return tangent
 
         state_tangent = jax.lax.cond(
             result.converged,

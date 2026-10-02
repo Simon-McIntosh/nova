@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 </head>
 <body>
   <main class="plan-doc">
@@ -313,6 +313,11 @@
     <div class="r-fu-body"><p>§1 and §2 need no smooth field and can run first. §2's brute-force check is the positive control for the tree. Lock <code>field-representation-on-hex-cells</code> from §2's fixtures before §3 is dispatched, because §3 and §4's saddle level sets depend on it.</p></div>
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority §1</pre>
     </article>
+<article class="r-fu" data-id="f-ctta-tree-edge-invariant" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The landed tree fails its own invariant on every certificate mesh</h4>
+    <div class="r-fu-body"><p>The §2 brute-force control (run r-20261002T075725216430-ctta-end-to-end-brute-force, commit 72b14996b) shows that <code>build_contour_tree</code> at b187b46d4 reports overflow on every persisted compact Solov'ev certificate mesh: 133 to 138 nodes and 255 edges against an edge capacity of 255, where a contour tree needs the node count to exceed the edge count by one. The synthetic tree tests did not see it. The tree landing recorded in §2 is therefore not yet sound. Root cause and repair are in flight as ctta-contour-tree-edge-invariant-repair, gated on the brute-force comparator, a regression test that fails at the base, and the counts of mesh vertices, join and split arcs, PL critical points and tree nodes before and after. The MAST fixtures for the same control are the EFIT psirz reconstruction sampled onto the hex carrier, not a forward state. Hold the field-representation-on-hex-cells lock until §2's fixtures pass.</p></div>
+    <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261001T205214115813-review-of-contour-tree-topology-authority" data-who="reckon-build" data-when="2026-10-01T21:32:29.777Z">
@@ -370,7 +375,7 @@
     <div class="r-comment-body"><p>built the piecewise-linear contour mesh on the hex carrier (nova/equilibrium/contour_tree_mesh.py): ContourMesh, a fixed-capacity jax pytree of the three-direction hex-centre triangulation clipped to the multi-unit vessel polygon, wall vertices valued by linear interpolation on the containing triangle; an over-capacity build refuses visibly (overflow flag set, every validity mask empty, indices blanked); gate 8 passed, head suite 14 passed, wall-vertex linear-field error 4.4e-16 Wb</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T003152788581-review-of-ctta-hex-contour-mesh" data-who="reckon-build" data-when="2026-10-02T00:43:53.092Z">
-    <div class="r-comment-body"><p>stored an independent review record for run r-20261001T230318372995-ctta-hex-contour-mesh at reviewed head b9658be0 (base f9603c3b); scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 17, fit 18, total 90, verdict pass; the prior review&#x27;s three blocking defects (truncating overflow path, unobservable capacity test, empty baseline/after arms) are repaired and independently verified — over-capacity build refuses visibly, the guard is falsified red by mutation, and both gate arms are present with 0 added failures</p></div>
+    <div class="r-comment-body"><p>stored an independent review record for run r-20261001T230318372995-ctta-hex-contour-mesh at reviewed head b9658be0 (base f9603c3b); scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 17, fit 18, total 90, verdict pass; the prior review's three blocking defects (truncating overflow path, unobservable capacity test, empty baseline/after arms) are repaired and independently verified — over-capacity build refuses visibly, the guard is falsified red by mutation, and both gate arms are present with 0 added failures</p></div>
 </div>
 </section>
 </main>

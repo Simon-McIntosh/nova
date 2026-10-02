@@ -1,0 +1,32 @@
+<section id="cca-map-fidelity-h200-remeasure">
+  <h3>Map-fidelity re-measure at the analytic Solov'ev state, every rung in both clip modes</h3>
+  <p><strong>2026-10-02 worker record.</strong> One H200 allocation (job 1279817,
+  betelgeuse, reservation <code>gpu_0003_grpA</code>, 1&times;H200) ran
+  <code>benchmarks/plasma_cell_map_fidelity.py</code> at revision
+  <code>fa8af260e</code> (after the chord-membership merge <code>92613fd3d</code>
+  of 2026-10-02 00:56 and the moment-reduction repair <code>427f05e10</code>),
+  looping every certificate rung of <code>diverted-single-null</code> and
+  <code>weak-rotation-reactor-static</code> in both <code>exact</code> and
+  <code>chord</code> clip modes. One CPU preflight of the 132-realised-cell
+  diverted row ran first, in place on the fleet allocation.</p>
+  <p><strong>Verdicts.</strong> Diverted chord below 1e-2 at every rung:
+  <strong>fail</strong> (sup 0.261 / 0.216 / 0.113 / 0.109 / 0.0597 at 110 / 300
+  / 500 / 1000 / 2500). Weak chord no worse than its committed receipt:
+  <strong>fail</strong>, worse by 116&times; to 534&times; at every rung. The exact
+  rows that decide <code>g-cca-exact-default-waits-on-map-fidelity</code>:
+  weak exact passes at every rung (1.66e-4 to 1.43e-3), but diverted exact fails
+  at every rung (0.066 to 0.181), and the chord rows the gate required to be
+  bit-identical changed materially — so the gate cannot be lifted.</p>
+  <p><strong>Attribution.</strong> The committed receipt (<code>de29a1a3</code>)
+  is an ancestor of head but does not contain the chord-membership merge, whose
+  change carries the chord-mode regression: diverted chord went 0.095&rarr;0.261
+  at 110 and weak chord 9.5e-5&rarr;0.0186 at 110. The moment-reduction repair
+  carries the weak-exact improvement (0.093&rarr;1.7e-4 at 110).</p>
+  <p><strong>Evidence.</strong> Per-row receipts, the receipt index
+  <code>map-fidelity.json</code>, per-row state archives and the job log are in
+  <a href="/nova/figures/plasma-cell-read-fidelity/map-fidelity/">docs/figures/plasma-cell-read-fidelity/map-fidelity</a>;
+  the row table, the verdicts and the committed-receipt comparison are in
+  <code>remeasure-2026-10-02.md</code> beside them. Instrument controls pass and
+  the declared vertical-displacement negative control is detected in both norms
+  on every row. No file under <code>nova/</code> or <code>tests/</code> changed.</p>
+</section>

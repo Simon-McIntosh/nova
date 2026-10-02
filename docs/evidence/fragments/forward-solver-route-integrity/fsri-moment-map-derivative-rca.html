@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="forward-solver-route-integrity">
+<title>Moment-map derivative stage measurement</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsri-moment-map-derivative-rca"
+         data-test-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225511267666-fsri-moment-map-derivative-rca/moment-map-derivative-terms-h200.log"
+         data-negative-control-log="none: measurement node changes no test path">
+  <h2>The first disagreement is the emergent boundary-flux term</h2>
+  <p>On the failing fixture, reverse mode and the forward JVP agree with each other,
+  while the first disagreement with central differences is
+  <code>TopologyState.boundary_flux</code>: <strong>0.3938583892</strong> relative
+  error at <code>1e-5 Wb</code>. <code>axis_flux</code> agrees at
+  <code>8.283e-10</code>. The term is published at
+  <code>nova/equilibrium/topology.py:1355</code>, after
+  <code>data_b = jnp.where(boundary_is_xpoint, data_x, data_w)</code> at line 1314.
+  All later stages inherit a discrepancy already present at this topology read.</p>
+
+  <figure>
+    <img src="/nova/figures/forward-solver-route-integrity/fsri-moment-map-derivative-rca/stage-derivatives.png"
+         alt="Relative error between forward JVP and central differences across moment-map stages and three step sizes.">
+    <figcaption>Fixture-native H200 receipt at commit <code>ca149deb7</code>.
+    The topology boundary-flux curve stays separated as the central-difference
+    step shrinks; the scalar no-selection control agrees at <code>9.914e-11</code>.</figcaption>
+  </figure>
+
+  <table>
+    <thead><tr><th>stage</th><th>forward vs central at 1e-5</th><th>reverse vs forward</th></tr></thead>
+    <tbody>
+      <tr><td>axis flux</td><td>8.283e-10</td><td>1.055e-15</td></tr>
+      <tr><td>boundary flux</td><td>0.3938583892</td><td>2.051e-14</td></tr>
+      <tr><td>support partition and clip weights</td><td>0.5554851689</td><td>1.296e-13</td></tr>
+      <tr><td>cell current moments</td><td>0.4504139233</td><td>1.051e-13</td></tr>
+      <tr><td>normalised moment observations</td><td>4.1178911799</td><td>6.634e-13</td></tr>
+      <tr><td>target residual normalisation</td><td>2.3917018488</td><td>1.215e-13</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Contract.</strong> <code>moment_jacobian</code> currently reports the
+  derivative of the local automatic-differentiation path through the selected
+  boundary. The public map evaluated by <code>moment_residual</code> recomputes
+  that emergent boundary for each flux argument, which is the finite-difference
+  contract and the one its Jacobian must satisfy. The unchanged mismatch below
+  the selection-changing coarse step excludes ordinary differencing noise;
+  no source repair is included in this measurement node.</p>
+
+  <p>Receipt: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225511267666-fsri-moment-map-derivative-rca/moment-map-derivative-terms-h200.log</code>
+  (<code>EXIT_STATUS=0</code>, H200 job <code>1280509</code>).</p>
+</article>
+</main>
+</body>
+</html>

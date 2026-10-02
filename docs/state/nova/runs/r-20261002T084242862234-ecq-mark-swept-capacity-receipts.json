@@ -1,0 +1,568 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "84ead4bcdfa52563cbfec3e0515f9af2b0755f10",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 10870527,
+      "input_tokens_cumulative": 10870527,
+      "output_tokens": 51918,
+      "output_tokens_cumulative": 51918,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 855,
+    "files": 16,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_omissions_and_grid_margins_are_quantified",
+        "path": "tests/imas/test_diiid_geometry_corroboration.py"
+      },
+      "run_function": {
+        "line": 152,
+        "name": "annotate_report",
+        "path": "docs/figures/exact-clip-moment-quadrature/ecq-mark-swept-capacity-receipts/mark_swept_capacity_receipts.py"
+      },
+      "window_line": 165
+    },
+    {
+      "existing_function": {
+        "line": 127,
+        "name": "test_named_controls_and_prior_rows_are_strict",
+        "path": "tests/test_equilibrium_profile.py"
+      },
+      "run_function": {
+        "line": 152,
+        "name": "annotate_report",
+        "path": "docs/figures/exact-clip-moment-quadrature/ecq-mark-swept-capacity-receipts/mark_swept_capacity_receipts.py"
+      },
+      "window_line": 165
+    },
+    {
+      "existing_function": {
+        "line": 187,
+        "name": "test_picard_is_jittable_and_uses_boundary_push_core",
+        "path": "tests/test_equilibrium_profile.py"
+      },
+      "run_function": {
+        "line": 152,
+        "name": "annotate_report",
+        "path": "docs/figures/exact-clip-moment-quadrature/ecq-mark-swept-capacity-receipts/mark_swept_capacity_receipts.py"
+      },
+      "window_line": 165
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_control_points_build_the_bounding_box_from_the_shape_figures",
+        "path": "tests/test_shape_constraints.py"
+      },
+      "run_function": {
+        "line": 152,
+        "name": "annotate_report",
+        "path": "docs/figures/exact-clip-moment-quadrature/ecq-mark-swept-capacity-receipts/mark_swept_capacity_receipts.py"
+      },
+      "window_line": 166
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "58378064f2f43b296d6ee574f869b0af0fb2fac3"
+  ],
+  "completed_at": "2026-10-02T09:21:39.809Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T08:43:10Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "docs/figures/cut-cell-current-attribution/",
+    "clip-quadrature/{hlo-large-buffers-300",
+    "exact-clip-memory/);"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084242862234-ecq-mark-swept-capacity-receipts/logs/verify_annotations.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084242862234-ecq-mark-swept-capacity-receipts/logs/"
+  },
+  "impl_move": {
+    "at_complete": 0.99,
+    "at_dispatch": 0.99,
+    "plan": "exact-clip-moment-quadrature",
+    "reason": "record provenance markers for an audit followup; the plan's executable sections are untouched",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T09:22:46.477655+00:00",
+    "horizon_seconds": 2400,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T08:42:46Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 25,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 10,
+    "headroom": 5,
+    "mean_context": 124000,
+    "observed_at": "2026-10-02T08:42:21Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T09:21:39.809Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084242862234-ecq-mark-swept-capacity-receipts/manifest.md",
+  "member": "s19i-xcell-rca",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "ecq-mark-swept-capacity-receipts",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1398,
+          "cached_input_tokens": 669474,
+          "input_tokens": 670874,
+          "output_tokens": 1904,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 672778,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Inputs: the provenance block the landed node wrote into docs/figures/cut-cell-current-attribution/reposed-fixture/certificate/solve-memory-identification.json (dimensions_provenance), reused verbatim in form. Measured, each with its recorded output: docs/figures/exact-clip-capacity/memory-base.json and memory-current.json, the eleven JSON receipts under docs/figures/millisecond-converged-solve/scan-prototype/parts/ that carry exact_support_capacity in {3072, 3840, 2816}, and the fenced JSON block in docs/figures/figure-and-solver-audit/low-state-amplitude-nan/report.md each carry a dimensions_provenance marker naming the retired swept-product bound and its supersession, with no numeric value changed (a before/after diff of every numeric field is recorded and empty); every edited JSON parses; a whole-tree sweep over git-tracked docs/figures/ for exact_support_capacity in {3072, 3840, 2816} is recorded, listing each remaining unmarked file, which must all lie under docs/figures/cut-cell-current-attribution/; the landing fragment cites the followup id",
+    "estimated_hours": null,
+    "goal": "mark the swept exact_support_capacity in the exact-clip-capacity, scan-prototype and low-state-amplitude receipts as historical with provenance, per the remainder of followup f-ecq-memory-identification-swept-product",
+    "id": "ecq-mark-swept-capacity-receipts",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T08:42:46Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 25,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 10,
+      "headroom": 5,
+      "mean_context": 124000,
+      "observed_at": "2026-10-02T08:42:21Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084242862234-ecq-mark-swept-capacity-receipts/manifest.md",
+    "negative_control": "none: provenance markers verified by the whole-tree sweep and the empty numeric diff",
+    "plan": "exact-clip-moment-quadrature",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "40m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/exact-clip-capacity",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts",
+      "docs/figures/figure-and-solver-audit/low-state-amplitude-nan/report.md",
+      "docs/evidence/fragments/exact-clip-moment-quadrature/ecq-mark-swept-capacity-receipts.html",
+      "docs/figures/exact-clip-moment-quadrature/ecq-mark-swept-capacity-receipts"
+    ]
+  },
+  "orientation_input_tokens": 2610740.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "ecq-mark-swept-capacity-receipts",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T08:42:51.911001+00:00",
+    "score": 0.71875,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "exact-clip-moment-quadrature",
+  "plan_impl_at_dispatch": 0.99,
+  "plan_link": null,
+  "promoted_revision": "58378064f2f43b296d6ee574f869b0af0fb2fac3",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "84ead4bcdfa52563cbfec3e0515f9af2b0755f10",
+    "reviewed_head_sha": "58378064f2f43b296d6ee574f869b0af0fb2fac3",
+    "scores": {
+      "durability": 15,
+      "evidence": 13,
+      "fit": 19,
+      "goal_fidelity": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 85
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "run_id": "r-20261002T084242862234-ecq-mark-swept-capacity-receipts",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "d431db19-3568-4c2e-849d-316d19e276f3",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 10870527,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 2299.339,
+    "generated_tokens": 51918,
+    "generation_seconds": 2098.344,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 38.2,
+    "machine_seconds": 200.995,
+    "peak_input_tokens": 183251,
+    "tokens_per_second": 24.74,
+    "wall_tokens_per_second": 22.58
+  },
+  "time_budget": "40m",
+  "tool_steps": 75.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "budget_overrun": true,
+        "budget_overrun_seconds": 8547,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: the diverted single-null row at 110 cells cannot be admitted from this node: the per-layout level-run count is a runtime property of the flux and must be declared by the clip caller; and the only such caller; forward_operator._profile_support (nova/equilibrium/forward_operator.py:3435); is outside the granted write paths and is owned by the concurrent peer run r-20261002T052807496384-msc-fused-route-enforces-axis-qualification. A host-side derivation from the flux is impossible because the curved clip path runs under jax.jit (tests/test_equilibrium_separatrix_clip.py:751).",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 12147,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-02T06:03:07Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-02T05:20:30Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 18702,
+          "worker_pid": 3234007
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "the diverted single-null row at 110 cells cannot be admitted from this node: the per-layout level-run count is a runtime property of the flux and must be declared by the clip caller; and the only such caller; forward_operator._profile_support (nova/equilibrium/forward_operator.py:3435); is outside the granted write paths and is owned by the concurrent peer run r-20261002T052807496384-msc-fused-route-enforces-axis-qualification. A host-side derivation from the flux is impossible because the curved clip path runs under jax.jit (tests/test_equilibrium_separatrix_clip.py:751).",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 9584,
+        "log_fresh": false,
+        "manifest_commits": [
+          "5b84f5bcb7dbc2e1d7451f49440996d61cafd480",
+          "7cac2452606e4fa8c8483f96b5f186955cf93a31"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "bb259726343376417f5b13139b0ff7044f01e7afa56b147d33a9a6258e47aba9",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/manifest.md; resolve the blocker before resuming the run",
+        "node": "ecq-per-layout-vertex-capacity",
+        "phase": "blocked",
+        "plan": "exact-clip-moment-quadrature",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+        "session": "s22-nova",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+          "session_id": "cd41481d-f7a6-4c2a-a110-9ff7b328886e",
+          "source": "pointer"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 9641,
+        "terminal_at": "2026-10-02T06:02:09Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-per-layout-vertex-capacity"
+      },
+      {
+        "budget_overrun": true,
+        "budget_overrun_seconds": 4098,
+        "budget_seconds": 2700,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 6798,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-02T07:26:34Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-02T06:49:34Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261002T052807496384-msc-fused-route-enforces-axis-qualification",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 21932,
+          "worker_pid": 611984
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "state": "complete"
+        },
+        "interruption": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 4576,
+        "log_fresh": false,
+        "manifest_commits": [
+          "571f4e8cc7e7916423e4baace06c33acd4245834"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "8524ab07d8ffb51a6e68cec887320566d61a927408a0eeefde201c4ccbe0ca8a",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T052807496384-msc-fused-route-enforces-axis-qualification/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "needs_help_complete": null,
+        "next_action": "reckon crew complete --run r-20261002T052807496384-msc-fused-route-enforces-axis-qualification --gate <verdict> --commit 571f4e8cc7e7916423e4baace06c33acd4245834",
+        "node": "msc-fused-route-enforces-axis-qualification",
+        "phase": "complete",
+        "plan": "millisecond-converged-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_status": "parsed",
+        "run_id": "r-20261002T052807496384-msc-fused-route-enforces-axis-qualification",
+        "session": "s22-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 4712,
+        "terminal_at": "2026-10-02T07:24:18Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-fused-route-enforces-axis-qualification"
+      }
+    ]
+  },
+  "wall_seconds": 2309,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T09:21:42Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T08:43:14Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T084242862234-ecq-mark-swept-capacity-receipts",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 8663,
+    "worker_pid": 2236910
+  },
+  "worker_seconds": 2270,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

@@ -148,12 +148,13 @@
         }
       ],
       "figure": {
-        "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-flux-function-fit/docs/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.png",
+        "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.png",
-        "sha256": "3cc36cb4886f7245c5ee12b6643fc76f33d059be111d8832db9b339d01a00945",
-        "vector_filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.svg",
+        "sha256": "dc2c6ff868c7c57295ed2251b1b64c5b7945c53ca671d64c2501daf3a5dcb211",
+        "vector_filesystem_path": "docs/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.svg",
         "vector_project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.svg",
-        "vector_sha256": "b1b0e420a08e52af51ce06f648b0a9ff11569430d0523c4f81e7357935450afb"
+        "vector_sha256": "ca3805d078146b15a7ee28edb82f8cc2b6961ba862c0ed25b918e1320f6f77c5",
+        "title": "MAST 21978/35: the projection moved the target by +5.212e-05; after freeing one scale at a time: pressure_gradient: converged: false, terminal residual 5.07e-02, active_set_cycle_detected; ff_prime: converged: false, terminal residual 2.24e-01, active_set_cycle_detected; shape needed"
       }
     }
   ]

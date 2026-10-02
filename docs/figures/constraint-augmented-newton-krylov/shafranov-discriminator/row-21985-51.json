@@ -96,42 +96,44 @@
   },
   "state_panel": {
     "png": {
-      "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.png",
+      "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.png",
       "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.png",
-      "sha256": "c560abd93bd58aa1796713a511b35e2ef112011b1b669ebbc76b9de09ecd6b84"
+      "sha256": "a491bf268085c201434e4d23eea88a79147f5004c9b8e05e593955a2d2839425"
     },
     "svg": {
-      "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
+      "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
       "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
-      "sha256": "ebce4040f935cdfdf0ce39ef88bad4d083a4b2b9e887ef231151b3b31dc20eb5"
+      "sha256": "07819499d9402fb65313e215327e0aa64b21abdc0271a864a61fe0b2a7668cb7"
     },
     "levels_wb": [
-      -1.461588756167263,
-      -1.2979570988172424,
-      -1.134325441467222,
-      -0.9706937841172016,
-      -0.8070621267671811,
-      -0.6434304694171606,
-      -0.47979881206714026,
-      -0.31616715471711987,
-      -0.15253549736709937,
-      0.011096159982921128,
-      0.17472781733294163,
-      0.338359474682962
+      -0.21935554785766842,
+      -0.168588557032942,
+      -0.11782156620821563,
+      -0.06705457538348925,
+      -0.016287584558762835,
+      0.034479406265963575,
+      0.08524639709068993,
+      0.13601338791541634,
+      0.18678037874014275,
+      0.23754736956486916,
+      0.28831436038959557,
+      0.3390813512143219
     ],
     "topology": {
       "read_status": "qualified",
       "class": "1",
       "axis_rz_m": [
         0.8993211781585156,
-        0.004630443500216432
+        0.004630443500216437
       ],
       "x_point_rz_m": [
         [
-          0.5587266601714519,
-          -1.1259795343799603
+          0.5587266601714503,
+          -1.1259795343799515
         ]
-      ]
+      ],
+      "axis_flux_wb": 0.3390813512143219,
+      "boundary_flux_wb": -0.21935554785766842
     },
     "wall_unit_count": 1
   }

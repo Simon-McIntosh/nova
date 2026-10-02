@@ -1,0 +1,27 @@
+<section id="cank-discriminator-and-fit-panels">
+    <h2>Shafranov discriminator state panels and the row-21978-35 fit panel, redrawn truthfully</h2>
+    <p><strong>Node:</strong> <code>cank-discriminator-and-fit-panels</code>. Both figures were re-rendered from their
+    committed receipts through <code>benchmarks/shafranov_combination_discriminator.py</code>; no equilibrium was solved.</p>
+    <p><strong>The state panels.</strong> The six <code>docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-*-state.{png,svg}</code>
+    panels were drawn by an older painter that marked the magnetic axis with a filled circle and the admitted saddle with a
+    hollow cross, so the same banked state read differently from the sibling <code>shafranov/</code> panels one directory over,
+    and the state's own boundary flux was not among the drawn contour levels. Each panel is now re-rendered from its committed
+    row receipt and the banked state through <code>_render_state_panel</code>: the axis is a solid triangle and the admitted
+    saddle a filled cross via <code>nova.media.draw_nulls</code> in the same vocabulary as the sibling panel, and
+    <code>poloidal.contour_levels</code> is handed the state's own boundary flux (read from the topology the receipt records as
+    <code>state_panel.topology.boundary_flux_wb</code>) so the separatrix is one of the drawn lines. For 21978/35 the axis flux
+    is 0.3140 Wb and the boundary flux −0.0683 Wb, and both are among the twelve recorded levels; the vessel is drawn
+    unit-faithfully.</p>
+    <p><strong>The fit panel.</strong> Both
+    <code>docs/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.{png,svg}</code> now carry in their
+    title, read from <code>flux-function-fit/receipt.json</code>: <code>converged: false, terminal residual 5.07e-02,
+    active_set_cycle_detected</code> for the pressure-gradient arm, and the same termination with a 2.24e-01 residual for the
+    <code>FF&#8242;</code> arm. The redraw re-derives the fit and refuses the row unless the order, basis, SI scale, condition
+    number and relative residual reproduce the receipt to <code>rtol=1e-9</code>. The landed record
+    <code>docs/evidence/archive/constraint-augmented-newton-krylov-landed.html</code> was spliced, not rewritten, so no caption
+    calls the non-converged arms' reference flux a terminal flux.</p>
+    <p><strong>Gate.</strong> <code>JAX_PLATFORMS=cpu pytest tests/test_shafranov_discriminator_render.py</code>:
+    <strong>14 passed</strong>. The negative control runs the same test against the base revision's panels and is red —
+    <strong>13 failed, 1 passed, EXIT=1</strong>: the base panels carry no <code>#3366cc</code> triangle or filled cross, the
+    base row receipts carry no boundary-flux level, and the base fit title carries no residual.</p>
+  </section>

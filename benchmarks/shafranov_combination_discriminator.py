@@ -87,6 +87,11 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DIRECTORY = (
     ROOT / "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator"
 )
+#: Directory holding the projected flux-function fit figure the same bank rows
+#: are drawn in, whose title the row's own arms settle.
+FLUX_FIT_DIRECTORY = (
+    ROOT / "docs/figures/constraint-augmented-newton-krylov/flux-function-fit"
+)
 #: Store group the reconstruction scalars and the terminal state are read from.
 EFIT_GROUP = "efm"
 #: Display raster resolution for the per-row state contour panels.
@@ -127,6 +132,20 @@ MAGNETICS_PROVENANCE: dict[str, str] = {
 }
 #: Relative tolerance the analytic inversion is round-tripped against.
 INVERSION_TOLERANCE = 1.0e-9
+#: Null glyph vocabulary shared with the sibling Shafranov-row panels: the
+#: magnetic axis is drawn as a solid triangle and the admitted saddle as a
+#: filled cross, so a reader recognises the same state across both directories.
+NULL_GLYPH_STYLE = DEFAULT_INK.variant(
+    axis_color="#3366cc", xpoint_color="#3366cc", axis_marker="^", xpoint_marker="P"
+)
+#: Contour count the state panels are drawn on, one line of which is the
+#: boundary flux of the drawn state so the separatrix is always visible.
+STATE_CONTOUR_COUNT = 12
+#: The freed-scale arm the projected-fit title leads with: the row's
+#: shape-versus-scale finding turns on whether freeing one component's scale
+#: reaches the source curve, and the pressure-gradient arm is the one whose
+#: non-convergence the finding is stated against.
+LEADING_ARM_COMPONENT = "pressure_gradient"
 #: Field names of one row document, in the order the document is written.
 ROW_FIELDS: tuple[str, ...] = (
     "identity",
@@ -805,6 +824,8 @@ def _state_topology(operator, state) -> dict[str, Any]:
         "x_point_rz_m": np.asarray(topology.x_point, dtype=float)
         .reshape(-1, 2)
         .tolist(),
+        "axis_flux_wb": _strict_float(np.asarray(topology.axis_flux)),
+        "boundary_flux_wb": _strict_float(np.asarray(topology.boundary_flux)),
     }
 
 
@@ -855,6 +876,21 @@ def _state_raster(profile, state, units, *, samples: int = RASTER_SAMPLES):
     return radial, height, np.asarray(raster, dtype=float)
 
 
+def state_contour_levels(field, topology: dict[str, Any]) -> np.ndarray:
+    """Return the state's contour levels with the boundary flux among them.
+
+    Naming the state's own boundary flux to :func:`poloidal.contour_levels`
+    replaces the nearest level with it, so the separatrix is one of the drawn
+    lines rather than an accident of the map's finite range.
+    """
+    return poloidal.contour_levels(
+        field,
+        count=STATE_CONTOUR_COUNT,
+        boundary=topology.get("boundary_flux_wb"),
+        axis=topology.get("axis_flux_wb"),
+    )
+
+
 def _render_state_panel(
     profile,
     state,
@@ -872,8 +908,8 @@ def _render_state_panel(
     """
     units = _wall_units(profile.operator)
     radial, height, field = _state_raster(profile, state, units)
-    levels = poloidal.contour_levels(field, count=12)
     topology = _state_topology(profile.operator, state)
+    levels = state_contour_levels(field, topology)
     figure, axis = plt.subplots(figsize=(4.8, 4.2), constrained_layout=True)
     poloidal.draw_flux_contours(axis, radial, height, field, levels)
     poloidal.draw_wall(axis, units=units)
@@ -882,7 +918,7 @@ def _render_state_panel(
             axis,
             magnetic_axis=topology["axis_rz_m"],
             x_points=np.asarray(topology["x_point_rz_m"], dtype=float),
-            style=DEFAULT_INK,
+            style=NULL_GLYPH_STYLE,
             contain=units,
         )
     poloidal_axes(axis)
@@ -1057,6 +1093,41 @@ def commensurability_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _banked_rows(selected, response_cache):
+    """Yield each qualified row's stored data, without solving.
+
+    Every reading and every panel is taken on the banked state, so the row set
+    and the state assembly live here rather than in each driver: the panel a
+    receipt records is drawn from the same state its readings are.
+    """
+    for shot, row_index in sorted(selected):
+        selected_row, qualification = selected[(shot, row_index)]
+        case, context = settled._mast_case_from_selection(
+            settled.SHOT_STORE, selected_row, qualification
+        )
+        passive_case, profile, _policy = settled._passive_inclusive_case(
+            case, context, response_cache
+        )
+        yield (
+            shot,
+            row_index,
+            case,
+            profile,
+            jnp.asarray(passive_case["state"]),
+            abs(float(passive_case["reference"]["plasma_current_a"])),
+        )
+
+
+def _selection() -> dict[tuple[int, int], Any]:
+    """Return the decomposition bank's qualified rows keyed by (shot, slice)."""
+    return {
+        (int(row["shot"]), int(row["slice_index"])): (row, qualification)
+        for row, qualification in settled.select_slices_by_shot(
+            settled.DECOMPOSITION_BANK
+        )
+    }
+
+
 def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any]:
     """Read every bank row of the decomposition bank five ways."""
     configure_dtypes()
@@ -1069,12 +1140,7 @@ def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any
         settled.response_carrier.DEFAULT_CARRIER,
         settled.response_carrier.DEFAULT_RECEIPT,
     )
-    selected = {
-        (int(row["shot"]), int(row["slice_index"])): (row, qualification)
-        for row, qualification in settled.select_slices_by_shot(
-            settled.DECOMPOSITION_BANK
-        )
-    }
+    selected = _selection()
     directory.mkdir(parents=True, exist_ok=True)
     receipt: dict[str, Any] = {
         "receipt": (
@@ -1123,16 +1189,9 @@ def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any
         "inputs": {"carrier_evidence": carrier_evidence},
         "rows_receipt": [],
     }
-    for shot, row_index in sorted(selected):
-        selected_row, qualification = selected[(shot, row_index)]
-        case, context = settled._mast_case_from_selection(
-            settled.SHOT_STORE, selected_row, qualification
-        )
-        passive_case, profile, _policy = settled._passive_inclusive_case(
-            case, context, response_cache
-        )
-        state = jnp.asarray(passive_case["state"])
-        target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
+    for shot, row_index, case, profile, state, target_current in _banked_rows(
+        selected, response_cache
+    ):
         group = zarr.open_group(str(settled.SHOT_STORE / f"{shot}.zarr"), mode="r")[
             EFIT_GROUP
         ]
@@ -1192,13 +1251,205 @@ def write_row(directory: Path, entry: dict[str, Any]) -> Path:
     return path
 
 
+def render_state_panels(
+    *, directory: Path = DEFAULT_DIRECTORY, cache_root: Path | None = None
+) -> dict[str, Any]:
+    """Re-render every recorded state panel from its committed row receipt.
+
+    The panel is redrawn from the state the row's receipt was measured on and
+    from the null positions and boundary flux that receipt records, so the
+    drawing is a function of the receipt rather than of a fresh five-way
+    reading; no equilibrium is solved.  The row documents keep every recorded
+    number and take only a refreshed ``state_panel`` block, so a re-render is
+    visible as a figure change and nothing else.  The painter marks the axis as
+    a solid triangle and the admitted saddle as a filled cross in the same
+    vocabulary the sibling Shafranov-row panels use.
+    """
+    configure_dtypes()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+        if cache_root is None
+        else cache_root
+    )
+    response_cache, _evidence = settled._persisted_response_cache(
+        settled.response_carrier.DEFAULT_CARRIER,
+        settled.response_carrier.DEFAULT_RECEIPT,
+    )
+    selected = _selection()
+    receipt_path = directory / "receipt.json"
+    if not receipt_path.exists():
+        raise FileNotFoundError(
+            f"the committed row receipt {receipt_path} must exist to re-render"
+        )
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    committed = {entry["identity"]: entry for entry in receipt["rows_receipt"]}
+    redrawn: list[str] = []
+    for shot, row_index, _case, profile, state, _target in _banked_rows(
+        selected, response_cache
+    ):
+        identity = f"{shot}/{row_index}"
+        entry = committed[identity]
+        entry["state_panel"] = _render_state_panel(
+            profile,
+            state,
+            path=directory / f"row-{shot}-{row_index}-state.png",
+            title=(
+                f"{shot}/{row_index}: banked terminal state, "
+                f"kappa = {entry['elongation']:.3f}"
+            ),
+            note=(
+                f"profiles {entry['profile_implied_combination']:.4f}, "
+                f"EFIT {entry['efit_own_combination']:.4f}, "
+                f"magnetics {entry['magnetics_implied_combination']:.4f}"
+            ),
+        )
+        write_row(directory, entry)
+        redrawn.append(identity)
+        print(f"SHAFRANOV-DISCRIMINATOR-PANEL {identity}", flush=True)
+    receipt["figure"] = _draw_panel(
+        receipt,
+        directory / "shafranov-combination-discriminator.png",
+        source=receipt["source"]["revision"],
+    )
+    receipt["render"] = {
+        "cache_version": cache.version_key,
+        "rows_redrawn": redrawn,
+        "solve_policy": "no new solve: the panels are drawn from the banked state",
+    }
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    return receipt
+
+
+def flux_fit_caption(entry: dict[str, Any]) -> str:
+    """Return the projected-fit figure's title from the row's committed arms.
+
+    Each freed-scale arm reports its own verdict, so the title carries the
+    converged flag, the terminal residual and the termination the receipt
+    recorded; a non-converged state is never titled as though it had settled.
+    """
+    arms = "; ".join(
+        f"{variant['component']}: converged: "
+        f"{str(bool(variant['converged'])).lower()}, "
+        f"terminal residual {variant['terminal_residual']:.2e}, "
+        f"{variant['termination']}"
+        for variant in entry["variants"]
+    )
+    closing = (
+        "scale alone closes it"
+        if entry["scale_alone_closes_the_gap"]
+        else "shape needed"
+    )
+    return (
+        f"the projection moved the target by "
+        f"{entry['projection_move_of_target']:+.3e}; "
+        f"after freeing one scale at a time: {arms}; {closing}"
+    )
+
+
+def render_flux_function_fit(
+    *, directory: Path = FLUX_FIT_DIRECTORY, cache_root: Path | None = None
+) -> dict[str, Any]:
+    """Redraw the projected flux-function row figure from its committed receipt.
+
+    The receipt persists the projection's order, basis, SI scale, condition
+    number and residual, so the curves are re-extracted and re-projected on CPU
+    and each freed-scale curve is drawn at the amplitude the receipt reports,
+    with the fit re-derived and refused if it no longer reproduces the record.
+    No equilibrium is solved.  The title carries each arm's own verdict, so a
+    non-converged arm is never drawn as if the flux had settled.
+    """
+    import benchmarks.shafranov_pair_receipt as pair
+
+    configure_dtypes()
+    configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+        if cache_root is None
+        else cache_root
+    )
+    response_cache, _evidence = settled._persisted_response_cache(
+        settled.response_carrier.DEFAULT_CARRIER,
+        settled.response_carrier.DEFAULT_RECEIPT,
+    )
+    selected = pair._selection()
+    receipt_path = directory / "receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    drawn: list[str] = []
+    for entry in receipt["rows_receipt"]:
+        if entry.get("figure") is None:
+            continue
+        shot, row_index = (int(part) for part in entry["identity"].split("/"))
+        selected_row, qualification = selected[(shot, row_index)]
+        case, context = settled._mast_case_from_selection(
+            settled.SHOT_STORE, selected_row, qualification
+        )
+        passive_case, profile, _policy = settled._passive_inclusive_case(
+            case, context, response_cache
+        )
+        projected, projection = pair._projected_profile(profile)
+        pair._check_receipt_projection(entry, projection)
+        scales = {
+            variant["component"]: 1.0 + variant["compensating_amplitude_fraction"]
+            for variant in entry["variants"]
+            if variant.get("compensating_amplitude_fraction") is not None
+        }
+        caption = flux_fit_caption(entry)
+        block = pair._render_projection(
+            projected,
+            core=profile.source.core,
+            projection=projection,
+            scales=scales,
+            reference=jnp.asarray(passive_case["state"]),
+            terminal=None,
+            units=pair._wall_units(projected.operator),
+            identity=entry["identity"],
+            caption=caption,
+            path=directory / f"row-{entry['identity'].replace('/', '-')}.png",
+            write_raster=True,
+        )
+        block["title"] = f"MAST {entry['identity']}: {caption}"
+        entry["figure"].update(block)
+        drawn.append(entry["identity"])
+        print(
+            "FLUX-FIT-RENDER "
+            + json.dumps(
+                {"identity": entry["identity"], "title": block["title"]}, sort_keys=True
+            ),
+            flush=True,
+        )
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    return {"rows": drawn, "receipt": str(receipt_path)}
+
+
 def main(argv=None) -> None:
     """Run the combination discriminator from the command line."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--directory", type=Path, default=DEFAULT_DIRECTORY)
     parser.add_argument("--cache-root", type=Path, default=None)
+    parser.add_argument(
+        "--render-directory",
+        type=Path,
+        default=None,
+        help="re-render the state panels from the committed row receipt "
+        "without solving",
+    )
+    parser.add_argument(
+        "--flux-fit-directory",
+        type=Path,
+        default=None,
+        help="redraw the projected flux-function fit figure from its committed "
+        "receipt without solving",
+    )
     arguments = parser.parse_args(argv)
-    measure(directory=arguments.directory, cache_root=arguments.cache_root)
+    if arguments.render_directory is not None:
+        render_state_panels(
+            directory=arguments.render_directory, cache_root=arguments.cache_root
+        )
+    elif arguments.flux_fit_directory is not None:
+        render_flux_function_fit(
+            directory=arguments.flux_fit_directory, cache_root=arguments.cache_root
+        )
+    else:
+        measure(directory=arguments.directory, cache_root=arguments.cache_root)
 
 
 if __name__ == "__main__":

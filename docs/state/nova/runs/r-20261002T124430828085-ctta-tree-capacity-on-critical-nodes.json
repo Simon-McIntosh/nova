@@ -1,0 +1,1002 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 7,
+  "attempt_kind": "resume",
+  "backend": "codex-terra",
+  "base_sha": "ae2179181bee2ca9bb7693f874c2d108826ee8c8",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 47579648,
+      "cached_input_tokens_cumulative": 47579648,
+      "input_tokens": 48420228,
+      "input_tokens_cumulative": 48420228,
+      "output_tokens": 96974,
+      "output_tokens_cumulative": 96974,
+      "reasoning_output_tokens": 22378,
+      "reasoning_output_tokens_cumulative": 22378
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 269,
+    "files": 11,
+    "removed": 52
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 250
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 250
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 250
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 250
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 250
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 235,
+        "name": "batched_identical",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 248
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_receipt_edges_index_compact_nodes_on_certificate_and_mast",
+        "path": "tests/test_contour_tree_brute_force.py"
+      },
+      "run_function": {
+        "line": 268,
+        "name": "measure_cpu_rungs",
+        "path": "benchmarks/contour_tree_brute_force.py"
+      },
+      "window_line": 276
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "18c54354121b5c8ca5d4609933e0cdba061f00f6",
+    "a6e31a6dccbeab1fd0366a1ecae887f31118e490",
+    "84d7b06023453d400300574735b7c25f23c8b365",
+    "9ee95900c66fd741bbac5ac7efb03b96024887e8",
+    "455e59349d52c3c2e5142324914de4ef3f4d171f",
+    "8828a880c9fbe2a0f776307c2307eae78ecf0248",
+    "514d0e8f4a2d866e71f3d376e1917b6a91b9803a",
+    "388bdea2fb213a14c678f1b0774378a146755083",
+    "f46982d3e67c5afe4330902cb06bc5f4b296d6c0",
+    "b5afccaeb7662bc8c602b0943bed428df8ea5de1",
+    "9bf3fb676517bb9ea974dae64562aaad54086b72",
+    "da5861dd96547f273ebf3ab98915f2e2ae946db3",
+    "233200a3575ed9231e1e9a33e39e6cd50584e4fc"
+  ],
+  "completed_at": "2026-10-02T15:30:14Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T12:44:49Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest --timeout",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_brute_force.py tests/test_contour_tree_merge.py tests/test_contour_tree_mesh.py tests/test_contour_tree_conventions.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/contour-tree-topology-authority/capacity-on-critical-nodes/contour-tree-after-suite.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "contour-tree-topology-authority",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T13:44:33.032388+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": null,
+    "metered": true,
+    "observed_at": null,
+    "read_at": "2026-10-02T12:44:33Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T15:30:14Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T124430828085-ctta-tree-capacity-on-critical-nodes/manifest.md",
+  "member": "disposable-r-20261002T124430828085-ctta-tree-capacity-on-critical-nodes",
+  "negative_control": {
+    "added_failure_ids": [],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [],
+    "declaration": "restore overflow = vertex_count > node_capacity; the 464-cell MAST and 340-cell certificate fixtures must fail with overflow",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T124430828085-ctta-tree-capacity-on-critical-nodes/scratch-vertex-capacity-negative-control.log",
+    "reason": "the control ran as a scratch overlay script, not pytest: with overflow = vertex_count > node_capacity restored it records overflow=true for the full 464-cell MAST carrier and the 340-cell certificate and exits 1; the refusal is stated in the log, it only names no pytest test id",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T124430828085-ctta-tree-capacity-on-critical-nodes/scratch-vertex-capacity-negative-control.log",
+    "test_paths": [
+      "tests/test_contour_tree_brute_force.py",
+      "tests/test_contour_tree_merge.py"
+    ],
+    "verdict": "waived"
+  },
+  "no_commit": null,
+  "node": "ctta-tree-capacity-on-critical-nodes",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 900,
+          "cached_input_tokens": 470921,
+          "input_tokens": 471823,
+          "output_tokens": 1853,
+          "reasoning_output_tokens": 119,
+          "total_tokens": 473676,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "With JAX_PLATFORMS=cpu, tests/test_contour_tree_brute_force.py runs the brute-force comparison on (a) the four Solov'ev certificates at their persisted rung and at the 340, 550, 1074 and 2616-cell rungs where those persisted states exist (name any rung that does not exist rather than substituting), and (b) MAST 27079 row 16 and 22475 row 50 on the full 464-cell carrier (644 vertices), each with tree and brute-force component counts equal at every sampled level, node count minus edge count one, and overflow false. A focused test in tests/test_contour_tree_merge.py shows a mesh with more vertices than the node capacity but few critical points builds without overflow, and that a field with more critical points than the node capacity sets the named overflow flag without raising under jit and without truncating silently. vmap and per-state trees stay identical. Record compile seconds and execute wall per rung on CPU. The other contour-tree tests (merge, mesh, conventions) still pass. Negative control: restore the vertex-count overflow condition and show the 464-cell MAST and 340-cell certificate cases fail with overflow; commit that log. Logs and per-rung figures (data-ink, component count against level, tree over brute force) under docs/figures/contour-tree-topology-authority/capacity-on-critical-nodes/, plus a short evidence fragment with the table. Record baseline_suite and after_suite as completed arms. Run the gates in place on this fleet allocation, logs written once to files; pytest --timeout 0. Every uv command carries --no-sync and nothing runs uv sync. The manifest status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Make build_contour_tree (nova/equilibrium/contour_tree.py) accept production-resolution hex carriers. Today it sets overflow whenever the mesh vertex count exceeds its 256-node capacity (the vertex_count > node_capacity comparison at the top of the sweep), although the trees it builds need only 13 to 52 nodes; every certificate rung from 340 cells up and the full 464-cell MAST carrier are refused, and the brute-force control had to run MAST at 90 cells (record: docs/evidence/archive/contour-tree-topology-authority-landed.html#end-to-end-brute-force). Judge overflow on what the receipt actually stores: critical nodes and tree edges against their stated capacities, with the sweep's working arrays sized by the mesh's own vertex and edge capacities. Plan rules locked today by the plan session: every refusal inside the traced read (capacity overflow, primary tie, type or order disagreement) is a named receipt flag marking the topology unqualified, and nothing raises under jit or vmap; nodes store raw psi and critical_type is classified on raw psi (under sigma=-1 the axis is critical_type 0); the carrier is the lattice of hex-cell centres; the axis is the primary O-point.",
+    "id": "ctta-tree-capacity-on-critical-nodes",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": null,
+      "metered": true,
+      "observed_at": null,
+      "read_at": "2026-10-02T12:44:33Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T124430828085-ctta-tree-capacity-on-critical-nodes/manifest.md",
+    "negative_control": "restore overflow = vertex_count > node_capacity; the 464-cell MAST and 340-cell certificate fixtures must fail with overflow",
+    "plan": "contour-tree-topology-authority",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/contour_tree.py",
+      "tests/test_contour_tree_merge.py",
+      "tests/test_contour_tree_brute_force.py",
+      "benchmarks/contour_tree_brute_force.py",
+      "docs/figures/contour-tree-topology-authority/capacity-on-critical-nodes",
+      "docs/evidence/fragments/contour-tree-topology-authority/ctta-tree-capacity-on-critical-nodes.html",
+      "docs/figures/contour-tree-topology-authority/ctta-tree-capacity-on-critical-nodes"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex-terra",
+    "member": null,
+    "node": "ctta-tree-capacity-on-critical-nodes",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T12:44:35.578249+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "contour-tree-topology-authority",
+  "plan_link": null,
+  "promoted_revision": "233200a3575ed9231e1e9a33e39e6cd50584e4fc",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "ae2179181bee2ca9bb7693f874c2d108826ee8c8",
+    "reviewed_head_sha": "233200a3575ed9231e1e9a33e39e6cd50584e4fc",
+    "scores": {
+      "durability": 19,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 96
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T124430828085-ctta-tree-capacity-on-critical-nodes",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fca5-6eca-7963-a9bf-7e92d7c4b15a",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 47579648,
+    "cumulative_input_tokens": 95999876,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 119352
+  },
+  "time_budget": "60m",
+  "tool_steps": 103.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 9925,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 7,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T15:30:18Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T14:50:11Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T124430828085-ctta-tree-capacity-on-critical-nodes",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 764,
+    "worker_pid": 1754485
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}

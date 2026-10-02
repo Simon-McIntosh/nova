@@ -440,7 +440,7 @@ def _caption(state: State) -> str:
         "carrier emits; the private-region wall maximum is the tree's own node at",
         "the highest-flux wall vertex. These low-persistence piecewise-linear",
         "extrema are drawn rather than hidden, and the critical-point geometry and",
-        "selection sections must absorb them by persistence and primary selection.",
+        "selection sections (§3 and §4) must absorb them by persistence and primary selection.",
     ]
     return " ".join(parts)
 

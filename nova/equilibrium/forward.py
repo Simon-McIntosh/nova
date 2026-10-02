@@ -2038,6 +2038,7 @@ class ForwardProfile:
         key = (
             route,
             live_read_fallback,
+            self.operator.clip_mode,
             static_value(requested_class),
             argument_layout(target_current),
             tuple(
@@ -2717,6 +2718,7 @@ class ForwardProfile:
             self.operator.program_identity,
             request.route,
             request.policy,
+            request.clip_mode,
             array_signature(initial_flux),
             array_signature(request.current),
             array_signature(request.target_current),

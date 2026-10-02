@@ -42,7 +42,7 @@ def test_request_clip_mode_builds_each_operator_and_records_each_receipt(
                 },
                 clip_mode=clip_mode,
             )
-            for clip_mode in ("chord", "chord_cells")
+            for clip_mode in ("chord", "exact", "chord_cells")
         )
         observed_modes: list[str] = []
         build_operator = ForwardFluxOperator.with_clip_mode
@@ -53,9 +53,9 @@ def test_request_clip_mode_builds_each_operator_and_records_each_receipt(
 
         monkeypatch.setattr(ForwardFluxOperator, "with_clip_mode", record_operator_mode)
         monkeypatch.setattr(
-            profile,
-            "_request_compilation_cache_key",
-            lambda request, _initial_flux: request.clip_mode,
+            ForwardFluxOperator,
+            "program_identity",
+            property(lambda _operator: "clip-mode-test-program"),
         )
         monkeypatch.setattr(
             profile,
@@ -74,20 +74,34 @@ def test_request_clip_mode_builds_each_operator_and_records_each_receipt(
                 constraints=(),
             ),
         )
-        receipts = tuple(profile.solve(request) for request in requests)
+        keys = tuple(
+            profile._request_compilation_cache_key(request, np.zeros(4))
+            for request in requests
+        )
+        receipts = tuple(profile.solve(request) for request in (*requests, requests[0]))
     finally:
         set_support_clip_mode(previous_mode)
 
     assert tuple(request.clip_mode for request in requests) == (
         "chord",
+        "exact",
         "chord_cells",
     )
     assert tuple(receipt.clip_mode for receipt in receipts) == (
         "chord",
+        "exact",
         "chord_cells",
+        "chord",
     )
-    assert observed_modes == ["chord", "chord_cells"]
+    assert len(set(keys)) == 3
+    assert [receipt.compilation_cache_hit for receipt in receipts] == [
+        False,
+        False,
+        False,
+        True,
+    ]
+    assert observed_modes == ["chord", "exact", "chord_cells", "chord"]
 
-    payload = json.loads(json.dumps(receipts[1].resolved_defaults.to_dict()))
-    assert ForwardSolvePolicy.from_dict(payload["policy"]) == requests[1].policy
+    payload = json.loads(json.dumps(receipts[2].resolved_defaults.to_dict()))
+    assert ForwardSolvePolicy.from_dict(payload["policy"]) == requests[2].policy
     assert payload["clip_mode"] == "chord_cells"

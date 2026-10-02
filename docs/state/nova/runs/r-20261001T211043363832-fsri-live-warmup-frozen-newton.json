@@ -311,6 +311,59 @@
   "plan_impl_at_dispatch": 0.65,
   "plan_link": null,
   "promoted_revision": "85444e645ab71753995e9f97312703ee3522ba8e",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 5177057105,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton",
+    "scratch_removed": true,
+    "scratch_warning": "run scratch /tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton is 5177057105 bytes, above the 2147483648 byte budget",
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "dirty",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "dirty": [
+            "?? docs/figures/millisecond-converged-solve/newton-krylov-route/exact 2>/dev/null"
+          ],
+          "head": "85444e645ab71753995e9f97312703ee3522ba8e",
+          "integrated_into": "HEAD",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-02T00:29:00.085Z",
+            "session_id": "55bef747-53f0-4046-8870-ca9d1d4d5aea",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:9044288f5196567fa2eb3e0d7270bdf49a7829a243e0a50502827aa851370b34",
+          "status_entries": [
+            {
+              "code": "??",
+              "path": "docs/figures/millisecond-converged-solve/newton-krylov-route/exact 2>/dev/null"
+            }
+          ],
+          "withheld": "this worktree is the working directory of recoverable session 55bef747-53f0-4046-8870-ca9d1d4d5aea"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": {
     "reason": "the remaining work is a new design step (terminal re-freeze) routed to codex-terra as a fresh node on a lineage base that carries all seven commits; this local-lane session's context is not needed",
     "session_id": "55bef747-53f0-4046-8870-ca9d1d4d5aea",

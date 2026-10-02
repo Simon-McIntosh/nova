@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="77">
+<meta name="plan-version" content="78">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -688,7 +688,10 @@
     <div class="r-comment-body"><p>Parsed review for c6604c8d stored at the generic and revision-pinned review paths; verdict pass-with-follow-on, total 84/100.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261002T225302405670-fsri-krylov-toy-witness-fail-closed" data-who="reckon-build" data-when="2026-10-02T23:14:07.809Z">
-    <div class="r-comment-body"><p>The four toy identity witnesses now compare every field by raw bit pattern (unsigned view of the same width, shape and dtype checked first), print the first differing index with both operand patterns, and exit nonzero on any difference; the gate drove each witness&#x27;s own comparison function over identical arrays (equal) and 1.0-vs-2.0, +0.0-vs--0.0, and two-NaN-different-payloads (each a difference), 16/16 PASS, and the dense arm of toy_identity.py now exits 1 where it previously exited 0.</p></div>
+    <div class="r-comment-body"><p>The four toy identity witnesses now compare every field by raw bit pattern (unsigned view of the same width, shape and dtype checked first), print the first differing index with both operand patterns, and exit nonzero on any difference; the gate drove each witness's own comparison function over identical arrays (equal) and 1.0-vs-2.0, +0.0-vs--0.0, and two-NaN-different-payloads (each a difference), 16/16 PASS, and the dense arm of toy_identity.py now exits 1 where it previously exited 0.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261002T231424171178-review-of-fsri-krylov-toy-witness-fail-closed" data-who="reckon-build" data-when="2026-10-02T23:29:17.343Z">
+    <div class="r-comment-body"><p>Independent review of r-20261002T225302405670-fsri-krylov-toy-witness-fail-closed: PASS 95/100 (goal_fidelity 20, evidence 18, scope_discipline 20, durability 18, fit 19) at reviewed head 22469374d over base 19a76002e; the four toy Krylov identity witnesses now compare raw bit patterns and fail closed, verified by reproducing the base 0 / head 1 dense-arm exit delta and the 16/16 comparison gate.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260923T054725981050-fsri-prewarm-pin-covers-the-lane-programs" data-who="reckon-ship" data-when="2026-09-23T10:56:04.745Z">
     <div class="r-comment-body"><p>compile-row refusal fix (958f5722b) and pin census on the worktree, not merged; lane submission missed the pin (hits 1158, misses 679, compile 458 s) because the pin is revision-keyed; land-or-drop in f-fsri-prewarm-pin-land-or-drop</p></div>

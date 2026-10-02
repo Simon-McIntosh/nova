@@ -1,0 +1,387 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 5,
+  "attempt_kind": "resume",
+  "backend": "codex-terra",
+  "base_sha": "d6dd846e1d37b986d67795813d6ce5d5c1208824",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 122558208,
+      "cached_input_tokens_cumulative": 122558208,
+      "input_tokens": 123971965,
+      "input_tokens_cumulative": 123971965,
+      "output_tokens": 95325,
+      "output_tokens_cumulative": 95325,
+      "reasoning_output_tokens": 23340,
+      "reasoning_output_tokens_cumulative": 23340
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 601,
+    "files": 7,
+    "removed": 12
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 158,
+        "name": "promotion_stub",
+        "path": "tests/test_measured_candidate_acceptance.py"
+      },
+      "run_function": {
+        "line": 1382,
+        "name": "accept_newton_ladder",
+        "path": "nova/equilibrium/fixed_point.py"
+      },
+      "window_line": 1393
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "fd671f3dcdd36da4553599e769b091cec96b5789",
+    "82ba414177378e11d40c4b55c0f2700c0b8d9a51",
+    "de11143a053027ce0bd30cfb6fafe3052453810a",
+    "47f4fe5233cf3ece4178a018b81e93f4e3c53328",
+    "69dd7142b8b9a36548ce74358aa76de5b6e71344",
+    "224a3b967b243f1d78c593e6ecfe1bc7c0e28b02",
+    "28b74cae42f2fc0086cfc57d163a9c13a38a29e6",
+    "dfcda3dbb1f60fdea76d3625186bc7c9c6e17e41"
+  ],
+  "completed_at": "2026-10-02T16:50:14Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T08:41:43Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest bound)",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "scripts/nova_lane/run.sh -- tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/accelerator-h200-split-fallback.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T09:41:23.939645+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": null,
+    "metered": true,
+    "observed_at": null,
+    "read_at": "2026-10-02T08:41:23Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T16:50:14Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/manifest.md",
+  "member": "disposable-r-20261002T084121851662-fsri-frozen-route-settle-residual-gate",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_frozen_route_settlement.py::test_frozen_partition_settlement_exhausts_while_the_live_residual_is_large"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_frozen_route_settlement.py::test_frozen_partition_settlement_exhausts_while_the_live_residual_is_large"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_frozen_route_settlement.py::test_frozen_partition_settlement_exhausts_while_the_live_residual_is_large"
+    ],
+    "declaration": "restore the settle branch's unconditional acceptance of an unchanged mask; the regression test and the accelerator-routes gate must fail at 2.37e-6",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/focused-baseline.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/focused-baseline.log",
+    "test_paths": [
+      "tests/test_frozen_route_settlement.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fsri-frozen-route-settle-residual-gate",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2705,
+          "cached_input_tokens": 322007,
+          "input_tokens": 324714,
+          "output_tokens": 1877,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 326591,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "(1) A new focused regression test file reproduces the premature settlement on a small fixture and fails at base d6dd846e1 (failing log committed) and passes at your head. (2) tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point passes at the 1e-6 tolerance on the H200 through scripts/nova_lane/run.sh (betelgeuse, reservation gpu_0003_grpA, one card, explicit --mem; RECKON_ALLOW_NESTED_LAUNCH=1; JAX_PLATFORMS=cuda; the launcher now supplies a 3600 s pytest bound), and on CPU (JAX_PLATFORMS=cpu, run in place on this fleet allocation, pytest --timeout 0); both logs committed, each with its wall time. The base measured 2.37e-06 on both in 7.5 min (H200) and 37 min (CPU). (3) tests/test_one_read_per_trip.py and tests/test_forward_operator_arguments.py still pass. (4) Re-run benchmarks/frozen_route_fixed_point_rca.py --refresh-newton-steps 8 on the H200 and record termination_reason, converged and the live residual after the fix beside the 2.37e-6 before, plus the per-pass wall against the measured 12.04 s frozen pass and 142.10 s base route. (5) The evidence fragment carries a residual-against-step figure for the picard and newton_krylov routes before and after, and a poloidal flux contour panel of the terminal state drawn with the committed nova.media painters (solved contours beside the picard reference on shared levels, both null sets, the wall, terminal residual and converged flag in the caption), rendered on compute. Write the manifest with what you have before any long wait; while a SLURM job runs write status: blocked with wait_condition, a wait_probe argument vector, and a wait_terminal that is a state the probe prints or a wait_file, never exit:0. Every uv command carries --no-sync and nothing runs uv sync; on compute nodes run /home/ITER/mcintos/Code/nova/.venv/bin/python with PYTHONPATH set to your own worktree root. The manifest status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Repair the frozen-Newton route's settlement test in nova/equilibrium/fixed_point.py so the route reaches the shared fixed point. The diagnosis on this base (docs/figures/millisecond-converged-solve/newton-krylov-route/fixed-point-rca/report.md and receipt.json, fragment fsri-frozen-route-fixed-point-diagnosis.html) measured: the route terminates ACTIVE_SET_SETTLED with converged=False after two active-set trips with bit-identical live residual 2.372871479533e-06 and zero mask change, retaining the incoming state on a trip that accepts no Newton promotion; the frozen map matches the live map to 7.11e-15 and the inner trajectory residual is 7.97e-13, so the floor is set by the settle branch accepting an unchanged mask without testing the reconciled live relative-sup residual. Keep the locked design (live reads through the Picard warm-up, one frozen partition per Newton pass). In the settle branch, compare the reconciled live relative-sup residual with the tolerance and refuse to settle while it exceeds it: continue the local Newton trajectory already preserved across an unchanged mask, or accept the promotion on the live objective, whichever the measurement shows reaches the fixed point. Bound the continuation explicitly and report converged=False honestly if the bound is exhausted. Never widen a tolerance.",
+    "id": "fsri-frozen-route-settle-residual-gate",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": null,
+      "metered": true,
+      "observed_at": null,
+      "read_at": "2026-10-02T08:41:23Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/manifest.md",
+    "negative_control": "restore the settle branch's unconditional acceptance of an unchanged mask; the regression test and the accelerator-routes gate must fail at 2.37e-6",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§1",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/fixed_point.py",
+      "tests/test_frozen_route_settlement.py",
+      "docs/figures/forward-solver-route-integrity/frozen-route-settle-gate",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-frozen-route-settle-residual-gate.html",
+      "docs/figures/forward-solver-route-integrity/fsri-frozen-route-settle-residual-gate",
+      "nova/equilibrium/forward.py",
+      "benchmarks/frozen_route_fixed_point_rca.py"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex-terra",
+    "member": null,
+    "node": "fsri-frozen-route-settle-residual-gate",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T08:41:26.166266+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_revision": "dfcda3dbb1f60fdea76d3625186bc7c9c6e17e41",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "d6dd846e1d37b986d67795813d6ce5d5c1208824",
+    "reviewed_head_sha": "dfcda3dbb1f60fdea76d3625186bc7c9c6e17e41",
+    "scores": {
+      "durability": 17,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 92
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T084121851662-fsri-frozen-route-settle-residual-gate",
+  "scope_acceptances": [
+    {
+      "path": "tests/test_one_read_per_trip.py",
+      "reason": "the brief allowed restating this test for per-pass reads; the change only adds live_partition_reads assertions beside the existing ones"
+    }
+  ],
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fbc6-e26d-73b1-bfd4-1bb6226f8bc1",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 122558208,
+    "cumulative_input_tokens": 246530173,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 118665
+  },
+  "time_budget": "60m",
+  "tool_steps": 77.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 29311,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 5,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T16:50:17Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T16:47:23Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T084121851662-fsri-frozen-route-settle-residual-gate",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 679,
+    "worker_pid": 2148124
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-02T16:50:14Z",
+    "session_id": "01a0fbc6-e26d-73b1-bfd4-1bb6226f8bc1",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-settle-residual-gate"
+  }
+}

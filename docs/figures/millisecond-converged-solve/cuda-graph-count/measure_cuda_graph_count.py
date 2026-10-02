@@ -335,7 +335,8 @@ def _plot(receipt: dict[str, object], png_output: Path, svg_output: Path) -> Non
     figure.tight_layout()
     figure.savefig(png_output)
     plt.rcParams["svg.fonttype"] = "none"
-    figure.savefig(svg_output)
+    plt.rcParams["svg.hashsalt"] = "alive-graph-count"
+    figure.savefig(svg_output, metadata={"Date": None})
     plt.close(figure)
 
 

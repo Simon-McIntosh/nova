@@ -57,7 +57,7 @@ esac
 # under suite-runs/logs/ are the correction for this list, and a CPU-lane file
 # that hits the per-file bound is a routing candidate.
 if [ "${NOVA_SUITE_GPU_FILES+set}" = set ]; then
-  # shellcheck=disable=SC2206
+  # shellcheck disable=SC2206
   GPU_FILES=(${NOVA_SUITE_GPU_FILES})
 else
   GPU_FILES=(

@@ -952,7 +952,9 @@
     "temperature_normalised_rmse": 0.07226481803377609,
     "density_rmse_m3": 2.4092668881284045e+18,
     "density_median_absolute_error_m3": 1.79116257279599e+18,
-    "density_normalised_rmse": 0.07584120756184365
+    "density_normalised_rmse": 0.07584120756184365,
+    "temperature_max_absolute_error_ev": 98.20279466837565,
+    "density_max_absolute_error_m3": 4.665891830875557e+18
   },
   "trace": [
     {

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="contour-tree-topology-authority">
+<meta name="plan-evidence-for" content="contour-tree-topology-authority">
+<title>Explanatory figure label polish (landing record)</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Explanatory figure: collision-free graph labels</h1></header>
+<section id="landing">
+<p>The plan&rsquo;s explanatory figure (<code>benchmarks/contour_tree_explanatory_figure.py</code>) drew the private-region wall maximum and the outside node at one fixed label offset, so their direct labels &mdash; which sit at the same flux level on adjacent ranks &mdash; overlapped and hid the word <em>maximum</em>. The graph panel now places each named label at the first candidate offset that clears every already-placed label box and every node marker in display coordinates, so no direct label collides with another label or a marker.</p>
+
+<p>The same change repairs a break the merge introduced: the tree types the virtual outside node <code>CRITICAL_TYPE_OUTSIDE</code>, which has no name in the figure&rsquo;s critical-type vocabulary, so <code>build_state</code> raised <code>KeyError: 3</code> at the merge head. The outside node is now named directly, the caption reports 5 piecewise-linear extrema (1 maximum, 4 minima) plus the outside node, and the figure and receipt are regenerated.</p>
+
+<p><strong>Measure.</strong> The two colliding labels render as <code>wall maximum</code> x&isin;[1283.4,&nbsp;1431.2] and <code>outside (wall contact)</code> x&isin;[1335.1,&nbsp;1545.9] at the fixed offset &mdash; overlapping &mdash; and separate to y&isin;[379.8,&nbsp;405.2] and y&isin;[419.8,&nbsp;445.2] with the placement search. <code>tests/test_contour_tree_explanatory_figure.py</code> computes the rendered label and marker bounding boxes in display coordinates and asserts no intersection, and the committed SVG is compared to the receipt&rsquo;s own digest.</p>
+
+<p><strong>Gate.</strong> 6 passed, <code>EXIT=0</code> at the worktree base <code>11985735c</code>. <strong>Negative control.</strong> Restoring the single fixed offset fails <code>test_graph_labels_do_not_collide</code> (<code>1 failed</code>, <code>EXIT=1</code>, <code>graph labels 'wall maximum' and 'outside (wall contact)' overlap</code>), and a scratch copy of the committed SVG with one altered coordinate fails <code>test_committed_figure_files_exist</code>. Both logs sit under <code>docs/figures/contour-tree-topology-authority/ctta-explanatory-figure-polish/</code>.</p>
+</section>
+</main></body>
+</html>

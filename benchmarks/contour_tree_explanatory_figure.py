@@ -38,8 +38,10 @@ state it is +1, because the axis flux exceeds the boundary flux.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
+import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -53,6 +55,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import jax.numpy as jnp
 from matplotlib.patches import FancyArrowPatch
+from matplotlib.transforms import Bbox
 from matplotlib.tri import LinearTriInterpolator, Triangulation
 from scipy.interpolate import griddata
 
@@ -68,9 +71,11 @@ ROOT = Path(__file__).resolve().parents[1]
 FIGURE_DIR_ENV = "CONTOUR_TREE_FIGURE_DIR"
 PLOT_SENTINEL_ENV = "CONTOUR_TREE_FIGURE_SENTINEL"
 POLOIDAL_EDGES_ENV = "CONTOUR_TREE_FIGURE_POLOIDAL_EDGES"
+FIXED_LABELS_ENV = "CONTOUR_TREE_FIGURE_FIXED_LABELS"
 FIGURE_ROOT = Path(
     os.environ.get(
-        FIGURE_DIR_ENV, ROOT / "docs/figures/contour-tree-topology-authority/explanatory"
+        FIGURE_DIR_ENV,
+        ROOT / "docs/figures/contour-tree-topology-authority/explanatory",
     )
 )
 FIGURE_STEM = FIGURE_ROOT / "contour-tree-computed"
@@ -93,6 +98,21 @@ ANALYTIC_COLOR = DEFAULT_INK.separatrix_color
 EDGE_COLOR = "#111111"
 OUTSIDE_COLOR = "#7a3b00"
 PAD = 0.05
+
+# Candidate anchor offsets, in points, for a graph-panel direct label.  The
+# first that clears every placed label box and every node marker is used, so
+# two nodes drawn at the same flux level cannot stack their labels.  Offsets
+# start far enough out to clear the label bbox padding and the marker glyph.
+GRAPH_LABEL_OFFSETS = (
+    (11.0, 7.0, "left"),
+    (11.0, -17.0, "left"),
+    (-11.0, 7.0, "right"),
+    (-11.0, -17.0, "right"),
+    (11.0, 22.0, "left"),
+    (11.0, -32.0, "left"),
+    (-11.0, 22.0, "right"),
+    (-11.0, -32.0, "right"),
+)
 
 INK = DEFAULT_INK.variant(label_fontsize=LABEL_FONTSIZE)
 
@@ -136,7 +156,9 @@ def _fixture():
     fixtures = certificate_rung_fixtures()
     selected = [item for item in fixtures if item.name.endswith(FIXTURE)]
     if len(selected) != 1:
-        raise RuntimeError("expected one %s fixture, found %d" % (FIXTURE, len(selected)))
+        raise RuntimeError(
+            "expected one %s fixture, found %d" % (FIXTURE, len(selected))
+        )
     return selected[0]
 
 
@@ -156,7 +178,9 @@ def _wall(fixture) -> tuple[Any, np.ndarray]:
         name = "%s-%d-cells" % (case, _rung_label(path.name))
         if name != fixture.name:
             continue
-        polyline = np.asarray(payload["render_data"]["wall_units_rz_m"][0], dtype=np.float64)
+        polyline = np.asarray(
+            payload["render_data"]["wall_units_rz_m"][0], dtype=np.float64
+        )
         return vessel_unit(polyline[:, 0], polyline[:, 1], name=str(case)), polyline
     raise RuntimeError("no persisted wall for " + fixture.name)
 
@@ -206,9 +230,13 @@ def _nodes(mesh, tree) -> tuple[Node, ...]:
     wall_rows = [row for row in rows if bool(is_wall[int(node_vertex[row])])]
     wall_row = max(wall_rows, key=psi_of) if wall_rows else -1
     join_level = psi_of(wall_row) if wall_row >= 0 else None
-    outside_rows = [row for row in rows if not bool(carrier_valid[int(node_vertex[row])])]
+    outside_rows = [
+        row for row in rows if not bool(carrier_valid[int(node_vertex[row])])
+    ]
     if len(outside_rows) != 1:
-        raise RuntimeError("expected one positionless outside node, found %d" % len(outside_rows))
+        raise RuntimeError(
+            "expected one positionless outside node, found %d" % len(outside_rows)
+        )
     outside_row = outside_rows[0]
 
     nodes = []
@@ -229,9 +257,12 @@ def _nodes(mesh, tree) -> tuple[Node, ...]:
             role = "private-region wall maximum"
         elif row == outside_row:
             role = "outside node"
-        kind = CRITICAL_NAME[int(critical_type[row])]
         if row == outside_row:
+            # The virtual slot is typed outside the DD critical-point
+            # vocabulary, so it carries no name from CRITICAL_NAME.
             kind = "outside (virtual)"
+        else:
+            kind = CRITICAL_NAME[int(critical_type[row])]
         raw_psi = psi_of(row)
         drawn_psi = raw_psi
         join_wb = None
@@ -403,6 +434,87 @@ def _plotted_level(node):
     return node.drawn_psi_wb
 
 
+def _annotation_display_box(annotation, renderer) -> Bbox:
+    """Display-space bounding box of a label, text and its padding together."""
+
+    annotation.update_positions(renderer)
+    box = annotation.get_window_extent(renderer=renderer)
+    pad = float(DEFAULT_INK.label_bbox.get("pad", 0.0)) * annotation.figure.dpi / 72.0
+    return Bbox.from_extents(box.x0 - pad, box.y0 - pad, box.x1 + pad, box.y1 + pad)
+
+
+def _marker_display_box(figure, panel, x_value, y_value, size) -> Bbox:
+    """Display-space bounding box of a marker of ``size`` points."""
+
+    x_display, y_display = panel.transData.transform((x_value, y_value))
+    half = 0.5 * size * figure.dpi / 72.0
+    return Bbox.from_extents(
+        x_display - half, y_display - half, x_display + half, y_display + half
+    )
+
+
+def _place_graph_labels(figure, panel, state, rank, names) -> None:
+    """Place each named graph label at the first offset that collides with nothing.
+
+    Candidate offsets are tried in order; a candidate is kept only when its
+    display box clears every already-placed label box and every node marker.
+    Two nodes drawn at the same flux level therefore cannot stack their labels,
+    and no label can be hidden behind a marker.
+    """
+
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    if os.environ.get(FIXED_LABELS_ENV) == "1":
+        # The pre-repair hook: every label at one fixed offset, so nodes drawn
+        # at the same flux level stack their labels.  It exists so the guard
+        # that requires a collision-free placement can be shown to fail.
+        for row, label in names:
+            node = _by_row(state, row)
+            panel.annotate(
+                label,
+                xy=(rank[node.row], _plotted_level(node)),
+                xytext=(6, 6),
+                textcoords="offset points",
+                fontsize=LABEL_FONTSIZE,
+                color=NODE_COLOR,
+                bbox=DEFAULT_INK.label_bbox,
+                zorder=DEFAULT_INK.zorder_label,
+            )
+        return
+    occupied = [
+        _marker_display_box(
+            figure, panel, rank[node.row], _plotted_level(node), _node_mark(node)[2]
+        )
+        for node in state.nodes
+    ]
+    for row, label in names:
+        node = _by_row(state, row)
+        point = (rank[node.row], _plotted_level(node))
+        for offset_x, offset_y, align in GRAPH_LABEL_OFFSETS:
+            annotation = panel.annotate(
+                label,
+                xy=point,
+                xytext=(offset_x, offset_y),
+                textcoords="offset points",
+                fontsize=LABEL_FONTSIZE,
+                color=NODE_COLOR,
+                bbox=DEFAULT_INK.label_bbox,
+                zorder=DEFAULT_INK.zorder_label,
+                ha=align,
+                va="center",
+            )
+            box = _annotation_display_box(annotation, renderer)
+            if any(box.overlaps(other) for other in occupied):
+                annotation.remove()
+                continue
+            occupied.append(box)
+            break
+        else:
+            raise RuntimeError(
+                "no collision-free placement found for the %r graph label" % label
+            )
+
+
 def _draw_graph(figure, state: State):
     ordered = sorted(state.nodes, key=lambda node: (-_plotted_level(node), node.row))
     rank = {}
@@ -461,18 +573,7 @@ def _draw_graph(figure, state: State):
         (state.wall_row, "wall maximum"),
         (state.outside_row, "outside (wall contact)"),
     ]
-    for row, label in names:
-        node = _by_row(state, row)
-        panel.annotate(
-            label,
-            xy=(rank[node.row], _plotted_level(node)),
-            xytext=(6, 6),
-            textcoords="offset points",
-            fontsize=LABEL_FONTSIZE,
-            color=NODE_COLOR,
-            bbox=DEFAULT_INK.label_bbox,
-            zorder=DEFAULT_INK.zorder_label,
-        )
+    _place_graph_labels(figure, panel, state, rank, names)
     return panel
 
 
@@ -480,6 +581,7 @@ def _caption(state: State) -> str:
     mins = 0
     saddles = 0
     maxima = 0
+    outside = 0
     for node in state.nodes:
         if node.critical_type == MINIMUM:
             mins += 1
@@ -487,20 +589,26 @@ def _caption(state: State) -> str:
             saddles += 1
         elif node.critical_type == MAXIMUM:
             maxima += 1
+        else:
+            outside += 1
     extra_extrema = (maxima - 1) + mins
     extra_saddles = saddles - 1
     parts = [
         "Diverted single-null Solovev certificate at its persisted 340-cell rung",
         "(fixture " + state.fixture + ").",
-        "The computed contour tree carries %d nodes and %d edges" % (len(state.nodes), len(state.edges)),
-        "so the node count exceeds the edge count by %d." % (len(state.nodes) - len(state.edges)),
+        "The computed contour tree carries %d nodes and %d edges"
+        % (len(state.nodes), len(state.edges)),
+        "so the node count exceeds the edge count by %d."
+        % (len(state.nodes) - len(state.edges)),
         "Two nodes are the analytic nulls: the magnetic-axis maximum and the",
-        "admitted X-point saddle. The other %d are piecewise-linear critical" % (len(state.nodes) - 2),
+        "admitted X-point saddle. The other %d are piecewise-linear critical"
+        % (len(state.nodes) - 2 - outside),
         "points beyond them: %d piecewise-linear extrema" % extra_extrema,
-        "(%d maximum, %d minima) and %d further saddles." % (maxima - 1, mins, extra_saddles),
-        "One of the minima is the positionless virtual outside node the padded",
-        "carrier emits; the private-region wall maximum is the tree's own node at",
-        "the highest-flux wall vertex. These low-persistence piecewise-linear",
+        "(%d maximum, %d minima) and %d further saddles, plus the positionless"
+        % (maxima - 1, mins, extra_saddles),
+        "virtual outside node the padded carrier emits, typed outside the critical-point",
+        "vocabulary. The private-region wall maximum is the tree's own node at the",
+        "highest-flux wall vertex. These low-persistence piecewise-linear",
         "extrema are drawn rather than hidden, and the critical-point geometry and",
         "selection sections (§3 and §4) must absorb them by persistence and primary selection.",
         "The poloidal panel draws no lines between nodes: the tree's adjacency is a",
@@ -555,6 +663,19 @@ def build_state() -> State:
     )
 
 
+def _svg_sha256(path: Path) -> str:
+    """Digest of an SVG with its only volatile record, the render timestamp, removed.
+
+    The receipt carries this digest so a committed figure can be compared to
+    the receipt that describes it; a figure left from another revision, or a
+    receipt regenerated without its figure, fails the comparison.
+    """
+
+    text = path.read_text(encoding="utf-8")
+    text = re.sub(r"<dc:date>.*?</dc:date>", "", text, flags=re.DOTALL)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=FIGURE_STEM)
@@ -586,6 +707,7 @@ def main() -> None:
         "contour_levels_wb": [float(level) for level in state.levels],
         "wall_points": int(state.wall.shape[0]),
         "figure": str(figure_path.relative_to(ROOT)),
+        "svg_sha256": _svg_sha256(figure_path.with_suffix(".svg")),
     }
     receipt_path = arguments.output.with_suffix(".json")
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")

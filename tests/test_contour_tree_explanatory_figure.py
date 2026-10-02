@@ -1,23 +1,28 @@
 """Guards pinning the explanatory figure to the receipt it is drawn from.
 
-Four things are asserted, each against the artifact or the drawn panel rather
+Five things are asserted, each against the artifact or the drawn panel rather
 than against ``build_state`` alone, so a stale, missing or divergent artifact
 fails the guard:
 
 * the drawn node set equals the receipt's valid nodes in count and carrier
   vertices, rebuilt independently from the fixture;
 * the committed receipt JSON matches that drawn set and keeps the contour-tree
-  node-minus-edge invariant, and the committed PNG and SVG exist;
+  node-minus-edge invariant, and the committed PNG and SVG exist and agree with
+  the receipt's own SVG digest, so a figure left from another revision fails;
 * the graph panel's signed-flux axis excludes the virtual outside node's
   ``-1.007`` mesh-padding sentinel, drawing it at its wall-contact join level
   instead;
+* the graph panel's direct labels clear every other label and every node
+  marker in display coordinates, so no label hides a marker or another label;
 * the poloidal panel draws no lines between nodes, since the tree's adjacency
   is topological rather than geometric.
 
-The two figure guards are falsified by hooks that restore the pre-repair
-behaviour: ``CONTOUR_TREE_FIGURE_SENTINEL`` re-plots the sentinel and
-``CONTOUR_TREE_FIGURE_POLOIDAL_EDGES`` restores the spatial edges.  Pointing
-``CONTOUR_TREE_FIGURE_DIR`` at a stale receipt falsifies the receipt guard.
+The figure guards are falsified by hooks that restore the pre-repair
+behaviour: ``CONTOUR_TREE_FIGURE_SENTINEL`` re-plots the sentinel,
+``CONTOUR_TREE_FIGURE_POLOIDAL_EDGES`` restores the spatial edges and
+``CONTOUR_TREE_FIGURE_FIXED_LABELS`` restores the single fixed label offset.
+Pointing ``CONTOUR_TREE_FIGURE_DIR`` at a stale receipt falsifies the receipt
+guard.
 """
 
 from __future__ import annotations
@@ -31,6 +36,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.transforms import Bbox
 
 from benchmarks import contour_tree_explanatory_figure as figure
 from nova.equilibrium.contour_tree import build_contour_tree
@@ -87,12 +93,21 @@ def test_committed_receipt_matches_the_computed_tree():
 
 
 def test_committed_figure_files_exist():
-    """The rendered PNG and SVG are present and non-empty."""
+    """The committed PNG and SVG exist and the SVG agrees with the receipt."""
 
     for suffix in (".png", ".svg"):
         path = figure.FIGURE_STEM.with_suffix(suffix)
         assert path.is_file(), "the committed figure %s is missing" % path.name
-        assert path.stat().st_size > 1024, "the committed figure %s is empty" % path.name
+        assert path.stat().st_size > 1024, (
+            "the committed figure %s is empty" % path.name
+        )
+    receipt_path = figure.FIGURE_STEM.with_suffix(".json")
+    payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert "svg_sha256" in payload, "the receipt carries no figure digest"
+    committed = figure._svg_sha256(figure.FIGURE_STEM.with_suffix(".svg"))
+    assert committed == payload["svg_sha256"], (
+        "the committed SVG does not match the receipt that describes it"
+    )
 
 
 def _render():
@@ -125,3 +140,58 @@ def test_poloidal_panel_draws_no_lines_between_nodes():
         if line.get_linestyle() in (dashed, "--", "dashed")
     ]
     assert offenders == [], "the panel drew topological adjacency as a spatial line"
+
+
+def _label_display_boxes(panel, renderer):
+    """Display-space boxes of every direct label, text and padding together."""
+
+    boxes = []
+    for text in panel.texts:
+        box = text.get_window_extent(renderer=renderer)
+        patch = text.get_bbox_patch()
+        if patch is not None:
+            box = Bbox.union([box, patch.get_window_extent(renderer)])
+        boxes.append((text.get_text(), box))
+    return boxes
+
+
+def _marker_display_boxes(figure, panel):
+    """Display-space boxes of every node marker in the panel."""
+
+    boxes = []
+    for line in panel.lines:
+        x_value = float(line.get_xdata()[0])
+        y_value = float(line.get_ydata()[0])
+        x_display, y_display = panel.transData.transform((x_value, y_value))
+        half = 0.5 * line.get_markersize() * figure.dpi / 72.0
+        boxes.append(
+            Bbox.from_extents(
+                x_display - half, y_display - half, x_display + half, y_display + half
+            )
+        )
+    return boxes
+
+
+def test_graph_labels_do_not_collide():
+    """No direct graph label overlaps another label or a node marker."""
+
+    state = figure.build_state()
+    rendered = plt.figure(figsize=(14.0, 8.0), dpi=figure.DEFAULT_INK.figure_dpi)
+    panel = figure._draw_graph(rendered, state)
+    rendered.canvas.draw()
+    renderer = rendered.canvas.get_renderer()
+    labels = _label_display_boxes(panel, renderer)
+    markers = _marker_display_boxes(rendered, panel)
+    assert len(labels) == 4, "expected four direct graph labels"
+    assert len(markers) == len(state.nodes), "one marker per drawn node"
+
+    for index in range(len(labels)):
+        for other in range(index + 1, len(labels)):
+            assert not labels[index][1].overlaps(labels[other][1]), (
+                "graph labels %r and %r overlap" % (labels[index][0], labels[other][0])
+            )
+    for name, box in labels:
+        for index, marker in enumerate(markers):
+            assert not box.overlaps(marker), (
+                "graph label %r overlaps node marker %d" % (name, index)
+            )

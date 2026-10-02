@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="44">
+<meta name="plan-version" content="45">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -250,10 +250,11 @@
     <div class="r-fu-body">The fsa-repair-the-cell-count-sign follow-on: the two gate-b figures print the same leading minus on the cell count and need the same title repair in their own driver.</div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit</pre>
     </article>
-<article class="r-fu" data-id="f-fsa-production-route-receipt-revision" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-production-route-receipt-revision" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-02T17:40:22+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Stamp every production-route receipt with the source revision it was solved at</h4>
     <div class="r-fu-body">S18 (nova-37) had to date an exact-mode receipt with git log on the file, because production-route receipts carry no source revision field. Add a source_revision field (git rev-parse HEAD of the tree that ran) to the production-route receipt writers, with a test asserting that it is present.</div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit</pre>
+    <p class="r-fu-outcome">Merged at 9a7af04e2 (commits 3547676b8, 9408475d9, 3373f1921, 4114627b7; re-review 82/100). Every benchmark that writes a production-route receipt stamps source_revision through one shared helper, and tests/test_production_solver_receipt_trip_alignment.py drives each writer's own payload builder, so removing the stamp from any one writer fails it (15 passed against 9 at base). The production-solver receipt's own measure script does not yet write the field; that gap is f-fsa-production-solver-receipt-writer-revision.</p>
     </article>
 <article class="r-fu" data-id="f-fsa-painters-draw-field-outside-the-wall" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Check every poloidal painter for field drawn outside the first wall by a convex-hull triangulation</h4>
@@ -463,7 +464,7 @@
     <div class="r-comment-body"><p>Independent review of run r-20261002T134346884424-fsa-production-route-receipt-revision (b12cb22cc21946e85211979b626c3f7009ae629a..9408475d9fb244c94683a5b471406bdbaeb453c3) stored at total 73/100 (goal_fidelity 16, evidence 14, scope_discipline 13, durability 13, fit 17), 4 follow-on findings, added_failure_count 0.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261002T134346884424-fsa-production-route-receipt-revision" data-who="reckon-build" data-when="2026-10-02T17:14:15.120Z">
-    <div class="r-comment-body"><p>Stamped source_revision on every production-route receipt writer and pinned it with a gate that drives each writer&#x27;s own payload builder on synthetic input: after arm 15 passed EXIT=0 (33.67s) against base arm 9 passed EXIT=0 (34.52s), 0 added failures, and removing the stamp from any one writer (five mutations, scratch copy) fails its targeted test EXIT=1.</p></div>
+    <div class="r-comment-body"><p>Stamped source_revision on every production-route receipt writer and pinned it with a gate that drives each writer's own payload builder on synthetic input: after arm 15 passed EXIT=0 (33.67s) against base arm 9 passed EXIT=0 (34.52s), 0 added failures, and removing the stamp from any one writer (five mutations, scratch copy) fails its targeted test EXIT=1.</p></div>
 </div>
 </section>
   </main>

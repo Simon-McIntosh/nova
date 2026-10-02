@@ -59,7 +59,9 @@ DEFAULT_OUTPUT = OUTPUT_ROOT / "profile.json"
 DEFAULT_COMPONENT_TABLE = OUTPUT_ROOT / "per-trip-components.csv"
 DEFAULT_DYNAMIC_TABLE = OUTPUT_ROOT / "per-trip-dynamic-counts.csv"
 DEFAULT_KERNEL_TABLE = OUTPUT_ROOT / "kernel-growth.csv"
-DEFAULT_FIGURE = OUTPUT_ROOT / "per-trip-components.png"
+# per-trip-components.png was retired from the served tree at 6d99b59ba (uncited);
+# the component breakdown is carried by per-trip-components.csv.
+DEFAULT_FIGURE = OUTPUT_ROOT / "per-trip-components.png"  # retired 6d99b59ba
 DEFAULT_TRACE_EVENTS = OUTPUT_ROOT / "trace-events.jsonl"
 DEFAULT_CENSUS_EVENTS = OUTPUT_ROOT / "census-events.jsonl"
 DEFAULT_REPORT = Path(

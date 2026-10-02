@@ -1051,23 +1051,25 @@ def _draw_figure(payload: dict[str, Any], output: Path) -> None:
     members = [row for row in payload["width_one"]["members"] if row.get("trips")]
     labels = [row["identity"] for row in members]
     positions = np.arange(len(members))
-    figure = plt.figure(figsize=(16.4, 8.6), constrained_layout=True)
-    grid = figure.add_gridspec(1, 3, width_ratios=(1.5, 1.5, 0.9))
+    plt.style.use("data-ink")
+    figure = plt.figure(figsize=(14.0, 12.0), constrained_layout=True)
+    grid = figure.add_gridspec(2, 2, height_ratios=(1.25, 1.0))
 
-    per_trip_axis = figure.add_subplot(grid[0, 0])
+    per_trip_axis = figure.add_subplot(grid[0, :])
     host_boundary = [row["boundary_per_trip_s"] * 1.0e3 for row in members]
     host_host = [row["host_reconciliation_per_trip_s"] * 1.0e3 for row in members]
     host_sync = [row["final_device_sync_per_trip_s"] * 1.0e3 for row in members]
     compiled_trip = [
         row["compiled"]["per_trip_quantum_s"] * 1.0e3
         for row in members
-        if row["compiled"].get("per_trip_quantum_s") is not None
+        if row.get("compiled") and row["compiled"].get("per_trip_quantum_s") is not None
     ]
     compiled_positions = np.asarray(
         [
             position
             for position, row in zip(positions, members, strict=True)
-            if row["compiled"].get("per_trip_quantum_s") is not None
+            if row.get("compiled")
+            and row["compiled"].get("per_trip_quantum_s") is not None
         ]
     )
     bar_width = 0.38
@@ -1076,7 +1078,7 @@ def _draw_figure(payload: dict[str, Any], output: Path) -> None:
         host_boundary,
         bar_width,
         color="#3b6ea5",
-        label="host trip-close boundary",
+        label="host boundary",
     )
     per_trip_axis.bar(
         positions - bar_width / 2,
@@ -1084,7 +1086,7 @@ def _draw_figure(payload: dict[str, Any], output: Path) -> None:
         bar_width,
         bottom=host_boundary,
         color="#f58518",
-        label="host reconciliation",
+        label="host reconcile",
     )
     per_trip_axis.bar(
         positions - bar_width / 2,
@@ -1094,38 +1096,35 @@ def _draw_figure(payload: dict[str, Any], output: Path) -> None:
         color="#54a24b",
         label="host device sync",
     )
-    per_trip_axis.bar(
-        compiled_positions + bar_width / 2,
-        compiled_trip,
-        bar_width,
-        color="#e15759",
-        label="compiled per trip (one boundary / trips)",
-    )
-    per_trip_axis.set_xticks(positions, labels, rotation=55, ha="right", fontsize=8)
+    if compiled_trip:
+        per_trip_axis.bar(
+            compiled_positions + bar_width / 2,
+            compiled_trip,
+            bar_width,
+            color="#e15759",
+            label="compiled",
+        )
+    per_trip_axis.set_xticks(positions, labels, rotation=45, ha="right")
     per_trip_axis.set_ylabel("per-trip quantum [ms] at width 1")
-    per_trip_axis.set_title("Width-1 per-trip quantum: host route vs compiled slice")
-    per_trip_axis.legend(frameon=False, fontsize=8)
+    per_trip_axis.legend(frameon=False, ncols=2)
     per_trip_axis.spines[["top", "right"]].set_visible(False)
 
-    solve_axis = figure.add_subplot(grid[0, 1])
+    solve_axis = figure.add_subplot(grid[1, 0])
     host_wall = [row["wall_per_solve_s"] * 1.0e3 for row in members]
     compiled_wall = [
         row["compiled"].get("program_dispatch_wall_per_solve_s") * 1.0e3
         for row in members
-        if row["compiled"].get("program_dispatch_wall_per_solve_s") is not None
+        if row.get("compiled")
+        and row["compiled"].get("program_dispatch_wall_per_solve_s") is not None
     ]
     compiled_wall_positions = np.asarray(
         [
             position
             for position, row in zip(positions, members, strict=True)
-            if row["compiled"].get("program_dispatch_wall_per_solve_s") is not None
+            if row.get("compiled")
+            and row["compiled"].get("program_dispatch_wall_per_solve_s") is not None
         ]
     )
-    compiled_api_walls = {
-        position: row["compiled"]["wall_per_solve_s"] * 1.0e3
-        for position, row in zip(positions, members, strict=True)
-        if row["compiled"].get("wall_per_solve_s") is not None
-    }
     solve_axis.bar(
         positions - bar_width / 2,
         host_wall,
@@ -1133,73 +1132,46 @@ def _draw_figure(payload: dict[str, Any], output: Path) -> None:
         color="#8da0cb",
         label="host per solve",
     )
-    solve_axis.bar(
-        compiled_wall_positions + bar_width / 2,
-        compiled_wall,
-        bar_width,
-        color="#4c78a8",
-        label="compiled program dispatch per solve",
-    )
-    for position, api_wall in compiled_api_walls.items():
-        solve_axis.text(
-            position + bar_width / 2,
-            api_wall,
-            f"api\n{api_wall * 1.0e-3:.2f} s",
-            ha="center",
-            va="bottom",
-            fontsize=6,
-            color="#1b5e98",
+    if compiled_wall:
+        solve_axis.bar(
+            compiled_wall_positions + bar_width / 2,
+            compiled_wall,
+            bar_width,
+            color="#4c78a8",
+            label="compiled dispatch",
         )
-    solve_axis.set_xticks(positions, labels, rotation=55, ha="right", fontsize=8)
+    solve_axis.set_xticks(positions, labels, rotation=55, ha="right")
     solve_axis.set_ylabel("wall per solve [ms] at width 1 (log)")
     solve_axis.set_yscale("log")
-    solve_axis.set_title("Width-1 wall per solve: host vs compiled dispatch")
-    solve_axis.legend(frameon=False, fontsize=8)
+    solve_axis.legend(frameon=False)
     solve_axis.spines[["top", "right"]].set_visible(False)
 
-    baseline_axis = figure.add_subplot(grid[0, 2])
+    baseline_axis = figure.add_subplot(grid[1, 1])
     summary = payload["baseline_summary"]
-    names = ["stale map\n(1024)", "HEAD map\n(1024)", "stale trip\n(1024)"]
+    names = [
+        "banked map",
+        "HEAD map",
+        "banked trip",
+        "HEAD trip",
+    ]
     values = [
         summary["stale_baseline_map_ms"],
         summary["head_map_ms"],
         summary["stale_baseline_quantum_ms"],
+        summary["head_quantum_ms"],
     ]
-    colors = ("#8da0cb", "#4c78a8", "#b279a2")
+    colors = ("#8d8d8d", "#356a8a", "#8d8d8d", "#356a8a")
     baseline_axis.bar(np.arange(len(names)), values, color=colors)
     for index, value in enumerate(values):
-        baseline_axis.text(
-            index, value, f" {value:.3f}", ha="left", va="center", fontsize=8
-        )
-    head_quantum = summary["head_quantum_ms"]
-    baseline_axis.text(
-        2.35,
-        summary["stale_baseline_quantum_ms"],
-        (
-            f"  HEAD trip\n  {head_quantum:.4f} ms"
-            if head_quantum is not None
-            else "  HEAD trip\n  not re-measured"
-        ),
-        ha="left",
-        va="center",
-        fontsize=8,
-        color="#b279a2",
-    )
-    baseline_axis.set_xticks(
-        np.arange(len(names)), names, rotation=30, ha="right", fontsize=8
-    )
-    baseline_axis.set_ylabel("ms/member")
-    baseline_axis.set_title("Stale baselines re-measured at HEAD (width 1024)")
+        if value is None:
+            continue
+        baseline_axis.text(index, value, f" {value:.3f}", ha="left", va="bottom")
+    baseline_axis.set_xticks(np.arange(len(names)), names, rotation=30, ha="right")
+    baseline_axis.set_ylabel("width-1024 wall [ms/member] (log)")
+    baseline_axis.set_yscale("log")
     baseline_axis.spines[["top", "right"]].set_visible(False)
-    figure.suptitle(
-        "Width-1 per-trip quantum and per-solve wall, host route against the "
-        "compiled slice route\n"
-        "(compiled closes every trip of a solve in one program and reads the "
-        f"receipt once) | revision {payload['measurement_revision'][:10]}",
-        fontsize=15,
-    )
     output.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(output, dpi=180)
+    figure.savefig(output, dpi=100)
     plt.close(figure)
 
 

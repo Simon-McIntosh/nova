@@ -1157,7 +1157,6 @@
     "path": "benchmarks/production_solve_host_profile.py",
     "sha256": "0059655ae5b57f04ece6e0e07c4f79f543844d733e3a188323f2029df807113b"
   },
-  "figure_path": "docs/figures/millisecond-converged-solve/trip-quantum/host-profile/host-profile.png",
   "figure_sha256": "acdc1ff72d0329043a7a4686148dd223594562a15f98e066cdb9b072beb16438",
   "measurement_revision": "5ba7fa558519c47abd3ab462073d6df80340ab55",
   "mechanism": {
@@ -1518,7 +1517,6 @@
   "pyspy": {
     "exit_status": 1,
     "frame_rows": 2905,
-    "path": "docs/figures/millisecond-converged-solve/trip-quantum/host-profile/production-solve-native.svg",
     "sample_count": 41416,
     "sample_errors": 146,
     "sampling_lag_warning": true,

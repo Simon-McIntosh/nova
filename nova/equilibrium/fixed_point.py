@@ -4645,6 +4645,10 @@ def _active_set_newton_krylov(
             & (selected_difference == 0)
             & (inner_result.accepted_newton_promotions == 0)
             & jnp.all(selected_state == state)
+            & (
+                ~jnp.asarray(freeze_topology)
+                | (selected_residual <= convergence_tolerance)
+            )
         )
         if stream_active_set:
             jax.debug.callback(
@@ -4934,7 +4938,10 @@ def newton_krylov(
     ``stop_on_active_set_settlement`` masks every later outer trip after an
     executed trip changes no active-set cells and accepts no Newton promotion
     under own-mask qualification, while retaining the trip's incoming state.
-    The two no-change checks prove the retained best iterate did not advance.
+    A frozen-partition route additionally requires its reconciled live
+    relative-sup residual to meet the convergence tolerance; otherwise its
+    bounded local trajectory continues and reports an exhausted budget honestly.
+    The no-change checks prove the retained best iterate did not advance.
     The compiled trip extent and telemetry shapes stay fixed; skipped rows retain
     the same NaN and -1 padding as every other terminal condition.  Disabling it
     runs the complete bounded loop for paired comparisons.  It is inert when

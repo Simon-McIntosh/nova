@@ -1,0 +1,372 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 7062084,
+      "input_tokens_cumulative": 7062084,
+      "output_tokens": 41445,
+      "output_tokens_cumulative": 41445,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 495,
+    "files": 5,
+    "removed": 123
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "step",
+        "path": "tests/test_single_site_krylov.py"
+      },
+      "run_function": {
+        "line": 90,
+        "name": "main",
+        "path": "docs/figures/forward-solver-route-integrity/single-site-krylov/toy_self_identity.py"
+      },
+      "window_line": 117
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "22469374d37230d703527ba4a2e32015862412c1"
+  ],
+  "completed_at": "2026-10-02T23:14:07.809Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T22:53:28Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T23:23:03.329936+00:00",
+    "horizon_seconds": 1800,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T22:53:03Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 28,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 9,
+    "headroom": 5,
+    "mean_context": 115556,
+    "observed_at": "2026-10-02T22:52:35Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T23:14:07.809Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225302405670-fsri-krylov-toy-witness-fail-closed/manifest.md",
+  "member": "disposable-r-20261002T225302405670-fsri-krylov-toy-witness-fail-closed",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsri-krylov-toy-witness-fail-closed",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 753,
+          "cached_input_tokens": 199470,
+          "input_tokens": 200225,
+          "output_tokens": 1660,
+          "reasoning_output_tokens": 270,
+          "total_tokens": 201885,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: review finding (1) of followup f-fsri-krylov-slice-2-review-findings. The witnesses docs/figures/forward-solver-route-integrity/single-site-krylov/toy_identity.py, toy_self_identity.py, rule_toy_identity.py and exit_toy_identity.py count mismatches and exit 0, and compare with np.array_equal(equal_nan=True), which accepts different signed zeros and NaN payloads; a reviewer ran one on 1.0 against 2.0 and it printed identical. Repair: each witness compares the raw bit patterns (for example arrays viewed as unsigned integers of the same width, with shape and dtype checked first) and exits nonzero on any difference, printing the first differing index and both bit patterns. Gate, logged under the run directory: for each of the four witnesses, (a) identical arrays exit 0, (b) 1.0 against 2.0 exits nonzero, (c) +0.0 against -0.0 exits nonzero, (d) two NaNs with different payloads exit nonzero. Drive these through the witness's own comparison function from a scratch script under /tmp, which is not committed. Every uv command carries --no-sync and nothing runs uv sync. The manifest's status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Make the single-site Krylov toy identity witnesses fail closed on any bit-pattern difference",
+    "id": "fsri-krylov-toy-witness-fail-closed",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T22:53:03Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 28,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 9,
+      "headroom": 5,
+      "mean_context": 115556,
+      "observed_at": "2026-10-02T22:52:35Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225302405670-fsri-krylov-toy-witness-fail-closed/manifest.md",
+    "negative_control": "",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "30m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/forward-solver-route-integrity/single-site-krylov/toy_identity.py",
+      "docs/figures/forward-solver-route-integrity/single-site-krylov/toy_self_identity.py",
+      "docs/figures/forward-solver-route-integrity/single-site-krylov/rule_toy_identity.py",
+      "docs/figures/forward-solver-route-integrity/single-site-krylov/exit_toy_identity.py",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-krylov-toy-witness-fail-closed.html",
+      "docs/figures/forward-solver-route-integrity/fsri-krylov-toy-witness-fail-closed"
+    ]
+  },
+  "orientation_input_tokens": 1644060.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsri-krylov-toy-witness-fail-closed",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T22:53:10.675196+00:00",
+    "score": 0.56875,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5010.112,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "22469374d37230d703527ba4a2e32015862412c1",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+    "reviewed_head_sha": "22469374d37230d703527ba4a2e32015862412c1",
+    "scores": {
+      "durability": 18,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 95
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T225302405670-fsri-krylov-toy-witness-fail-closed",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "137ffe0c-9747-4c4a-8a92-9a3bf8d7dff9",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 7062084,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1225.15,
+    "generated_tokens": 41445,
+    "generation_seconds": 1104.141,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 68.0,
+    "machine_seconds": 121.009,
+    "peak_input_tokens": 156445,
+    "tokens_per_second": 37.54,
+    "wall_tokens_per_second": 33.83
+  },
+  "time_budget": "30m",
+  "tool_steps": 63.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1239,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T23:14:09Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T22:53:33Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T225302405670-fsri-krylov-toy-witness-fail-closed",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 6808,
+    "worker_pid": 1922862
+  },
+  "worker_seconds": 1191,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

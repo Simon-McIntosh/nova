@@ -31,6 +31,46 @@
   },
   "bit_identical_to_artifact": false,
   "comparison_kind": "one DIII-D gate frame's terminal state at the driver's device against the committed batched artifact",
+  "compile_cache": {
+    "events": [
+      {
+        "key": "jit_stage-967ab7b464451608d02f2b28a0dd17b47dba81746fe67ef063bf8742eed02ef4",
+        "module": "jit_stage",
+        "status": "miss"
+      },
+      {
+        "key": "jit_solve-55418f04d40e11e3881c17a9c56a84ca5e0fe6267d15bc0939da18e626c33c0e",
+        "module": "jit_solve",
+        "status": "hit"
+      },
+      {
+        "key": "jit_isnan-43fb8ef14aac790982d447d6848ed95345271de23450f3f608f46e660ba656f1",
+        "module": "jit_isnan",
+        "status": "hit"
+      },
+      {
+        "key": "jit_logical_not-1d59649af83c59a0aa98803c3109dc5ba45855f456ad9926029e8ce33d27f3f9",
+        "module": "jit_logical_not",
+        "status": "hit"
+      },
+      {
+        "key": "jit_greater_equal-f06d6725dd187e29b614feaf41cc1d461ef5a847a6df35b6338785e4d0e0b198",
+        "module": "jit_greater_equal",
+        "status": "hit"
+      },
+      {
+        "key": "jit_bitwise_and-bf947d812fce5aeb83820fa34309752fe387c8fd2257e889c690886bfac7034d",
+        "module": "jit_bitwise_and",
+        "status": "miss"
+      }
+    ],
+    "main_program": {
+      "key": "jit_solve-55418f04d40e11e3881c17a9c56a84ca5e0fe6267d15bc0939da18e626c33c0e",
+      "module": "jit_solve",
+      "status": "hit"
+    }
+  },
+  "compile_seconds": 157.97748311050236,
   "frame": {
     "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
     "index": 4
@@ -44,17 +84,17 @@
         "cuda",
         "cpu"
       ],
-      "job_id": 1273398,
-      "job_name": "diiid-gate-frame-20260918",
+      "job_id": 1280450,
+      "job_name": "diiid-terminal-control",
       "node": "98dci4-gpu-0003",
       "partition": "betelgeuse",
-      "requested_memory_mib": 131072,
+      "requested_memory_mib": 163840,
       "requested_time_limit": null,
       "reservation": "gpu_0003_grpA",
       "tmpdir": "/tmp"
     },
     "allocation_proof": "driver-local proof of the reserved H200, mirroring the instrument's with a memory floor: the instrument's proof requires exactly 128 GiB, which one frame's 131 GiB compile footprint does not fit",
-    "artifact_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/mulw-diiid-identity-single-member-build/docs/figures/batched-operator-boundary/exit-incidence/diiid-width5.json",
+    "artifact_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels/docs/figures/batched-operator-boundary/exit-incidence/diiid-width5.json",
     "artifact_primary_arm": "head",
     "artifact_revisions": {
       "base_materialisation": "git archive with the current row-persistence instrument overlaid",
@@ -67,7 +107,7 @@
     "artifact_schema": "nova.diiid-strict-exit-paired/1",
     "artifact_secondary_arm": "base",
     "artifact_sha256": "95706db87178b96351007a693334bc2dc8a9433c063b711f6f12e95681fb1d42",
-    "cache_root": "/home/ITER/mcintos/.cache",
+    "cache_root": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
     "declared_member_count": 5,
     "device": "NVIDIA H200 NVL",
     "device_memory": {
@@ -90,10 +130,11 @@
       "xla_python_client_mem_fraction": null,
       "xla_python_client_preallocate": "false"
     },
-    "device_sha": "903459aab633a3eb1600760268789302c67a8699",
-    "device_tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/mulw-diiid-identity-single-member-build",
+    "device_sha": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+    "device_tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels",
     "driver": "benchmarks/diiid_gate_frame_identity.py",
-    "driver_sha256": "425f394073dab20dace6c65fc711cabc4116517daa477b02ed42945b922c341c",
+    "driver_revision": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+    "driver_sha256": "28e49be2c7077049930283b8f06c76002dfc794a4f95df868e17faea569e814a",
     "evidence_inputs": {
       "bank": {
         "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
@@ -112,9 +153,12 @@
     "execution_route": "one_compiled_program_per_frame, both strict-exit passes on the same program: the stacked vmap program the committed artifact was measured with is refused by this revision's accelerated history program, whose argument layout converts the vmapped target current with numpy",
     "frame_timeout_seconds": 3600.0,
     "identity_comparator": "benchmarks.solve_program_size_gate._require_identity_rows",
-    "job_id": 1273398,
+    "instrument_sha256": "1f187537e044b8f09b7f71aff32817f47d6fa85056d1777f3ab517c4c6ccc83f",
+    "job_id": 1280450,
     "machine_artifact_digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
     "machine_cache": "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache",
+    "measurement_cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels",
+    "measurement_module": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels/nova/equilibrium/forward.py",
     "member_identities": [
       "d3d_shot_0040ca9bdc.parquet frame 137"
     ],
@@ -122,7 +166,7 @@
     "node": "98dci4-gpu-0003",
     "partition": "betelgeuse",
     "persistent_compilation_cache": {
-      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-0745ecebea4cb264e054",
       "entry_key_fields": [
         "serialized computation",
         "jaxlib version",
@@ -149,7 +193,7 @@
       "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
       "maximum_bytes": 8589934592,
       "minimum_compile_seconds": 1.0,
-      "root": "/home/ITER/mcintos/.cache",
+      "root": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
       "runtime_identity": {
         "backend": "gpu",
         "backend_version": "PJRT C API\ncuda 12090",
@@ -176,75 +220,190 @@
     },
     "process_isolation": "one re-executed child per frame, each started as a fresh `python <this driver> --frame-index <i>` that builds only its own member through strict_exit_incidence.build_diiid_member, with each frame's receipt written by its own child and a fresh process for the next: five frames in one process held 131 GiB resident after the first frame, and process exit is what returns it",
     "re_exec_not_fork": "children are re-executed rather than forked: a fork taken after a CUDA context is up deadlocks silently, so no process here forks",
-    "recorded_at": "2026-09-18T11:44:12.828920+00:00",
+    "recorded_at": "2026-10-02T17:24:33.423683+00:00",
     "requested_repeats": 1,
     "reservation": "gpu_0003_grpA",
     "role": "frame_child",
     "route_qualification": "a difference measured on the per-frame route against an artifact measured on the stacked vmap route is device- and route-qualified",
     "scheduled_core_count": 8
   },
-  "identity_row_count": 1173,
+  "input_fingerprints": {
+    "coil_current_sha256": "e3da527eaa43ad75d6cf4581f61b6a67849ab054cf7f35efe8a217a5820a1f57",
+    "options": {
+      "active_set_steps": 16,
+      "gmres_iterations": 24,
+      "newton_steps": 24,
+      "relaxation": 0.5,
+      "step_cap": 10.0,
+      "warmup": 8
+    },
+    "seed_sha256": "d46a1b080d0ee25754d89518626466affe289aa20fdcb42d7921a9f92dbe41fd",
+    "target_current": 1629095.3674316406,
+    "tolerance": 1e-06
+  },
   "main": {
     "with_exit": {
       "batch_elapsed_ms": null,
       "batched_ms_per_member": null,
       "converged": false,
       "executed_trips": 2,
-      "terminal_residual": 0.2153838213511468,
-      "terminal_state_sha256": "5ba9e0cc5cc3671961838f70d3f4a0057b2e6caae452ed9356bc5bddbc571c70",
-      "termination": "active_set_settled"
+      "terminal_residual": 0.21515943654382086,
+      "terminal_state_sha256": "ca2455ed3c4b37878e5769dee25270b34ae828f31532996ae90e5a3a41bc933f",
+      "termination": "active_set_settled",
+      "timing": {
+        "compile_warm_p95_ms": 458.53676920000004,
+        "compile_warm_solve_ms": 457.960771,
+        "first_compiled_solve_ms": 458.600769,
+        "samples_compile_warm_ms": [
+          458.600769,
+          457.320773
+        ]
+      }
     },
     "without_exit": {
       "batch_elapsed_ms": null,
       "batched_ms_per_member": null,
       "converged": false,
       "executed_trips": 2,
-      "terminal_residual": 0.2153838213511468,
-      "terminal_state_sha256": "5ba9e0cc5cc3671961838f70d3f4a0057b2e6caae452ed9356bc5bddbc571c70",
-      "termination": "active_set_stagnated"
+      "terminal_residual": 0.21515943654382086,
+      "terminal_state_sha256": "ca2455ed3c4b37878e5769dee25270b34ae828f31532996ae90e5a3a41bc933f",
+      "termination": "active_set_stagnated",
+      "timing": {
+        "compile_warm_p95_ms": 2730.2235895999997,
+        "compile_warm_solve_ms": 1656.346421,
+        "first_compiled_solve_ms": 2849.543275,
+        "samples_compile_warm_ms": [
+          2849.543275,
+          463.149567
+        ]
+      }
     }
   },
   "main_against_artifact": {
     "base": {
       "with_exit": {
-        "absolute_terminal_residual_difference": 1.0398409023060218e-05,
+        "absolute_terminal_residual_difference": 0.00023478321634901045,
         "artifact_converged": false,
         "artifact_terminal_residual": 0.21539421976016987,
         "main_converged": false,
-        "main_terminal_residual": 0.2153838213511468,
+        "main_terminal_residual": 0.21515943654382086,
         "terminal_state_sha256_identical": false
       },
       "without_exit": {
-        "absolute_terminal_residual_difference": 1.0398409023060218e-05,
+        "absolute_terminal_residual_difference": 0.00023478321634901045,
         "artifact_converged": false,
         "artifact_terminal_residual": 0.21539421976016987,
         "main_converged": false,
-        "main_terminal_residual": 0.2153838213511468,
+        "main_terminal_residual": 0.21515943654382086,
         "terminal_state_sha256_identical": false
       }
     },
     "head": {
       "with_exit": {
-        "absolute_terminal_residual_difference": 1.3877787807814457e-16,
+        "absolute_terminal_residual_difference": 0.00022438480732581145,
         "artifact_converged": false,
         "artifact_terminal_residual": 0.21538382135114667,
         "main_converged": false,
-        "main_terminal_residual": 0.2153838213511468,
+        "main_terminal_residual": 0.21515943654382086,
         "terminal_state_sha256_identical": false
       },
       "without_exit": {
-        "absolute_terminal_residual_difference": 1.3877787807814457e-16,
+        "absolute_terminal_residual_difference": 0.00022438480732581145,
         "artifact_converged": false,
         "artifact_terminal_residual": 0.21538382135114667,
         "main_converged": false,
-        "main_terminal_residual": 0.2153838213511468,
+        "main_terminal_residual": 0.21515943654382086,
         "terminal_state_sha256_identical": false
       }
     }
   },
   "maximum_absolute_terminal_state_difference": 0.0,
   "maximum_absolute_terminal_state_difference_scope": "between this frame's two strict-exit passes at the driver's device; the committed artifact carries terminal-state hashes rather than state arrays, so a state-array difference against it cannot be formed",
+  "panel": {
+    "axis_off": true,
+    "caption": "d3d_shot_0040ca9bdc.parquet frame 137 \u2014 cold diverted seed reference (blue) and terminal state (ochre), 15 shared Wb levels; terminal residual 0.215159; converged=False. Triangles mark axes; filled crosses mark admitted saddles; hollow crosses mark other qualified saddles.",
+    "direct_labels": [
+      "Seed reference",
+      "Terminal"
+    ],
+    "embedded_caption": false,
+    "png": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-0040ca9bdc-parquet-frame-137.png",
+    "reference_contour_segment_count": 7,
+    "reference_linewidth_pt": 2.4,
+    "reference_markers": {
+      "other_x_points_drawn": 0,
+      "strike_points_drawn": 0,
+      "x_points_drawn": 1,
+      "x_points_dropped_outside_wall": 0
+    },
+    "shared_contour_levels_wb": [
+      -28.791327781596888,
+      -26.538450719579476,
+      -24.285573657562065,
+      -22.032696595544657,
+      -19.779819533527245,
+      -17.526942471509834,
+      -15.274065409492422,
+      -13.021188347475011,
+      -10.7683112854576,
+      -8.515434223440188,
+      -6.262557161422777,
+      -4.009680099405365,
+      -1.7568030373879573,
+      0.49607402462945416,
+      2.7489510866468683
+    ],
+    "svg": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-0040ca9bdc-parquet-frame-137.svg",
+    "terminal_contour_segment_count": 1,
+    "terminal_linewidth_pt": 3.0,
+    "terminal_markers": {
+      "other_x_points_drawn": 0,
+      "strike_points_drawn": 0,
+      "x_points_drawn": 1,
+      "x_points_dropped_outside_wall": 0
+    }
+  },
   "primary_artifact_arm": "head",
-  "schema": "nova.diiid-gate-frame-identity/1",
-  "strict_qualification": "fired"
+  "schema": "nova.diiid-gate-frame-identity/2",
+  "strict_qualification": "fired",
+  "terminal_flux_artifact": {
+    "path": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-0040ca9bdc-parquet-frame-137.npz",
+    "reference_kind": "production cold diverted seed for the committed frame",
+    "reference_topology": {
+      "axis_flux_wb": 2.751000906545343,
+      "axis_rz_m": [
+        1.7231301069259626,
+        0.0016905876109371814
+      ],
+      "boundary_flux_wb": 0.7042928875209449,
+      "converged_topology_class": "limited",
+      "other_qualified_x_points_rz_m": [],
+      "status": "read",
+      "x_point_rz_m": [
+        1.2897911071777337,
+        -1.1884135007858274
+      ]
+    },
+    "sha256": "4a9e2292c37cfcc05fdaa3eb2cc7d8ea4fc59f79cfff16439f742edfeb4328e8",
+    "terminal_state_element_count": 1173,
+    "terminal_state_sha256": "ca2455ed3c4b37878e5769dee25270b34ae828f31532996ae90e5a3a41bc933f",
+    "terminal_topology": {
+      "axis_flux_wb": 2.2070896828097792,
+      "axis_rz_m": [
+        1.717311476722095,
+        -0.2135647013126281
+      ],
+      "boundary_flux_wb": 0.21374543780517263,
+      "converged_topology_class": "diverted",
+      "other_qualified_x_points_rz_m": [],
+      "status": "read",
+      "x_point_rz_m": [
+        1.3103672779610591,
+        -1.187629667178104
+      ]
+    }
+  },
+  "terminal_state_element_count": 1173,
+  "terminal_state_element_count_note": "the number of scalar elements in this frame's terminal state; it is not a count of compared rows",
+  "with_exit_minus_without_exit_terminal_residual": 0.0
 }

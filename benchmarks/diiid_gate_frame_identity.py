@@ -56,7 +56,9 @@ import argparse
 from datetime import UTC, datetime
 import gc
 import hashlib
+import importlib.util
 import json
+import logging
 import numpy as np
 import os
 import re
@@ -112,7 +114,12 @@ MINIMUM_DEVICE_AVAILABLE_MIB = 32 * 1024
 # is keyed against the same hardware autotuning measurements the artifact was
 # produced with.  The frames are new programs and miss the whole-program
 # entries either way; the per-fusion autotune entries are what they share.
-DEFAULT_CACHE_ROOT = Path("/home/ITER/mcintos/.cache")
+DEFAULT_CACHE_ROOT = Path(
+    os.environ.get(
+        "NOVA_COMPILATION_CACHE_ROOT",
+        "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+    )
+)
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -151,6 +158,16 @@ def _write_json(path: Path, payload: Any) -> None:
         encoding="utf-8",
     )
     temporary.replace(path)
+
+
+def _array_sha256(value: Any) -> str:
+    """Hash one array with the same dtype-and-shape contract as the solver."""
+    array = np.ascontiguousarray(np.asarray(value))
+    digest = hashlib.sha256()
+    digest.update(array.dtype.str.encode("ascii"))
+    digest.update(np.asarray(array.shape, dtype=np.int64).tobytes())
+    digest.update(array.tobytes())
+    return digest.hexdigest()
 
 
 def _artifact_index(artifact: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -194,6 +211,7 @@ def _main_arm(passed: dict[str, Any]) -> dict[str, Any]:
         "converged": _converged(passed.get("termination")),
         "batch_elapsed_ms": passed.get("batch_elapsed_ms"),
         "batched_ms_per_member": passed.get("batched_ms_per_member"),
+        "timing": passed.get("timing"),
     }
 
 
@@ -388,6 +406,220 @@ def _child_command(
     ]
 
 
+def _point(value: Any) -> list[float] | None:
+    array = np.asarray(value, dtype=np.float64).reshape(-1)
+    if array.size < 2 or not np.all(np.isfinite(array[:2])):
+        return None
+    return array[:2].tolist()
+
+
+def _topology_receipt(operator: Any, state: Any) -> dict[str, Any]:
+    """Read the axis, admitted saddle, and other qualified saddles."""
+    try:
+        state = np.asarray(state, dtype=np.float64)
+        _masks, topology = operator.read(state)
+        if hasattr(operator, "null_flux_pool"):
+            pool = operator.null_flux_pool(state)
+        elif hasattr(operator, "_null_flux_pool"):
+            pool = operator._null_flux_pool(state)
+        else:
+            pool, _ = operator.topology.split_flux_map(state)
+        census = operator._fixed_design_topology.grid.candidate_table_status(pool)
+        candidates = np.asarray(census["retained_candidate"], dtype=np.float64)[1]
+        valid = np.asarray(census["retained_valid"], dtype=bool)[1]
+        qualified = candidates[valid, :2]
+        x_point = _point(topology.x_point)
+        if x_point is not None and qualified.size:
+            admitted = np.asarray(x_point, dtype=np.float64)
+            qualified = qualified[
+                np.linalg.norm(qualified - admitted[None, :], axis=1) > 1.0e-10
+            ]
+        return {
+            "status": "read",
+            "axis_rz_m": _point(topology.axis),
+            "x_point_rz_m": x_point,
+            "other_qualified_x_points_rz_m": qualified.tolist(),
+            "axis_flux_wb": float(np.asarray(topology.axis_flux)),
+            "boundary_flux_wb": float(np.asarray(topology.boundary_flux)),
+            "converged_topology_class": (
+                "diverted" if bool(np.asarray(topology.diverted)) else "limited"
+            ),
+        }
+    except Exception as error:
+        return {
+            "status": "unreadable",
+            "axis_rz_m": None,
+            "x_point_rz_m": None,
+            "other_qualified_x_points_rz_m": [],
+            "error": f"{type(error).__name__}: {error}",
+        }
+
+
+def _measure_frame(member: Any, repeats: int, instrument: Any) -> dict[str, Any]:
+    """Measure one frame while retaining its terminal flux and cache receipt."""
+    identity = str(member.identity)
+    print(
+        "STAGE DIIID_MEMBER_1_COMPILE_START width=1 "
+        f"identity={identity!r} "
+        f"rss_mib={instrument._PeakRssSampler._current_mib():.3f}",
+        flush=True,
+    )
+    sampler = instrument._PeakRssSampler()
+    cache_probe = instrument._PersistentCacheProbe()
+    compiler_logger = logging.getLogger("jax._src.compiler")
+    previous_log_level = compiler_logger.level
+    compiler_logger.setLevel(logging.DEBUG)
+    compiler_logger.addHandler(cache_probe)
+    try:
+        with sampler:
+            compiled, state, compile_seconds = instrument._compiled_member(member)
+            print(
+                "STAGE DIIID_MEMBER_1_COMPILE_DONE "
+                f"seconds={compile_seconds:.6f} "
+                f"rss_mib={instrument._PeakRssSampler._current_mib():.3f}",
+                flush=True,
+            )
+            control, control_timing, control_flux = instrument._time_arm(
+                compiled,
+                state,
+                settlement=False,
+                repeats=repeats,
+                machine="DIIID",
+                member_number=1,
+                arm_name="WITHOUT_EXIT",
+            )
+            exited, exited_timing, exited_flux = instrument._time_arm(
+                compiled,
+                state,
+                settlement=True,
+                repeats=repeats,
+                machine="DIIID",
+                member_number=1,
+                arm_name="WITH_EXIT",
+            )
+    finally:
+        compiler_logger.removeHandler(cache_probe)
+        compiler_logger.setLevel(previous_log_level)
+    row = instrument._strict_exit_member_row(
+        identity,
+        instrument._array_sha256(member.state),
+        member.state_authority,
+        control,
+        exited,
+        control_flux,
+        exited_flux,
+        control_payload={"timing": control_timing},
+        exited_payload={"timing": exited_timing},
+    )
+    instrument._assert_cross_arm_identity([row])
+    cache_events = list(cache_probe.events)
+    main_events = [event for event in cache_events if event["module"] == "jit_solve"]
+    row["compile_seconds"] = compile_seconds
+    row["compile_cache"] = {
+        "main_program": main_events[-1] if main_events else None,
+        "events": cache_events,
+    }
+    memory = sampler.receipt()
+    row["host_memory"] = memory
+    row["input_fingerprints"] = {
+        "seed_sha256": _array_sha256(member.state),
+        "coil_current_sha256": _array_sha256(member.current),
+        "target_current": float(member.target_current),
+        "tolerance": float(member.tolerance),
+        "options": member.options,
+    }
+    terminal_flux = np.asarray(exited_flux, dtype=np.float64)
+    reference_flux = np.asarray(member.state, dtype=np.float64)
+    del compiled, state, control_flux, exited_flux
+    gc.collect()
+    return {
+        "row": row,
+        "terminal_flux": terminal_flux,
+        "reference_flux": reference_flux,
+        "cache_events": cache_events,
+    }
+
+
+def _write_terminal_flux_artifact(
+    *, member: Any, measured: dict[str, Any], path: Path
+) -> dict[str, Any]:
+    """Persist the terminal state and all geometry needed for render-only use."""
+    operator = member.profile.operator
+    row = measured["row"]
+    terminal_flux = measured["terminal_flux"]
+    expected_hash = str(row["with_exit"]["terminal_state_sha256"])
+    terminal_hash = _array_sha256(terminal_flux)
+    if terminal_hash != expected_hash:
+        raise RuntimeError(
+            "the terminal flux to persist does not match the measured terminal-state "
+            f"hash: {terminal_hash} != {expected_hash}"
+        )
+    node_count = int(member.profile.lattice.node_count)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.stem}.pending.npz")
+    np.savez_compressed(
+        temporary,
+        terminal_state_wb=terminal_flux,
+        reference_state_wb=measured["reference_flux"],
+        terminal_grid_wb=terminal_flux[:node_count].reshape(
+            member.profile.lattice.shape
+        ),
+        reference_grid_wb=measured["reference_flux"][:node_count].reshape(
+            member.profile.lattice.shape
+        ),
+        radius_m=np.asarray(member.profile.lattice.radius, dtype=np.float64),
+        height_m=np.asarray(member.profile.lattice.height, dtype=np.float64),
+        wall_coordinate_m=np.asarray(operator.wall.coordinate, dtype=np.float64),
+        wall_unit_offsets=np.asarray(operator.wall_unit_offsets, dtype=np.int32),
+        wall_unit_closed=np.asarray(operator.wall_unit_closed, dtype=bool),
+        wall_unit_kinds=np.asarray(tuple(operator.wall_unit_kinds), dtype="U32"),
+    )
+    temporary.replace(path)
+    return {
+        "path": _relative(path),
+        "sha256": _file_sha256(path),
+        "terminal_state_sha256": terminal_hash,
+        "terminal_state_element_count": int(terminal_flux.size),
+        "terminal_topology": _topology_receipt(operator, terminal_flux),
+        "reference_topology": _topology_receipt(operator, measured["reference_flux"]),
+        "reference_kind": "production cold diverted seed for the committed frame",
+    }
+
+
+def _load_terminal_flux_artifact(
+    receipt: dict[str, Any], *, root: Path = ROOT
+) -> dict[str, np.ndarray]:
+    """Load a frame NPZ only after both its file and terminal-state hashes agree."""
+    artifact = receipt.get("terminal_flux_artifact")
+    if not isinstance(artifact, dict):
+        raise RuntimeError("the frame receipt carries no terminal flux artifact")
+    path = Path(str(artifact["path"]))
+    if not path.is_absolute():
+        path = root / path
+    recorded_file_hash = str(artifact["sha256"])
+    observed_file_hash = _file_sha256(path)
+    if observed_file_hash != recorded_file_hash:
+        raise RuntimeError(
+            "terminal flux NPZ digest mismatch: "
+            f"{observed_file_hash} != {recorded_file_hash}"
+        )
+    with np.load(path, allow_pickle=False) as loaded:
+        arrays = {key: np.asarray(loaded[key]) for key in loaded.files}
+    observed_state_hash = _array_sha256(arrays["terminal_state_wb"])
+    expected_state_hash = str(receipt["main"]["with_exit"]["terminal_state_sha256"])
+    artifact_state_hash = str(artifact["terminal_state_sha256"])
+    if (
+        observed_state_hash != expected_state_hash
+        or observed_state_hash != artifact_state_hash
+    ):
+        raise RuntimeError(
+            "terminal flux array hash does not match its recorded terminal-state hash: "
+            f"npz={observed_state_hash} receipt={expected_state_hash} "
+            f"artifact={artifact_state_hash}"
+        )
+    return arrays
+
+
 def _frame_receipt(
     *,
     header: dict[str, Any],
@@ -395,10 +627,11 @@ def _frame_receipt(
     index: int,
     member_state_count: int,
     artifact_reference: dict[str, Any] | None,
+    terminal_flux_artifact: dict[str, Any],
 ) -> dict[str, Any]:
     """One frame's identity comparison, written by the frame's own process."""
     identity = str(row["identity"])
-    identity_row_count = _require_identity_rows(
+    terminal_state_element_count = _require_identity_rows(
         member_state_count, f"DIII-D gate frame {identity!r} terminal state"
     )
     main_arms = {
@@ -417,10 +650,14 @@ def _frame_receipt(
             for arm in ARTIFACT_ARMS
         }
     return {
-        "schema": "nova.diiid-gate-frame-identity/1",
+        "schema": "nova.diiid-gate-frame-identity/2",
         "header": header,
         "frame": {"identity": identity, "index": index},
-        "identity_row_count": identity_row_count,
+        "terminal_state_element_count": terminal_state_element_count,
+        "terminal_state_element_count_note": (
+            "the number of scalar elements in this frame's terminal state; it is "
+            "not a count of compared rows"
+        ),
         "comparison_kind": (
             "one DIII-D gate frame's terminal state at the driver's device "
             "against the committed batched artifact"
@@ -429,6 +666,11 @@ def _frame_receipt(
             "max_absolute_flux_difference"
         ],
         "main": main_arms,
+        "with_exit_minus_without_exit_terminal_residual": (
+            main_arms["with_exit"]["terminal_residual"]
+            - main_arms["without_exit"]["terminal_residual"]
+        ),
+        "input_fingerprints": row.get("input_fingerprints"),
         "artifact_reference": artifact_reference,
         "maximum_absolute_terminal_state_difference_scope": (
             "between this frame's two strict-exit passes at the driver's device; "
@@ -439,6 +681,9 @@ def _frame_receipt(
         "main_against_artifact": comparisons,
         "primary_artifact_arm": PRIMARY_ARTIFACT_ARM,
         "bit_identical_to_artifact": _bit_identity(comparisons),
+        "compile_seconds": row.get("compile_seconds"),
+        "compile_cache": row.get("compile_cache"),
+        "terminal_flux_artifact": terminal_flux_artifact,
     }
 
 
@@ -487,8 +732,9 @@ def run(arguments: argparse.Namespace) -> int:
         "artifact_primary_arm": PRIMARY_ARTIFACT_ARM,
         "artifact_secondary_arm": "base",
         "artifact_revisions": artifact.get("source"),
-        "device_sha": _git("rev-parse", "HEAD"),
-        "device_tree": str(ROOT),
+        "device_sha": arguments.solver_revision or _git("rev-parse", "HEAD"),
+        "device_tree": str(arguments.solver_tree or ROOT),
+        "driver_revision": _git("rev-parse", "HEAD"),
         "driver": str(Path(__file__).relative_to(ROOT)),
         "driver_sha256": _file_sha256(Path(__file__)),
         "machine_cache": str(arguments.machine_cache),
@@ -533,6 +779,28 @@ def run(arguments: argparse.Namespace) -> int:
 
     configure_dtypes()
     import jax
+    from nova.equilibrium import forward
+
+    header["measurement_module"] = str(Path(forward.__file__).resolve())
+    header["measurement_cwd"] = str(Path.cwd().resolve())
+    header["instrument_sha256"] = _file_sha256(Path(instrument.__file__))
+    if arguments.solver_tree:
+        expected = subprocess.check_output(
+            [
+                "git",
+                "-C",
+                str(ROOT),
+                "show",
+                f"{arguments.solver_revision}:nova/equilibrium/forward.py",
+            ]
+        )
+        if (
+            Path(forward.__file__).resolve()
+            != arguments.solver_tree / "nova/equilibrium/forward.py"
+            or _file_sha256(Path(forward.__file__))
+            != hashlib.sha256(expected).hexdigest()
+        ):
+            raise RuntimeError("historical control imported the wrong solver module")
 
     if not jax.config.jax_enable_x64:
         raise RuntimeError("extended precision was not enabled before array build")
@@ -585,15 +853,43 @@ def _measure(
             "this driver measures the whole DIII-D gate set: asked for "
             f"{arguments.member_count} of {len(identities)} frames"
         )
+    selected_indices = tuple(arguments.frame_indices)
+    if selected_indices != tuple(range(len(identities))):
+        raise ValueError("a complete aggregate requires all five frames in this job")
+    if (
+        not selected_indices
+        or len(set(selected_indices)) != len(selected_indices)
+        or any(index < 0 or index >= len(identities) for index in selected_indices)
+    ):
+        raise ValueError(
+            f"frame indices must be unique values in [0, {len(identities) - 1}]"
+        )
     header["member_identities"] = identities
+    header["selected_frame_indices"] = list(selected_indices)
+    header["selected_member_identities"] = [
+        identities[index] for index in selected_indices
+    ]
     header["comparator_self_check"] = _comparator_self_check()
+    previous_run_path = arguments.receipt_dir / "run.json"
+    if previous_run_path.exists():
+        previous_run = _read_json(previous_run_path)
+        header["previous_run_compile_seconds"] = previous_run.get("summary", {}).get(
+            "per_frame_compile_seconds", {}
+        )
+        header["historical_cold_compile_seconds"] = {
+            identity: comparison["previous_cold_seconds"]
+            for identity, comparison in previous_run.get(
+                "cold_versus_current_compile_seconds", {}
+            ).items()
+        }
     print(f"COMPARATOR_SELF_CHECK=PASS {header['comparator_self_check']}", flush=True)
     exchange = arguments.exchange or Path(tempfile.mkdtemp(prefix="nova-diiid-frames-"))
     exchange = Path(exchange)
     exchange.mkdir(parents=True, exist_ok=True)
     header["frame_exchange_directory"] = str(exchange)
     frames = []
-    for index, identity in enumerate(identities):
+    for index in selected_indices:
+        identity = identities[index]
         frame = _frame_in_child(
             arguments=arguments,
             index=index,
@@ -743,14 +1039,16 @@ def _frame_child(
     header["evidence_inputs"] = evidence_inputs
     member_state_count = int(np.asarray(member.state).size)
     receipt_path = arguments.receipt_dir / f"{_slug(identity)}.json"
+    flux_path = arguments.receipt_dir / f"{_slug(identity)}.npz"
     outcome_path = Path(arguments.exchange) / f"{_slug(identity)}.json"
     outcome: dict[str, Any]
     try:
         with _Heartbeat(identity, HEARTBEAT_INTERVAL_SECONDS):
-            result = instrument._measure_machine(
-                [member], arguments.repeats, name="DIIID"
-            )
-        row = result["members"][0]
+            measured = _measure_frame(member, arguments.repeats, instrument)
+        row = measured["row"]
+        terminal_flux_artifact = _write_terminal_flux_artifact(
+            member=member, measured=measured, path=flux_path
+        )
         try:
             receipt = _frame_receipt(
                 header=header,
@@ -758,15 +1056,16 @@ def _frame_child(
                 index=index,
                 member_state_count=member_state_count,
                 artifact_reference=artifact_index.get(identity),
+                terminal_flux_artifact=terminal_flux_artifact,
             )
         except EmptyIdentitySetError as error:
             _write_json(
                 receipt_path,
                 {
-                    "schema": "nova.diiid-gate-frame-identity/1",
+                    "schema": "nova.diiid-gate-frame-identity/2",
                     "header": header,
                     "frame": {"identity": identity, "index": index},
-                    "identity_row_count": 0,
+                    "terminal_state_element_count": 0,
                     "identity_refused": str(error),
                     "identity_refused_note": (
                         "the frame's terminal state carried no identity rows, "
@@ -789,7 +1088,10 @@ def _frame_child(
                 "index": index,
                 "receipt": _relative(receipt_path),
                 "row": row,
-                "execution_contract": result["execution_contract"],
+                "execution_contract": {
+                    "route": "one_compiled_program_per_frame",
+                    "member_count": 1,
+                },
             }
         print(f"FRAME_LANDED {identity} {receipt_path}", flush=True)
     except BaseException:
@@ -904,6 +1206,241 @@ def _frame_failures(failed: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
+def _wall_units_from_arrays(arrays: dict[str, np.ndarray]) -> tuple[Any, ...]:
+    from nova.equilibrium.wall_mask import WallUnit
+
+    coordinate = arrays["wall_coordinate_m"]
+    offsets = arrays["wall_unit_offsets"].astype(int)
+    closed = arrays["wall_unit_closed"].astype(bool)
+    kinds = arrays["wall_unit_kinds"].astype(str)
+    return tuple(
+        WallUnit(
+            coordinate[start:stop, 0],
+            coordinate[start:stop, 1],
+            closed=bool(closed[index]),
+            kind=str(kinds[index]),
+        )
+        for index, (start, stop) in enumerate(
+            zip(offsets[:-1], offsets[1:], strict=True)
+        )
+    )
+
+
+def _draw_topology(
+    axis: Any, topology: dict[str, Any], units: tuple[Any, ...], style: Any
+) -> Any:
+    from nova.media import poloidal
+
+    other_x_points = topology.get("other_qualified_x_points_rz_m") or None
+    return poloidal.draw_nulls(
+        axis,
+        magnetic_axis=topology.get("axis_rz_m"),
+        x_points=topology.get("x_point_rz_m"),
+        other_x_points=other_x_points,
+        contain=units,
+        style=style,
+    )
+
+
+def _render_frame_receipt(receipt_path: Path) -> dict[str, Any]:
+    """Render one digest-checked frame as PNG and SVG through Nova's painters."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from nova.media import poloidal
+    from nova.media.ink import DEFAULT_INK, poloidal_axes
+
+    receipt = _read_json(receipt_path)
+    arrays = _load_terminal_flux_artifact(receipt)
+    units = _wall_units_from_arrays(arrays)
+    reference = arrays["reference_grid_wb"]
+    terminal = arrays["terminal_grid_wb"]
+    levels = poloidal.contour_levels(
+        np.concatenate((reference.ravel(), terminal.ravel())), count=15
+    )
+    figure, axis = plt.subplots(figsize=(14, 8), constrained_layout=False)
+    poloidal_axes(axis)
+    reference_color = "#3b6ea8"
+    terminal_color = "#a65e2e"
+    reference_contours = poloidal.draw_flux_contours(
+        axis,
+        arrays["radius_m"],
+        arrays["height_m"],
+        reference.T,
+        levels,
+        color=reference_color,
+        linewidth=2.4,
+        wall=units,
+    )
+    terminal_contours = poloidal.draw_flux_contours(
+        axis,
+        arrays["radius_m"],
+        arrays["height_m"],
+        terminal.T,
+        levels,
+        color=terminal_color,
+        linewidth=3.0,
+        wall=units,
+    )
+    reference_contours.set_linestyle("dashed")
+    poloidal.draw_wall(axis, units=units, linewidth=2.6)
+    reference_markers = _draw_topology(
+        axis,
+        receipt["terminal_flux_artifact"]["reference_topology"],
+        units,
+        DEFAULT_INK.variant(
+            axis_color=reference_color,
+            xpoint_color=reference_color,
+            axis_markersize=11,
+            xpoint_markersize=13,
+        ),
+    )
+    terminal_markers = _draw_topology(
+        axis,
+        receipt["terminal_flux_artifact"]["terminal_topology"],
+        units,
+        DEFAULT_INK.variant(
+            axis_color=terminal_color,
+            xpoint_color=terminal_color,
+            axis_markersize=7,
+            xpoint_markersize=9,
+        ),
+    )
+    identity = str(receipt["frame"]["identity"])
+    residual = receipt["main"]["with_exit"]["terminal_residual"]
+    converged = receipt["main"]["with_exit"]["converged"]
+    caption = (
+        f"{identity} — cold diverted seed reference (blue) and terminal state "
+        f"(ochre), 15 shared Wb levels; terminal residual {residual:.6g}; "
+        f"converged={converged}. Triangles mark axes; filled crosses mark "
+        "admitted saddles; hollow crosses mark other qualified saddles."
+    )
+    direct_labels = []
+    for contours, label, color, fraction in (
+        (reference_contours, "Seed reference", reference_color, 0.25),
+        (terminal_contours, "Terminal", terminal_color, 0.75),
+    ):
+        segments = [
+            segment
+            for collection in contours.allsegs
+            for segment in collection
+            if len(segment) > 1
+        ]
+        segment = max(segments, key=len)
+        point = segment[int(fraction * (len(segment) - 1))]
+        axis.annotate(
+            label,
+            xy=point,
+            xytext=(16, 10 if fraction < 0.5 else -22),
+            textcoords="offset points",
+            color=color,
+            fontsize=20,
+        )
+        direct_labels.append(label)
+    figure.subplots_adjust(left=0.04, right=0.96, top=0.96, bottom=0.04)
+    stem = receipt_path.with_suffix("")
+    png_path = stem.with_suffix(".png")
+    svg_path = stem.with_suffix(".svg")
+    figure.savefig(png_path, dpi=100)
+    figure.savefig(svg_path)
+    plt.close(figure)
+    panel = {
+        "png": _relative(png_path),
+        "svg": _relative(svg_path),
+        "caption": caption,
+        "shared_contour_levels_wb": levels.tolist(),
+        "reference_contour_segment_count": sum(
+            len(segment) > 1
+            for collection in reference_contours.allsegs
+            for segment in collection
+        ),
+        "terminal_contour_segment_count": sum(
+            len(segment) > 1
+            for collection in terminal_contours.allsegs
+            for segment in collection
+        ),
+        "reference_markers": reference_markers,
+        "terminal_markers": terminal_markers,
+        "axis_off": not axis.axison,
+        "reference_linewidth_pt": float(reference_contours.get_linewidths()[0]),
+        "terminal_linewidth_pt": float(terminal_contours.get_linewidths()[0]),
+        "direct_labels": direct_labels,
+        "embedded_caption": bool(figure.texts),
+    }
+    if (
+        not panel["reference_contour_segment_count"]
+        or not panel["terminal_contour_segment_count"]
+    ):
+        raise RuntimeError(
+            "known-present reference or terminal contours were not drawn"
+        )
+    receipt["panel"] = panel
+    _write_json(receipt_path, receipt)
+    return panel
+
+
+def _render_run(receipt_dir: Path) -> list[dict[str, Any]]:
+    run_path = receipt_dir / "run.json"
+    run_receipt = _read_json(run_path)
+    panels = [
+        _render_frame_receipt(ROOT / path)
+        for path in run_receipt.get("frame_receipts", ())
+    ]
+    run_receipt["panels"] = panels
+    _write_json(run_path, run_receipt)
+    return panels
+
+
+def _validate_frame_contract(
+    receipt: dict[str, Any], header: dict[str, Any], identity: str, index: int
+) -> dict[str, Any]:
+    """Refuse a foreign or misidentified frame before aggregate admission."""
+    provenance = receipt.get("header", {})
+    fields = ("job_id", "device_sha", "driver_sha256", "cache_root")
+    for field in fields:
+        expected = header.get(field)
+        if expected in (None, "") or provenance.get(field) != expected:
+            raise RuntimeError(
+                f"frame provenance mismatch for {field}: "
+                f"{provenance.get(field)!r} != {expected!r} ({identity})"
+            )
+    if receipt.get("frame") != {"identity": identity, "index": index} or provenance.get(
+        "member_identities"
+    ) != [identity]:
+        raise RuntimeError(f"frame identity mismatch: expected {index}: {identity}")
+    if (
+        provenance.get("persistent_compilation_cache", {}).get("root")
+        != header["cache_root"]
+    ):
+        raise RuntimeError(f"frame cache root mismatch: {identity}")
+    return {
+        **{field: provenance[field] for field in fields},
+        "identity": identity,
+        "index": index,
+    }
+
+
+def _row_from_frame_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
+    """Recover summary fields from one independently landed frame receipt."""
+    without_exit = receipt["main"]["without_exit"]
+    with_exit = receipt["main"]["with_exit"]
+    both_converged = bool(without_exit["converged"] and with_exit["converged"])
+    return {
+        "identity": str(receipt["frame"]["identity"]),
+        "strict_qualification": receipt["strict_qualification"],
+        "terminal_state_bit_identical_where_both_arms_converged": (
+            receipt["maximum_absolute_terminal_state_difference"] == 0.0
+            if both_converged
+            else None
+        ),
+        "without_exit": without_exit,
+        "with_exit": with_exit,
+        "compile_seconds": receipt["compile_seconds"],
+        "compile_cache": receipt["compile_cache"],
+    }
+
+
 def _persist(
     arguments: argparse.Namespace,
     header: dict[str, Any],
@@ -922,13 +1459,32 @@ def _persist(
     refused = [frame for frame in frames if frame["status"] == "refused"]
     failed = [frame for frame in frames if frame["status"] in ("failed", "hung")]
     hung = [frame for frame in frames if frame["status"] == "hung"]
-    receipts = []
+    identities = header["member_identities"]
+    if (
+        len(frames) != len(identities)
+        or len(measured) != len(identities)
+        or {frame["identity"] for frame in measured} != set(identities)
+    ):
+        raise RuntimeError("aggregate requires five successful children from this job")
+    landed_receipts = []
     for frame in measured:
         path = Path(frame["receipt_path"])
         receipt = _read_json(path)
-        receipts.append((path, receipt))
+        _validate_frame_contract(receipt, header, frame["identity"], frame["index"])
+        landed_receipts.append((path, receipt))
         print(f"FRAME_RECEIPT={path} {_frame_narrative(receipt)}", flush=True)
-    rows = [frame["row"] for frame in measured]
+    receipts = []
+    for index, identity in enumerate(identities):
+        path = arguments.receipt_dir / f"{_slug(identity)}.json"
+        if not path.exists():
+            raise RuntimeError(f"the complete run is missing frame receipt {path}")
+        receipt = _read_json(path)
+        if receipt.get("schema") != "nova.diiid-gate-frame-identity/2":
+            raise RuntimeError(f"frame receipt {path} does not carry terminal arrays")
+        _validate_frame_contract(receipt, header, identity, index)
+        _load_terminal_flux_artifact(receipt)
+        receipts.append((path, receipt))
+    rows = [_row_from_frame_receipt(receipt) for _, receipt in receipts]
     contracts = [
         frame["execution_contract"]
         for frame in measured
@@ -937,28 +1493,46 @@ def _persist(
     execution_contract = None
     if contracts:
         execution_contract = dict(contracts[0])
-        execution_contract["member_count"] = len(contracts)
+        execution_contract["member_count"] = len(receipts)
         execution_contract["one_re_exec_child_per_frame"] = True
         execution_contract["child_after_cuda_context_never_forks"] = True
         execution_contract["child_process_count"] = len(frames)
+        execution_contract["resumed_from_independent_frame_receipts"] = len(
+            receipts
+        ) - len(landed_receipts)
     host_memory = {
         str(frame["identity"]): (frame.get("row") or {}).get("host_memory")
         for frame in frames
     }
     exit_codes = {str(frame["identity"]): frame["child_exit_code"] for frame in frames}
     run_receipt = {
-        "schema": "nova.diiid-gate-frame-identity-run/1",
+        "schema": "nova.diiid-gate-frame-identity-run/2",
         "header": header,
         "frame_receipts": [_relative(path) for path, _ in receipts],
         "frames": {
             str(receipt["frame"]["identity"]): {
-                "identity_row_count": receipt["identity_row_count"],
+                "provenance": _validate_frame_contract(
+                    receipt,
+                    header,
+                    receipt["frame"]["identity"],
+                    receipt["frame"]["index"],
+                ),
+                "terminal_state_element_count": receipt["terminal_state_element_count"],
                 "bit_identical_to_artifact": receipt["bit_identical_to_artifact"],
                 "maximum_absolute_terminal_state_difference": (
                     receipt["maximum_absolute_terminal_state_difference"]
                 ),
-                "child_exit_code": exit_codes[str(receipt["frame"]["identity"])],
-                "child_host_memory": host_memory[str(receipt["frame"]["identity"])],
+                "child_exit_code": exit_codes.get(str(receipt["frame"]["identity"])),
+                "child_host_memory": host_memory.get(str(receipt["frame"]["identity"])),
+                "compile_seconds": receipt["compile_seconds"],
+                "compile_cache": receipt["compile_cache"],
+                "without_exit_solve_ms": receipt["main"]["without_exit"]["timing"][
+                    "compile_warm_solve_ms"
+                ],
+                "with_exit_solve_ms": receipt["main"]["with_exit"]["timing"][
+                    "compile_warm_solve_ms"
+                ],
+                "terminal_flux_artifact": receipt["terminal_flux_artifact"],
             }
             for _, receipt in receipts
         },
@@ -975,6 +1549,33 @@ def _persist(
         "narrative": [_frame_narrative(receipt) for _, receipt in receipts],
         "identity_refusals": [str(frame["refusal"]) for frame in refused],
     }
+    previous_compile = header.get("previous_run_compile_seconds", {})
+    current_compile = run_receipt["summary"]["per_frame_compile_seconds"]
+    run_receipt["previous_versus_current_compile_seconds"] = {
+        identity: {
+            "previous_seconds": previous_compile.get(identity),
+            "current_seconds": current_compile.get(identity),
+            "saved_seconds": (
+                float(previous_compile[identity]) - float(current_compile[identity])
+                if previous_compile.get(identity) is not None
+                and current_compile.get(identity) is not None
+                else None
+            ),
+        }
+        for identity in current_compile
+    }
+    run_receipt["cache_lookup_rows"] = [
+        {
+            "identity": str(row["identity"]),
+            **event,
+        }
+        for row in rows
+        for event in row.get("compile_cache", {}).get("events", ())
+    ]
+    _write_json(arguments.receipt_dir / "run.json", run_receipt)
+    panels = _render_run(arguments.receipt_dir)
+    run_receipt = _read_json(arguments.receipt_dir / "run.json")
+    run_receipt["panels"] = panels
     _write_json(arguments.receipt_dir / "run.json", run_receipt)
     print(f"RUN_RECEIPT={arguments.receipt_dir / 'run.json'}", flush=True)
     if failed:
@@ -988,6 +1589,133 @@ def _persist(
     return 0
 
 
+def _frame_indices(value: str) -> tuple[int, ...]:
+    try:
+        return tuple(int(item) for item in value.split(",") if item.strip())
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(
+            "frame indices must be a comma-separated integer list"
+        ) from error
+
+
+def _historical_instrument(tree: Path, revision: str, artifact: Path) -> None:
+    """Keep measurement code fixed while importing historical runtime dependencies."""
+    import benchmarks
+
+    expected = _read_json(artifact)["source"]["head_revision"]
+    if revision != expected:
+        raise RuntimeError(f"historical control revision {revision} != {expected}")
+    if "nova" in sys.modules:
+        raise RuntimeError("historical runtime must be selected before importing nova")
+    sys.path.insert(0, str(tree))
+    benchmarks.__path__.insert(0, str(tree / "benchmarks"))
+    path = ROOT / "benchmarks/strict_exit_incidence.py"
+    spec = importlib.util.spec_from_file_location(
+        "benchmarks.strict_exit_incidence", path
+    )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    benchmarks.strict_exit_incidence = module
+
+
+def _compare_control(
+    receipt_dir: Path, control_path: Path, artifact_path: Path
+) -> None:
+    """Record paired-pass changes separately from differences against the artifact."""
+    run_path = receipt_dir / "run.json"
+    aggregate = _read_json(run_path)
+    artifact = _read_json(artifact_path)
+    control = _read_json(control_path)
+    historical_revision = artifact["source"]["head_revision"]
+    contract = {**aggregate["header"], "device_sha": historical_revision}
+    control_identity = aggregate["header"]["member_identities"][1]
+    _validate_frame_contract(control, contract, control_identity, 1)
+    _load_terminal_flux_artifact(control)
+    comparisons = []
+    artifact_members = {row["identity"]: row["head"] for row in artifact["members"]}
+    current_control = None
+    for index, path in enumerate(aggregate["frame_receipts"]):
+        receipt = _read_json(ROOT / path)
+        identity = aggregate["header"]["member_identities"][index]
+        _validate_frame_contract(receipt, aggregate["header"], identity, index)
+        historical = receipt["artifact_reference"]["head"]
+        current = receipt["main"]
+        comparisons.append(
+            {
+                "identity": identity,
+                "historical_revision": historical_revision,
+                "current_revision": receipt["header"]["device_sha"],
+                "historical_with_exit_minus_without_exit_residual": (
+                    historical["with_exit"]["terminal_residual"]
+                    - historical["without_exit"]["terminal_residual"]
+                ),
+                "current_with_exit_minus_without_exit_residual": (
+                    current["with_exit"]["terminal_residual"]
+                    - current["without_exit"]["terminal_residual"]
+                ),
+                "current_max_absolute_paired_flux_difference": receipt[
+                    "maximum_absolute_terminal_state_difference"
+                ],
+                "historical_max_absolute_paired_flux_difference": artifact_members[
+                    identity
+                ]["terminal_state_difference"]["max_absolute_flux_difference"],
+                "current_against_artifact_residual_difference": {
+                    arm: receipt["main_against_artifact"]["head"][arm][
+                        "absolute_terminal_residual_difference"
+                    ]
+                    for arm in ("without_exit", "with_exit")
+                },
+            }
+        )
+        if index == 1:
+            current_control = receipt
+    historical_errors = [
+        control["main_against_artifact"]["head"][arm][
+            "absolute_terminal_residual_difference"
+        ]
+        for arm in ("without_exit", "with_exit")
+    ]
+    inputs_equal = (
+        control["input_fingerprints"] == current_control["input_fingerprints"]
+    )
+    restored = max(historical_errors) < 1.0e-10
+    verdict = (
+        "historical runtime restores frame 44 artifact residuals "
+        "with the same measurement driver"
+        if restored
+        else "historical per-frame control does not restore artifact residuals; "
+        "attribution remains open"
+    )
+    aggregate["identity_revision_comparison"] = comparisons
+    aggregate["historical_control"] = {
+        "receipt": _relative(control_path),
+        "provenance": _validate_frame_contract(control, contract, control_identity, 1),
+        "measurement_module": control["header"]["measurement_module"],
+        "measurement_cwd": control["header"]["measurement_cwd"],
+        "instrument_sha256": control["header"]["instrument_sha256"],
+        "same_instrument": control["header"]["instrument_sha256"]
+        == current_control["header"]["instrument_sha256"],
+        "same_input_fingerprints": inputs_equal,
+        "historical_against_artifact_max_residual_difference": max(historical_errors),
+        "restores_artifact_residual": restored,
+        "verdict": verdict,
+        "qualification": (
+            "The measurement driver and paired solve instrument are fixed; nova and "
+            "supporting profile builders come from the historical revision. "
+            "Equal seed, "
+            "current and options hashes do not prove equality of every operator leaf. "
+            "One control frame cannot attribute the other four frames."
+        ),
+    }
+    _write_json(run_path, aggregate)
+    print(
+        "HISTORICAL_CONTROL="
+        + json.dumps(aggregate["historical_control"], sort_keys=True),
+        flush=True,
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--receipt-dir", type=Path, default=DEFAULT_RECEIPT_DIR)
@@ -997,6 +1725,15 @@ def main() -> int:
     parser.add_argument("--cpu-count", type=int, default=SCHEDULED_CORE_COUNT)
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--cache-root", type=Path, default=DEFAULT_CACHE_ROOT)
+    parser.add_argument("--solver-tree", type=Path)
+    parser.add_argument("--solver-revision")
+    parser.add_argument("--compare-control", type=Path)
+    parser.add_argument(
+        "--frame-indices",
+        type=_frame_indices,
+        default=(0, 1, 2, 3, 4),
+        help="zero-based bank frames measured by this parent job",
+    )
     parser.add_argument(
         "--frame-index",
         type=int,
@@ -1019,7 +1756,23 @@ def main() -> int:
         help="a child still running after this many seconds is killed and reported",
     )
     parser.add_argument("--probe", action="store_true")
+    parser.add_argument(
+        "--render-only",
+        action="store_true",
+        help="validate the persisted terminal arrays and regenerate every panel",
+    )
     arguments = parser.parse_args()
+    if arguments.solver_tree:
+        arguments.solver_tree = arguments.solver_tree.resolve()
+        _historical_instrument(
+            arguments.solver_tree, arguments.solver_revision, arguments.artifact
+        )
+
+    if arguments.compare_control:
+        _compare_control(
+            arguments.receipt_dir, arguments.compare_control, arguments.artifact
+        )
+        return 0
 
     if arguments.probe:
         from benchmarks import strict_exit_incidence as instrument
@@ -1029,6 +1782,14 @@ def main() -> int:
             f"comparator={_require_identity_rows.__module__} "
             f"instrument={instrument.__name__} "
             f"receipt_dir={arguments.receipt_dir} artifact={arguments.artifact}",
+            flush=True,
+        )
+        return 0
+
+    if arguments.render_only:
+        panels = _render_run(arguments.receipt_dir)
+        print(
+            f"RENDERED_PANELS={len(panels)} receipt_dir={arguments.receipt_dir}",
             flush=True,
         )
         return 0

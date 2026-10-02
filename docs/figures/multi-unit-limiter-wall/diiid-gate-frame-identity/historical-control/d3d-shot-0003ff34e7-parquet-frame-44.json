@@ -3,28 +3,28 @@
     "base": {
       "with_exit": {
         "converged": false,
-        "terminal_residual": 0.04220289939481695,
-        "terminal_state_sha256": "5b4f862c573490cacfbf0dbf5ddf20be48c1660949b291c160b4b1225f128578",
+        "terminal_residual": 0.4497723529118475,
+        "terminal_state_sha256": "4553c00fe1f417924b252bb5dcefeb70b1d32b389a0c646d5954e89b5f2aff3b",
         "termination": "active_set_settled"
       },
       "without_exit": {
         "converged": false,
-        "terminal_residual": 0.042202899394819145,
-        "terminal_state_sha256": "5cbbd1aa542c8dbf0fec292ec1e5f6068ad9588d9446529607caccf52d7e3afe",
+        "terminal_residual": 0.4497723529118475,
+        "terminal_state_sha256": "4553c00fe1f417924b252bb5dcefeb70b1d32b389a0c646d5954e89b5f2aff3b",
         "termination": "active_set_stagnated"
       }
     },
     "head": {
       "with_exit": {
         "converged": false,
-        "terminal_residual": 0.04220289939481827,
-        "terminal_state_sha256": "c1513c3ed9954547a7483971449eab9a27a47b70090638a438ae5e73577041b3",
+        "terminal_residual": 0.44992479964918985,
+        "terminal_state_sha256": "315b793f5d6cc4ca65fa0bb5119e06dcbbb99bb0c105edd983992ca36cfd036a",
         "termination": "active_set_settled"
       },
       "without_exit": {
         "converged": false,
-        "terminal_residual": 0.04220289939481906,
-        "terminal_state_sha256": "eb07a48c7711e44770a71af1c16b4f6aa855c257183c3b2232390e1d33cbb880",
+        "terminal_residual": 0.44992479964918985,
+        "terminal_state_sha256": "315b793f5d6cc4ca65fa0bb5119e06dcbbb99bb0c105edd983992ca36cfd036a",
         "termination": "active_set_stagnated"
       }
     }
@@ -39,9 +39,9 @@
         "status": "miss"
       },
       {
-        "key": "jit_solve-a0fc6eed63b2454306e93103f736656114665005789406d2d505327731e91bd7",
+        "key": "jit_solve-46063e83e9e6ba404bbee987e21c504d4e0197a638c9eb438b3fc7cbb9a49d27",
         "module": "jit_solve",
-        "status": "hit"
+        "status": "miss"
       },
       {
         "key": "jit_isnan-43fb8ef14aac790982d447d6848ed95345271de23450f3f608f46e660ba656f1",
@@ -65,15 +65,15 @@
       }
     ],
     "main_program": {
-      "key": "jit_solve-a0fc6eed63b2454306e93103f736656114665005789406d2d505327731e91bd7",
+      "key": "jit_solve-46063e83e9e6ba404bbee987e21c504d4e0197a638c9eb438b3fc7cbb9a49d27",
       "module": "jit_solve",
-      "status": "hit"
+      "status": "miss"
     }
   },
-  "compile_seconds": 156.5799044817686,
+  "compile_seconds": 2703.742765998468,
   "frame": {
-    "identity": "d3d_shot_001554e054.parquet frame 144",
-    "index": 2
+    "identity": "d3d_shot_0003ff34e7.parquet frame 44",
+    "index": 1
   },
   "header": {
     "allocation": {
@@ -130,8 +130,8 @@
       "xla_python_client_mem_fraction": null,
       "xla_python_client_preallocate": "false"
     },
-    "device_sha": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
-    "device_tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels",
+    "device_sha": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+    "device_tree": "/tmp/diiid-historical.BFEKX9",
     "driver": "benchmarks/diiid_gate_frame_identity.py",
     "driver_revision": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
     "driver_sha256": "28e49be2c7077049930283b8f06c76002dfc794a4f95df868e17faea569e814a",
@@ -147,8 +147,8 @@
         "manifest_sha256": "c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e"
       },
       "member_count": 1,
-      "member_identity": "d3d_shot_001554e054.parquet frame 144",
-      "member_number": 3
+      "member_identity": "d3d_shot_0003ff34e7.parquet frame 44",
+      "member_number": 2
     },
     "execution_route": "one_compiled_program_per_frame, both strict-exit passes on the same program: the stacked vmap program the committed artifact was measured with is refused by this revision's accelerated history program, whose argument layout converts the vmapped target current with numpy",
     "frame_timeout_seconds": 3600.0,
@@ -157,10 +157,10 @@
     "job_id": 1280450,
     "machine_artifact_digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
     "machine_cache": "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache",
-    "measurement_cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels",
-    "measurement_module": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels/nova/equilibrium/forward.py",
+    "measurement_cwd": "/tmp/diiid-historical.BFEKX9",
+    "measurement_module": "/tmp/diiid-historical.BFEKX9/nova/equilibrium/forward.py",
     "member_identities": [
-      "d3d_shot_001554e054.parquet frame 144"
+      "d3d_shot_0003ff34e7.parquet frame 44"
     ],
     "minimum_node_memory_mib": 131072,
     "node": "98dci4-gpu-0003",
@@ -220,7 +220,7 @@
     },
     "process_isolation": "one re-executed child per frame, each started as a fresh `python <this driver> --frame-index <i>` that builds only its own member through strict_exit_incidence.build_diiid_member, with each frame's receipt written by its own child and a fresh process for the next: five frames in one process held 131 GiB resident after the first frame, and process exit is what returns it",
     "re_exec_not_fork": "children are re-executed rather than forked: a fork taken after a CUDA context is up deadlocks silently, so no process here forks",
-    "recorded_at": "2026-10-02T17:16:02.488927+00:00",
+    "recorded_at": "2026-10-02T17:28:51.930130+00:00",
     "requested_repeats": 1,
     "reservation": "gpu_0003_grpA",
     "role": "frame_child",
@@ -228,7 +228,7 @@
     "scheduled_core_count": 8
   },
   "input_fingerprints": {
-    "coil_current_sha256": "24d71799f0d33b925b46f3d907dbf18145d516299b92be96b39b53d5f367e7e4",
+    "coil_current_sha256": "909d5a4ef527816032deadc433a30bbce5f8271cc8e98c4986e43f0b8d288789",
     "options": {
       "active_set_steps": 16,
       "gmres_iterations": 24,
@@ -237,8 +237,8 @@
       "step_cap": 10.0,
       "warmup": 8
     },
-    "seed_sha256": "e56ff50628e4fd583b8eb2205602ff29f5399b200f27204390af731f8f12d75e",
-    "target_current": 988842.2265648842,
+    "seed_sha256": "abfcff1c4ec73ba8121b6f0b29b09fc187061f5fbe3883e7d2ca6547d1ac8b89",
+    "target_current": 1182769.0064013004,
     "tolerance": 1e-06
   },
   "main": {
@@ -246,17 +246,17 @@
       "batch_elapsed_ms": null,
       "batched_ms_per_member": null,
       "converged": false,
-      "executed_trips": 1,
-      "terminal_residual": 9.18757862539715,
-      "terminal_state_sha256": "e56ff50628e4fd583b8eb2205602ff29f5399b200f27204390af731f8f12d75e",
+      "executed_trips": 2,
+      "terminal_residual": 0.4499247996491895,
+      "terminal_state_sha256": "224bb654d51f0aec909e35c478581d040610852c179583e4a0d934b769e67c7a",
       "termination": "active_set_settled",
       "timing": {
-        "compile_warm_p95_ms": 254.51747365,
-        "compile_warm_solve_ms": 253.9232005,
-        "first_compiled_solve_ms": 254.583504,
+        "compile_warm_p95_ms": 1685.6830661,
+        "compile_warm_solve_ms": 1684.935698,
+        "first_compiled_solve_ms": 1685.766107,
         "samples_compile_warm_ms": [
-          254.583504,
-          253.262897
+          1685.766107,
+          1684.105289
         ]
       }
     },
@@ -264,17 +264,17 @@
       "batch_elapsed_ms": null,
       "batched_ms_per_member": null,
       "converged": false,
-      "executed_trips": 2,
-      "terminal_residual": 9.18757862539715,
-      "terminal_state_sha256": "e56ff50628e4fd583b8eb2205602ff29f5399b200f27204390af731f8f12d75e",
+      "executed_trips": 3,
+      "terminal_residual": 0.4499247996491895,
+      "terminal_state_sha256": "224bb654d51f0aec909e35c478581d040610852c179583e4a0d934b769e67c7a",
       "termination": "active_set_stagnated",
       "timing": {
-        "compile_warm_p95_ms": 3906.68336965,
-        "compile_warm_solve_ms": 2272.8010555,
-        "first_compiled_solve_ms": 4088.225849,
+        "compile_warm_p95_ms": 52245.66167665,
+        "compile_warm_solve_ms": 28706.1096895,
+        "first_compiled_solve_ms": 54861.167453,
         "samples_compile_warm_ms": [
-          4088.225849,
-          457.376262
+          54861.167453,
+          2551.051926
         ]
       }
     }
@@ -282,124 +282,93 @@
   "main_against_artifact": {
     "base": {
       "with_exit": {
-        "absolute_terminal_residual_difference": 9.145375726002332,
+        "absolute_terminal_residual_difference": 0.00015244673734204905,
         "artifact_converged": false,
-        "artifact_terminal_residual": 0.04220289939481695,
+        "artifact_terminal_residual": 0.4497723529118475,
         "main_converged": false,
-        "main_terminal_residual": 9.18757862539715,
+        "main_terminal_residual": 0.4499247996491895,
         "terminal_state_sha256_identical": false
       },
       "without_exit": {
-        "absolute_terminal_residual_difference": 9.14537572600233,
+        "absolute_terminal_residual_difference": 0.00015244673734204905,
         "artifact_converged": false,
-        "artifact_terminal_residual": 0.042202899394819145,
+        "artifact_terminal_residual": 0.4497723529118475,
         "main_converged": false,
-        "main_terminal_residual": 9.18757862539715,
+        "main_terminal_residual": 0.4499247996491895,
         "terminal_state_sha256_identical": false
       }
     },
     "head": {
       "with_exit": {
-        "absolute_terminal_residual_difference": 9.145375726002332,
+        "absolute_terminal_residual_difference": 3.3306690738754696e-16,
         "artifact_converged": false,
-        "artifact_terminal_residual": 0.04220289939481827,
+        "artifact_terminal_residual": 0.44992479964918985,
         "main_converged": false,
-        "main_terminal_residual": 9.18757862539715,
+        "main_terminal_residual": 0.4499247996491895,
         "terminal_state_sha256_identical": false
       },
       "without_exit": {
-        "absolute_terminal_residual_difference": 9.14537572600233,
+        "absolute_terminal_residual_difference": 3.3306690738754696e-16,
         "artifact_converged": false,
-        "artifact_terminal_residual": 0.04220289939481906,
+        "artifact_terminal_residual": 0.44992479964918985,
         "main_converged": false,
-        "main_terminal_residual": 9.18757862539715,
+        "main_terminal_residual": 0.4499247996491895,
         "terminal_state_sha256_identical": false
       }
     }
   },
   "maximum_absolute_terminal_state_difference": 0.0,
   "maximum_absolute_terminal_state_difference_scope": "between this frame's two strict-exit passes at the driver's device; the committed artifact carries terminal-state hashes rather than state arrays, so a state-array difference against it cannot be formed",
-  "panel": {
-    "axis_off": true,
-    "caption": "d3d_shot_001554e054.parquet frame 144 \u2014 cold diverted seed reference (blue) and terminal state (ochre), 15 shared Wb levels; terminal residual 9.18758; converged=False. Triangles mark axes; filled crosses mark admitted saddles; hollow crosses mark other qualified saddles.",
-    "direct_labels": [
-      "Seed reference",
-      "Terminal"
-    ],
-    "embedded_caption": false,
-    "png": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-001554e054-parquet-frame-144.png",
-    "reference_contour_segment_count": 6,
-    "reference_linewidth_pt": 2.4,
-    "reference_markers": {
-      "other_x_points_drawn": 0,
-      "strike_points_drawn": 0,
-      "x_points_drawn": 1,
-      "x_points_dropped_outside_wall": 0
-    },
-    "shared_contour_levels_wb": [
-      -21.347556929306123,
-      -19.637033530540677,
-      -17.926510131775228,
-      -16.21598673300978,
-      -14.505463334244336,
-      -12.794939935478888,
-      -11.08441653671344,
-      -9.373893137947995,
-      -7.6633697391825475,
-      -5.9528463404171,
-      -4.242322941651654,
-      -2.5317995428862083,
-      -0.821276144120759,
-      0.8892472546446868,
-      2.5997706534101312
-    ],
-    "svg": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-001554e054-parquet-frame-144.svg",
-    "terminal_contour_segment_count": 6,
-    "terminal_linewidth_pt": 3.0,
-    "terminal_markers": {
-      "other_x_points_drawn": 0,
-      "strike_points_drawn": 0,
-      "x_points_drawn": 1,
-      "x_points_dropped_outside_wall": 0
-    }
-  },
   "primary_artifact_arm": "head",
   "schema": "nova.diiid-gate-frame-identity/2",
   "strict_qualification": "fired",
   "terminal_flux_artifact": {
-    "path": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-001554e054-parquet-frame-144.npz",
+    "path": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/historical-control/d3d-shot-0003ff34e7-parquet-frame-44.npz",
     "reference_kind": "production cold diverted seed for the committed frame",
     "reference_topology": {
-      "axis_flux_wb": 2.139940704284283,
+      "axis_flux_wb": 1.8411226197830797,
       "axis_rz_m": [
-        1.7594630718231212,
-        0.013277635909617625
+        1.7179585695266726,
+        -0.05030857771635039
       ],
-      "boundary_flux_wb": 0.8071505617048927,
-      "converged_topology_class": "limited",
+      "boundary_flux_wb": -0.10334621821586715,
+      "converged_topology_class": "diverted",
       "other_qualified_x_points_rz_m": [],
       "status": "read",
       "x_point_rz_m": [
-        1.3818272352218621,
-        -1.0605466365814207
+        1.5306249856948846,
+        -1.0527421236038206
       ]
     },
-    "sha256": "698f8a6443576780b111a4a9a4e07d000b5dfa5ec7970a32096dec7951d6255d",
+    "sha256": "acdd7380480933e00744a3c0afa8edead61423aa831379d870adb8f7c403a6ee",
     "terminal_state_element_count": 1173,
-    "terminal_state_sha256": "e56ff50628e4fd583b8eb2205602ff29f5399b200f27204390af731f8f12d75e",
+    "terminal_state_sha256": "224bb654d51f0aec909e35c478581d040610852c179583e4a0d934b769e67c7a",
     "terminal_topology": {
-      "axis_flux_wb": 2.139940704284283,
+      "axis_flux_wb": 1.601124722093636,
       "axis_rz_m": [
-        1.7594630718231212,
-        0.013277635909617625
+        1.6881938683049145,
+        -0.33254085602004835
       ],
-      "boundary_flux_wb": 0.8071505617048927,
-      "converged_topology_class": "limited",
-      "other_qualified_x_points_rz_m": [],
+      "boundary_flux_wb": 0.11802333449949237,
+      "converged_topology_class": "diverted",
+      "other_qualified_x_points_rz_m": [
+        [
+          1.1116294720116253,
+          -1.217127165674755
+        ],
+        [
+          1.1420233053940207,
+          1.1151236544373668
+        ],
+        [
+          1.2103193832492758,
+          -1.3897902866173066
+        ]
+      ],
       "status": "read",
       "x_point_rz_m": [
-        1.3818272352218621,
-        -1.0605466365814207
+        1.2464849181021889,
+        -1.1721079107758852
       ]
     }
   },

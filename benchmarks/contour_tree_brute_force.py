@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -11,7 +12,7 @@ import jax.numpy as jnp
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
-from nova.equilibrium.contour_tree import ContourTreeResult, build_contour_tree
+from nova.equilibrium.contour_tree import build_contour_tree
 from nova.equilibrium.contour_tree_mesh import ContourMesh, build_contour_mesh
 from nova.equilibrium.wall_mask import vessel_unit
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
@@ -26,11 +27,18 @@ VERTEX_CAPACITY = 256
 EDGE_CAPACITY = 2048
 TRIANGLE_CAPACITY = 1024
 
-MAST_CELLS = 90
-MAST_VERTEX_CAPACITY = VERTEX_CAPACITY
-MAST_EDGE_CAPACITY = EDGE_CAPACITY
-MAST_TRIANGLE_CAPACITY = TRIANGLE_CAPACITY
+# The hex generator selects 464 carrier cells from this target resolution.
+MAST_CELLS = 400
+# Two masked centres remain in the fixed carrier beside its 644 live vertices.
+MAST_VERTEX_CAPACITY = 646
+MAST_EDGE_CAPACITY = 2048
+MAST_TRIANGLE_CAPACITY = 2048
 MAST_ROWS = ((27079, 16), (22475, 50))
+CERTIFICATE_RUNG_PATHS = (
+    (340, "*production-route-cells-300.json"),
+    (550, "*production-route-cells-500.json"),
+    (1074, "*production-route-cells-1000.json"),
+)
 
 
 @dataclass(frozen=True)
@@ -65,6 +73,36 @@ def certificate_fixtures() -> tuple[Fixture, ...]:
         if mesh.overflow:
             raise RuntimeError(f"certificate mesh capacity refused: {path.name}")
         fixtures.append(Fixture(payload["case"], mesh))
+    return tuple(fixtures)
+
+
+def certificate_rung_fixtures() -> tuple[Fixture, ...]:
+    """Read persisted certificate carriers at the available production rungs."""
+
+    fixtures = []
+    for rung, pattern in CERTIFICATE_RUNG_PATHS:
+        for path in sorted(PART_ROOT.glob(pattern)):
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            render = payload.get("render_data")
+            if not render:
+                continue
+            count = int(payload["realised_cells"])
+            coordinate = np.asarray(render["coordinates_rz_m"], dtype=np.float64)[
+                :count
+            ]
+            flux = np.asarray(render["terminal_flux_wb"], dtype=np.float64)[:count]
+            wall = np.asarray(render["wall_units_rz_m"][0], dtype=np.float64)
+            mesh = build_contour_mesh(
+                coordinate,
+                flux,
+                [vessel_unit(wall[:, 0], wall[:, 1], name=payload["case"])],
+                vertex_capacity=count + 128,
+                edge_capacity=3 * count + 256,
+                triangle_capacity=2 * count + 256,
+            )
+            if mesh.overflow:
+                raise RuntimeError(f"certificate mesh capacity refused: {path.name}")
+            fixtures.append(Fixture(f"{payload['case']}-{rung}-cells", mesh))
     return tuple(fixtures)
 
 
@@ -105,14 +143,8 @@ def _mast_mesh(shot: int, row: int) -> ContourMesh:
     )
 
 
-def tree_fits(mesh: ContourMesh) -> bool:
-    """Whether the carrier fits the tree's declared fixed node capacity."""
-
-    return int(np.sum(np.asarray(mesh.vertex_valid))) <= ContourTreeResult.node_capacity
-
-
 def mast_fixtures() -> tuple[Fixture, ...]:
-    """Read the MAST rows named in the plan's primary-selection section."""
+    """Read the MAST rows used to select the primary magnetic axis."""
 
     return tuple(
         Fixture(f"mast-{shot}-row-{row}", _mast_mesh(shot, row))
@@ -160,6 +192,7 @@ def _tree_count(mesh: ContourMesh, tree, level: float, *, corrupt: bool) -> int:
     """Count tree arcs crossing a regular level without reusing its merge code."""
 
     edges = np.asarray(tree.edges)[np.asarray(tree.edge_valid)]
+    edges = np.asarray(tree.node_vertex)[edges]
     if corrupt:
         wall = np.asarray(mesh.vertex_is_wall)
         edges = edges[~(wall[edges[:, 0]] | wall[edges[:, 1]])]
@@ -232,6 +265,52 @@ def batched_identical(fixtures: tuple[Fixture, ...]) -> bool:
     )
 
 
+def measure_cpu_rungs(
+    fixtures: tuple[Fixture, ...],
+) -> list[dict[str, float | int | str]]:
+    """Measure cold compilation and warm execution for each fixed carrier."""
+
+    rows = []
+    for fixture in fixtures:
+        arguments = (
+            fixture.mesh.vertex_psi,
+            fixture.mesh.vertex_valid,
+            fixture.mesh.vertex_is_wall,
+            fixture.mesh.edges,
+            fixture.mesh.edge_valid,
+            jnp.asarray(1, dtype=jnp.int32),
+        )
+        started = time.perf_counter()
+        build_contour_tree(*arguments).overflow.block_until_ready()
+        cold_seconds = time.perf_counter() - started
+        started = time.perf_counter()
+        result = build_contour_tree(*arguments)
+        result.overflow.block_until_ready()
+        execute_seconds = time.perf_counter() - started
+        comparison = compare(fixture.mesh)
+        rows.append(
+            {
+                "name": fixture.name,
+                "vertices": int(
+                    np.count_nonzero(np.asarray(fixture.mesh.vertex_valid))
+                ),
+                "edges": int(
+                    np.count_nonzero(np.asarray(fixture.mesh.edge_valid))
+                ),
+                "compile_seconds": cold_seconds - execute_seconds,
+                "execute_seconds": execute_seconds,
+                "overflow": bool(result.overflow),
+                "node_count": comparison["node_count"],
+                "edge_count": comparison["edge_count"],
+                "mismatches": sum(
+                    row["tree"] != row["brute_force"]
+                    for row in comparison["rows"]
+                ),
+            }
+        )
+    return rows
+
+
 def render(fixtures: tuple[Fixture, ...], directory: Path = FIGURE_ROOT) -> list[Path]:
     """Render one data-ink component-count comparison per persisted fixture.
 
@@ -251,12 +330,11 @@ def render(fixtures: tuple[Fixture, ...], directory: Path = FIGURE_ROOT) -> list
     for fixture in fixtures:
         rows = None
         tree = None
-        if tree_fits(fixture.mesh):
-            try:
-                rows = compare(fixture.mesh)["rows"]
-                tree = [row["tree"] for row in rows]
-            except RuntimeError:
-                rows = None
+        try:
+            rows = compare(fixture.mesh)["rows"]
+            tree = [row["tree"] for row in rows]
+        except RuntimeError:
+            rows = None
         if rows is None:
             rows = standalone_rows(fixture.mesh)
         level = [row["level"] for row in rows]

@@ -21,6 +21,7 @@ import pytest
 from benchmarks.contour_tree_brute_force import (
     batched_identical,
     certificate_fixtures,
+    certificate_rung_fixtures,
     compare,
     mast_fixtures,
     standalone_rows,
@@ -43,7 +44,7 @@ def fixtures():
 
 @pytest.fixture(scope="module")
 def mast():
-    """Load the MAST carriers named in the plan's primary-selection section."""
+    """Load the MAST carriers used to select the primary magnetic axis."""
 
     result = mast_fixtures()
     assert result
@@ -71,6 +72,49 @@ def test_batched_certificate_trees_match_independent_builds(fixtures):
     assert batched_identical(fixtures)
 
 
+def test_production_certificate_rungs_match_independent_components():
+    """Every persisted production-resolution certificate stays qualified."""
+
+    selected = os.environ.get("CONTOUR_TREE_CERTIFICATE")
+    fixtures = tuple(
+        fixture
+        for fixture in certificate_rung_fixtures()
+        if selected is None or fixture.name == selected
+    )
+    assert fixtures
+    for fixture in fixtures:
+        result = compare(fixture.mesh, corrupt=_corrupt())
+        assert not bool(np.asarray(result["tree"].overflow))
+        assert result["node_count"] - result["edge_count"] == 1
+        assert all(row["tree"] == row["brute_force"] for row in result["rows"])
+
+
+def test_receipt_edges_index_compact_nodes_on_certificate_and_mast():
+    """Every receipt edge resolves through its compact node-row index."""
+
+    certificate = next(
+        fixture
+        for fixture in certificate_rung_fixtures()
+        if fixture.name.endswith("diverted-single-null-340-cells")
+    )
+    fixtures = (certificate, mast_fixtures()[0])
+    for fixture in fixtures:
+        result = build_contour_tree(
+            fixture.mesh.vertex_psi,
+            fixture.mesh.vertex_valid,
+            fixture.mesh.vertex_is_wall,
+            fixture.mesh.edges,
+            fixture.mesh.edge_valid,
+            jnp.asarray(1, dtype=jnp.int32),
+        )
+        edges = np.asarray(result.edges)[np.asarray(result.edge_valid)]
+        valid = np.asarray(result.node_valid)
+        assert np.all(valid[edges])
+        carrier_vertices = np.asarray(result.node_vertex)[edges]
+        assert np.all(carrier_vertices >= 0)
+        assert np.all(carrier_vertices < fixture.mesh.vertex_valid.size)
+
+
 def test_mast_standalone_superlevel_counts_are_well_formed(mast):
     """The MAST carriers' independent superlevel counts are well formed.
 
@@ -81,6 +125,7 @@ def test_mast_standalone_superlevel_counts_are_well_formed(mast):
 
     for fixture in mast:
         assert not fixture.mesh.overflow
+        assert int(np.count_nonzero(np.asarray(fixture.mesh.vertex_valid))) == 644
         rows = standalone_rows(fixture.mesh)
         counts = [row["brute_force"] for row in rows]
         values = np.asarray(fixture.mesh.vertex_psi)[
@@ -115,8 +160,8 @@ def test_batched_mast_trees_match_independent_builds(mast):
     assert batched_identical(mast)
 
 
-def test_capacity_refusal_remains_visible():
-    """An over-capacity carrier is refused instead of returning a prefix."""
+def test_large_monotone_carrier_keeps_a_compact_tree():
+    """A carrier can exceed DD capacity when its critical receipt does not."""
 
     count = 257
     result = build_contour_tree(
@@ -129,4 +174,6 @@ def test_capacity_refusal_remains_visible():
         jnp.ones(count - 1, dtype=bool),
         jnp.asarray(1, dtype=jnp.int32),
     )
-    assert bool(np.asarray(result.overflow))
+    assert not bool(np.asarray(result.overflow))
+    assert int(np.sum(result.node_valid)) == 2
+    assert int(np.sum(result.edge_valid)) == 1

@@ -67,7 +67,7 @@ def test_single_maximum_has_one_contour_arc():
 
     assert _nodes(result) == {0: 2, 2: 0}
     assert int(np.sum(result.node_valid) - np.sum(result.edge_valid)) == 1
-    assert np.asarray(result.edges)[np.asarray(result.edge_valid)].tolist() == [[0, 2]]
+    assert np.asarray(result.edges)[np.asarray(result.edge_valid)].tolist() == [[0, 1]]
 
 
 def test_regular_triangle_cycle_does_not_create_a_saddle():
@@ -80,7 +80,7 @@ def test_regular_triangle_cycle_does_not_create_a_saddle():
 
     assert _nodes(result) == {0: 2, 3: 0}
     assert int(np.sum(result.node_valid) - np.sum(result.edge_valid)) == 1
-    assert np.asarray(result.edges)[np.asarray(result.edge_valid)].tolist() == [[0, 3]]
+    assert np.asarray(result.edges)[np.asarray(result.edge_valid)].tolist() == [[0, 1]]
 
 
 def test_join_saddle_matches_superlevel_component_event():
@@ -155,8 +155,8 @@ def test_batched_tree_is_identical_to_per_field_tree():
             )
 
 
-def test_capacity_overflow_is_reported_not_truncated():
-    """A carrier exceeding the DD node capacity carries an explicit refusal bit."""
+def test_large_carrier_with_few_critical_points_stays_qualified():
+    """Carrier storage does not consume the receipt's critical-node capacity."""
 
     count = 257
     values = jnp.arange(count, 0, -1, dtype=jnp.float64)
@@ -170,4 +170,28 @@ def test_capacity_overflow_is_reported_not_truncated():
         jnp.asarray(1, dtype=jnp.int32),
     )
 
+    assert not bool(result.overflow)
+    assert int(np.sum(result.node_valid)) == 2
+    assert int(np.sum(result.edge_valid)) == 1
+
+
+def test_critical_node_capacity_overflow_is_jittable_and_visible():
+    """Too many events refuse the receipt without raising or losing the flag."""
+
+    leaves = 257
+    values = jnp.concatenate((jnp.asarray([0.0]), jnp.arange(1, leaves + 1.0)))
+    edges = jnp.stack(
+        (jnp.zeros(leaves, dtype=jnp.int32), jnp.arange(1, leaves + 1)), axis=1
+    )
+    result = jax.jit(build_contour_tree)(
+        values,
+        jnp.ones(values.size, dtype=bool),
+        jnp.zeros(values.size, dtype=bool),
+        edges,
+        jnp.ones(leaves, dtype=bool),
+        jnp.asarray(1, dtype=jnp.int32),
+    )
+
     assert bool(result.overflow)
+    assert int(np.sum(result.node_valid)) == 256
+    assert int(np.sum(result.edge_valid)) == 255

@@ -56,9 +56,10 @@ class ContourTreeArrays:
     piecewise-linear vertex, ``node_psi`` is raw flux in webers, and
     ``critical_type`` uses the DD convention (minimum 0, saddle 1, maximum 2).
     ``node_valid`` and ``edge_valid`` make every array fixed shaped.  Edges
-    refer to vertex slots, which are also the node slots.  ``overflow`` means
-    that a candidate could not fit in the declared DD capacities; callers must
-    refuse that receipt instead of treating the prefix as a tree.
+    refer to compact node rows; ``node_vertex`` maps each valid node row back to
+    its carrier vertex.  ``overflow`` means that a candidate could not fit in
+    the declared DD capacities; callers must refuse that receipt instead of
+    treating the prefix as a tree.
     """
 
     node_vertex: jax.Array
@@ -196,7 +197,7 @@ def _sweep_tree(
     node_type = jnp.full(node_capacity, -1, dtype=jnp.int32)
     output_edges = jnp.zeros((edge_capacity, 2), dtype=jnp.int32)
     output_valid = jnp.zeros(edge_capacity, dtype=bool)
-    overflow = jnp.asarray(vertex_count > node_capacity, dtype=bool)
+    overflow = jnp.asarray(False)
     wall_flag = jnp.zeros(vertex_count, dtype=bool)
 
     def visit(rank, state):
@@ -246,19 +247,10 @@ def _sweep_tree(
             1,
             jnp.where(signed_maximum, 2, jnp.where(signed_minimum, 0, 1)),
         ).astype(jnp.int32)
-        node_slot = vertex
-        fits_node = node_slot < node_capacity
-        node_valid = node_valid.at[jnp.minimum(node_slot, node_capacity - 1)].set(
-            node_valid[jnp.minimum(node_slot, node_capacity - 1)] | (event & fits_node)
+        node_valid = node_valid.at[vertex].set(node_valid[vertex] | event)
+        node_type = node_type.at[vertex].set(
+            jnp.where(event, critical, node_type[vertex])
         )
-        node_type = node_type.at[jnp.minimum(node_slot, node_capacity - 1)].set(
-            jnp.where(
-                event & fits_node,
-                critical,
-                node_type[jnp.minimum(node_slot, node_capacity - 1)],
-            )
-        )
-        overflow = overflow | (event & ~fits_node)
         connect = usable & (saddle | terminal | first_wall)
         sources = births[neighbour_root]
         output_edges, output_valid, overflow = _append_edges(
@@ -334,6 +326,8 @@ def build_contour_tree(
 
     node_capacity = ContourTreeResult.node_capacity
     edge_capacity = ContourTreeResult.edge_capacity
+    mesh_node_capacity = vertex_psi.size
+    mesh_edge_capacity = edges.shape[0]
     signed = jnp.asarray(sigma, dtype=vertex_psi.dtype) * vertex_psi
     join = _sweep_tree(
         signed,
@@ -342,8 +336,8 @@ def build_contour_tree(
         edges,
         edge_valid,
         True,
-        node_capacity,
-        edge_capacity,
+        mesh_node_capacity,
+        mesh_edge_capacity,
     )
     split = _sweep_tree(
         signed,
@@ -352,8 +346,8 @@ def build_contour_tree(
         edges,
         edge_valid,
         False,
-        node_capacity,
-        edge_capacity,
+        mesh_node_capacity,
+        mesh_edge_capacity,
     )
     join_nodes, join_types, join_edges, join_valid, join_overflow, _ = join
     split_nodes, split_types, split_edges, split_valid, split_overflow, _ = split
@@ -401,15 +395,34 @@ def build_contour_tree(
         virtual,
         merged_edges,
     )
+    node_count = jnp.sum(node_valid, dtype=jnp.int32)
+    node_source = jnp.nonzero(node_valid, size=node_capacity, fill_value=0)[0]
+    compact_node_valid = slots < node_count
+    edge_count = jnp.sum(merged_valid, dtype=jnp.int32)
+    edge_source = jnp.nonzero(merged_valid, size=edge_capacity, fill_value=0)[0]
+    compact_edge_valid = jnp.arange(edge_capacity) < edge_count
+    carrier_vertex = jnp.arange(vertex_count, dtype=jnp.int32)
+    node_matches = (
+        node_source[:, None] == carrier_vertex[None, :]
+    ) & compact_node_valid[:, None]
+    vertex_node = jnp.argmax(node_matches, axis=0).astype(jnp.int32)
+    compact_edges = vertex_node[merged_edges[edge_source]]
+    edge_nodes_valid = jnp.all(
+        jnp.any(node_matches, axis=0)[merged_edges[edge_source]], axis=1
+    )
+    overflow = overflow | (node_count > node_capacity) | (edge_count > edge_capacity)
+    overflow = overflow | jnp.any(compact_edge_valid & ~edge_nodes_valid)
     return ContourTreeArrays(
-        node_vertex=slots,
+        node_vertex=node_source,
         node_psi=jnp.where(
-            node_valid, vertex_psi[slots], jnp.zeros((), vertex_psi.dtype)
+            compact_node_valid,
+            vertex_psi[node_source],
+            jnp.zeros((), vertex_psi.dtype),
         ),
-        node_valid=node_valid,
-        critical_type=critical_type,
-        edges=merged_edges,
-        edge_valid=merged_valid,
+        node_valid=compact_node_valid,
+        critical_type=jnp.where(compact_node_valid, critical_type[node_source], -1),
+        edges=compact_edges,
+        edge_valid=compact_edge_valid,
         overflow=overflow,
     )
 

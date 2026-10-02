@@ -49,6 +49,26 @@ ARMS = {
 }
 
 
+def _source_revision() -> str:
+    """Return the git revision of the tree this driver runs from."""
+    return subprocess.check_output(
+        ["git", "-C", str(Path(__file__).resolve().parents[1]), "rev-parse", "HEAD"],
+        text=True,
+    ).strip()
+
+
+def stamp_source_revision(payload: dict) -> dict:
+    """Stamp a receipt payload with the git revision that produced it.
+
+    A production-route receipt is only reproducible if a reader can name the
+    tree the measurement ran at, so the running revision is recorded beside the
+    numbers.  Omitting it leaves the receipt unattributable, which the
+    receipt-revision gate must fail against.
+    """
+    payload["source_revision"] = _source_revision()
+    return payload
+
+
 def arm_label(arm: str, relaxation: float) -> str:
     tag = f"{int(relaxation * 100):03d}" if relaxation != 1.0 else "100"
     return arm if arm != "c" else f"c-r{tag}"
@@ -110,6 +130,7 @@ def measure_one(label: str, clip_mode: str, relaxation: float) -> dict[str, obje
     summary = _read_terminal_row(label)
     summary["completed_at_unix_seconds"] = time()
     summary["exit_status"] = 0
+    stamp_source_revision(summary)
     receipt_dir = OUTPUT_ROOT / "receipts"
     receipt_dir.mkdir(parents=True, exist_ok=True)
     receipt_path = receipt_dir / f"{label}.json"
@@ -172,6 +193,7 @@ def run_all() -> int:
             print("DISCRIMINATOR_END " + json.dumps(record, sort_keys=True), flush=True)
     best = best_of(landed)
     best["banked_weak_110_residual"] = BANKED_WEAK_110_RESIDUAL
+    stamp_source_revision(best)
     RECEIPT.write_text(
         json.dumps(best, indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",

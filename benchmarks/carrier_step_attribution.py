@@ -65,6 +65,18 @@ def _source_commit() -> str:
     ).strip()
 
 
+def stamp_source_revision(payload: dict) -> dict:
+    """Stamp a receipt payload with the git revision that produced it.
+
+    A production-route receipt is only reproducible if a reader can name the
+    tree the measurement ran at, so the running revision is recorded beside the
+    numbers.  Omitting it leaves the receipt unattributable, which the
+    receipt-revision gate must fail against.
+    """
+    payload["source_revision"] = _source_commit()
+    return payload
+
+
 def _angle_and_norm(reference, compared) -> dict[str, float]:
     """Measure directional agreement between two exact-space steps."""
 
@@ -405,7 +417,7 @@ def measure() -> dict[str, Any]:
             "projected-residual Jacobian failed its finite-difference check"
         )
 
-    return {
+    receipt = {
         "artifact": str(OUTPUT.relative_to(HERE)),
         "schema": "carrier-step-attribution-1",
         "source_commit": _source_commit(),
@@ -520,6 +532,7 @@ def measure() -> dict[str, Any]:
             ),
         },
     }
+    return stamp_source_revision(receipt)
 
 
 def main() -> None:

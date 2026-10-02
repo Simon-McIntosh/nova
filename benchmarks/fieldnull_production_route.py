@@ -107,6 +107,18 @@ def _revision() -> str:
     ).stdout.strip()
 
 
+def stamp_source_revision(payload: dict[str, Any]) -> dict[str, Any]:
+    """Stamp a receipt payload with the git revision that produced it.
+
+    A production-route receipt is only reproducible if a reader can name the
+    tree the measurement ran at, so the running revision is recorded beside the
+    numbers.  Omitting it leaves the receipt unattributable, which the
+    receipt-revision gate must fail against.
+    """
+    payload["source_revision"] = _revision()
+    return payload
+
+
 def _source_hashes() -> dict[str, str]:
     return {
         path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
@@ -527,7 +539,7 @@ def _scientific_check(device) -> dict[str, Any]:
 def measure(platform_name: str) -> dict[str, Any]:
     configure_dtypes()
     device = jax.devices(platform_name)[0]
-    return {
+    receipt = {
         "schema": "nova.fieldnull-production-route",
         "schema_version": 1,
         "captured_at": datetime.now(UTC).isoformat(),
@@ -548,6 +560,7 @@ def measure(platform_name: str) -> dict[str, Any]:
         "scientific": _scientific_check(device),
         "timing": _timings(device),
     }
+    return stamp_source_revision(receipt)
 
 
 def assemble(cpu_path: Path, gpu_path: Path) -> dict[str, Any]:
@@ -587,7 +600,7 @@ def assemble(cpu_path: Path, gpu_path: Path) -> dict[str, Any]:
         and capture["scientific"]["resolved_false_candidates"] == 0
         for capture in (cpu, gpu)
     )
-    return {
+    receipt = {
         "schema": "nova.fieldnull-production-route",
         "schema_version": 1,
         "assembled_at": datetime.now(UTC).isoformat(),
@@ -627,6 +640,7 @@ def assemble(cpu_path: Path, gpu_path: Path) -> dict[str, Any]:
             "production_route": "single rectangular implementation",
         },
     }
+    return stamp_source_revision(receipt)
 
 
 def _arguments() -> argparse.Namespace:

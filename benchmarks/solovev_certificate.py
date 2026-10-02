@@ -278,6 +278,18 @@ def _source_revision() -> str:
     ).strip()
 
 
+def stamp_source_revision(payload: dict[str, Any]) -> dict[str, Any]:
+    """Stamp a receipt payload with the git revision that produced it.
+
+    A production-route receipt is only reproducible if a reader can name the
+    tree the measurement ran at, so the running revision is recorded beside the
+    numbers.  Omitting it leaves the receipt unattributable, which the
+    receipt-revision gate must fail against.
+    """
+    payload["source_revision"] = _source_revision()
+    return payload
+
+
 def _lane() -> dict[str, Any]:
     return {
         "execution": "slurm" if os.environ.get("SLURM_JOB_ID") else "local",
@@ -848,7 +860,7 @@ def _production_solver_receipt(equilibrium: Any) -> dict[str, Any]:
 
     trace = np.asarray(history.trace, dtype=np.float64)
     trace_indices = np.flatnonzero(np.isfinite(trace))
-    return {
+    receipt = {
         "telemetry_scope": (
             "active-set residuals cover every production trip; detailed inner "
             "globalisation arrays describe the terminal frozen-mask trip exposed "
@@ -882,6 +894,7 @@ def _production_solver_receipt(equilibrium: Any) -> dict[str, Any]:
             "continue_globalization_state": "production default enabled",
         },
     }
+    return stamp_source_revision(receipt)
 
 
 def _finite_census(

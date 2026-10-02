@@ -63,6 +63,26 @@ def write_json(path, payload):
     temporary.replace(path)
 
 
+def _source_revision() -> str:
+    """Return the git revision of the tree this driver runs from."""
+    return subprocess.check_output(
+        ["git", "-C", str(Path(__file__).resolve().parents[1]), "rev-parse", "HEAD"],
+        text=True,
+    ).strip()
+
+
+def stamp_source_revision(payload):
+    """Stamp a receipt payload with the git revision that produced it.
+
+    A production-route receipt is only reproducible if a reader can name the
+    tree the measurement ran at, so the running revision is recorded beside the
+    numbers.  Omitting it leaves the receipt unattributable, which the
+    receipt-revision gate must fail against.
+    """
+    payload["source_revision"] = _source_revision()
+    return payload
+
+
 def finite_float(value):
     scalar = float(value)
     return scalar if math.isfinite(scalar) else None
@@ -500,7 +520,7 @@ def assemble(output):
     }
     payload["gate_passed"] = evidence_complete(payload)
     payload["status"] = "complete" if payload["gate_passed"] else "incomplete"
-    return payload
+    return stamp_source_revision(payload)
 
 
 def job_in_queue(job):

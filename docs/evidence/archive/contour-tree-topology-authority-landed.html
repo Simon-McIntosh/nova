@@ -82,6 +82,12 @@
     <p>Each fixture loses exactly that one spurious minimum: the diverted single-null 340-cell certificate goes from 5 to 4, and MAST 27079 row 16 from 22 to 21. The four contour-tree test files pass, 32 tests. The focused test fails at the base source and under the declared mutation, and the review scored 97 of 100.</p>
     <p>Still open on the followup: §3 and §4 must measure how persistence reduces the remaining piecewise-linear extrema to the analytic axis and X-point. A stray trailing whitespace in <code>edge-invariant-repair/baseline-brute-force.log</code> is also left over.</p>
   </section>
+  <section id="explanatory-figure-from-computed-tree">
+    <h2>§2 — the plan's explanatory figure, drawn from the computed tree</h2>
+    <p>Run <code>r-20261002T164824351467-ctta-explanatory-figure-from-computed-tree</code> (local lane), merged at <code>78e721dfb</code>, replaces the hand-placed tree with the one <code>build_contour_tree</code> computes. The fixture is the diverted single-null Solov'ev certificate at its persisted 340-cell rung.</p>
+    <figure><img src="/nova/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png" alt="Computed contour tree of the diverted single-null certificate: poloidal panel with nodes at their carrier vertices, and the tree as a graph against signed flux"><figcaption>Diverted single-null Solov'ev certificate, 340 cells. Left: line contours of &psi;, the wall, the analytic magnetic axis (red triangle) and admitted X-point (red cross), and every emitted tree node at its carrier vertex. Triangles are maxima, inverted triangles minima, squares saddles, and the diamond is the private-region wall maximum. Right: the tree's 13 nodes and 12 edges against signed flux, with the outside attachment drawn explicitly at the wall-contact level, not at the virtual node's sentinel value. Eleven of the 13 nodes are piecewise-linear critical points beyond the analytic axis and X-point; §3 and §4 must absorb them.</figcaption></figure>
+    <p>The first review (55 of 100) blocked three things. The virtual node's &minus;1.007 Wb sentinel set the flux axis and flattened the tree. Dotted tree edges on the poloidal panel read as spatial paths. The guard test never read the committed artifacts. All three are repaired, each with a committed negative control, and the re-review scored 76 of 100. A guard test checks the drawn nodes against the committed receipt, 5 tests. Its follow-ons are open as f-ctta-explanatory-figure-polish.</p>
+  </section>
 </main>
 </body>
 </html>

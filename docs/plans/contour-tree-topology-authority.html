@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 </head>
 <body>
   <main class="plan-doc">
@@ -335,6 +335,11 @@
 <article class="r-fu" data-id="f-ctta-sweep-cost-on-carrier-size" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Make the contour-tree sweep near-linear in carrier size</h4>
     <div class="r-fu-body"><p>With production carriers admitted (merged at 76e935345, record contour-tree-topology-authority-landed#tree-capacity-on-critical-nodes), CPU execute grows from 3.3 s at 353 live vertices to 75.8 s at 1089, against compile near 1.4 s. Each sweep visit forms a repeated-neighbour matrix over the fixed edge buffer, so work grows with vertices times the square of the edge capacity. That is an implementation choice of the vectorised union-find sweep, not a property of contour trees. Replace it with an adjacency-indexed sweep (CSR neighbour lists from the carrier, fixed-shape and traceable) and keep the brute-force comparator, the edge-endpoint invariant and the twelve certificate-rung cases as the gate. Report compile and execute against vertex count on CPU and on the H200, and profile before raising the production rung, as the re-review asked. The topology contract does not change.</p></div>
+    <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
+    </article>
+<article class="r-fu" data-id="f-ctta-explanatory-figure-polish" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Polish the computed-tree explanatory figure and refresh its fragment</h4>
+    <div class="r-fu-body"><p>The computed-tree figure merged at 78e721dfb (record contour-tree-topology-authority-landed#explanatory-figure-from-computed-tree) passed re-review at 76/100 with three follow-ons. (1) In the graph panel the private-region wall-maximum label and the outside-node label sit at the same flux level on adjacent ranks with the same fixed offset, so they overlap and hide the word maximum; place them so neither collides. (2) The fragment docs/evidence/fragments/contour-tree-topology-authority/ctta-explanatory-figure-from-computed-tree.html still describes dashed poloidal edges and a 2-test gate; bring it in line with the delivered figure and its 5-test guard. (3) test_committed_figure_files_exist checks only that the PNG and SVG exist; compare their content to the receipt so a stale render fails.</p></div>
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
     </article>
 </section>

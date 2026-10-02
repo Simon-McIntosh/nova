@@ -4893,42 +4893,7 @@ def _active_set_newton_krylov(
         ),
         live_partition_reads=jnp.where(freeze_topology, outer.iterations + 1, 0),
     )
-    if not freeze_topology:
-        return frozen_result
-
-    live_result = _newton_krylov_inner(
-        map_fn,
-        outer.state,
-        newton_steps=newton_steps,
-        gmres_iterations=gmres_iterations,
-        warmup=warmup,
-        relaxation=relaxation,
-        step_cap=step_cap,
-        krylov_condition_limit=krylov_condition_limit,
-        convergence_tolerance=convergence_tolerance,
-        stream_inner_iterations=stream_inner_iterations,
-        model_trust_selection=model_trust_selection,
-        precision=precision,
-    )
-    use_live_fallback = ~outer.converged
-    return frozen_result._replace(
-        state=jnp.where(use_live_fallback, live_result.state, frozen_result.state),
-        residual=jnp.where(
-            use_live_fallback, live_result.residual, frozen_result.residual
-        ),
-        trace=jnp.where(use_live_fallback, live_result.trace, frozen_result.trace),
-        converged=jnp.where(
-            use_live_fallback, live_result.converged, frozen_result.converged
-        ),
-        termination_reason=jnp.where(
-            use_live_fallback,
-            live_result.termination_reason,
-            frozen_result.termination_reason,
-        ),
-        live_read_steps=jnp.where(
-            use_live_fallback, live_result.attempted_newton_promotions, 0
-        ),
-    )
+    return frozen_result
 
 
 def newton_krylov(

@@ -1958,6 +1958,32 @@ class ForwardProfile:
             self.operator,
             None if target_current is None else jnp.asarray(target_current),
         )
+        if route == "newton_krylov" and not bool(np.asarray(history.converged)):
+            live_program = self._accelerated_history_program(
+                route,
+                requested_class=requested_class,
+                target_current=target_current,
+                live_read_fallback=True,
+                **options,
+            )
+            live_history = live_program(
+                history.state,
+                external,
+                self.operator,
+                None if target_current is None else jnp.asarray(target_current),
+            )
+            history = live_history._replace(
+                active_set_iterations=history.active_set_iterations,
+                active_set_residuals=history.active_set_residuals,
+                active_set_mask_differences=history.active_set_mask_differences,
+                active_set_cycle_damping_activations=(
+                    history.active_set_cycle_damping_activations
+                ),
+                frozen_partition_reads=history.frozen_partition_reads,
+                frozen_partition_refreezes=history.frozen_partition_refreezes,
+                live_partition_reads=history.live_partition_reads,
+                live_read_steps=live_history.attempted_newton_promotions,
+            )
         return self._receipt(
             history.state,
             history,
@@ -1973,6 +1999,7 @@ class ForwardProfile:
         *,
         requested_class=None,
         target_current=None,
+        live_read_fallback: bool = False,
         **options,
     ) -> Callable[
         [jax.Array, jax.Array, ForwardFluxOperator, jax.Array | None],
@@ -2007,6 +2034,7 @@ class ForwardProfile:
         )
         key = (
             route,
+            live_read_fallback,
             static_value(requested_class),
             argument_layout(target_current),
             tuple(
@@ -2040,6 +2068,13 @@ class ForwardProfile:
                 operator=self.operator,
                 target_value=target_current,
             ):
+                if live_read_fallback:
+                    return fixed_point.newton_krylov(
+                        mapped,
+                        initial_flux,
+                        map_arguments=(external, operator, target_value),
+                        **{"newton_steps": self.newton_steps, **options, "warmup": 0},
+                    )
                 return fixed_point.newton_krylov(
                     mapped,
                     initial_flux,

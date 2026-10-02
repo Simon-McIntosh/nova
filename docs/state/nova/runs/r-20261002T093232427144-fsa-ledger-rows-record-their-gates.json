@@ -269,6 +269,43 @@
   "plan_impl_at_dispatch": 0.96,
   "plan_link": null,
   "promoted_revision": "ac83a864bd8a0497bb9f6a1318fbc468e1cd2f93",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 26515181,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T093232427144-fsa-ledger-rows-record-their-gates",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 1
+      },
+      "worktrees": [
+        {
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "unintegrated",
+          "dirty": [],
+          "head": "ac83a864bd8a0497bb9f6a1318fbc468e1cd2f93",
+          "integrated_into": "HEAD",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-ledger-rows-record-their-gates",
+          "reclaimable": false,
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "its HEAD is not reachable from the integration revision, so removing it would destroy the only copy of that commit; merge it or discard it deliberately"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "its HEAD is not reachable from the integration revision, so removing it would destroy the only copy of that commit; merge it or discard it deliberately"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [

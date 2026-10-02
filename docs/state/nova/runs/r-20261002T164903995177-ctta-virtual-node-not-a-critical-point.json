@@ -882,6 +882,32 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "b2e3ca2408d6aa8338ed5555f6fca24517b2bacc",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 70379,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T164903995177-ctta-virtual-node-not-a-critical-point",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-virtual-node-not-a-critical-point"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

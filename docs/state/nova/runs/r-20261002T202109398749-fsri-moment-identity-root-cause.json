@@ -520,6 +520,32 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "fb6ecfb6e923f294f5e713553316ba9f0c2da646",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 8389,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T202109398749-fsri-moment-identity-root-cause",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-moment-identity-root-cause"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [

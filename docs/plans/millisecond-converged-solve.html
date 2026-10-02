@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="147">
+<meta name="plan-version" content="148">
 </head>
 <body>
 <main class="plan-doc">
@@ -753,6 +753,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261002T090507348942-review-of-msc-fused-route-wider-gate" data-who="reckon-build" data-when="2026-10-02T09:52:39.981Z">
     <div class="r-comment-body"><p>Reviewed run r-20261002T081037268041-msc-fused-route-wider-gate passes review: the landed change 571f4e8cc7e7916423e4baace06c33acd4245834 (the fused linear read now enforces the qualified axis) adds zero failures over base d786948c468d01c1ffb87718758ed60483ea4910 across the three ungated modules, confirmed by independent re-run (head 3 failed/12 passed; base 3 failed/12 passed, the same three ids); scores goal_fidelity 20, evidence 19, scope_discipline 20, durability 18, fit 20, total 97, verdict pass.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20261002T1155-reference-lane" data-who="reckon-build s22-nova" data-when="2026-10-02T11:55:00Z">
+    <div class="r-comment-body">The full 29-test reference comparison owed by the fused-route enforcement (bb6331523) is complete. Node msc-reference-lane-full-run (review pass 89/100) ran tests/test_equilibrium_forward_reference.py on the H200 lane under a 3600 s per-test bound at merged main 0e5e34157 (job 1280066) and at base d786948c4 (job 1280067). Both arms gave 21 passed and 8 failed, with all 29 tests reaching a verdict and identical failure ids, so the enforcement adds zero failures. The eight are a pre-existing red baseline in the forward-reference lane, for example test_the_solve_reaches_its_fixed_point at 1.44e-2 against 1e-6, identical at both revisions; they belong to S21's forward-reference work. Both arms ran against a prewarm pin compiled for another revision, so their walls (976 s, 967 s) are compile-affected and are not timing evidence.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

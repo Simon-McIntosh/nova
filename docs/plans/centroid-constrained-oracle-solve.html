@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -136,6 +136,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T094037591786-review-of-cco-fixed-point-attribution" data-who="reckon-build" data-when="2026-10-02T09:58:04.886Z">
     <div class="r-comment-body"><p>Review of r-20261002T092942806602-cco-fixed-point-attribution stored as parsed record (verdict pass, total 92; goal_fidelity 19, evidence 17, scope_discipline 20, durability 17, fit 19). The reviewed report answers its node goal and all four gate clauses and its arithmetic reproduces; one finding: it cites a non-existent method ForwardProfile.solve_with_constraints (actual _solve_augmented_constraints, forward.py:2117, with the newton_krylov call at the cited line 2179). added_failure_count 0 / added_failure_ids [] are empty by absence of both suite arms (the reviewed run is read-only and ran no suite), disclosed in gate_arms_note. Transient note: a malformed edit call truncated the unversioned review JSON to 0 bytes mid-session; it was restored byte-faithfully from the .at- snapshot, both records now parse identically (total 92, one follow-on finding) and check-manifest is clean.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261002T1155-unit-leverage" data-who="reckon-build s22-nova" data-when="2026-10-02T11:55:00Z">
+    <div class="r-comment-body">Two S22 nodes on the fixed point. (1) Attribution (Opus, read-only, review pass 92/100, ~/.config/reckon/crew/reports/nova/s22/cco-fixed-point-attribution.md): the terminal residual of both positive arms is carried by the flux block, not the row. The probable cause is the compensating-column scaling: a 1e-3 T unit gives the radial row 1/286 of unit leverage, and the level column starts above its 1 Wb cap. The 1e-3-of-span boundary clause cannot be met at 135 cells by construction, because the compensator's own flux is 3.2e-3 of span; that clause is a lead decision. (2) Unit-leverage positive control (merge 8cabd23e4, H200): with field_scale_t 0.25 T and the level seeded inside its cap, the solve ended ACTIVE_SET_SETTLED after 5 of 7 promotions. That is not budget exhaustion. The terminal residual was 2.33e-3, the centroid row 6.45e-3 pitches, the field -8.13e-3 T (opposite in sign to the banked +2.39e-3 T) and the level -4.07 Wb. The final pass refused its Krylov action as NONFINITE_LINEAR_ACTION, so the attribution is neither confirmed nor refuted, and a non-finite linear action is the new open defect. The receipt now records per-pass active-set history (5f33c95cb), but no solve has yet run with it. Review notes: the receipt's field_identity block still reports the 1e-3 T default, and the landing fragment anchors at 5f33c95cb rather than the measured 8289cdb9c.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T053656352101-review-of-cco-bounded-row-step-control" data-who="s19c-review-cco-c" data-when="2026-09-17T06:45:40.145Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T205409901465-cco-bounded-row-step-control stored at the fence path, total 84, findings recorded on the reviewed run's completion</p></div>

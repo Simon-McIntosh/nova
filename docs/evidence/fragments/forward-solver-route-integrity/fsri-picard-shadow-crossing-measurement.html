@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="forward-solver-route-integrity">
+<title>Picard shadow-crossing measurement — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsri-picard-shadow-crossing-measurement"
+         data-test-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T213957060519-fsri-picard-shadow-crossing-measurement/picard-shadow-crossing-h200.log"
+         data-negative-control-log="none: measurement node changes no test path">
+
+  <h2>Residual-shadow crossing does not explain the three derivative failures</h2>
+
+  <p>The matched H200 measurement at <code>d8bc23881be8933ef969ee4148458053e2fbc3bc</code>
+  <strong>refutes</strong> the proposed Picard residual-shadow mechanism. For both conductor-current
+  tests, neither sign of the test perturbation changed the terminal residual-shadow mask: every
+  Hamming distance from the unperturbed terminal mask is <strong>0</strong>. Replaying the eighty
+  Picard trips with that terminal mask held in both directions leaves the finite difference unchanged
+  to numerical noise, while the reverse derivative remains far from it. The direct moment-map test
+  does not call the Picard residual map at all, so holding its residual shadow is necessarily a
+  no-op and it retains its failure.</p>
+
+  <figure>
+    <img src="/nova/figures/forward-solver-route-integrity/picard-shadow-crossing/finite-difference-comparison.png"
+         alt="Live and terminal-mask-held finite differences compared with reverse derivatives for the moment, flux-current, and plasma-current arms.">
+    <figcaption>Finite-difference magnitude against the test step. Blue is live and grey is the same
+    calculation with the unperturbed terminal residual shadow held fixed; the dotted line is the
+    corresponding reverse derivative. The live and held curves coincide in all three panels, while
+    the reverse line remains separate.</figcaption>
+  </figure>
+
+  <h3>Moment-map directional derivative</h3>
+  <p>The test's three central differences operate directly on the Anderson terminal flux and make
+  <strong>zero Picard trips</strong>. At steps <code>1e-3</code>, <code>3e-5</code>, and <code>1e-5</code>,
+  the ± terminal residual-shadow masks each have Hamming distance 0 from the unperturbed mask.
+  The live and residual-shadow-held directional derivatives are identical: respectively
+  <code>[-1.4083747635, 1.2389865409, 2.9520564139]</code>,
+  <code>[-1.3969578675, 1.2312406664, 2.9189702779]</code>, and
+  <code>[-1.3967608822, 1.2308649116, 2.9183728011]</code>. The reverse derivative is
+  <code>[-0.2729172687, 0.7598863825, 0.5266709523]</code>; the normalized errors remain
+  <code>3.1917738196</code>, <code>3.1482329209</code>, and <code>3.1474466497</code>.
+  Its mismatch therefore lies outside Picard's residual-shadow branch.</p>
+
+  <h3>Conductor-current derivatives</h3>
+  <p>Both tests perturb conductor index 3 by ±<code>293.1862789774 A</code> and run 80 Picard
+  trips at relaxation 0.7. The plus/minus terminal residuals are
+  <code>0.0011282049086</code> and <code>0.0011267771941</code>, with a terminal-mask Hamming
+  distance of 0 in every arm.</p>
+  <table>
+    <thead><tr><th>observable</th><th>live central difference</th><th>mask-held central difference</th><th>mask-change part</th><th>mask-held reverse</th><th>reverse vs held relative error</th></tr></thead>
+    <tbody>
+      <tr><td>sum of flux squared</td><td>-0.0006662465886557</td><td>-0.0006662465886631</td><td>7.37e-15</td><td>-0.0429587478486803</td><td>63.4787509305</td></tr>
+      <tr><td>plasma current</td><td>-0.9368935998653215</td><td>-0.9368935998655201</td><td>1.99e-13</td><td>-11.53687895157779</td><td>11.3139692204</td></tr>
+    </tbody>
+  </table>
+  <p>The negative control stated for this measurement is met in the informative sense: holding the
+  mask fixed in both reverse and finite-difference arms <em>does not</em> restore agreement, because
+  neither perturbation crosses the selected residual branch. The values reproduce the recorded test
+  failures (63.478750931 and 11.313969220) rather than moving them.</p>
+
+  <h3>Receipt and follow-on</h3>
+  <p>Job <code>1280498</code> on the H200 completed with <code>EXIT_STATUS=0</code>; its lane receipt is
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T213957060519-fsri-picard-shadow-crossing-measurement/picard-shadow-crossing-h200.log</code>,
+  and its machine-readable rows are in the sibling <code>picard-shadow-crossing.json</code>.
+  The next investigation must instrument the remaining continuous Picard/adjoint or observation-map
+  dependency; this measurement rules out only a finite perturbation changing the carried residual-shadow
+  selection on these exact test fixtures.</p>
+
+</article>
+</main>
+</body>
+</html>

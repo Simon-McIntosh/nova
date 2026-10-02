@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="forward-solver-route-integrity">
+<title>Moment-identity root cause — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsri-moment-identity-root-cause"
+         data-commit="cc67fa31a"
+         data-test-log="docs/figures/forward-solver-route-integrity/moment-identity-root-cause/main.log"
+         data-negative-control-log="none: a diagnosis node that changes no source">
+
+  <h2>The moment-identity failure is not a regression from either merge, and the divergence is the separatrix clamp in the solve path</h2>
+
+  <p><code>tests/test_equilibrium_forward_solve.py::test_solve_path_current_moments_match_profile_owned_support</code>
+  fails on CPU at <strong>every</strong> revision named for this node: the parent and
+  the merge of the frozen-Newton lineage (<code>f863867a8</code>, <code>db580bec8</code>),
+  the parent and the merge of the clip-mode request field
+  (<code>3ecff38e</code>, <code>af7403bc0</code>) — and <code>main 96845bc64</code>. The
+  failure is bit-identical at all five: <code>Mismatched elements: 31 / 625 (4.96%)</code>,
+  <code>Max absolute difference among violations: 173.43143596</code>,
+  <code>Max relative difference among violations: 0.31223999</code>, and the same first
+  mismatch <code>[135]: 660.3190283954135 (ACTUAL), 641.0264598166705 (DESIRED)</code>.
+  It is therefore <strong>not a regression from these merges</strong>; it predates both.</p>
+
+  <h3>What the test compares</h3>
+  <p>The test builds a profile-owned support from the atomic mesh chord clip,
+  <code>geometry.atomic_mesh.traced_clip(ones).qualify(masks.profile_participation)</code>,
+  and compares two ways of integrating the cell currents on it:</p>
+  <ul>
+    <li><code>support_current_moments — the direct arm</code>: <code>operator.support_current_moments(operator.source.core, masks.psi_norm, sample_psi_norm, profile_support)</code>, passing the <strong>bare <code>source.core</code></strong> profile. The docstring claims solve moments equal direct integration on the profile-owned support.</li>
+    <li>the solve arm: <code>operator.cell_current_moments(seed)</code>, which routes through <code>ForwardSource.current_moments</code> and wraps the profile in <code>_FluxSelectedProfile(self.core, self.common_sol)</code>.</li>
+  </ul>
+
+  <h3>Measured mechanism</h3>
+  <p>An instrumented arm at <code>96845bc64</code> (same fixture, in a detached scratch tree)
+  computes the solve arm beside the direct arm twice — once with bare <code>source.core</code>,
+  once with the solve path's own wrapper <code>_FluxSelectedProfile(operator.source.core, operator.source.common_sol)</code>:</p>
+  <pre>
+PROBE common_sol declared: False
+PROBE solve.sum():     805518.0447146993
+PROBE core.sum():      805679.5741956339  maxabs(core-solve):    173.43143595642226  nmismatch: 31
+PROBE fluxsel.sum():   805518.0447146993  maxabs(fluxsel-solve): 0.0                 nmismatch: 0
+PROBE mismatch indices: [135, 136, 138, 139, 158, 166, 182, 192, 206, 218, 255, 269,
+ 280, 294, 330, 344, 355, 369, 381, 393, 407, 408, 416, 417, 434, 435, 436, 437, 438, 439, 440]</pre>
+  <p>The wrapped profile reproduces the solve arm <strong>exactly</strong> (maxabs 0.0,
+  0 mismatches); the bare profile reproduces the failure exactly (same 31 indices, same
+  maxabs 173.4314359564). The entire divergence is the profile argument. <code>common_sol</code>
+  is undeclared here, so <code>_FluxSelectedProfile.current_density</code> returns
+  <code>jnp.where(flux &gt; 1.0, 0.0, confined)</code>: it <strong>zeroes the current density above
+  the separatrix</strong> (<code>psi_norm &gt; 1</code>) at every quadrature point, while the bare
+  <code>source.core</code> profile integrates the same straddling cells with the core profile
+  extended past <code>psi_norm = 1</code>. The 31 cells are exactly the cells the separatrix
+  crosses; there the two arms differ by up to 31 % relative, everywhere else they agree.</p>
+
+  <h3>Responsible code change</h3>
+  <p>The pointwise separatrix selection entered <code>ForwardSource.current_moments</code>
+  together with <code>_FluxSelectedProfile</code> in <code>8b88abb7a</code>
+  (<em>fix(equilibrium): select open support from live flux</em>, 2026-09-01), which made
+  the solve arm clamp the profile where the direct comparison arm does not. That commit
+  predates the test's authoring/aligned body (<code>ac945c19f</code> 2026-09-04,
+  <code>87a7f3499</code> 2026-09-04) and both sampled merges (2026-10-02). The failing comparison is a
+  contract mismatch in the test arm — a different clip/profile branch, not a reduction-order
+  or support-mask change — and it is not a regression from the frozen-Newton or clip-mode merges.</p>
+
+  <h3>Evidence</h3>
+  <p>Five gate logs, one per revision, committed under
+  <code>docs/figures/forward-solver-route-integrity/moment-identity-root-cause/</code>:
+  <code>frozen-newton-parent.log</code>, <code>frozen-newton-merge.log</code>,
+  <code>clip-mode-parent.log</code>, <code>clip-mode-merge.log</code>, <code>main.log</code>.
+  Each header names the revision, tree, command, the imported <code>module.__file__</code>
+  and the resolved working directory; each ends <code>EXIT=1</code>. Reproduce with:</p>
+  <pre>env -C &lt;tree&gt; PYTHONPATH=&lt;tree&gt; JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python \
+  -m pytest -p no:cacheprovider --timeout 0 -vv \
+  &lt;tree&gt;/tests/test_equilibrium_forward_solve.py::test_solve_path_current_moments_match_profile_owned_support</pre>
+
+  <h3>Follow-on</h3>
+  <p>The test arm and the solve path disagree by construction, so the test cannot pass
+  until one of them changes. The repair is the reconciliation of the two moment paths,
+  not a tolerance change: either the direct comparison arm adopts the pointwise separatrix
+  clamp the solve path applies, or the solve path stops applying it on the straddling
+  cells. Choosing between those is the follow-on, and it needs a decision the plan does not settle.
+  The five gate logs and the numbers above are enough for a reader to reach it.</p>
+
+</article>
+</main>
+</body>
+</html>

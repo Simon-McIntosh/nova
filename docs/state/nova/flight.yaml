@@ -1,0 +1,14 @@
+version: 1
+
+# The project's own standing suite: every collected test file in its own
+# pytest process, with the files whose measured CPU wall exceeds ten minutes
+# routed to the H200 lane. The runner (reckon/crew/standing_suite.py) executes
+# this one command from the checkout root under the whole-run budget below,
+# kills the whole process group at it, and reads the combined log's
+# pytest-style summary line.
+review:
+  suite:
+    command:
+      - bash
+      - scripts/nova_lane/standing_suite.sh
+    budget: 3h

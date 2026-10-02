@@ -1,6 +1,6 @@
 HEADER revision=92613fd3d tree=/tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution/revisions/92613fd3d cwd=/tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution/revisions/92613fd3d
 HEADER module nova.equilibrium.clip_quadrature file:
-/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-regression-attribution/nova/equilibrium/clip_quadrature.py
+HEADER nova.equilibrium.clip_quadrature=/tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution/revisions/92613fd3d/nova/equilibrium/clip_quadrature.py (corrected: the run resolved nova from the extraction via PYTHONPATH; the value printed here originally was a worktree path read from a probe run outside the extraction cwd)
 revision=92613fd3d0e5736e7c47aea888d0183d97cc8271 tree=/tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution/revisions/92613fd3d command=['benchmarks/plasma_cell_map_fidelity.py', '--case', 'weak-rotation-reactor-static', '--cells', '-110', '--cpu-preflight']
 module.__file__=/tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution/revisions/92613fd3d/benchmarks/plasma_cell_map_fidelity.py
 cwd=/tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution/revisions/92613fd3d backend=cpu

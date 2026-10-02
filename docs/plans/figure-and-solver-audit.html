@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="31">
+<meta name="plan-version" content="32">
 </head>
 <body>
   <main class="plan-doc">
@@ -414,6 +414,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261002T093708304781-review-of-fsa-ledger-rows-record-their-gates" data-who="reckon-build" data-when="2026-10-02T09:59:15.481Z">
     <div class="r-comment-body"><p>Reviewed run r-20261002T093232427144-fsa-ledger-rows-record-their-gates (head ac83a864b, base d598cd193): verdict pass, total 89 — goal_fidelity 20, evidence 19, scope_discipline 20, durability 14, fit 16; three follow-on findings (a row-level `failures` key no ledger reader consumes, an argv stored as a list the ledger normaliser stringifies, and the missing gate/exit-status agreement guard the source followup requires); review record stored at review-of-fsa-ledger-rows-record-their-gates.json and its .at-ac83a864b companion.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261002T093232427144-fsa-ledger-rows-record-their-gates" data-who="reckon-build" data-when="2026-10-02T09:36:11.062Z">
+    <div class="r-comment-body"><p>Corrected two nova ledger rows in docs/state/nova/crew.json: nia-limited-boundary-touches-wall-2 now reads gate failed (exit 1, argv-list command, three failing ids under failures) and msc-persist-the-baseline-state-array binds its gate to after_suite.log (sha256 243371c8...57a, exit 0, 43 passed); 22 insertions and 10 deletions in 5 hunks, both rows read back through reckon crew ledger --view records.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

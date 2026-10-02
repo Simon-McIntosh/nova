@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="145">
+<meta name="plan-version" content="146">
 </head>
 <body>
 <main class="plan-doc">
@@ -746,7 +746,10 @@
     <div class="r-comment-body">S22 landed the fused-route axis enforcement at merge bb6331523. The review asked for three things: the modules outside the original gate, which the wider-gate node r-20261002T081037268041 ran at zero added failures; the solve-level identity test the rewrite removed; and the benchmark readers that now refuse unqualified iterates. The identity coverage that remains is the single-state equality test, because the fixture's relaxed map leaves the qualified region, where the two-read comparator also raises. Drivers that must inspect unqualified states should catch NoQualifiedAxisError or read under trace.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261002T052807496384-msc-fused-route-enforces-axis-qualification" data-who="reckon-build" data-when="2026-10-02T07:26:33.723Z">
-    <div class="r-comment-body"><p>fused linear read now enforces require_qualified_axis in _support_partition (nova/equilibrium/forward_operator.py), matching the read route; tests/test_fused_same_state_read.py drops the NoQualifiedAxisError fallback and adds a test holding the fused route to the read route&#x27;s refusal of an unqualified state. Measure: read(unqualified) and current_moments_and_observation(unqualified) both raise NoQualifiedAxisError on the identical array (head log EXIT=0); the declared negative control (call removed) reports DID NOT RAISE NoQualifiedAxisError with non-zero EXIT. Zero added failures against base d786948c4 across the three gate files: tests/test_fused_same_state_read.py 4 passed head and base; tests/test_topology_o_qualification.py 2 failed,4 passed identical head and base; tests/test_equilibrium_forward_reference.py on the H200 lane 5 failed,7 passed,17 errors with 22 identical failure ids at both revisions (0 added).</p></div>
+    <div class="r-comment-body"><p>fused linear read now enforces require_qualified_axis in _support_partition (nova/equilibrium/forward_operator.py), matching the read route; tests/test_fused_same_state_read.py drops the NoQualifiedAxisError fallback and adds a test holding the fused route to the read route's refusal of an unqualified state. Measure: read(unqualified) and current_moments_and_observation(unqualified) both raise NoQualifiedAxisError on the identical array (head log EXIT=0); the declared negative control (call removed) reports DID NOT RAISE NoQualifiedAxisError with non-zero EXIT. Zero added failures against base d786948c4 across the three gate files: tests/test_fused_same_state_read.py 4 passed head and base; tests/test_topology_o_qualification.py 2 failed,4 passed identical head and base; tests/test_equilibrium_forward_reference.py on the H200 lane 5 failed,7 passed,17 errors with 22 identical failure ids at both revisions (0 added).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261002T081037268041-msc-fused-route-wider-gate" data-who="reckon-build" data-when="2026-10-02T09:00:09.046Z">
+    <div class="r-comment-body"><p>Enforced-axis change at 571f4e8cc adds no failure in the three ungated modules: head == base on all three (tests/test_forward_operator_domain.py 3 failed,3 passed; tests/test_sol_support_selection.py 7 passed; tests/test_two_branch_batch_cost.py 2 passed), added failures zero, and the audit lists all 46 _support_partition call sites outside tests/ with 3 production and 7 benchmark/script hosts able to take an unqualified intermediate; report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/msc-fused-route-wider-gate.md.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

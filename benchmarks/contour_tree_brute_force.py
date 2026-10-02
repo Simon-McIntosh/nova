@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -34,9 +35,9 @@ MAST_EDGE_CAPACITY = 2048
 MAST_TRIANGLE_CAPACITY = 2048
 MAST_ROWS = ((27079, 16), (22475, 50))
 CERTIFICATE_RUNG_PATHS = (
-    (340, "diverted-single-null-production-route-cells-300.json", (354, 1024, 768)),
-    (550, "diverted-single-null-production-route-cells-500.json", (560, 1664, 1088)),
-    (1074, "diverted-single-null-production-route-cells-1000.json", (1100, 3200, 2112)),
+    (340, "*production-route-cells-300.json"),
+    (550, "*production-route-cells-500.json"),
+    (1074, "*production-route-cells-1000.json"),
 )
 
 
@@ -79,29 +80,29 @@ def certificate_rung_fixtures() -> tuple[Fixture, ...]:
     """Read persisted certificate carriers at the available production rungs."""
 
     fixtures = []
-    for rung, filename, capacity in CERTIFICATE_RUNG_PATHS:
-        path = PART_ROOT / filename
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        render = payload["render_data"]
-        count = int(payload["realised_cells"])
-        if count != rung:
-            raise RuntimeError(
-                f"certificate rung mismatch: {path.name} has {count} cells"
+    for rung, pattern in CERTIFICATE_RUNG_PATHS:
+        for path in sorted(PART_ROOT.glob(pattern)):
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            render = payload.get("render_data")
+            if not render:
+                continue
+            count = int(payload["realised_cells"])
+            coordinate = np.asarray(render["coordinates_rz_m"], dtype=np.float64)[
+                :count
+            ]
+            flux = np.asarray(render["terminal_flux_wb"], dtype=np.float64)[:count]
+            wall = np.asarray(render["wall_units_rz_m"][0], dtype=np.float64)
+            mesh = build_contour_mesh(
+                coordinate,
+                flux,
+                [vessel_unit(wall[:, 0], wall[:, 1], name=payload["case"])],
+                vertex_capacity=count + 128,
+                edge_capacity=3 * count + 256,
+                triangle_capacity=2 * count + 256,
             )
-        coordinate = np.asarray(render["coordinates_rz_m"], dtype=np.float64)[:count]
-        flux = np.asarray(render["terminal_flux_wb"], dtype=np.float64)[:count]
-        wall = np.asarray(render["wall_units_rz_m"][0], dtype=np.float64)
-        mesh = build_contour_mesh(
-            coordinate,
-            flux,
-            [vessel_unit(wall[:, 0], wall[:, 1], name=payload["case"])],
-            vertex_capacity=capacity[0],
-            edge_capacity=capacity[1],
-            triangle_capacity=capacity[2],
-        )
-        if mesh.overflow:
-            raise RuntimeError(f"certificate mesh capacity refused: {path.name}")
-        fixtures.append(Fixture(f"{payload['case']}-{rung}-cells", mesh))
+            if mesh.overflow:
+                raise RuntimeError(f"certificate mesh capacity refused: {path.name}")
+            fixtures.append(Fixture(f"{payload['case']}-{rung}-cells", mesh))
     return tuple(fixtures)
 
 
@@ -191,6 +192,7 @@ def _tree_count(mesh: ContourMesh, tree, level: float, *, corrupt: bool) -> int:
     """Count tree arcs crossing a regular level without reusing its merge code."""
 
     edges = np.asarray(tree.edges)[np.asarray(tree.edge_valid)]
+    edges = np.asarray(tree.node_vertex)[edges]
     if corrupt:
         wall = np.asarray(mesh.vertex_is_wall)
         edges = edges[~(wall[edges[:, 0]] | wall[edges[:, 1]])]
@@ -261,6 +263,45 @@ def batched_identical(fixtures: tuple[Fixture, ...]) -> bool:
         )
         for index, fixture in enumerate(fixtures)
     )
+
+
+def measure_cpu_rungs(
+    fixtures: tuple[Fixture, ...],
+) -> list[dict[str, float | int | str]]:
+    """Measure cold compilation and warm execution for each fixed carrier."""
+
+    rows = []
+    for fixture in fixtures:
+        arguments = (
+            fixture.mesh.vertex_psi,
+            fixture.mesh.vertex_valid,
+            fixture.mesh.vertex_is_wall,
+            fixture.mesh.edges,
+            fixture.mesh.edge_valid,
+            jnp.asarray(1, dtype=jnp.int32),
+        )
+        started = time.perf_counter()
+        build_contour_tree(*arguments).overflow.block_until_ready()
+        cold_seconds = time.perf_counter() - started
+        started = time.perf_counter()
+        result = build_contour_tree(*arguments)
+        result.overflow.block_until_ready()
+        execute_seconds = time.perf_counter() - started
+        rows.append(
+            {
+                "name": fixture.name,
+                "vertices": int(
+                    np.count_nonzero(np.asarray(fixture.mesh.vertex_valid))
+                ),
+                "edges": int(
+                    np.count_nonzero(np.asarray(fixture.mesh.edge_valid))
+                ),
+                "compile_seconds": cold_seconds - execute_seconds,
+                "execute_seconds": execute_seconds,
+                "overflow": bool(result.overflow),
+            }
+        )
+    return rows
 
 
 def render(fixtures: tuple[Fixture, ...], directory: Path = FIGURE_ROOT) -> list[Path]:

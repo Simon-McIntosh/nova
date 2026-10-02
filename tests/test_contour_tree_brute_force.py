@@ -82,6 +82,26 @@ def test_production_certificate_rungs_match_independent_components():
         assert all(row["tree"] == row["brute_force"] for row in result["rows"])
 
 
+def test_receipt_edges_index_compact_nodes_on_certificate_and_mast():
+    """Every receipt edge resolves through its compact node-row index."""
+
+    fixtures = (certificate_rung_fixtures()[0], mast_fixtures()[0])
+    for fixture in fixtures:
+        result = build_contour_tree(
+            fixture.mesh.vertex_psi,
+            fixture.mesh.vertex_valid,
+            fixture.mesh.vertex_is_wall,
+            fixture.mesh.edges,
+            fixture.mesh.edge_valid,
+            jnp.asarray(1, dtype=jnp.int32),
+        )
+        edges = np.asarray(result.edges)[np.asarray(result.edge_valid)]
+        valid = np.asarray(result.node_valid)
+        assert np.all(valid[edges])
+        carrier_vertices = np.asarray(result.node_vertex)[edges]
+        assert np.all(np.asarray(fixture.mesh.vertex_valid)[carrier_vertices])
+
+
 def test_mast_standalone_superlevel_counts_are_well_formed(mast):
     """The MAST carriers' independent superlevel counts are well formed.
 

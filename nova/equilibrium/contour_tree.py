@@ -56,9 +56,10 @@ class ContourTreeArrays:
     piecewise-linear vertex, ``node_psi`` is raw flux in webers, and
     ``critical_type`` uses the DD convention (minimum 0, saddle 1, maximum 2).
     ``node_valid`` and ``edge_valid`` make every array fixed shaped.  Edges
-    refer to vertex slots, which are also the node slots.  ``overflow`` means
-    that a candidate could not fit in the declared DD capacities; callers must
-    refuse that receipt instead of treating the prefix as a tree.
+    refer to compact node rows; ``node_vertex`` maps each valid node row back to
+    its carrier vertex.  ``overflow`` means that a candidate could not fit in
+    the declared DD capacities; callers must refuse that receipt instead of
+    treating the prefix as a tree.
     """
 
     node_vertex: jax.Array
@@ -400,7 +401,17 @@ def build_contour_tree(
     edge_count = jnp.sum(merged_valid, dtype=jnp.int32)
     edge_source = jnp.nonzero(merged_valid, size=edge_capacity, fill_value=0)[0]
     compact_edge_valid = jnp.arange(edge_capacity) < edge_count
+    carrier_vertex = jnp.arange(vertex_count, dtype=jnp.int32)
+    node_matches = (
+        node_source[:, None] == carrier_vertex[None, :]
+    ) & compact_node_valid[:, None]
+    vertex_node = jnp.argmax(node_matches, axis=0).astype(jnp.int32)
+    compact_edges = vertex_node[merged_edges[edge_source]]
+    edge_nodes_valid = jnp.all(
+        jnp.any(node_matches, axis=0)[merged_edges[edge_source]], axis=1
+    )
     overflow = overflow | (node_count > node_capacity) | (edge_count > edge_capacity)
+    overflow = overflow | jnp.any(compact_edge_valid & ~edge_nodes_valid)
     return ContourTreeArrays(
         node_vertex=node_source,
         node_psi=jnp.where(
@@ -410,7 +421,7 @@ def build_contour_tree(
         ),
         node_valid=compact_node_valid,
         critical_type=jnp.where(compact_node_valid, critical_type[node_source], -1),
-        edges=merged_edges[edge_source],
+        edges=compact_edges,
         edge_valid=compact_edge_valid,
         overflow=overflow,
     )

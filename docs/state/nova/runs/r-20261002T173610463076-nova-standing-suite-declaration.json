@@ -1,0 +1,371 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "9a7af04e2e2f4ac6ae05fe239968cf28fb2f85ee",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 10649371,
+      "input_tokens_cumulative": 10649371,
+      "output_tokens": 54617,
+      "output_tokens_cumulative": 54617,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 455,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "f1e9f8f4bfb4f2e53f634cd122da3720598b9433",
+    "5ff6f6de1315bf463158ac5fc6c31d0f1d9e394e",
+    "90529c613d19c93132b471d699cf2fcfe2b4d001"
+  ],
+  "completed_at": "2026-10-02T18:18:37.188Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T17:36:32Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "run the full suite",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "scripts/nova_lane/run.sh",
+    ".h200.launch.log"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider --timeout 0 tests/test_standing_suite_wrapper.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T173610463076-nova-standing-suite-declaration/gate-wrapper-test.log"
+  },
+  "impl_move": {
+    "at_complete": 0.0,
+    "at_dispatch": 0.0,
+    "plan": "nova-portfolio-replan",
+    "reason": "test-lane infrastructure under §4; the section's census items remain",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T18:36:13.617298+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T17:36:13Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 21,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 12,
+    "headroom": 5,
+    "mean_context": 151429,
+    "observed_at": "2026-10-02T17:35:52Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T18:18:37.188Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T173610463076-nova-standing-suite-declaration/manifest.md",
+  "member": "disposable-r-20261002T173610463076-nova-standing-suite-declaration",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_standing_suite_wrapper.py::test_summary_line_carries_every_category"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_standing_suite_wrapper.py::test_summary_line_carries_every_category"
+    ],
+    "declaration": "remove the wrapper's final summary line; the wrapper test must fail",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T173610463076-nova-standing-suite-declaration/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T173610463076-nova-standing-suite-declaration/negative-control.log",
+    "test_paths": [
+      "tests/test_standing_suite_wrapper.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "nova-standing-suite-declaration",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1887,
+          "cached_input_tokens": 691899,
+          "input_tokens": 693788,
+          "output_tokens": 1731,
+          "reasoning_output_tokens": 167,
+          "total_tokens": 695519,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Read the draft in full first. The declaration is the draft's section 1 block (command [bash, scripts/nova_lane/standing_suite.sh], budget 3h). The wrapper is the draft's section 3 script: one fresh pytest process per test file, files over ten minutes of CPU wall routed through scripts/nova_lane/run.sh to the H200, -m slow excluded on the CPU pass, one combined pytest-style summary line at the end. Verify the draft's section 4 inputs against the repository rather than copying them; tests/test_equilibrium_forward_solve.py now carries an accelerator-routes test measured at 4649 s on CPU (749 s on the H200, S21 run r-20261002T084121851662, merged at db580bec8), which the draft's records predate, so correct the routed list or the arithmetic wherever the repository says otherwise. Evidence required: (1) a fast test, tests/test_standing_suite_wrapper.py, runs the wrapper against two or three tiny fixture test files (one passing, one failing, one killed by a short per-file bound) with H200 routing disabled, asserting the final summary line carries every category with the ERROR line for the killed file, in the form reckon/crew/standing_suite.py parses; a mutation dropping the summary line makes it fail (log committed). (2) A dry run of the real wrapper (a list-only mode, added if the draft has none) prints the per-file plan (CPU-pass files, H200-routed files, the -m expression) without executing the suite; output committed. (3) reckon's own config reader returns the command and the 3h budget for project nova, logged. (4) The evidence fragment states what the draft's section 4 said, what the repository shows, what changed. Do NOT run the full suite or reckon crew suite run: the coordinator schedules the first wave close separately. Run the fast test in place with pytest --timeout 0. Every uv command carries --no-sync; nothing runs uv sync. The manifest status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Land nova's standing-suite declaration, a docs/state/nova/flight.yaml review.suite block running the wrapper scripts/nova_lane/standing_suite.sh, as designed in the reckon draft /home/ITER/mcintos/.config/reckon/crew/reports/reckon/s25-coord/nova-standing-suite-draft.md, with the draft's timing inputs checked against the repository.",
+    "id": "nova-standing-suite-declaration",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T17:36:13Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 21,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 12,
+      "headroom": 5,
+      "mean_context": 151429,
+      "observed_at": "2026-10-02T17:35:52Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T173610463076-nova-standing-suite-declaration/manifest.md",
+    "negative_control": "remove the wrapper's final summary line; the wrapper test must fail",
+    "plan": "nova-portfolio-replan",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/state/nova/flight.yaml",
+      "scripts/nova_lane/standing_suite.sh",
+      "tests/test_standing_suite_wrapper.py",
+      "docs/figures/nova-portfolio-replan/standing-suite",
+      "docs/evidence/fragments/nova-portfolio-replan/nova-standing-suite-declaration.html",
+      "docs/figures/nova-portfolio-replan/nova-standing-suite-declaration"
+    ]
+  },
+  "orientation_input_tokens": 2053596.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "nova-standing-suite-declaration",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T17:36:18.145312+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "nova-portfolio-replan",
+  "plan_impl_at_dispatch": 0.0,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "90529c613d19c93132b471d699cf2fcfe2b4d001",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "9a7af04e2e2f4ac6ae05fe239968cf28fb2f85ee",
+    "reviewed_head_sha": "90529c613d19c93132b471d699cf2fcfe2b4d001",
+    "scores": {
+      "durability": 20,
+      "evidence": 20,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 100
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T173610463076-nova-standing-suite-declaration",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "27b6ef09-40db-4662-981c-eba6aad1cd87",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 10649371,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 2510.535,
+    "generated_tokens": 54617,
+    "generation_seconds": 2230.468,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 39.6,
+    "machine_seconds": 280.067,
+    "peak_input_tokens": 189982,
+    "tokens_per_second": 24.49,
+    "wall_tokens_per_second": 21.76
+  },
+  "time_budget": "60m",
+  "tool_steps": 79.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 2525,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T18:18:38Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T17:36:41Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T173610463076-nova-standing-suite-declaration",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 9518,
+    "worker_pid": 2942299
+  },
+  "worker_seconds": 2477,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

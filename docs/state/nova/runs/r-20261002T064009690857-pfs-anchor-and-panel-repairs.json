@@ -1,0 +1,443 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "9ac842a600928fd88b9b68ff531265be0cbb06d3",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 19045581,
+      "input_tokens_cumulative": 19045581,
+      "output_tokens": 82333,
+      "output_tokens_cumulative": 82333,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 539,
+    "files": 16,
+    "removed": 3
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "3581cf1337cbbf802b87f8a4a6d10c56e2976fa4",
+    "ef65f088146274fd31cbcb42467a4b97dd731e67",
+    "77b3004067ccc83be495991e82c8fdf63d799caf"
+  ],
+  "completed_at": "2026-10-02T07:46:10.108Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T06:40:39Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "compensator-authority/compensator-authority.png"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "python docs/figures/playable-forward-solve/pfs-anchor-and-panel-repairs/render_panels.py; python docs/figures/playable-forward-solve/pfs-anchor-and-panel-repairs/render_attribution.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T064009690857-pfs-anchor-and-panel-repairs/render-gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.996,
+    "at_dispatch": 0.996,
+    "plan": "playable-forward-solve",
+    "reason": "figure and caption repairs for audit followups; the plan's executable sections are untouched",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T07:30:14.553719+00:00",
+    "horizon_seconds": 3000,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T06:40:14Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 2,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 16,
+    "headroom": 1,
+    "mean_context": 160000,
+    "observed_at": "2026-10-02T06:40:12Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T07:46:10.108Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T064009690857-pfs-anchor-and-panel-repairs/manifest.md",
+  "member": "s19i-ucc-mergeprep",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "pfs-anchor-and-panel-repairs",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 5745,
+          "cached_input_tokens": 512057,
+          "input_tokens": 517804,
+          "output_tokens": 2241,
+          "reasoning_output_tokens": 523,
+          "total_tokens": 520045,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Inputs: the reviewed triage at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-triage-pfs-cank.md, rows 3, 6 and 7. The review found its no-change currency claim false (one playable figure commit, 872eccce5, since 2026-09-21), so re-verify each defect at HEAD before editing and record what was found. Rendering reads committed receipts only, on the login node; no solve runs. Measured, each with its recorded output: every limited-anchor caption states the state actually drawn, rows 11 to 14 as refusals and rows 15 to 17 at the receipt's own flux and wall position, and the atlas paragraph calls no row converged or boundary-limited against its receipt; no panel in the four named centroid-attribution and batched-labeller figures is drawn from an absent or invalid series, the throughput curve is replaced by the refusal, and the compensator line breaks between its two measured groups with the nine-of-ten claim reconciled; early-frame-placement panels are sorted by row, carry no frame or grey background, and draw every unconverged arm in a refused style titled unconverged; every regenerated figure follows the repository plotting rules and is staged with git add -f; the landing fragment cites all three followup ids",
+    "estimated_hours": null,
+    "goal": "make the limited-anchor, centroid-attribution, batched-labeller and early-frame-placement figures state the data they draw, per followups f-fsaudit-repair-limited-anchor-census-panels, f-fsaudit-repair-empty-and-invalid-data-panels and f-fsaudit-repair-early-frame-placement-panel",
+    "id": "pfs-anchor-and-panel-repairs",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T06:40:14Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 2,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 16,
+      "headroom": 1,
+      "mean_context": 160000,
+      "observed_at": "2026-10-02T06:40:12Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T064009690857-pfs-anchor-and-panel-repairs/manifest.md",
+    "negative_control": "none: caption and panel agreement verified by re-reading each caption against its named receipt field",
+    "plan": "playable-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§8",
+    "spec_level": "exact",
+    "time_budget": "50m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/playable-forward-solve/limited-anchor",
+      "docs/figures/playable-forward-solve/centroid-attribution",
+      "docs/figures/playable-forward-solve/batched-labeller",
+      "docs/figures/playable-forward-solve/early-frame-placement",
+      "docs/evidence/poloidal-convergence-atlas.html",
+      "docs/evidence/archive/playable-forward-solve-landed.html",
+      "docs/evidence/fragments/playable-forward-solve/pfs-anchor-and-panel-repairs.html",
+      "docs/figures/playable-forward-solve/pfs-anchor-and-panel-repairs"
+    ]
+  },
+  "orientation_input_tokens": 4774250.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "pfs-anchor-and-panel-repairs",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T06:40:19.037748+00:00",
+    "score": 0.71875,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "playable-forward-solve",
+  "plan_impl_at_dispatch": 0.996,
+  "plan_link": null,
+  "promoted_revision": "77b3004067ccc83be495991e82c8fdf63d799caf",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "9ac842a600928fd88b9b68ff531265be0cbb06d3",
+    "reviewed_head_sha": "77b3004067ccc83be495991e82c8fdf63d799caf",
+    "scores": {
+      "durability": 5,
+      "evidence": 13,
+      "fit": 17,
+      "goal_fidelity": 16,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 71
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "run_id": "r-20261002T064009690857-pfs-anchor-and-panel-repairs",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§8",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "2af7c9bd-e6e9-491a-9379-85c4e1f19acc",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 19045581,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 3918.052,
+    "generated_tokens": 82333,
+    "generation_seconds": 3655.305,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 47.7,
+    "machine_seconds": 262.747,
+    "peak_input_tokens": 229000,
+    "tokens_per_second": 22.52,
+    "wall_tokens_per_second": 21.01
+  },
+  "time_budget": "50m",
+  "tool_steps": 111.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "budget_overrun": true,
+        "budget_overrun_seconds": 1195,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: the diverted single-null row at 110 cells cannot be admitted from this node: the per-layout level-run count is a runtime property of the flux and must be declared by the clip caller; and the only such caller; forward_operator._profile_support (nova/equilibrium/forward_operator.py:3435); is outside the granted write paths and is owned by the concurrent peer run r-20261002T052807496384-msc-fused-route-enforces-axis-qualification. A host-side derivation from the flux is impossible because the curved clip path runs under jax.jit (tests/test_equilibrium_separatrix_clip.py:751).",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 4795,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-02T06:03:07Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-02T05:20:30Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 18702,
+          "worker_pid": 3234007
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "the diverted single-null row at 110 cells cannot be admitted from this node: the per-layout level-run count is a runtime property of the flux and must be declared by the clip caller; and the only such caller; forward_operator._profile_support (nova/equilibrium/forward_operator.py:3435); is outside the granted write paths and is owned by the concurrent peer run r-20261002T052807496384-msc-fused-route-enforces-axis-qualification. A host-side derivation from the flux is impossible because the curved clip path runs under jax.jit (tests/test_equilibrium_separatrix_clip.py:751).",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 2232,
+        "log_fresh": false,
+        "manifest_commits": [
+          "5b84f5bcb7dbc2e1d7451f49440996d61cafd480",
+          "7cac2452606e4fa8c8483f96b5f186955cf93a31"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "bb259726343376417f5b13139b0ff7044f01e7afa56b147d33a9a6258e47aba9",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/manifest.md; resolve the blocker before resuming the run",
+        "node": "ecq-per-layout-vertex-capacity",
+        "phase": "blocked",
+        "plan": "exact-clip-moment-quadrature",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+        "session": "s22-nova",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+          "session_id": "cd41481d-f7a6-4c2a-a110-9ff7b328886e",
+          "source": "pointer"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 2288,
+        "terminal_at": "2026-10-02T06:02:09Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-per-layout-vertex-capacity"
+      }
+    ]
+  },
+  "wall_seconds": 3931,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T07:46:14Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T06:40:46Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T064009690857-pfs-anchor-and-panel-repairs",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 14369,
+    "worker_pid": 301004
+  },
+  "worker_seconds": 3879,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

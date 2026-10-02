@@ -313,6 +313,32 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "d255945461ee063747b05e7097fbefb59c6abfdd",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5026,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T225511267666-fsri-moment-map-derivative-rca",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-moment-map-derivative-rca"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [

@@ -1,0 +1,104 @@
+<!-- node: fsri-frozen-route-settle-evidence | plan: forward-solver-route-integrity §1 -->
+<h3 id="fsri-frozen-route-settle-evidence">Frozen-Newton settle repair: residual, terminal state and route cost</h3>
+
+<p>The settle repair freezes the partition within each Newton pass, re-reads it
+live between passes, terminates on the live residual only, and falls back to
+separately compiled live-read Newton steps. Its evidence rests on one after
+receipt and the log trail of the arms that led to it. This node adds the
+residual-against-step figure, a poloidal flux panel of the terminal state, and
+the route-cost accounting; it changes no solver source.</p>
+
+<p><strong>Before.</strong> The pre-repair frozen route recorded a live residual
+of <code>2.372871479533e-06</code> and terminated <code>ACTIVE_SET_SETTLED</code>
+with the mask unchanged: the loop ended on the retained state without consulting
+the live residual, so the frozen partition settled a fixed point that had not
+converged. The Newton-Krylov live residual is flat across its two active-set
+steps at that value, above the registered <code>1e-6</code> tolerance
+<em>(figure, left-of-right panel, solid)</em>.</p>
+
+<p><strong>After.</strong> The repaired route terminates <code>CONVERGED</code>
+with a live residual of <code>1.282728063088e-11</code>: two frozen passes, three
+live partition reads, and one live-read Newton step. The live-read step crosses
+the tolerance on its own step <em>(figure, dashed)</em>. The Picard reference
+route, unaffected by the repair, drives the shared map from <code>1.2948</code>
+to <code>2.1257e-08</code> over its 480 map evaluations <em>(figure, left
+panel)</em>.</p>
+
+<figure>
+  <img src="/nova/figures/forward-solver-route-integrity/frozen-route-settle-evidence/route-residual-before-after.png"
+       alt="Fixed-point residual against step: the Picard reference route per map evaluation on the left, and the Newton-Krylov live residual per active-set step before and after the settle repair on the right, with the registered tolerance marked">
+  <figcaption>Left: the Picard reference route (blue) falls from <code>1.29</code>
+  to <code>0.21e-07</code> over 480 map evaluations. Right: the Newton-Krylov
+  live residual per active-set step &mdash; before the repair (solid) flat at
+  <code>2.37e-06</code> and terminated <code>ACTIVE_SET_SETTLED</code>; after
+  (dashed) the live-read Newton fallback reaches <code>1.28e-11</code> and
+  terminates <code>CONVERGED</code>. Dotted line: the registered
+  <code>1e-6</code> tolerance. Reads and histories from the two committed RCA
+  receipts; the Picard trace from the H200 solve in this node (job 1280457).</figcaption>
+</figure>
+
+<figure>
+  <img src="/nova/figures/forward-solver-route-integrity/frozen-route-settle-evidence/terminal-flux-panel.png"
+       alt="Poloidal flux contours of the solved Newton-Krylov terminal state beside the Picard reference on one shared level array, with the magnetic axis marked and the first wall drawn">
+  <figcaption>Terminal state of the accelerator machine, rendered with the
+  committed <code>nova.media</code> painters. Blue: the solved Newton-Krylov
+  terminal flux (live residual <code>1.28e-11</code>, <code>converged=True</code>).
+  Grey, beneath: the Picard reference on the same physical level array; the two
+  coincide, so the reference is hidden where the maps agree. Solid triangle: the
+  magnetic axis (no X-point on this wall-limited branch). Black: the first wall.
+  H200 solve, job 1280457, revision <code>3a4faa65c</code>.</figcaption>
+</figure>
+
+<h4>Negative arms (measured)</h4>
+<ul>
+  <li><strong>Honest bound alone</strong> (<code>fd671f3dc</code>): an honest
+  settle bound without the live fallback still fails on the H200 at
+  <code>2.372871479533e-06</code> after 412.21&nbsp;s.</li>
+  <li><strong>Frozen objective</strong> (<code>82ba41417</code>): evaluates the
+  trajectory through the frozen map and rejects on flux parity, missing the
+  Picard reference by <code>1.1976779784e-05</code>.</li>
+  <li><strong>Live objective on the frozen map</strong> (<code>de11143a0</code>):
+  evaluates the trajectory through the live objective, rejects it, and repeats
+  the <code>2.372871479533e-06</code> residual.</li>
+  <li><strong>Combined graph</strong> (<code>47f4fe523</code>): passes the H200
+  arm in 768.47&nbsp;s but aborts in the JAX CPU compilation of the combined
+  program (<code>EXIT=134</code>).</li>
+</ul>
+
+<h4>Passing arm</h4>
+<p><code>224a3b967</code> separates the frozen and live programs at the host
+unit: the accelerator-routes test passes with Picard flux parity at
+<code>1e-6</code> on the H200 in 749.31&nbsp;s (job 1280379) and on CPU in
+4649.01&nbsp;s. The after RCA receipt (job 1280440) reads the terminal live
+residual <code>1.282728063088e-11</code> with 2 frozen passes, 3 live partition
+reads and 1 live-read step, against the before receipt's
+<code>2.372871476315e-06</code> <code>ACTIVE_SET_SETTLED</code>.</p>
+
+<h4>Route cost</h4>
+<p>The lane logs record wall time only: the base route (<code>fd671f3dc</code>)
+fails at 412.21&nbsp;s; the split-fallback passing arm runs 749.31&nbsp;s on the
+H200 and 4649.01&nbsp;s on CPU; the combined-graph attempt passes the H200 in
+768.47&nbsp;s but aborts on CPU. <strong>Compile seconds and execute seconds are
+not separable from these logs and are reported as unmeasured</strong>, never
+estimated: the runs predate the launcher's per-program cache rows.</p>
+
+<table>
+  <thead><tr><th>arm</th><th>host</th><th>outcome</th><th>compile [s]</th><th>execute [s]</th><th>total [s]</th></tr></thead>
+  <tbody>
+    <tr><td>base route <code>fd671f3dc</code></td><td>H200</td><td>fail 2.37e-06</td><td>unmeasured</td><td>unmeasured</td><td>412.21</td></tr>
+    <tr><td>combined graph</td><td>H200</td><td>pass</td><td>unmeasured</td><td>unmeasured</td><td>768.47</td></tr>
+    <tr><td>combined graph</td><td>CPU</td><td>abort 134</td><td>unmeasured</td><td>unmeasured</td><td>&mdash;</td></tr>
+    <tr><td>frozen pass + live fallback</td><td>H200</td><td>pass</td><td>unmeasured</td><td>unmeasured</td><td>749.31</td></tr>
+    <tr><td>frozen pass + live fallback</td><td>CPU</td><td>pass</td><td>unmeasured</td><td>unmeasured</td><td>4649.01</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Per-solve route counters</strong> (after receipt, job 1280440): frozen
+passes 2, live partition reads 3, live-read Newton steps 1 (attempted 1, accepted
+1); before receipt: 2 passes, 3 reads, 0 live steps, settled at
+<code>2.37e-06</code>.</p>
+
+<p><strong>Reproduce.</strong>
+<code>scripts/nova_lane/run.sh --log &lt;path&gt; --mode script --rungs h200 --force-submit --env RECKON_ALLOW_NESTED_LAUNCH=1 -- benchmarks/frozen_route_settle_figures.py</code>
+rendered both figures from the persisted solve; the arrays are committed under
+this directory.</p>

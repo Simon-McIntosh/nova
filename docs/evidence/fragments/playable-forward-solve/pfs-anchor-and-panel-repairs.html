@@ -45,8 +45,11 @@ elementwise figure whose element-0 legend entry plotted no points.</p>
 <p>The placement grid is sorted by frame row (11..17), carries no panel frame or grey background,
 and draws every unconverged arm in a refused dashed style, with the unconverged arms named in each
 panel title — including the <code>conditioned_warm</code> arm of rows 16 (ratio 1.370) and 17 (1.544)
-whose boundary crosses the first wall inboard (the <code>conditioned</code> arm is unconverged on both
-rows but does not cross).</p>
+whose boundary crosses the first wall inboard. The <code>conditioned</code> arm is unconverged on both
+rows; at row 17 the receipt records <code>converged=false</code> with no <code>enclosed_area_ratio</code>
+(its solve raises <code>NoQualifiedAxisError</code>), so no contour is drawn there. Correction of
+<code>2026-10-02</code>: an earlier version of this paragraph stated the conditioned arm "does not
+cross" at row 17; the receipt records no ratio to cross with.</p>
 
 <h3>Deviations and out-of-scope</h3>
 <ul>

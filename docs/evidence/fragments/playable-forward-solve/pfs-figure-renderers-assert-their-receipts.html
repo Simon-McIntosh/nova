@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>pfs-figure-renderers-assert-their-receipts — landing record</title>
+</head>
+<body>
+<section id="pfs-figure-renderers-assert-their-receipts">
+<h2>Figure render drivers assert their receipts</h2>
+<p>A new test, <code>tests/test_playable_figure_receipts.py</code>, re-runs the three
+playable render drivers with <code>Figure.savefig</code> replaced by a no-op, captures the
+title and label strings they actually draw, and asserts each number or state word equals
+the receipt field it was read from. It covers the limited-anchor census (rows 11 to 17,
+refusal or boundary flux), the early-frame-placement convergence states, the
+centroid-attribution class panel, the batched-labeller arms 1.06/2.34/3.18 slices/s and
+its parity flag, the keyframes throughput series, the compensator-authority groups at rows
+15 to 17 and 95 to 97, and the axis-configuration identity and offsets. The drivers read
+their receipts under <code>PLAYABLE_FIGURE_RECEIPTS_ROOT</code> when set, so a drift can be
+produced against a perturbed copy while the expectation stays the committed receipt.</p>
+
+<h3>Measure</h3>
+<p>Head: 8 passed in a fresh process on one compute node, <code>JAX_PLATFORMS=cpu
+--timeout 0</code>, no image written to the repository tree.
+Negative control: perturbing one field (row 15 <code>boundary_flux_wb</code> in a temporary
+copy of <code>limited-anchor-containment.json</code>) makes the drawn
+<code>psi_N = 0.0020</code> disagree with the receipt's <code>0.0138</code>: 1 failed, 7
+passed, exit 1. Also corrects the stale clause in
+<code>pfs-anchor-and-panel-repairs.html</code> that stated the conditioned arm does not cross
+at row 17; the receipt records <code>converged=false</code> with no
+<code>enclosed_area_ratio</code>.</p>
+</section>
+</body>
+</html>

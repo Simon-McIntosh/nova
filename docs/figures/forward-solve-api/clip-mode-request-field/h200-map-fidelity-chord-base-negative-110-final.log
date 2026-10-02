@@ -1,3 +1,4 @@
+revision=bf8122ae28f481e1ac7eb9194bdfcf21f6f567e5 tree=/tmp/fsapi-clip-mode-base/nova command=JAX_PLATFORMS=cuda /home/ITER/mcintos/Code/nova/.venv/bin/python /tmp/fsapi-clip-mode-base/nova/benchmarks/plasma_cell_map_fidelity.py --case weak-rotation-reactor-static --cells -110 --output /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core/docs/figures/forward-solve-api/clip-mode-request-field/map-fidelity-chord-base-negative-110
 NOVA_LANE_START=2026-10-02T19:57:50+0200
 PLACEMENT=submit
 RUNG=h200

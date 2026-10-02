@@ -1,0 +1,587 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "d8d417286ec7e0c0ade25d03ef714a4cdeb34814",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 26888192,
+      "cached_input_tokens_cumulative": 26888192,
+      "input_tokens": 27093926,
+      "input_tokens_cumulative": 27093926,
+      "output_tokens": 55255,
+      "output_tokens_cumulative": 55255,
+      "reasoning_output_tokens": 17176,
+      "reasoning_output_tokens_cumulative": 17176
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 551,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "6698d40b2a689c9e57cfd806ebd0ae72f742939f",
+    "5bac66d2ba673ee7d5360fb3b2b4fd1619961724",
+    "1dfc73eae342da3133374c5bc4091e6c10e2c138",
+    "d0e8f17e44aa6eb6f05cc94141ed513e1fa18d04"
+  ],
+  "completed_at": "2026-10-02T21:55:30Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T20:56:01Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "measure.py",
+    "derivatives.json"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/centroid-constrained-oracle-solve/root-cause/centroid-moment/measure.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T205538048023-cco-root-cause-centroid-moment-contract/centroids.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8,
+    "plan": "centroid-constrained-oracle-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 3.599513052887867,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-04T16:44:52Z, which is after this node's 3600s horizon ending 2026-10-02T21:55:40.630802+00:00",
+    "horizon_ends_at": "2026-10-02T21:55:40.630802+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T20:55:39Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-04T16:44:52Z",
+    "resets_at": "2026-10-09T10:39:35Z",
+    "seconds_until_reset": 567835,
+    "state": "quiet",
+    "utilisation_pct": 22.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T20:55:39Z",
+    "read_at": "2026-10-02T20:55:40Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 22.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T21:55:30Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T205538048023-cco-root-cause-centroid-moment-contract/manifest.md",
+  "member": "disposable-r-20261002T205538048023-cco-root-cause-centroid-moment-contract",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "cco-root-cause-centroid-moment-contract",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1397,
+          "cached_input_tokens": 666982,
+          "input_tokens": 668381,
+          "output_tokens": 1917,
+          "reasoning_output_tokens": 615,
+          "total_tokens": 670298,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Lead ruling 2026-10-02: root-cause before any fix or ladder; this node measures, it fixes nothing and runs no solve. Inputs: /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-flux-map-gallery.md (converged map contracted, wall flux -4.5 to -20.6 Wb, axis +22.2 mm) and /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-map-and-compensator-closed-forms.md (map and compensator columns verified; the production row at nova/equilibrium/observation.py weights cell centres by cell current only, while S21's map-fidelity diagnostic adds within-cell first moments). CPU in place with JAX_PLATFORMS=cpu, on main, for the weak-rotation-reactor-static -110 row at 135 cells: (1) at the analytic Solovev state, compute the row's current centroid both in the production zeroth-moment form and in a first-moment form that adds each cell's within-cell first moment, reusing the S21 diagnostic's computation (name its source), and give each against the analytic continuous centroid; (2) linearise the fixed-point map at the analytic state and measure the coupled centroid response D_c (I - D_F)^-1 C to each compensator column, the field it predicts to cancel the zeroth-moment offset, and compare it with the converged -2.1256e-2 T and the direct-leverage prediction +3.79e-3 T, stating the conditioning of I - D_F and any eigenvalue near 1; (3) evaluate both centroid forms on the converged terminal state /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T133233397975-cco-cap-factor-finite-tangent/h200-receipt/control-positive-state.npy. Receipts and panels under docs/figures/centroid-constrained-oracle-solve/root-cause/centroid-moment/; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-centroid-moment-contract.md states whether the zeroth-moment offset and the coupled response together explain the converged field and the contracted map, and what a first-moment row would require of the analytic state.",
+    "estimated_hours": null,
+    "goal": "test whether the centroid row's cell-centre definition and the coupled fixed-point response explain the bogus constrained flux map",
+    "id": "cco-root-cause-centroid-moment-contract",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T20:55:39Z",
+      "read_at": "2026-10-02T20:55:40Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 22.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T205538048023-cco-root-cause-centroid-moment-contract/manifest.md",
+    "negative_control": "the linearised coupled response must reproduce the direct leverage +1.629 m/T when the map Jacobian D_F is set to zero, so the susceptibility calculation is shown able to reduce to the measured direct response",
+    "plan": "centroid-constrained-oracle-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "open",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/centroid-constrained-oracle-solve/root-cause/centroid-moment",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-centroid-moment-contract.md",
+      "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-root-cause-centroid-moment-contract.html",
+      "docs/figures/centroid-constrained-oracle-solve/cco-root-cause-centroid-moment-contract"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex",
+    "member": null,
+    "node": "cco-root-cause-centroid-moment-contract",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T20:55:46.081002+00:00",
+    "score": 0.83125,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "hold",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": null,
+    "comment": "",
+    "confidence": 0.39,
+    "decision_source": "jev",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "unavailable",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 1.3780549642476851,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 10,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 3
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 3,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": null,
+    "jev_latency_ms": 393.969,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1950.632,
+    "model": null,
+    "offered": [
+      {
+        "availability": "served",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 1.3780549642476851,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 3,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude-opus": 0.31,
+      "hold": 0.69
+    },
+    "rendered_token_estimate": 731,
+    "usage": {
+      "cost": 6.7914e-05,
+      "input_tokens": 1617,
+      "output_tokens": 34
+    }
+  },
+  "plan": "centroid-constrained-oracle-solve",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "d0e8f17e44aa6eb6f05cc94141ed513e1fa18d04",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "none",
+  "role": "implement",
+  "run_id": "r-20261002T205538048023-cco-root-cause-centroid-moment-contract",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fe67-287f-7593-be8b-93c7bea27376",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "open",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 26888192,
+    "cumulative_input_tokens": 53982118,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 72431
+  },
+  "time_budget": "60m",
+  "tool_steps": 151.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3569,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T21:55:41Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T21:34:59Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T205538048023-cco-root-cause-centroid-moment-contract",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 585,
+    "worker_pid": 542163
+  },
+  "worker_seconds": 3569,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-02T21:55:30Z",
+    "session_id": "01a0fe67-287f-7593-be8b-93c7bea27376",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-centroid-moment-contract"
+  }
+}

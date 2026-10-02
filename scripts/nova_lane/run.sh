@@ -76,10 +76,40 @@ join_by() {
   printf '%s\n' "${joined}"
 }
 
+pytest_timeout_argument() {
+  local index argument
+  for ((index = 0; index < ${#target_args[@]}; index++)); do
+    argument=${target_args[index]}
+    case "${argument}" in
+      --timeout)
+        if ((index + 1 < ${#target_args[@]})); then
+          printf '%s\n' "${target_args[index + 1]}"
+        else
+          printf '<missing value>\n'
+        fi
+        return 0
+        ;;
+      --timeout=*)
+        printf '%s\n' "${argument#--timeout=}"
+        return 0
+        ;;
+    esac
+  done
+  return 1
+}
+
 # Populate the global `command` array for the requested target.
 build_command() {
+  pytest_timeout=''
   case "${mode}" in
-    pytest) command=("${SHARED_PYTHON}" -m pytest -p no:cacheprovider "${target}" "${target_args[@]}") ;;
+    pytest)
+      if ! pytest_timeout="$(pytest_timeout_argument)"; then
+        pytest_timeout=${NOVA_LANE_TEST_TIMEOUT:-3600}
+        command=("${SHARED_PYTHON}" -m pytest -p no:cacheprovider "${target}" "${target_args[@]}" --timeout "${pytest_timeout}")
+      else
+        command=("${SHARED_PYTHON}" -m pytest -p no:cacheprovider "${target}" "${target_args[@]}")
+      fi
+      ;;
     script) command=("${SHARED_PYTHON}" "${target}" "${target_args[@]}") ;;
     python-c) command=("${SHARED_PYTHON}" -c "${target}" "${target_args[@]}") ;;
     *) die "unknown --mode ${mode}" ;;
@@ -114,6 +144,7 @@ run_payload() {
     printf 'JAX_PLATFORMS=%s\n' "${JAX_PLATFORMS}"
     printf 'TMPDIR=%s\n' "${TMPDIR}"
     printf 'MODE=%s\n' "${mode}"
+    if [[ "${mode}" == pytest ]]; then printf 'PYTEST_TIMEOUT=%s\n' "${pytest_timeout}"; fi
     printf 'COMMAND='
     printf '%q ' "${command[@]}"
     printf '\n'
@@ -238,6 +269,10 @@ while (($#)); do
 done
 if [[ -z "${target}" && $# -gt 0 ]]; then target=$1; shift; fi
 target_args=("$@")
+payload_target_args=("${target_args[@]}")
+if [[ "${mode}" == pytest ]] && ! pytest_timeout_argument >/dev/null; then
+  payload_target_args+=(--timeout "${NOVA_LANE_TEST_TIMEOUT:-3600}")
+fi
 
 # --- validation ------------------------------------------------------------
 [[ -n "${log_path}" ]] || { usage; die '--log is required'; }
@@ -272,7 +307,7 @@ if [[ "${dry_run}" == true ]]; then
     platforms="$(rung_platforms "${r}")"
     mapfile -t rung_flags < <(rung_sbatch_flags "${r}")
     printf 'RUNG=%s JAX_PLATFORMS=%s SUBMIT_COMMAND=' "${r}" "${platforms}"
-    submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${cores}" --mem="${mem}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${target_args[@]}")
+    submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${cores}" --mem="${mem}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${payload_target_args[@]}")
     printf '%q ' "${submit[@]}"
     printf '\n'
     printf 'PAYLOAD_PRELUDE=%s\n' "${prelude}"
@@ -343,7 +378,7 @@ wait_for_job() {
 for r in "${rung_array[@]}"; do
   export NOVA_LANE_RUNG="${r}"
   mapfile -t rung_flags < <(rung_sbatch_flags "${r}")
-  submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${cores}" --mem="${mem}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${target_args[@]}")
+  submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${cores}" --mem="${mem}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${payload_target_args[@]}")
   if ! out="$("${submit[@]}")"; then
     die "sbatch submission failed for rung ${r}"
   fi

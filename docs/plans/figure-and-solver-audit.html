@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="40">
+<meta name="plan-version" content="41">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -450,6 +450,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261002T124932834128-fsa-eight-ledger-rows-read-against-logs" data-who="reckon-build" data-when="2026-10-02T13:08:03Z">
     <div class="r-comment-body"><p>Reconciled eight passed/nonzero ledger rows against their logs: one gate corrected to failed with its one failure ID, seven retained passes now state their causes, and the closing recount finds 0 unexplained rows.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261002T130847636928-review-of-fsa-eight-ledger-rows-read-against-logs" data-who="reckon-build" data-when="2026-10-02T13:25:13Z">
+    <div class="r-comment-body"><p>Independent review of r-20261002T124932834128-fsa-eight-ledger-rows-read-against-logs passes at 93/100: all five dimensions parsed, one true failed gate and seven justified nonzero observations reconcile with their primary logs, the diff changes exactly the eight named rows, and three non-blocking durability follow-ons remain.</p></div>
 </div>
 </section>
   </main>

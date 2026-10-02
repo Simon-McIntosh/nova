@@ -1,0 +1,23 @@
+<section id="sweep-cost-on-carrier-size">
+  <h3>Carrier-indexed contour-tree sweep</h3>
+  <p>Each fixed carrier edge is indexed once into a fixed-width neighbour table.
+  A sweep visit follows and de-duplicates only that vertex's local entries; it
+  no longer creates a matrix over the full edge buffer. The resulting work is
+  linear in carrier vertices for bounded-degree carriers, with a visible
+  overflow refusal if the fixed adjacency width is exceeded.</p>
+  <table>
+    <thead><tr><th>live vertices</th><th>before execute [s]</th><th>after execute [s]</th><th>after compile [s]</th></tr></thead>
+    <tbody>
+      <tr><td>353</td><td>6.105</td><td>0.084</td><td>1.412</td></tr>
+      <tr><td>558</td><td>19.320</td><td>0.198</td><td>1.198</td></tr>
+      <tr><td>1089</td><td>100.381</td><td>0.490</td><td>1.553</td></tr>
+    </tbody>
+  </table>
+  <figure>
+    <img src="/nova/figures/contour-tree-topology-authority/sweep-cost/cpu-execute-seconds.png" alt="CPU contour-tree execute seconds before and after carrier adjacency indexing">
+    <figcaption>Warm CPU execution on the diverted single-null certificate carriers. The indexed sweep rises from 0.084 s at 353 vertices to 0.490 s at 1089 vertices, while the repeated full-edge scan rises from 6.105 s to 100.381 s.</figcaption>
+  </figure>
+  <p>The CPU topology gate passes all 33 merge, mesh, conventions and
+  brute-force tests; it covers all twelve certificate rungs, both MAST
+  carriers, the endpoint invariant, receipt compactness and vmap agreement.</p>
+</section>

@@ -395,6 +395,51 @@ def _seed_level_offset_wb(context: dict[str, Any], seed: np.ndarray) -> dict[str
     }
 
 
+def linear_action_diagnosis(source_root: Path, output_root: Path) -> dict[str, Any]:
+    configure_dtypes()
+    control = json.loads((source_root / "control-positive.json").read_text())
+    solve = control["solve"]
+    amplitudes = jnp.asarray(solve["compensating_amplitudes"])
+    rows = jnp.asarray(
+        [
+            *(
+                np.asarray(solve["centroid_error_m"])
+                / control["characteristic_pitch_m"]
+            ),
+            solve["level_row_scaled_residual"],
+        ]
+    )
+    scales = jnp.asarray((solve["field_scale_t"],) * 2 + (solve["level_scale_wb"],))
+    unknown = constraint_module.BoundedExteriorFieldUnknown(
+        jnp.eye(3),
+        scales,
+        jnp.asarray((solve["field_bound_t"],) * 2 + (jnp.inf,)),
+        jnp.ones(3),
+    )
+    point = jnp.concatenate((amplitudes / scales, rows))
+    direction = jnp.asarray((0.4, -0.8, 0.1, -0.6, 0.2, 0.0))
+
+    def update(joined):
+        values, residuals = joined[:3], joined[3:]
+        step, _refused = unknown.damped_step(values, residuals)
+        return values + step
+
+    tangent = jax.jvp(update, (point,), (direction,))[1]
+    difference = (
+        update(point + 1.0e-5 * direction) - update(point - 1.0e-5 * direction)
+    ) / 2.0e-5
+    receipt = {
+        "source_state_sha256_binary64": control["terminal_state_sha256_binary64"],
+        "jvp": np.asarray(tangent),
+        "central_difference": np.asarray(difference),
+        "field_block_finite": bool(np.all(np.isfinite(np.asarray(tangent[:2])))),
+        "level_block_finite": bool(np.all(np.isfinite(np.asarray(tangent[2:])))),
+        "central_difference_finite": bool(np.all(np.isfinite(np.asarray(difference)))),
+    }
+    _write_json(output_root / "nonfinite-linear-action.json", receipt)
+    return receipt
+
+
 def _solve(
     context: dict[str, Any],
     seed: np.ndarray,
@@ -1823,6 +1868,7 @@ def parse_args() -> argparse.Namespace:
             "the declared bound and the level started at the seed's deficit"
         ),
     )
+    parser.add_argument("--diagnose-linear-action", action="store_true")
     parser.add_argument("--merge-controls", action="store_true")
     parser.add_argument("--reread-gauge", action="store_true")
     parser.add_argument(
@@ -1931,6 +1977,10 @@ def main() -> None:
             arguments.figure,
             arguments.control_lane,
         )
+        return
+    if arguments.diagnose_linear_action:
+        receipt = linear_action_diagnosis(arguments.source_root, arguments.output_root)
+        print(f"CENTROID_LINEAR_ACTION {receipt}", flush=True)
         return
     if arguments.chunked and arguments.control_arm is not None:
         control = control_arm_chunked(

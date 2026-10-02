@@ -1400,19 +1400,21 @@ def _draw_control_comparison(receipt: dict[str, Any], path: Path) -> None:
 def _draw_regularisation(receipt: dict[str, Any], path: Path) -> dict[str, Any]:
     """Draw closure and peak current directly from the persisted sweep."""
     sweep = _regularisation_curves(receipt)
-    labels = [f"{weight:g}" for weight in sweep["weights"]]
+    labels = ["0", "10⁻⁴", "10⁻³", "10⁻²", "10⁻¹", "1", "10", "100"]
     x = np.arange(len(labels), dtype=float)
     colours = {
         "upper-point-plus-20mm": "#73559D",
         "elongation-plus-5pct": "#2F718E",
     }
     names = {
-        "upper-point-plus-20mm": "upper +20 mm",
-        "elongation-plus-5pct": "elongation +5%",
+        "upper-point-plus-20mm": "upper",
+        "elongation-plus-5pct": "elongation",
     }
     figure, (closure_axis, current_axis) = plt.subplots(1, 2, figsize=(14, 6))
     for command, curve in sweep["commands"].items():
         colour = colours[command]
+        label_offset = 6 if command == "elongation-plus-5pct" else -6
+        label_vertical_alignment = "bottom" if label_offset > 0 else "top"
         closure = [row["closure_fraction_exercised_rows"] for row in curve]
         current = [row["maximum_absolute_current_change_a"] / 1000.0 for row in curve]
         closure_axis.plot(x, closure, color=colour, linewidth=3.0, marker="o")
@@ -1420,18 +1422,20 @@ def _draw_regularisation(receipt: dict[str, Any], path: Path) -> dict[str, Any]:
         closure_axis.annotate(
             names[command],
             (x[-1], closure[-1]),
-            xytext=(8, 0),
+            xytext=(8, label_offset),
             textcoords="offset points",
-            va="center",
+            ha="left",
+            va=label_vertical_alignment,
             color=colour,
             fontsize=20,
         )
         current_axis.annotate(
             names[command],
             (x[-1], current[-1]),
-            xytext=(8, 0),
+            xytext=(8, label_offset),
             textcoords="offset points",
-            va="center",
+            ha="left",
+            va=label_vertical_alignment,
             color=colour,
             fontsize=20,
         )
@@ -1464,12 +1468,12 @@ def _draw_regularisation(receipt: dict[str, Any], path: Path) -> dict[str, Any]:
     current_axis.set_ylabel("maximum current change [kA]")
     current_axis.set_yscale("log")
     for axis in (closure_axis, current_axis):
-        axis.set_xticks(x, labels)
-        axis.set_xlabel("dimensionless regularisation weight")
-        axis.set_xlim(-0.25, len(labels) - 0.35)
+        axis.set_xticks(x, labels, rotation=45, ha="right")
+        axis.set_xlabel("regularisation weight")
+        axis.set_xlim(-0.25, len(labels) + 2.0)
         _despine(axis)
     closure_axis.set_ylim(0.0, 1.0)
-    figure.tight_layout()
+    figure.subplots_adjust(left=0.1, bottom=0.25, right=0.98, wspace=0.45)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=100)
     plt.close(figure)
@@ -1552,14 +1556,8 @@ def _direction_reversal_arm(
 
 def _finalize_receipt(directory: Path) -> dict[str, Any]:
     """Aggregate completed controls and regenerate both audit figures."""
-    upper_path = directory / "upper-point-plus-20mm.json"
-    elongation_path = directory / "elongation-plus-5pct.json"
-    null_path = directory / "null-resolve.json"
-    consistency_path = directory / CONSISTENCY_DIAGNOSTIC
-    upper = json.loads(upper_path.read_text(encoding="utf-8"))
-    elongation = json.loads(elongation_path.read_text(encoding="utf-8"))
-    null = json.loads(null_path.read_text(encoding="utf-8"))
-    consistency = json.loads(consistency_path.read_text(encoding="utf-8"))
+    receipt_path = directory / "shape-inverse-receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     control_arms = [
         json.loads(
             (directory / NEGATIVE_CONTROL_ARMS[name]).read_text(encoding="utf-8")
@@ -1577,25 +1575,20 @@ def _finalize_receipt(directory: Path) -> dict[str, Any]:
         "arms": control_arms,
     }
     _write(directory / NEGATIVE_CONTROL, negative_control)
-    receipt = {
-        "outcome": "measured_negative_shape_motion",
+    receipt["outcome"] = "measured_negative_shape_motion"
+    receipt["interpretation"] = (
+        "Shape error is command-dependent rather than uniformly large: the "
+        "upper-point arm ends near the command scale while elongation is "
+        "substantially worse. Both remain outside the steering tolerance."
+    )
+    receipt.pop("all_prescribed_negative_control", None)
+    receipt["negative_control"] = {
         "interpretation": (
-            "Shape error is command-dependent rather than uniformly large: the "
-            "upper-point arm ends near the command scale while elongation is "
-            "substantially worse. Both remain outside the steering tolerance."
+            "The direction-reversed active-current update is worse than its "
+            "controlled arm on each command, so the control discriminates."
         ),
-        "runtime": upper["runtime"],
-        "null_arm": null,
-        "arms": [upper, elongation],
-        "consistency_receipt": consistency,
-        "negative_control": {
-            "interpretation": (
-                "The direction-reversed active-current update is worse than its "
-                "controlled arm on each command, so the control discriminates."
-            ),
-            "source_path": NEGATIVE_CONTROL,
-            "receipt": negative_control,
-        },
+        "source_path": NEGATIVE_CONTROL,
+        "receipt": negative_control,
     }
     receipt["negative_control"]["comparison"] = _control_comparison(receipt)
     receipt["regularisation_sweep"] = _regularisation_curves(receipt)

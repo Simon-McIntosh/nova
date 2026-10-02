@@ -1,0 +1,97 @@
+revision: db580bec8331d8366242ff840c9f57b442c248c6
+tree: /tmp/reckon-crew-scratch/r-20261002T202109398749-fsri-moment-identity-root-cause/fsri-mir/db580bec8331d8366242ff840c9f57b442c248c6
+command: env -C /tmp/reckon-crew-scratch/r-20261002T202109398749-fsri-moment-identity-root-cause/fsri-mir/db580bec8331d8366242ff840c9f57b442c248c6 PYTHONPATH=/tmp/reckon-crew-scratch/r-20261002T202109398749-fsri-moment-identity-root-cause/fsri-mir/db580bec8331d8366242ff840c9f57b442c248c6 JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 0 -vv /tmp/reckon-crew-scratch/r-20261002T202109398749-fsri-moment-identity-root-cause/fsri-mir/db580bec8331d8366242ff840c9f57b442c248c6/tests/test_equilibrium_forward_solve.py::test_solve_path_current_moments_match_profile_owned_support
+module.__file__: /tmp/reckon-crew-scratch/r-20261002T202109398749-fsri-moment-identity-root-cause/fsri-mir/db580bec8331d8366242ff840c9f57b442c248c6/nova/__init__.py
+cwd: /tmp/reckon-crew-scratch/r-20261002T202109398749-fsri-moment-identity-root-cause/fsri-mir/db580bec8331d8366242ff840c9f57b442c248c6
+----- pytest -----
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /tmp/reckon-crew-scratch/r-20261002T202109398749-fsri-moment-identity-root-cause/fsri-mir/db580bec8331d8366242ff840c9f57b442c248c6
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... 22:36:52 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 1 item
+
+tests/test_equilibrium_forward_solve.py::test_solve_path_current_moments_match_profile_owned_support FAILED [100%]
+
+=================================== FAILURES ===================================
+_________ test_solve_path_current_moments_match_profile_owned_support __________
+
+machine = (ForwardProfile(operator=ForwardFluxOperator(grid=FluxTarget(null=Null2D(maxsize=5, precision=<Precision.DOUBLE: 'floa....26096842,
+        0.23558035,  0.21166023,  0.19052074,  0.17335953,  0.1609408 ,
+        0.1535261 ], dtype=float64))
+
+    def test_solve_path_current_moments_match_profile_owned_support(machine):
+        """Solve moments equal direct integration on profile-owned support."""
+        profile, seed, _vacuum = machine
+        operator, seed = _with_direct_samples(profile, seed)
+        masks, topology = operator.read(seed)
+        geometry = operator.moment_geometry
+        profile_support = geometry.atomic_mesh.traced_clip(
+            jnp.ones(
+                len(geometry.atomic_mesh.node_coordinates),
+                dtype=jnp.asarray(seed).dtype,
+            )
+        ).qualify(masks.profile_participation)
+        sample_flux = operator.sample_node_flux(seed)
+        sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+        direct = operator.support_current_moments(
+            operator.source.core,
+            masks.psi_norm,
+            sample_psi_norm,
+            profile_support,
+        )
+        radial_second, vertical_second, cross_second = geometry.second_moment.T
+        determinant = radial_second * vertical_second - cross_second**2
+        expected = (
+            direct.cell_current,
+            (vertical_second * direct.radial_moment - cross_second * direct.vertical_moment)
+            / determinant,
+            (radial_second * direct.vertical_moment - cross_second * direct.radial_moment)
+            / determinant,
+        )
+        actual = operator.cell_current_moments(seed)
+        for observed, direct in zip(actual, expected, strict=True):
+>           np.testing.assert_allclose(observed, direct, rtol=2e-13, atol=2e-13)
+E           AssertionError: 
+E           Not equal to tolerance rtol=2e-13, atol=2e-13
+E           
+E           Mismatched elements: 31 / 625 (4.96%)
+E           First 5 mismatches are at indices:
+E            [135]: 660.3190283954135 (ACTUAL), 641.0264598166705 (DESIRED)
+E            [136]: 1085.189564627652 (ACTUAL), 1084.8968786004486 (DESIRED)
+E            [138]: 1085.1895646276528 (ACTUAL), 1085.0439037923409 (DESIRED)
+E            [139]: 660.3190283954162 (ACTUAL), 640.3322974653005 (DESIRED)
+E            [158]: 782.9392003070747 (ACTUAL), 723.3399427877206 (DESIRED)
+E           Max absolute difference among violations: 173.43143596
+E           Max relative difference among violations: 0.31223999
+E            ACTUAL: array([    0.      ,     0.      ,     0.      ,     0.      ,
+E                      0.      ,     0.      ,     0.      ,     0.      ,
+E                      0.      ,     0.      ,     0.      ,     0.      ,...
+E            DESIRED: array([    0.      ,     0.      ,     0.      ,     0.      ,
+E                      0.      ,     0.      ,     0.      ,     0.      ,
+E                      0.      ,     0.      ,     0.      ,     0.      ,...
+
+tests/test_equilibrium_forward_solve.py:338: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_equilibrium_forward_solve.py::test_solve_path_current_moments_match_profile_owned_support - AssertionError: 
+Not equal to tolerance rtol=2e-13, atol=2e-13
+
+Mismatched elements: 31 / 625 (4.96%)
+First 5 mismatches are at indices:
+ [135]: 660.3190283954135 (ACTUAL), 641.0264598166705 (DESIRED)
+ [136]: 1085.189564627652 (ACTUAL), 1084.8968786004486 (DESIRED)
+ [138]: 1085.1895646276528 (ACTUAL), 1085.0439037923409 (DESIRED)
+ [139]: 660.3190283954162 (ACTUAL), 640.3322974653005 (DESIRED)
+ [158]: 782.9392003070747 (ACTUAL), 723.3399427877206 (DESIRED)
+Max absolute difference among violations: 173.43143596
+Max relative difference among violations: 0.31223999
+ ACTUAL: array([    0.      ,     0.      ,     0.      ,     0.      ,
+           0.      ,     0.      ,     0.      ,     0.      ,
+           0.      ,     0.      ,     0.      ,     0.      ,...
+ DESIRED: array([    0.      ,     0.      ,     0.      ,     0.      ,
+           0.      ,     0.      ,     0.      ,     0.      ,
+           0.      ,     0.      ,     0.      ,     0.      ,...
+======================== 1 failed in 122.78s (0:02:02) =========================
+EXIT=1

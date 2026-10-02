@@ -817,7 +817,20 @@ def _measure(
             "this driver measures the whole DIII-D gate set: asked for "
             f"{arguments.member_count} of {len(identities)} frames"
         )
+    selected_indices = tuple(arguments.frame_indices)
+    if (
+        not selected_indices
+        or len(set(selected_indices)) != len(selected_indices)
+        or any(index < 0 or index >= len(identities) for index in selected_indices)
+    ):
+        raise ValueError(
+            f"frame indices must be unique values in [0, {len(identities) - 1}]"
+        )
     header["member_identities"] = identities
+    header["selected_frame_indices"] = list(selected_indices)
+    header["selected_member_identities"] = [
+        identities[index] for index in selected_indices
+    ]
     header["comparator_self_check"] = _comparator_self_check()
     previous_run_path = arguments.receipt_dir / "run.json"
     if previous_run_path.exists():
@@ -831,7 +844,8 @@ def _measure(
     exchange.mkdir(parents=True, exist_ok=True)
     header["frame_exchange_directory"] = str(exchange)
     frames = []
-    for index, identity in enumerate(identities):
+    for index in selected_indices:
+        identity = identities[index]
         frame = _frame_in_child(
             arguments=arguments,
             index=index,
@@ -1306,6 +1320,26 @@ def _render_run(receipt_dir: Path) -> list[dict[str, Any]]:
     return panels
 
 
+def _row_from_frame_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
+    """Recover summary fields from one independently landed frame receipt."""
+    without_exit = receipt["main"]["without_exit"]
+    with_exit = receipt["main"]["with_exit"]
+    both_converged = bool(without_exit["converged"] and with_exit["converged"])
+    return {
+        "identity": str(receipt["frame"]["identity"]),
+        "strict_qualification": receipt["strict_qualification"],
+        "terminal_state_bit_identical_where_both_arms_converged": (
+            receipt["maximum_absolute_terminal_state_difference"] == 0.0
+            if both_converged
+            else None
+        ),
+        "without_exit": without_exit,
+        "with_exit": with_exit,
+        "compile_seconds": receipt["compile_seconds"],
+        "compile_cache": receipt["compile_cache"],
+    }
+
+
 def _persist(
     arguments: argparse.Namespace,
     header: dict[str, Any],
@@ -1324,13 +1358,23 @@ def _persist(
     refused = [frame for frame in frames if frame["status"] == "refused"]
     failed = [frame for frame in frames if frame["status"] in ("failed", "hung")]
     hung = [frame for frame in frames if frame["status"] == "hung"]
-    receipts = []
+    landed_receipts = []
     for frame in measured:
         path = Path(frame["receipt_path"])
         receipt = _read_json(path)
-        receipts.append((path, receipt))
+        landed_receipts.append((path, receipt))
         print(f"FRAME_RECEIPT={path} {_frame_narrative(receipt)}", flush=True)
-    rows = [frame["row"] for frame in measured]
+    receipts = []
+    for identity in artifact_index:
+        path = arguments.receipt_dir / f"{_slug(identity)}.json"
+        if not path.exists():
+            raise RuntimeError(f"the complete run is missing frame receipt {path}")
+        receipt = _read_json(path)
+        if receipt.get("schema") != "nova.diiid-gate-frame-identity/2":
+            raise RuntimeError(f"frame receipt {path} does not carry terminal arrays")
+        _load_terminal_flux_artifact(receipt)
+        receipts.append((path, receipt))
+    rows = [_row_from_frame_receipt(receipt) for _, receipt in receipts]
     contracts = [
         frame["execution_contract"]
         for frame in measured
@@ -1339,10 +1383,13 @@ def _persist(
     execution_contract = None
     if contracts:
         execution_contract = dict(contracts[0])
-        execution_contract["member_count"] = len(contracts)
+        execution_contract["member_count"] = len(receipts)
         execution_contract["one_re_exec_child_per_frame"] = True
         execution_contract["child_after_cuda_context_never_forks"] = True
         execution_contract["child_process_count"] = len(frames)
+        execution_contract["resumed_from_independent_frame_receipts"] = len(
+            receipts
+        ) - len(landed_receipts)
     host_memory = {
         str(frame["identity"]): (frame.get("row") or {}).get("host_memory")
         for frame in frames
@@ -1359,8 +1406,8 @@ def _persist(
                 "maximum_absolute_terminal_state_difference": (
                     receipt["maximum_absolute_terminal_state_difference"]
                 ),
-                "child_exit_code": exit_codes[str(receipt["frame"]["identity"])],
-                "child_host_memory": host_memory[str(receipt["frame"]["identity"])],
+                "child_exit_code": exit_codes.get(str(receipt["frame"]["identity"])),
+                "child_host_memory": host_memory.get(str(receipt["frame"]["identity"])),
                 "compile_seconds": receipt["compile_seconds"],
                 "compile_cache": receipt["compile_cache"],
                 "without_exit_solve_ms": receipt["main"]["without_exit"]["timing"][
@@ -1426,6 +1473,15 @@ def _persist(
     return 0
 
 
+def _frame_indices(value: str) -> tuple[int, ...]:
+    try:
+        return tuple(int(item) for item in value.split(",") if item.strip())
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(
+            "frame indices must be a comma-separated integer list"
+        ) from error
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--receipt-dir", type=Path, default=DEFAULT_RECEIPT_DIR)
@@ -1435,6 +1491,12 @@ def main() -> int:
     parser.add_argument("--cpu-count", type=int, default=SCHEDULED_CORE_COUNT)
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--cache-root", type=Path, default=DEFAULT_CACHE_ROOT)
+    parser.add_argument(
+        "--frame-indices",
+        type=_frame_indices,
+        default=(0, 1, 2, 3, 4),
+        help="zero-based bank frames measured by this parent job",
+    )
     parser.add_argument(
         "--frame-index",
         type=int,

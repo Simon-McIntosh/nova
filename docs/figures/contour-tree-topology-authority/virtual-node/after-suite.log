@@ -1,0 +1,5 @@
+# revision 310b2ceca (working tree, fix applied) tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-virtual-node-not-a-critical-point
+# command: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu uv run --no-sync pytest --timeout 0 -p no:cacheprovider tests/test_contour_tree_merge.py tests/test_contour_tree_brute_force.py tests/test_contour_tree_mesh.py tests/test_contour_tree_conventions.py -q
+................................                                         [100%]
+32 passed in 1262.61s (0:21:02)
+EXIT=0

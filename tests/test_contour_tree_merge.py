@@ -6,7 +6,11 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.equilibrium.contour_tree import build_contour_tree
+from nova.equilibrium.contour_tree import (
+    CRITICAL_TYPE_OUTSIDE,
+    build_contour_tree,
+    dd_emittable_nodes,
+)
 from nova.jax.config import configure_dtypes
 
 
@@ -195,3 +199,90 @@ def test_critical_node_capacity_overflow_is_jittable_and_visible():
     assert bool(result.overflow)
     assert int(np.sum(result.node_valid)) == 256
     assert int(np.sum(result.edge_valid)) == 255
+
+
+def _carrier_regions(vertex_valid, mesh_edges):
+    """Label every carrier vertex by its connected component over valid edges."""
+
+    parent = list(range(vertex_valid.size))
+
+    def find(node):
+        while parent[node] != node:
+            parent[node] = parent[parent[node]]
+            node = parent[node]
+        return node
+
+    for left, right in mesh_edges:
+        if vertex_valid[left] and vertex_valid[right]:
+            parent[find(int(left))] = find(int(right))
+    return np.asarray([find(node) for node in range(vertex_valid.size)])
+
+
+def test_virtual_slot_is_typed_outside_and_excluded_from_dd():
+    """The padded outside slot is typed outside and never a DD critical point.
+
+    A padded carrier values its spare slots below every interior level and the
+    sweep keeps one as the outside node.  That node is bookkeeping, not a
+    critical point: it must carry CRITICAL_TYPE_OUTSIDE rather than a minimum,
+    and dd_emittable_nodes must drop it.  Each wall-bearing region must still
+    record its outside contact as its own wall-join saddle.  The diverted
+    single-null certificate and the full MAST EFIT carrier.
+    """
+
+    from benchmarks.contour_tree_brute_force import (
+        certificate_rung_fixtures,
+        mast_fixtures,
+    )
+
+    certificate = next(
+        fixture
+        for fixture in certificate_rung_fixtures()
+        if fixture.name.endswith("diverted-single-null-340-cells")
+    )
+    for fixture in (certificate, mast_fixtures()[0]):
+        mesh = fixture.mesh
+        vertex_valid = np.asarray(mesh.vertex_valid)
+        vertex_is_wall = np.asarray(mesh.vertex_is_wall)
+        mesh_edges = np.asarray(mesh.edges)[np.asarray(mesh.edge_valid)]
+        result = build_contour_tree(
+            mesh.vertex_psi,
+            mesh.vertex_valid,
+            mesh.vertex_is_wall,
+            mesh.edges,
+            mesh.edge_valid,
+            jnp.asarray(1, dtype=jnp.int32),
+        )
+        node_valid = np.asarray(result.node_valid)
+        critical_type = np.asarray(result.critical_type)
+        node_vertex = np.asarray(result.node_vertex)
+        emitted = node_vertex[node_valid]
+        emitted_type = critical_type[node_valid]
+
+        virtual_rows = np.nonzero(node_valid & ~vertex_valid[node_vertex])[0]
+        assert virtual_rows.size == 1, fixture.name
+        assert int(critical_type[virtual_rows[0]]) == CRITICAL_TYPE_OUTSIDE
+
+        minima = node_valid & (critical_type == 0)
+        assert not np.any(~vertex_valid[node_vertex[minima]]), fixture.name
+
+        emittable = np.asarray(dd_emittable_nodes(result))
+        assert int(node_valid.sum()) - int(np.sum(emittable)) == 1
+        assert not np.any(~vertex_valid[node_vertex[emittable]]), fixture.name
+
+        assert int(node_valid.sum()) - int(np.sum(result.edge_valid)) == 1
+
+        labels = _carrier_regions(vertex_valid, mesh_edges)
+        wall_regions = {
+            int(labels[vertex])
+            for vertex in np.nonzero(vertex_valid & vertex_is_wall)[0]
+        }
+        assert wall_regions
+        for region in wall_regions:
+            joins = [
+                carrier
+                for carrier, kind in zip(emitted, emitted_type, strict=True)
+                if int(labels[carrier]) == region
+                and vertex_is_wall[carrier]
+                and kind == 1
+            ]
+            assert joins, f"{fixture.name} region {region} lost its wall join"

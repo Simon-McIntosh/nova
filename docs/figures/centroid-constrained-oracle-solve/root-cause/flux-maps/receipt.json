@@ -90,6 +90,24 @@
       "wall_rms_wb": 0.7689133176248859
     }
   },
+  "axis_shift_evidence": {
+    "closed_form_axis_rz_m": [
+      6.2,
+      0.0
+    ],
+    "magnitude_source": "source topology receipt, solve.topology.axis_rz_m",
+    "median_nearest_neighbour_within_0_5_m_m": 0.2891472495526931,
+    "nearest_sample_to_closed_form_axis_m": 0.14049882060797714,
+    "radial_shift_mm": 22.197285133077393,
+    "sample_grid_point_count": 772,
+    "sample_grid_read": "The 772-point sample grid resolves an outward shift but not its 22.197 mm magnitude; that magnitude is read from the source topology receipt.",
+    "source_axis_rz_m": [
+      6.222197285133078,
+      0.00038481765234316123
+    ],
+    "source_receipt": "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json",
+    "vertical_shift_mm": 0.38481765234316123
+  },
   "case": "weak-rotation-reactor-static",
   "compensator": {
     "level_wb": -13.498416329636555,
@@ -166,12 +184,20 @@
   },
   "figures": {
     "gallery.png": {
+      "bytes": 267849,
+      "dpi": 55,
       "project_absolute_src": "/nova/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/gallery.png",
-      "sha256": "6ccc8e8a9d7471103df640a640cd54de20ce1fd8545e30be7f9062a027c6507b"
+      "sha256": "8407ce9b3a829d6a4ea0b16febd386ff44050986047b6c473bdcfa5999cd3843"
     },
     "gallery.svg": {
+      "bytes": 286901,
+      "contour_group_count": 15,
+      "line_path_points": 29872,
+      "max_coordinate_rounding_pt": 0.0049999999999954525,
+      "path_count": 135,
       "project_absolute_src": "/nova/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/gallery.svg",
-      "sha256": "554951f9b9bf7cc6e13f3635d70f6d376537e533f92e747e8535b15f2c4602e9"
+      "relative_path_precision_decimals": 2,
+      "sha256": "90693778419f0811519baf7c61844ca1c08dfe25e9c15dd3d304f0a18eda6ae4"
     }
   },
   "panel_sample_archive": {

@@ -88,6 +88,18 @@
     <figure><img src="/nova/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png" alt="Computed contour tree of the diverted single-null certificate: poloidal panel with nodes at their carrier vertices, and the tree as a graph against signed flux"><figcaption>Diverted single-null Solov'ev certificate, 340 cells. Left: line contours of &psi;, the wall, the analytic magnetic axis (red triangle) and admitted X-point (red cross), and every emitted tree node at its carrier vertex. Triangles are maxima, inverted triangles minima, squares saddles, and the diamond is the private-region wall maximum. Right: the tree's 13 nodes and 12 edges against signed flux, with the outside attachment drawn explicitly at the wall-contact level, not at the virtual node's sentinel value. Eleven of the 13 nodes are piecewise-linear critical points beyond the analytic axis and X-point; §3 and §4 must absorb them.</figcaption></figure>
     <p>The first review (55 of 100) blocked three things. The virtual node's &minus;1.007 Wb sentinel set the flux axis and flattened the tree. Dotted tree edges on the poloidal panel read as spatial paths. The guard test never read the committed artifacts. All three are repaired, each with a committed negative control, and the re-review scored 76 of 100. A guard test checks the drawn nodes against the committed receipt, 5 tests. Its follow-ons are open as f-ctta-explanatory-figure-polish.</p>
   </section>
+  <section id="sweep-cost-near-linear">
+    <h2>§2 — the sweep is near-linear in carrier size</h2>
+    <p>Run <code>r-20261002T202550601832-ctta-sweep-cost-on-carrier-size</code> (codex-terra), merged at <code>4db6fb357</code>, closes f-ctta-sweep-cost-on-carrier-size. Each sweep visit had formed a repeated-neighbour matrix over the whole edge buffer. Each carrier edge is now indexed once into a bounded neighbour table, and only local union roots are resolved, about O(V + E) against the earlier O(V&middot;(V + E) + V&middot;E<sup>2</sup>).</p>
+    <table>
+      <thead><tr><th>live vertices</th><th>CPU execute before</th><th>CPU execute after</th><th>H200 execute after</th></tr></thead>
+      <tr><td>353</td><td>6.105 s</td><td>0.084 s</td><td>0.603 s</td></tr>
+      <tr><td>558</td><td>19.320 s</td><td>0.198 s</td><td>1.140 s</td></tr>
+      <tr><td>1089</td><td>100.381 s</td><td>0.490 s</td><td>2.772 s</td></tr>
+    </table>
+    <p>All 18 base and head receipts match, and the 33-test topology gate passes. Restoring the repeated-neighbour sweep makes the 1074-cell case 101 s again. The review scored 89 of 100 and re-measured 0.464 s at 1089 vertices.</p>
+    <p>Two limits remain. The sweep is a <code>fori_loop</code> of vertex visits, each running a data-dependent <code>while_loop</code>, so on the H200 it is launch-latency bound and slower than CPU for one field. The new int64 index scatter raises a JAX FutureWarning that a later release will turn into an error. Both, with the uncommitted receipt comparator and performance guard, are open as f-ctta-sweep-durability-and-placement. Figure: <code>/nova/figures/contour-tree-topology-authority/sweep-cost/cpu-execute-seconds.png</code>.</p>
+  </section>
 </main>
 </body>
 </html>

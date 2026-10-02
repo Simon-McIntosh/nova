@@ -26,8 +26,8 @@
   <title>Contour-tree topology authority | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="40">
+<meta name="plan-modified" content="2026-10-03">
+<meta name="plan-version" content="43">
 </head>
 <body>
   <main class="plan-doc">
@@ -149,6 +149,8 @@
     beside the PNG.</p>
 
     <h2 id="s2">§2 — The contour tree on the hex carrier</h2>
+    <p><strong>Landed.</strong> The contour tree on the hex carrier is built, repaired and checked. It matches an independent brute-force superlevel count at every level on four Solov'ev certificates at 340, 550 and 1074 cells and on two MAST rows on the full 464-cell carrier. It keeps one more node than edges, gives identical trees batched and per state, and flags overflow on the receipt. The virtual outside node is typed and kept out of DD emission, and the sweep is near-linear in carrier size. Record: <a href="/nova/evidence/archive/contour-tree-topology-authority-landed.html#tree-edge-invariant-repair">edge invariant</a>, <a href="/nova/evidence/archive/contour-tree-topology-authority-landed.html#end-to-end-brute-force">brute force</a>, <a href="/nova/evidence/archive/contour-tree-topology-authority-landed.html#tree-capacity-on-critical-nodes">production carriers</a>, <a href="/nova/evidence/archive/contour-tree-topology-authority-landed.html#virtual-node-typed-outside">outside node</a>, <a href="/nova/evidence/archive/contour-tree-topology-authority-landed.html#explanatory-figure-from-computed-tree">figure</a>, <a href="/nova/evidence/archive/contour-tree-topology-authority-landed.html#sweep-cost-near-linear">sweep cost</a>.</p>
+    <details><summary>Design and done-when as planned</summary>
     <p>The tree is built combinatorially, so its topology cannot depend on a tolerance:</p>
     <ul>
       <li><strong>Mesh.</strong> Hex cell centres form a triangular lattice. Triangulate
@@ -182,6 +184,7 @@
       <li>a fixture whose capacity is exceeded reports the refusal rather than truncating
       the tree.</li>
     </ul>
+    </details>
 
     <h2 id="s3">§3 — Critical-point geometry</h2>
     <p>Each interior tree node is located and valued on a smooth field representation:
@@ -332,10 +335,11 @@
     <div class="r-fu-body"><p>The repair review (89/100) left three follow-ons. (1) The padded virtual-outside slot is still emitted as a minimum, although the §1 contract says the virtual node is not a critical point; make the DD mapping skip it and cover that with a test. (2) The repaired certificate trees carry 2 to 4 maxima, 5 to 8 minima and 6 to 10 saddles where the analytic Solov'ev field has one magnetic axis and at most one X-point; §3 and §4 must show by measurement, per fixture, that persistence and primary selection reduce these to the analytic axis and X-point, with the persistence of each discarded pair. (3) docs/figures/contour-tree-topology-authority/edge-invariant-repair/baseline-brute-force.log carries trailing whitespace at lines 15, 21, 22 and 31.</p></div>
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
     </article>
-<article class="r-fu" data-id="f-ctta-sweep-cost-on-carrier-size" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ctta-sweep-cost-on-carrier-size" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="2026-10-02T22:14:12+00:00" data-resolved-by="nova-s21">
     <h4 class="r-fu-title">Make the contour-tree sweep near-linear in carrier size</h4>
     <div class="r-fu-body"><p>With production carriers admitted (merged at 76e935345, record contour-tree-topology-authority-landed#tree-capacity-on-critical-nodes), CPU execute grows from 3.3 s at 353 live vertices to 75.8 s at 1089, against compile near 1.4 s. Each sweep visit forms a repeated-neighbour matrix over the fixed edge buffer, so work grows with vertices times the square of the edge capacity. That is an implementation choice of the vectorised union-find sweep, not a property of contour trees. Replace it with an adjacency-indexed sweep (CSR neighbour lists from the carrier, fixed-shape and traceable) and keep the brute-force comparator, the edge-endpoint invariant and the twelve certificate-rung cases as the gate. Report compile and execute against vertex count on CPU and on the H200, and profile before raising the production rung, as the re-review asked. The topology contract does not change.</p></div>
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
+    <p class="r-fu-outcome">Merged at 4db6fb357 (review 89/100): each carrier edge indexed once into a bounded neighbour table, about O(V + E); CPU execute at 1089 vertices 100.4 s to 0.49 s; all 18 base and head receipts identical (contour-tree-topology-authority-landed#sweep-cost-near-linear).</p>
     </article>
 <article class="r-fu" data-id="f-ctta-explanatory-figure-polish" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="2026-10-02T21:33:46+00:00" data-resolved-by="nova-s21">
     <h4 class="r-fu-title">Polish the computed-tree explanatory figure and refresh its fragment</h4>
@@ -347,6 +351,11 @@
     <h4 class="r-fu-title">Show that the tree&#x27;s limiter level converges as the wall polyline is sampled more finely</h4>
     <div class="r-fu-body"><p>Carried from profile-owned-solve-domain §5, which the lead closed on 2026-10-02 with its negative result: that ladder probed a read this plan deletes, and its post-repair 0.0 Wb was a non-measurement. The question it asked still stands for the tree: does the limited boundary level <code>σψ_lim</code> converge as wall vertices are added?</p><p><strong>Done when:</strong> on MAST 27079 row 16 (limited) and the 9×9 grid fixture, <code>σψ_lim</code> and the limiter contact position are tabled while the wall polyline sampling doubles at least three times. The successive differences fall, and the receipt states the observed order and the finest-pair difference in webers and millimetres. A diverted control (MAST row 10) shows the class and the primary X-point unchanged across the same ladder.</p></div>
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority §4</pre>
+    </article>
+<article class="r-fu" data-id="f-ctta-sweep-durability-and-placement" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-03" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the sweep&#x27;s identity and cost checks durable, fix its dtype warning, and place it for the device</h4>
+    <div class="r-fu-body"><p>The near-linear sweep merged at 4db6fb357 leaves four follow-ons from its 89/100 review. (1) The base-versus-head receipt comparator and the performance negative control ran from /tmp and are not committed, and the comparison log prints only nodes, edges and overflow; commit both as tests or a benchmark mode that compare every receipt field. (2) _carrier_adjacency's int64 index scatter raises a JAX FutureWarning (cannot safely cast int64 to int32) in two capacity tests that a later JAX will turn into an error; give the index and scatter one dtype. (3) On the H200 the sweep is launch-latency bound: a fori_loop of vertex visits, each a data-dependent while_loop, takes 2.772 s at 1089 vertices against 0.490 s on CPU; decide from measurement whether a single field runs host-side, whether batched fields amortise it on device, or whether a parallel union-find suits the card. (4) The equivalence of the duplicate-index scatter to the earlier segmented max is argued in review but named by no test.</p></div>
+    <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

@@ -58,24 +58,34 @@ _MINIMUM_TRACED_POLYGON_VERTICES = 3
 """Fewest vertices a traced polygon can enclose area with."""
 
 
-def traced_polygon_vertex_capacity(straight_vertex_capacity: int) -> int:
-    """Return the maximal live vertex count of one traced clipped polygon.
+def traced_polygon_vertex_capacity(
+    straight_vertex_capacity: int, level_run_count: int = 1
+) -> int:
+    """Return the per-layout maximal live vertex count of one traced polygon.
 
-    A clipped polygon is its traced level arc joined to a straight chain of
-    cell-boundary edges. The arc enters the polygon as its fixed
-    ``_SPLINE_BOUNDARY_SEGMENTS`` samples, and every other vertex is a straight
-    cell-boundary vertex: the compact traced polygon from which the arc is
-    expanded carries at most ``straight_vertex_capacity`` vertices, and the arc
-    replaces one of them. One arc plus that straight chain is the realised
-    layout, so the capacity is their sum; counting the arc's slot once as a
-    straight vertex as well only widens the bound. Reserving the straight
-    sample count for every slot instead, as the expansion once did, multiplies
-    the capacity by the arc sample count for a layout that spends it on one
-    arc and a handful of straight edges.
+    A clipped polygon is made of the traced level arcs the cell boundary admits
+    joined to a straight chain of cell-boundary edges. Each level run enters as
+    its fixed ``_SPLINE_BOUNDARY_SEGMENTS`` arc samples, and every other vertex
+    is a straight cell-boundary vertex: the compact traced polygon from which
+    the runs are expanded carries at most ``straight_vertex_capacity``
+    vertices, and each run replaces one of them. ``level_run_count`` is how many
+    level runs the layout can present -- one for a single-crossing cell, two
+    for a cell the separatrix enters and leaves twice, as a diverted layout
+    presents near its saddle -- so the capacity is the arc samples per run plus
+    the straight chain. Counting one run's slot once as a straight vertex as
+    well only widens the bound. Reserving the straight sample count for every
+    slot instead, as the expansion once did, multiplies the capacity by the arc
+    sample count for a layout that spends it on a handful of arcs and straight
+    edges; charging every row for the runs only a diverted layout presents is
+    the other error, so the count is derived per layout rather than fixed.
     """
     if straight_vertex_capacity < _MINIMUM_TRACED_POLYGON_VERTICES:
         raise ValueError("a traced polygon carries at least three vertices")
-    return _SPLINE_BOUNDARY_SEGMENTS + int(straight_vertex_capacity)
+    if level_run_count < 1:
+        raise ValueError("a traced polygon presents at least one level run")
+    return int(level_run_count) * _SPLINE_BOUNDARY_SEGMENTS + int(
+        straight_vertex_capacity
+    )
 
 
 class TracedCapacityRefusalError(RuntimeError):
@@ -927,12 +937,15 @@ def _traced_clip(
     curve_evaluator=None,
     participating_cell=None,
     arc_tracer: Callable | None = None,
+    level_run_count: int = 1,
 ):
     """Map one fixed-capacity clip body over independent atomic-cell inputs.
 
     A level evaluator with cell-local data supplies ``for_cell(index)``; a
     coordinate-only callable can be shared directly. Global contour and
-    refusal reductions are performed after the cell map.
+    refusal reductions are performed after the cell map. ``level_run_count`` is
+    the number of level runs this layout can present, fixed for every cell so
+    the packed shape stays a compile-time constant.
     """
     from nova.jax.config import configure_dtypes
 
@@ -995,6 +1008,7 @@ def _traced_clip(
             evaluator,
             row(participation),
             arc_tracer,
+            level_run_count,
         )
         return jax.tree.map(lambda value: value[0] if value.ndim else value, result)
 
@@ -1021,6 +1035,7 @@ def _clip_cell(
     curve_evaluator=None,
     participating_cell=None,
     arc_tracer: Callable | None = None,
+    level_run_count: int = 1,
 ):
     """Clip fixed atomic cells using only traced fixed-shape operations.
 
@@ -1322,7 +1337,9 @@ def _clip_cell(
             axis=2,
         ).reshape(cell_count, chord_capacity * _SPLINE_BOUNDARY_SEGMENTS)
         live_vertex_count = jnp.sum(expanded_valid, axis=1)
-        support_capacity = traced_polygon_vertex_capacity(chord_capacity)
+        support_capacity = traced_polygon_vertex_capacity(
+            chord_capacity, level_run_count
+        )
         overflow = live_vertex_count > support_capacity
         support, vertex_count = _pack_traced_vertices(
             expanded_candidate, expanded_valid, support_capacity
@@ -2124,8 +2141,15 @@ class AtomicCellMesh:
         curve_evaluator=None,
         participating_cell=None,
         arc_tracer: Callable | None = None,
+        level_run_count: int = 1,
     ) -> TracedClippedSupports:
-        """Clip this fixed topology inside a JAX transformation."""
+        """Clip this fixed topology inside a JAX transformation.
+
+        ``level_run_count`` declares how many level runs this layout can
+        present, so the derived vertex capacity is charged only for the arcs
+        the layout actually spends. It is a Python integer, never a traced
+        value: the packed shape is a compile-time constant.
+        """
         return _traced_clip(
             self.node_coordinates,
             self.cell_nodes,
@@ -2140,6 +2164,7 @@ class AtomicCellMesh:
             curve_evaluator,
             participating_cell,
             arc_tracer,
+            level_run_count,
         )
 
     def traced_saddle_wedges(

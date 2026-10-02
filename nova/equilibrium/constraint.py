@@ -596,10 +596,8 @@ class BoundedExteriorFieldUnknown:
         """
         raw = -jnp.asarray(row_residual)
         magnitude = jnp.abs(raw)
-        tiny = jnp.finfo(jnp.asarray(self.field_scale).dtype).tiny
-        factor = jnp.minimum(
-            1.0, jnp.asarray(self.step_limit) / jnp.maximum(magnitude, tiny)
-        )
+        step_limit = jnp.asarray(self.step_limit)
+        factor = step_limit / jnp.maximum(step_limit, magnitude)
         normalized_value = jnp.asarray(normalized)
         refused = self.bound_refusal(normalized_value + factor * raw)
         for _ in range(int(self.backtrack_steps)):

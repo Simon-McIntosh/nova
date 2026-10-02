@@ -1,0 +1,16 @@
+{
+  "central_difference": [
+    0.9999999999997856,
+    -1.0,
+    0.10000000001397778
+  ],
+  "central_difference_finite": true,
+  "field_block_finite": true,
+  "jvp": [
+    1.0,
+    -1.0,
+    0.1
+  ],
+  "level_block_finite": true,
+  "source_state_sha256_binary64": "f1097ebdb78a38860580e589c878105a1ba7832ac87bcf63f6ce30a51efdbfbd"
+}

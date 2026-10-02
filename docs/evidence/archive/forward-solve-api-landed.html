@@ -1159,6 +1159,13 @@ width="1200"><figcaption>The panel the receipt renders, re-rendered in the regen
 unit collection, the red fitted boundary, the axis and the wall-contact nulls of the limited state, and
 the census ampere split in a fitted title.</figcaption></figure>
 </section>
+<section id="clip-mode-request-field-core">
+  <h2>The clip mode is a field of the request and receipt</h2>
+  <p>Run <code>r-20261002T170741100631-fsapi-clip-mode-request-field-core</code> (codex-terra), merged at <code>af7403bc0</code>, is the first of three nodes for followup f-fsapi-clip-mode-is-a-request-field. <code>ForwardSolveRequest</code> carries <code>clip_mode</code> with its chord default, and the solve passes it explicitly into the operator build. <code>ForwardSolveReceipt</code> records it, so a solve built from a request no longer reads the module global <code>_SUPPORT_CLIP_MODE</code>. The global remains only as the default for the roughly forty benchmarks and tests not yet migrated. A migration node and a deletion node follow.</p>
+  <p>The first review (87 of 100) blocked on a real defect: <code>_request_compilation_cache_key</code> omitted the clip mode. Otherwise identical chord and exact requests gave equal keys, so an exact request could reuse a chord program and report a cache hit. The regression test had replaced the key function with a lambda, which hid it. The key now includes the operator's and the request's clip mode. The test exercises the real key: chord, exact and chord_cells keys differ, and only a repeated same-mode request reports reuse. The re-review scored 100 of 100 and found no other request-field omission in the request path.</p>
+  <p>On the H200, the head and base chord rows for the reactor-static certificate at 110 cells agree at sup-relative 9.540289289876033e-05. Their raw arrays differ by at most 2.9e-11, which the re-review ruled same-device variation. The committed historical 110-cell chord receipt differs materially from both fresh rows, which is a provenance question for that receipt, not a property of this change.</p>
+  <p>One log the run cited as the existing clip tests passing in fact recorded 4 failed, from an intermediate working-tree state. The coordinator re-ran the three clip-mode test files at the merged head (<code>ea53e9f3e</code>) through <code>reckon crew verify-gate</code>: 11 passed.</p>
+</section>
 </main>
 </body>
 </html>

@@ -257,6 +257,32 @@
   "plan_link": null,
   "predecessor_run": "r-20261002T093232427144-fsa-ledger-rows-record-their-gates",
   "promoted_revision": "9d15864983ccd1ba4c52420ef5c5b3f0d8d16848",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5032,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T115150153972-fsa-ledger-rows-in-schema-fields",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-ledger-rows-in-schema-fields"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

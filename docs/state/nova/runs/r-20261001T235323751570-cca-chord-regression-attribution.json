@@ -275,6 +275,33 @@
   "plan_impl_at_dispatch": 0.8,
   "plan_link": null,
   "promoted_revision": "6297324c6f9b053d25b6c3fba667162c849ba04b",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 7571212878,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution",
+    "scratch_removed": true,
+    "scratch_warning": "run scratch /tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution is 7571212878 bytes, above the 2147483648 byte budget",
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-regression-attribution"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

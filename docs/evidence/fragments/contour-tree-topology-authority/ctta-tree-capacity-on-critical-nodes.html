@@ -1,6 +1,7 @@
 <section id="capacity-on-critical-nodes">
   <h3>Receipt capacity follows critical topology</h3>
   <p>The sweep uses carrier-sized working arrays and compacts only emitted critical nodes and arcs into the 256-node, 255-edge receipt. The former vertex-count guard rejects the same MAST carrier; the red arm ends <code>EXIT=1</code> at <code>RuntimeError: contour tree capacity refused</code>.</p>
+  <p>Component-count agreement alone cannot validate receipt edge indexing: it sees only the arc's carrier endpoints crossing each level. The receipt now remaps every arc endpoint through <code>node_vertex</code> into a compact node row, and the focused certificate and MAST test asserts that each valid edge endpoint indexes a valid node row.</p>
   <table>
     <thead><tr><th>fixture</th><th>live vertices</th><th>carrier edges</th><th>nodes</th><th>tree edges</th><th>levels</th><th>mismatches</th><th>overflow</th></tr></thead>
     <tbody>
@@ -8,6 +9,7 @@
       <tr><td>MAST 22475 row 50</td><td>644</td><td>1737</td><td>69</td><td>68</td><td>644</td><td>0</td><td>false</td></tr>
     </tbody>
   </table>
+  <p>CPU execution rises from 3.322 s at 353 live vertices to 75.771 s at 1089 because each sweep visit forms a repeated-neighbour matrix over the fixed edge buffer before the vertex loop. This is an implementation choice in the current vectorised union-find sweep, not an inherent requirement of contour-tree topology; its dominant fixed-buffer work grows with the product of carrier vertices and squared edge capacity.</p>
   <table>
     <thead><tr><th>certificate rung</th><th>live vertices</th><th>carrier edges</th><th>node − edge</th><th>mismatches</th><th>overflow</th><th>compile [s]</th><th>execute [s]</th></tr></thead>
     <tbody>

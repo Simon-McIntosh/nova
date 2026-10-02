@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="45">
+<meta name="plan-version" content="46">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -465,6 +465,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261002T134346884424-fsa-production-route-receipt-revision" data-who="reckon-build" data-when="2026-10-02T17:14:15.120Z">
     <div class="r-comment-body"><p>Stamped source_revision on every production-route receipt writer and pinned it with a gate that drives each writer's own payload builder on synthetic input: after arm 15 passed EXIT=0 (33.67s) against base arm 9 passed EXIT=0 (34.52s), 0 added failures, and removing the stamp from any one writer (five mutations, scratch copy) fails its targeted test EXIT=1.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261002T171506596098-review-of-fsa-production-route-receipt-revision" data-who="reckon-build" data-when="2026-10-02T17:41:42.543Z">
+    <div class="r-comment-body"><p>Independent review of r-20261002T134346884424-fsa-production-route-receipt-revision at head 4114627b: parsed record scores goal_fidelity 17, evidence 17, scope_discipline 14, durability 17, fit 17 (total 82, pass-with-follow-ons), added_failure_count 0 against the reviewed run base 9 passed / after 15 passed gate logs.</p></div>
 </div>
 </section>
   </main>

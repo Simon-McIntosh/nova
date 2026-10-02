@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="160">
+<meta name="plan-version" content="161">
 </head>
 <body>
 <main class="plan-doc">
@@ -760,6 +760,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-mcs-graph-count-partial-20261002" data-who="" data-when="">
     <div class="r-comment-body">Measured on titan, job 1280456: across a ladder of 20 distinct programs the alive CUDA executable-graph count, read from XLA's command-buffer lifecycle log, stayed at 1 from program 1 to program 20, so graphs do not accumulate per compiled program and the count is not process-cumulative across programs in this ladder. Whether dropping an executable releases its graph is not measured: XLA logs a count only on a graph lifecycle event, and a settled re-read after dropping handles (job 1280468) found none. The command-buffer-disabled arm logged no count events at all, so its zero is an absence of events, not a measured count. An earlier post-hoc reading of a release was withdrawn. The run's commits were not integrated because its figure still drew the withdrawn reading; the followup stays open and needs a counter that does not depend on lifecycle events, together with an inventory of the command buffers inside the production solve, before any repair.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-mcs-graph-count-integrated-20261002" data-who="" data-when="">
+    <div class="r-comment-body">Correcting the previous comment: the record repair did land, and the measurement is integrated at 893fe74a9 (independent review 84/100). The figure now draws only job 1280456's twenty readings, all 1. The ladder peaks at two alive graphs, far below the 1669 at which the twenty-edit sweep failed, so the non-accumulation result holds for this small regime and does not yet explain that failure. The followup stays open for a counter that does not depend on lifecycle events, run at a scale that approaches the sweep's.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19h-s3-certificate-prerequisite" data-who="reckon-ship s19-handoff" data-when="2026-09-15T10:15:00Z">
     <div class="r-comment-body">Section 3 prerequisite, held by the coordinator rather than by a plan-level wire: the certified millisecond measurement runs only once gs-absolute-accuracy-gates section 3 (the certificate artifact and its pin) is current on the exact cut-cell participation and the joint qualification, because it reports cost for certificate-passing solves. The stage-scoped dependency gs-absolute-accuracy-gates#s3 was authored and withdrawn the same hour: the roadmap's anchor resolver did not recognise that section (reported to reckon), and a plan-level dependency on the whole certificate plan would hold section 2, which never needed it. gs-absolute-accuracy-gates now informs this plan; no section 3 node is dispatched before the certificate lands.</div>

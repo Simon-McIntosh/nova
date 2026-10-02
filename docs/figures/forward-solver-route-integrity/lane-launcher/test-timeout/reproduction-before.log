@@ -1,0 +1,13 @@
+REVISION=b6d479a93a1c2047815b9eecb2c1018643615244 TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout COMMAND=scripts/nova_lane/run.sh --dry-run --log /tmp/nova-lane-reproduction.log -- tests/test_nova_lane_launcher.py
+SOURCE_REVISION=b6d479a93a1c2047815b9eecb2c1018643615244
+LOG_PATH=/tmp/nova-lane-reproduction.log
+RUNG=h200 JAX_PLATFORMS=cuda,cpu SUBMIT_COMMAND=sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task=7 --mem=64G --time=01:00:00 --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout --export=ALL --output=/tmp/nova-lane-reproduction.log --error=/tmp/nova-lane-reproduction.log --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout/scripts/nova_lane/run.sh --payload -- tests/test_nova_lane_launcher.py 
+PAYLOAD_PRELUDE=
+PAYLOAD_SAMPLER=
+RUNG=titan JAX_PLATFORMS=cuda,cpu SUBMIT_COMMAND=sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task=7 --mem=64G --time=01:00:00 --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout --export=ALL --output=/tmp/nova-lane-reproduction.log --error=/tmp/nova-lane-reproduction.log --partition=titan --gres=gpu:1 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout/scripts/nova_lane/run.sh --payload -- tests/test_nova_lane_launcher.py 
+PAYLOAD_PRELUDE=
+PAYLOAD_SAMPLER=
+RUNG=cpu JAX_PLATFORMS=cpu SUBMIT_COMMAND=sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task=7 --mem=64G --time=01:00:00 --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout --export=ALL --output=/tmp/nova-lane-reproduction.log --error=/tmp/nova-lane-reproduction.log --partition=all_debug /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout/scripts/nova_lane/run.sh --payload -- tests/test_nova_lane_launcher.py 
+PAYLOAD_PRELUDE=
+PAYLOAD_SAMPLER=
+EXIT=0

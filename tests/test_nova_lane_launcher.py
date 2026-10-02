@@ -14,6 +14,8 @@ import os
 from pathlib import Path
 import subprocess
 
+import pytest
+
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 LAUNCHER = REPOSITORY_ROOT / "scripts" / "nova_lane" / "run.sh"
 
@@ -55,6 +57,58 @@ def test_dry_run_prints_a_submission_line_for_every_rung(tmp_path: Path) -> None
     assert "--partition=all_debug" in cpu
     assert "JAX_PLATFORMS=cpu" in cpu
     assert "--gres" not in cpu
+
+
+def _h200_submission_line(result: subprocess.CompletedProcess[str]) -> str:
+    return next(
+        line for line in result.stdout.splitlines() if line.startswith("RUNG=h200 ")
+    )
+
+
+def test_dry_run_pytest_uses_a_long_default_per_test_timeout(tmp_path: Path) -> None:
+    result = _launch(
+        "--dry-run",
+        "--log",
+        str(tmp_path / "lane.log"),
+        "--",
+        "tests/example_target.py",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "--timeout 3600" in _h200_submission_line(result)
+
+
+def test_dry_run_pytest_keeps_the_callers_timeout(tmp_path: Path) -> None:
+    result = _launch(
+        "--dry-run",
+        "--log",
+        str(tmp_path / "lane.log"),
+        "--",
+        "tests/example_target.py",
+        "--timeout",
+        "45",
+    )
+
+    assert result.returncode == 0, result.stderr
+    line = _h200_submission_line(result)
+    assert "--timeout 45" in line
+    assert "--timeout 3600" not in line
+
+
+def test_dry_run_pytest_reads_the_timeout_environment_override(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("NOVA_LANE_TEST_TIMEOUT", "7200")
+    result = _launch(
+        "--dry-run",
+        "--log",
+        str(tmp_path / "lane.log"),
+        "--",
+        "tests/example_target.py",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "--timeout 7200" in _h200_submission_line(result)
 
 
 def test_mem_zero_is_refused(tmp_path: Path) -> None:
@@ -114,7 +168,7 @@ SQUEUE_FAKE = "\n".join(
         "#!/usr/bin/env bash",
         'job=""',
         'while [ $# -gt 0 ]; do case "$1" in -j) job=$2; shift 2 ;;',
-        '*) shift ;; esac; done',
+        "*) shift ;; esac; done",
         'if [ "$job" = "12345" ]; then printf "PENDING ReqNodeNotAvail\\n"; fi',
     ]
 )

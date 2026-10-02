@@ -252,10 +252,11 @@ def _smooth_control():
 
     def solve(value):
         return fixed_point.picard(
-            lambda state: 0.2 * state + value,
+            lambda state, control: 0.2 * state + control,
             initial,
             evaluations=80,
             relaxation=0.7,
+            map_arguments=(value,),
         ).state[0]
 
     reverse = jax.grad(solve)(parameter)[0]

@@ -1,0 +1,693 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "b76cda4d073fe409935e8c67f3a3e34677740d7b",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3950542,
+      "input_tokens_cumulative": 3950542,
+      "output_tokens": 22433,
+      "output_tokens_cumulative": 22433,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 82,
+    "files": 4,
+    "removed": 2
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 134,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 138
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 138
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_native_and_torax_rungs_share_the_typed_call_and_receipt",
+        "path": "tests/test_forward_transport.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 148
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 138
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 138
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 136,
+        "name": "__post_init__",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 137
+    },
+    {
+      "existing_function": {
+        "line": 427,
+        "name": "_transport_window_receipt",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 541,
+        "name": "_solve_native",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 582
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "_evolved_receipt_and_geometry",
+        "path": "tests/test_transport_evolved_state.py"
+      },
+      "run_function": {
+        "line": 541,
+        "name": "_solve_native",
+        "path": "nova/transport/forward.py"
+      },
+      "window_line": 582
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_request_clip_mode_builds_each_operator_and_records_each_receipt",
+        "path": "tests/test_forward_solve_clip_mode_request.py"
+      },
+      "run_function": {
+        "line": 24,
+        "name": "test_omitted_request_clip_mode_follows_the_process_mode",
+        "path": "tests/test_forward_solve_clip_mode_bridge.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 82,
+        "name": "test_request_path_is_bit_identical_and_defaults_round_trip_through_json",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 24,
+        "name": "test_omitted_request_clip_mode_follows_the_process_mode",
+        "path": "tests/test_forward_solve_clip_mode_bridge.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_cold_portfolio_seed_policy_solves_and_records_its_selected_branch",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 24,
+        "name": "test_omitted_request_clip_mode_follows_the_process_mode",
+        "path": "tests/test_forward_solve_clip_mode_bridge.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_compilation_cache_receipt_observes_reuse_not_the_request_field",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 24,
+        "name": "test_omitted_request_clip_mode_follows_the_process_mode",
+        "path": "tests/test_forward_solve_clip_mode_bridge.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 126,
+        "name": "test_request_execution_is_bit_identical_to_the_keyword_fixture",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "run_function": {
+        "line": 24,
+        "name": "test_omitted_request_clip_mode_follows_the_process_mode",
+        "path": "tests/test_forward_solve_clip_mode_bridge.py"
+      },
+      "window_line": 37
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "d8dbbcf62650cb01ecaae733487b9b139ee54edf"
+  ],
+  "completed_at": "2026-10-02T23:39:25.953Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T23:25:36Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest process",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_transport_forward_seam.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T232504661081-fsapi-clip-mode-transport-receipt/logs/after_test_transport_forward_seam.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.985,
+    "plan": "forward-solve-api",
+    "reason": "corrective-run:repairs:r-20261002T224857428165-fsapi-clip-mode-request-bridge",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-03T00:05:07.880443+00:00",
+    "horizon_seconds": 2400,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T23:25:07Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 24,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 11,
+    "headroom": 2,
+    "mean_context": 133333,
+    "observed_at": "2026-10-02T23:24:43Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T23:39:25.953Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T232504661081-fsapi-clip-mode-transport-receipt/manifest.md",
+  "member": "disposable-r-20261002T232504661081-fsapi-clip-mode-transport-receipt",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_transport_forward_seam.py::test_coupled_receipt_records_each_requests_own_clip_mode"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_transport_forward_seam.py::test_coupled_receipt_records_each_requests_own_clip_mode"
+    ],
+    "declaration": "drop clip_mode=request.clip_mode from the transport from_policy call; the transport receipt test must fail under an exact global with an explicit chord request",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T232504661081-fsapi-clip-mode-transport-receipt/logs/negative_control_transport_receipt.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T232504661081-fsapi-clip-mode-transport-receipt/logs/negative_control_transport_receipt.log",
+    "test_paths": [
+      "tests/test_forward_solve_clip_mode_bridge.py",
+      "tests/test_transport_forward_seam.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fsapi-clip-mode-transport-receipt",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2468,
+          "cached_input_tokens": 306895,
+          "input_tokens": 309365,
+          "output_tokens": 1584,
+          "reasoning_output_tokens": 59,
+          "total_tokens": 310949,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: review of the clip-mode bridge (merged 60e51288a). nova/transport/forward.py:350 _equilibrium_resolved_defaults calls ResolvedForwardSolveDefaults.from_policy(request.policy) without clip_mode. Since the bridge, an omitted from_policy mode resolves the process global, so an explicit clip_mode='chord' request under set_support_clip_mode('exact') records exact in the transport receipt's equilibrium_resolved_defaults, the opposite of the mode it solved in. Repair: pass clip_mode=request.clip_mode at that call site, as nova/equilibrium/forward.py:2686 already does. Gate, logged under the run directory: (1) tests/test_transport_forward_seam.py gains a test that, under an exact global, builds an equilibrium request with explicit chord, then with explicit exact, and asserts the transport resolved defaults record each request's own mode; the global is restored in a finally. (2) tests/test_forward_solve_clip_mode_bridge.py gains two tests for the routes the bridge left unevidenced. A ForwardSolveRequest constructed directly with no mode under an exact global carries exact, and ResolvedForwardSolveDefaults.from_policy with no mode under an exact global records exact; each test also checks that an explicit mode wins. (3) Both test files and tests/test_forward_solve_clip_mode_request.py pass with JAX_PLATFORMS=cpu in one fresh pytest process per file in place on this fleet allocation, adding no failure against the dispatch base. The negative control fails test (1). Every uv command carries --no-sync and nothing runs uv sync. The manifest's status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Make the transport receipt record the clip mode of the equilibrium request it solved",
+    "id": "fsapi-clip-mode-transport-receipt",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T23:25:07Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 24,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 11,
+      "headroom": 2,
+      "mean_context": 133333,
+      "observed_at": "2026-10-02T23:24:43Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T232504661081-fsapi-clip-mode-transport-receipt/manifest.md",
+    "negative_control": "drop clip_mode=request.clip_mode from the transport from_policy call; the transport receipt test must fail under an exact global with an explicit chord request",
+    "plan": "forward-solve-api",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "exact",
+    "time_budget": "40m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/transport/forward.py",
+      "tests/test_transport_forward_seam.py",
+      "tests/test_forward_solve_clip_mode_bridge.py",
+      "docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-transport-receipt.html",
+      "docs/figures/forward-solve-api/fsapi-clip-mode-transport-receipt"
+    ]
+  },
+  "orientation_input_tokens": 805482.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsapi-clip-mode-transport-receipt",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T23:25:12.762756+00:00",
+    "score": 0.49375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.965,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solve-api",
+  "plan_impl_at_dispatch": 0.985,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "d8dbbcf62650cb01ecaae733487b9b139ee54edf",
+  "resume_waiver": null,
+  "review": {
+    "absent": [
+      "The reviewed manifest's baseline_suite and after_suite each name only one log_path and carry one composite command string, although each arm ran three test files as separate processes; the failure counts are nonetheless 0 in both arms so the added-failure delta is measured rather than absent."
+    ],
+    "reviewed_base_sha": "b76cda4d073fe409935e8c67f3a3e34677740d7b",
+    "reviewed_head_sha": "d8dbbcf62650cb01ecaae733487b9b139ee54edf",
+    "scores": {
+      "durability": 18,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 93
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T232504661081-fsapi-clip-mode-transport-receipt",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "3f47b6fa-3bcc-48a0-9daf-26078afa0334",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 3950542,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 820.361,
+    "generated_tokens": 22433,
+    "generation_seconds": 599.615,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 52.0,
+    "machine_seconds": 220.746,
+    "peak_input_tokens": 119660,
+    "tokens_per_second": 37.41,
+    "wall_tokens_per_second": 27.35
+  },
+  "time_budget": "40m",
+  "tool_steps": 40.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 829,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T23:39:30Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T23:25:42Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T232504661081-fsapi-clip-mode-transport-receipt",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 4126,
+    "worker_pid": 2174684
+  },
+  "worker_seconds": 782,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

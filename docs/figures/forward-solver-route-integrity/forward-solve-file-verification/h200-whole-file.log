@@ -1,0 +1,200 @@
+NOVA_LANE_START=2026-10-02T21:16:27+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1280471
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=bd439c315c5ec9db523d22e0eb5addc164be7a33
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=3600
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_equilibrium_forward_solve.py -q --timeout 3600 
+21:17:29 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+F.......................FFF..                                            [100%]
+=================================== FAILURES ===================================
+_________ test_solve_path_current_moments_match_profile_owned_support __________
+
+machine = (ForwardProfile(operator=ForwardFluxOperator(grid=FluxTarget(null=Null2D(maxsize=5, precision=<Precision.DOUBLE: 'floa....26096842,
+        0.23558035,  0.21166023,  0.19052074,  0.17335953,  0.1609408 ,
+        0.1535261 ], dtype=float64))
+
+    def test_solve_path_current_moments_match_profile_owned_support(machine):
+        """Solve moments equal direct integration on profile-owned support."""
+        profile, seed, _vacuum = machine
+        operator, seed = _with_direct_samples(profile, seed)
+        masks, topology = operator.read(seed)
+        geometry = operator.moment_geometry
+        profile_support = geometry.atomic_mesh.traced_clip(
+            jnp.ones(
+                len(geometry.atomic_mesh.node_coordinates),
+                dtype=jnp.asarray(seed).dtype,
+            )
+        ).qualify(masks.profile_participation)
+        sample_flux = operator.sample_node_flux(seed)
+        sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+        direct = operator.support_current_moments(
+            operator.source.core,
+            masks.psi_norm,
+            sample_psi_norm,
+            profile_support,
+        )
+        radial_second, vertical_second, cross_second = geometry.second_moment.T
+        determinant = radial_second * vertical_second - cross_second**2
+        expected = (
+            direct.cell_current,
+            (vertical_second * direct.radial_moment - cross_second * direct.vertical_moment)
+            / determinant,
+            (radial_second * direct.vertical_moment - cross_second * direct.radial_moment)
+            / determinant,
+        )
+        actual = operator.cell_current_moments(seed)
+        for observed, direct in zip(actual, expected, strict=True):
+>           np.testing.assert_allclose(observed, direct, rtol=2e-13, atol=2e-13)
+E           AssertionError: 
+E           Not equal to tolerance rtol=2e-13, atol=2e-13
+E           
+E           Mismatched elements: 31 / 625 (4.96%)
+E           First 5 mismatches are at indices:
+E            [135]: 660.3190282121516 (ACTUAL), 641.0264596630168 (DESIRED)
+E            [136]: 1085.1895644306242 (ACTUAL), 1084.8968784033425 (DESIRED)
+E            [138]: 1085.1895644306232 (ACTUAL), 1085.0439035960653 (DESIRED)
+E            [139]: 660.319028212153 (ACTUAL), 640.3322973054009 (DESIRED)
+E            [158]: 782.9392001288134 (ACTUAL), 723.3399426258638 (DESIRED)
+E           Max absolute difference among violations: 173.43143609
+E           Max relative difference among violations: 0.31223999
+E            ACTUAL: array([    0.      ,     0.      ,     0.      ,     0.      ,
+E                      0.      ,     0.      ,     0.      ,     0.      ,
+E                      0.      ,     0.      ,     0.      ,     0.      ,...
+E            DESIRED: array([    0.      ,     0.      ,     0.      ,     0.      ,
+E                      0.      ,     0.      ,     0.      ,     0.      ,
+E                      0.      ,     0.      ,     0.      ,     0.      ,...
+
+tests/test_equilibrium_forward_solve.py:338: AssertionError
+_______ test_the_moment_map_is_differentiable_against_finite_differences _______
+
+converged = ForwardEquilibrium(flux=Array([0.9870836 , 1.00168895, 1.02343175, 1.05400143, 1.08782948,
+       1.12020859, 1.147977..., 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+       2, 2, 2, 2, 2, 2, 2, 2, 2], dtype=int8)), constraints=(), constraint_outer=None)
+machine = (ForwardProfile(operator=ForwardFluxOperator(grid=FluxTarget(null=Null2D(maxsize=5, precision=<Precision.DOUBLE: 'floa....26096842,
+        0.23558035,  0.21166023,  0.19052074,  0.17335953,  0.1609408 ,
+        0.1535261 ], dtype=float64))
+
+    def test_the_moment_map_is_differentiable_against_finite_differences(
+        converged, machine
+    ):
+        """Small central-difference steps converge to the moment Jacobian.
+    
+        The 1e-3 Wb interval crosses a local selection change and must remain
+        outside the 1e-2 derivative tolerance. The 3e-5 Wb and 1e-5 Wb steps stay
+        local, enter that tolerance in sequence, and decrease the normalised error.
+        """
+        profile, _seed, _vacuum = machine
+        targets = MomentTargets(
+            plasma_current=0.9 * float(converged.moments.plasma_current),
+            poloidal_beta=0.5,
+            internal_inductance=0.8,
+        )
+        residual = np.asarray(profile.moment_residual(converged.flux, targets))
+        assert np.all(np.isfinite(residual))
+        assert np.max(np.abs(residual)) > 1.0e-3
+    
+        jacobian = profile.moment_jacobian(converged.flux, targets)
+        assert jacobian.shape == (3, converged.flux.size)
+        rng = np.random.default_rng(11)
+        direction = jnp.asarray(rng.standard_normal(converged.flux.shape))
+        direction = direction / jnp.max(jnp.abs(direction))
+        analytic = jacobian @ direction
+>       assert float(jnp.max(jnp.abs(analytic))) > 1.0
+E       assert 0.7598863825264144 > 1.0
+E        +  where 0.7598863825264144 = float(Array(0.75988638, dtype=float64))
+E        +    where Array(0.75988638, dtype=float64) = <function max at 0x7f1e6fe0aa30>(Array([0.27291727, 0.75988638, 0.52667095], dtype=float64))
+E        +      where <function max at 0x7f1e6fe0aa30> = jnp.max
+E        +      and   Array([0.27291727, 0.75988638, 0.52667095], dtype=float64) = <PjitFunction of <function abs at 0x7f1e6fe8d6f0>>(Array([-0.27291727,  0.75988638,  0.52667095], dtype=float64))
+E        +        where <PjitFunction of <function abs at 0x7f1e6fe8d6f0>> = jnp.abs
+
+tests/test_equilibrium_forward_solve.py:905: AssertionError
+__________ test_the_solve_is_differentiable_in_the_conductor_current ___________
+
+machine = (ForwardProfile(operator=ForwardFluxOperator(grid=FluxTarget(null=Null2D(maxsize=5, precision=<Precision.DOUBLE: 'floa....26096842,
+        0.23558035,  0.21166023,  0.19052074,  0.17335953,  0.1609408 ,
+        0.1535261 ], dtype=float64))
+
+    def test_the_solve_is_differentiable_in_the_conductor_current(machine):
+        """A functional of the converged flux differentiates through the ladder."""
+        profile, seed, _vacuum = machine
+        conductor = profile.operator.external_current
+    
+        def linked_flux(current):
+            """Return a smooth scalar of the equilibrium the conductors support."""
+            state = profile.solve(
+                seed, route="picard", current=current, evaluations=80, relaxation=0.7
+            )
+            return jnp.sum(state.flux**2)
+    
+        gradient = jax.grad(linked_flux)(conductor)
+        assert np.all(np.isfinite(np.asarray(gradient)))
+        probe = int(np.argmax(np.abs(np.asarray(gradient))))
+        delta = GRADIENT_STEP * float(jnp.abs(conductor[probe]))
+        numeric = float(
+            (
+                linked_flux(conductor.at[probe].add(delta))
+                - linked_flux(conductor.at[probe].add(-delta))
+            )
+            / (2.0 * delta)
+        )
+        error = abs(float(gradient[probe]) - numeric) / max(abs(numeric), 1.0e-30)
+>       assert error < FLUX_GRADIENT_TOLERANCE
+E       assert 63.47875092912272 < 0.001
+
+tests/test_equilibrium_forward_solve.py:943: AssertionError
+______ test_the_plasma_current_is_differentiable_in_the_conductor_current ______
+
+machine = (ForwardProfile(operator=ForwardFluxOperator(grid=FluxTarget(null=Null2D(maxsize=5, precision=<Precision.DOUBLE: 'floa....26096842,
+        0.23558035,  0.21166023,  0.19052074,  0.17335953,  0.1609408 ,
+        0.1535261 ], dtype=float64))
+
+    def test_the_plasma_current_is_differentiable_in_the_conductor_current(machine):
+        """The observed plasma current carries a derivative through the solve."""
+        profile, seed, _vacuum = machine
+        conductor = profile.operator.external_current
+    
+        def observed_current(current):
+            """Return the plasma current the conductors support."""
+            return profile.solve(
+                seed, route="picard", current=current, evaluations=80, relaxation=0.7
+            ).moments.plasma_current
+    
+        gradient = jax.grad(observed_current)(conductor)
+        probe = int(np.argmax(np.abs(np.asarray(gradient))))
+        assert abs(float(gradient[probe])) > 0.0
+        delta = GRADIENT_STEP * float(jnp.abs(conductor[probe]))
+        numeric = float(
+            (
+                observed_current(conductor.at[probe].add(delta))
+                - observed_current(conductor.at[probe].add(-delta))
+            )
+            / (2.0 * delta)
+        )
+        error = abs(float(gradient[probe]) - numeric) / max(abs(numeric), 1.0e-30)
+>       assert error < CURRENT_GRADIENT_TOLERANCE
+E       assert 11.313969220454661 < 0.001
+
+tests/test_equilibrium_forward_solve.py:969: AssertionError
+=============================== warnings summary ===============================
+tests/test_equilibrium_forward_solve.py::test_the_host_root_find_holds_the_equilibrium_it_is_seeded_on
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/scipy/optimize/_nonlin.py:376: RuntimeWarning: invalid value encountered in scalar divide
+    and dx_norm/self.x_rtol <= x_norm))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_equilibrium_forward_solve.py::test_solve_path_current_moments_match_profile_owned_support
+FAILED tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences
+FAILED tests/test_equilibrium_forward_solve.py::test_the_solve_is_differentiable_in_the_conductor_current
+FAILED tests/test_equilibrium_forward_solve.py::test_the_plasma_current_is_differentiable_in_the_conductor_current
+4 failed, 25 passed, 1 warning in 905.35s (0:15:05)
+EXIT_STATUS=1
+NOVA_LANE_END=2026-10-02T21:32:08+0200
+NOVA_LANE_EXIT_STATUS=1

@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="221">
+<meta name="plan-version" content="222">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
 <meta name="plan-impl" content="0.8">
@@ -1791,6 +1791,9 @@ fails all three recorded cells. See the
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261001T191207055972-cca-chord-membership-applied-flag" data-who="reckon-build" data-when="2026-10-01T22:01:01.621Z">
     <div class="r-comment-body"><p>Chord membership now acts only when the global fit executed (membership_applied threaded through clipped_support_current_moments and both integrators); head passes the 550-cell exterior regression with cells 7 and 64 booking zero and adds no failure across every tests/ file importing clip_quadrature, fixing the two synthetic identities that failed at base b0a0676df.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20261002T0225-remeasure" data-who="reckon-build" data-when="2026-10-02T02:25:00+02:00">
+    <div class="r-comment-body">re-measure landed at be13ced0d: weak exact passes every rung; diverted exact fails (0.066 to 0.18), so the exact-default gate stays closed; chord regressed at every rung against de29a1a30, and f-cca-chord-membership-finish-option-one stays open (its pass criteria failed) until the attribution names the commit.</div>
 </div>
 </section>
 

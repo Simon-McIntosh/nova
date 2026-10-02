@@ -305,6 +305,51 @@
   "plan_impl_at_dispatch": 0.65,
   "plan_link": null,
   "promoted_revision": "5095e04a1d87e1b413b4cd660c239f836f1f4218",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 10064,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T053506691175-fsri-frozen-newton-terminal-residual",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "unintegrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "dirty": [],
+          "head": "5095e04a1d87e1b413b4cd660c239f836f1f4218",
+          "integrated_into": "HEAD",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-newton-terminal-residual",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-02T06:30:24.586Z",
+            "session_id": "73334d0c-7519-4a9c-9bb7-24d3110095b7",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-newton-terminal-residual"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 73334d0c-7519-4a9c-9bb7-24d3110095b7"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": {
     "reason": "codex-terra resumes are budget-held; the hypothesis this run tested is falsified and the follow-on is a separate diagnosis node on a lineage carrying its commit",
     "session_id": "73334d0c-7519-4a9c-9bb7-24d3110095b7",

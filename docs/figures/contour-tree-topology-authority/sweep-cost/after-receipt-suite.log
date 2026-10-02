@@ -1,0 +1,20 @@
+revision: 3ab1adef4903973ece6c3df64a51ab29e9b611b2 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size command=bounded receipt comparison on every fixture
+diverted-single-null {'nodes': 13, 'edges': 12, 'overflow': False}
+moderate-rotation-conventional-static {'nodes': 16, 'edges': 15, 'overflow': False}
+strong-rotation-compact-static {'nodes': 22, 'edges': 21, 'overflow': False}
+weak-rotation-reactor-static {'nodes': 18, 'edges': 17, 'overflow': False}
+diverted-single-null-340-cells {'nodes': 13, 'edges': 12, 'overflow': False}
+moderate-rotation-conventional-static-340-cells {'nodes': 20, 'edges': 19, 'overflow': False}
+strong-rotation-compact-static-340-cells {'nodes': 20, 'edges': 19, 'overflow': False}
+weak-rotation-reactor-static-340-cells {'nodes': 24, 'edges': 23, 'overflow': False}
+diverted-single-null-550-cells {'nodes': 13, 'edges': 12, 'overflow': False}
+moderate-rotation-conventional-static-550-cells {'nodes': 22, 'edges': 21, 'overflow': False}
+strong-rotation-compact-static-550-cells {'nodes': 18, 'edges': 17, 'overflow': False}
+weak-rotation-reactor-static-550-cells {'nodes': 14, 'edges': 13, 'overflow': False}
+diverted-single-null-1074-cells {'nodes': 15, 'edges': 14, 'overflow': False}
+moderate-rotation-conventional-static-1074-cells {'nodes': 32, 'edges': 31, 'overflow': False}
+strong-rotation-compact-static-1074-cells {'nodes': 26, 'edges': 25, 'overflow': False}
+weak-rotation-reactor-static-1074-cells {'nodes': 24, 'edges': 23, 'overflow': False}
+mast-27079-row-16 {'nodes': 66, 'edges': 65, 'overflow': False}
+mast-22475-row-50 {'nodes': 69, 'edges': 68, 'overflow': False}
+fixtures=18 failures=0 EXIT=0

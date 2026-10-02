@@ -201,6 +201,26 @@ def test_critical_node_capacity_overflow_is_jittable_and_visible():
     assert int(np.sum(result.edge_valid)) == 255
 
 
+def test_carrier_neighbour_capacity_overflow_is_visible():
+    """A carrier vertex beyond the fixed neighbour width refuses the receipt."""
+
+    leaves = 17
+    branches = jnp.stack(
+        (jnp.zeros(leaves, dtype=jnp.int32), jnp.arange(1, leaves + 1)), axis=1
+    )
+    edges = jnp.zeros((3 * leaves, 2), dtype=jnp.int32).at[:leaves].set(branches)
+    result = build_contour_tree(
+        jnp.arange(leaves + 1, dtype=jnp.float64),
+        jnp.ones(leaves + 1, dtype=bool),
+        jnp.zeros(leaves + 1, dtype=bool),
+        edges,
+        jnp.arange(edges.shape[0]) < leaves,
+        jnp.asarray(1, dtype=jnp.int32),
+    )
+
+    assert bool(result.overflow)
+
+
 def _carrier_regions(vertex_valid, mesh_edges):
     """Label every carrier vertex by its connected component over valid edges."""
 

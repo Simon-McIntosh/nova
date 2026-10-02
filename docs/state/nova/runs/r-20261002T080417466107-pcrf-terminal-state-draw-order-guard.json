@@ -310,6 +310,32 @@
   "plan_impl_at_dispatch": 0.85,
   "plan_link": null,
   "promoted_revision": "cee0449f1aa39c881dac63f54028ef82934f978f",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 10064,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T080417466107-pcrf-terminal-state-draw-order-guard",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-terminal-state-draw-order-guard"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

@@ -144,6 +144,7 @@ def draw_flux_contours(
     style: InkStyle = DEFAULT_INK,
     color: str | None = None,
     linewidth: float | None = None,
+    wall=None,
     **kwargs,
 ):
     """Draw unfilled flux contours at the given absolute levels.
@@ -151,6 +152,12 @@ def draw_flux_contours(
     ``levels`` is required rather than defaulted. Two maps compared at
     independently chosen levels can be made to look like anything, so the
     caller computes one physical level array and hands the same one to both.
+
+    ``wall`` is optional and names the wall units the field must stay inside.
+    A raster interpolated from scattered nodes is finite across their whole
+    convex hull, so it carries field beyond a concave wall; when ``wall`` is
+    given, every grid point outside the wall units is blanked before
+    contouring and no contour is drawn there.
     """
     r = np.asarray(radius, dtype=float)
     z = np.asarray(height, dtype=float)
@@ -163,9 +170,97 @@ def draw_flux_contours(
     ordered = np.asarray(sorted(float(level) for level in levels), dtype=float)
     if ordered.size == 0:
         raise ValueError("at least one contour level is required")
+    if wall is not None:
+        grid_r, grid_z = np.meshgrid(r, z)
+        inside = inside_wall_units(
+            np.column_stack((grid_r.ravel(), grid_z.ravel())), wall
+        ).reshape(values.shape)
+        values = np.where(inside, values, np.nan)
     return axes.contour(
         r,
         z,
+        values,
+        levels=ordered,
+        colors=color or style.contour_color,
+        linewidths=linewidth or style.contour_linewidth,
+        linestyles="solid",
+        zorder=kwargs.pop("zorder", style.zorder_flux),
+        **kwargs,
+    )
+
+
+def triangles_outside_wall(
+    radius: Sequence[float],
+    height: Sequence[float],
+    triangles: np.ndarray,
+    wall,
+) -> np.ndarray:
+    """Flag the triangles of a node triangulation that leave the wall units.
+
+    A Delaunay triangulation spans the convex hull of its nodes, so across a
+    concave wall it bridges the gap and a contour through those triangles is a
+    field the machine cannot hold. A triangle is kept only when its centroid,
+    its three vertices and its three edge midpoints all lie in the vessel
+    interior as :func:`nova.media.sources.frame.inside_wall_units` defines it
+    (vessel units united, material units removed). The extra probes stop a
+    triangle with an interior centroid from cutting a re-entrant corner.
+    """
+    r = np.asarray(radius, dtype=float)
+    z = np.asarray(height, dtype=float)
+    corners = np.stack((r[triangles], z[triangles]), axis=-1)  # (n, 3, 2)
+    probes = np.concatenate(
+        (
+            corners.mean(axis=1, keepdims=True),
+            corners,
+            0.5 * (corners + np.roll(corners, 1, axis=1)),
+        ),
+        axis=1,
+    )  # (n, 7, 2)
+    inside = inside_wall_units(probes.reshape(-1, 2), wall).reshape(probes.shape[:2])
+    return ~np.all(inside, axis=1)
+
+
+def draw_scattered_contours(
+    axes: matplotlib.axes.Axes,
+    radius: Sequence[float],
+    height: Sequence[float],
+    flux: Sequence[float],
+    levels: Sequence[float],
+    wall,
+    style: InkStyle = DEFAULT_INK,
+    color: str | None = None,
+    linewidth: float | None = None,
+    **kwargs,
+):
+    """Draw unfilled contours of a field sampled at scattered nodes.
+
+    The nodes are triangulated and every triangle that leaves the wall units
+    is masked before contouring (:func:`triangles_outside_wall`), so no
+    contour vertex lies in the gap a convex-hull triangulation would bridge.
+    ``wall`` is any source :func:`coerce_wall_units` accepts; it is required,
+    because a flux map drawn without the vessel it must sit inside cannot be
+    checked.
+    """
+    import matplotlib.tri as mtri
+
+    r = np.asarray(radius, dtype=float)
+    z = np.asarray(height, dtype=float)
+    values = np.asarray(flux, dtype=float)
+    if not (r.shape == z.shape == values.shape) or r.ndim != 1:
+        raise ValueError(
+            "radius, height and flux must be equal-length vectors, "
+            f"got {r.shape}, {z.shape}, {values.shape}"
+        )
+    ordered = np.asarray(sorted(float(level) for level in levels), dtype=float)
+    if ordered.size == 0:
+        raise ValueError("at least one contour level is required")
+    triangulation = mtri.Triangulation(r, z)
+    outside = triangles_outside_wall(r, z, triangulation.triangles, wall)
+    if np.all(outside):
+        raise ValueError("every triangle of the node mesh lies outside the wall")
+    triangulation.set_mask(outside)
+    return axes.tricontour(
+        triangulation,
         values,
         levels=ordered,
         colors=color or style.contour_color,

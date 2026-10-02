@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="figure-and-solver-audit">
+<title>Poloidal painters mask field outside the wall — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsa-painters-mask-outside-wall"
+         data-test-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T093145794496-fsa-painters-mask-outside-wall/logs/head-test.log"
+         data-negative-control-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T093145794496-fsa-painters-mask-outside-wall/logs/negative-control.log">
+
+  <h2>Scattered-node and rasterised contours stay inside the first wall</h2>
+
+  <p>Carries followup <strong>f-fsa-painters-draw-field-outside-the-wall</strong>.</p>
+
+  <p>No <code>nova.media</code> painter triangulated a scattered field before this change: the
+  one contour painter, <code>draw_flux_contours</code>, takes a regular grid. The figures that
+  drew field beyond the wall built that grid by interpolating nodes over their convex hull
+  (<code>_raster_field</code>, <code>LinearNDInterpolator</code>) and contoured it unmasked.
+  <code>nova/media/poloidal.py</code> now carries two repairs.</p>
+
+  <ul>
+    <li><code>draw_scattered_contours</code> triangulates the nodes and masks every triangle whose
+    centroid, vertices or edge midpoints leave the wall units, using the same
+    <code>inside_wall_units</code> predicate (vessel units united, material units removed) that
+    <code>draw_wall</code> callers already hold. The wall argument is required.</li>
+    <li><code>draw_flux_contours</code> takes an optional <code>wall</code> and blanks grid points
+    outside it, so a hull-interpolated raster draws nothing beyond the wall.</li>
+  </ul>
+
+  <h3>Measure</h3>
+  <p><code>tests/test_contour_inside_wall.py</code>: 7 passed on a slotted vessel and a vessel with
+  a material hole. With the triangle mask removed, 4 of the 7 fail (negative-control log). The
+  unmasked triangulation of the same nodes is asserted to draw outside the wall, so the
+  inside-wall assertion is shown able to fail. Seven test modules importing
+  <code>nova.media</code> were run each in its own process; none failed (the playable-session
+  module did not finish inside its 540 s bound and is reported in the manifest).</p>
+
+  <p>The figure <code>docs/figures/plasma-cell-read-fidelity/exact-mode-construction-comparison.png</code>
+  still shows the old field: its owner regenerates it by passing the wall to
+  <code>draw_flux_contours</code>. The renderers that triangulate or interpolate scattered fields
+  outside <code>nova.media</code> are listed in the report under
+  <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-painters-mask-outside-wall.md</code>.</p>
+</article>
+</main>
+</body>
+</html>

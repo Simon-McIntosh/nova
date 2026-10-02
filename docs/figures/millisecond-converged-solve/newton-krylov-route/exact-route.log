@@ -1,0 +1,7 @@
+revision=b6d110cf61fe27ab542dbdf47c952324e0e73232 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton command=timeout 3600 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton/tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point -q
+module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton/nova/equilibrium/forward.py
+cwd=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton
+23:19:27 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+Terminated
+EXIT=143
+[H[2J[3J

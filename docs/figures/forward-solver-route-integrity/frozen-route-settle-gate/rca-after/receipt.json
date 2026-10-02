@@ -1,0 +1,428 @@
+{
+  "frozen_partition_reads": 3,
+  "frozen_partition_refreezes": 1,
+  "frozen_residual": 2.3184046265790363e-05,
+  "initial_route_wall_seconds": 205.7096266578883,
+  "label_difference_cells": 0,
+  "live_residual": 1.2827280630881833e-11,
+  "operator_geometry": {
+    "grid_coordinate": {
+      "changed_entries": 0,
+      "maximum_absolute_difference": 0.0,
+      "shape": [
+        625,
+        2
+      ],
+      "terminal_value": {
+        "l2_norm": 26.745359150908982,
+        "maximum": 1.42,
+        "minimum": -0.42
+      },
+      "warm_value": {
+        "l2_norm": 26.745359150908982,
+        "maximum": 1.42,
+        "minimum": -0.42
+      }
+    },
+    "net_current_normalisation": "not applicable: absolute-current fixture",
+    "physical_node_number": 686
+  },
+  "partition_difference_cells": 0,
+  "partition_fields": {
+    "partition.label": {
+      "changed_entries": 0,
+      "maximum_absolute_difference": 0.0,
+      "shape": [
+        625
+      ],
+      "terminal_value": {
+        "l2_norm": 15.811388300841896,
+        "maximum": 2,
+        "minimum": 0
+      },
+      "warm_value": {
+        "l2_norm": 15.811388300841896,
+        "maximum": 2,
+        "minimum": 0
+      }
+    },
+    "partition.profile_support": {
+      "status": "not present in this fixture"
+    },
+    "partition.residual_shadow": {
+      "changed_entries": 0,
+      "maximum_absolute_difference": null,
+      "shape": [
+        686
+      ],
+      "terminal_value": {
+        "maximum": false,
+        "minimum": false
+      },
+      "warm_value": {
+        "maximum": false,
+        "minimum": false
+      }
+    },
+    "partition.topology.axis": {
+      "changed_entries": 2,
+      "maximum_absolute_difference": 4.4253046915798677e-07,
+      "shape": [
+        2
+      ],
+      "terminal_value": {
+        "l2_norm": 1.0138125413840287,
+        "maximum": 1.0138125413840287,
+        "minimum": -3.5138385897413717e-15
+      },
+      "warm_value": {
+        "l2_norm": 1.0138129839144978,
+        "maximum": 1.0138129839144978,
+        "minimum": 1.309578655507218e-14
+      }
+    },
+    "partition.topology.axis_flux": {
+      "changed_entries": 1,
+      "maximum_absolute_difference": 8.806365402236338e-06,
+      "shape": [],
+      "terminal_value": 2.0784759944150077,
+      "warm_value": 2.0784671880496055
+    },
+    "partition.topology.boundary": {
+      "changed_entries": 2,
+      "maximum_absolute_difference": 5.352783467185551e-14,
+      "shape": [
+        2
+      ],
+      "terminal_value": {
+        "l2_norm": 1.1973905409717365,
+        "maximum": 1.1973905409717365,
+        "minimum": 1.2445914926940496e-15
+      },
+      "warm_value": {
+        "l2_norm": 1.1973905409717343,
+        "maximum": 1.1973905409717343,
+        "minimum": 5.477242616454956e-14
+      }
+    },
+    "partition.topology.boundary_flux": {
+      "changed_entries": 1,
+      "maximum_absolute_difference": 6.6430230281078195e-06,
+      "shape": [],
+      "terminal_value": 1.5405747196561954,
+      "warm_value": 1.5405680766331673
+    },
+    "partition.topology.diverted": {
+      "changed_entries": 0,
+      "maximum_absolute_difference": null,
+      "shape": [],
+      "terminal_value": false,
+      "warm_value": false
+    },
+    "partition.topology.wall_point": {
+      "changed_entries": 2,
+      "maximum_absolute_difference": 5.352783467185551e-14,
+      "shape": [
+        2
+      ],
+      "terminal_value": {
+        "l2_norm": 1.1973905409717365,
+        "maximum": 1.1973905409717365,
+        "minimum": 1.2445914926940496e-15
+      },
+      "warm_value": {
+        "l2_norm": 1.1973905409717343,
+        "maximum": 1.1973905409717343,
+        "minimum": 5.477242616454956e-14
+      }
+    },
+    "partition.topology.wall_point_flux": {
+      "changed_entries": 1,
+      "maximum_absolute_difference": 6.6430230281078195e-06,
+      "shape": [],
+      "terminal_value": 1.5405747196561954,
+      "warm_value": 1.5405680766331673
+    },
+    "partition.topology.wall_unit_index": {
+      "changed_entries": 0,
+      "maximum_absolute_difference": 0.0,
+      "shape": [],
+      "terminal_value": 0,
+      "warm_value": 0
+    },
+    "partition.topology.x_point": {
+      "changed_entries": 2,
+      "maximum_absolute_difference": NaN,
+      "shape": [
+        2
+      ],
+      "terminal_value": {
+        "l2_norm": NaN,
+        "maximum": NaN,
+        "minimum": NaN
+      },
+      "warm_value": {
+        "l2_norm": NaN,
+        "maximum": NaN,
+        "minimum": NaN
+      }
+    },
+    "partition.topology.x_point_flux": {
+      "changed_entries": 1,
+      "maximum_absolute_difference": NaN,
+      "shape": [],
+      "terminal_value": NaN,
+      "warm_value": NaN
+    }
+  },
+  "refresh_newton_steps": 8,
+  "refreshed_frozen_partition_reads": 2,
+  "refreshed_frozen_partition_refreezes": 0,
+  "refreshed_live_residual": 1.2827280630881833e-11,
+  "refreshed_route": {
+    "accepted_newton_promotions": 0,
+    "active_set_iterations": 1,
+    "active_set_mask_differences": [
+      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ],
+    "active_set_residuals": [
+      1.2827280630881833e-11,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN
+    ],
+    "attempted_newton_promotions": 0,
+    "converged": true,
+    "inner_iteration_accepted": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ],
+    "inner_iteration_residuals_after": [
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN
+    ],
+    "inner_iteration_residuals_before": [
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN
+    ],
+    "live_partition_reads": 2,
+    "live_read_steps": 0,
+    "termination_reason": 1,
+    "termination_reason_name": "CONVERGED",
+    "trajectory_residual": 1.2827280630881833e-11
+  },
+  "refreshed_route_wall_seconds": 37.72507721558213,
+  "residual_shadow_difference_entries": 0,
+  "residual_terms": {
+    "components": {
+      "grid": {
+        "l2_residual": 4.671694765914668e-10,
+        "maximum_absolute_residual": 2.8326674339496094e-11,
+        "row_count": 686
+      },
+      "wall_and_sample": {
+        "l2_residual": 0.0,
+        "maximum_absolute_residual": 0.0,
+        "row_count": 0
+      }
+    },
+    "terms": [
+      {
+        "frozen_minus_state": 4.862579033426684e-05,
+        "live_minus_frozen": -4.862581866094118e-05,
+        "live_minus_state": -2.8326674339496094e-11,
+        "name": "grid cell 287 at R=0.97583333, Z=-0.00000000"
+      },
+      {
+        "frozen_minus_state": 4.8322149499124833e-05,
+        "live_minus_frozen": -4.832217770234237e-05,
+        "live_minus_state": -2.8203217539157777e-11,
+        "name": "grid cell 288 at R=0.97583333, Z=0.03500000"
+      },
+      {
+        "frozen_minus_state": 4.8322149499124833e-05,
+        "live_minus_frozen": -4.832217770234237e-05,
+        "live_minus_state": -2.8203217539157777e-11,
+        "name": "grid cell 286 at R=0.97583333, Z=-0.03500000"
+      },
+      {
+        "frozen_minus_state": 4.6440571435546474e-05,
+        "live_minus_frozen": -4.6440599529962157e-05,
+        "live_minus_state": -2.809441568274451e-11,
+        "name": "grid cell 262 at R=0.94166667, Z=-0.00000000"
+      },
+      {
+        "frozen_minus_state": 4.614908945432816e-05,
+        "live_minus_frozen": -4.614911738975991e-05,
+        "live_minus_state": -2.793543174561819e-11,
+        "name": "grid cell 261 at R=0.94166667, Z=-0.03500000"
+      },
+      {
+        "frozen_minus_state": 4.614908945432816e-05,
+        "live_minus_frozen": -4.614911738931582e-05,
+        "live_minus_state": -2.793498765640834e-11,
+        "name": "grid cell 263 at R=0.94166667, Z=0.03500000"
+      },
+      {
+        "frozen_minus_state": 5.019292308627854e-05,
+        "live_minus_frozen": -5.019295098573906e-05,
+        "live_minus_state": -2.7899460519620334e-11,
+        "name": "grid cell 312 at R=1.01000000, Z=-0.00000000"
+      },
+      {
+        "frozen_minus_state": 4.987955991175852e-05,
+        "live_minus_frozen": -4.987958772773027e-05,
+        "live_minus_state": -2.7815971748168522e-11,
+        "name": "grid cell 313 at R=1.01000000, Z=0.03500000"
+      },
+      {
+        "frozen_minus_state": 4.987955991175852e-05,
+        "live_minus_frozen": -4.987958772728618e-05,
+        "live_minus_state": -2.7815527658958672e-11,
+        "name": "grid cell 311 at R=1.01000000, Z=-0.03500000"
+      },
+      {
+        "frozen_minus_state": 4.741898569426972e-05,
+        "live_minus_frozen": -4.741901350024946e-05,
+        "live_minus_state": -2.7805979740946896e-11,
+        "name": "grid cell 285 at R=0.97583333, Z=-0.07000000"
+      },
+      {
+        "frozen_minus_state": 4.7418985694491766e-05,
+        "live_minus_frozen": -4.741901350024946e-05,
+        "live_minus_state": -2.780575769634197e-11,
+        "name": "grid cell 289 at R=0.97583333, Z=0.07000000"
+      },
+      {
+        "frozen_minus_state": 4.894807144451008e-05,
+        "live_minus_frozen": -4.8948098974488374e-05,
+        "live_minus_state": -2.7529978297025082e-11,
+        "name": "grid cell 314 at R=1.01000000, Z=0.07000000"
+      }
+    ]
+  },
+  "route": {
+    "accepted_newton_promotions": 1,
+    "active_set_iterations": 2,
+    "active_set_mask_differences": [
+      0,
+      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ],
+    "active_set_residuals": [
+      2.3728714793315085e-06,
+      2.3728714793315085e-06,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN
+    ],
+    "attempted_newton_promotions": 1,
+    "converged": true,
+    "inner_iteration_accepted": [
+      1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ],
+    "inner_iteration_residuals_after": [
+      1.2827280630881833e-11,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN
+    ],
+    "inner_iteration_residuals_before": [
+      2.372871478728213e-06,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN
+    ],
+    "live_partition_reads": 3,
+    "live_read_steps": 1,
+    "termination_reason": 1,
+    "termination_reason_name": "CONVERGED",
+    "trajectory_residual": 1.2827280630881833e-11
+  },
+  "support_difference_cells": 0,
+  "trajectory_residual": 1.2827280630881833e-11
+}

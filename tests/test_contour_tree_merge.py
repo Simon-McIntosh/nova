@@ -70,6 +70,19 @@ def test_single_maximum_has_one_contour_arc():
     assert np.asarray(result.edges)[np.asarray(result.edge_valid)].tolist() == [[0, 2]]
 
 
+def test_regular_triangle_cycle_does_not_create_a_saddle():
+    """A regular triangular carrier stays one arc instead of duplicating its join."""
+
+    result = _tree(
+        [4.0, 3.0, 2.0, 1.0],
+        [(0, 1), (1, 2), (2, 3), (0, 2), (1, 3)],
+    )
+
+    assert _nodes(result) == {0: 2, 3: 0}
+    assert int(np.sum(result.node_valid) - np.sum(result.edge_valid)) == 1
+    assert np.asarray(result.edges)[np.asarray(result.edge_valid)].tolist() == [[0, 3]]
+
+
 def test_join_saddle_matches_superlevel_component_event():
     """Two maxima join at the only saddle in a Y-shaped carrier."""
 

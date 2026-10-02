@@ -105,6 +105,60 @@ def _append_edges(
     return jax.lax.fori_loop(0, sources.size, append, (edges, edge_valid, overflow))
 
 
+def _insert_split_nodes(
+    node_valid: jax.Array,
+    edges: jax.Array,
+    edge_valid: jax.Array,
+    overflow: jax.Array,
+    split_only: jax.Array,
+    values: jax.Array,
+) -> tuple[jax.Array, jax.Array, jax.Array, jax.Array]:
+    """Subdivide join arcs at split-only critical vertices.
+
+    A join tree already preserves every superlevel component event.  The split
+    tree contributes critical vertices that lie in the interior of those arcs;
+    subdividing an arc preserves its level-crossing count while retaining the
+    additional critical node.  In contrast, appending the split arc creates a
+    cycle whenever both trees describe the same contour region.
+    """
+
+    capacity = edges.shape[0]
+    edge_indices = jnp.arange(capacity, dtype=jnp.int32)
+
+    def above(left: jax.Array, right: jax.Array) -> jax.Array:
+        return (values[left] > values[right]) | (
+            (values[left] == values[right]) & (left < right)
+        )
+
+    def insert(vertex: jax.Array, state):
+        nodes, table, valid, overflow_bit = state
+        source = table[:, 0]
+        target = table[:, 1]
+        crosses = valid & (above(source, vertex) != above(target, vertex))
+        arc_slot = jnp.argmax(crosses).astype(jnp.int32)
+        free_slot = jnp.argmin(jnp.where(valid, capacity, edge_indices)).astype(
+            jnp.int32
+        )
+        has_arc = jnp.any(crosses)
+        has_slot = jnp.any(~valid)
+        requested = split_only[vertex]
+        write = requested & has_arc & has_slot
+        old = table[arc_slot]
+        table = table.at[arc_slot].set(
+            jnp.where(write, jnp.stack((old[0], vertex)), old)
+        )
+        table = table.at[free_slot].set(
+            jnp.where(write, jnp.stack((vertex, old[1])), table[free_slot])
+        )
+        valid = valid.at[free_slot].set(valid[free_slot] | write)
+        nodes = nodes.at[vertex].set(nodes[vertex] | write)
+        return nodes, table, valid, overflow_bit | (requested & ~write)
+
+    return jax.lax.fori_loop(
+        0, values.size, insert, (node_valid, edges, edge_valid, overflow)
+    )
+
+
 def _sweep_tree(
     values: jax.Array,
     vertex_valid: jax.Array,
@@ -132,6 +186,9 @@ def _sweep_tree(
     edge_count = edges.shape[0]
     index = jnp.arange(vertex_count, dtype=jnp.int32)
     order = jnp.lexsort((index, -values if descending else values))
+    last_usable_rank = jnp.max(
+        jnp.where(vertex_valid[order], index, jnp.asarray(-1, dtype=jnp.int32))
+    )
     parents = index
     active = jnp.zeros(vertex_count, dtype=bool)
     births = index
@@ -177,7 +234,7 @@ def _sweep_tree(
         neighbour_wall = jnp.any(representative & wall_flag[neighbour_root])
         component_count = jnp.sum(representative, dtype=jnp.int32)
         first_wall = usable & descending & vertex_is_wall[vertex] & ~neighbour_wall
-        final_vertex = usable & (rank == vertex_count - 1)
+        final_vertex = usable & (rank == last_usable_rank)
         extremum = component_count == 0
         saddle = component_count >= 2
         terminal = final_vertex & (component_count == 1)
@@ -212,10 +269,10 @@ def _sweep_tree(
             representative & connect,
             vertex,
         )
-        parent_update = jnp.where(root_active & usable, vertex, parents[neighbour_root])
-        parents = parents.at[neighbour_root].set(
-            jnp.where(usable, parent_update, parents[neighbour_root])
+        active_root = (
+            jnp.zeros(vertex_count, dtype=bool).at[neighbour_root].max(root_active)
         )
+        parents = jnp.where(active_root & usable, vertex, parents)
         parents = parents.at[vertex].set(vertex)
         first_root = jnp.argmax(representative).astype(jnp.int32)
         inherited = births[neighbour_root[first_root]]
@@ -307,15 +364,43 @@ def build_contour_tree(
         critical_type,
         jnp.where(sigma > 0, critical_type, 2 - critical_type),
     )
-    merged_edges, merged_valid, overflow = _append_edges(
+    split_only = split_nodes & ~join_nodes
+    node_valid, merged_edges, merged_valid, overflow = _insert_split_nodes(
+        node_valid,
         join_edges,
         join_valid,
         join_overflow | split_overflow,
-        split_edges[:, 0],
-        split_valid & ~join_nodes[split_edges[:, 0]],
-        split_edges[:, 1],
+        split_only,
+        signed,
     )
+    vertex_count = vertex_valid.size
     slots = jnp.arange(node_capacity, dtype=jnp.int32)
+    join_order = join[-1]
+    terminal_rank = jnp.max(
+        jnp.where(
+            vertex_valid[join_order],
+            jnp.arange(vertex_count, dtype=jnp.int32),
+            jnp.asarray(-1, dtype=jnp.int32),
+        )
+    )
+    terminal = join_order[terminal_rank]
+    virtual = jnp.argmin(
+        jnp.where(vertex_valid, vertex_count, jnp.arange(vertex_count, dtype=jnp.int32))
+    )
+    has_virtual = jnp.any(~vertex_valid)
+    replace_terminal = has_virtual & join_nodes[terminal]
+    node_valid = node_valid.at[terminal].set(
+        jnp.where(replace_terminal, False, node_valid[terminal])
+    )
+    node_valid = node_valid.at[virtual].set(node_valid[virtual] | replace_terminal)
+    critical_type = critical_type.at[virtual].set(
+        jnp.where(replace_terminal, 0, critical_type[virtual])
+    )
+    merged_edges = jnp.where(
+        (merged_edges == terminal) & replace_terminal,
+        virtual,
+        merged_edges,
+    )
     return ContourTreeArrays(
         node_vertex=slots,
         node_psi=jnp.where(

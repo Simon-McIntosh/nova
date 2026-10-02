@@ -11,7 +11,7 @@ from pathlib import Path
 import socket
 import subprocess
 from time import perf_counter
-from typing import Any
+from typing import Any, Sequence
 
 import jax
 import jax.numpy as jnp
@@ -898,52 +898,111 @@ def _draw_control(
     }
 
 
+# One ink names the terminal series in both control panels, so the pair reads
+# as one comparison and no reader has to hold two colour keys.  The analytic
+# field is the reference and carries a distinct blue, drawn wider than the
+# terminal contour so it stays visible as a halo wherever the two coincide.
+TERMINAL_INK = "#b5651d"
+ANALYTIC_INK = "#3366cc"
+CONTACT_INK = "#cc0000"
+
+
 def _draw_state(
     context: dict[str, Any],
-    state: np.ndarray,
+    state: np.ndarray | None,
     path: Path,
     *,
     title: str,
-    color: str,
     project_src: str,
+    topology: dict[str, Any] | None = None,
+    contact_rz_m: Sequence[float] | None = None,
 ) -> dict[str, Any]:
-    """Draw one terminal state beside the analytic field under the plotting rules."""
+    """Draw one control panel under the plotting rules.
+
+    Both panels draw the analytic field in one blue and the terminal series in
+    one shared ink, so the pair compares under a single colour convention and
+    the analytic contours stay visible.  A state draws its own terminal flux
+    contours and topology; the arm whose terminal state was never persisted
+    draws the receipt-stated topology (its axis and any X-point) instead, so
+    the same figure carries its terminal nulls and limiter contact even when
+    the contours behind them cannot be redrawn without a solve.
+    """
     wall = np.asarray(context["machine"].wall_node, dtype=np.float64)
     radial, height, analytic_field = certificate._raster_field(
         context["coordinates"], context["analytic"], wall
     )
-    _, _, field = certificate._raster_field(context["coordinates"], state, wall)
     levels = poloidal.contour_levels(analytic_field, count=12)
     analytic_topology = oracle_probe._topology(
         context["profile"].operator, context["analytic"]
     )
-    topology = oracle_probe._topology(context["profile"].operator, state)
     figure, axis = plt.subplots(figsize=(4.8, 4.2), constrained_layout=True)
     poloidal.draw_flux_contours(
-        axis, radial, height, analytic_field, levels, color="#3366cc"
+        axis,
+        radial,
+        height,
+        analytic_field,
+        levels,
+        color=ANALYTIC_INK,
+        linewidth=2.4,
     )
-    poloidal.draw_flux_contours(axis, radial, height, field, levels, color=color)
+    if state is not None:
+        _, _, field = certificate._raster_field(context["coordinates"], state, wall)
+        poloidal.draw_flux_contours(
+            axis,
+            radial,
+            height,
+            field,
+            levels,
+            color=TERMINAL_INK,
+            linewidth=1.2,
+        )
     poloidal.draw_wall(axis, units=(wall,))
     poloidal.draw_nulls(
         axis,
         magnetic_axis=analytic_topology["axis_rz_m"],
         x_points=analytic_topology["x_point_rz_m"],
         style=DEFAULT_INK.variant(
-            axis_marker="^", axis_color="#3366cc", xpoint_color="#3366cc"
+            axis_marker="^", axis_color=ANALYTIC_INK, xpoint_color=ANALYTIC_INK
         ),
         contain=(wall,),
     )
-    poloidal.draw_nulls(
-        axis,
-        magnetic_axis=topology["axis_rz_m"],
-        x_points=topology["x_point_rz_m"],
-        style=DEFAULT_INK.variant(
-            axis_marker="^", axis_color=color, xpoint_color=color
-        ),
-        contain=(wall,),
-    )
+    if topology is not None:
+        poloidal.draw_nulls(
+            axis,
+            magnetic_axis=topology["axis_rz_m"],
+            x_points=topology["x_point_rz_m"],
+            style=DEFAULT_INK.variant(
+                axis_marker="^",
+                axis_color=TERMINAL_INK,
+                xpoint_color=TERMINAL_INK,
+            ),
+            contain=(wall,),
+        )
+    if contact_rz_m is not None:
+        contact = np.asarray(contact_rz_m, dtype=float)
+        axis.plot(
+            contact[0],
+            contact[1],
+            marker="x",
+            markersize=9,
+            markeredgewidth=2.0,
+            color=CONTACT_INK,
+            linestyle="none",
+            zorder=6,
+        )
+        axis.annotate(
+            "limiter contact",
+            xy=(contact[0], contact[1]),
+            xytext=(16, -12),
+            textcoords="offset points",
+            fontsize=8,
+            color=CONTACT_INK,
+            ha="left",
+            va="top",
+            arrowprops={"arrowstyle": "-", "linewidth": 0.8, "color": CONTACT_INK},
+        )
     poloidal_axes(axis)
-    axis.set_title(f"{title}\nanalytic blue / terminal coloured", fontsize=8)
+    axis.set_title(f"{title}\nanalytic blue / terminal shared ink", fontsize=8)
     path.parent.mkdir(parents=True, exist_ok=True)
     vector_path = path.with_suffix(".svg")
     figure.savefig(vector_path)
@@ -1032,6 +1091,7 @@ def control_arm(
         context = _context("weak-rotation-reactor-static", -110)
         displaced = _translated_state(context)
         result, state = _solve(context, displaced, constrained=constrained)
+        topology = result["topology"]
         figure = _draw_state(
             context,
             state,
@@ -1041,10 +1101,11 @@ def control_arm(
                 if constrained
                 else "same displaced seed, no row"
             ),
-            color="#cc7722" if constrained else "#a23b72",
             project_src=(
                 f"/nova/figures/centroid-constrained-oracle-solve/control-{arm}.png"
             ),
+            topology=topology,
+            contact_rz_m=topology.get("wall_contact_rz_m"),
         )
     finally:
         set_support_clip_mode(previous_mode)
@@ -1240,23 +1301,31 @@ def control_arm_chunked(
 def render_control_state(
     output_root: Path, figure_path: Path, arm: str
 ) -> dict[str, Any]:
-    """Draw a banked terminal state and record the panel in that arm's receipt.
+    """Draw a banked control panel and record it in that arm's receipt.
 
-    The panel is a pure function of the fixture context and the persisted
-    state, so it is drawn by its own short call rather than inside the solve
-    that produced the state.  The state is checked against the digest its
-    receipt records before anything is drawn.
+    The panel is a pure function of the fixture context, the arm's terminal
+    state and its receipt, so it is drawn by its own short call rather than
+    inside the solve that produced the state.  Where a terminal state was
+    persisted the panel draws its flux contours and the state is checked
+    against the digest its receipt records before anything is drawn; where the
+    arm's state was never persisted the panel draws the receipt-stated terminal
+    topology and limiter contact instead, so the panel still carries the
+    reading it is cited for without a re-solve.
     """
     receipt_path = output_root / f"control-{arm}.json"
     control = json.loads(receipt_path.read_text(encoding="utf-8"))
-    state_path = Path(control["terminal_state_path"])
-    state = np.load(state_path)
-    digest = _digest(np.asarray(state, dtype=np.float64))
-    if digest != control["terminal_state_sha256_binary64"]:
-        raise ValueError(
-            "the banked state does not hash to the digest its receipt records: "
-            f"{digest} against {control['terminal_state_sha256_binary64']}"
-        )
+    state: np.ndarray | None = None
+    if control.get("terminal_state_path"):
+        state_path = Path(control["terminal_state_path"])
+        state = np.load(state_path)
+        digest = _digest(np.asarray(state, dtype=np.float64))
+        if digest != control["terminal_state_sha256_binary64"]:
+            raise ValueError(
+                "the banked state does not hash to the digest its receipt "
+                f"records: {digest} against "
+                f"{control['terminal_state_sha256_binary64']}"
+            )
+    topology = control["solve"]["topology"]
     configure_dtypes()
     previous_mode = support_clip_mode()
     set_support_clip_mode("exact")
@@ -1271,14 +1340,18 @@ def render_control_state(
                 if arm == "positive"
                 else "same displaced seed, no row"
             ),
-            color="#cc7722" if arm == "positive" else "#a23b72",
             project_src=(
                 f"/nova/figures/centroid-constrained-oracle-solve/control-{arm}.png"
             ),
+            topology=topology,
+            contact_rz_m=topology.get("wall_contact_rz_m"),
         )
     finally:
         set_support_clip_mode(previous_mode)
     control["figure"] = figure
+    control["panel_source"] = (
+        "persisted terminal state" if state is not None else "committed receipt"
+    )
     _write_json(receipt_path, control)
     return control
 

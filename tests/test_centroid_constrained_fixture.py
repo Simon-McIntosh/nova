@@ -10,6 +10,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from benchmarks import centroid_constrained_fixture_receipt as control_receipt_module
+import nova.equilibrium.constraint as constraint_module
 from scripts.analytic_oracle_fixtures.centroid_row import (
     DEFAULT_FIELD_BOUND_T,
     DEFAULT_FIELD_SCALE_T,
@@ -269,3 +270,48 @@ def test_control_render_refuses_a_state_that_misses_its_receipt_digest(
         control_receipt_module.render_control_state(
             tmp_path, tmp_path / "control-positive.png", "positive"
         )
+
+
+class _CellPoolOperator:
+    """Operator stub stating a cell count shorter than its flux vector.
+
+    The carried cells come first and the direct sampling nodes follow, with a
+    physical prefix that adds the wall nodes between the two blocks, so a pool
+    sized from the physical prefix is longer than the cells the stencil
+    convention states.
+    """
+
+    def __init__(self, node_number: int, physical_node_number: int) -> None:
+        self.grid = SimpleNamespace(node_number=node_number)
+        self.physical_node_number = physical_node_number
+
+
+def test_lattice_order_guard_refuses_a_prefix_sized_pool() -> None:
+    """The cell-carried read hands the operator its cells, not the prefix.
+
+    A flux vector is longer than its cells: the operator assembles the pool it
+    reads as the carried cells first and the sampling nodes after them, indexed
+    from the cell count, while the physical prefix adds the wall nodes between
+    the two.  The guard is stated on the slice that is actually handed over, so
+    a call site that sizes the slice from the physical prefix -- longer than the
+    cell count the stencil convention states -- is refused rather than silently
+    answered with a neighbouring cell's polynomial.  Removing that cell-count
+    check, which is the pre-fix guard's indexing, reddens this case.
+    """
+    operator = _CellPoolOperator(node_number=3, physical_node_number=4)
+    state = jnp.asarray((0.1, 0.2, 0.3, 0.9, 10.0, 20.0, 30.0))
+
+    with np.testing.assert_raises_regex(
+        ValueError, "carries the operator's cells first"
+    ):
+        constraint_module._sampled_cell_pool(
+            state, operator, pool_length=operator.physical_node_number
+        )
+
+    # the cell count the stencil convention states is the slice that is taken
+    pool = constraint_module._sampled_cell_pool(
+        state, operator, pool_length=int(operator.grid.node_number)
+    )
+    np.testing.assert_array_equal(
+        np.asarray(pool), np.asarray(state)[: int(operator.grid.node_number)]
+    )

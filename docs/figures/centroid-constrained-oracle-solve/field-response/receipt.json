@@ -1350,5 +1350,152 @@
   "target_centroid_m": [
     6.063530173332898,
     0.0
-  ]
+  ],
+  "arms": [
+    {
+      "component": "radial",
+      "field_amplitude_mt": 10.0,
+      "field_amplitude_t": 0.01,
+      "target_component": "centroid_z",
+      "one_map_shift_m": -0.0492519099191573,
+      "one_map_shift_pitches": -0.10567641403409823,
+      "one_map_to_predicted_ratio": 1.0017342800773645,
+      "one_map_sign_agreement": true,
+      "four_trip_shift_m": -0.3272643300598359,
+      "four_trip_to_predicted_ratio": 6.656227110899823,
+      "four_trip_sign_agreement": true,
+      "drawn": true,
+      "panel": "/nova/figures/centroid-constrained-oracle-solve/field-response/panels/radial-plus-10mt.png",
+      "part_receipt": "docs/figures/centroid-constrained-oracle-solve/field-response/parts/radial-+10mt.json"
+    },
+    {
+      "component": "radial",
+      "field_amplitude_mt": 1.0,
+      "field_amplitude_t": 0.001,
+      "target_component": "centroid_z",
+      "one_map_shift_m": -0.004916455066941906,
+      "one_map_shift_pitches": -0.010548897333869779,
+      "one_map_to_predicted_ratio": 0.9999574808570242,
+      "one_map_sign_agreement": true,
+      "four_trip_shift_m": -0.03362320128654565,
+      "four_trip_to_predicted_ratio": 6.838620753988907,
+      "four_trip_sign_agreement": true,
+      "drawn": false,
+      "panel": null,
+      "part_receipt": "docs/figures/centroid-constrained-oracle-solve/field-response/parts/radial-+1mt.json"
+    },
+    {
+      "component": "radial",
+      "field_amplitude_mt": -10.0,
+      "field_amplitude_t": -0.01,
+      "target_component": "centroid_z",
+      "one_map_shift_m": 0.049251909915724645,
+      "one_map_shift_pitches": 0.10567641402673301,
+      "one_map_to_predicted_ratio": 1.0017342800075477,
+      "one_map_sign_agreement": true,
+      "four_trip_shift_m": 0.3272643300508002,
+      "four_trip_to_predicted_ratio": 6.656227110716046,
+      "four_trip_sign_agreement": true,
+      "drawn": false,
+      "panel": null,
+      "part_receipt": "docs/figures/centroid-constrained-oracle-solve/field-response/parts/radial--10mt.json"
+    },
+    {
+      "component": "radial",
+      "field_amplitude_mt": -1.0,
+      "field_amplitude_t": -0.001,
+      "target_component": "centroid_z",
+      "one_map_shift_m": 0.004916455068124512,
+      "one_map_shift_pitches": 0.010548897336407216,
+      "one_map_to_predicted_ratio": 0.9999574810975543,
+      "one_map_sign_agreement": true,
+      "four_trip_shift_m": 0.033623201280075316,
+      "four_trip_to_predicted_ratio": 6.838620752672906,
+      "four_trip_sign_agreement": true,
+      "drawn": false,
+      "panel": null,
+      "part_receipt": "docs/figures/centroid-constrained-oracle-solve/field-response/parts/radial--1mt.json"
+    },
+    {
+      "component": "vertical",
+      "field_amplitude_mt": 10.0,
+      "field_amplitude_t": 0.01,
+      "target_component": "centroid_r",
+      "one_map_shift_m": 0.01018758089195515,
+      "one_map_shift_pitches": 0.021858787164015438,
+      "one_map_to_predicted_ratio": 0.6258537759605963,
+      "one_map_sign_agreement": true,
+      "four_trip_shift_m": 0.06206650872398978,
+      "four_trip_to_predicted_ratio": 3.8129325555858666,
+      "four_trip_sign_agreement": true,
+      "drawn": true,
+      "panel": "/nova/figures/centroid-constrained-oracle-solve/field-response/panels/vertical-plus-10mt.png",
+      "part_receipt": "docs/figures/centroid-constrained-oracle-solve/field-response/parts/vertical-+10mt.json"
+    },
+    {
+      "component": "vertical",
+      "field_amplitude_mt": 1.0,
+      "field_amplitude_t": 0.001,
+      "target_component": "centroid_r",
+      "one_map_shift_m": -0.004485917495744118,
+      "one_map_shift_pitches": -0.009625122667957068,
+      "one_map_to_predicted_ratio": -2.7558342192661125,
+      "one_map_sign_agreement": false,
+      "four_trip_shift_m": 0.0006931216770871274,
+      "four_trip_to_predicted_ratio": 0.42580552086479523,
+      "four_trip_sign_agreement": true,
+      "drawn": false,
+      "panel": null,
+      "part_receipt": "docs/figures/centroid-constrained-oracle-solve/field-response/parts/vertical-+1mt.json"
+    },
+    {
+      "component": "vertical",
+      "field_amplitude_mt": -10.0,
+      "field_amplitude_t": -0.01,
+      "target_component": "centroid_r",
+      "one_map_shift_m": -0.022296773857350516,
+      "one_map_shift_pitches": -0.04784064434539894,
+      "one_map_to_predicted_ratio": 1.3697579688797197,
+      "one_map_sign_agreement": true,
+      "four_trip_shift_m": -0.06076765688463226,
+      "four_trip_to_predicted_ratio": 3.73314017536367,
+      "four_trip_sign_agreement": true,
+      "drawn": false,
+      "panel": null,
+      "part_receipt": "docs/figures/centroid-constrained-oracle-solve/field-response/parts/vertical--10mt.json"
+    },
+    {
+      "component": "vertical",
+      "field_amplitude_mt": -1.0,
+      "field_amplitude_t": -0.001,
+      "target_component": "centroid_r",
+      "one_map_shift_m": -0.007741494294116968,
+      "one_map_shift_pitches": -0.01661038846230618,
+      "one_map_to_predicted_ratio": 4.755833094171073,
+      "one_map_sign_agreement": true,
+      "four_trip_shift_m": -0.012738898744637517,
+      "four_trip_to_predicted_ratio": 7.825889154123821,
+      "four_trip_sign_agreement": true,
+      "drawn": false,
+      "panel": null,
+      "part_receipt": "docs/figures/centroid-constrained-oracle-solve/field-response/parts/vertical--1mt.json"
+    }
+  ],
+  "publication": {
+    "drawn_panels": [
+      "/nova/figures/centroid-constrained-oracle-solve/field-response/panels/vertical-plus-10mt.png",
+      "/nova/figures/centroid-constrained-oracle-solve/field-response/panels/radial-plus-10mt.png"
+    ],
+    "arms_measured": 8,
+    "arms_drawn": 2,
+    "arms_measured_not_drawn": [
+      "radial +1 mT",
+      "radial -10 mT",
+      "radial -1 mT",
+      "vertical +1 mT",
+      "vertical -10 mT",
+      "vertical -1 mT"
+    ],
+    "note": "Eight arms were measured: vertical and radial at +/-1 mT and +/-10 mT. Only the +10 mT pair is drawn; the other six are measured and not drawn, with their shifts, ratios and sign agreement listed in `arms` and their full receipts under `parts/`."
+  }
 }

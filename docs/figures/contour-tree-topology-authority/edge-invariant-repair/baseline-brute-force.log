@@ -1,0 +1,50 @@
+rev=878018cd28c009792cc51307219c9d4dc94ef9f6 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-contour-tree-edge-invariant-repair command=certificate comparator baseline arm
+TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-contour-tree-edge-invariant-repair
+COMMAND=JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-contour-tree-edge-invariant-repair /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest --timeout 0 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-contour-tree-edge-invariant-repair/tests/test_contour_tree_brute_force.py::test_certificate_tree_matches_independent_superlevel_components -q
+MODULE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-contour-tree-edge-invariant-repair/nova/equilibrium/contour_tree.py
+CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-contour-tree-edge-invariant-repair
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______ test_certificate_tree_matches_independent_superlevel_components ________
+
+fixtures = (Fixture(name='diverted-single-null', mesh=ContourMesh(vertex_rz=Array([[ 1.53669204, -1.19443928],
+       [ 1.6485164..., False, False, False], dtype=bool), vertex_capacity=256, edge_capacity=2048, triangle_capacity=1024, overflow=False)))
+
+    def test_certificate_tree_matches_independent_superlevel_components(fixtures):
+        """Every stored certificate field agrees at every vertex-separated level."""
+    
+        corrupt = os.environ.get("CONTOUR_TREE_CORRUPT") == "drop-wall-joins"
+        for fixture in fixtures:
+>           result = compare(fixture.mesh, corrupt=corrupt)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_contour_tree_brute_force.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mesh = ContourMesh(vertex_rz=Array([[ 1.53669204, -1.19443928],
+       [ 1.64851643, -1.12818151],
+       [ 1.55871461, -1.10....., False, False, False], dtype=bool), vertex_capacity=256, edge_capacity=2048, triangle_capacity=1024, overflow=False)
+corrupt = False
+
+    def compare(mesh: ContourMesh, *, corrupt: bool = False) -> dict[str, object]:
+        """Compare tree arcs with an independent carrier-graph traversal."""
+    
+        tree = build_contour_tree(
+            mesh.vertex_psi,
+            mesh.vertex_valid,
+            mesh.vertex_is_wall,
+            mesh.edges,
+            mesh.edge_valid,
+            jnp.asarray(1, dtype=jnp.int32),
+        )
+        if bool(tree.overflow):
+>           raise RuntimeError("contour tree capacity refused")
+E           RuntimeError: contour tree capacity refused
+
+benchmarks/contour_tree_brute_force.py:110: RuntimeError
+---------------------------- Captured stderr setup -----------------------------
+10:15:05 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+=========================== short test summary info ============================
+FAILED tests/test_contour_tree_brute_force.py::test_certificate_tree_matches_independent_superlevel_components
+1 failed in 11.82s
+EXIT=1

@@ -290,6 +290,12 @@ def build_contour_mesh(
     triangle_valid_arr = np.zeros(triangle_capacity, dtype=bool)
     triangle_valid_arr[: min(len(triangles), triangle_capacity)] = True
     vertex_psi_arr = _pad(vertex_psi, vertex_capacity, 0.0)
+    if not overflow and np.any(vertex_valid_arr):
+        outside_value = float(np.min(vertex_psi_arr[vertex_valid_arr])) - max(
+            1.0,
+            float(np.ptp(vertex_psi_arr[vertex_valid_arr])),
+        )
+        vertex_psi_arr[~vertex_valid_arr] = outside_value
     if overflow:
         # A truncated mesh would carry triangle or edge indices past the vertex
         # array. Refuse visibly: mark nothing valid and blank every index, so no

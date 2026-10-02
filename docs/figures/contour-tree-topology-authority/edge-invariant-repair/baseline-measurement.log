@@ -1,0 +1,4 @@
+diverted-single-null: valid=140 wall=8 interior=132 join_nodes=121 join_arcs=287 split_nodes=103 split_arcs=239 merged_nodes=138 maxima=2 minima=5 join_saddles=119 split_saddles=98 both_saddles=79 join_only_saddles=35
+moderate-rotation-conventional-static: valid=136 wall=0 interior=136 join_nodes=113 join_arcs=262 split_nodes=109 split_arcs=255 merged_nodes=135 maxima=3 minima=6 join_saddles=110 split_saddles=103 both_saddles=78 join_only_saddles=26
+strong-rotation-compact-static: valid=135 wall=0 interior=135 join_nodes=119 join_arcs=287 split_nodes=117 split_arcs=265 merged_nodes=135 maxima=4 minima=8 join_saddles=115 split_saddles=109 both_saddles=89 join_only_saddles=18
+weak-rotation-reactor-static: valid=135 wall=0 interior=135 join_nodes=112 join_arcs=257 split_nodes=116 split_arcs=269 merged_nodes=133 maxima=2 minima=8 join_saddles=110 split_saddles=108 both_saddles=85 join_only_saddles=17

@@ -1,0 +1,97 @@
+<!-- fragment: fsri-frozen-route-fixed-point-diagnosis -->
+<section id="fsri-frozen-route-fixed-point-diagnosis">
+<h3>What the frozen Newton route holds fixed that moves its fixed point</h3>
+
+<p><strong>Landed.</strong>
+<code>benchmarks/frozen_route_fixed_point_rca.py</code> now records the solver
+termination state and reports it. The measured answer is that the frozen
+<em>partition</em> holds nothing that moves the fixed point: at the terminus the
+frozen map and the live map agree to machine precision, and the 2.37e-6 residual
+is a settlement of the outer active-set loop, not a stale partition. The full
+receipt is
+<code>docs/figures/millisecond-converged-solve/newton-krylov-route/fixed-point-rca/report.md</code>.</p>
+
+<p>One real H200 job (betelgeuse reservation <code>gpu_0003_grpA</code>, one
+card, 64&nbsp;GiB, <code>JAX_PLATFORMS=cuda</code>, shared interpreter, no
+<code>uv</code> on compute), log
+<code>…/runs/r-20261002T070350895037-fsri-frozen-route-fixed-point-diagnosis/fixed-point-rca-h200-final.log</code>,
+job <code>1279957</code>, <code>EXIT=0</code>, 3&nbsp;m&nbsp;37&nbsp;s.</p>
+
+<ol>
+  <li><strong>Requalification and re-freeze ran.</strong> 3 partition reads and
+    1 re-freeze at the terminal state; the terminal-vs-warm partition difference
+    is 0 cells (0 labels, 0 support inclusions, 0 residual-shadow entries).</li>
+  <li><strong>Residual at the frozen terminus.</strong> live map residual
+    <code>2.372871479533e-06</code>, frozen map residual
+    <code>2.372871476315e-06</code>. It is carried entirely by the 686 grid rows
+    (maximum absolute <code>5.240042604937e-06</code>, l2
+    <code>8.592331853079e-05</code>); the wall/sample component is empty (0 rows,
+    0.0). The largest terms sit at R&nbsp;≈&nbsp;0.9075–0.9758, Z&nbsp;≈&nbsp;0,
+    worst on grid cell 262 (R=0.94166667, Z=0).</li>
+  <li><strong>What stayed frozen.</strong> labels 0 changed, residual shadow 0
+    changed, profile support absent in this limiter fixture, topology
+    coordinates and fluxes changed by at most <code>1.33e-15</code> (roundoff;
+    x-point is NaN with no X-point), and the operator grid is shared static
+    geometry with 0 changes (<code>physical_node_number</code> 686). There is no
+    net-current normalisation scalar in this absolute-current fixture.</li>
+  <li><strong>Mechanism, measured.</strong> the route holds the active set
+    fixed within each pass and terminates <code>ACTIVE_SET_SETTLED</code>
+    (<code>converged=False</code>) after 2 active-set trips whose per-trip live
+    residuals are bit-identical (<code>2.372871479532645e-06</code>) with mask
+    differences <code>0</code>, retaining the incoming state on a trip that
+    accepts no Newton promotion. <strong>The condition that sets the 2.37e-6
+    floor is the settlement/acceptance branch</strong>: it settles on an
+    unchanged mask with no accepted promotion and does not test the reconciled
+    live relative-sup residual against tolerance, so the floor is the live
+    residual at the state the acceptance test refuses to move. It is not a
+    frozen quantity — the frozen partition cannot set this floor, because the
+    frozen map agrees with the live map to <code>7.11e-15</code> absolute at that
+    state (warm value <code>2.372871476315e-06</code> against live
+    <code>2.372871479533e-06</code>). The carried inner trajectory residual
+    (<code>7.969573083161e-13</code>) sits seven orders below the reconciled
+    live residual, localizing the defect to the outer acceptance/settlement test
+    rather than the inner Newton. A second frozen pass from that state reproduces
+    the live residual bit-for-bit and the identical settlement reason, so the
+    terminus is a property of the route, not of a partition that went stale.</li>
+  <li><strong>Recommended fix.</strong> keep the locked design (live reads
+    through warm-up, one partition per Newton pass) and, in the settlement
+    branch, compare the reconciled live relative-sup residual with the tolerance
+    and refuse to settle while it exceeds it — continue the local Newton
+    trajectory (already preserved across an unchanged mask) or accept the
+    promotion on the live objective instead of retaining the state. Then the
+    frozen route reaches the same fixed point the live-read route reaches. A
+    re-frozen refresh alone does not move the residual, so the fix is the
+    residual gate in the settle test, not the refresh; each bounded pass measured
+    12.04&nbsp;s against the base route's 142.10&nbsp;s.</li>
+</ol>
+
+<p><strong>Flux-contour panel.</strong> the receipt is numeric JSON and carries
+no poloidal flux state, so no contour panel of the terminal state is available
+from this node; the terminal state is reported by its residual decomposition and
+cell terms above.</p>
+
+<p><strong>Coordinate and caveat.</strong> the terminal state is a limiter
+equilibrium (x-point NaN, <code>topology.diverted</code> false). The terminal
+re-solve re-freezes too, so it tests a repeated frozen pass and not a live-read
+pass; it establishes that the residual is reproduced bit-for-bit at the
+terminus.</p>
+
+<p>Evidence logs, at revision <code>64fdfe787</code> (run-local, absolute):</p>
+<table>
+  <thead><tr><th>measure</th><th>log</th><th>result</th></tr></thead>
+  <tr><th scope="row">reporting fix reproduction</th>
+    <td>empty-slice <code>np.max</code> raised <code>zero-size array to reduction
+    operation maximum</code>; guarded helper returns 0.0</td>
+    <td>defect reproduced, then fixed</td></tr>
+  <tr><th scope="row">H200 receipt, prior attempt</th>
+    <td><code>…/fixed-point-rca-h200.log</code></td>
+    <td><code>EXIT=1</code> reporting crash at line 146 (evidence preserved)</td></tr>
+  <tr><th scope="row">H200 measured receipt</th>
+    <td><code>…/fixed-point-rca-h200-rerun.log</code> (job 1279922),
+        <code>…/fixed-point-rca-h200-diag.log</code> (job 1279926)</td>
+    <td><code>EXIT=0</code>, <code>ACTIVE_SET_SETTLED</code>, residual 2.37e-6</td></tr>
+  <tr><th scope="row">H200 final report</th>
+    <td><code>…/fixed-point-rca-h200-final.log</code> (job 1279957)</td>
+    <td><code>EXIT=0</code>, report regenerated</td></tr>
+</table>
+</section>

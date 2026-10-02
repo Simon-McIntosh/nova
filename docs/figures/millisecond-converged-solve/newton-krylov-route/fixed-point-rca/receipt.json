@@ -1,0 +1,424 @@
+{
+  "frozen_partition_reads": 3,
+  "frozen_partition_refreezes": 1,
+  "frozen_residual": 2.372871476315067e-06,
+  "initial_route_wall_seconds": 142.0996980201453,
+  "label_difference_cells": 0,
+  "live_residual": 2.372871479532645e-06,
+  "operator_geometry": {
+    "grid_coordinate": {
+      "changed_entries": 0,
+      "maximum_absolute_difference": 0.0,
+      "shape": [
+        625,
+        2
+      ],
+      "terminal_value": {
+        "l2_norm": 26.745359150908982,
+        "maximum": 1.42,
+        "minimum": -0.42
+      },
+      "warm_value": {
+        "l2_norm": 26.745359150908982,
+        "maximum": 1.42,
+        "minimum": -0.42
+      }
+    },
+    "net_current_normalisation": "not applicable: absolute-current fixture",
+    "physical_node_number": 686
+  },
+  "partition_difference_cells": 0,
+  "partition_fields": {
+    "partition.label": {
+      "changed_entries": 0,
+      "maximum_absolute_difference": 0.0,
+      "shape": [
+        625
+      ],
+      "terminal_value": {
+        "l2_norm": 15.811388300841896,
+        "maximum": 2,
+        "minimum": 0
+      },
+      "warm_value": {
+        "l2_norm": 15.811388300841896,
+        "maximum": 2,
+        "minimum": 0
+      }
+    },
+    "partition.profile_support": {
+      "status": "not present in this fixture"
+    },
+    "partition.residual_shadow": {
+      "changed_entries": 0,
+      "maximum_absolute_difference": null,
+      "shape": [
+        686
+      ],
+      "terminal_value": {
+        "maximum": false,
+        "minimum": false
+      },
+      "warm_value": {
+        "maximum": false,
+        "minimum": false
+      }
+    },
+    "partition.topology.axis": {
+      "changed_entries": 1,
+      "maximum_absolute_difference": 8.464390640260603e-16,
+      "shape": [
+        2
+      ],
+      "terminal_value": {
+        "l2_norm": 1.0138129839144976,
+        "maximum": 1.0138129839144976,
+        "minimum": 1.3095786555071297e-14
+      },
+      "warm_value": {
+        "l2_norm": 1.0138129839144976,
+        "maximum": 1.0138129839144976,
+        "minimum": 1.2249347491045237e-14
+      }
+    },
+    "partition.topology.axis_flux": {
+      "changed_entries": 1,
+      "maximum_absolute_difference": 8.881784197001252e-16,
+      "shape": [],
+      "terminal_value": 2.0784671880496055,
+      "warm_value": 2.0784671880496064
+    },
+    "partition.topology.boundary": {
+      "changed_entries": 1,
+      "maximum_absolute_difference": 9.637783703870368e-16,
+      "shape": [
+        2
+      ],
+      "terminal_value": {
+        "l2_norm": 1.1973905409717345,
+        "maximum": 1.1973905409717345,
+        "minimum": 5.286220356712777e-14
+      },
+      "warm_value": {
+        "l2_norm": 1.1973905409717345,
+        "maximum": 1.1973905409717345,
+        "minimum": 5.382598193751481e-14
+      }
+    },
+    "partition.topology.boundary_flux": {
+      "changed_entries": 1,
+      "maximum_absolute_difference": 1.3322676295501878e-15,
+      "shape": [],
+      "terminal_value": 1.5405680766331662,
+      "warm_value": 1.5405680766331675
+    },
+    "partition.topology.diverted": {
+      "changed_entries": 0,
+      "maximum_absolute_difference": null,
+      "shape": [],
+      "terminal_value": false,
+      "warm_value": false
+    },
+    "partition.topology.wall_point": {
+      "changed_entries": 1,
+      "maximum_absolute_difference": 9.637783703870368e-16,
+      "shape": [
+        2
+      ],
+      "terminal_value": {
+        "l2_norm": 1.1973905409717345,
+        "maximum": 1.1973905409717345,
+        "minimum": 5.286220356712777e-14
+      },
+      "warm_value": {
+        "l2_norm": 1.1973905409717345,
+        "maximum": 1.1973905409717345,
+        "minimum": 5.382598193751481e-14
+      }
+    },
+    "partition.topology.wall_point_flux": {
+      "changed_entries": 1,
+      "maximum_absolute_difference": 1.3322676295501878e-15,
+      "shape": [],
+      "terminal_value": 1.5405680766331662,
+      "warm_value": 1.5405680766331675
+    },
+    "partition.topology.wall_unit_index": {
+      "changed_entries": 0,
+      "maximum_absolute_difference": 0.0,
+      "shape": [],
+      "terminal_value": 0,
+      "warm_value": 0
+    },
+    "partition.topology.x_point": {
+      "changed_entries": 2,
+      "maximum_absolute_difference": NaN,
+      "shape": [
+        2
+      ],
+      "terminal_value": {
+        "l2_norm": NaN,
+        "maximum": NaN,
+        "minimum": NaN
+      },
+      "warm_value": {
+        "l2_norm": NaN,
+        "maximum": NaN,
+        "minimum": NaN
+      }
+    },
+    "partition.topology.x_point_flux": {
+      "changed_entries": 1,
+      "maximum_absolute_difference": NaN,
+      "shape": [],
+      "terminal_value": NaN,
+      "warm_value": NaN
+    }
+  },
+  "refresh_newton_steps": 8,
+  "refreshed_frozen_partition_reads": 3,
+  "refreshed_frozen_partition_refreezes": 1,
+  "refreshed_live_residual": 2.372871479532645e-06,
+  "refreshed_route": {
+    "accepted_newton_promotions": 1,
+    "active_set_iterations": 2,
+    "active_set_mask_differences": [
+      0,
+      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ],
+    "active_set_residuals": [
+      2.372871479532645e-06,
+      2.372871479532645e-06,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN
+    ],
+    "attempted_newton_promotions": 1,
+    "converged": false,
+    "inner_iteration_accepted": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ],
+    "inner_iteration_residuals_after": [
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN
+    ],
+    "inner_iteration_residuals_before": [
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN
+    ],
+    "termination_reason": 10,
+    "termination_reason_name": "ACTIVE_SET_SETTLED",
+    "trajectory_residual": 7.969573083160983e-13
+  },
+  "refreshed_route_wall_seconds": 12.039062010124326,
+  "residual_shadow_difference_entries": 0,
+  "residual_terms": {
+    "components": {
+      "grid": {
+        "l2_residual": 8.592331853078618e-05,
+        "maximum_absolute_residual": 5.240042604937045e-06,
+        "row_count": 686
+      },
+      "wall_and_sample": {
+        "l2_residual": 0.0,
+        "maximum_absolute_residual": 0.0,
+        "row_count": 0
+      }
+    },
+    "terms": [
+      {
+        "frozen_minus_state": 5.240042597831618e-06,
+        "live_minus_frozen": 7.105427357601002e-15,
+        "live_minus_state": 5.240042604937045e-06,
+        "name": "grid cell 262 at R=0.94166667, Z=-0.00000000"
+      },
+      {
+        "frozen_minus_state": 5.22808911829209e-06,
+        "live_minus_frozen": 6.217248937900877e-15,
+        "live_minus_state": 5.228089124509339e-06,
+        "name": "grid cell 237 at R=0.90750000, Z=-0.00000000"
+      },
+      {
+        "frozen_minus_state": 5.224780390333805e-06,
+        "live_minus_frozen": 6.661338147750939e-15,
+        "live_minus_state": 5.224780396995143e-06,
+        "name": "grid cell 263 at R=0.94166667, Z=0.03500000"
+      },
+      {
+        "frozen_minus_state": 5.224780388113359e-06,
+        "live_minus_frozen": 6.8833827526759706e-15,
+        "live_minus_state": 5.224780394996742e-06,
+        "name": "grid cell 261 at R=0.94166667, Z=-0.03500000"
+      },
+      {
+        "frozen_minus_state": 5.201704367685522e-06,
+        "live_minus_frozen": 6.661338147750939e-15,
+        "live_minus_state": 5.2017043743468605e-06,
+        "name": "grid cell 238 at R=0.90750000, Z=0.03500000"
+      },
+      {
+        "frozen_minus_state": 5.201704365687121e-06,
+        "live_minus_frozen": 6.439293542825908e-15,
+        "live_minus_state": 5.2017043721264145e-06,
+        "name": "grid cell 236 at R=0.90750000, Z=-0.03500000"
+      },
+      {
+        "frozen_minus_state": 5.171468396847345e-06,
+        "live_minus_frozen": 6.8833827526759706e-15,
+        "live_minus_state": 5.171468403730728e-06,
+        "name": "grid cell 264 at R=0.94166667, Z=0.07000000"
+      },
+      {
+        "frozen_minus_state": 5.171468392628498e-06,
+        "live_minus_frozen": 6.661338147750939e-15,
+        "live_minus_state": 5.171468399289836e-06,
+        "name": "grid cell 260 at R=0.94166667, Z=-0.07000000"
+      },
+      {
+        "frozen_minus_state": 5.117900180984236e-06,
+        "live_minus_frozen": 6.217248937900877e-15,
+        "live_minus_state": 5.117900187201485e-06,
+        "name": "grid cell 239 at R=0.90750000, Z=0.07000000"
+      },
+      {
+        "frozen_minus_state": 5.1179001774315225e-06,
+        "live_minus_frozen": 6.217248937900877e-15,
+        "live_minus_state": 5.117900183648771e-06,
+        "name": "grid cell 235 at R=0.90750000, Z=-0.07000000"
+      },
+      {
+        "frozen_minus_state": 5.084532925803131e-06,
+        "live_minus_frozen": 7.105427357601002e-15,
+        "live_minus_state": 5.084532932908559e-06,
+        "name": "grid cell 287 at R=0.97583333, Z=-0.00000000"
+      },
+      {
+        "frozen_minus_state": 5.082562863467643e-06,
+        "live_minus_frozen": 7.105427357601002e-15,
+        "live_minus_state": 5.082562870573071e-06,
+        "name": "grid cell 288 at R=0.97583333, Z=0.03500000"
+      }
+    ]
+  },
+  "route": {
+    "accepted_newton_promotions": 1,
+    "active_set_iterations": 2,
+    "active_set_mask_differences": [
+      0,
+      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ],
+    "active_set_residuals": [
+      2.372871479532645e-06,
+      2.372871479532645e-06,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN
+    ],
+    "attempted_newton_promotions": 1,
+    "converged": false,
+    "inner_iteration_accepted": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ],
+    "inner_iteration_residuals_after": [
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN
+    ],
+    "inner_iteration_residuals_before": [
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN
+    ],
+    "termination_reason": 10,
+    "termination_reason_name": "ACTIVE_SET_SETTLED",
+    "trajectory_residual": 7.969573083160983e-13
+  },
+  "support_difference_cells": 0,
+  "trajectory_residual": 7.969573083160983e-13
+}

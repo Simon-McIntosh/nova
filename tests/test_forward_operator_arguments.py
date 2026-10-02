@@ -10,7 +10,7 @@ from nova.biot.null import Null1D, Null2D
 from nova.biot.target import FluxTarget
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium import fixed_point
-from nova.equilibrium.forward import _lattice_cells
+from nova.equilibrium.forward import _lattice_cells, _shared_shadowed_map
 from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
@@ -127,10 +127,37 @@ def test_the_bound_frozen_partition_hooks_take_the_map_operand_order() -> None:
     shadowed = operator.traced_flux_map_with_shadow()
     assert shadowed._read_frozen_partition is not None
 
-    bound = fixed_point._bind_traced_map_arguments(
-        shadowed, (external, operator, None)
-    )
+    bound = fixed_point._bind_traced_map_arguments(shadowed, (external, operator, None))
     partition = bound._read_frozen_partition(initial, None)
     assert partition is not None
     mapped = bound._map_frozen_partition(initial, partition)
     assert mapped.shape == initial.shape
+
+
+def test_the_shared_shadowed_map_retains_the_warmed_partition_protocol() -> None:
+    """The Newton route carries its warmed partition hooks with its map."""
+    configure_dtypes()
+    operator = _operator()
+    external = operator.external()
+    initial = jnp.linspace(-1.0, 1.0, operator.node_number)
+    shadowed = operator.traced_flux_map_with_shadow()
+    shared = _shared_shadowed_map(shadowed)
+    shadow = operator.residual_shadow_mask(initial)
+
+    np.testing.assert_array_equal(
+        np.asarray(shared(initial, shadow, external, operator)),
+        np.asarray(shadowed(initial, shadow, external, operator)),
+    )
+    partition = shared._read_frozen_partition(initial, None, external, operator)
+    np.testing.assert_array_equal(
+        np.asarray(
+            shared._map_frozen_partition(initial, partition, external, operator)
+        ),
+        np.asarray(
+            shadowed._map_frozen_partition(initial, partition, external, operator)
+        ),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(shared._frozen_partition_shadow(partition)),
+        np.asarray(shadowed._frozen_partition_shadow(partition)),
+    )

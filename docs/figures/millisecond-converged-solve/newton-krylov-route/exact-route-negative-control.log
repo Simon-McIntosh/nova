@@ -1,0 +1,7 @@
+revision=3763af81dcdf19491b4534a60889158ea51f01c3-mutation (HEAD 3763af81dcdf19491b4534a60889158ea51f01c3 with the declared mutation: _shared_shadowed_map reverted to base => live topology partition read on every Newton step)
+tree=/tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/negctl-tree
+command=cd /tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/negctl-tree && timeout 3600 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/negctl-tree/tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point -q
+module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton/nova/equilibrium/forward.py
+cwd=/tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/negctl-tree
+start=2026-10-01T22:26:33Z
+00:26:41 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m

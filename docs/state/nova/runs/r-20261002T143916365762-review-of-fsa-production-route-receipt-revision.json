@@ -268,6 +268,32 @@
   "plan_impl_at_dispatch": 1.0,
   "plan_link": null,
   "promoted_revision": "5179ab0fb37ca58b9863a956be0d4c91e63fc46e",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 6003,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T143916365762-review-of-fsa-production-route-receipt-revision",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/review-of-fsa-production-route-receipt-revision"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "full",

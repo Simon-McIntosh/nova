@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="36">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -142,6 +142,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T094100739066-cco-unit-leverage-positive-control" data-who="reckon-build" data-when="2026-10-02T10:09:47.079Z">
     <div class="r-comment-body"><p>Unit-leverage three-column positive control (H200 job 1280166, 135 cells, seed 062b465a7364914f, budget 10 Newton/30 GMRES unchanged) did not converge: terminal residual 2.3289e-3, centroid row 6.4530e-3 pitches, field -8.1279e-3 T, settled ACTIVE_SET_SETTLED after 7 attempted/5 accepted promotions with the last pass refused as NONFINITE_LINEAR_ACTION, gauge-free span offset +2.4875e-2 of span against the predicted -3.2e-3; not confirmed, and not refuted because a Krylov refusal engaged.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T100958441155-review-of-cco-unit-leverage-positive-control" data-who="reckon-build" data-when="2026-10-02T10:38:58.483Z">
+    <div class="r-comment-body"><p>Independent review of cco-unit-leverage-positive-control (base d598cd1931, head 93d592381) stored parsed and complete: goal_fidelity 16, evidence 15, scope_discipline 19, durability 13, fit 16, total 79, added_failure_count 0; three follow-on findings — the unit-leverage receipt&#x27;s field_identity.field_scale_t (0.001 T, the fixture default) contradicts its own solve.field_scale_t (0.25 T) at benchmarks/centroid_constrained_fixture_receipt.py:870; the evidence fragment&#x27;s data-commit 5f33c95cb names a revision the measured receipt (8289cdb9c) did not come from; and the fragment&#x27;s summary reason for the &quot;not refuted&quot; verdict cites a Krylov NONFINITE_LINEAR_ACTION where the done-when&#x27;s &quot;refusal&quot; means the damped-step bound refusal.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T053656352101-review-of-cco-bounded-row-step-control" data-who="s19c-review-cco-c" data-when="2026-09-17T06:45:40.145Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T205409901465-cco-bounded-row-step-control stored at the fence path, total 84, findings recorded on the reviewed run's completion</p></div>

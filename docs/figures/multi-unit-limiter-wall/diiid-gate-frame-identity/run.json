@@ -11,25 +11,25 @@
       "identity": "d3d_shot_00000c4a7b.parquet frame 179",
       "key": "jit_solve-fde34012b315f206840361c55f1c55085a228829abd7b8811c92251a01e93a19",
       "module": "jit_solve",
-      "status": "miss"
+      "status": "hit"
     },
     {
       "identity": "d3d_shot_00000c4a7b.parquet frame 179",
       "key": "jit_isnan-43fb8ef14aac790982d447d6848ed95345271de23450f3f608f46e660ba656f1",
       "module": "jit_isnan",
-      "status": "miss"
+      "status": "hit"
     },
     {
       "identity": "d3d_shot_00000c4a7b.parquet frame 179",
       "key": "jit_logical_not-1d59649af83c59a0aa98803c3109dc5ba45855f456ad9926029e8ce33d27f3f9",
       "module": "jit_logical_not",
-      "status": "miss"
+      "status": "hit"
     },
     {
       "identity": "d3d_shot_00000c4a7b.parquet frame 179",
       "key": "jit_greater_equal-f06d6725dd187e29b614feaf41cc1d461ef5a847a6df35b6338785e4d0e0b198",
       "module": "jit_greater_equal",
-      "status": "miss"
+      "status": "hit"
     },
     {
       "identity": "d3d_shot_00000c4a7b.parquet frame 179",
@@ -47,7 +47,7 @@
       "identity": "d3d_shot_0003ff34e7.parquet frame 44",
       "key": "jit_solve-ef6337f9973e245751db93a1bdbe92aed5c05bb8b6d752d86b8f58bc678279d8",
       "module": "jit_solve",
-      "status": "miss"
+      "status": "hit"
     },
     {
       "identity": "d3d_shot_0003ff34e7.parquet frame 44",
@@ -59,13 +59,13 @@
       "identity": "d3d_shot_0003ff34e7.parquet frame 44",
       "key": "jit_logical_not-1d59649af83c59a0aa98803c3109dc5ba45855f456ad9926029e8ce33d27f3f9",
       "module": "jit_logical_not",
-      "status": "miss"
+      "status": "hit"
     },
     {
       "identity": "d3d_shot_0003ff34e7.parquet frame 44",
       "key": "jit_greater_equal-f06d6725dd187e29b614feaf41cc1d461ef5a847a6df35b6338785e4d0e0b198",
       "module": "jit_greater_equal",
-      "status": "miss"
+      "status": "hit"
     },
     {
       "identity": "d3d_shot_0003ff34e7.parquet frame 44",
@@ -83,7 +83,7 @@
       "identity": "d3d_shot_001554e054.parquet frame 144",
       "key": "jit_solve-a0fc6eed63b2454306e93103f736656114665005789406d2d505327731e91bd7",
       "module": "jit_solve",
-      "status": "miss"
+      "status": "hit"
     },
     {
       "identity": "d3d_shot_001554e054.parquet frame 144",
@@ -101,7 +101,7 @@
       "identity": "d3d_shot_001554e054.parquet frame 144",
       "key": "jit_greater_equal-f06d6725dd187e29b614feaf41cc1d461ef5a847a6df35b6338785e4d0e0b198",
       "module": "jit_greater_equal",
-      "status": "miss"
+      "status": "hit"
     },
     {
       "identity": "d3d_shot_001554e054.parquet frame 144",
@@ -119,7 +119,7 @@
       "identity": "d3d_shot_002495e835.parquet frame 146",
       "key": "jit_solve-0ad4cbbf0e728ea57ad79de95589f8eda0ef48973220316fddd1e61d31091d08",
       "module": "jit_solve",
-      "status": "miss"
+      "status": "hit"
     },
     {
       "identity": "d3d_shot_002495e835.parquet frame 146",
@@ -155,7 +155,7 @@
       "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
       "key": "jit_solve-55418f04d40e11e3881c17a9c56a84ca5e0fe6267d15bc0939da18e626c33c0e",
       "module": "jit_solve",
-      "status": "miss"
+      "status": "hit"
     },
     {
       "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
@@ -182,39 +182,12 @@
       "status": "miss"
     }
   ],
-  "cold_versus_current_compile_seconds": {
-    "d3d_shot_00000c4a7b.parquet frame 179": {
-      "current_seconds": 501.57219267077744,
-      "previous_cold_seconds": 2921.6095497058704,
-      "saved_seconds": 2420.037357035093
-    },
-    "d3d_shot_0003ff34e7.parquet frame 44": {
-      "current_seconds": 504.05185915343463,
-      "previous_cold_seconds": 2933.2340078558773,
-      "saved_seconds": 2429.1821487024426
-    },
-    "d3d_shot_001554e054.parquet frame 144": {
-      "current_seconds": 483.84354900568724,
-      "previous_cold_seconds": 2937.004198802635,
-      "saved_seconds": 2453.160649796948
-    },
-    "d3d_shot_002495e835.parquet frame 146": {
-      "current_seconds": 479.52651894278824,
-      "previous_cold_seconds": 2879.6675900667906,
-      "saved_seconds": 2400.1410711240023
-    },
-    "d3d_shot_0040ca9bdc.parquet frame 137": {
-      "current_seconds": 481.6388642564416,
-      "previous_cold_seconds": 2868.827464716509,
-      "saved_seconds": 2387.1886004600674
-    }
-  },
   "execution_contract": {
     "child_after_cuda_context_never_forks": true,
-    "child_process_count": 3,
+    "child_process_count": 5,
     "member_count": 5,
     "one_re_exec_child_per_frame": true,
-    "resumed_from_independent_frame_receipts": 2,
+    "resumed_from_independent_frame_receipts": 0,
     "route": "one_compiled_program_per_frame"
   },
   "frame_failures": [],
@@ -232,8 +205,14 @@
   "frames": {
     "d3d_shot_00000c4a7b.parquet frame 179": {
       "bit_identical_to_artifact": false,
-      "child_exit_code": null,
-      "child_host_memory": null,
+      "child_exit_code": 0,
+      "child_host_memory": {
+        "final_rss_mib": 6575.08203125,
+        "initial_rss_mib": 1876.53125,
+        "max_rss_mib": 6887.01171875,
+        "sample_count": 4781,
+        "sampling_interval_seconds": 0.05
+      },
       "compile_cache": {
         "events": [
           {
@@ -244,22 +223,22 @@
           {
             "key": "jit_solve-fde34012b315f206840361c55f1c55085a228829abd7b8811c92251a01e93a19",
             "module": "jit_solve",
-            "status": "miss"
+            "status": "hit"
           },
           {
             "key": "jit_isnan-43fb8ef14aac790982d447d6848ed95345271de23450f3f608f46e660ba656f1",
             "module": "jit_isnan",
-            "status": "miss"
+            "status": "hit"
           },
           {
             "key": "jit_logical_not-1d59649af83c59a0aa98803c3109dc5ba45855f456ad9926029e8ce33d27f3f9",
             "module": "jit_logical_not",
-            "status": "miss"
+            "status": "hit"
           },
           {
             "key": "jit_greater_equal-f06d6725dd187e29b614feaf41cc1d461ef5a847a6df35b6338785e4d0e0b198",
             "module": "jit_greater_equal",
-            "status": "miss"
+            "status": "hit"
           },
           {
             "key": "jit_bitwise_and-bf947d812fce5aeb83820fa34309752fe387c8fd2257e889c690886bfac7034d",
@@ -270,11 +249,19 @@
         "main_program": {
           "key": "jit_solve-fde34012b315f206840361c55f1c55085a228829abd7b8811c92251a01e93a19",
           "module": "jit_solve",
-          "status": "miss"
+          "status": "hit"
         }
       },
-      "compile_seconds": 501.57219267077744,
-      "maximum_absolute_terminal_state_difference": 2.1094237467877974e-15,
+      "compile_seconds": 157.71427184715867,
+      "maximum_absolute_terminal_state_difference": 1.5543122344752192e-15,
+      "provenance": {
+        "cache_root": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+        "device_sha": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+        "driver_sha256": "28e49be2c7077049930283b8f06c76002dfc794a4f95df868e17faea569e814a",
+        "identity": "d3d_shot_00000c4a7b.parquet frame 179",
+        "index": 0,
+        "job_id": 1280450
+      },
       "terminal_flux_artifact": {
         "path": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-00000c4a7b-parquet-frame-179.npz",
         "reference_kind": "production cold diverted seed for the committed frame",
@@ -293,38 +280,44 @@
             -0.9479644298553487
           ]
         },
-        "sha256": "46f1ddf40dd9c82de209b47997a512e475afed48e9a5618c4e2161154a1e6acd",
+        "sha256": "37fb6f7ca1d1b37532fd55756d9a3e9510c0eb7b23b4bb6470abcfeab3702f96",
         "terminal_state_element_count": 1173,
-        "terminal_state_sha256": "a2752a7648e418ad10a1f60d3a6eac5f87e3d6e31bbc0d8393b816c9d41772b6",
+        "terminal_state_sha256": "d44f7490b477bcf29f824c87c225d938361e77e8432d07f55dbbf1523f444fea",
         "terminal_topology": {
-          "axis_flux_wb": 0.33871753893738515,
+          "axis_flux_wb": 0.3387175389373847,
           "axis_rz_m": [
-            1.8204157182076068,
-            -0.13333440836229926
+            1.820415718207608,
+            -0.13333440836229735
           ],
-          "boundary_flux_wb": -1.2131457323539143,
-          "converged_topology_class": "diverted",
+          "boundary_flux_wb": -1.213145732353913,
+          "converged_topology_class": "limited",
           "other_qualified_x_points_rz_m": [
             [
-              1.3288312645682856,
-              0.9395004441935055
+              1.3288312645682863,
+              0.9395004441935056
             ]
           ],
           "status": "read",
           "x_point_rz_m": [
-            1.5958196973170522,
+            1.5958196973170524,
             -1.09603439902111
           ]
         }
       },
       "terminal_state_element_count": 1173,
-      "with_exit_solve_ms": 24395.616527500002,
-      "without_exit_solve_ms": 27648.80003
+      "with_exit_solve_ms": 20587.959619,
+      "without_exit_solve_ms": 22504.973519
     },
     "d3d_shot_0003ff34e7.parquet frame 44": {
       "bit_identical_to_artifact": false,
-      "child_exit_code": null,
-      "child_host_memory": null,
+      "child_exit_code": 0,
+      "child_host_memory": {
+        "final_rss_mib": 6515.3125,
+        "initial_rss_mib": 1789.65234375,
+        "max_rss_mib": 6830.44140625,
+        "sample_count": 3135,
+        "sampling_interval_seconds": 0.05
+      },
       "compile_cache": {
         "events": [
           {
@@ -335,7 +328,7 @@
           {
             "key": "jit_solve-ef6337f9973e245751db93a1bdbe92aed5c05bb8b6d752d86b8f58bc678279d8",
             "module": "jit_solve",
-            "status": "miss"
+            "status": "hit"
           },
           {
             "key": "jit_isnan-43fb8ef14aac790982d447d6848ed95345271de23450f3f608f46e660ba656f1",
@@ -345,12 +338,12 @@
           {
             "key": "jit_logical_not-1d59649af83c59a0aa98803c3109dc5ba45855f456ad9926029e8ce33d27f3f9",
             "module": "jit_logical_not",
-            "status": "miss"
+            "status": "hit"
           },
           {
             "key": "jit_greater_equal-f06d6725dd187e29b614feaf41cc1d461ef5a847a6df35b6338785e4d0e0b198",
             "module": "jit_greater_equal",
-            "status": "miss"
+            "status": "hit"
           },
           {
             "key": "jit_bitwise_and-bf947d812fce5aeb83820fa34309752fe387c8fd2257e889c690886bfac7034d",
@@ -361,11 +354,19 @@
         "main_program": {
           "key": "jit_solve-ef6337f9973e245751db93a1bdbe92aed5c05bb8b6d752d86b8f58bc678279d8",
           "module": "jit_solve",
-          "status": "miss"
+          "status": "hit"
         }
       },
-      "compile_seconds": 504.05185915343463,
+      "compile_seconds": 157.02754153497517,
       "maximum_absolute_terminal_state_difference": 0.0,
+      "provenance": {
+        "cache_root": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+        "device_sha": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+        "driver_sha256": "28e49be2c7077049930283b8f06c76002dfc794a4f95df868e17faea569e814a",
+        "identity": "d3d_shot_0003ff34e7.parquet frame 44",
+        "index": 1,
+        "job_id": 1280450
+      },
       "terminal_flux_artifact": {
         "path": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-0003ff34e7-parquet-frame-44.npz",
         "reference_kind": "production cold diverted seed for the committed frame",
@@ -404,17 +405,17 @@
         }
       },
       "terminal_state_element_count": 1173,
-      "with_exit_solve_ms": 632.253487,
-      "without_exit_solve_ms": 4152.3184550000005
+      "with_exit_solve_ms": 464.818978,
+      "without_exit_solve_ms": 1563.211082
     },
     "d3d_shot_001554e054.parquet frame 144": {
       "bit_identical_to_artifact": false,
       "child_exit_code": 0,
       "child_host_memory": {
-        "final_rss_mib": 12989.99609375,
-        "initial_rss_mib": 1846.3671875,
-        "max_rss_mib": 12990.0,
-        "sample_count": 9353,
+        "final_rss_mib": 6556.265625,
+        "initial_rss_mib": 1857.7265625,
+        "max_rss_mib": 6870.890625,
+        "sample_count": 3145,
         "sampling_interval_seconds": 0.05
       },
       "compile_cache": {
@@ -427,7 +428,7 @@
           {
             "key": "jit_solve-a0fc6eed63b2454306e93103f736656114665005789406d2d505327731e91bd7",
             "module": "jit_solve",
-            "status": "miss"
+            "status": "hit"
           },
           {
             "key": "jit_isnan-43fb8ef14aac790982d447d6848ed95345271de23450f3f608f46e660ba656f1",
@@ -442,7 +443,7 @@
           {
             "key": "jit_greater_equal-f06d6725dd187e29b614feaf41cc1d461ef5a847a6df35b6338785e4d0e0b198",
             "module": "jit_greater_equal",
-            "status": "miss"
+            "status": "hit"
           },
           {
             "key": "jit_bitwise_and-bf947d812fce5aeb83820fa34309752fe387c8fd2257e889c690886bfac7034d",
@@ -453,11 +454,19 @@
         "main_program": {
           "key": "jit_solve-a0fc6eed63b2454306e93103f736656114665005789406d2d505327731e91bd7",
           "module": "jit_solve",
-          "status": "miss"
+          "status": "hit"
         }
       },
-      "compile_seconds": 483.84354900568724,
+      "compile_seconds": 156.5799044817686,
       "maximum_absolute_terminal_state_difference": 0.0,
+      "provenance": {
+        "cache_root": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+        "device_sha": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+        "driver_sha256": "28e49be2c7077049930283b8f06c76002dfc794a4f95df868e17faea569e814a",
+        "identity": "d3d_shot_001554e054.parquet frame 144",
+        "index": 2,
+        "job_id": 1280450
+      },
       "terminal_flux_artifact": {
         "path": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-001554e054-parquet-frame-144.npz",
         "reference_kind": "production cold diverted seed for the committed frame",
@@ -496,17 +505,17 @@
         }
       },
       "terminal_state_element_count": 1173,
-      "with_exit_solve_ms": 275.068868,
-      "without_exit_solve_ms": 3548.697951
+      "with_exit_solve_ms": 253.9232005,
+      "without_exit_solve_ms": 2272.8010555
     },
     "d3d_shot_002495e835.parquet frame 146": {
       "bit_identical_to_artifact": false,
       "child_exit_code": 0,
       "child_host_memory": {
-        "final_rss_mib": 12985.12109375,
-        "initial_rss_mib": 1856.93359375,
-        "max_rss_mib": 12985.125,
-        "sample_count": 9269,
+        "final_rss_mib": 6399.921875,
+        "initial_rss_mib": 1869.7578125,
+        "max_rss_mib": 6882.828125,
+        "sample_count": 3196,
         "sampling_interval_seconds": 0.05
       },
       "compile_cache": {
@@ -519,7 +528,7 @@
           {
             "key": "jit_solve-0ad4cbbf0e728ea57ad79de95589f8eda0ef48973220316fddd1e61d31091d08",
             "module": "jit_solve",
-            "status": "miss"
+            "status": "hit"
           },
           {
             "key": "jit_isnan-43fb8ef14aac790982d447d6848ed95345271de23450f3f608f46e660ba656f1",
@@ -545,11 +554,19 @@
         "main_program": {
           "key": "jit_solve-0ad4cbbf0e728ea57ad79de95589f8eda0ef48973220316fddd1e61d31091d08",
           "module": "jit_solve",
-          "status": "miss"
+          "status": "hit"
         }
       },
-      "compile_seconds": 479.52651894278824,
+      "compile_seconds": 160.24918315187097,
       "maximum_absolute_terminal_state_difference": 0.0,
+      "provenance": {
+        "cache_root": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+        "device_sha": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+        "driver_sha256": "28e49be2c7077049930283b8f06c76002dfc794a4f95df868e17faea569e814a",
+        "identity": "d3d_shot_002495e835.parquet frame 146",
+        "index": 3,
+        "job_id": 1280450
+      },
       "terminal_flux_artifact": {
         "path": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-002495e835-parquet-frame-146.npz",
         "reference_kind": "production cold diverted seed for the committed frame",
@@ -588,17 +605,17 @@
         }
       },
       "terminal_state_element_count": 1173,
-      "with_exit_solve_ms": 279.4712995,
-      "without_exit_solve_ms": 3430.6223109999996
+      "with_exit_solve_ms": 257.159575,
+      "without_exit_solve_ms": 1774.1297395000001
     },
     "d3d_shot_0040ca9bdc.parquet frame 137": {
       "bit_identical_to_artifact": false,
       "child_exit_code": 0,
       "child_host_memory": {
-        "final_rss_mib": 12993.61328125,
-        "initial_rss_mib": 1855.921875,
-        "max_rss_mib": 12993.61328125,
-        "sample_count": 9303,
+        "final_rss_mib": 6560.4921875,
+        "initial_rss_mib": 1860.1796875,
+        "max_rss_mib": 6885.69140625,
+        "sample_count": 3150,
         "sampling_interval_seconds": 0.05
       },
       "compile_cache": {
@@ -611,7 +628,7 @@
           {
             "key": "jit_solve-55418f04d40e11e3881c17a9c56a84ca5e0fe6267d15bc0939da18e626c33c0e",
             "module": "jit_solve",
-            "status": "miss"
+            "status": "hit"
           },
           {
             "key": "jit_isnan-43fb8ef14aac790982d447d6848ed95345271de23450f3f608f46e660ba656f1",
@@ -637,11 +654,19 @@
         "main_program": {
           "key": "jit_solve-55418f04d40e11e3881c17a9c56a84ca5e0fe6267d15bc0939da18e626c33c0e",
           "module": "jit_solve",
-          "status": "miss"
+          "status": "hit"
         }
       },
-      "compile_seconds": 481.6388642564416,
+      "compile_seconds": 157.97748311050236,
       "maximum_absolute_terminal_state_difference": 0.0,
+      "provenance": {
+        "cache_root": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+        "device_sha": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+        "driver_sha256": "28e49be2c7077049930283b8f06c76002dfc794a4f95df868e17faea569e814a",
+        "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
+        "index": 4,
+        "job_id": 1280450
+      },
       "terminal_flux_artifact": {
         "path": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-0040ca9bdc-parquet-frame-137.npz",
         "reference_kind": "production cold diverted seed for the committed frame",
@@ -680,8 +705,8 @@
         }
       },
       "terminal_state_element_count": 1173,
-      "with_exit_solve_ms": 492.33702500000004,
-      "without_exit_solve_ms": 2956.9053755
+      "with_exit_solve_ms": 457.960771,
+      "without_exit_solve_ms": 1656.346421
     }
   },
   "header": {
@@ -693,8 +718,8 @@
         "cuda",
         "cpu"
       ],
-      "job_id": 1280417,
-      "job_name": "diiid-terminal-panels",
+      "job_id": 1280450,
+      "job_name": "diiid-terminal-control",
       "node": "98dci4-gpu-0003",
       "partition": "betelgeuse",
       "requested_memory_mib": 163840,
@@ -720,17 +745,28 @@
     "comparator_self_check": "identity set for comparator self-check carries 0 rows; a comparison over no rows cannot read as within drift",
     "declared_member_count": 5,
     "device": null,
-    "device_sha": "6e6c93b00a57d31ea320616651ab45a7c4fe5f72",
+    "device_sha": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
     "device_tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels",
     "driver": "benchmarks/diiid_gate_frame_identity.py",
-    "driver_sha256": "976664818bc5bafd859e4775d1eaa50a3b178e9870fa061d019c9b766190fa30",
+    "driver_revision": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+    "driver_sha256": "28e49be2c7077049930283b8f06c76002dfc794a4f95df868e17faea569e814a",
     "execution_route": "one_compiled_program_per_frame, both strict-exit passes on the same program: the stacked vmap program the committed artifact was measured with is refused by this revision's accelerated history program, whose argument layout converts the vmapped target current with numpy",
-    "frame_exchange_directory": "/tmp/nova-diiid-frames-2vchva4t",
+    "frame_exchange_directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/repair-exchange",
     "frame_timeout_seconds": 3600.0,
+    "historical_cold_compile_seconds": {
+      "d3d_shot_00000c4a7b.parquet frame 179": 2921.6095497058704,
+      "d3d_shot_0003ff34e7.parquet frame 44": 2933.2340078558773,
+      "d3d_shot_001554e054.parquet frame 144": 2937.004198802635,
+      "d3d_shot_002495e835.parquet frame 146": 2879.6675900667906,
+      "d3d_shot_0040ca9bdc.parquet frame 137": 2868.827464716509
+    },
     "identity_comparator": "benchmarks.solve_program_size_gate._require_identity_rows",
-    "job_id": 1280417,
+    "instrument_sha256": "1f187537e044b8f09b7f71aff32817f47d6fa85056d1777f3ab517c4c6ccc83f",
+    "job_id": 1280450,
     "machine_artifact_digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
     "machine_cache": "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache",
+    "measurement_cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels",
+    "measurement_module": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels/nova/equilibrium/forward.py",
     "member_identities": [
       "d3d_shot_00000c4a7b.parquet frame 179",
       "d3d_shot_0003ff34e7.parquet frame 44",
@@ -795,26 +831,30 @@
       "version_key": "runtime-0745ecebea4cb264e054"
     },
     "previous_run_compile_seconds": {
-      "d3d_shot_00000c4a7b.parquet frame 179": 2921.6095497058704,
-      "d3d_shot_0003ff34e7.parquet frame 44": 2933.2340078558773,
-      "d3d_shot_001554e054.parquet frame 144": 2937.004198802635,
-      "d3d_shot_002495e835.parquet frame 146": 2879.6675900667906,
-      "d3d_shot_0040ca9bdc.parquet frame 137": 2868.827464716509
+      "d3d_shot_00000c4a7b.parquet frame 179": 501.57219267077744,
+      "d3d_shot_0003ff34e7.parquet frame 44": 504.05185915343463,
+      "d3d_shot_001554e054.parquet frame 144": 483.84354900568724,
+      "d3d_shot_002495e835.parquet frame 146": 479.52651894278824,
+      "d3d_shot_0040ca9bdc.parquet frame 137": 481.6388642564416
     },
     "process_isolation": "one re-executed child per frame, each started as a fresh `python <this driver> --frame-index <i>` that builds only its own member through strict_exit_incidence.build_diiid_member, with each frame's receipt written by its own child and a fresh process for the next: five frames in one process held 131 GiB resident after the first frame, and process exit is what returns it",
     "re_exec_not_fork": "children are re-executed rather than forked: a fork taken after a CUDA context is up deadlocks silently, so no process here forks",
-    "recorded_at": "2026-10-02T14:45:35.085205+00:00",
+    "recorded_at": "2026-10-02T17:06:01.187130+00:00",
     "requested_repeats": 1,
     "reservation": "gpu_0003_grpA",
     "role": "driver",
     "route_qualification": "a difference measured on the per-frame route against an artifact measured on the stacked vmap route is device- and route-qualified",
     "scheduled_core_count": 8,
     "selected_frame_indices": [
+      0,
+      1,
       2,
       3,
       4
     ],
     "selected_member_identities": [
+      "d3d_shot_00000c4a7b.parquet frame 179",
+      "d3d_shot_0003ff34e7.parquet frame 44",
       "d3d_shot_001554e054.parquet frame 144",
       "d3d_shot_002495e835.parquet frame 146",
       "d3d_shot_0040ca9bdc.parquet frame 137"
@@ -822,7 +862,7 @@
   },
   "identity_refusals": [],
   "narrative": [
-    "d3d_shot_00000c4a7b.parquet frame 179: differs from the committed batched artifact; largest absolute terminal-residual difference 2.637e-01; paired-pass terminal-state difference 2.109e-15",
+    "d3d_shot_00000c4a7b.parquet frame 179: differs from the committed batched artifact; largest absolute terminal-residual difference 2.637e-01; paired-pass terminal-state difference 1.554e-15",
     "d3d_shot_0003ff34e7.parquet frame 44: differs from the committed batched artifact; largest absolute terminal-residual difference 2.161e-01; paired-pass terminal-state difference 0.000e+00",
     "d3d_shot_001554e054.parquet frame 144: differs from the committed batched artifact; largest absolute terminal-residual difference 9.145e+00; paired-pass terminal-state difference 0.000e+00",
     "d3d_shot_002495e835.parquet frame 146: differs from the committed batched artifact; largest absolute terminal-residual difference 6.019e+00; paired-pass terminal-state difference 0.000e+00",
@@ -832,8 +872,14 @@
     {
       "axis_off": true,
       "caption": "d3d_shot_00000c4a7b.parquet frame 179 \u2014 cold diverted seed reference (blue) and terminal state (ochre), 15 shared Wb levels; terminal residual 0.0552893; converged=False. Triangles mark axes; filled crosses mark admitted saddles; hollow crosses mark other qualified saddles.",
+      "direct_labels": [
+        "Seed reference",
+        "Terminal"
+      ],
+      "embedded_caption": false,
       "png": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-00000c4a7b-parquet-frame-179.png",
       "reference_contour_segment_count": 8,
+      "reference_linewidth_pt": 2.4,
       "reference_markers": {
         "other_x_points_drawn": 0,
         "strike_points_drawn": 0,
@@ -859,6 +905,7 @@
       ],
       "svg": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-00000c4a7b-parquet-frame-179.svg",
       "terminal_contour_segment_count": 1,
+      "terminal_linewidth_pt": 3.0,
       "terminal_markers": {
         "other_x_points_drawn": 1,
         "strike_points_drawn": 0,
@@ -869,8 +916,14 @@
     {
       "axis_off": true,
       "caption": "d3d_shot_0003ff34e7.parquet frame 44 \u2014 cold diverted seed reference (blue) and terminal state (ochre), 15 shared Wb levels; terminal residual 0.23382; converged=False. Triangles mark axes; filled crosses mark admitted saddles; hollow crosses mark other qualified saddles.",
+      "direct_labels": [
+        "Seed reference",
+        "Terminal"
+      ],
+      "embedded_caption": false,
       "png": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-0003ff34e7-parquet-frame-44.png",
       "reference_contour_segment_count": 9,
+      "reference_linewidth_pt": 2.4,
       "reference_markers": {
         "other_x_points_drawn": 0,
         "strike_points_drawn": 0,
@@ -896,6 +949,7 @@
       ],
       "svg": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-0003ff34e7-parquet-frame-44.svg",
       "terminal_contour_segment_count": 4,
+      "terminal_linewidth_pt": 3.0,
       "terminal_markers": {
         "other_x_points_drawn": 0,
         "strike_points_drawn": 0,
@@ -906,8 +960,14 @@
     {
       "axis_off": true,
       "caption": "d3d_shot_001554e054.parquet frame 144 \u2014 cold diverted seed reference (blue) and terminal state (ochre), 15 shared Wb levels; terminal residual 9.18758; converged=False. Triangles mark axes; filled crosses mark admitted saddles; hollow crosses mark other qualified saddles.",
+      "direct_labels": [
+        "Seed reference",
+        "Terminal"
+      ],
+      "embedded_caption": false,
       "png": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-001554e054-parquet-frame-144.png",
       "reference_contour_segment_count": 6,
+      "reference_linewidth_pt": 2.4,
       "reference_markers": {
         "other_x_points_drawn": 0,
         "strike_points_drawn": 0,
@@ -933,6 +993,7 @@
       ],
       "svg": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-001554e054-parquet-frame-144.svg",
       "terminal_contour_segment_count": 6,
+      "terminal_linewidth_pt": 3.0,
       "terminal_markers": {
         "other_x_points_drawn": 0,
         "strike_points_drawn": 0,
@@ -943,8 +1004,14 @@
     {
       "axis_off": true,
       "caption": "d3d_shot_002495e835.parquet frame 146 \u2014 cold diverted seed reference (blue) and terminal state (ochre), 15 shared Wb levels; terminal residual 6.8734; converged=False. Triangles mark axes; filled crosses mark admitted saddles; hollow crosses mark other qualified saddles.",
+      "direct_labels": [
+        "Seed reference",
+        "Terminal"
+      ],
+      "embedded_caption": false,
       "png": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-002495e835-parquet-frame-146.png",
       "reference_contour_segment_count": 7,
+      "reference_linewidth_pt": 2.4,
       "reference_markers": {
         "other_x_points_drawn": 0,
         "strike_points_drawn": 0,
@@ -970,6 +1037,7 @@
       ],
       "svg": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-002495e835-parquet-frame-146.svg",
       "terminal_contour_segment_count": 7,
+      "terminal_linewidth_pt": 3.0,
       "terminal_markers": {
         "other_x_points_drawn": 0,
         "strike_points_drawn": 0,
@@ -980,8 +1048,14 @@
     {
       "axis_off": true,
       "caption": "d3d_shot_0040ca9bdc.parquet frame 137 \u2014 cold diverted seed reference (blue) and terminal state (ochre), 15 shared Wb levels; terminal residual 0.215159; converged=False. Triangles mark axes; filled crosses mark admitted saddles; hollow crosses mark other qualified saddles.",
+      "direct_labels": [
+        "Seed reference",
+        "Terminal"
+      ],
+      "embedded_caption": false,
       "png": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-0040ca9bdc-parquet-frame-137.png",
       "reference_contour_segment_count": 7,
+      "reference_linewidth_pt": 2.4,
       "reference_markers": {
         "other_x_points_drawn": 0,
         "strike_points_drawn": 0,
@@ -1007,6 +1081,7 @@
       ],
       "svg": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-0040ca9bdc-parquet-frame-137.svg",
       "terminal_contour_segment_count": 1,
+      "terminal_linewidth_pt": 3.0,
       "terminal_markers": {
         "other_x_points_drawn": 0,
         "strike_points_drawn": 0,
@@ -1015,38 +1090,65 @@
       }
     }
   ],
+  "previous_versus_current_compile_seconds": {
+    "d3d_shot_00000c4a7b.parquet frame 179": {
+      "current_seconds": 157.71427184715867,
+      "previous_seconds": 501.57219267077744,
+      "saved_seconds": 343.85792082361877
+    },
+    "d3d_shot_0003ff34e7.parquet frame 44": {
+      "current_seconds": 157.02754153497517,
+      "previous_seconds": 504.05185915343463,
+      "saved_seconds": 347.02431761845946
+    },
+    "d3d_shot_001554e054.parquet frame 144": {
+      "current_seconds": 156.5799044817686,
+      "previous_seconds": 483.84354900568724,
+      "saved_seconds": 327.26364452391863
+    },
+    "d3d_shot_002495e835.parquet frame 146": {
+      "current_seconds": 160.24918315187097,
+      "previous_seconds": 479.52651894278824,
+      "saved_seconds": 319.2773357909173
+    },
+    "d3d_shot_0040ca9bdc.parquet frame 137": {
+      "current_seconds": 157.97748311050236,
+      "previous_seconds": 481.6388642564416,
+      "saved_seconds": 323.66138114593923
+    }
+  },
   "schema": "nova.diiid-gate-frame-identity-run/2",
   "summary": {
     "additional_repetitions_after_first_compiled_solve": 1,
     "bit_identical_converged_members": 0,
     "compile_seconds": {
       "count": 5,
-      "maximum": 504.05185915343463,
-      "mean": 490.12659680582584,
-      "minimum": 479.52651894278824
+      "maximum": 160.24918315187097,
+      "mean": 157.90967682525516,
+      "minimum": 156.5799044817686
     },
     "landed_frames": 5,
     "per_frame_compile_seconds": {
-      "d3d_shot_00000c4a7b.parquet frame 179": 501.57219267077744,
-      "d3d_shot_0003ff34e7.parquet frame 44": 504.05185915343463,
-      "d3d_shot_001554e054.parquet frame 144": 483.84354900568724,
-      "d3d_shot_002495e835.parquet frame 146": 479.52651894278824,
-      "d3d_shot_0040ca9bdc.parquet frame 137": 481.6388642564416
+      "d3d_shot_00000c4a7b.parquet frame 179": 157.71427184715867,
+      "d3d_shot_0003ff34e7.parquet frame 44": 157.02754153497517,
+      "d3d_shot_001554e054.parquet frame 144": 156.5799044817686,
+      "d3d_shot_002495e835.parquet frame 146": 160.24918315187097,
+      "d3d_shot_0040ca9bdc.parquet frame 137": 157.97748311050236
     },
     "saved_executed_trips": 2,
     "strict_exit_fired_members": 5,
     "strict_exit_never_members": 0,
     "with_exit_solve_ms": {
       "count": 5,
-      "maximum": 24395.616527500002,
-      "mean": 5214.949441400001,
-      "minimum": 275.068868
+      "maximum": 20587.959619,
+      "mean": 4404.364428700001,
+      "minimum": 253.9232005
     },
     "without_exit_solve_ms": {
       "count": 5,
-      "maximum": 27648.80003,
-      "mean": 8347.4688245,
-      "minimum": 2956.9053755
+      "maximum": 22504.973519,
+      "mean": 5954.2923634,
+      "minimum": 1563.211082
     }
   }
 }

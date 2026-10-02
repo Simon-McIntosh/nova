@@ -860,7 +860,94 @@
       "d3d_shot_0040ca9bdc.parquet frame 137"
     ]
   },
+  "historical_control": {
+    "historical_against_artifact_max_residual_difference": 3.3306690738754696e-16,
+    "instrument_sha256": "1f187537e044b8f09b7f71aff32817f47d6fa85056d1777f3ab517c4c6ccc83f",
+    "measurement_cwd": "/tmp/diiid-historical.BFEKX9",
+    "measurement_module": "/tmp/diiid-historical.BFEKX9/nova/equilibrium/forward.py",
+    "provenance": {
+      "cache_root": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+      "device_sha": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+      "driver_sha256": "28e49be2c7077049930283b8f06c76002dfc794a4f95df868e17faea569e814a",
+      "identity": "d3d_shot_0003ff34e7.parquet frame 44",
+      "index": 1,
+      "job_id": 1280450
+    },
+    "qualification": "The measurement driver and paired solve instrument are fixed; nova and supporting profile builders come from the historical revision. Equal seed, current and options hashes do not prove equality of every operator leaf. One control frame cannot attribute the other four frames.",
+    "receipt": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/historical-control/d3d-shot-0003ff34e7-parquet-frame-44.json",
+    "restores_artifact_residual": true,
+    "same_input_fingerprints": true,
+    "same_instrument": true,
+    "verdict": "historical runtime restores frame 44 artifact residuals with the same measurement driver"
+  },
   "identity_refusals": [],
+  "identity_revision_comparison": [
+    {
+      "current_against_artifact_residual_difference": {
+        "with_exit": 0.2636596409279067,
+        "without_exit": 0.26365964092790667
+      },
+      "current_max_absolute_paired_flux_difference": 1.5543122344752192e-15,
+      "current_revision": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+      "current_with_exit_minus_without_exit_residual": -1.3877787807814457e-17,
+      "historical_max_absolute_paired_flux_difference": 0.0,
+      "historical_revision": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+      "historical_with_exit_minus_without_exit_residual": 0.0,
+      "identity": "d3d_shot_00000c4a7b.parquet frame 179"
+    },
+    {
+      "current_against_artifact_residual_difference": {
+        "with_exit": 0.216104584503612,
+        "without_exit": 0.216104584503612
+      },
+      "current_max_absolute_paired_flux_difference": 0.0,
+      "current_revision": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+      "current_with_exit_minus_without_exit_residual": 0.0,
+      "historical_max_absolute_paired_flux_difference": 0.0,
+      "historical_revision": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+      "historical_with_exit_minus_without_exit_residual": 0.0,
+      "identity": "d3d_shot_0003ff34e7.parquet frame 44"
+    },
+    {
+      "current_against_artifact_residual_difference": {
+        "with_exit": 9.145375726002332,
+        "without_exit": 9.14537572600233
+      },
+      "current_max_absolute_paired_flux_difference": 0.0,
+      "current_revision": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+      "current_with_exit_minus_without_exit_residual": 0.0,
+      "historical_max_absolute_paired_flux_difference": 6.88338275267597e-14,
+      "historical_revision": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+      "historical_with_exit_minus_without_exit_residual": -7.91033905045424e-16,
+      "identity": "d3d_shot_001554e054.parquet frame 144"
+    },
+    {
+      "current_against_artifact_residual_difference": {
+        "with_exit": 6.018594898503446,
+        "without_exit": 6.018594898503446
+      },
+      "current_max_absolute_paired_flux_difference": 0.0,
+      "current_revision": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+      "current_with_exit_minus_without_exit_residual": 0.0,
+      "historical_max_absolute_paired_flux_difference": 0.0,
+      "historical_revision": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+      "historical_with_exit_minus_without_exit_residual": 0.0,
+      "identity": "d3d_shot_002495e835.parquet frame 146"
+    },
+    {
+      "current_against_artifact_residual_difference": {
+        "with_exit": 0.00022438480732581145,
+        "without_exit": 0.00022438480732581145
+      },
+      "current_max_absolute_paired_flux_difference": 0.0,
+      "current_revision": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+      "current_with_exit_minus_without_exit_residual": 0.0,
+      "historical_max_absolute_paired_flux_difference": 0.0,
+      "historical_revision": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+      "historical_with_exit_minus_without_exit_residual": 0.0,
+      "identity": "d3d_shot_0040ca9bdc.parquet frame 137"
+    }
+  ],
   "narrative": [
     "d3d_shot_00000c4a7b.parquet frame 179: differs from the committed batched artifact; largest absolute terminal-residual difference 2.637e-01; paired-pass terminal-state difference 1.554e-15",
     "d3d_shot_0003ff34e7.parquet frame 44: differs from the committed batched artifact; largest absolute terminal-residual difference 2.161e-01; paired-pass terminal-state difference 0.000e+00",

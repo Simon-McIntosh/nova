@@ -22,16 +22,16 @@ from pathlib import Path
 arm, output = sys.argv[1], Path(sys.argv[2])
 instrument = len(sys.argv) > 3 and sys.argv[3] == "instrument"
 output.mkdir(parents=True, exist_ok=True)
-SLICE1_SOURCE = Path(
+CAPACITY_SCAN_SOURCE = Path(
     "/home/ITER/mcintos/.config/reckon/crew/runs/"
     "r-20260923T163850406961-fsri-single-site-krylov-vmap-exit/mechanism/"
     "fixed_point_e62c8110e.py"
 )
 
 
-# the nova modules that differ between the revision slice one was measured
-# at (8d02dd0f) and this tree, exported under the run directory
-PREMERGE_ROOT = SLICE1_SOURCE.parent / "premerge"
+# the nova modules that differ between the revision the capacity scan was first
+# measured at (8d02dd0f) and this tree, exported under the run directory
+PREMERGE_ROOT = CAPACITY_SCAN_SOURCE.parent / "premerge"
 PREMERGE = {
     ".".join(path.relative_to(PREMERGE_ROOT).with_suffix("").parts): path
     for path in PREMERGE_ROOT.rglob("*.py")
@@ -51,7 +51,7 @@ class _ServedModules(importlib.abc.MetaPathFinder):
 
 
 served = {
-    "slice1": {"nova.equilibrium.fixed_point": SLICE1_SOURCE},
+    "slice1": {"nova.equilibrium.fixed_point": CAPACITY_SCAN_SOURCE},
     "exit": {},
     "premerge-slice1": PREMERGE,
     "premerge-exit": {

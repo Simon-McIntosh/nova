@@ -23,8 +23,8 @@
   <title>Centroid-constrained oracle solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="52">
+<meta name="plan-modified" content="2026-10-03">
+<meta name="plan-version" content="53">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -202,6 +202,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T211405320600-review-of-cco-root-cause-flux-map-gallery" data-who="reckon-build" data-when="2026-10-02T21:22:47Z">
     <div class="r-comment-body"><p>Independent review of d64a5b27b0d4ed9fd126e1d0843b789447537336..6f7fa4f53da71b12d8ee32ebd587d123449fefba stored parsed at both granted review paths; verdict pass-with-follow-ons, scores 19/18/20/16/17 for total 90/100, added_failure_count 0 with no suite arms to measure a delta; export sizes 267849/286901 bytes satisfy the 300000-byte bound.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T220130925940-cco-root-cause-coupled-centroid-response" data-who="reckon-build" data-when="2026-10-02T22:58:45Z">
+    <div class="r-comment-body"><p>The analytic-state central slope is +1.629225248 m/T in both centroid calls, against +0.836870105 m/T JVP with stable 121-cell support; the formal coupled response predicts +0.004623914 T, opposite to the observed -0.021255811 T, so the cell-centre offset plus this response does not explain the terminal field. Evidence: docs/evidence/fragments/centroid-constrained-oracle-solve/cco-root-cause-coupled-centroid-response.html.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T053656352101-review-of-cco-bounded-row-step-control" data-who="s19c-review-cco-c" data-when="2026-09-17T06:45:40.145Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T205409901465-cco-bounded-row-step-control stored at the fence path, total 84, findings recorded on the reviewed run's completion</p></div>

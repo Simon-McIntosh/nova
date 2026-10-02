@@ -1,0 +1,360 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "d0e8f17e44aa6eb6f05cc94141ed513e1fa18d04",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 20456448,
+      "cached_input_tokens_cumulative": 20456448,
+      "input_tokens": 20642808,
+      "input_tokens_cumulative": 20642808,
+      "output_tokens": 48638,
+      "output_tokens_cumulative": 48638,
+      "reasoning_output_tokens": 12787,
+      "reasoning_output_tokens_cumulative": 12787
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 2731,
+    "files": 6,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "49eacc1a442427a4690d4cc445a12299694ca2cc",
+    "8aaf12d5218cdd1d14a565a177367e5d81a2ddb2",
+    "91b7112f94504679d59e402afd8801337157bd65",
+    "b7f71be2719b977d2d5d0aad841834dac6593056",
+    "46214fb0c73701a669a6ab377c0e1b07957f165a",
+    "cfc315dd3c936b338808a36de8ecce49cf9830fa",
+    "fcafc84ea0e2d134f708cd24a881a25fb66d5ce2",
+    "25671c28680ce7c66e0a1ea16cff99bf3d781b1e"
+  ],
+  "completed_at": "2026-10-02T22:58:45Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T22:02:25Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-coupled-centroid-response /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-coupled-centroid-response/docs/figures/centroid-constrained-oracle-solve/root-cause/coupled-response/coupled.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T220130925940-cco-root-cause-coupled-centroid-response/coupled.log"
+  },
+  "impl_move": {
+    "at_complete": 0.8,
+    "at_dispatch": 0.8,
+    "plan": "centroid-constrained-oracle-solve",
+    "reason": "a root-cause measurement; no implementable section moves",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 4.189816418427434,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T23:01:41.400151+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T22:01:40Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 601913,
+    "state": "quiet",
+    "utilisation_pct": 2.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T22:01:40Z",
+    "read_at": "2026-10-02T22:01:41Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 2.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T22:58:45Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T220130925940-cco-root-cause-coupled-centroid-response/manifest.md",
+  "member": "disposable-r-20261002T220130925940-cco-root-cause-coupled-centroid-response",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "cco-root-cause-coupled-centroid-response",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1941,
+          "cached_input_tokens": 729590,
+          "input_tokens": 731533,
+          "output_tokens": 2371,
+          "reasoning_output_tokens": 1243,
+          "total_tokens": 733904,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Lead ruling 2026-10-02: root-cause before any fix; this node measures, fixes nothing and runs no solve. Continue /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-centroid-moment-contract.md from its committed driver docs/figures/centroid-constrained-oracle-solve/root-cause/centroid-moment/measure.py (commit d0e8f17e4), without changing solver code, CPU in place with JAX_PLATFORMS=cpu, writing every output under docs/figures/centroid-constrained-oracle-solve/root-cause/coupled-response/. (1) Record in derivatives.json, for each unit compensator column at the analytic state, the centroid JVP and the matching central finite difference through BOTH calls, the row-native ForwardProfile.current_moment_observation used by CurrentCentroidConstraint.observed and the requested_class=LIMITED call, with active cells, normalisation and units, and state which call reproduces the +1.629 m/T historical central difference. (2) With the call that reproduces it, compute D_c (I - D_F)^-1 C for each column, the conditioning of I - D_F and its eigenvalues nearest 1, and the field the coupled response predicts to cancel the -6.17 mm cell-centre offset, compared with the converged -2.1256e-2 T. Commit derivatives.json as soon as it is written, before the inverse. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-coupled-centroid-response.md states whether the cell-centre offset and the coupled response together explain the converged field, and whether the two calls disagree in a way that is itself a defect.",
+    "estimated_hours": null,
+    "goal": "measure the centroid row's derivative and its coupled fixed-point response at the analytic centroid fixture state",
+    "id": "cco-root-cause-coupled-centroid-response",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T22:01:40Z",
+      "read_at": "2026-10-02T22:01:41Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 2.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T220130925940-cco-root-cause-coupled-centroid-response/manifest.md",
+    "negative_control": "with D_F set to zero the coupled response must reduce to the direct leverage the row-native call measures",
+    "plan": "centroid-constrained-oracle-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/centroid-constrained-oracle-solve/root-cause/coupled-response",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-coupled-centroid-response.md",
+      "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-root-cause-coupled-centroid-response.html",
+      "docs/figures/centroid-constrained-oracle-solve/cco-root-cause-coupled-centroid-response"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex",
+    "member": null,
+    "node": "cco-root-cause-coupled-centroid-response",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T22:01:50.819996+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5002.328,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "centroid-constrained-oracle-solve",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "25671c28680ce7c66e0a1ea16cff99bf3d781b1e",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "d0e8f17e44aa6eb6f05cc94141ed513e1fa18d04",
+    "reviewed_head_sha": "25671c28680ce7c66e0a1ea16cff99bf3d781b1e",
+    "scores": {
+      "durability": 15,
+      "evidence": 17,
+      "fit": 17,
+      "goal_fidelity": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 87
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "run_id": "r-20261002T220130925940-cco-root-cause-coupled-centroid-response",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fea4-0bd4-7b11-8cc5-ca899ecd3662",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 20456448,
+    "cumulative_input_tokens": 41099256,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 61425
+  },
+  "time_budget": "60m",
+  "tool_steps": 214.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3380,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T22:58:48Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T22:02:35Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T220130925940-cco-root-cause-coupled-centroid-response",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 562,
+    "worker_pid": 1093009
+  },
+  "worker_seconds": 3380,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

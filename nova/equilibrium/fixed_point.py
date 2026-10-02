@@ -4613,6 +4613,28 @@ def _active_set_newton_krylov(
         )
         selected_finite = jnp.where(retain_incoming, True, selected_finite)
         selected_difference = jnp.where(retain_incoming, 0, selected_difference)
+        trajectory_mapped = (
+            jax.lax.cond(
+                usable_partition(partition),
+                lambda: partitioned_map(trajectory_state, partition),
+                lambda: shadowed_map_fn(trajectory_state, mask),
+            )
+            if freeze_topology
+            else selected_mapped
+        )
+        trajectory_residual = _relative_residual(trajectory_mapped, trajectory_state)
+        accept_trajectory = (
+            jnp.asarray(freeze_topology)
+            & (selected_difference == 0)
+            & trajectory_finite
+            & jnp.isfinite(trajectory_residual)
+            & (trajectory_residual <= convergence_tolerance)
+        )
+        selected_state = jnp.where(accept_trajectory, trajectory_state, selected_state)
+        selected_residual = jnp.where(
+            accept_trajectory, trajectory_residual, selected_residual
+        )
+        selected_finite = jnp.where(accept_trajectory, True, selected_finite)
         continue_trajectory = (
             continue_newton_trajectory
             & (selected_difference == 0)

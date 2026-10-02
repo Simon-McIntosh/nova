@@ -93,6 +93,77 @@ def _count_from_line(line: str) -> int | None:
     return None
 
 
+def _parse_arm_output(
+    text: str,
+    *,
+    arm: str,
+    command: list[str],
+    xla_flags: str,
+    log_path: Path,
+    exit_status: int,
+) -> dict[str, object]:
+    latest_count: int | None = None
+    count_events: list[dict[str, object]] = []
+    rows: list[dict[str, object]] = []
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        count = _count_from_line(line)
+        if count is not None:
+            latest_count = count
+            if "Destroying GPU command buffer executable graph" in line:
+                action = "destroy"
+            elif "Instantiated executable graph" in line:
+                action = "instantiate"
+            else:
+                action = "update"
+            count_events.append(
+                {"log_line": line_number, "action": action, "count": count}
+            )
+        if not line.startswith(EVENT_PREFIX):
+            continue
+        event = json.loads(line.removeprefix(EVENT_PREFIX))
+        if event["kind"] in {"program", "before_drop", "after_drop"}:
+            event["alive_executable_graphs"] = latest_count
+            event["log_line"] = line_number
+            rows.append(event)
+
+    arm_receipt: dict[str, object] = {
+        "arm": arm,
+        "command": command,
+        "xla_flags": xla_flags,
+        "exit_status": exit_status,
+        "log": log_path.name,
+        "count_observations": len(count_events),
+        "count_events": count_events,
+        "rows": rows,
+    }
+    if arm == "command_buffers_enabled" and count_events:
+        before_drop = next(row for row in rows if row["kind"] == "before_drop")
+        after_drop = next(row for row in rows if row["kind"] == "after_drop")
+        release_events = [
+            event
+            for event in count_events
+            if before_drop["log_line"] < event["log_line"] < after_drop["log_line"]
+            and event["action"] == "destroy"
+        ]
+        settled_events = [
+            event
+            for event in count_events
+            if event["log_line"] > after_drop["log_line"]
+            and event["action"] == "destroy"
+        ]
+        if not release_events:
+            raise RuntimeError(
+                "enabled arm emitted no destruction count after cache clear"
+            )
+        arm_receipt["alive_executable_graphs_after_cache_clear"] = release_events[0][
+            "count"
+        ]
+        arm_receipt["alive_executable_graphs_after_process_settle"] = (
+            settled_events[-1]["count"] if settled_events else None
+        )
+    return arm_receipt
+
+
 def _run_arm(
     script: Path,
     output_dir: Path,
@@ -135,41 +206,24 @@ def _run_arm(
     )
     log_path = output_dir / f"{arm}.log"
     log_path.write_text(completed.stdout, encoding="utf-8")
-
-    latest_count: int | None = None
-    count_observations = 0
-    rows: list[dict[str, object]] = []
-    for line in completed.stdout.splitlines():
-        count = _count_from_line(line)
-        if count is not None:
-            latest_count = count
-            count_observations += 1
-        if not line.startswith(EVENT_PREFIX):
-            continue
-        event = json.loads(line.removeprefix(EVENT_PREFIX))
-        if event["kind"] in {"program", "before_drop", "after_drop"}:
-            event["alive_executable_graphs"] = latest_count
-            rows.append(event)
-
-    arm_receipt: dict[str, object] = {
-        "arm": arm,
-        "command": command,
-        "xla_flags": env.get("XLA_FLAGS", "<default>"),
-        "exit_status": completed.returncode,
-        "log": str(log_path),
-        "count_observations": count_observations,
-        "rows": rows,
-    }
+    arm_receipt = _parse_arm_output(
+        completed.stdout,
+        arm=arm,
+        command=command,
+        xla_flags=env.get("XLA_FLAGS", "<default>"),
+        log_path=log_path,
+        exit_status=completed.returncode,
+    )
     if completed.returncode != 0:
         raise RuntimeError(f"{arm} exited {completed.returncode}; read {log_path}")
-    if arm == "command_buffers_enabled" and count_observations == 0:
+    if arm == "command_buffers_enabled" and arm_receipt["count_observations"] == 0:
         raise RuntimeError(
             "enabled arm emitted no gpu_command_buffer count; "
             "the instrument did not observe its positive control"
         )
-    if arm == "command_buffers_disabled" and count_observations != 0:
+    if arm == "command_buffers_disabled" and arm_receipt["count_observations"] != 0:
         raise RuntimeError(
-            f"disabled arm emitted {count_observations} graph counts; "
+            f"disabled arm emitted {arm_receipt['count_observations']} graph counts; "
             "command buffers were not disabled"
         )
     return arm_receipt
@@ -191,12 +245,14 @@ def _classify(
     initial = int(counts[0])
     peak = max(int(count) for count in counts)
     final = int(counts[-1])
-    post_drop = int(after_drop["alive_executable_graphs"])
+    post_drop = int(enabled["alive_executable_graphs_after_cache_clear"])
     growth = final - initial
     release = final - post_drop
     control_rows = [row for row in disabled["rows"] if row["kind"] == "program"]
     control_counts = [row["alive_executable_graphs"] or 0 for row in control_rows]
-    if growth > 0 and release > 0:
+    if growth == 0 and release > 0:
+        verdict = "executable_scoped_not_process_cumulative"
+    elif growth > 0 and release > 0:
         verdict = "per_compiled_executable_and_released_when_executables_are_dropped"
     elif growth > 0:
         verdict = "process_cumulative_across_dropped_executables"
@@ -207,6 +263,9 @@ def _classify(
         "initial_alive_executable_graphs": initial,
         "final_alive_executable_graphs": final,
         "peak_alive_executable_graphs": peak,
+        "transient_peak_alive_executable_graphs": max(
+            event["count"] for event in enabled["count_events"]
+        ),
         "growth_across_program_ladder": growth,
         "alive_executable_graphs_after_drop": post_drop,
         "graphs_released_after_drop": release,
@@ -238,7 +297,14 @@ def _plot(receipt: dict[str, object], output: Path) -> None:
     y_enabled = [row["alive_executable_graphs"] for row in enabled_rows]
     x_disabled = [row["programs_compiled"] for row in disabled_rows]
     y_disabled = [row["alive_executable_graphs"] or 0 for row in disabled_rows]
-    post_drop = next(row for row in enabled["rows"] if row["kind"] == "after_drop")
+    after_drop = next(row for row in enabled["rows"] if row["kind"] == "after_drop")
+    post_drop = {
+        "programs_compiled": after_drop["programs_compiled"],
+        "dropped_handles": after_drop["dropped_handles"],
+        "alive_executable_graphs": receipt["summary"][
+            "alive_executable_graphs_after_drop"
+        ],
+    }
 
     figure, axis = plt.subplots(figsize=(14, 7), dpi=100)
     enabled_colour = "#31688e"
@@ -290,6 +356,7 @@ def _plot(receipt: dict[str, object], output: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--child", action="store_true")
+    parser.add_argument("--analyze-existing", action="store_true")
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--programs", type=int, default=20)
     parser.add_argument("--start-size", type=int, default=64)
@@ -304,28 +371,47 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     script = Path(__file__).resolve()
     receipt_path = output_dir / "receipt.json"
+    prior_receipt = {}
+    if receipt_path.exists():
+        prior_receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    current_revision = subprocess.check_output(
+        ["git", "-C", str(script.parents[4]), "rev-parse", "HEAD"], text=True
+    ).strip()
     receipt: dict[str, object] = {
         "schema_version": 1,
         "measurement": (
             "CUDA executable-graph lifetime across distinct compiled programs"
         ),
-        "revision": subprocess.check_output(
-            ["git", "-C", str(script.parents[4]), "rev-parse", "HEAD"], text=True
-        ).strip(),
+        "revision": prior_receipt.get("revision", current_revision),
+        "analysis_revision": current_revision,
         "instrument": str(script),
         "working_directory": str(Path.cwd().resolve()),
         "programs": arguments.programs,
         "arms": [],
     }
     for arm in ("command_buffers_enabled", "command_buffers_disabled"):
-        arm_receipt = _run_arm(
-            script,
-            output_dir,
-            arm=arm,
-            programs=arguments.programs,
-            start_size=arguments.start_size,
-            size_step=arguments.size_step,
-        )
+        if arguments.analyze_existing:
+            log_path = output_dir / f"{arm}.log"
+            xla_flags = "--xla_gpu_graph_min_graph_size=1"
+            if arm == "command_buffers_disabled":
+                xla_flags += " --xla_gpu_enable_command_buffer="
+            arm_receipt = _parse_arm_output(
+                log_path.read_text(encoding="utf-8"),
+                arm=arm,
+                command=prior_receipt["arms"][len(receipt["arms"])]["command"],
+                xla_flags=xla_flags,
+                log_path=log_path,
+                exit_status=0,
+            )
+        else:
+            arm_receipt = _run_arm(
+                script,
+                output_dir,
+                arm=arm,
+                programs=arguments.programs,
+                start_size=arguments.start_size,
+                size_step=arguments.size_step,
+            )
         receipt["arms"].append(arm_receipt)
         receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     receipt["summary"] = _classify(*receipt["arms"])

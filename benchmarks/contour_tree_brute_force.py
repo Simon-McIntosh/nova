@@ -11,7 +11,7 @@ import jax.numpy as jnp
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
-from nova.equilibrium.contour_tree import ContourTreeResult, build_contour_tree
+from nova.equilibrium.contour_tree import build_contour_tree
 from nova.equilibrium.contour_tree_mesh import ContourMesh, build_contour_mesh
 from nova.equilibrium.wall_mask import vessel_unit
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
@@ -22,12 +22,12 @@ from nova.media.sources.plasma_mesh import hex_mesh
 ROOT = Path(__file__).resolve().parents[1]
 PART_ROOT = ROOT / "docs/figures/gs-absolute-accuracy/solovev/production-route-parts"
 FIGURE_ROOT = ROOT / "docs/figures/contour-tree-topology-authority/brute-force"
-VERTEX_CAPACITY = 256
+VERTEX_CAPACITY = 4096
 EDGE_CAPACITY = 2048
 TRIANGLE_CAPACITY = 1024
 
-MAST_CELLS = 90
-MAST_VERTEX_CAPACITY = VERTEX_CAPACITY
+MAST_CELLS = 464
+MAST_VERTEX_CAPACITY = 1024
 MAST_EDGE_CAPACITY = EDGE_CAPACITY
 MAST_TRIANGLE_CAPACITY = TRIANGLE_CAPACITY
 MAST_ROWS = ((27079, 16), (22475, 50))
@@ -105,14 +105,8 @@ def _mast_mesh(shot: int, row: int) -> ContourMesh:
     )
 
 
-def tree_fits(mesh: ContourMesh) -> bool:
-    """Whether the carrier fits the tree's declared fixed node capacity."""
-
-    return int(np.sum(np.asarray(mesh.vertex_valid))) <= ContourTreeResult.node_capacity
-
-
 def mast_fixtures() -> tuple[Fixture, ...]:
-    """Read the MAST rows named in the plan's primary-selection section."""
+    """Read the MAST rows used to select the primary magnetic axis."""
 
     return tuple(
         Fixture(f"mast-{shot}-row-{row}", _mast_mesh(shot, row))
@@ -251,12 +245,11 @@ def render(fixtures: tuple[Fixture, ...], directory: Path = FIGURE_ROOT) -> list
     for fixture in fixtures:
         rows = None
         tree = None
-        if tree_fits(fixture.mesh):
-            try:
-                rows = compare(fixture.mesh)["rows"]
-                tree = [row["tree"] for row in rows]
-            except RuntimeError:
-                rows = None
+        try:
+            rows = compare(fixture.mesh)["rows"]
+            tree = [row["tree"] for row in rows]
+        except RuntimeError:
+            rows = None
         if rows is None:
             rows = standalone_rows(fixture.mesh)
         level = [row["level"] for row in rows]

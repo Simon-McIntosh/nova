@@ -1,0 +1,349 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "bd439c315c5ec9db523d22e0eb5addc164be7a33",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 5628339,
+      "input_tokens_cumulative": 5628339,
+      "output_tokens": 22233,
+      "output_tokens_cumulative": 22233,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 697,
+    "files": 9,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "85c7c512a178a38c567f8cb03d916ff0d686a5b4",
+    "9a70815f68e64376367ba9c7ceb0c399ce2a4114",
+    "047405ee3313fb69999d97640d8739b917d24ee7",
+    "4b985c4e4f684fb15562012b46e3458787b22a12",
+    "4f53fa908cc9b0d35083d4230171efd206fef532"
+  ],
+  "completed_at": "2026-10-02T21:10:05.126Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T18:49:26Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T19:49:09.889609+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T18:49:09Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 26,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 13,
+    "headroom": 2,
+    "mean_context": 154667,
+    "observed_at": "2026-10-02T18:48:43Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T21:10:05.126Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T184908677651-fsri-forward-solve-file-verification/manifest.md",
+  "member": "disposable-r-20261002T184908677651-fsri-forward-solve-file-verification",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsri-forward-solve-file-verification",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1447,
+          "cached_input_tokens": 808561,
+          "input_tokens": 810010,
+          "output_tokens": 1211,
+          "reasoning_output_tokens": 34,
+          "total_tokens": 811221,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "(1) H200: the whole file in one job through scripts/nova_lane/run.sh (RECKON_ALLOW_NESTED_LAUNCH=1, H200 rung, betelgeuse gpu_0003_grpA, one card, explicit --mem, JAX_PLATFORMS=cuda; the launcher supplies a 3600 s per-test bound), log committed with its pass, fail and skip counts and wall. (2) CPU: the file split into SLURM jobs that each fit their partition (all_debug holds 59 minutes; test_the_accelerator_routes_agree_on_the_fixed_point alone took 4649 s on CPU, so it goes to the sirius partition with an explicit --time and --mem, through the launcher's CPU rung or plain sbatch with JAX_PLATFORMS=cpu and the shared interpreter, no uv on the compute node), each job's log committed, with a short table of test, partition, outcome and wall. Report every failure with its test id and first error line; fix nothing, this is a measurement node. Write the manifest before submitting; while jobs run write status: blocked with wait_probe [\"sacct\",\"-n\",\"-X\",\"-j\",\"<comma-separated ids>\",\"--format=State\"] and wait_terminal COMPLETED. Logs under docs/figures/forward-solver-route-integrity/forward-solve-file-verification/. Every uv command carries --no-sync and nothing runs uv sync. The manifest status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Measure whether tests/test_equilibrium_forward_solve.py (28 tests) passes in full at main revision bd439c315c5ec9db523d22e0eb5addc164be7a33, on the H200 and on CPU, now that the frozen-Newton route (db580bec8) and the clip-mode request field (af7403bc0) are merged.",
+    "id": "fsri-forward-solve-file-verification",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T18:49:09Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 26,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 13,
+      "headroom": 2,
+      "mean_context": 154667,
+      "observed_at": "2026-10-02T18:48:43Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T184908677651-fsri-forward-solve-file-verification/manifest.md",
+    "negative_control": "none: a measurement node that changes no source",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§1",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/forward-solver-route-integrity/forward-solve-file-verification",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-file-verification.html",
+      "docs/figures/forward-solver-route-integrity/fsri-forward-solve-file-verification"
+    ]
+  },
+  "orientation_input_tokens": 5150007.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsri-forward-solve-file-verification",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T18:49:13.034800+00:00",
+    "score": 0.71875,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": null,
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "4f53fa908cc9b0d35083d4230171efd206fef532",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "bd439c315c5ec9db523d22e0eb5addc164be7a33",
+    "reviewed_head_sha": "4f53fa908cc9b0d35083d4230171efd206fef532",
+    "scores": {
+      "durability": 20,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 93
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T184908677651-fsri-forward-solve-file-verification",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "3392d2bf-0e5c-4692-b7a0-424db8dac86c",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 12539025,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 2949.433,
+    "generated_tokens": 64786,
+    "generation_seconds": 616.956,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 40.4,
+    "machine_seconds": 2332.477,
+    "peak_input_tokens": 193731,
+    "tokens_per_second": 105.01,
+    "wall_tokens_per_second": 21.97
+  },
+  "time_budget": "60m",
+  "tool_steps": 64.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 8439,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T21:10:06Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T20:20:50Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T184908677651-fsri-forward-solve-file-verification",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 11952,
+    "worker_pid": 3823699
+  },
+  "worker_seconds": 8400,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

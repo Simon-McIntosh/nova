@@ -273,6 +273,32 @@
   "plan_impl_at_dispatch": 1.0,
   "plan_link": null,
   "promoted_revision": "b6d479a93a1c2047815b9eecb2c1018643615244",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5049,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T073439477227-review-of-msc-fused-route-enforces-axis-qualification",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/review-of-msc-fused-route-enforces-axis-qualification"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "none",

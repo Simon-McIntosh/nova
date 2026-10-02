@@ -1,7 +1,7 @@
 # arm=head revision=4af94d326 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-timeout-equals-form-test
 # note: captured at the revision above; the log-only commit that adds this file is its immediate child, so source and tests at the final head are identical to this revision
 # cmd=UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-timeout-equals-form-test uv run --no-sync pytest tests/test_nova_lane_launcher.py
-10:51:22 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+10:51:03 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
 rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-timeout-equals-form-test
@@ -15,5 +15,5 @@ collected 8 items
 
 tests/test_nova_lane_launcher.py ........                                [100%]
 
-============================== 8 passed in 15.87s ==============================
+============================== 8 passed in 14.61s ==============================
 EXIT=0

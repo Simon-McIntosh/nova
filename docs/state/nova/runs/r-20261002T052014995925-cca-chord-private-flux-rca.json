@@ -260,6 +260,51 @@
   "plan_impl_at_dispatch": 0.8,
   "plan_link": null,
   "promoted_revision": "2992599ff08a3932a0d8ea3341a1a7c849ca445b",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "no terminal manifest was delivered",
+    "scratch_bytes": 0,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T052014995925-cca-chord-private-flux-rca",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "dirty": [],
+          "head": "2992599ff08a3932a0d8ea3341a1a7c849ca445b",
+          "integrated_into": "HEAD",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-private-flux-rca",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-02T05:21:01.706Z",
+            "session_id": "f8113c4b-953c-4ecc-b327-af7f1222c122",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-private-flux-rca"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session f8113c4b-953c-4ecc-b327-af7f1222c122"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_remedy": {
     "command": "reckon crew resume --run r-20261002T052014995925-cca-chord-private-flux-rca --advice continue",
     "session_id": "f8113c4b-953c-4ecc-b327-af7f1222c122",

@@ -86,10 +86,13 @@ class ContourTreeArrays:
     overflow: jax.Array
 
 
-def _roots(parents: jax.Array) -> jax.Array:
-    """Pointer-jump a fixed-size union-find forest to canonical roots."""
+def _neighbour_roots(parents: jax.Array, neighbours: jax.Array) -> jax.Array:
+    """Follow only the adjacency entries required by one sweep visit."""
 
-    return jax.lax.fori_loop(0, parents.size, lambda _i, tree: tree[tree], parents)
+    def unresolved(roots: jax.Array) -> jax.Array:
+        return jnp.any(roots != parents[roots])
+
+    return jax.lax.while_loop(unresolved, lambda roots: parents[roots], neighbours)
 
 
 def _append_edges(
@@ -175,12 +178,61 @@ def _insert_split_nodes(
     )
 
 
+def _carrier_adjacency(
+    edges: jax.Array, edge_valid: jax.Array, vertex_count: int
+) -> tuple[jax.Array, jax.Array, jax.Array]:
+    """Index each carrier edge once for constant-degree sweep visits.
+
+    Three-direction carriers have bounded vertex degree; ordinary sparse graphs
+    retain their full edge-width neighbourhood so the public graph contract is
+    unchanged.  An unexpected carrier degree is a visible capacity refusal.
+    """
+
+    edge_count = edges.shape[0]
+    neighbour_capacity = 16 if edge_count > 2 * vertex_count else edge_count
+    neighbours = jnp.zeros((vertex_count, neighbour_capacity), dtype=jnp.int32)
+    neighbour_valid = jnp.zeros((vertex_count, neighbour_capacity), dtype=bool)
+    counts = jnp.zeros(vertex_count, dtype=jnp.int32)
+    overflow = jnp.asarray(False)
+
+    def append(edge_index: int, state):
+        table, valid, counts, overflow = state
+        left, right = edges[edge_index]
+        write = edge_valid[edge_index]
+        left_slot = counts[left]
+        right_slot = counts[right]
+        left_fits = left_slot < neighbour_capacity
+        right_fits = right_slot < neighbour_capacity
+        left_slot = jnp.minimum(left_slot, neighbour_capacity - 1)
+        right_slot = jnp.minimum(right_slot, neighbour_capacity - 1)
+        table = table.at[left, left_slot].set(
+            jnp.where(write & left_fits, right, table[left, left_slot])
+        )
+        table = table.at[right, right_slot].set(
+            jnp.where(write & right_fits, left, table[right, right_slot])
+        )
+        valid = valid.at[left, left_slot].set(
+            valid[left, left_slot] | (write & left_fits)
+        )
+        valid = valid.at[right, right_slot].set(
+            valid[right, right_slot] | (write & right_fits)
+        )
+        counts = counts.at[left].add(write)
+        counts = counts.at[right].add(write)
+        return table, valid, counts, overflow | (write & ~(left_fits & right_fits))
+
+    neighbours, neighbour_valid, _, overflow = jax.lax.fori_loop(
+        0, edge_count, append, (neighbours, neighbour_valid, counts, overflow)
+    )
+    return neighbours, neighbour_valid, overflow
+
+
 def _sweep_tree(
     values: jax.Array,
     vertex_valid: jax.Array,
     vertex_is_wall: jax.Array,
-    edges: jax.Array,
-    edge_valid: jax.Array,
+    neighbours: jax.Array,
+    neighbour_valid: jax.Array,
     descending: bool,
     node_capacity: int,
     edge_capacity: int,
@@ -199,7 +251,7 @@ def _sweep_tree(
     """
 
     vertex_count = values.size
-    edge_count = edges.shape[0]
+    neighbour_count = neighbours.shape[1]
     index = jnp.arange(vertex_count, dtype=jnp.int32)
     order = jnp.lexsort((index, -values if descending else values))
     last_usable_rank = jnp.max(
@@ -229,16 +281,11 @@ def _sweep_tree(
         ) = state
         vertex = order[rank].astype(jnp.int32)
         usable = vertex_valid[vertex]
-        roots = _roots(parents)
-        first = edges[:, 0]
-        second = edges[:, 1]
-        is_first = edge_valid & (first == vertex)
-        is_second = edge_valid & (second == vertex)
-        neighbour = jnp.where(is_first, second, first)
-        adjacent = is_first | is_second
-        neighbour_root = roots[neighbour]
+        adjacent = neighbour_valid[vertex]
+        neighbour = jnp.where(adjacent, neighbours[vertex], vertex)
+        neighbour_root = _neighbour_roots(parents, neighbour)
         root_active = adjacent & active[neighbour]
-        earlier = jnp.arange(edge_count)[:, None] < jnp.arange(edge_count)
+        earlier = jnp.arange(neighbour_count)[:, None] < jnp.arange(neighbour_count)
         repeated = jnp.any(
             earlier
             & root_active[:, None]
@@ -276,10 +323,9 @@ def _sweep_tree(
             representative & connect,
             vertex,
         )
-        active_root = (
-            jnp.zeros(vertex_count, dtype=bool).at[neighbour_root].max(root_active)
+        parents = parents.at[neighbour_root].set(
+            jnp.where(root_active & usable, vertex, parents[neighbour_root])
         )
-        parents = jnp.where(active_root & usable, vertex, parents)
         parents = parents.at[vertex].set(vertex)
         first_root = jnp.argmax(representative).astype(jnp.int32)
         inherited = births[neighbour_root[first_root]]
@@ -344,12 +390,15 @@ def build_contour_tree(
     mesh_node_capacity = vertex_psi.size
     mesh_edge_capacity = edges.shape[0]
     signed = jnp.asarray(sigma, dtype=vertex_psi.dtype) * vertex_psi
+    neighbours, neighbour_valid, adjacency_overflow = _carrier_adjacency(
+        edges, edge_valid, mesh_node_capacity
+    )
     join = _sweep_tree(
         signed,
         vertex_valid,
         vertex_is_wall,
-        edges,
-        edge_valid,
+        neighbours,
+        neighbour_valid,
         True,
         mesh_node_capacity,
         mesh_edge_capacity,
@@ -358,8 +407,8 @@ def build_contour_tree(
         signed,
         vertex_valid,
         vertex_is_wall,
-        edges,
-        edge_valid,
+        neighbours,
+        neighbour_valid,
         False,
         mesh_node_capacity,
         mesh_edge_capacity,
@@ -425,7 +474,12 @@ def build_contour_tree(
     edge_nodes_valid = jnp.all(
         jnp.any(node_matches, axis=0)[merged_edges[edge_source]], axis=1
     )
-    overflow = overflow | (node_count > node_capacity) | (edge_count > edge_capacity)
+    overflow = (
+        overflow
+        | adjacency_overflow
+        | (node_count > node_capacity)
+        | (edge_count > edge_capacity)
+    )
     overflow = overflow | jnp.any(compact_edge_valid & ~edge_nodes_valid)
     return ContourTreeArrays(
         node_vertex=node_source,

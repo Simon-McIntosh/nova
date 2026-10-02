@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 from contextlib import contextmanager
@@ -331,6 +332,7 @@ def main():
         seed, route="picard", current=conductor, evaluations=80, relaxation=0.7
     )
     report = {
+        "driver_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "held": held,
         "map_tangent": _map_tangent_contract(profile, terminal.flux, conductor),
         "moment": _moment_contract(profile, terminal.flux),

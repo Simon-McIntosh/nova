@@ -28,7 +28,7 @@
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.99">
-<meta name="plan-version" content="79">
+<meta name="plan-version" content="80">
 </head>
 <body>
   <main class="plan-doc">
@@ -288,10 +288,11 @@ matrix. Record: <a href="/nova/evidence/archive/exact-clip-moment-quadrature-lan
     <div class="r-fu-body"><p>Decision <code>fallback-fence-norm</code> is locked to <code>moment-relative-l2</code>. Re-express the retained fan's refinement floor in the moment relative L2 norm and judge each of the five fallback rows against it.</p><p><strong>Done when:</strong> the receipt states, per row, its error and the fence in that one norm, with a pass or fail verdict; the evidence record replaces the two superseded fences with this one; and the module test passes in one fresh all_debug process with the default route bit-identical to base.</p></div>
     <pre class="r-fu-prompt">/reckon-build exact-clip-moment-quadrature</pre>
     </article>
-<article class="r-fu" data-id="f-ecq-production-diverted-one-arc-census" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-02" data-recommends-skill="/reckon-build exact-clip-moment-quadrature" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ecq-production-diverted-one-arc-census" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-02" data-recommends-skill="/reckon-build exact-clip-moment-quadrature" data-resolved-at="2026-10-02T20:28:16+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Census the production diverted layouts against the one-arc bound, and watch the saddle-wedge margin</h4>
     <div class="r-fu-body">The one-arc census that retired the two-run wiring measured the analytic bank's only diverted row, diverted-single-null, at three resolutions; the bank carries no double-null diverted row and no production geometry. Its spline saddle wedges reached 160, 152 and 146 vertices against one-run capacities of 162, 154 and 148, a two-vertex margin, and the logs carrying those maxima have no revision or command header. Run docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/one_arc_census.py, with a provenance header on every log, over the production diverted rows the forward lanes solve (MAST and DIII-D diverted slices in the bank) at their production cell counts, recording realised maximum vertices, saddle-wedge maxima and refused cells per row. If any row refuses a cell, land 61b291089 from refs/held/ecq-level-run-wiring with that row as its positive control; if none does, delete the ref.</div>
     <pre class="r-fu-prompt">/reckon-build exact-clip-moment-quadrature: census the production diverted layouts against the one-arc traced bound and record the saddle-wedge margin.</pre>
+    <p class="r-fu-outcome">Merged at 8c9f7cb42 (commits 1024be47a, 80d20b80c, 06a15267b, d7e48acc0; review 91/100). All eleven production diverted rows, the six MAST production moment-seed slices (21978/35, 21983/35, 21985/51, 21986/46, 21989/55, 22086/43) and the five DIII-D forward-gate frames, refuse no cell at their 1089-cell production layout under the one-run bound: realised maximum 132 live vertices against capacity 136 (headroom 4), largest spline saddle wedge 131 (margin 5). Every row log carries its revision, tree and command. The two-run wiring 61b291089 is retired and refs/held/ecq-level-run-wiring is deleted. The evaluated banks hold single-null and limited diverted layouts only; a double-null diverted row added later is unmeasured and would need its own census.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

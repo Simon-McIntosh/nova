@@ -60,6 +60,8 @@ def _changed(left: Any, right: Any) -> dict[str, Any]:
     def summary(value: np.ndarray) -> Any:
         if value.ndim == 0:
             return value.item()
+        if value.size == 0:
+            return {"minimum": None, "maximum": None}
         result: dict[str, Any] = {
             "minimum": value.min().item(),
             "maximum": value.max().item(),
@@ -72,7 +74,9 @@ def _changed(left: Any, right: Any) -> dict[str, Any]:
         "shape": list(left_array.shape),
         "changed_entries": int(np.count_nonzero(left_array != right_array)),
         "maximum_absolute_difference": (
-            float(np.max(np.abs(difference))) if is_numeric else None
+            float(np.max(np.abs(difference)))
+            if is_numeric and difference.size
+            else None
         ),
         "warm_value": summary(left_array),
         "terminal_value": summary(right_array),
@@ -113,11 +117,18 @@ def _partition_fields(warmed, terminal) -> dict[str, dict[str, Any]]:
     return _field_changes("partition", warmed, terminal)
 
 
+def _maximum_absolute(values: np.ndarray) -> float:
+    """Reduce a component slice; an absent component is empty and carries 0.0."""
+    return float(np.max(np.abs(values))) if values.size else 0.0
+
+
 def _residual_terms(live, frozen, state, coordinate, physical_count: int):
     """Name the largest map residual terms by physical cell or wall entry."""
     live_term = np.asarray(live - state)
     frozen_term = np.asarray(frozen - state)
     mismatch = live_term - frozen_term
+    grid_term = live_term[:physical_count]
+    tail_term = live_term[physical_count:]
     ranking = np.argsort(np.abs(live_term))[::-1][:12]
     terms = []
     for index in ranking:
@@ -136,16 +147,14 @@ def _residual_terms(live, frozen, state, coordinate, physical_count: int):
         )
     components = {
         "grid": {
-            "maximum_absolute_residual": float(
-                np.max(np.abs(live_term[:physical_count]))
-            ),
-            "l2_residual": float(np.linalg.norm(live_term[:physical_count])),
+            "row_count": int(grid_term.size),
+            "maximum_absolute_residual": _maximum_absolute(grid_term),
+            "l2_residual": float(np.linalg.norm(grid_term)),
         },
         "wall_and_sample": {
-            "maximum_absolute_residual": float(
-                np.max(np.abs(live_term[physical_count:]))
-            ),
-            "l2_residual": float(np.linalg.norm(live_term[physical_count:])),
+            "row_count": int(tail_term.size),
+            "maximum_absolute_residual": _maximum_absolute(tail_term),
+            "l2_residual": float(np.linalg.norm(tail_term)),
         },
     }
     return {
@@ -174,10 +183,13 @@ def _markdown(receipt: dict[str, Any]) -> str:
         "## Residual at the frozen terminal state",
         "",
         f"The frozen map residual is {receipt['frozen_residual']:.12e}; the live-map "
-        f"residual is {receipt['live_residual']:.12e}. The grid component reaches "
-        f"{components['grid']['maximum_absolute_residual']:.12e}; "
-        "the remaining wall/sample component reaches "
-        f"{components['wall_and_sample']['maximum_absolute_residual']:.12e}.",
+        f"residual is {receipt['live_residual']:.12e}. It decomposes into a grid "
+        f"component ({components['grid']['row_count']} rows) reaching "
+        f"{components['grid']['maximum_absolute_residual']:.12e} maximum absolute "
+        f"(l2 {components['grid']['l2_residual']:.12e}), and a wall/sample component "
+        f"({components['wall_and_sample']['row_count']} rows) reaching "
+        f"{components['wall_and_sample']['maximum_absolute_residual']:.12e} maximum "
+        f"absolute (l2 {components['wall_and_sample']['l2_residual']:.12e}).",
         "",
         "| entry | live map − state | frozen map − state | live − frozen |",
         "| --- | ---: | ---: | ---: |",
@@ -241,8 +253,12 @@ def _markdown(receipt: dict[str, Any]) -> str:
             "Keep live reads during warm-up and one frozen partition per Newton "
             "pass, but make the terminal reconciliation refresh the complete "
             "partition and continue a bounded Newton pass whenever its live "
-            "residual exceeds tolerance. This retains the one-read-per-pass cost "
-            "while targeting the measured refreshed residual above.",
+            "residual exceeds tolerance. The measured prediction for that recipe "
+            f"is {receipt['refreshed_live_residual']:.12e} after "
+            f"{receipt['refresh_newton_steps']} additional Newton steps, at a "
+            f"cost of {receipt['refreshed_route_wall_seconds']:.2f} s for the "
+            "bounded refresh over the base route's "
+            f"{receipt['initial_route_wall_seconds']:.2f} s.",
             "",
         ]
     )

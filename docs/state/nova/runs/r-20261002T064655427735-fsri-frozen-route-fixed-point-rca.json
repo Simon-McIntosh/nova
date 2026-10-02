@@ -263,6 +263,51 @@
   "plan_impl_at_dispatch": 0.65,
   "plan_link": null,
   "promoted_revision": "f157f841942b84b57d99c22603ed2539d039b830",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 5029,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T064655427735-fsri-frozen-route-fixed-point-rca",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "unintegrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "dirty": [],
+          "head": "f157f841942b84b57d99c22603ed2539d039b830",
+          "integrated_into": "HEAD",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-fixed-point-rca",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-02T06:56:02Z",
+            "session_id": "01a0fb5e-4c01-7de2-84ef-84007ae82f70",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-fixed-point-rca"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a0fb5e-4c01-7de2-84ef-84007ae82f70"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": {
     "reason": "codex-terra resumes are budget-held at 100% of the free-plan window; a fresh dispatch on base f157f8419 carries the committed diagnostic",
     "session_id": "01a0fb5e-4c01-7de2-84ef-84007ae82f70",

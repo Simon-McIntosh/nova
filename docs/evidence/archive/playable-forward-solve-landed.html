@@ -1967,6 +1967,38 @@ standalone kernel wall only. Receipts: <code>~/.config/reckon/crew/reports/nova/
   negative control re-renders from a receipt whose titles carry the row-index list again and whose middle panel is returned to a linear ordinate, and five checks fail against the three that pass: the middle wall panel is no longer on a log axis, the title names neither arm nor revision, the title holds a comma-separated integer run, the title no longer agrees with its source receipt, and the files the receipt names are not beside the mutated receipt. The render receipt records the source receipt, arm, revision, title and per-panel ordinate of each figure, so a rendered panel can be audited against its measurement
   without re-running the kernels.</p>
 </section>
+<section id="shape-inverse-control-and-regularisation">
+  <h2>The shape-inverse receipt refuses its unsettled control and persists the regularisation trade-off (2026-10-02)</h2>
+  <p><strong>Interpretation corrected per arm.</strong> The all-prescribed comparison is withdrawn
+  as a negative control: on elongation it recorded <code>66.6808 mm</code>, which is
+  <code>13.0029 mm</code> better than the shape-inverse arm's <code>79.6837 mm</code>. The current
+  receipt no longer calls the errors uniformly large. It reports upper-point plus 20 mm at
+  <code>18.9875 mm</code> and elongation plus 5% at <code>79.6837 mm</code>; both fail the steering
+  tolerance, at materially different scales.</p>
+  <p><strong>Direction-reversal control refused.</strong> Both reversed-current arms were rerun
+  on the fleet CPU allocation with the active-set budget raised from 16 to 64 trips and a
+  ten-minute process ceiling per command. Upper terminated after 7 trips at residual
+  <code>9.386702e-4</code>; elongation terminated after 4 trips at
+  <code>1.378488e-3</code>. Neither converged, and neither reached the enlarged budget. Their
+  terminal shape errors, 40.2382 and 112.6220 mm, are retained as diagnostics only and are not
+  compared with the converged controlled arms. The receipt verdict is
+  <code>refused_non_convergence</code>, <code>comparison_admissible</code> is false, and the invalid
+  control-comparison figure is deleted.</p>
+  <p><strong>Regularisation curve.</strong> The receipt carries all sixteen measured points:
+  closure fraction and maximum current for eight weights on each command. Weight 100 is below
+  20 kA on both arms—<code>4.850 kA</code> upper and <code>11.213 kA</code> elongation—but closes
+  only <code>3.64%</code> and <code>29.46%</code> of exercised rows. No weight admits under the
+  stated 80% closure floor and 20 kA ceiling.</p>
+  <figure>
+    <img src="/nova/figures/playable-forward-solve/shape-inverse/shape-regularisation-curve.png" alt="Receipt-driven regularisation curves showing closure fraction and maximum current at all eight weights for both commands.">
+    <figcaption>The hand-authored pixel-coordinate SVG is replaced by this receipt-driven PNG.
+    Left: 80%-closure fractions. Right: maximum current against the 20 kA ceiling. No weight
+    admits.</figcaption>
+  </figure>
+  <p>Receipt: <code>docs/figures/playable-forward-solve/shape-inverse/shape-inverse-receipt.json</code>.
+  Generator: <code>benchmarks/playable_shape_inverse_receipt.py</code>. Worker-authored record:
+  <code>docs/evidence/fragments/playable-forward-solve/pfs-shape-inverse-control-and-regularisation.html</code>.</p>
+</section>
 </main>
 </body>
 </html>

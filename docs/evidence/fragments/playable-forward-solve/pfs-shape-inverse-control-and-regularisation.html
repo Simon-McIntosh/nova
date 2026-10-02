@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="plan-slug" content="playable-forward-solve">
+<meta name="plan-status" content="active">
+<title>Shape-inverse control and regularisation — landing record</title>
+</head>
+<body>
+<section id="pfs-shape-inverse-control-and-regularisation">
+<h2>The shape-inverse receipt refuses its unsettled control and retains the complete regularisation sweep</h2>
+<p><strong>Defect reproduced.</strong> The committed all-prescribed comparison was not a
+negative control on both commands: its elongation error was <code>66.6808 mm</code>,
+<code>13.0029 mm</code> better than the controlled arm's <code>79.6837 mm</code>. Its
+"large errors" interpretation is therefore withdrawn. Shape error is reported per arm:
+<code>18.9875 mm</code> for upper-point plus 20 mm and <code>79.6837 mm</code> for
+elongation plus 5%; both miss the steering tolerance, but they are not uniform.</p>
+<p><strong>Direction-reversal control refused.</strong> Both arms were rerun on the fleet CPU
+allocation with the active-set budget raised from 16 to 64 trips and a ten-minute process ceiling
+per command. Upper terminated after 7 trips with residual <code>9.386702e-4</code>; elongation
+terminated after 4 trips with residual <code>1.378488e-3</code>. Neither converged. Their terminal
+shape errors, 40.2382 and 112.6220 mm, remain diagnostic values only: they are not compared with
+the converged shape-inverse arms and establish no causal directionality. The aggregate receipt
+marks the control <code>refused_non_convergence</code>, sets
+<code>comparison_admissible</code> false, and carries no comparison verdict. The invalid control
+figure is deleted.</p>
+<p><strong>Regularisation sweep.</strong> The aggregate receipt now promotes the two complete
+eight-weight curves—sixteen rows total—with closure fraction and maximum current on every row.
+At weight 100, the upper command is below the current ceiling at <code>4.850 kA</code> but closes
+only <code>3.64%</code> of exercised rows; elongation is below it at <code>11.213 kA</code> but
+closes only <code>29.46%</code>. No weight combines the <code>80%</code> closure floor with the
+<code>20 kA</code> current ceiling, so no weight admits.</p>
+<figure>
+  <img src="/nova/figures/playable-forward-solve/shape-inverse/shape-regularisation-curve.png" alt="Eight-weight regularisation sweep for upper-point and elongation commands, with closure fraction and maximum current panels.">
+  <figcaption>All sixteen persisted points, rendered from
+  <code>shape-inverse-receipt.json</code>. Left: fraction of exercised rows closing by at least
+  80%. Right: maximum current change against the 20 kA ceiling. No weight admits because every
+  ceiling-compliant point remains below the closure floor.</figcaption>
+</figure>
+<p><strong>Execution.</strong> The two control logs are
+<code>convergence-upper.log</code> and <code>convergence-elongation.log</code> in the run directory;
+both end <code>EXIT=0</code> with an explicit refusal. <code>retract-control.log</code> records the
+receipt and figure regeneration and ends <code>EXIT=0</code>. The generator and renderer are in
+<code>benchmarks/playable_shape_inverse_receipt.py</code>.</p>
+</section>
+</body>
+</html>

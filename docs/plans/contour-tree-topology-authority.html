@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 </head>
 <body>
   <main class="plan-doc">
@@ -362,6 +362,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20261002T0725-tree-mesh" data-who="reckon-build" data-when="2026-10-02T07:25:00+02:00">
     <div class="r-comment-body">tree (b187b46d4) and mesh (068e57e53) landed; §2 stays open for the end-to-end brute-force check on the Solov'ev and MAST fixtures and the figure regenerated from the computed tree.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T230257338103-ctta-join-split-contour-tree" data-who="reckon-build" data-when="2026-10-02T00:17:52.550Z">
+    <div class="r-comment-body"><p>Added a JAX-traceable, fixed-capacity join/split contour-tree receipt in nova/equilibrium/contour_tree.py; wall contact is recorded once per wall-bearing region at its own highest wall vertex, guarded by a two-region test in tests/test_contour_tree_merge.py (head gate 13 passed).</p></div>
 </div>
 </section>
 </main>

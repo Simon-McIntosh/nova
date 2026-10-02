@@ -1,0 +1,973 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "f9603c3be1e2ced6d06bc28bdff8598b6cc153ed",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 2190334,
+      "input_tokens_cumulative": 2190334,
+      "output_tokens": 9728,
+      "output_tokens_cumulative": 9728,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 563,
+    "files": 5,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 48,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "window_line": 131
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "cc8883adcdd2d647b1edec225f3089988a798c35",
+    "2ef31f1d715a6e3cb2d1ad455e32c2672adae281",
+    "2118e335aaa3e913e66edce37123906afe0b9599",
+    "cffdb55979f11611db95b955479b6780f862dae3",
+    "dce30cab15fab11c155510b01e90a61ed2a655a2",
+    "ccce28720376b1eab447c59aaf4807811665d6a1",
+    "a126966ffcdc60671c5a750e3090e3e80ba0e854",
+    "3bb30654a62872d68260b0d5b979ab0eca0e5924",
+    "a70aa0cb0d4a49681525f8d579692714ad77c5e8"
+  ],
+  "completed_at": "2026-10-02T00:17:52.550Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-01T23:03:13Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_contour_tree_merge.py tests/test_contour_tree_conventions.py -q",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T230257338103-ctta-join-split-contour-tree/evidence/baseline-a126966ff.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "contour-tree-topology-authority",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T00:02:58.716715+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": null,
+    "metered": true,
+    "observed_at": null,
+    "read_at": "2026-10-01T23:02:58Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T00:17:52.550Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-01T23:27:05Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'codex' to 'claude'",
+        "from_backend": "codex-terra",
+        "from_harness": "codex",
+        "reason": "codex-terra resumes are held at the free-plan window; the remaining step is a manifest status correction",
+        "session": "fresh",
+        "session_id": "01a0f9b5-4044-7583-b80e-07a52aecec13",
+        "session_source": "stream",
+        "to_backend": "clive",
+        "to_harness": "claude"
+      }
+    ],
+    "root_run_id": "r-20261001T230257338103-ctta-join-split-contour-tree"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T230257338103-ctta-join-split-contour-tree/manifest.md",
+  "member": "disposable-r-20261001T230257338103-ctta-join-split-contour-tree",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_contour_tree_merge.py::test_each_wall_region_joins_outside_at_its_own_wall_vertex"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_contour_tree_merge.py::test_each_wall_region_joins_outside_at_its_own_wall_vertex"
+    ],
+    "declaration": "disable simulation-of-simplicity tie breaking: the plateau field produces a wrong node set and its test fails",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T230257338103-ctta-join-split-contour-tree/evidence/negative-control-region-wall.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T230257338103-ctta-join-split-contour-tree/evidence/negative-control-region-wall.log",
+    "test_paths": [
+      "tests/test_contour_tree_merge.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "ctta-join-split-contour-tree",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 619,
+          "cached_input_tokens": 678799,
+          "input_tokens": 679420,
+          "output_tokens": 3985,
+          "reasoning_output_tokens": 1187,
+          "total_tokens": 683405,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Shared interface between the mesh and the tree (both nodes build to it): the mesh returns a frozen dataclass ContourMesh in nova/equilibrium/contour_tree_mesh.py with fixed-capacity jax arrays vertex_rz (V,2) m, vertex_psi (V,) Wb, vertex_valid (V,) bool, vertex_is_wall (V,) bool, edges (E,2) int32 vertex indices, edge_valid (E,) bool, triangles (T,3) int32, triangle_valid (T,) bool, plus the capacities V, E, T and an overflow flag; the tree consumes vertex_psi, vertex_valid, vertex_is_wall, edges and edge_valid only, and sigma from contour_tree.sigma_for_state. In nova/equilibrium/contour_tree.py (the section 1 contract already lives there; read it and the plan's sections 1, 2 and 4 at main), add a jit- and vmap-traceable function that takes vertex values, validity and wall masks, an edge list and sigma, and returns the contour tree into ContourTreeResult's node and edge arrays with critical_type 0, 1 or 2 on raw psi. It computes the join tree of sigma*psi (superlevel sets descending from the maximum) and the split tree, then merges them. Ties break by simulation of simplicity (vertex index as the secondary key), so no two values are equal. Every wall vertex is connected to one virtual outside node valued below every interior level, so a region meets the wall where it joins the outside node, at its highest wall vertex. Node and edge capacities come from ContourTreeResult, and an overflow sets a named receipt flag rather than truncating. Port the semantics of /home/ITER/mcintos/Code/imas-efit/src/EFIT/contour_tree.f90 and its Python oracle (see docs/evidence/contour-tree-topology-authority/reuse-map.md rows 4 to 6); reuse the fixed-slot connectivity kernels named there. tests/test_contour_tree_merge.py, on synthetic piecewise-linear fields over small triangulated grids (a single maximum; two maxima joined by a saddle; a plateau needing tie breaking; a field touching a wall), asserts: the node set and critical types match the analytic critical points; node count minus edge count is 1; each saddle's level equals the level where a brute-force connected-component count of the superlevel set over the edge graph changes; the batched (vmap) and per-field trees are identical; an over-capacity field reports the overflow flag. Negative control: disable the tie breaking and the plateau test fails, logged. Fresh process, in place on the fleet allocation (TMPDIR=/tmp, JAX_PLATFORMS=cpu, configure_dtypes before any array), gates in the foreground. Logs under docs/figures/contour-tree-topology-authority/tree/ (force-add; *.log is gitignored). Do not edit any other nova module.",
+    "estimated_hours": 3.0,
+    "goal": "The contour tree of sigma*psi on a piecewise-linear vertex/edge field, built from its join and split trees with simulation-of-simplicity tie breaking and a virtual outside node joined at wall vertices",
+    "id": "ctta-join-split-contour-tree",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": null,
+      "metered": true,
+      "observed_at": null,
+      "read_at": "2026-10-01T23:02:58Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T230257338103-ctta-join-split-contour-tree/manifest.md",
+    "negative_control": "disable simulation-of-simplicity tie breaking: the plateau field produces a wrong node set and its test fails",
+    "plan": "contour-tree-topology-authority",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/contour_tree.py",
+      "tests/test_contour_tree_merge.py",
+      "docs/figures/contour-tree-topology-authority/tree",
+      "docs/evidence/fragments/contour-tree-topology-authority/ctta-join-split-contour-tree.html",
+      "docs/figures/contour-tree-topology-authority/ctta-join-split-contour-tree"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex-terra",
+    "member": null,
+    "node": "ctta-join-split-contour-tree",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-01T23:03:00.616810+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "contour-tree-topology-authority",
+  "plan_link": null,
+  "promoted_revision": "a70aa0cb0d4a49681525f8d579692714ad77c5e8",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "f9603c3be1e2ced6d06bc28bdff8598b6cc153ed",
+    "reviewed_head_sha": "a70aa0cb0d4a49681525f8d579692714ad77c5e8",
+    "scores": {
+      "durability": 15,
+      "evidence": 18,
+      "fit": 20,
+      "goal_fidelity": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 91
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261001T230257338103-ctta-join-split-contour-tree",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "e48024fd-3b77-40fd-af30-9378d526d8cd",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 1,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 2190334,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 340.335,
+    "generated_tokens": 9728,
+    "generation_seconds": 317.859,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 22.3,
+    "machine_seconds": 22.476,
+    "peak_input_tokens": 107082,
+    "tokens_per_second": 30.6,
+    "wall_tokens_per_second": 28.58
+  },
+  "time_budget": "60m",
+  "tool_steps": 64.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 4479,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T00:17:53Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-01T23:41:36Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261001T230257338103-ctta-join-split-contour-tree",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 13618,
+    "worker_pid": 360161
+  },
+  "worker_seconds": 2995,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

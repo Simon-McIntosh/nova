@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="146">
+<meta name="plan-version" content="147">
 </head>
 <body>
 <main class="plan-doc">
@@ -750,6 +750,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261002T081037268041-msc-fused-route-wider-gate" data-who="reckon-build" data-when="2026-10-02T09:00:09.046Z">
     <div class="r-comment-body"><p>Enforced-axis change at 571f4e8cc adds no failure in the three ungated modules: head == base on all three (tests/test_forward_operator_domain.py 3 failed,3 passed; tests/test_sol_support_selection.py 7 passed; tests/test_two_branch_batch_cost.py 2 passed), added failures zero, and the audit lists all 46 _support_partition call sites outside tests/ with 3 production and 7 benchmark/script hosts able to take an unqualified intermediate; report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/msc-fused-route-wider-gate.md.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261002T090507348942-review-of-msc-fused-route-wider-gate" data-who="reckon-build" data-when="2026-10-02T09:52:39.981Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261002T081037268041-msc-fused-route-wider-gate passes review: the landed change 571f4e8cc7e7916423e4baace06c33acd4245834 (the fused linear read now enforces the qualified axis) adds zero failures over base d786948c468d01c1ffb87718758ed60483ea4910 across the three ungated modules, confirmed by independent re-run (head 3 failed/12 passed; base 3 failed/12 passed, the same three ids); scores goal_fidelity 20, evidence 19, scope_discipline 20, durability 18, fit 20, total 97, verdict pass.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

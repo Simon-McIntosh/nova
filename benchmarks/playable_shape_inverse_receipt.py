@@ -28,6 +28,11 @@ from benchmarks.efit_forward_parity_slice import (
     select_slices_by_shot,
 )
 from benchmarks.label_seed_residual_field import _persisted_response_cache
+from nova.equilibrium.fixed_point import FIXED_POINT_RESIDUAL_TOLERANCE
+from nova.equilibrium.reduced_newton import (
+    NEWTON_STEPS,
+    solve_constrained_reduced_newton,
+)
 from nova.equilibrium.shape_inverse import (
     NoAdmissibleShapeStepError,
     achieved_target,
@@ -59,6 +64,7 @@ NEGATIVE_CONTROL_ARMS = {
 CONSISTENCY_DIAGNOSTIC = "seed-consistency-diagnostic.json"
 FORWARD_GAMMA_FACTOR = 1.0e-12
 DELTA_CURRENT_CEILING_A = 20_000.0
+CONTROL_ACTIVE_SET_STEPS = 64
 DELTA_REGULARISATION_WEIGHTS = (
     0.0,
     1.0e-4,
@@ -1331,10 +1337,27 @@ def _regularisation_curves(receipt: dict[str, Any]) -> dict[str, Any]:
     curves = {}
     for arm in receipt["arms"]:
         curve = arm["delta_regularisation_sweep"]["weight_curve"]
-        if len(curve) != len(DELTA_REGULARISATION_WEIGHTS):
+        observed_weights = tuple(
+            float(row["delta_regularisation_weight"]) for row in curve
+        )
+        if observed_weights != DELTA_REGULARISATION_WEIGHTS:
             raise AssertionError(
-                f"{arm['arm']} has {len(curve)} regularisation rows, "
-                f"expected {len(DELTA_REGULARISATION_WEIGHTS)}"
+                f"{arm['arm']} regularisation weights {observed_weights!r} "
+                f"do not equal {DELTA_REGULARISATION_WEIGHTS!r} in order"
+            )
+        closure = np.asarray(
+            [row["closure_fraction_exercised_rows"] for row in curve], dtype=float
+        )
+        maximum_current = np.asarray(
+            [row["maximum_absolute_current_change_a"] for row in curve], dtype=float
+        )
+        if not np.all(np.isfinite(closure)):
+            raise AssertionError(
+                f"{arm['arm']} regularisation closure fractions must all be finite"
+            )
+        if not np.all(np.isfinite(maximum_current)):
+            raise AssertionError(
+                f"{arm['arm']} regularisation maximum currents must all be finite"
             )
         curves[arm["arm"]] = [
             {
@@ -1424,8 +1447,8 @@ def _draw_regularisation(receipt: dict[str, Any], path: Path) -> dict[str, Any]:
     figure, (closure_axis, current_axis) = plt.subplots(1, 2, figsize=(14, 6))
     for command, curve in sweep["commands"].items():
         colour = colours[command]
-        label_offset = 6 if command == "elongation-plus-5pct" else -6
-        label_vertical_alignment = "bottom" if label_offset > 0 else "top"
+        label_offset = 6
+        label_vertical_alignment = "bottom"
         closure = [row["closure_fraction_exercised_rows"] for row in curve]
         current = [row["maximum_absolute_current_change_a"] / 1000.0 for row in curve]
         closure_axis.plot(x, closure, color=colour, linewidth=3.0, marker="o")
@@ -1439,6 +1462,7 @@ def _draw_regularisation(receipt: dict[str, Any], path: Path) -> dict[str, Any]:
             va=label_vertical_alignment,
             color=colour,
             fontsize=20,
+            clip_on=True,
         )
         current_axis.annotate(
             names[command],
@@ -1449,6 +1473,7 @@ def _draw_regularisation(receipt: dict[str, Any], path: Path) -> dict[str, Any]:
             va=label_vertical_alignment,
             color=colour,
             fontsize=20,
+            clip_on=True,
         )
     closure_axis.axhline(
         sweep["closure_floor"], color="0.45", linewidth=1.2, linestyle=":"
@@ -1514,19 +1539,22 @@ def _direction_reversal_arm(
     controlled_delta = controlled_current[free] - seed[free]
     reversed_current[free] = seed[free] - controlled_delta
 
-    solver = ProductionSolver(machine)
-    solver.prescribed_current = reversed_current
     started = perf_counter()
-    equilibrium, trips, _program = solver._forward_after_admission(
-        machine.profile, previous.flux, solver.prescribed_current
+    result = solve_constrained_reduced_newton(
+        machine.profile,
+        jnp.asarray(previous.flux),
+        constraint_pairs=(),
+        current=None,
+        prescribed_current=jnp.asarray(reversed_current),
+        tolerance=FIXED_POINT_RESIDUAL_TOLERANCE,
+        newton_steps=NEWTON_STEPS,
+        active_set_steps=CONTROL_ACTIVE_SET_STEPS,
     )
     wall = perf_counter() - started
-    converged = bool(np.asarray(equilibrium.fixed_point.converged))
-    if not converged:
-        raise AssertionError(
-            f"{name} direction-reversal control did not converge after "
-            f"{int(trips)} trips; its shape error is not comparable"
-        )
+    equilibrium = ProductionSolver._reduced_receipt(machine.profile, result)
+    trips = int(result.active_set_iterations)
+    converged = bool(np.asarray(result.converged))
+    terminal_residual = float(np.asarray(result.terminal_residual))
     prior = achieved_target(machine.profile, previous.flux)
     achieved = achieved_target(machine.profile, equilibrium.flux)
     point_error = np.linalg.norm(_points(achieved) - _points(target), axis=1)
@@ -1545,10 +1573,15 @@ def _direction_reversal_arm(
         "commanded_turning_points_m": _points(target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
         "shape_error_by_turning_point_m": point_error.tolist(),
-        "final_turning_point_error_m": control_error,
+        "final_turning_point_error_m": control_error if converged else None,
+        "diagnostic_terminal_turning_point_error_m": control_error,
         "controlled_arm_error_m": arm_error,
-        "control_minus_arm_error_m": control_error - arm_error,
-        "negative_control_discriminates": bool(control_error > arm_error),
+        "control_minus_arm_error_m": (control_error - arm_error if converged else None),
+        "negative_control_discriminates": (
+            bool(control_error > arm_error) if converged else None
+        ),
+        "comparison_admissible": converged,
+        "verdict": ("measured_control" if converged else "refused_non_convergence"),
         "controlled_current_change_by_circuit_a": {
             _circuit_label(int(index), circuit_names): float(delta)
             for index, delta in zip(free, controlled_delta, strict=True)
@@ -1558,12 +1591,15 @@ def _direction_reversal_arm(
             for index, delta in zip(free, controlled_delta, strict=True)
         },
         "maximum_absolute_current_change_a": float(np.max(np.abs(controlled_delta))),
-        "trips": int(trips),
+        "trip_budget": CONTROL_ACTIVE_SET_STEPS,
+        "trips": trips,
         "wall_s": float(wall),
         "converged": converged,
+        "terminal_residual": terminal_residual,
+        "termination_reason": int(np.asarray(result.termination_reason)),
         "qualified_axis": True,
     }
-    if not payload["negative_control_discriminates"]:
+    if converged and not payload["negative_control_discriminates"]:
         raise AssertionError(
             f"{name} direction-reversal error {control_error:.8f} m does not "
             f"exceed controlled error {arm_error:.8f} m"
@@ -1591,7 +1627,6 @@ def _finalize_receipt(directory: Path) -> dict[str, Any]:
         "runtime": control_arms[0]["runtime"],
         "arms": control_arms,
     }
-    _write(directory / NEGATIVE_CONTROL, negative_control)
     receipt["outcome"] = "measured_negative_shape_motion"
     receipt["interpretation"] = (
         "Shape error is command-dependent rather than uniformly large: the "
@@ -1609,10 +1644,73 @@ def _finalize_receipt(directory: Path) -> dict[str, Any]:
     }
     receipt["negative_control"]["comparison"] = _control_comparison(receipt)
     receipt["regularisation_sweep"] = _regularisation_curves(receipt)
+    _write(directory / NEGATIVE_CONTROL, negative_control)
     _write(directory / "shape-inverse-receipt.json", receipt)
     _draw_control_comparison(
         receipt, directory / "direction-reversal-negative-control.png"
     )
+    _draw_regularisation(receipt, directory / "shape-regularisation-curve.png")
+    return receipt
+
+
+def _retract_control(directory: Path, control_directory: Path) -> dict[str, Any]:
+    """Publish non-convergence refusals without a shape-error comparison."""
+    receipt_path = directory / "shape-inverse-receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    control_arms = [
+        json.loads(
+            (control_directory / NEGATIVE_CONTROL_ARMS[name]).read_text(
+                encoding="utf-8"
+            )
+        )
+        for name in ("upper-point-plus-20mm", "elongation-plus-5pct")
+    ]
+    invalid = [
+        arm["controlled_arm"]
+        for arm in control_arms
+        if arm.get("verdict") != "refused_non_convergence"
+        or bool(arm.get("converged"))
+        or bool(arm.get("comparison_admissible"))
+        or arm.get("final_turning_point_error_m") is not None
+        or not np.isfinite(float(arm.get("terminal_residual", np.nan)))
+    ]
+    if invalid:
+        raise AssertionError(
+            "control retraction requires finite non-convergence refusals for "
+            + ", ".join(invalid)
+        )
+    negative_control = {
+        "control": "terminal_active_current_update_with_sign_reversed",
+        "verdict": "refused_non_convergence",
+        "comparison_admissible": False,
+        "interpretation": (
+            "Both reversed-update solves terminated without fixed-point "
+            "convergence. Their terminal shape errors are diagnostic only and "
+            "cannot establish a discriminating causal control."
+        ),
+        "runtime": control_arms[0]["runtime"],
+        "arms": control_arms,
+    }
+    receipt["outcome"] = "shape_inverse_regularisation_control_refused"
+    receipt["interpretation"] = (
+        "The two shape-inverse arms retain their per-command errors and the "
+        "regularisation sweep remains measured. The direction-reversal control "
+        "is refused because neither reversed-update equilibrium converged."
+    )
+    receipt.pop("all_prescribed_negative_control", None)
+    receipt["negative_control"] = {
+        "verdict": "refused_non_convergence",
+        "comparison_admissible": False,
+        "interpretation": negative_control["interpretation"],
+        "source_path": NEGATIVE_CONTROL,
+        "receipt": negative_control,
+    }
+    receipt["regularisation_sweep"] = _regularisation_curves(receipt)
+    for arm in control_arms:
+        _write(directory / NEGATIVE_CONTROL_ARMS[arm["controlled_arm"]], arm)
+    _write(directory / NEGATIVE_CONTROL, negative_control)
+    _write(receipt_path, receipt)
+    (directory / "direction-reversal-negative-control.png").unlink(missing_ok=True)
     _draw_regularisation(receipt, directory / "shape-regularisation-curve.png")
     return receipt
 
@@ -1708,6 +1806,7 @@ def measure(
             name: gamma_factor for name, _target, gamma_factor in definitions
         },
         "hardware_current_ceiling_a": DELTA_CURRENT_CEILING_A,
+        "direction_reversal_active_set_trip_budget": CONTROL_ACTIVE_SET_STEPS,
         "delta_regularisation": {
             "term": "weight**2 * sum((delta_current_a / scale_a)**2)",
             "scale": "caller-stated 20 kA per active circuit",
@@ -1747,12 +1846,23 @@ def measure(
             runtime,
         )
         _write_command_receipt(directory / NEGATIVE_CONTROL_ARMS[command], payload)
-        print(
-            f"CONTROL-DONE {command} arm_error_mm="
-            f"{1000 * payload['controlled_arm_error_m']:.6g} control_error_mm="
-            f"{1000 * payload['final_turning_point_error_m']:.6g}",
-            flush=True,
-        )
+        if payload["comparison_admissible"]:
+            print(
+                f"CONTROL-DONE {command} arm_error_mm="
+                f"{1000 * payload['controlled_arm_error_m']:.6g} "
+                f"control_error_mm="
+                f"{1000 * payload['final_turning_point_error_m']:.6g}",
+                flush=True,
+            )
+        else:
+            print(
+                f"CONTROL-REFUSED {command} trips={payload['trips']} "
+                f"budget={payload['trip_budget']} "
+                f"terminal_residual={payload['terminal_residual']:.6g} "
+                f"diagnostic_error_mm="
+                f"{1000 * payload['diagnostic_terminal_turning_point_error_m']:.6g}",
+                flush=True,
+            )
         return payload
     if command in {None, "null-resolve"}:
         null_target = achieved_target(profile, prime.flux)
@@ -1850,11 +1960,19 @@ def main() -> None:
     parser.add_argument("--diagnose-consistency", action="store_true")
     parser.add_argument("--direction-reversal-control", action="store_true")
     parser.add_argument("--finalize-receipt", action="store_true")
+    parser.add_argument("--retract-control", action="store_true")
+    parser.add_argument("--control-directory", type=Path)
     parser.add_argument("--command", choices=COMMAND_NAMES)
     arguments = parser.parse_args()
     if arguments.finalize_receipt:
         receipt = _finalize_receipt(arguments.directory)
         print("RECEIPT-FINALIZED " + json.dumps(receipt), flush=True)
+        return
+    if arguments.retract_control:
+        if arguments.control_directory is None:
+            parser.error("--retract-control requires --control-directory")
+        receipt = _retract_control(arguments.directory, arguments.control_directory)
+        print("CONTROL-RETRACTED " + json.dumps(receipt), flush=True)
         return
     measure(
         arguments.directory,

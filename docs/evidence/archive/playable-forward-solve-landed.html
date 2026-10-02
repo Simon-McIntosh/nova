@@ -1968,24 +1968,22 @@ standalone kernel wall only. Receipts: <code>~/.config/reckon/crew/reports/nova/
   without re-running the kernels.</p>
 </section>
 <section id="shape-inverse-control-and-regularisation">
-  <h2>The shape-inverse receipt distinguishes its control and persists the regularisation trade-off (2026-10-02)</h2>
+  <h2>The shape-inverse receipt refuses its unsettled control and persists the regularisation trade-off (2026-10-02)</h2>
   <p><strong>Interpretation corrected per arm.</strong> The all-prescribed comparison is withdrawn
   as a negative control: on elongation it recorded <code>66.6808 mm</code>, which is
   <code>13.0029 mm</code> better than the shape-inverse arm's <code>79.6837 mm</code>. The current
   receipt no longer calls the errors uniformly large. It reports upper-point plus 20 mm at
   <code>18.9875 mm</code> and elongation plus 5% at <code>79.6837 mm</code>; both fail the steering
   tolerance, at materially different scales.</p>
-  <p><strong>Discriminating control.</strong> The replacement reverses only the sign of each
-  terminal active-current update while retaining its magnitude, actuator set, carrier seed,
-  starting state and target. CPU solves on the fleet allocation measured <code>40.2382 mm</code>
-  for the reversed upper update, <code>21.2507 mm</code> worse than its arm, and
-  <code>112.6220 mm</code> for reversed elongation, <code>32.9383 mm</code> worse. Finalization
-  asserts both comparisons.</p>
-  <figure>
-    <img src="/nova/figures/playable-forward-solve/shape-inverse/direction-reversal-negative-control.png" alt="Maximum turning-point error on both shape commands for the shape inverse and its direction-reversed current-update control.">
-    <figcaption>The causal direction-reversal control is worse on both commands, unlike the
-    withdrawn all-prescribed comparison.</figcaption>
-  </figure>
+  <p><strong>Direction-reversal control refused.</strong> Both reversed-current arms were rerun
+  on the fleet CPU allocation with the active-set budget raised from 16 to 64 trips and a
+  ten-minute process ceiling per command. Upper terminated after 7 trips at residual
+  <code>9.386702e-4</code>; elongation terminated after 4 trips at
+  <code>1.378488e-3</code>. Neither converged, and neither reached the enlarged budget. Their
+  terminal shape errors, 40.2382 and 112.6220 mm, are retained as diagnostics only and are not
+  compared with the converged controlled arms. The receipt verdict is
+  <code>refused_non_convergence</code>, <code>comparison_admissible</code> is false, and the invalid
+  control-comparison figure is deleted.</p>
   <p><strong>Regularisation curve.</strong> The receipt carries all sixteen measured points:
   closure fraction and maximum current for eight weights on each command. Weight 100 is below
   20 kA on both arms—<code>4.850 kA</code> upper and <code>11.213 kA</code> elongation—but closes

@@ -28,7 +28,8 @@ TRIANGLE_CAPACITY = 1024
 
 # The hex generator selects 464 carrier cells from this target resolution.
 MAST_CELLS = 400
-MAST_VERTEX_CAPACITY = 644
+# Two masked centres remain in the fixed carrier beside its 644 live vertices.
+MAST_VERTEX_CAPACITY = 646
 MAST_EDGE_CAPACITY = 2048
 MAST_TRIANGLE_CAPACITY = 2048
 MAST_ROWS = ((27079, 16), (22475, 50))

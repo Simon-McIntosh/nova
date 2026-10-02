@@ -1,0 +1,20 @@
+<section id="capacity-on-critical-nodes">
+  <h3>Receipt capacity follows critical topology</h3>
+  <p>The sweep uses carrier-sized working arrays and compacts only emitted critical nodes and arcs into the 256-node, 255-edge receipt. The former vertex-count guard rejects the same MAST carrier; the red arm ends <code>EXIT=1</code> at <code>RuntimeError: contour tree capacity refused</code>.</p>
+  <table>
+    <thead><tr><th>fixture</th><th>live vertices</th><th>carrier edges</th><th>nodes</th><th>tree edges</th><th>levels</th><th>mismatches</th><th>overflow</th></tr></thead>
+    <tbody>
+      <tr><td>MAST 27079 row 16</td><td>644</td><td>1737</td><td>66</td><td>65</td><td>644</td><td>0</td><td>false</td></tr>
+      <tr><td>MAST 22475 row 50</td><td>644</td><td>1737</td><td>69</td><td>68</td><td>644</td><td>0</td><td>false</td></tr>
+    </tbody>
+  </table>
+  <p>The 340, 550, and 1074 certificate inputs exist as realised 340, 550, and 1074-cell states; no persisted 2616-cell input was found. Their full-resolution comparator remains follow-on work.</p>
+  <figure>
+    <img src="/nova/figures/contour-tree-topology-authority/capacity-on-critical-nodes/mast-27079-row-16-components.png" alt="Tree and brute-force component counts for MAST 27079 row 16">
+    <figcaption>MAST 27079 row 16: tree and independent superlevel component counts coincide at every sampled level.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/contour-tree-topology-authority/capacity-on-critical-nodes/mast-22475-row-50-components.png" alt="Tree and brute-force component counts for MAST 22475 row 50">
+    <figcaption>MAST 22475 row 50: tree and independent superlevel component counts coincide at every sampled level.</figcaption>
+  </figure>
+</section>

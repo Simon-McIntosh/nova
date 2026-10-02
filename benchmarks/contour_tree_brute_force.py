@@ -22,7 +22,7 @@ from nova.media.sources.plasma_mesh import hex_mesh
 ROOT = Path(__file__).resolve().parents[1]
 PART_ROOT = ROOT / "docs/figures/gs-absolute-accuracy/solovev/production-route-parts"
 FIGURE_ROOT = ROOT / "docs/figures/contour-tree-topology-authority/brute-force"
-VERTEX_CAPACITY = 4096
+VERTEX_CAPACITY = 256
 EDGE_CAPACITY = 2048
 TRIANGLE_CAPACITY = 1024
 

@@ -11,6 +11,10 @@ cells: this read never resamples onto a raster.  Results map to DD 4.1.0 under
 COCOS 17 as ``contour_tree.node`` and ``contour_tree.edges`` (with
 ``critical_type`` on raw ``psi``), ``boundary.type``, ``boundary.psi``,
 ``global_quantities.psi_magnetic_axis``, and ``boundary.closest_wall_point``.
+The virtual outside node is not a critical point of the module contract: it
+carries :data:`CRITICAL_TYPE_OUTSIDE`, outside the DD minimum/saddle/maximum
+vocabulary, and :func:`dd_emittable_nodes` excludes it from the DD
+``contour_tree`` mapping.
 
 The fixed capacities are 256 nodes and 255 edges.  A capacity overflow is a
 visible refusal rather than a truncated topology result.
@@ -33,6 +37,14 @@ ContourTreeNode: TypeAlias = tuple[int, float, float, float]
 ContourTreeEdge: TypeAlias = tuple[int, int]
 """One pair of indices into :attr:`ContourTreeResult.node`."""
 
+CRITICAL_TYPE_OUTSIDE: int = 3
+"""Type of the virtual outside node: not a minimum (0), saddle (1) or maximum (2).
+
+The wall-contact receiver that carries the outside is a bookkeeping node, not a
+critical point of the field, so it is typed outside the DD critical vocabulary
+and :func:`dd_emittable_nodes` drops it from the ``contour_tree`` mapping.
+"""
+
 
 class FluxCurrentSignError(ValueError):
     """The current sign and raw flux ordering disagree with declared COCOS."""
@@ -54,7 +66,10 @@ class ContourTreeArrays:
 
     Node rows retain their carrier-vertex slots: ``node_vertex`` identifies the
     piecewise-linear vertex, ``node_psi`` is raw flux in webers, and
-    ``critical_type`` uses the DD convention (minimum 0, saddle 1, maximum 2).
+    ``critical_type`` uses the DD convention (minimum 0, saddle 1, maximum 2),
+    except for the virtual outside node which carries
+    :data:`CRITICAL_TYPE_OUTSIDE` and is dropped from the DD ``contour_tree``
+    mapping by :func:`dd_emittable_nodes`.
     ``node_valid`` and ``edge_valid`` make every array fixed shaped.  Edges
     refer to compact node rows; ``node_vertex`` maps each valid node row back to
     its carrier vertex.  ``overflow`` means that a candidate could not fit in
@@ -369,6 +384,32 @@ def build_contour_tree(
     )
     vertex_count = vertex_valid.size
     slots = jnp.arange(node_capacity, dtype=jnp.int32)
+    join_order = join[-1]
+    terminal_rank = jnp.max(
+        jnp.where(
+            vertex_valid[join_order],
+            jnp.arange(vertex_count, dtype=jnp.int32),
+            jnp.asarray(-1, dtype=jnp.int32),
+        )
+    )
+    terminal = join_order[terminal_rank]
+    virtual = jnp.argmin(
+        jnp.where(vertex_valid, vertex_count, jnp.arange(vertex_count, dtype=jnp.int32))
+    )
+    has_virtual = jnp.any(~vertex_valid)
+    replace_terminal = has_virtual & join_nodes[terminal]
+    node_valid = node_valid.at[terminal].set(
+        jnp.where(replace_terminal, False, node_valid[terminal])
+    )
+    node_valid = node_valid.at[virtual].set(node_valid[virtual] | replace_terminal)
+    critical_type = critical_type.at[virtual].set(
+        jnp.where(replace_terminal, CRITICAL_TYPE_OUTSIDE, critical_type[virtual])
+    )
+    merged_edges = jnp.where(
+        (merged_edges == terminal) & replace_terminal,
+        virtual,
+        merged_edges,
+    )
     node_count = jnp.sum(node_valid, dtype=jnp.int32)
     node_source = jnp.nonzero(node_valid, size=node_capacity, fill_value=0)[0]
     compact_node_valid = slots < node_count
@@ -399,6 +440,19 @@ def build_contour_tree(
         edge_valid=compact_edge_valid,
         overflow=overflow,
     )
+
+
+def dd_emittable_nodes(result: ContourTreeArrays) -> jax.Array:
+    """Select the receipt's node rows that are DD ``contour_tree`` critical points.
+
+    The virtual outside node is not a critical point of the field: it carries
+    :data:`CRITICAL_TYPE_OUTSIDE` and is excluded here, so a caller mapping the
+    receipt to DD ``equilibrium.time_slice.contour_tree`` never emits it as a
+    minimum, saddle or maximum.  The tree keeps the node and its arcs; only the
+    DD mapping drops it.
+    """
+
+    return result.node_valid & (result.critical_type != CRITICAL_TYPE_OUTSIDE)
 
 
 def _require_flux_current_consistency(
@@ -482,6 +536,7 @@ def sigma_for_state(state: ContourTreeState) -> int:
 
 
 __all__ = [
+    "CRITICAL_TYPE_OUTSIDE",
     "ContourTreeEdge",
     "ContourTreeArrays",
     "ContourTreeNode",
@@ -489,5 +544,6 @@ __all__ = [
     "ContourTreeState",
     "FluxCurrentSignError",
     "build_contour_tree",
+    "dd_emittable_nodes",
     "sigma_for_state",
 ]

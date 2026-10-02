@@ -6,7 +6,11 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.equilibrium.contour_tree import build_contour_tree
+from nova.equilibrium.contour_tree import (
+    CRITICAL_TYPE_OUTSIDE,
+    build_contour_tree,
+    dd_emittable_nodes,
+)
 from nova.jax.config import configure_dtypes
 
 
@@ -214,15 +218,15 @@ def _carrier_regions(vertex_valid, mesh_edges):
     return np.asarray([find(node) for node in range(vertex_valid.size)])
 
 
-def test_virtual_slot_is_not_emitted_and_wall_joins_survive():
-    """The padded virtual outside slot is no critical node; wall joins remain.
+def test_virtual_slot_is_typed_outside_and_excluded_from_dd():
+    """The padded outside slot is typed outside and never a DD critical point.
 
-    A padded carrier values its spare slots below every interior level.  Those
-    slots are not critical points of the field, so the receipt must not emit one
-    of them in place of a real terminal node; every emitted node must sit on a
-    live carrier vertex.  Each wall-bearing region must still record its outside
-    contact as its own wall-join saddle.  Diverted single-null certificate and
-    the full MAST EFIT carrier.
+    A padded carrier values its spare slots below every interior level and the
+    sweep keeps one as the outside node.  That node is bookkeeping, not a
+    critical point: it must carry CRITICAL_TYPE_OUTSIDE rather than a minimum,
+    and dd_emittable_nodes must drop it.  Each wall-bearing region must still
+    record its outside contact as its own wall-join saddle.  The diverted
+    single-null certificate and the full MAST EFIT carrier.
     """
 
     from benchmarks.contour_tree_brute_force import (
@@ -250,10 +254,21 @@ def test_virtual_slot_is_not_emitted_and_wall_joins_survive():
         )
         node_valid = np.asarray(result.node_valid)
         critical_type = np.asarray(result.critical_type)
-        emitted = np.asarray(result.node_vertex)[node_valid]
+        node_vertex = np.asarray(result.node_vertex)
+        emitted = node_vertex[node_valid]
         emitted_type = critical_type[node_valid]
 
-        assert np.all(vertex_valid[emitted]), fixture.name
+        virtual_rows = np.nonzero(node_valid & ~vertex_valid[node_vertex])[0]
+        assert virtual_rows.size == 1, fixture.name
+        assert int(critical_type[virtual_rows[0]]) == CRITICAL_TYPE_OUTSIDE
+
+        minima = node_valid & (critical_type == 0)
+        assert not np.any(~vertex_valid[node_vertex[minima]]), fixture.name
+
+        emittable = np.asarray(dd_emittable_nodes(result))
+        assert int(node_valid.sum()) - int(np.sum(emittable)) == 1
+        assert not np.any(~vertex_valid[node_vertex[emittable]]), fixture.name
+
         assert int(node_valid.sum()) - int(np.sum(result.edge_valid)) == 1
 
         labels = _carrier_regions(vertex_valid, mesh_edges)

@@ -1,0 +1,1227 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "d786948c468d01c1ffb87718758ed60483ea4910",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 9640798,
+      "input_tokens_cumulative": 9640798,
+      "output_tokens": 41779,
+      "output_tokens_cumulative": 41779,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 55,
+    "files": 2,
+    "removed": 38
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1695
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1695
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1695
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1695
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1695
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 1683,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1686
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 60
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 60
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 60
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 60
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "window_line": 59
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "571f4e8cc7e7916423e4baace06c33acd4245834"
+  ],
+  "completed_at": "2026-10-02T07:26:33.723Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T05:28:26Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests/test_equilibrium_forward_reference.py",
+    "failure/error"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q --timeout 0 tests/test_fused_same_state_read.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T052807496384-msc-fused-route-enforces-axis-qualification/head_fused.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 1.0,
+    "plan": "millisecond-converged-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T06:13:09.737319+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T05:28:09Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 14,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 6,
+    "headroom": 9,
+    "mean_context": 120000,
+    "observed_at": "2026-10-02T05:27:55Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T07:26:33.723Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T052807496384-msc-fused-route-enforces-axis-qualification/manifest.md",
+  "member": "s19i-xcell-rca",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_fused_same_state_read.py::test_the_linear_arm_refuses_the_states_the_two_read_route_refuses"
+    ],
+    "baseline_failure_ids": [
+      "ERROR tests/test_equilibrium_forward_reference.py::test_every_conductor_the_entry_declares_is_placed",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_hex_operator_carries_the_authored_cell_geometry",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_no_current_appears_outside_the_declared_support",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_differenced_field_agrees_with_the_analytic_cell_field",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_observation_operator_matches_an_independent_quadrature",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_passive_structure_cannot_carry_the_reproduction_gap",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_plasma_mesh_is_hexagonal_and_wall_trimmed",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_receipt_layer_reads_the_solve_without_changing_it",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_relaxed_route_walks_down_the_vertical_instability",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_solve_reaches_its_fixed_point",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_solved_axis_matches_the_stored_axis",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_solved_boundary_matches_the_stored_boundary",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_solved_flux_map_matches_the_stored_map",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_solved_plasma_current_matches_the_stored_current",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_solved_shape_moments_match_the_stored_flux_map",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_stabilisation_pair_carries_the_turns_the_entry_declares",
+      "FAILED tests/test_equilibrium_forward_reference.py::test_couplings_and_current_vectors_share_geometric_expansion_centres",
+      "FAILED tests/test_equilibrium_forward_reference.py::test_the_free_boundary_map_does_not_contract_at_the_equilibrium",
+      "FAILED tests/test_equilibrium_forward_reference.py::test_the_published_equilibrium_is_the_scored_post_map_state",
+      "FAILED tests/test_equilibrium_forward_reference.py::test_the_published_solve_runs_on_the_production_mesh",
+      "FAILED tests/test_equilibrium_forward_reference.py::test_the_relaxed_routes_leave_the_equilibrium_on_a_bounded_budget"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_fused_same_state_read.py::test_the_linear_arm_refuses_the_states_the_two_read_route_refuses"
+    ],
+    "declaration": "remove the require_qualified_axis call from the fused route and observe the same-refusal test fail",
+    "head_failure_ids": [
+      "ERROR tests/test_equilibrium_forward_reference.py::test_every_conductor_the_entry_declares_is_placed",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_hex_operator_carries_the_authored_cell_geometry",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_no_current_appears_outside_the_declared_support",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_differenced_field_agrees_with_the_analytic_cell_field",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_observation_operator_matches_an_independent_quadrature",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_passive_structure_cannot_carry_the_reproduction_gap",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_plasma_mesh_is_hexagonal_and_wall_trimmed",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_receipt_layer_reads_the_solve_without_changing_it",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_relaxed_route_walks_down_the_vertical_instability",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_solve_reaches_its_fixed_point",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_solved_axis_matches_the_stored_axis",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_solved_boundary_matches_the_stored_boundary",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_solved_flux_map_matches_the_stored_map",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_solved_plasma_current_matches_the_stored_current",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_solved_shape_moments_match_the_stored_flux_map",
+      "ERROR tests/test_equilibrium_forward_reference.py::test_the_stabilisation_pair_carries_the_turns_the_entry_declares",
+      "FAILED tests/test_equilibrium_forward_reference.py::test_couplings_and_current_vectors_share_geometric_expansion_centres",
+      "FAILED tests/test_equilibrium_forward_reference.py::test_the_free_boundary_map_does_not_contract_at_the_equilibrium",
+      "FAILED tests/test_equilibrium_forward_reference.py::test_the_published_equilibrium_is_the_scored_post_map_state",
+      "FAILED tests/test_equilibrium_forward_reference.py::test_the_published_solve_runs_on_the_production_mesh",
+      "FAILED tests/test_equilibrium_forward_reference.py::test_the_relaxed_routes_leave_the_equilibrium_on_a_bounded_budget"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T052807496384-msc-fused-route-enforces-axis-qualification/negative_control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T052807496384-msc-fused-route-enforces-axis-qualification/negative_control.log",
+    "test_paths": [
+      "tests/test_fused_same_state_read.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "msc-fused-route-enforces-axis-qualification",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 3379,
+          "cached_input_tokens": 392736,
+          "input_tokens": 396117,
+          "output_tokens": 1267,
+          "reasoning_output_tokens": 428,
+          "total_tokens": 397384,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Reuse: call require_qualified_axis (nova/equilibrium/topology.py:216, already a no-op under trace) on the admitted flag that _support_partition (nova/equilibrium/forward_operator.py:3319) currently discards at :3324, following the read route at :3185; write no new qualification mechanism and do not edit topology.py or forward.py. Measured, each with its recorded output: in tests/test_fused_same_state_read.py the try/except NoQualifiedAxisError substitute in _unfused_linear_read (:93-113) is removed and a test shows both routes refusing the same intermediate states from identical inputs; the declared negative control (remove the new enforcement call) turns that test red and its log is recorded; no failure is added, against a stated base revision, in tests/test_fused_same_state_read.py, tests/test_topology_o_qualification.py and tests/test_equilibrium_forward_reference.py, each run in its own fresh process with JAX_PLATFORMS=cpu and --timeout 0 on the fleet allocation; the landing fragment cites the followup id",
+    "estimated_hours": null,
+    "goal": "make the fused linear read through current_moments_and_observation enforce require_qualified_axis as the two-request read route does, per followup f-msc-fused-route-enforces-axis-qualification",
+    "id": "msc-fused-route-enforces-axis-qualification",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T05:28:09Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 14,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 6,
+      "headroom": 9,
+      "mean_context": 120000,
+      "observed_at": "2026-10-02T05:27:55Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T052807496384-msc-fused-route-enforces-axis-qualification/manifest.md",
+    "negative_control": "remove the require_qualified_axis call from the fused route and observe the same-refusal test fail",
+    "plan": "millisecond-converged-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/forward_operator.py",
+      "tests/test_fused_same_state_read.py",
+      "docs/evidence/fragments/millisecond-converged-solve/msc-fused-route-enforces-axis-qualification.html",
+      "docs/figures/millisecond-converged-solve/msc-fused-route-enforces-axis-qualification"
+    ]
+  },
+  "orientation_input_tokens": 3186228.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "msc-fused-route-enforces-axis-qualification",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T05:28:12.308887+00:00",
+    "score": 0.56875,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "millisecond-converged-solve",
+  "plan_impl_at_dispatch": 1.0,
+  "plan_link": null,
+  "promoted_revision": "571f4e8cc7e7916423e4baace06c33acd4245834",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "d786948c468d01c1ffb87718758ed60483ea4910",
+    "reviewed_head_sha": "571f4e8cc7e7916423e4baace06c33acd4245834",
+    "scores": {
+      "durability": 17,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 88
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T052807496384-msc-fused-route-enforces-axis-qualification",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "7b3d4b98-54e5-4c8f-824d-5deb135c6f28",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 1,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 22326027,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 2213.066,
+    "generated_tokens": 105534,
+    "generation_seconds": 1764.477,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 51.4,
+    "machine_seconds": 448.589,
+    "peak_input_tokens": 246903,
+    "tokens_per_second": 59.81,
+    "wall_tokens_per_second": 47.69
+  },
+  "time_budget": "45m",
+  "tool_steps": 102.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 7087,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T07:26:34Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T06:49:34Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T052807496384-msc-fused-route-enforces-axis-qualification",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 21932,
+    "worker_pid": 611984
+  },
+  "worker_seconds": 7052,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

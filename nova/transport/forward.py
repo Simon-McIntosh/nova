@@ -347,7 +347,10 @@ def _equilibrium_resolved_defaults(
     request = inputs.equilibrium_request
     if request is None:
         return None
-    return ResolvedForwardSolveDefaults.from_policy(request.policy)
+    return ResolvedForwardSolveDefaults.from_policy(
+        request.policy,
+        clip_mode=request.clip_mode,
+    )
 
 
 class TransportEngineError(RuntimeError):

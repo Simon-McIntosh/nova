@@ -8,6 +8,7 @@ import json
 import numpy as np
 
 from nova.equilibrium import ExplicitSolveSeed, ForwardSolveRequest
+from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.jax.config import configure_dtypes
 from nova.transport.coupled_window import (
     TransportSweepReceipt,
@@ -25,17 +26,37 @@ from tests.test_forward_transport import _request
 configure_dtypes()
 
 
-def _coupled_input():
+def _coupled_input(clip_mode: str | None = None):
     transport_input = _request(TransportRung.NATIVE_PSI_DIFFUSION)
+    mode_overrides = {} if clip_mode is None else {"clip_mode": clip_mode}
     equilibrium_request = ForwardSolveRequest.from_defaults(
         carrier_identity="transport-forward-fixture",
         source_profile=object(),
         seed_policy=ExplicitSolveSeed(np.zeros(3, dtype=np.float64)),
+        **mode_overrides,
     )
     return dataclasses.replace(
         transport_input,
         equilibrium_request=equilibrium_request,
     )
+
+
+def test_coupled_receipt_records_each_requests_own_clip_mode():
+    """The transport receipt records the request's mode, not the process global."""
+
+    previous_mode = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        recorded = [
+            ForwardTransport()
+            .solve(_coupled_input(clip_mode=clip_mode))
+            .equilibrium_resolved_defaults.clip_mode
+            for clip_mode in ("chord", "exact")
+        ]
+    finally:
+        set_support_clip_mode(previous_mode)
+
+    assert recorded == ["chord", "exact"]
 
 
 def test_native_coupled_receipt_round_trips_route_and_equilibrium_defaults():

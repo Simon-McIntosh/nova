@@ -1295,6 +1295,17 @@ def _control_comparison(receipt: dict[str, Any]) -> list[dict[str, Any]]:
         arm["controlled_arm"]: arm
         for arm in receipt["negative_control"]["receipt"]["arms"]
     }
+    unsettled = []
+    for name in ("upper-point-plus-20mm", "elongation-plus-5pct"):
+        if not bool(controlled[name].get("converged")):
+            unsettled.append(f"{name} controlled arm")
+        if not bool(control[name].get("converged")):
+            unsettled.append(f"{name} direction-reversal control")
+    if unsettled:
+        raise AssertionError(
+            "shape-error comparison requires converged equilibria; unsettled: "
+            + ", ".join(unsettled)
+        )
     comparison = []
     for name in ("upper-point-plus-20mm", "elongation-plus-5pct"):
         arm_error = float(controlled[name]["final_turning_point_error_m"])
@@ -1510,6 +1521,12 @@ def _direction_reversal_arm(
         machine.profile, previous.flux, solver.prescribed_current
     )
     wall = perf_counter() - started
+    converged = bool(np.asarray(equilibrium.fixed_point.converged))
+    if not converged:
+        raise AssertionError(
+            f"{name} direction-reversal control did not converge after "
+            f"{int(trips)} trips; its shape error is not comparable"
+        )
     prior = achieved_target(machine.profile, previous.flux)
     achieved = achieved_target(machine.profile, equilibrium.flux)
     point_error = np.linalg.norm(_points(achieved) - _points(target), axis=1)
@@ -1543,7 +1560,7 @@ def _direction_reversal_arm(
         "maximum_absolute_current_change_a": float(np.max(np.abs(controlled_delta))),
         "trips": int(trips),
         "wall_s": float(wall),
-        "converged": bool(np.asarray(equilibrium.fixed_point.converged)),
+        "converged": converged,
         "qualified_axis": True,
     }
     if not payload["negative_control_discriminates"]:

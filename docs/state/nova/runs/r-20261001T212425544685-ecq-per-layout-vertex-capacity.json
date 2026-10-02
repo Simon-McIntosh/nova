@@ -317,6 +317,58 @@
   "plan_impl_at_dispatch": 0.99,
   "plan_link": null,
   "promoted_revision": "7cac2452606e4fa8c8483f96b5f186955cf93a31",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 10052,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "unintegrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "dirty": [],
+          "head": "61b2910890cea4b5f0528dd2c2c036f8dd39ad89",
+          "integrated_into": "HEAD",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-per-layout-vertex-capacity",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-02T10:24:28.305Z",
+            "session_id": "cd41481d-f7a6-4c2a-a110-9ff7b328886e",
+            "session_source": "pointer",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-per-layout-vertex-capacity"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session cd41481d-f7a6-4c2a-a110-9ff7b328886e"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-02T10:24:28.305Z",
+      "session_id": "cd41481d-f7a6-4c2a-a110-9ff7b328886e",
+      "session_source": "pointer",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-per-layout-vertex-capacity"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session cd41481d-f7a6-4c2a-a110-9ff7b328886e"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

@@ -1,0 +1,498 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 5,
+  "attempt_kind": "lane-change",
+  "backend": "codex-astra",
+  "base_sha": "b68eb93ff3427e0a31cfccda56d1eaf22b01e08e",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 79658880,
+      "cached_input_tokens_cumulative": 79658880,
+      "input_tokens": 80102155,
+      "input_tokens_cumulative": 80102155,
+      "output_tokens": 88822,
+      "output_tokens_cumulative": 88822,
+      "reasoning_output_tokens": 20687,
+      "reasoning_output_tokens_cumulative": 20687
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 6914,
+    "files": 26,
+    "removed": 255
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 623,
+        "name": "_frame_receipt",
+        "path": "benchmarks/diiid_gate_frame_identity.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 623,
+        "name": "_frame_receipt",
+        "path": "benchmarks/diiid_gate_frame_identity.py"
+      },
+      "window_line": 659
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 717,
+        "name": "run",
+        "path": "benchmarks/diiid_gate_frame_identity.py"
+      },
+      "window_line": 752
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 717,
+        "name": "run",
+        "path": "benchmarks/diiid_gate_frame_identity.py"
+      },
+      "window_line": 749
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 717,
+        "name": "run",
+        "path": "benchmarks/diiid_gate_frame_identity.py"
+      },
+      "window_line": 749
+    },
+    {
+      "existing_function": {
+        "line": 120,
+        "name": "main",
+        "path": "tests/measure_external_wall_correction.py"
+      },
+      "run_function": {
+        "line": 717,
+        "name": "run",
+        "path": "benchmarks/diiid_gate_frame_identity.py"
+      },
+      "window_line": 773
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 717,
+        "name": "run",
+        "path": "benchmarks/diiid_gate_frame_identity.py"
+      },
+      "window_line": 759
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 717,
+        "name": "run",
+        "path": "benchmarks/diiid_gate_frame_identity.py"
+      },
+      "window_line": 760
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1622,
+        "name": "_compare_control",
+        "path": "benchmarks/diiid_gate_frame_identity.py"
+      },
+      "window_line": 1705
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 1622,
+        "name": "_compare_control",
+        "path": "benchmarks/diiid_gate_frame_identity.py"
+      },
+      "window_line": 1703
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "60fb6c5cba45da1b7a2f1f6c32fa447d3db77a69",
+    "3e98097edfd7114a1601a37cf24c6cfff970b058",
+    "37290e840839390655fea67991509312f5d039bc",
+    "6e6c93b00a57d31ea320616651ab45a7c4fe5f72",
+    "0a36644409e2dec21a825370b1b4ee001e259f89",
+    "79c9ce89e530663dc851c40705e288d7689c35bd",
+    "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+    "16d59153d53521838ddbc6becca875379a6e1a80",
+    "471afc8bc72f94fc1f0d8a2f02293c1d481e03d4"
+  ],
+  "completed_at": "2026-10-02T18:36:06Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T13:47:28Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "env PYTHONDONTWRITEBYTECODE=1 JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/check_completed_run.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/repair-final-validation.log"
+  },
+  "impl_move": {
+    "at_complete": 0.97,
+    "at_dispatch": 0.97,
+    "plan": "multi-unit-limiter-wall",
+    "reason": "evidence and record repairs for the gate-frame identity section; its regression contract stays open",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 3.226173541963015,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T14:47:04.165755+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T13:47:03Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T10:39:36Z",
+    "seconds_until_reset": 593552,
+    "state": "quiet",
+    "utilisation_pct": 6.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T13:47:03Z",
+    "read_at": "2026-10-02T13:47:04Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 6.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T18:36:06Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 5,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-02T16:49:34Z",
+        "detail": "continued session '01a0fcde-d624-7930-b972-04ab5645b9d3' on harness 'codex'",
+        "from_backend": "codex",
+        "from_harness": "codex",
+        "reason": "the review-repair round was granted no write paths and the run deadline had elapsed; both blocking findings need repository writes and a fresh H200 job",
+        "session": "continued",
+        "session_id": "01a0fcde-d624-7930-b972-04ab5645b9d3",
+        "session_source": "stream",
+        "to_backend": "codex-astra",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261002T134659485416-mulw-gate-frame-terminal-panels"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/manifest.md",
+  "member": "disposable-r-20261002T134659485416-mulw-gate-frame-terminal-panels",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "mulw-gate-frame-terminal-panels",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 526,
+          "cached_input_tokens": 222571,
+          "input_tokens": 223099,
+          "output_tokens": 1150,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 224249,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Per /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-triage-rest.md row f-mulw-gate-frame-record-repairs: benchmarks/diiid_gate_frame_identity.py renames identity_row_count to what it counts (the terminal state's element count) and persists each frame's terminal flux array as one npz beside its receipt under docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/; the five frames run as ONE H200 job (betelgeuse, reservation gpu_0003_grpA, one card, explicit --mem, TMPDIR=/tmp in submit and payload, NOVA_COMPILATION_CACHE_ROOT at the pinned pre-warm cache, the shared interpreter without uv), submitted with RECKON_ALLOW_NESTED_LAUNCH=1 sbatch because it is a separate job and not a step of the fleet allocation; run.json then carries per-frame compile and solve walls for all five frames and the job's cache hit or miss rows, the cold-versus-warm compile wall reported as measured. Each frame gets a PNG+SVG poloidal panel drawn with nova.media painters from its npz: line contours on shared levels against the reference where one exists, both null sets via draw_nulls, the wall via draw_wall, the terminal residual and converged flag in the caption, cited from docs/evidence/archive/multi-unit-limiter-wall-landed.html (spliced, not rewritten). Commit the driver change and write the manifest BEFORE waiting on the job. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mulw-gate-frame-terminal-panels.md.",
+    "estimated_hours": 1.5,
+    "goal": "persist the five DIII-D gate frames' terminal flux and draw their contour panels",
+    "id": "mulw-gate-frame-terminal-panels",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T13:47:03Z",
+      "read_at": "2026-10-02T13:47:04Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 6.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/manifest.md",
+    "negative_control": "a frame receipt whose npz digest does not match its recorded terminal-state hash is refused by the driver's load check",
+    "plan": "multi-unit-limiter-wall",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/diiid_gate_frame_identity.py",
+      "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity",
+      "docs/evidence/archive/multi-unit-limiter-wall-landed.html",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mulw-gate-frame-terminal-panels.md",
+      "docs/evidence/fragments/multi-unit-limiter-wall/mulw-gate-frame-terminal-panels.html",
+      "docs/figures/multi-unit-limiter-wall/mulw-gate-frame-terminal-panels"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex",
+    "member": null,
+    "node": "mulw-gate-frame-terminal-panels",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T13:47:09.814499+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": null,
+  "plan": "multi-unit-limiter-wall",
+  "plan_impl_at_dispatch": 0.97,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "471afc8bc72f94fc1f0d8a2f02293c1d481e03d4",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "b68eb93ff3427e0a31cfccda56d1eaf22b01e08e",
+    "reviewed_head_sha": "471afc8bc72f94fc1f0d8a2f02293c1d481e03d4",
+    "scores": {
+      "durability": 18,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 95
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T134659485416-mulw-gate-frame-terminal-panels",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fcde-d624-7930-b972-04ab5645b9d3",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 79658880,
+    "cumulative_input_tokens": 159761035,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 109509
+  },
+  "time_budget": "60m",
+  "tool_steps": 185.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 17318,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 5,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T18:36:08Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T16:49:38Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T134659485416-mulw-gate-frame-terminal-panels",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1340,
+    "worker_pid": 2169035
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}

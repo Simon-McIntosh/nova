@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="plasma-cell-read-fidelity">
+<meta name="plan-evidence-for" content="plasma-cell-read-fidelity">
+<title>Terminal-state analytic-panel draw-order guard (landing record)</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Terminal-state analytic-panel draw-order guard</h1></header>
+<section id="landing">
+<p>Adds <code>tests/test_plasma_cell_terminal_state_draw_order.py</code>, a committed pytest that renders the terminal-state figure from the committed receipt <code>docs/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.json</code> with no solve and asserts, on the pixel census the benchmark computes from that render itself, that the small panel-state markers do not overpaint the large reference markers on the analytic panel.</p>
+<p>The guard renders through <code>render</code> with no <code>draw_order</code> argument, so it reads the committed default rather than a value the test supplies, and it asserts that the CLI's <code>--draw-order</code> default agrees with <code>render</code>'s default so the two cannot drift. To express that, <code>benchmarks/plasma_cell_terminal_state.py</code> gains one module-level <code>DEFAULT_DRAW_ORDER</code> feeding both <code>render</code>'s signature and the CLI, and the argument parser moves into <code>build_argument_parser()</code> so a test can read it. The change is behaviour-preserving: a re-render of the committed figure from the committed receipt is byte-identical between the base revision and this one (<code>sha256 9cc670c1&nbsp;&hellip;</code> both; the committed PNG blob differs for environmental reasons only, so the refactor's own effect is the base-vs-head comparison). The benchmark's census needed no extraction, so no committed figure was re-rendered.</p>
+<p><strong>Measure</strong> (fleet allocation node cn&nbsp;98dci4-clu-2018, job 1277272, <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>, no solve). Under the committed default the analytic panel of case 0 (<code>diverted-single-null</code>) reads <code>reference_pixels=675, panel_pixels=0</code>: the reference markers are present and detected (675&nbsp;px, so the box is a positive control that the instrument sees known-present paint) and no panel-state pixel lands on them. <a href="/nova/figures/plasma-cell-read-fidelity/terminal-state-markers/draw-order-guard/pass.log">pass.log</a> (<code>2 passed</code>, <code>EXIT=0</code>).</p>
+<p><strong>Negative control 1</strong> (explicit; declared: draw the panel-state markers after the reference markers; the overpaint assertion must fail). <code>NOVA_TERMINAL_STATE_DRAW_ORDER=panel-last</code> draws the panel-state markers last; the analytic panel then reads <code>reference_pixels=300, panel_pixels=333</code>, and the assertion fails with <code>AssertionError: 333 panel-state pixels overpaint the analytic reference markers</code>. <a href="/nova/figures/plasma-cell-read-fidelity/terminal-state-markers/draw-order-guard/negative-control-panel-last.log">negative-control-panel-last.log</a> (<code>EXIT=1</code>).</p>
+<p><strong>Negative control 2</strong> (flipped default). A scratch copy of the benchmark with <code>DEFAULT_DRAW_ORDER</code> set to <code>panel-last</code> makes the no-argument render pick up the reversed order, and the same guard fails with 333 overpainted pixels while the defaults-agreement test still passes. <a href="/nova/figures/plasma-cell-read-fidelity/terminal-state-markers/draw-order-guard/negative-control-flipped-default.log">negative-control-flipped-default.log</a> (<code>EXIT=1</code>, <code>1 failed, 1 passed</code>).</p>
+<p><strong>Suite arms.</strong> The covering suite (the guard file) runs completed at the base revision <code>3a28b398c</code> (1 failed: <code>test_draw_order_defaults_agree</code>, the assertion that needs <code>build_argument_parser</code>; 1 passed) and at the final head <code>bf0539550</code> (2 passed, no failures), so the change adds no failure. The arms hold only the analytic panel; the arm panels (columns 1 and 2) stay unasserted.</p>
+</section>
+</main></body>
+</html>

@@ -1,0 +1,45 @@
+# revision bf0539550524f0f065eaaf2f8a16b94d69fa3c60 (scratch copy: tests + benchmarks/plasma_cell_terminal_state.py with DEFAULT_DRAW_ORDER flipped to panel-last)
+# worktree /tmp/nc2flip.JSwH (scratch tree, cwd for the run)
+# module benchmarks.plasma_cell_terminal_state from /tmp/nc2flip.JSwH/benchmarks/plasma_cell_terminal_state.py
+# mutation 304:DEFAULT_DRAW_ORDER = "panel-last"
+# command (cd /tmp/nc2flip.JSwH) PYTHONPATH=/tmp/nc2flip.JSwH:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-terminal-state-draw-order-guard JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider -s -q --timeout=300 tests/test_plasma_cell_terminal_state_draw_order.py
+.analytic panel: reference_pixels=300 panel_pixels=333
+F
+=================================== FAILURES ===================================
+____________ test_analytic_panel_reference_markers_not_overpainted _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-mcintos/pytest-530/test_analytic_panel_reference_0')
+
+    def test_analytic_panel_reference_markers_not_overpainted(tmp_path: Path) -> None:
+        census = _render_census(tmp_path, **_draw_order_override())
+>       _assert_analytic_panel_clear(census)
+
+tests/test_plasma_cell_terminal_state_draw_order.py:84: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+census = [{'status': 'measured', 'box_halfwidth_px': 16.0, 'panels': [{'reference_pixels': 300, 'panel_pixels': 333}, {'referen...54, 'panel_pixels': 115}, {'reference_pixels': 654, 'panel_pixels': 115}]}, {'status': 'no_admitted_reference_saddle'}]
+
+    def _assert_analytic_panel_clear(census: list[dict]) -> None:
+        measured = [entry for entry in census if entry.get("status") == "measured"]
+        assert measured, "no measured analytic panel in the census"
+        for entry in measured:
+            analytic = entry["panels"][0]
+            print(
+                f"analytic panel: reference_pixels={analytic['reference_pixels']} "
+                f"panel_pixels={analytic['panel_pixels']}"
+            )
+            assert analytic["reference_pixels"] > 0, (
+                "analytic panel holds no reference marker pixels"
+            )
+>           assert analytic["panel_pixels"] == 0, (
+                f"{analytic['panel_pixels']} panel-state pixels overpaint the "
+                f"analytic reference markers"
+            )
+E           AssertionError: 333 panel-state pixels overpaint the analytic reference markers
+E           assert 333 == 0
+
+tests/test_plasma_cell_terminal_state_draw_order.py:63: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_plasma_cell_terminal_state_draw_order.py::test_analytic_panel_reference_markers_not_overpainted
+1 failed, 1 passed in 10.23s
+EXIT=1

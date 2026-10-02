@@ -119,9 +119,13 @@ def _sweep_tree(
 
     A lexicographic ordering of value then carrier index is simulation of
     simplicity: values can be exactly equal without creating an ambiguous
-    union.  The first wall vertex encountered while descending is a join with
-    the virtual outside component.  It is represented by that real wall slot;
-    the virtual node is deliberately not emitted as a DD critical point.
+    union.  Every wall vertex is joined to one virtual outside component, so
+    each wall-bearing region meets the outside at its own highest wall vertex,
+    the first one reached as the level descends.  A wall vertex whose active
+    neighbour components already carry a wall is not a new contact, so one
+    region is recorded once however many wall vertices it holds as the sweep
+    reaches them.  The contact is represented by that real wall slot; the
+    virtual node is deliberately not emitted as a DD critical point.
     """
 
     vertex_count = values.size
@@ -136,7 +140,7 @@ def _sweep_tree(
     output_edges = jnp.zeros((edge_capacity, 2), dtype=jnp.int32)
     output_valid = jnp.zeros(edge_capacity, dtype=bool)
     overflow = jnp.asarray(vertex_count > node_capacity, dtype=bool)
-    wall_seen = jnp.asarray(False)
+    wall_flag = jnp.zeros(vertex_count, dtype=bool)
 
     def visit(rank, state):
         (
@@ -148,7 +152,7 @@ def _sweep_tree(
             output_edges,
             output_valid,
             overflow,
-            wall_seen,
+            wall_flag,
         ) = state
         vertex = order[rank].astype(jnp.int32)
         usable = vertex_valid[vertex]
@@ -170,8 +174,9 @@ def _sweep_tree(
             axis=0,
         )
         representative = root_active & ~repeated
+        neighbour_wall = jnp.any(representative & wall_flag[neighbour_root])
         component_count = jnp.sum(representative, dtype=jnp.int32)
-        first_wall = usable & descending & vertex_is_wall[vertex] & ~wall_seen
+        first_wall = usable & descending & vertex_is_wall[vertex] & ~neighbour_wall
         final_vertex = usable & (rank == vertex_count - 1)
         extremum = component_count == 0
         saddle = component_count >= 2
@@ -218,6 +223,9 @@ def _sweep_tree(
             jnp.where(extremum | saddle | first_wall, vertex, inherited)
         )
         active = active.at[vertex].set(usable)
+        wall_flag = wall_flag.at[vertex].set(
+            usable & (vertex_is_wall[vertex] | neighbour_wall)
+        )
         return (
             parents,
             active,
@@ -227,7 +235,7 @@ def _sweep_tree(
             output_edges,
             output_valid,
             overflow,
-            wall_seen | (usable & descending & vertex_is_wall[vertex]),
+            wall_flag,
         )
 
     result = jax.lax.fori_loop(
@@ -243,7 +251,7 @@ def _sweep_tree(
             output_edges,
             output_valid,
             overflow,
-            wall_seen,
+            wall_flag,
         ),
     )
     return result[3], result[4], result[5], result[6], result[7], order

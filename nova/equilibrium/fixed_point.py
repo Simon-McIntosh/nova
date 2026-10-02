@@ -2903,12 +2903,16 @@ def picard(
     if carry_shadows and not observe_shadows:
         raise ValueError("promoted shadow masks require an initial shadow mask")
 
-    def iterate(state, arguments):
+    map_argument_count = len(map_arguments)
+
+    def iterate(state, dynamic_arguments):
+        arguments = dynamic_arguments[:map_argument_count]
+        callback_values = dynamic_arguments[map_argument_count:]
         bound_map = _bind_traced_map_arguments(map_fn, arguments)
         bound_shadowed_map = _bind_traced_map_arguments(shadowed_map_fn, arguments)
-        bound_shadow_mask = _bind_callback_arguments(shadow_mask_fn, callback_arguments)
+        bound_shadow_mask = _bind_callback_arguments(shadow_mask_fn, callback_values)
         bound_promoted_shadow = _bind_callback_arguments(
-            promoted_shadow_mask_fn, callback_arguments
+            promoted_shadow_mask_fn, callback_values
         )
 
         def shadow_mask(value):
@@ -2967,9 +2971,11 @@ def picard(
 
     @solve.defjvp
     def solve_jvp(primals, tangents):
-        state, *arguments = primals
-        _state_tangent, *argument_tangents = tangents
-        result, terminal_shadow = iterate(state, tuple(arguments))
+        state, *dynamic_arguments = primals
+        _state_tangent, *dynamic_tangents = tangents
+        arguments = tuple(dynamic_arguments[:map_argument_count])
+        argument_tangents = tuple(dynamic_tangents[:map_argument_count])
+        result, terminal_shadow = iterate(state, tuple(dynamic_arguments))
 
         def terminal_map(value, shadow, *dynamic_arguments):
             if carry_shadows:
@@ -3023,7 +3029,7 @@ def picard(
         )
         return result, tangent_result
 
-    return solve(_solver_state(initial, precision), *map_arguments)
+    return solve(_solver_state(initial, precision), *map_arguments, *callback_arguments)
 
 
 def anderson(

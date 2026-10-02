@@ -1,0 +1,492 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "9ac842a600928fd88b9b68ff531265be0cbb06d3",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 19095222,
+      "input_tokens_cumulative": 19095222,
+      "output_tokens": 70095,
+      "output_tokens_cumulative": 70095,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 5307,
+    "files": 9,
+    "removed": 264
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1471,
+        "name": "reread_gauge_readings",
+        "path": "benchmarks/centroid_constrained_fixture_receipt.py"
+      },
+      "window_line": 1549
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1471,
+        "name": "reread_gauge_readings",
+        "path": "benchmarks/centroid_constrained_fixture_receipt.py"
+      },
+      "window_line": 1549
+    },
+    {
+      "existing_function": {
+        "line": 606,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 1471,
+        "name": "reread_gauge_readings",
+        "path": "benchmarks/centroid_constrained_fixture_receipt.py"
+      },
+      "window_line": 1549
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "fc2f43b7440d5bee3b4af50ec109077fc1bbaf83",
+    "cf9b6e78dd327cb9650288395a2728d0452e65bf"
+  ],
+  "completed_at": "2026-10-02T07:41:52.589Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T06:36:23Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "env PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-control-figures-from-persisted-state JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider --timeout 0 tests/test_centroid_constrained_fixture.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T063538147071-cco-control-figures-from-persisted-state/logs/gate-fixture.log"
+  },
+  "impl_move": {
+    "at_complete": 0.8,
+    "at_dispatch": 0.8,
+    "plan": "centroid-constrained-oracle-solve",
+    "reason": "review figure and record repairs only; the section-2 compensating unknown (f-cco-001) and the section-3 certificate that carry this plan's impl are untouched",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T07:25:43.957818+00:00",
+    "horizon_seconds": 3000,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T06:35:43Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 1,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 12,
+    "headroom": 2,
+    "mean_context": 183333,
+    "observed_at": "2026-10-02T06:35:42Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T07:41:52.589Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T063538147071-cco-control-figures-from-persisted-state/manifest.md",
+  "member": "s19i-ucc-discrim",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_centroid_constrained_fixture.py::test_lattice_order_guard_refuses_a_prefix_sized_pool"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_centroid_constrained_fixture.py::test_lattice_order_guard_refuses_a_prefix_sized_pool"
+    ],
+    "declaration": "restore the pre-fix lattice-order guard indexing and observe the guard test fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T063538147071-cco-control-figures-from-persisted-state/logs/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T063538147071-cco-control-figures-from-persisted-state/logs/negative-control.log",
+    "test_paths": [
+      "tests/test_centroid_constrained_fixture.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cco-control-figures-from-persisted-state",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2421,
+          "cached_input_tokens": 502154,
+          "input_tokens": 504577,
+          "output_tokens": 1948,
+          "reasoning_output_tokens": 71,
+          "total_tokens": 506525,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Inputs: the reviewed triage at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-triage-rest.md, rows for those two followups; no betelgeuse or other solve is run, rendering reads only persisted states and committed receipts on the login node. Measured, each with its recorded output: re-verify each defect at HEAD before editing; every named control figure exists as PNG and SVG rendered from the persisted terminal state under the repository plotting rules (axis off, line contours on shared levels, both null sets via draw_nulls, the wall via draw_wall), git add -f; level_error_wb appears in no receipt or caption; all eight field-response arms are published or listed in the receipt as measured-and-not-drawn; the positive and negative pair share one colour convention with the analytic contours visible, and the positive panel marks its limiter contact at the coordinates its receipt states; a test in tests/test_centroid_constrained_fixture.py fails under the pre-fix indexing of the lattice-order guard (declared negative control applied, log recorded) and passes after, in a fresh process with JAX_PLATFORMS=cpu --timeout 0; the landing fragment cites both followup ids",
+    "estimated_hours": null,
+    "goal": "render the centroid control and field-response figures from their persisted terminal states and receipts, per followups f-cco-review-repairs and f-ccos-cite-the-negative-control-and-the-unpublished-arms",
+    "id": "cco-control-figures-from-persisted-state",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T06:35:43Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 1,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 12,
+      "headroom": 2,
+      "mean_context": 183333,
+      "observed_at": "2026-10-02T06:35:42Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T063538147071-cco-control-figures-from-persisted-state/manifest.md",
+    "negative_control": "restore the pre-fix lattice-order guard indexing and observe the guard test fail",
+    "plan": "centroid-constrained-oracle-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "50m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/centroid-constrained-oracle-solve",
+      "benchmarks/centroid_constrained_fixture_receipt.py",
+      "tests/test_centroid_constrained_fixture.py",
+      "docs/evidence/archive/centroid-constrained-oracle-solve-landed.html",
+      "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-control-figures-from-persisted-state.html",
+      "docs/figures/centroid-constrained-oracle-solve/cco-control-figures-from-persisted-state"
+    ]
+  },
+  "orientation_input_tokens": 5561104.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "cco-control-figures-from-persisted-state",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T06:35:48.378446+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "centroid-constrained-oracle-solve",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_revision": "cf9b6e78dd327cb9650288395a2728d0452e65bf",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "9ac842a600928fd88b9b68ff531265be0cbb06d3",
+    "reviewed_head_sha": "cf9b6e78dd327cb9650288395a2728d0452e65bf",
+    "scores": {
+      "durability": 17,
+      "evidence": 15,
+      "fit": 18,
+      "goal_fidelity": 17,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 87
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T063538147071-cco-control-figures-from-persisted-state",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "19fb9354-9afd-469a-86e1-87f580acc7bc",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 1,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 19095222,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 3900.836,
+    "generated_tokens": 70095,
+    "generation_seconds": 3156.137,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 49.2,
+    "machine_seconds": 744.699,
+    "peak_input_tokens": 236064,
+    "tokens_per_second": 22.21,
+    "wall_tokens_per_second": 17.97
+  },
+  "time_budget": "50m",
+  "tool_steps": 119.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "budget_overrun": true,
+        "budget_overrun_seconds": 924,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: the diverted single-null row at 110 cells cannot be admitted from this node: the per-layout level-run count is a runtime property of the flux and must be declared by the clip caller; and the only such caller; forward_operator._profile_support (nova/equilibrium/forward_operator.py:3435); is outside the granted write paths and is owned by the concurrent peer run r-20261002T052807496384-msc-fused-route-enforces-axis-qualification. A host-side derivation from the flux is impossible because the curved clip path runs under jax.jit (tests/test_equilibrium_separatrix_clip.py:751).",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 4524,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-02T06:03:07Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-02T05:20:30Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 18702,
+          "worker_pid": 3234007
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "the diverted single-null row at 110 cells cannot be admitted from this node: the per-layout level-run count is a runtime property of the flux and must be declared by the clip caller; and the only such caller; forward_operator._profile_support (nova/equilibrium/forward_operator.py:3435); is outside the granted write paths and is owned by the concurrent peer run r-20261002T052807496384-msc-fused-route-enforces-axis-qualification. A host-side derivation from the flux is impossible because the curved clip path runs under jax.jit (tests/test_equilibrium_separatrix_clip.py:751).",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1961,
+        "log_fresh": false,
+        "manifest_commits": [
+          "5b84f5bcb7dbc2e1d7451f49440996d61cafd480",
+          "7cac2452606e4fa8c8483f96b5f186955cf93a31"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "bb259726343376417f5b13139b0ff7044f01e7afa56b147d33a9a6258e47aba9",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/manifest.md; resolve the blocker before resuming the run",
+        "node": "ecq-per-layout-vertex-capacity",
+        "phase": "blocked",
+        "plan": "exact-clip-moment-quadrature",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+        "session": "s22-nova",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+          "session_id": "cd41481d-f7a6-4c2a-a110-9ff7b328886e",
+          "source": "pointer"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 2017,
+        "terminal_at": "2026-10-02T06:02:09Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-per-layout-vertex-capacity"
+      }
+    ]
+  },
+  "wall_seconds": 3929,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T07:41:54Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T06:36:38Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T063538147071-cco-control-figures-from-persisted-state",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 14571,
+    "worker_pid": 159793
+  },
+  "worker_seconds": 3839,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

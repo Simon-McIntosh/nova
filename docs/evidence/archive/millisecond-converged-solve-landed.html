@@ -38,9 +38,15 @@
 
     <figure>
       <img src="/nova/figures/millisecond-converged-solve/strict-exit-incidence.png"
-           alt="Paired warm solve times with and without the strict settled exit for twelve MAST members and two DIII-D frames, with compile seconds per member">
+           alt="Paired width-1 warm solve times with and without the strict settled exit for twelve MAST members and two DIII-D frames, drawn as markers only">
       <figcaption>Paired width-1 warm solves with and without the strict settled exit, one compiled
-      program per member.</figcaption>
+      program per member, drawn as markers only because the members are categorical. The former
+      incidence panels are dropped: <code>strict_qualification_firing_trip</code> is <code>null</code>
+      for every harvested member, so no incidence value was persisted and none is plotted. Three of
+      the seventeen declared members are missing (DIII-D frames 137, 144 and 146; the
+      scheduler's three-hour limit ended the sweep before they were reached); both this caption and
+      <code>strict-exit-incidence.json</code> (<code>completion.missing_member_count</code> = 3,
+      <code>completion.declared_member_count</code> = 17) state the count.</figcaption>
     </figure>
 
     <table>
@@ -188,6 +194,24 @@
     index grows while its counted work stays constant. The repair does not need to explain the compiler: drive every trip as
     one dispatch of the common fast executable with an explicit carry, from the host, until settlement, keeping the trip
     executable vmap-able over a batch with per-lane active masks. Upper bound: 41 s to about 3 s per solve.</p>
+    <figure>
+      <img src="/nova/figures/millisecond-converged-solve/trip-quantum/outer-loop/outer-loop-trace.png"
+           alt="Upper panel: callback-delimited wall per active outer iteration on a log axis against the compiled one-trip wall; lower panel: promotion attempts and accepted promotions per outer-loop index.">
+      <figcaption>Wall per active outer iteration (upper) against promotion counts (lower),
+      capture <code>2026-09-04T22:35:37Z</code> (<code>trip-quantum/outer-loop/profile.json</code>).
+      The lower panel is a <strong>repeated result</strong>, not a copied file: the
+      frozen-partition scoring capture at <code>2026-09-05T01:35:08Z</code> and the
+      fallback-carry capture at <code>2026-09-05T04:07:06Z</code> carry the same series —
+      twelve promotion attempts across six indices with 12, 12, 12, 12, 5 and 0 accepted —
+      because the counts genuinely did not move between the three captures
+      (<code>accepted_promotions</code> 12 of <code>attempted_promotions</code> 12 in the first
+      trip of each, <code>accepted_newton_promotions</code> 65 of
+      <code>attempted_newton_promotions</code> 84). Only the first two bars of the upper panel
+      differ: iterations 1 and 2 fall from about 3.3 s here to about 0.2 s in the two later
+      captures, where the frozen-partition scoring had landed. Repeats:
+      <code>trip-quantum/recovery-frozen/outer-loop.json</code> and
+      <code>trip-quantum/fallback-carry/outer-loop.json</code>.</figcaption>
+    </figure>
   </section>
 
   <section id="common-trip-negative">
@@ -212,6 +236,48 @@
     that a trip's cost grows with its index for the same static budgets, from 3.4 s to 12.2 s, and that the slowest trips are
     those where most promotions are rejected: the budgets hide dynamic work. The next measurement is a per-trip device trace
     inside the fused solve with the dynamic loop counts the receipts carry.</p>
+  </section>
+
+  <section id="scanned-trip-loop-prototype">
+    <h2>The production outer trip loop is already scanable; the two backends agree (2026-09-15)</h2>
+    <p><strong>Receipts:</strong>
+    <code>docs/figures/millisecond-converged-solve/scan-prototype/parts/</code> (cpu/cuda ×
+    production/scanned census and execution receipts, plus <code>{cpu,cuda}-comparison.json</code>),
+    report <code>docs/figures/millisecond-converged-solve/scan-prototype/report.md</code>; CPU job
+    1270960 on <code>98dci4-clu-3142</code> and one H200, job 1270961, at revision
+    <code>ac4c66a7…</code>. A whole-cell 300-cell solve whose outer trip loop drives the verbatim
+    per-trip body under <code>jax.lax.scan</code>, compared arm-to-arm with the production
+    <code>fori_loop</code>.</p>
+    <figure>
+      <img src="/nova/figures/millisecond-converged-solve/scan-prototype/per-trip-residual-cpu.svg"
+           alt="Per-trip live residual for the production fori_loop and the scanned arm on CPU, both settling identically">
+      <figcaption>CPU (job 1270960): per-trip residual for the production <code>fori_loop</code> and
+      the scanned arm, re-rendered from <code>parts/cpu-production-execution.json</code> and
+      <code>parts/cpu-scanned-execution.json</code> (receipt field
+      <code>terminal.active_set_residuals</code>).</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/millisecond-converged-solve/scan-prototype/per-trip-residual-cuda.svg"
+           alt="Per-trip live residual for the production fori_loop and the scanned arm on CUDA, settling identically to the CPU trace">
+      <figcaption>CUDA (job 1270961): the same two arms re-rendered from
+      <code>parts/cuda-production-execution.json</code> and
+      <code>parts/cuda-scanned-execution.json</code> — the CUDA trace drawn from its own platform's
+      numbers, not copied from the CPU one. The two SVGs were byte-identical apart from their render
+      timestamp because the two backends agree below display resolution.</figcaption>
+    </figure>
+    <h3>Reading</h3>
+    <p>The two backends agree. Within each platform the scanned and production histories are
+    bit-identical (<code>per_trip_residual_sup_difference</code> = 0.0); across platforms the
+    per-trip residual histories differ by at most <code>5.70e-16</code> absolute
+    (<code>9.20e-14</code> relative), their terminal residuals reading
+    <code>6.195329180404239e-03</code> on CPU and <code>6.195329180403669e-03</code> on CUDA — a
+    last-two-digit difference below the plots' display resolution. The two former SVGs were
+    byte-identical apart from their render timestamp for this reason and not because the CUDA figure
+    carried CPU data: each was rendered from its own platform's receipt, and the sub-picometre
+    difference vanishes in the SVG coordinate quantisation. The scanned arm is the production
+    program with its single coordination line (<code>fixed_point.py:3837</code>) replaced, so this
+    confirms the outer loop is already scanable with no source change — an architectural option not
+    exercised at three trips, not a measured speedup.</p>
   </section>
 
   <section id="per-trip-kernels">
@@ -494,7 +560,7 @@
 <section id="flux-function-coefficients-baked-constants"><h2>Flux-function profile coefficients are baked compile-time constants (2026-09-15)</h2>
 <p>Node <code>msc-profile-coefficients-recompile-audit</code>. On the weak 300-cell whole-cell row, lowering the certificate solve program for the committed source profile and for a source whose p' is scaled by 0.9 and whose FF' by 1.1 (only the two gradient scalars moved; machine, exterior, seed, target current and mesh held identical) yields different StableHLO digests on both routes: certificate <code>ee1f463bb9c4ebf4…</code> vs <code>7410c702fb3760cf…</code>, compiled slice <code>ab765e7ade66aa7e…</code> vs <code>a6aed81adf44550d…</code>. CPU-only SLURM job 1271055 (<code>all_debug</code>, 8 cores / 64 GiB) lowered in 1 min 52 s, exit 0; no solve executed.</p>
 <p><strong>Result.</strong> Of 34,983 committed constants, 14,218 differ from the 34,402 in the scaled module; 54 of them carry exactly the root coefficients (27 sites of p' → 0.9·p' and 27 of FF' → 1.1·FF'), the remainder are the downstream constant-fold cascade through <code>current_density</code> → <code>current_moments</code> → residual arithmetic. The change is structural as well as a value swap: op counts shift materially (constants −581, multiply −288, add −219, broadcast_in_dim −564, dot_general −90, callees −378, total −3,625 of 186,085), so the scaled coefficients changed how far constant folding collapsed the graph. A profile change therefore relowers and recompiles the program; the exterior fix does not reach the profile coefficients.</p>
-<figure><img src="/nova/figures/millisecond-converged-solve/profile-args/flux-functions.png" alt="Committed and scaled flux functions: p' scaled by 0.9 and FF' by 1.1 over normalised flux, the only two values moved between the two lowered programs"><figcaption>The two moved coefficients: the committed pressure-gradient p' (−16018.99, × 0.9) and diamagnetic gradient FF' (−0.19522, × 1.1); everything else in the pair is identical.</figcaption></figure>
+<figure><img src="/nova/figures/millisecond-converged-solve/flux-arguments/flux-functions.png" alt="Committed and scaled flux functions: p' scaled by 0.9 and FF' by 1.1 over normalised flux, the only two values moved between the two lowered programs"><figcaption>The two moved coefficients: the committed pressure-gradient p' (−16018.99, × 0.9) and diamagnetic gradient FF' (−0.19522, × 1.1); everything else in the pair is identical. Coefficient receipt: <code>docs/figures/millisecond-converged-solve/flux-arguments/flux-functions.json</code>.</figcaption></figure>
 <p><strong>Remedy.</strong> A minimal set of two fixed-shape f64[1] arguments (pressure and diamagnetic gradients, 16 bytes) traced instead of closed over makes one compiled program serve every profile of a mesh, mirroring the exterior fix; the profile is otherwise a fully static node (empty pytree leaves) whose callable identity digests its closure and keys the JIT cache. Full constant census with shape, dtype and source location: <code>~/.config/reckon/crew/reports/nova/s19-review/profile-args/profile-1271055-constants.json</code>; report: <code>~/.config/reckon/crew/reports/nova/s19-review/profile-args/results.md</code>; receipt: <code>benchmarks/profile-coefficients-recompile.json</code>; benchmark: <code>benchmarks/profile_coefficients_recompile_audit.py</code>.</p>
 </section>
 <section id="program-constant-census"><h2>The compiled solve captures 2.94 GiB of literals at 1000 requested cells (2026-09-15)</h2>
@@ -639,7 +705,9 @@
          alt="Pressure and diamagnetic flux-function gradients for the committed profile and the coefficient-scaled profile sharing one compiled program">
     <figcaption>The committed weak 300-cell profile and the audit profile, with pressure
     coefficients scaled by 0.9 and diamagnetic coefficients by 1.1. Their values differ while
-    their fixed shapes and compiled program are identical.</figcaption>
+    their fixed shapes and compiled program are identical. Coefficient receipt:
+    <code>docs/figures/millisecond-converged-solve/flux-arguments/flux-functions.json</code>
+    (the committed p′ −16018.991541361902 and FF′ −0.1952180958410202 with their 0.9/1.1 scalings).</figcaption>
   </figure>
 
   <table>
@@ -990,7 +1058,7 @@ scripts/analytic_oracle_fixtures/measure.py:984: in _analytic_profile_support
   <p><strong>Figure.</strong> The upper panel places the four measured states on one logarithmic byte axis against the ceiling and the target; the lower panel is the threshold's value across the revision chain, which is a step from <code>450 MB</code> to <code>50 MB</code> at <code>dd7d82867</code> and back at the repair.</p>
   <figure>
     <img src="/nova/figures/millisecond-converged-solve/program-size/executable-ceiling-vs-target.png" alt="Upper panel: four measured 300-cell solve executable sizes on a logarithmic byte axis, at 461,724,765, 443,217,410, 436,447,170 and 210,159,751 bytes, with a dashed line at the 450,000,000-byte regression ceiling and a dotted line at the 50,000,000-byte target. Lower panel: the MAX_300_EXECUTABLE_BYTES value across the revision chain, a step from 450 MB at the base revision to 50 MB at dd7d82867 and back to 450 MB at the repair.">
-    <figcaption>The ceiling and the target are two quantities, not two values of one. All three archived states — the <code>461_724_765</code>-byte baseline, the <code>443_217_410</code>-byte interim receipt and the <code>436_447_170</code>-byte case fixture — sit above the target and below the ceiling, which is exactly the region a reduction is expected to occupy while the reduction work is open. Vector twin: <code>executable-ceiling-vs-target.svg</code> beside it.</figcaption>
+    <figcaption>The ceiling and the target are two quantities, not two values of one. The <code>461_724_765</code>-byte baseline sits <strong>above</strong> the <code>450_000_000</code>-byte regression ceiling (<code>docs/figures/millisecond-converged-solve/program-size/gate/receipt.json</code> → <code>rows[0].before.executable_bytes</code>), while the <code>443_217_410</code>-byte interim receipt (<code>gate/receipt.json</code> → <code>rows[0].after.executable_bytes</code>) and the <code>436_447_170</code>-byte case fixture sit between the target and the ceiling — that band is exactly the region a reduction is expected to occupy while the reduction work is open. The figure draws a fourth point the paragraph above closes on: the <code>210_159_751</code>-byte head state after the mesh-array landing, read from the mesh-argument receipt <code>~/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments/receipts/size-300.json</code> and absent from the gate receipt. The case-fixture value is a case-body literal at <code>tests/test_solve_program_size.py:75</code>, not a field of any receipt. Vector twin: <code>…/program-size/executable-ceiling-vs-target.svg</code>.</figcaption>
   </figure>
   <p><strong>The archived gate receipt and report are regenerated, and their verdict is unchanged.</strong> The only field that moves in <code>gate/receipt.json</code> is the added <code>300_cell_executable_target_bytes</code>; <code>passed</code>, <code>failures</code>, <code>findings</code>, every row and the <code>300_cell_executable_bytes</code> limit read as before. The report gains the two stated-limit lines.</p>
   <p><strong>Scope.</strong> <code>tests/test_solve_program_size.py</code> sits outside this node's write scope by design, and it was not edited: the file is byte-identical to head at <code>e4805f18e28c42af5090f7e179d2750c</code>, and the case bodies were executed as committed. Verifying the merged result belongs to a separately dispatched test node.</p>

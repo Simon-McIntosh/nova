@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="msc-receipt-backed-captions">
+  <meta name="plan-title" content="Receipt-backed captions for five millisecond-converged-solve figures">
+  <meta name="plan-summary" content="Five figure followups repaired from their committed receipts: the executable-ceiling caption, the duplicate flux-functions pair, the strict-exit incidence figure, the scan-prototype backend pair, and the trip-quantum trio citation.">
+  <meta name="plan-evidence-for" content="millisecond-converged-solve">
+  <title>Receipt-backed captions | nova</title>
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Receipt-backed captions for five millisecond-converged-solve figures</h1>
+    <p class="lede">Each figure and caption was re-read from the receipt it names. No solve
+    ran; every measurement below is a re-read of a committed artifact on the login node.</p>
+  </header>
+
+  <section id="executable-ceiling-caption">
+    <h2>Executable-ceiling caption corrected and extended</h2>
+    <p>Followup <code>f-msc-figure-repair-executable-ceiling-caption</code>. The caption said the
+    three archived states sat "above the target and below the ceiling"; the
+    <code>461,724,765</code>-byte baseline is a fourth state <em>above</em> the
+    <code>450,000,000</code>-byte regression ceiling, and the figure draws a fourth point,
+    <code>210,159,751</code>, the record had dropped. The caption now says the baseline sits above
+    the ceiling, adds the head state, and names the source of every byte count: the baseline and the
+    interim <code>443,217,410</code> from
+    <code>docs/figures/millisecond-converged-solve/program-size/gate/receipt.json</code> →
+    <code>rows[0].before.executable_bytes</code> / <code>rows[0].after.executable_bytes</code>; the
+    case fixture <code>436,447,170</code> as a case-body literal at
+    <code>tests/test_solve_program_size.py:75</code> (not a gate-receipt field); and the head state
+    from the mesh-argument receipt
+    <code>~/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments/receipts/size-300.json</code>.
+    Measured: baseline 461,724,765 &gt; ceiling 450,000,000.</p>
+  </section>
+
+  <section id="duplicate-flux-functions">
+    <h2>One flux-functions figure served, with its coefficient receipt</h2>
+    <p>Followup <code>f-msc-figure-repair-duplicate-flux-functions</code>.
+    <code>flux-arguments/flux-functions.png</code> and
+    <code>profile-args/flux-functions.png</code> were byte-identical (md5
+    <code>7e3dc7972522…</code>) with no receipt in either directory. The generator
+    <code>benchmarks/profile_coefficients_recompile_audit.py</code> writes to
+    <code>flux-arguments/</code>, so that copy owns the measurement; the
+    <code>profile-args/</code> copy was removed and its citation repointed. A receipt
+    <code>flux-arguments/flux-functions.json</code> now carries the four coefficients the caption
+    quotes: p′ committed <code>−16018.991541361902</code> (× 0.9 = <code>−14417.092387225712</code>)
+    and FF′ committed <code>−0.1952180958410202</code> (× 1.1 = <code>−0.21473990542512225</code>),
+    with their <code>source.py:285-286</code> definitions and <code>measure.py:158-159</code> closure
+    scalars. Exactly one flux-functions figure remains served.</p>
+  </section>
+
+  <section id="strict-exit-incidence">
+    <h2>strict-exit-incidence plots no absent value</h2>
+    <p>Followup <code>f-msc-figure-repair-strict-exit-empty-panels</code>. In the committed receipt
+    <code>strict_qualification_firing_trip</code> is <code>null</code> for every harvested member, so
+    the two former incidence panels plotted no measured value — each of the fourteen markers sat on
+    the "not persisted" line. Re-rendered from <code>strict-exit-incidence.json</code> alone
+    (<code>docs/figures/millisecond-converged-solve/msc-receipt-backed-captions/render_strict_exit_incidence.py</code>),
+    the figure now draws only the paired per-member latency, as markers without a connecting line, so
+    the DIII-D members are not connected. The caption and the receipt both state the missing-member
+    count: <code>completion.missing_member_count</code> = 3 of
+    <code>completion.declared_member_count</code> = 17 (DIII-D frames 137, 144 and 146).</p>
+  </section>
+
+  <section id="scan-prototype-backends">
+    <h2>The CPU and CUDA scan-prototype figures re-render from their own receipts and agree</h2>
+    <p>Followup <code>f-msc-figure-repair-scan-prototype-cpu-cuda-identical</code>. The two SVGs were
+    byte-identical apart from their render timestamp. Each was re-rendered from its own platform's
+    receipts (<code>parts/{cpu,cuda}-{production,scanned}-execution.json</code>). The CPU and CUDA
+    per-trip residual histories agree to a maximum absolute difference of <code>5.70e-16</code>
+    (<code>9.20e-14</code> relative), their terminal residuals reading
+    <code>6.195329180404239e-03</code> and <code>6.195329180403669e-03</code>; within each platform
+    the two arms are bit-identical. So the CUDA figure was not showing CPU data — the two backends
+    genuinely agree below display resolution, and the byte-identical files were quantisation, not a
+    mislabel. The evidence record now states this agreement.</p>
+  </section>
+
+  <section id="trip-quantum-trio">
+    <h2>One trip-quantum figure cited, naming the three captures and the repeated panel</h2>
+    <p>Followup <code>f-msc-figure-repair-trip-quantum-near-identical-trio</code>. Three near-identical
+    figures (<code>trip-quantum/outer-loop/outer-loop-trace.png</code>,
+    <code>trip-quantum/recovery-frozen/per-trip.png</code>,
+    <code>trip-quantum/fallback-carry/per-trip-after.png</code>) were uncited. One is now cited from
+    the <code>outer-loop</code> receipt, with a caption naming the three capture timestamps
+    (<code>2026-09-04T22:35:37Z</code>, <code>2026-09-05T01:35:08Z</code>,
+    <code>2026-09-05T04:07:06Z</code>) and calling the identical lower panel — promotions 12, 12, 12,
+    12, 5, 0 — a repeated result rather than a copied file. All three receipts record
+    <code>accepted_promotions</code> 12 of <code>attempted_promotions</code> 12 and
+    <code>accepted_newton_promotions</code> 65 of <code>attempted_newton_promotions</code> 84.</p>
+  </section>
+</main>
+</body>
+</html>

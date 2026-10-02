@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="151">
+<meta name="plan-version" content="152">
 </head>
 <body>
 <main class="plan-doc">
@@ -493,6 +493,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T080805401213-review-of-msc-receipt-backed-captions" data-who="reckon-build" data-when="2026-10-02T08:35:57.457Z">
     <div class="r-comment-body"><p>Reviewed run r-20261002T063747070770-msc-receipt-backed-captions at head 074e57f5d; verdict pass, total 85 (goal_fidelity 19, evidence 15, fit 17, durability 15, scope_discipline 19); two follow-on findings recorded (the scan-prototype byte-identical-apart-from-timestamp claim does not hold, and the landed doc's absent benchmarks/profile-coefficients-recompile.json citation); added_failure_count 0 by absence of any declared suite arm.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T141354001490-review-of-msc-figure-cohort-cite-or-retire" data-who="reckon-build" data-when="2026-10-02T14:44:56.017Z">
+    <div class="r-comment-body"><p>Independent review of r-20261002T134117794154-msc-figure-cohort-cite-or-retire at head 6d99b59ba stored; scores goal_fidelity 18, evidence 17, scope_discipline 19, durability 15, fit 17, total 86 of 100; the 67-to-26 and 45-to-0 citation contraction reproduced with the same src/href instrument; three follow-on findings recorded.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T163422200795" data-who="coordinator" data-when="2026-09-04T16:36:00Z">
     <div class="r-comment-body"><p>§2 first restructure landed on solver-convergence-regression at <code>72ae8431</code>: one topology read per active-set trip (receipt <code>docs/figures/millisecond-converged-solve/trip-quantum/one-read/profile.json</code>, H200 job 1262715). It is behaviour-preserving and removes the redundant reads, but it does not move the per-trip wall: 5.83 s against 5.85 s on 22086/43 pure. The trip-quantum picture changes accordingly: the isolated components (84 residual evaluations, 144 Jacobian-vector products, one read, GMRES, line search) sum to 0.20 s per trip, and 5.63 s (96.6 percent) is a fused-device or synchronisation remainder the isolated probes cannot see; the earlier 63 percent topology attribution is withdrawn. The closed jaxpr has zero host callbacks, the static census gives an 0.09 s scan floor, and the CUPTI replay dies inside the Jacobi SVD, so the candidates are recompilation per trip, dynamic while loops far beyond the static count, and the 126 SVDs per trip. <code>msc-trip-remainder-attribution</code> measures which with an nsys device trace, an ablation ladder (condition estimates, line-search grades, flood and reachability loops) and a recompile count, so the repair toward one millisecond per fixed point is aimed by measurement.</p></div>

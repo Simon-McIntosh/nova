@@ -74,9 +74,9 @@ def test_batched_certificate_trees_match_independent_builds(fixtures):
 def test_mast_standalone_superlevel_counts_are_well_formed(mast):
     """The MAST carriers' independent superlevel counts are well formed.
 
-    This is the standalone half of the end-to-end control: the host graph
-    search alone resolves every critical level of each MAST row. The tree arm
-    is compared once the receipt accepts these carriers' fixed capacity.
+    The host graph search alone resolves every critical level of each MAST row,
+    independently of the tree; it is the independent side of the end-to-end
+    control.
     """
 
     for fixture in mast:
@@ -98,6 +98,21 @@ def test_mast_standalone_superlevel_counts_are_well_formed(mast):
             assert row["brute_force"] <= int(np.count_nonzero(values > row["level"]))
         # The MAST equilibrium splits into more than one superlevel region.
         assert max(counts) >= 2
+
+
+def test_mast_tree_matches_independent_superlevel_components(mast):
+    """Every MAST carrier's tree agrees with the independent count at each level."""
+
+    for fixture in mast:
+        result = compare(fixture.mesh, corrupt=_corrupt())
+        assert result["node_count"] - result["edge_count"] == 1
+        assert all(row["tree"] == row["brute_force"] for row in result["rows"])
+
+
+def test_batched_mast_trees_match_independent_builds(mast):
+    """The MAST batch result is identical to per-state receipts."""
+
+    assert batched_identical(mast)
 
 
 def test_capacity_refusal_remains_visible():

@@ -1,0 +1,9 @@
+# gate: ctta-end-to-end-brute-force at the virtual merge of main + 84374f8da
+# revision: 222867e6e84d5a5e5a90b4a680e8049f1c1b2948
+# tree: /tmp/reckon-crew-scratch/ctta-bf-merged (git archive extraction of 222867e6e)
+# module under test: /tmp/reckon-crew-scratch/ctta-bf-merged/nova/equilibrium/contour_tree.py
+# cwd: /tmp/reckon-crew-scratch/ctta-bf-merged
+# command: JAX_PLATFORMS=cpu PYTHONPATH=/tmp/reckon-crew-scratch/ctta-bf-merged /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_brute_force.py -q
+......                                                                   [100%]
+6 passed in 156.18s (0:02:36)
+EXIT=0

@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="47">
+<meta name="plan-version" content="48">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -518,6 +518,11 @@
 <article class="r-fu" data-id="f-fsri-implement-live-warmup-frozen-newton" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Implement the locked third repair: live topology reads through the warmup, then a frozen Newton partition</h4>
     <div class="r-fu-body"><p>Decision <code>newton-krylov-third-repair</code> is locked to <code>live-warmup-frozen-newton</code>. Start from the six unmerged commits on the run worktree <code>msc-newton-krylov-route-regression</code> at <code>8e0f3bbc</code> (attempt two, every read live). Keep the live reads only through the Picard warmup. Take the Newton partition once, from the warmed state, and hold it fixed for every Newton step. Re-qualify it at the terminal state.</p><p><strong>Done when:</strong> the exact route test completes inside its existing performance fence in one all_debug job (attempt two timed out at 59:25 in job 1273996); the focused refusal test passes; the NoQualifiedAxisError of attempt one (job 1273977) does not recur; the receipt records partition reads per solve (one during Newton); and no failure is added in tests/test_fixed_point.py or tests/test_reduced_newton.py in fresh processes against a stated base. Negative control: re-reading the partition on every Newton step brings the timeout back.</p></div>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-lane-timeout-equals-form-test" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Commit the --timeout=value regression test and strip evidence-log trailing whitespace</h4>
+    <div class="r-fu-body"><p>The lane-launcher pytest bound landed at d6281d5f3 (record: forward-solver-route-integrity-landed#lane-launcher-test-timeout). The review dry-ran the <code>--timeout=45</code> spelling and it kept 45, but no committed test exercises the equals form. Add one beside the split-form test in tests/test_nova_lane_launcher.py, and strip the trailing whitespace the review found in docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/*.log.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity</pre>
     </article>
 </section>

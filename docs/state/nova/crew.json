@@ -201164,13 +201164,31 @@
           "files": 12
         },
         "tests_added": null,
-        "gate": "passed",
+        "gate": "failed",
         "gate_check": {
-          "command": "one all_debug job over the three topology test files (30 passed, 3 failed as named under follow_ons)",
+          "command": [
+            "env",
+            "TMPDIR=/tmp",
+            "srun",
+            "--partition=all_debug",
+            "--time=00:59:00",
+            "--cpus-per-task=4",
+            "--mem=64G",
+            "--output=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/limited-touch/pytest-final.slurm.log",
+            "--error=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/limited-touch/pytest-final.slurm.err",
+            "bash",
+            "-lc",
+            "export TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-limited-boundary-touches-wall-2; /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_limited_boundary_touches_wall.py tests/test_jax_topology.py tests/test_limiter_topology_receipts.py tests/test_topology_limiter_contact.py -vv"
+          ],
           "exit_status": 1,
           "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/limited-touch/pytest-final.slurm.log",
           "log_digest": null
         },
+        "failures": [
+          "tests/test_jax_topology.py::test_the_topology_read_matches_a_traversed_formulation",
+          "tests/test_topology_limiter_contact.py::test_limiter_contact_is_arc_length_quadratic_extremum",
+          "tests/test_topology_limiter_contact.py::test_level_error_stays_second_order[diverted-single-null]"
+        ],
         "suite_delta": null,
         "failure_classification": null,
         "outcome": "",
@@ -201473,12 +201491,6 @@
           "generated_tokens": 36973
         },
         "follow_on_paths": [
-          "tests/test_jax_topology.py::test_the_topology_read_matches_a_traversed_formulation",
-          "0.00051738",
-          "0.22031877",
-          "tests/test_topology_limiter_contact.py::test_limiter_contact_is_arc_length_quadratic_extremum",
-          "tests/test_topology_limiter_contact.py::test_level_error_stays_second_order[diverted-single-null",
-          "1.9",
           "docs/plans/null-identification-authority.html"
         ],
         "dispute_count": 0,
@@ -215776,8 +215788,8 @@
         "gate_check": {
           "command": "JAX_PLATFORMS=cpu PYTHONPATH=$PWD /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_certificate_baseline_revision.py tests/test_solve_program_size.py tests/test_solve_program_size_gate.py",
           "exit_status": 0,
-          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153922912568-msc-persist-the-baseline-state-array/logs/negative_control.log",
-          "log_digest": null
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153922912568-msc-persist-the-baseline-state-array/logs/after_suite.log",
+          "log_digest": "243371c899ae7efdea987819ccd4d30950e799e9f2834e1cc599c9662c8ef57a"
         },
         "suite_delta": null,
         "failure_classification": null,

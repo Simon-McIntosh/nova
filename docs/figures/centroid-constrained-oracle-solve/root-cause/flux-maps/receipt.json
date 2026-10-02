@@ -1,0 +1,269 @@
+{
+  "analytic_axis_rz_m": [
+    6.2,
+    0.0
+  ],
+  "analytic_control": {
+    "axis_flux_wb": 49.94072179477446,
+    "axis_rz_m": [
+      6.2,
+      0.0
+    ],
+    "gradient_at_axis_wb_per_m": [
+      0.0,
+      0.0
+    ],
+    "passed": true,
+    "x_point_count": 0
+  },
+  "analytic_x_points_rz_m": [],
+  "array_diagnostics": {
+    "contour_crossings_m": {
+      "analytic": {
+        "midplane_level_20_wb": [
+          4.592016013528529,
+          7.465156177166999
+        ],
+        "vertical_at_r_6_2_level_20_wb": [
+          -2.7844945413679265,
+          2.7844945413679265
+        ]
+      },
+      "converged": {
+        "midplane_level_20_wb": [
+          4.735344959086402,
+          7.417543778647776
+        ],
+        "vertical_at_r_6_2_level_20_wb": [
+          -2.2424297313399864,
+          2.242429731391537
+        ]
+      },
+      "earlier": {
+        "midplane_level_20_wb": [
+          4.6351088587015274,
+          7.451422979896934
+        ],
+        "vertical_at_r_6_2_level_20_wb": [
+          -2.593170981351438,
+          2.59317098121258
+        ]
+      }
+    },
+    "converged": {
+      "most_negative_sample_rz_m": [
+        6.493222053721063,
+        3.2553152261114033
+      ],
+      "sample_max_wb": 0.09455298383450383,
+      "sample_min_wb": -21.64092530837032,
+      "sample_rms_wb": 12.634922721788886,
+      "wall_max_wb": -4.5016782914842866,
+      "wall_min_wb": -20.61168195920584,
+      "wall_rms_wb": 14.89750681206374
+    },
+    "converged_contact_difference_wb": -4.5016782914842866,
+    "converged_to_earlier_sample_rms_ratio": 3.4122354987095083,
+    "earlier": {
+      "most_negative_sample_rz_m": [
+        6.348648428944716,
+        -3.5057240896584343
+      ],
+      "sample_max_wb": 0.030058619334631942,
+      "sample_min_wb": -6.936383925996028,
+      "sample_rms_wb": 3.702828461449204,
+      "wall_max_wb": -1.2417666755554964,
+      "wall_min_wb": -6.624405018394082,
+      "wall_rms_wb": 4.497554301451193
+    },
+    "earlier_contact_difference_wb": -1.2417666755554964,
+    "seed": {
+      "most_negative_sample_rz_m": [
+        3.5355060125551305,
+        0.7220621952528967
+      ],
+      "sample_max_wb": 1.6580333515093244,
+      "sample_min_wb": -0.7287497106300691,
+      "sample_rms_wb": 0.691495943994265,
+      "wall_max_wb": 1.3786728915761923,
+      "wall_min_wb": -0.7270575408987927,
+      "wall_rms_wb": 0.7689133176248859
+    }
+  },
+  "axis_shift_evidence": {
+    "closed_form_axis_rz_m": [
+      6.2,
+      0.0
+    ],
+    "magnitude_source": "source topology receipt, solve.topology.axis_rz_m",
+    "median_nearest_neighbour_within_0_5_m_m": 0.2891472495526931,
+    "nearest_sample_to_closed_form_axis_m": 0.14049882060797714,
+    "radial_shift_mm": 22.197285133077393,
+    "sample_grid_point_count": 772,
+    "sample_grid_read": "The 772-point sample grid resolves an outward shift but not its 22.197 mm magnitude; that magnitude is read from the source topology receipt.",
+    "source_axis_rz_m": [
+      6.222197285133078,
+      0.00038481765234316123
+    ],
+    "source_receipt": "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json",
+    "vertical_shift_mm": 0.38481765234316123
+  },
+  "case": "weak-rotation-reactor-static",
+  "compensator": {
+    "level_wb": -13.498416329636555,
+    "radial_field_t": -7.579039140032072e-12,
+    "sampled_range_wb": 3.492675958357795,
+    "vertical_field_t": -0.021255810528996315
+  },
+  "compensator_levels_wb": [
+    -14.90305873655315,
+    -14.587965407551438,
+    -14.272872078549728,
+    -13.957778749548018,
+    -13.642685420546307,
+    -13.327592091544595,
+    -13.012498762542885,
+    -12.697405433541174,
+    -12.382312104539462,
+    -12.067218775537752
+  ],
+  "converged": {
+    "axis_rz_m": [
+      6.222197285133078,
+      0.00038481765234316123
+    ],
+    "axis_shift_from_analytic_m": [
+      0.022197285133077393,
+      0.00038481765234316123
+    ],
+    "boundary_flux_wb": -4.50167829148427,
+    "compensating_amplitudes": [
+      -0.021255810528996315,
+      -7.579039140032072e-12,
+      -13.498416329636555
+    ],
+    "converged_flag": true,
+    "qualified": false,
+    "source_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T133233397975-cco-cap-factor-finite-tangent/h200-receipt/control-positive-state.npy",
+    "source_receipt": "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json",
+    "state_sha256_binary64": "41b9e055fbdcd4b7940e1d799a3f796eeb5116865257e7993c721bf0824cb50e",
+    "terminal_residual": 8.49138557668533e-13
+  },
+  "coordinate_count": 772,
+  "difference_levels_wb": [
+    -21.630201366556786,
+    -18.025167805463987,
+    -14.42013424437119,
+    -10.815100683278393,
+    -7.210067122185595,
+    -3.6050335610927995,
+    0.0,
+    3.6050335610927995,
+    7.210067122185595,
+    10.815100683278391,
+    14.420134244371187,
+    18.02516780546399,
+    21.630201366556786
+  ],
+  "earlier": {
+    "axis_rz_m": [
+      6.204000206587128,
+      9.377358813833503e-05
+    ],
+    "axis_shift_from_analytic_m": [
+      0.004000206587127408,
+      9.377358813833503e-05
+    ],
+    "boundary_flux_wb": -1.2417666755554908,
+    "converged_flag": false,
+    "qualified": false,
+    "source_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T094100739066-cco-unit-leverage-positive-control/receipt/control-positive-state.npy",
+    "source_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T094100739066-cco-unit-leverage-positive-control/receipt/control-positive.json",
+    "state_sha256_binary64": "f1097ebdb78a38860580e589c878105a1ba7832ac87bcf63f6ce30a51efdbfbd",
+    "terminal_residual": 0.00232889358930198
+  },
+  "figures": {
+    "gallery.png": {
+      "bytes": 267849,
+      "dpi": 55,
+      "project_absolute_src": "/nova/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/gallery.png",
+      "sha256": "8407ce9b3a829d6a4ea0b16febd386ff44050986047b6c473bdcfa5999cd3843"
+    },
+    "gallery.svg": {
+      "bytes": 286901,
+      "contour_group_count": 15,
+      "line_path_points": 29872,
+      "max_coordinate_rounding_pt": 0.0049999999999954525,
+      "path_count": 135,
+      "project_absolute_src": "/nova/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/gallery.svg",
+      "relative_path_precision_decimals": 2,
+      "sha256": "90693778419f0811519baf7c61844ca1c08dfe25e9c15dd3d304f0a18eda6ae4"
+    }
+  },
+  "panel_sample_archive": {
+    "bytes": 36171,
+    "filesystem_path": "docs/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/samples.npz",
+    "sha256": "bbbe3875f1e476d173d3a7b313057d3efce51850a60bf2120229f3eaa4409e9f"
+  },
+  "raster_difference": {
+    "max_wb": 0.09418432071533997,
+    "min_wb": -21.630201366556786,
+    "rms_wb": 10.99883030108546
+  },
+  "realised_cells": 135,
+  "requested_cells": -110,
+  "sampled_flux": {
+    "analytic": {
+      "at_analytic_axis_wb": 49.64600441827189,
+      "max_wb": 49.698838930804165,
+      "min_wb": -19.621906854341148
+    },
+    "compensator": {
+      "at_analytic_axis_wb": -13.383396420207008,
+      "max_wb": -11.752125446533668,
+      "min_wb": -15.244801404891463
+    },
+    "converged": {
+      "at_analytic_axis_wb": 49.48165246063332,
+      "max_wb": 49.68963052838364,
+      "min_wb": -34.03171015179692
+    },
+    "difference": {
+      "at_analytic_axis_wb": -0.1643519576385728,
+      "max_wb": 0.09455298383450383,
+      "min_wb": -21.64092530837032
+    },
+    "earlier": {
+      "at_analytic_axis_wb": 49.59585986106216,
+      "max_wb": 49.66564622247385,
+      "min_wb": -23.32042701900914
+    },
+    "seed": {
+      "at_analytic_axis_wb": 49.55738022792981,
+      "max_wb": 49.695228938665934,
+      "min_wb": -19.64094739098658
+    }
+  },
+  "schema": "nova.flux-map-gallery",
+  "seed_axis_rz_m": [
+    6.22,
+    0.0
+  ],
+  "seed_sha256_binary64": "062b465a7364914f13d383bb10e5a9dbdc7c18dc2dc803584d43ab6851c7ce5d",
+  "shared_flux_levels_wb": [
+    -10.0,
+    -5.0,
+    0.0,
+    5.0,
+    10.0,
+    15.0,
+    20.0,
+    25.0,
+    30.0,
+    35.0,
+    40.0,
+    45.0,
+    50.0
+  ],
+  "source_revision": "11985735c020a39df74f76c75cbe6354e0e67d36"
+}

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="centroid-constrained-oracle-solve">
+<title>Centroid-constrained flux maps — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" id="flux-map-gallery" data-node="cco-root-cause-flux-map-gallery"
+         data-test-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T202608289672-cco-root-cause-flux-map-gallery/size-reexport.log">
+  <h2>Six poloidal flux maps from the persisted 135-cell control</h2>
+  <p>The analytic, deliberately displaced seed, converged H200 state, earlier unconverged state,
+  converged compensator, and terminal-minus-reference fields are line contours from the same
+  persisted 772-point sample archive. The four physical flux maps use one shared level array;
+  the compensator and difference panels use levels appropriate to their separate quantities.
+  The wall and both available null sets use the committed Nova painters. This limited static
+  reference has no X-point. No solve or product-code fix ran in this node.</p>
+  <figure>
+    <img src="/nova/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/gallery.png"
+         alt="Six line-contour panels comparing the analytic reference, displaced seed, converged and earlier states, compensator and flux difference within the wall">
+    <figcaption>Analytic and seed panels are not terminal solves. The converged state has terminal
+    residual 8.4913855767e-13 and converged flag true; the earlier state has residual
+    2.3288935893e-3 and flag false. The compensator and difference panels derive from the
+    converged state. Blue is analytic, ochre is the named state, purple is compensator flux;
+    the black outline is the wall. The gallery PNG is 267,849 bytes and its SVG companion is
+    286,901 bytes, each below the 300,000-byte publication limit.</figcaption>
+  </figure>
+  <p><strong>Clear map error:</strong> at the outboard wall contact the converged persisted array
+  reads -4.501678291 Wb against analytic zero; its 772-point RMS difference is 12.634923 Wb,
+  versus 3.702828 Wb for the earlier state. At R=6.2 m the upper 20 Wb contour contracts
+  by 0.542065 m. The direct array difference reaches -21.640925 Wb. The uniform-field
+  compensator shape matches its closed form exactly at all stored coordinates, so the
+  painter and compensator shape do not explain the flux departure.</p>
+  <p><strong>Axis provenance:</strong> the +22.197 mm radial axis shift is read from the
+  <code>solve.topology.axis_rz_m</code> field of the source H200 receipt, whose terminal-state
+  digest was verified against the persisted array. The 772-point sample grid resolves an
+  outward shift but not its magnitude: its nearest point is 0.1405 m from the analytic axis,
+  and the median local nearest-neighbour spacing is 0.2891 m. The centroid row itself misses
+  the target by only about 3.93e-12 m. The axis number is therefore a topology-receipt read,
+  not a measurement of the plotted grid.</p>
+  <p>The <a href="/nova/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/gallery.svg">SVG gallery</a>,
+  <a href="/nova/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/receipt.json">receipt</a>
+  and stored sample archive carry the figure levels, source hashes, direct array diagnostics,
+  export sizes and topology provenance. The ranked diagnosis is in the assigned crew report.</p>
+</article>
+</main>
+</body>
+</html>

@@ -1,0 +1,536 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "f8136784c44e3705d8a955ad04401b88dbd5fd8d",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 16575174,
+      "input_tokens_cumulative": 16575174,
+      "output_tokens": 71196,
+      "output_tokens_cumulative": 71196,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 22631,
+    "files": 27,
+    "removed": 14965
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 368,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 419
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 368,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 415
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 368,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 416
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 953,
+        "name": "_draw_panel",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 964
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1055,
+        "name": "commensurability_summary",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1071
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1055,
+        "name": "commensurability_summary",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1068
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1055,
+        "name": "commensurability_summary",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1068
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 1055,
+        "name": "commensurability_summary",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1074
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1131,
+        "name": "measure",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1148
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1131,
+        "name": "measure",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1149
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "measure_production_receipt",
+        "path": "tests/test_conditioning_shrinkage.py"
+      },
+      "run_function": {
+        "line": 1131,
+        "name": "measure",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1146
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "7181d7b98db2b179a8ac1392d4254ea4631d9ff8",
+    "2e2000428bff0be8c9871e74047467cee6e29440"
+  ],
+  "completed_at": "2026-10-02T15:00:45.594Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T14:08:58Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest of",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_shafranov_discriminator_render.py -vv",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T140840326701-cank-discriminator-and-fit-panels/gate-render.log"
+  },
+  "impl_move": {
+    "at_complete": 0.96,
+    "at_dispatch": 0.96,
+    "plan": "constraint-augmented-newton-krylov",
+    "reason": "figure and record repairs from the audit; no implementable section moves",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T15:08:41.080645+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T14:08:41Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 4,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 11,
+    "headroom": 3,
+    "mean_context": 177778,
+    "observed_at": "2026-10-02T14:08:37Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 1
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T15:00:45.594Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T140840326701-cank-discriminator-and-fit-panels/manifest.md",
+  "member": "disposable-r-20261002T140840326701-cank-discriminator-and-fit-panels",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_shafranov_discriminator_render.py::test_flux_function_fit_title_carries_each_arms_verdict",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_draws_the_states_own_boundary_flux[row-21978-35-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_draws_the_states_own_boundary_flux[row-21983-35-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_draws_the_states_own_boundary_flux[row-21985-51-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_draws_the_states_own_boundary_flux[row-21986-46-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_draws_the_states_own_boundary_flux[row-21989-55-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_draws_the_states_own_boundary_flux[row-22086-43-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_marks_nulls_in_the_axis_and_saddle_glyphs[row-21978-35-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_marks_nulls_in_the_axis_and_saddle_glyphs[row-21983-35-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_marks_nulls_in_the_axis_and_saddle_glyphs[row-21985-51-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_marks_nulls_in_the_axis_and_saddle_glyphs[row-21986-46-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_marks_nulls_in_the_axis_and_saddle_glyphs[row-21989-55-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_marks_nulls_in_the_axis_and_saddle_glyphs[row-22086-43-state.svg]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_shafranov_discriminator_render.py::test_flux_function_fit_title_carries_each_arms_verdict",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_draws_the_states_own_boundary_flux[row-21978-35-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_draws_the_states_own_boundary_flux[row-21983-35-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_draws_the_states_own_boundary_flux[row-21985-51-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_draws_the_states_own_boundary_flux[row-21986-46-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_draws_the_states_own_boundary_flux[row-21989-55-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_draws_the_states_own_boundary_flux[row-22086-43-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_marks_nulls_in_the_axis_and_saddle_glyphs[row-21978-35-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_marks_nulls_in_the_axis_and_saddle_glyphs[row-21983-35-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_marks_nulls_in_the_axis_and_saddle_glyphs[row-21985-51-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_marks_nulls_in_the_axis_and_saddle_glyphs[row-21986-46-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_marks_nulls_in_the_axis_and_saddle_glyphs[row-21989-55-state.svg]",
+      "tests/test_shafranov_discriminator_render.py::test_state_panel_marks_nulls_in_the_axis_and_saddle_glyphs[row-22086-43-state.svg]"
+    ],
+    "declaration": "the render test fails on the base revision's panels (hollow or absent null glyphs, title without the residual)",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T140840326701-cank-discriminator-and-fit-panels/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T140840326701-cank-discriminator-and-fit-panels/negative-control.log",
+    "test_paths": [
+      "tests/test_shafranov_discriminator_render.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cank-discriminator-and-fit-panels",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1255,
+          "cached_input_tokens": 301265,
+          "input_tokens": 302522,
+          "output_tokens": 1261,
+          "reasoning_output_tokens": 108,
+          "total_tokens": 303783,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Per /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-triage-pfs-cank.md rows 15 and 16: (a) every state panel under docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/ is re-rendered from its committed row receipt through benchmarks/shafranov_combination_discriminator.py (render path only, no new solve) drawing the axis as a solid triangle and the admitted saddle as a filled cross via nova.media draw_nulls, matching the sibling docs/figures/constraint-augmented-newton-krylov/shafranov/ panel for the same state, with a boundary-flux contour level and the wall; (b) both docs/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.png and .svg carry 'converged: false, terminal residual 5.07e-02, active_set_cycle_detected' read from flux-function-fit/receipt.json in the title, and no caption in docs/evidence/archive/constraint-augmented-newton-krylov-landed.html calls a non-converged state terminal flux (spliced, not rewritten). A render test asserts the null glyphs and the title text and fails under the previous painter. Gate: JAX_PLATFORMS=cpu pytest of that render test, in place on the fleet allocation. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cank-discriminator-and-fit-panels.md. AGENTS.md plotting rules bind.",
+    "estimated_hours": null,
+    "goal": "draw the Shafranov discriminator state panels and the row-21978-35 fit panel truthfully",
+    "id": "cank-discriminator-and-fit-panels",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T14:08:41Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 4,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 11,
+      "headroom": 3,
+      "mean_context": 177778,
+      "observed_at": "2026-10-02T14:08:37Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 1
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T140840326701-cank-discriminator-and-fit-panels/manifest.md",
+    "negative_control": "the render test fails on the base revision's panels (hollow or absent null glyphs, title without the residual)",
+    "plan": "constraint-augmented-newton-krylov",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/shafranov_combination_discriminator.py",
+      "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator",
+      "docs/figures/constraint-augmented-newton-krylov/flux-function-fit",
+      "docs/evidence/archive/constraint-augmented-newton-krylov-landed.html",
+      "tests/test_shafranov_discriminator_render.py",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cank-discriminator-and-fit-panels.md",
+      "docs/evidence/fragments/constraint-augmented-newton-krylov/cank-discriminator-and-fit-panels.html",
+      "docs/figures/constraint-augmented-newton-krylov/cank-discriminator-and-fit-panels"
+    ]
+  },
+  "orientation_input_tokens": 4789782.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "cank-discriminator-and-fit-panels",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T14:08:43.876066+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "constraint-augmented-newton-krylov",
+  "plan_impl_at_dispatch": 0.96,
+  "plan_link": null,
+  "promoted_revision": "2e2000428bff0be8c9871e74047467cee6e29440",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "f8136784c44e3705d8a955ad04401b88dbd5fd8d",
+    "reviewed_head_sha": "2e2000428bff0be8c9871e74047467cee6e29440",
+    "scores": {
+      "durability": 16,
+      "evidence": 17,
+      "fit": 16,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 88
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T140840326701-cank-discriminator-and-fit-panels",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "f46c87d2-6258-4323-9d2a-6db77c83a703",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 14,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 16575174,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 3095.971,
+    "generated_tokens": 71196,
+    "generation_seconds": 2380.672,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 45.6,
+    "machine_seconds": 715.299,
+    "peak_input_tokens": 218910,
+    "tokens_per_second": 29.91,
+    "wall_tokens_per_second": 23.0
+  },
+  "time_budget": "60m",
+  "tool_steps": 100.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3107,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T15:00:47Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T14:09:04Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T140840326701-cank-discriminator-and-fit-panels",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 14152,
+    "worker_pid": 1048635
+  },
+  "worker_seconds": 3024,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

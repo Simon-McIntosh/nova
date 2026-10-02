@@ -288,6 +288,32 @@
   "plan_impl_at_dispatch": 0.0,
   "plan_link": null,
   "promoted_revision": "d1adce6cb9f6e6f80626ce64655e4c524008282f",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5045,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T130847636928-review-of-fsa-eight-ledger-rows-read-against-logs",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/review-of-fsa-eight-ledger-rows-read-against-logs"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "full",

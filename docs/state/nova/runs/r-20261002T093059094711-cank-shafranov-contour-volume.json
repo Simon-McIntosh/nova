@@ -1,0 +1,491 @@
+{
+  "agent": {
+    "alias": "sonnet 5.5",
+    "backend": "claude",
+    "effort": "high",
+    "launch": "cli",
+    "model": "claude-sonnet-5-5",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "claude",
+  "base_sha": "d598cd1931edec10fff7a069b0149bd048989503",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": 1.6410327999999998,
+    "cost_usd_cumulative": 1.6410327999999998,
+    "detail": "backend reports utilisation and reset time",
+    "headroom": "known",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": "seven_day",
+    "refusal": false,
+    "resets_at": "2026-10-04T06:00:00Z",
+    "surpassed_threshold": 0.75,
+    "threshold_status": "allowed_warning",
+    "tokens": {
+      "cache_creation_input_tokens": 135497,
+      "cache_creation_input_tokens_cumulative": 135497,
+      "cache_read_input_tokens": 3610314,
+      "cache_read_input_tokens_cumulative": 3610314,
+      "fallback_credit": null,
+      "inference_geo": "not_available",
+      "input_tokens": 66,
+      "input_tokens_cumulative": 66,
+      "output_tokens": 37685,
+      "output_tokens_cumulative": 37685,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": 94.0
+  },
+  "changed_lines": {
+    "added": 78,
+    "files": 2,
+    "removed": 57
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "_contour_integrals",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 479,
+        "name": "test_shafranov_contour_integral_error_falls_with_resolution",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "window_line": 489
+    },
+    {
+      "existing_function": {
+        "line": 431,
+        "name": "test_shafranov_contour_integrals_equal_their_volume_side",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 479,
+        "name": "test_shafranov_contour_integral_error_falls_with_resolution",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "window_line": 485
+    },
+    {
+      "existing_function": {
+        "line": 579,
+        "name": "_contour_combination",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 506,
+        "name": "test_beta_p_plus_half_internal_inductance_matches_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "window_line": 524
+    },
+    {
+      "existing_function": {
+        "line": 506,
+        "name": "test_beta_p_plus_half_internal_inductance_matches_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 579,
+        "name": "_contour_combination",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "window_line": 591
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "window_line": 701
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "a5d8a4da16e29a0182bd877478c7ceabbf94cdd7"
+  ],
+  "completed_at": "2026-10-02T09:44:42.427Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T09:31:17Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests/test_equilibrium_diagnostics.py",
+    "docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider --timeout 0 -m 'slow or not slow' tests/test_equilibrium_diagnostics.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T093059094711-cank-shafranov-contour-volume/suite-after.log"
+  },
+  "impl_move": {
+    "at_complete": 0.96,
+    "at_dispatch": 0.96,
+    "plan": "constraint-augmented-newton-krylov",
+    "reason": "an audit followup repair; the plan's executable sections are untouched",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "claude",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'claude'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T10:11:01.157980+00:00",
+    "horizon_seconds": 2400,
+    "metered": true,
+    "observed_at": "2026-09-23T10:36:09.044Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-09-23T14:20:00Z",
+    "seconds_until_reset": 0,
+    "state": "quiet",
+    "utilisation_pct": 44.0
+  },
+  "lane_declaration": {
+    "backend": "claude",
+    "headroom": "unknown",
+    "metered": true,
+    "observed_at": "2026-09-23T10:36:09.044Z",
+    "read_at": "2026-10-02T09:31:01Z",
+    "resolved_backend": "claude",
+    "utilisation_pct": 44.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T09:44:42.427Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T093059094711-cank-shafranov-contour-volume/manifest.md",
+  "member": "parity-reuse-scout",
+  "negative_control": {
+    "declaration": "none: the failing parametrised test is itself the discriminating check, measured at the matched base and at head",
+    "reason": "the failing parametrised test is itself the discriminating check, measured at the matched base and at head",
+    "test_paths": [
+      "tests/test_equilibrium_diagnostics.py"
+    ],
+    "verdict": "none-recorded"
+  },
+  "no_commit": null,
+  "node": "cank-shafranov-contour-volume",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 4441,
+          "cached_input_tokens": 730537,
+          "input_tokens": 734980,
+          "output_tokens": 1530,
+          "reasoning_output_tokens": 556,
+          "total_tokens": 736510,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Measured, each with its recorded log: tests/test_equilibrium_diagnostics.py::test_shafranov_contour_integrals_equal_their_volume_side runs at a matched base (the parent of 796df3501) and at HEAD in fresh processes with JAX_PLATFORMS=cpu --timeout 0, and the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cank-shafranov-contour-volume.md states per resolution the maximum relative difference at each revision, attributing the failures to 796df3501 or showing them pre-existing; the mechanism behind the residual (contour discretisation, volume-side quadrature, or the field-response change) is named with a discriminating measurement; then either a repair in nova/equilibrium/diagnostics.py brings all three resolutions under the unchanged 5e-4 bound with no failure added in tests/test_equilibrium_diagnostics.py against the matched base, or, if the residual is physical, no tolerance is touched and the report states the physics ruling the bound would need, for the lead; the bound is never widened to pass",
+    "estimated_hours": null,
+    "goal": "resolve the three test_shafranov_contour_integrals_equal_their_volume_side failures at 321, 641 and 1281 cells under the unchanged 5e-4 bound, per followup f-fsa-shafranov-merged-failures",
+    "id": "cank-shafranov-contour-volume",
+    "lane_declaration": {
+      "backend": "claude",
+      "headroom": "unknown",
+      "metered": true,
+      "observed_at": "2026-09-23T10:36:09.044Z",
+      "read_at": "2026-10-02T09:31:01Z",
+      "resolved_backend": "claude",
+      "utilisation_pct": 44.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T093059094711-cank-shafranov-contour-volume/manifest.md",
+    "negative_control": "none: the failing parametrised test is itself the discriminating check, measured at the matched base and at head",
+    "plan": "constraint-augmented-newton-krylov",
+    "requested_backend": "claude",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "open",
+    "time_budget": "40m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/diagnostics.py",
+      "tests/test_equilibrium_diagnostics.py",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cank-shafranov-contour-volume.md",
+      "docs/evidence/fragments/constraint-augmented-newton-krylov/cank-shafranov-contour-volume.html",
+      "docs/figures/constraint-augmented-newton-krylov/cank-shafranov-contour-volume"
+    ]
+  },
+  "orientation_input_tokens": 2513013.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "claude",
+    "member": null,
+    "node": "cank-shafranov-contour-volume",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T09:31:03.115259+00:00",
+    "score": 0.90625,
+    "source": null,
+    "state": "unknown"
+  },
+  "plan": "constraint-augmented-newton-krylov",
+  "plan_impl_at_dispatch": 0.96,
+  "plan_link": null,
+  "promoted_revision": "a5d8a4da16e29a0182bd877478c7ceabbf94cdd7",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "d598cd1931edec10fff7a069b0149bd048989503",
+    "reviewed_head_sha": "a5d8a4da16e29a0182bd877478c7ceabbf94cdd7",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 91
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T093059094711-cank-shafranov-contour-volume",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "819535ff-43c6-4b75-868c-1d5bde590862",
+  "session_model": "claude-sonnet-5-5",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "open",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 1,
+  "throughput": {
+    "cumulative_cached_input_tokens": 3610314,
+    "cumulative_input_tokens": 3745877,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+    "elapsed_seconds": 794.778,
+    "generated_tokens": 37685,
+    "generation_seconds": 291.704,
+    "input_budget_tokens": 1000000,
+    "input_utilisation_pct": 14.6,
+    "machine_seconds": 503.074,
+    "peak_input_tokens": 146065,
+    "tokens_per_second": 129.19,
+    "wall_tokens_per_second": 47.42
+  },
+  "time_budget": "40m",
+  "tool_steps": 36.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "budget_overrun": true,
+        "budget_overrun_seconds": 1209,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 4809,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-02T09:00:12Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-02T08:11:02Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261002T081037268041-msc-fused-route-wider-gate",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 16203,
+          "worker_pid": 1723878
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1852,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "9095da4cdae0c5e39bd266591f125a445f54b645cbe14f0175157610ed4e5f6f",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T081037268041-msc-fused-route-wider-gate/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --plan millisecond-converged-solve --section '§3' --role review --spec-level exact --node review-of-msc-fused-route-wider-gate --goal 'attach an independent review to run r-20261002T081037268041-msc-fused-route-wider-gate' --done-when 'the review for r-20261002T081037268041-msc-fused-route-wider-gate stores a parsed record scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T081037268041-msc-fused-route-wider-gate.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T081037268041-msc-fused-route-wider-gate.at-571f4e8cc7e7916423e4baace06c33acd4245834.json --time-budget 60m --session s22-nova --allow-unreconciled-runs --local",
+        "node": "msc-fused-route-wider-gate",
+        "phase": "complete",
+        "plan": "millisecond-converged-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261002T081037268041-msc-fused-route-wider-gate",
+        "session": "s22-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1903,
+        "terminal_at": "2026-10-02T08:59:19Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-fused-route-wider-gate"
+      }
+    ]
+  },
+  "wall_seconds": 805,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T09:44:45Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T09:31:20Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T093059094711-cank-shafranov-contour-volume",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 340,
+    "worker_pid": 2578636
+  },
+  "worker_seconds": 775,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

@@ -1,0 +1,164 @@
+{
+  "json": [
+    {
+      "file": "docs/figures/exact-clip-capacity/memory-base.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 102,
+      "provenance_paths": [
+        "/rows[0]/dimensions_provenance",
+        "/rows[1]/dimensions_provenance",
+        "/rows[2]/dimensions_provenance"
+      ]
+    },
+    {
+      "file": "docs/figures/exact-clip-capacity/memory-current.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 102,
+      "provenance_paths": [
+        "/rows[0]/dimensions_provenance",
+        "/rows[1]/dimensions_provenance",
+        "/rows[2]/dimensions_provenance"
+      ]
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-comparison.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 112,
+      "provenance_paths": [
+        "/census/production/dimensions_provenance",
+        "/census/scanned/dimensions_provenance",
+        "/dimensions_provenance"
+      ]
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-figure.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 0,
+      "provenance_paths": []
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-production-census.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 35,
+      "provenance_paths": [
+        "/dimensions_provenance"
+      ]
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-production-execution.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 1620,
+      "provenance_paths": [
+        "/census/dimensions_provenance"
+      ]
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-scanned-census.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 35,
+      "provenance_paths": [
+        "/dimensions_provenance"
+      ]
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-scanned-execution.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 1620,
+      "provenance_paths": [
+        "/census/dimensions_provenance"
+      ]
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-comparison.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 112,
+      "provenance_paths": [
+        "/census/production/dimensions_provenance",
+        "/census/scanned/dimensions_provenance",
+        "/dimensions_provenance"
+      ]
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-figure.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 0,
+      "provenance_paths": []
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-production-census.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 35,
+      "provenance_paths": [
+        "/dimensions_provenance"
+      ]
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-production-execution.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 1620,
+      "provenance_paths": [
+        "/census/dimensions_provenance"
+      ]
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-scanned-census.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 35,
+      "provenance_paths": [
+        "/dimensions_provenance"
+      ]
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-scanned-execution.json",
+      "numeric_changed": {},
+      "numeric_fields_before": 1620,
+      "provenance_paths": [
+        "/census/dimensions_provenance"
+      ]
+    }
+  ],
+  "report": {
+    "file": "docs/figures/figure-and-solver-audit/low-state-amplitude-nan/report.md",
+    "status": "already-marked"
+  },
+  "sweep": {
+    "marked": [
+      "docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/production-1000.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/production-110.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/production-300.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-cost/receipt.json",
+      "docs/figures/cut-cell-current-attribution/reposed-fixture/certificate/solve-memory-identification.json",
+      "docs/figures/exact-clip-capacity/memory-base.json",
+      "docs/figures/exact-clip-capacity/memory-current.json",
+      "docs/figures/figure-and-solver-audit/low-state-amplitude-nan/report.md",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-comparison.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-production-census.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-production-execution.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-scanned-census.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cpu-scanned-execution.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-comparison.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-production-census.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-production-execution.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-scanned-census.json",
+      "docs/figures/millisecond-converged-solve/scan-prototype/parts/cuda-scanned-execution.json"
+    ],
+    "target_value_files": 33,
+    "unmarked": [
+      "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-large-buffers-300.json",
+      "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300-gathered.json",
+      "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300-scan.json",
+      "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/base-memory.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-110.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-300.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory-parts/requested-110.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory-parts/requested-300.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-memory.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-bounded-parts/requested-1000.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-bounded.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-implicit-parts/requested-1000.json",
+      "docs/figures/cut-cell-current-attribution/exact-clip-memory/gpu-memory-1000-implicit.json"
+    ]
+  }
+}

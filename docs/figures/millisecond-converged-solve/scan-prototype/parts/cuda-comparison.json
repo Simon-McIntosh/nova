@@ -35,6 +35,25 @@
         "wall_nodes": 121,
         "whole_cell_quadrature_points_per_cell": 1408
       },
+      "dimensions_provenance": {
+        "exact_support_capacity": {
+          "status": "historical",
+          "recorded_value": 3072,
+          "superseded_expression": "atomic_support_capacity * spline_chain_samples_per_chord, 128 times every straight slot",
+          "retired_by_revision": "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+          "current_expression": "spline_chain_samples_per_chord + atomic_support_capacity, one traced arc plus the straight edge chain",
+          "current_derived_value_for_this_layout": 152
+        },
+        "measurements": "compile wall, solve, stages and allocator fields record this run as measured and are unchanged by the capacity retirement",
+        "chain_samples_reserved_for_every_slot": 128,
+        "exact_quadrature_points_per_cell": {
+          "status": "historical",
+          "recorded_value": 196480,
+          "superseded_expression": "(exact_support_capacity - 2) * quadrature_nodes_per_triangle at the swept capacity 3072",
+          "retired_by_revision": "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+          "current_expression": "the exact route's closed-form polygon moments evaluate no per-cell quadrature points"
+        }
+      },
       "executable_artifact_bytes": 392621954,
       "executable_artifact_mib": 374.43347358703613,
       "instruction_count": 448355,
@@ -95,6 +114,25 @@
         "wall_nodes": 121,
         "whole_cell_quadrature_points_per_cell": 1408
       },
+      "dimensions_provenance": {
+        "exact_support_capacity": {
+          "status": "historical",
+          "recorded_value": 3072,
+          "superseded_expression": "atomic_support_capacity * spline_chain_samples_per_chord, 128 times every straight slot",
+          "retired_by_revision": "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+          "current_expression": "spline_chain_samples_per_chord + atomic_support_capacity, one traced arc plus the straight edge chain",
+          "current_derived_value_for_this_layout": 152
+        },
+        "measurements": "compile wall, solve, stages and allocator fields record this run as measured and are unchanged by the capacity retirement",
+        "chain_samples_reserved_for_every_slot": 128,
+        "exact_quadrature_points_per_cell": {
+          "status": "historical",
+          "recorded_value": 196480,
+          "superseded_expression": "(exact_support_capacity - 2) * quadrature_nodes_per_triangle at the swept capacity 3072",
+          "retired_by_revision": "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+          "current_expression": "the exact route's closed-form polygon moments evaluate no per-cell quadrature points"
+        }
+      },
       "executable_artifact_bytes": 392600626,
       "executable_artifact_mib": 374.4131336212158,
       "instruction_count": 448367,
@@ -152,6 +190,25 @@
     "spline_chain_samples_per_chord": 128,
     "wall_nodes": 121,
     "whole_cell_quadrature_points_per_cell": 1408
+  },
+  "dimensions_provenance": {
+    "exact_support_capacity": {
+      "status": "historical",
+      "recorded_value": 3072,
+      "superseded_expression": "atomic_support_capacity * spline_chain_samples_per_chord, 128 times every straight slot",
+      "retired_by_revision": "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+      "current_expression": "spline_chain_samples_per_chord + atomic_support_capacity, one traced arc plus the straight edge chain",
+      "current_derived_value_for_this_layout": 152
+    },
+    "measurements": "compile wall, solve, stages and allocator fields record this run as measured and are unchanged by the capacity retirement",
+    "chain_samples_reserved_for_every_slot": 128,
+    "exact_quadrature_points_per_cell": {
+      "status": "historical",
+      "recorded_value": 196480,
+      "superseded_expression": "(exact_support_capacity - 2) * quadrature_nodes_per_triangle at the swept capacity 3072",
+      "retired_by_revision": "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+      "current_expression": "the exact route's closed-form polygon moments evaluate no per-cell quadrature points"
+    }
   },
   "lane_from_production": {
     "clip_mode": "chord",

@@ -7,7 +7,7 @@
   of followup <code>f-ecq-memory-identification-swept-product</code> that node
   <code>ecq-mark-swept-capacity-receipts</code> left open for the
   <code>cut-cell-current-attribution</code> figures. No product source and no
-  test is touched; the writes are fifteen receipts and one marker driver.</p>
+  test is touched; the writes are seventeen receipts and one marker driver.</p>
 
   <p><strong>What is marked.</strong> The traced support capacity derives from
   the realised layout: <code>spline_chain_samples_per_chord +
@@ -19,33 +19,34 @@
   recorded dimensions mapping now carries a <code>dimensions_provenance</code>
   block in the form the predecessor node established: it names the retiring
   revision, quotes the superseded swept expression, and gives the bound the
-  current code derives for the same layout. The three layouts and their current
-  bounds are <code>152 = 128 + 24</code> for atomic capacity 24,
+  current code derives for the same layout. The four layouts and their
+  current bounds are <code>150 = 128 + 22</code> for atomic capacity 22,
+  <code>152 = 128 + 24</code> for atomic capacity 24,
   <code>158 = 128 + 30</code> for atomic capacity 30 and
-  <code>150 = 128 + 22</code> for atomic capacity 22.</p>
+  <code>148 = 128 + 20</code> for atomic capacity 20.</p>
 
-  <p><strong>The fifteen receipts.</strong> Four under
+  <p><strong>The seventeen receipts.</strong> Four under
   <code>docs/figures/cut-cell-current-attribution/clip-quadrature/</code>
   (<code>hlo-large-buffers-300</code>, <code>solve-memory-300</code>,
   <code>solve-memory-300-scan</code>, <code>solve-memory-300-gathered</code>)
-  and eleven under
+  and thirteen under
   <code>docs/figures/cut-cell-current-attribution/exact-clip-memory/</code>
   (<code>base-memory</code>, <code>complete-memory</code>,
   <code>final-memory</code>,
   <code>gpu-memory-1000-bounded</code>, <code>gpu-memory-1000-implicit</code>,
   and the <code>complete-memory-parts</code>, <code>final-memory-parts</code>,
   <code>gpu-memory-1000-bounded-parts</code>,
-  <code>gpu-memory-1000-implicit-parts</code> part files). Twenty-one
-  <code>dimensions_provenance</code> blocks are added in total: three each to
-  <code>base-memory</code>, <code>complete-memory</code> and
-  <code>final-memory</code>, and one to each of the twelve remaining files.</p>
+  <code>gpu-memory-1000-implicit-parts</code> part files, three in each of the
+  first two). Twenty-three <code>dimensions_provenance</code> blocks are added in
+  total: three each to <code>base-memory</code>, <code>complete-memory</code> and
+  <code>final-memory</code>, and one to each of the fourteen remaining files.</p>
 
-  <p><strong>Fourteen files record a <code>dimensions</code> mapping; one does
+  <p><strong>Sixteen files record a <code>dimensions</code> mapping; one does
   not.</strong> <code>hlo-large-buffers-300.json</code> records the same atomic
   capacity, chord samples and companion quadrature count under
   <code>dimension_context</code>, with the chord samples stored as
   <code>spline_chain_samples</code> and the companion as
-  <code>quadrature_points_per_cell</code>. The annotator handles the fourteen
+  <code>quadrature_points_per_cell</code>. The annotator handles the sixteen
   unchanged; a context arm of the same shape adds the block beside the context
   mapping, reading its two renamed fields under their canonical names. The
   sweep's unmarked set would otherwise retain this file, so the arm is required
@@ -54,18 +55,30 @@
   <p><strong>No numeric value changed.</strong> A before/after diff walks every
   JSON number in each file, keyed by path, reserialised byte-identically by
   <code>json.dumps(obj, indent=2)</code> as the originals were written. Across
-  the fifteen receipts the recorded change set is empty (0 changed numeric
-  fields), and the git diff is purely additive: <strong>399 insertions, 0
-  deletions</strong>. Every edited file parses. The per-file changed-count is
-  recorded in <code>annotation-receipt.json</code>.</p>
+  the seventeen receipts the recorded change set is empty (0 changed numeric
+  fields) and every edited file parses. Commit sizes are stated by
+  <code>git diff --shortstat</code> rather than by the receipt subset: the first
+  marking changed 17 files with 823 insertions (<code>df8f2989b</code>), the
+  fragment 1 file with 71 insertions (<code>4d3e05548</code>) and the repair
+  changed 5 files with 225 insertions and 47 deletions. The 399-insertion figure the first fragment quoted counted only
+  the fourteen JSON receipts and is not the size of any commit. Every per-file
+  changed-count is recorded in <code>annotation-receipt.json</code>.</p>
 
-  <p><strong>Whole-tree sweep.</strong> A sweep over every git-tracked JSON file
+  <p><strong>Whole-tree sweep.</strong> A sweep over every git-tracked file
   under <code>docs/figures/</code> for <code>exact_support_capacity</code> in
-  {3072, 3840, 2816} reports 34 target files, all marked, <strong>zero
-  unmarked</strong>. The reference driver
-  <code>mark_swept_capacity_receipts.py</code> is itself among the 34, matched by
-  the quoted capacity inside its own report snippet and reading as marked by the
+  {2560, 3072, 3840, 2816} reports 36 target files, all marked, <strong>zero
+  unmarked for every swept value</strong>: 2560 marks 5 files, 2816 marks 8,
+  3072 marks 26 and 3840 marks 9, each with zero unmarked (a file carrying two
+  layouts is counted under both). The reference driver
+  <code>mark_swept_capacity_receipts.py</code> is among the 36, matched by the
+  quoted capacity inside its own report snippet and reading as marked by the
   same substring test; it was untracked when the predecessor ran, which is why
-  that run saw 33. The sweep output is on disk at
+  that run saw fewer. The sweep output is on disk at
   <code>annotation-receipt.json</code>.</p>
+
+  <p><strong>The followup's own receipt.</strong> The receipt the followup names,
+  <code>docs/figures/cut-cell-current-attribution/reposed-fixture/certificate/solve-memory-identification.json</code>,
+  already carries a <code>dimensions_provenance</code> block from node
+  <code>ecq-retire-superseded-claims</code> and lies outside this node's write
+  paths, so it is not edited here.</p>
 </section>

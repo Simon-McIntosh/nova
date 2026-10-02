@@ -9,11 +9,20 @@ bound was the swept product atomic_support_capacity times
 spline_chain_samples_per_chord, 128 samples reserved for every straight slot.
 
 Committed receipts under cut-cell-current-attribution/clip-quadrature and
-exact-clip-memory carry a swept capacity in {3072, 3840, 2816}; most record it
-in a ``dimensions`` mapping and one in a ``dimension_context`` mapping, both
-beside the same atomic capacity, chord samples and companion quadrature count.
-Each gains a ``dimensions_provenance`` block in the form the predecessor node
-established, inserted by the same annotator it used.
+exact-clip-memory carry a swept capacity in {2560, 3072, 3840, 2816}: four
+layouts, one per atomic support capacity 20, 24, 30 and 22. Most record the
+dimensions in a ``dimensions`` mapping and one in a ``dimension_context``
+mapping, both beside the same atomic capacity, chord samples and companion
+quadrature count. Each gains a ``dimensions_provenance`` block in the form the
+predecessor node established, inserted by the same annotator it used, and the
+block states the bound the current code derives for that layout:
+148 = 128 + 20, 150 = 128 + 22, 152 = 128 + 24 and 158 = 128 + 30. The
+committed receipts carry twenty-three blocks in total: nine for capacity 3072,
+five for 2560, five for 3840 and four for 2816.
+
+Commit sizes, each by git diff --shortstat rather than the receipt subset:
+df8f2989b changed 17 files with 823 insertions; 4d3e05548 changed 1 file with
+71 insertions.
 
 This driver imports that annotator by path and reuses ``provenance``,
 ``annotate``, ``numeric_paths`` and ``swept_files`` unchanged; it only points
@@ -51,6 +60,8 @@ TARGET_DIRS = [
 
 CONTEXT_KEY = "dimension_context"
 CONTEXT_QUADRATURE_KEY = "quadrature_points_per_cell"
+
+TARGET_VALUES = {2560, 3072, 3840, 2816}
 
 
 def load_reference():
@@ -153,7 +164,7 @@ def target_files(ref) -> list:
         if not any(target in path.parents for target in TARGET_DIRS):
             continue
         values = {int(v) for v in ref.CAP_RE.findall(path.read_text(errors="replace"))}
-        if values & ref.TARGET_VALUES:
+        if values & TARGET_VALUES:
             hits.append(path)
     return hits
 
@@ -206,11 +217,22 @@ def main():
         receipt["json"].append(entry)
         if arm == "context":
             receipt["context_arm"] = entry
+    ref.TARGET_VALUES = TARGET_VALUES
     hits = ref.swept_files()
+    per_value = {}
+    for value in sorted(TARGET_VALUES):
+        found = {n: h for n, h in hits.items() if value in h["values"]}
+        per_value[str(value)] = {
+            "marked": sorted(n for n, h in found.items() if h["marked"]),
+            "unmarked": sorted(n for n, h in found.items() if not h["marked"]),
+            "marked_count": sum(1 for h in found.values() if h["marked"]),
+            "unmarked_count": sum(1 for h in found.values() if not h["marked"]),
+        }
     receipt["sweep"] = {
         "target_value_files": len(hits),
         "marked": sorted(n for n, v in hits.items() if v["marked"]),
         "unmarked": sorted(n for n, v in hits.items() if not v["marked"]),
+        "per_value": per_value,
     }
     out = NODE / "annotation-receipt.json"
     out.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
@@ -222,8 +244,15 @@ def main():
     print("SWEEP target files:", receipt["sweep"]["target_value_files"])
     print("SWEEP marked:", len(receipt["sweep"]["marked"]))
     print("SWEEP unmarked:", len(receipt["sweep"]["unmarked"]))
-    for name in receipt["sweep"]["unmarked"]:
-        print("   ", name)
+    for value, entry in receipt["sweep"]["per_value"].items():
+        print(
+            "   value",
+            value,
+            "marked",
+            entry["marked_count"],
+            "unmarked",
+            entry["unmarked_count"],
+        )
 
 
 if __name__ == "__main__":

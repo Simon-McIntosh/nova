@@ -1846,6 +1846,18 @@ Receipt: <code>/nova/figures/forward-solver-route-integrity/single-site-krylov/b
     <figure><img src="/nova/figures/forward-solver-route-integrity/frozen-route-settle-evidence/terminal-flux-panel.png" alt="Poloidal flux contours of the terminal state, solved beside the picard reference, with both null sets and the wall"><figcaption>Terminal state of the repaired newton_krylov route from one H200 solve (job 1280457): solved and picard reference contours on shared levels, both axis markers (solved red, reference grey) and the wall. Limited equilibrium, no X-point; terminal residual 1.28e-11, converged.</figcaption></figure>
   </section>
 
+  <section id="forward-solve-file-at-main">
+    <h2>§1 — the forward-solve test file at main: 25 pass, four fail on both devices</h2>
+    <p>Run <code>r-20261002T184908677651-fsri-forward-solve-file-verification</code> (local lane), merged at <code>4d38e4986</code>, ran all 29 tests of <code>tests/test_equilibrium_forward_solve.py</code> at main. The H200 run was one job, 905 s. The CPU run was split into SLURM jobs, with the two tests that overran the 59-minute <code>all_debug</code> limit re-run alone on sirius. The accelerator-routes test passes on both devices. 25 tests pass, and the same four fail on both devices, so no failure is a device artefact.</p>
+    <ul>
+      <li><code>test_solve_path_current_moments_match_profile_owned_support</code>: 31 of 625 elements outside rtol 2e-13. Run <code>r-20261002T202109398749-fsri-moment-identity-root-cause</code>, merged at <code>d0ff31019</code> with review 94 of 100, measured it failing identically at the parent and the merge of both the frozen-Newton lineage and the clip-mode request field. It is therefore not a regression from them. The solve path wraps the core profile in <code>_FluxSelectedProfile</code>, which carries no current above the separatrix without a declared scrape-off layer, since <code>8b88abb7a</code>. The test's direct arm integrated the bare core profile, and the wrapped profile reproduces the solve arm exactly. The test arm is being corrected.</li>
+      <li><code>test_the_moment_map_is_differentiable_against_finite_differences</code>: the coarse-step relative error is 0.7598863825266692, against the &gt; 1.0 the ladder ordering requires. This is the second regression this section names.</li>
+      <li><code>test_the_solve_is_differentiable_in_the_conductor_current</code>: 63.478750929152035 against &lt; 0.001.</li>
+      <li><code>test_the_plasma_current_is_differentiable_in_the_conductor_current</code>: 11.313969220440912 against &lt; 0.001.</li>
+    </ul>
+    <p>The three derivative failures are being attributed on the H200, at the parent and the merge of each of today's merges, by <code>fsri-derivative-tests-root-cause</code>.</p>
+  </section>
+
   <section id="lane-launcher-test-timeout">
     <h2>Lane launcher: a default pytest bound</h2>
     <p>Run <code>r-20261002T072853636572-fsri-lane-launcher-test-timeout</code> (codex-terra), merged at <code>d6281d5f3</code> from <code>55bca9b99</code>, <code>75495edb0</code>, <code>2308e555e</code> and <code>e1c48a691</code>. The repository's <code>timeout = 300</code> killed long H200 gates. <code>scripts/nova_lane/run.sh</code> now appends <code>--timeout ${NOVA_LANE_TEST_TIMEOUT:-3600}</code> to a pytest payload unless the caller passed <code>--timeout</code> or <code>--timeout=value</code>. Its dry run previews exactly the submitted argument list, and the in-place header records <code>PYTEST_TIMEOUT</code>.</p>

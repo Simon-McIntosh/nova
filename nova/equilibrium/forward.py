@@ -121,7 +121,6 @@ from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.forward_operator import (
     ForwardFluxOperator,
     ForwardTopologyState,
-    support_clip_mode,
 )
 from nova.equilibrium.flux_surface_connectivity import traced_spline_contour
 from nova.equilibrium.labels import LCFS_ANGLES
@@ -673,13 +672,17 @@ class ForwardProfile:
         """Return the immutable source state the solve consumes."""
         return self.operator.source
 
-    def _with_source(self, source: ForwardSource) -> ForwardProfile:
-        """Bind per-slice source arguments while retaining compiled programs."""
-        if source is self.source:
+    def _with_source(
+        self, source: ForwardSource, *, clip_mode: str | None = None
+    ) -> ForwardProfile:
+        """Bind request-owned source and clip choices without rebuilding geometry."""
+        if source is self.source and clip_mode is None:
             return self
         active = object.__new__(type(self))
         active.__dict__ = self.__dict__.copy()
         active.operator = self.operator.with_source(source)
+        if clip_mode is not None:
+            active.operator = active.operator.with_clip_mode(clip_mode)
         return active
 
     def flux_map(
@@ -929,7 +932,7 @@ class ForwardProfile:
         """
 
         state = jnp.asarray(seed)
-        if support_clip_mode() != "exact":
+        if self.operator._active_support_clip_mode != "exact":
             return state
         if not getattr(self.operator, "use_linear_moments", False):
             return state
@@ -2035,6 +2038,7 @@ class ForwardProfile:
         key = (
             route,
             live_read_fallback,
+            self.operator.clip_mode,
             static_value(requested_class),
             argument_layout(target_current),
             tuple(
@@ -2579,7 +2583,7 @@ class ForwardProfile:
         self, request: ForwardSolveRequest
     ) -> ForwardSolveReceipt:
         """Resolve one typed request whose constraint targets remain fixed."""
-        active = self._with_source(request.source_profile)
+        active = self._with_source(request.source_profile, clip_mode=request.clip_mode)
         if request.constraint_pairs and request.route not in _CONSTRAINABLE:
             raise ValueError(
                 "augmented constraints require a route carrying a compensating "
@@ -2679,6 +2683,7 @@ class ForwardProfile:
             resolved_defaults=ResolvedForwardSolveDefaults.from_policy(
                 policy,
                 compilation_cache_directory=cache_directory,
+                clip_mode=request.clip_mode,
             ),
             seed_provenance=request.seed_policy.provenance(),
         )
@@ -2713,6 +2718,7 @@ class ForwardProfile:
             self.operator.program_identity,
             request.route,
             request.policy,
+            request.clip_mode,
             array_signature(initial_flux),
             array_signature(request.current),
             array_signature(request.target_current),

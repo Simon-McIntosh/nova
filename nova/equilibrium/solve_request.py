@@ -32,6 +32,7 @@ SolveRoute = Literal[
     "newton_krylov",
     "reduced_newton",
 ]
+SupportClipMode = Literal["chord", "exact", "chord_cells"]
 JsonScalar = str | int | float | bool | None
 
 
@@ -487,6 +488,7 @@ class ForwardSolveRequest:
     prescribed_current: object | None = None
     enforce: tuple[str, ...] = ()
     compilation_cache_hit: bool = False
+    clip_mode: SupportClipMode = "chord"
 
     def __post_init__(self) -> None:
         """Require a self-consistent, statically shaped request."""
@@ -497,6 +499,8 @@ class ForwardSolveRequest:
             raise ValueError("request route must equal its resolved policy route")
         object.__setattr__(self, "constraint_pairs", tuple(self.constraint_pairs))
         object.__setattr__(self, "enforce", tuple(self.enforce))
+        if self.clip_mode not in {"chord", "exact", "chord_cells"}:
+            raise ValueError(f"unknown support clip mode {self.clip_mode!r}")
 
     @classmethod
     def from_defaults(
@@ -532,6 +536,7 @@ class ResolvedForwardSolveDefaults:
     policy: ForwardSolvePolicy
     deviations: tuple[tuple[str, JsonScalar], ...]
     compilation_cache_directory: str | None
+    clip_mode: SupportClipMode
 
     @classmethod
     def from_policy(
@@ -540,6 +545,7 @@ class ResolvedForwardSolveDefaults:
         *,
         nova_version: str = NOVA_VERSION,
         compilation_cache_directory: str | None = None,
+        clip_mode: SupportClipMode = "chord",
     ) -> ResolvedForwardSolveDefaults:
         """Compare one resolved policy with its version's declared defaults."""
 
@@ -556,6 +562,7 @@ class ResolvedForwardSolveDefaults:
             policy=policy,
             deviations=deviations,
             compilation_cache_directory=compilation_cache_directory,
+            clip_mode=clip_mode,
         )
 
     def to_dict(self) -> dict[str, object]:
@@ -566,6 +573,7 @@ class ResolvedForwardSolveDefaults:
             "policy": self.policy.to_dict(),
             "deviations": dict(self.deviations),
             "compilation_cache_directory": self.compilation_cache_directory,
+            "clip_mode": self.clip_mode,
         }
 
     @classmethod
@@ -577,6 +585,7 @@ class ResolvedForwardSolveDefaults:
             "policy",
             "deviations",
             "compilation_cache_directory",
+            "clip_mode",
         }
         if set(payload) != expected:
             raise ValueError(
@@ -597,6 +606,7 @@ class ResolvedForwardSolveDefaults:
             policy,
             nova_version=str(payload["nova_version"]),
             compilation_cache_directory=cache_directory,
+            clip_mode=str(payload["clip_mode"]),
         )
         if dict(restored.deviations) != dict(deviation_payload):
             raise ValueError("resolved-default deviations disagree with the policy")
@@ -628,6 +638,12 @@ class ForwardSolveReceipt:
         return self.terminal_state
 
     @property
+    def clip_mode(self) -> SupportClipMode:
+        """Return the request clip mode persisted in receipt provenance."""
+
+        return self.resolved_defaults.clip_mode
+
+    @property
     def constraints(self) -> tuple[ConstraintRecord, ...]:
         """Return terminal augmented-row records in request tuple order."""
 
@@ -646,6 +662,7 @@ __all__ = [
     "SampledFluxFunction",
     "SolveSeedProvenance",
     "SolveRoute",
+    "SupportClipMode",
     "declared_forward_solve_policy",
     "default_forward_compilation_cache_root",
     "resolve_forward_solve_policy",

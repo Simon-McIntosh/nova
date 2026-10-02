@@ -1,4 +1,5 @@
 revision=92613fd3d0e5736e7c47aea888d0183d97cc8271 tree=/tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution/revisions/92613fd3d command=['benchmarks/plasma_cell_map_fidelity.py', '--case', 'diverted-single-null', '--cells', '-110', '--cpu-preflight']
+HEADER nova.equilibrium.clip_quadrature=/tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution/revisions/92613fd3d/nova/equilibrium/clip_quadrature.py (resolved by the run via PYTHONPATH at the extraction)
 module.__file__=/tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution/revisions/92613fd3d/benchmarks/plasma_cell_map_fidelity.py
 cwd=/tmp/reckon-crew-scratch/r-20261001T235323751570-cca-chord-regression-attribution/revisions/92613fd3d backend=cpu
 BUILD case=diverted-single-null requested=-110

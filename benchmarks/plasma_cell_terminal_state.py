@@ -301,10 +301,11 @@ def _cluster_pixel_census(figure, axes, receipt):
     return census
 
 
-DRAW_ORDERS = ("reference-last", "panel-last")
+DEFAULT_DRAW_ORDER = "reference-last"
+DRAW_ORDERS = (DEFAULT_DRAW_ORDER, "panel-last")
 
 
-def render(receipt, output, draw_order="reference-last"):
+def render(receipt, output, draw_order=DEFAULT_DRAW_ORDER):
     """Draw all measured fields on a shared physical contour array per case.
 
     ``draw_order`` names which null set is drawn last, and therefore which one
@@ -588,12 +589,17 @@ def measure(output, negative_log):
         set_support_clip_mode(previous)
 
 
-def main():
+def build_argument_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--negative-control-log", type=Path)
     parser.add_argument("--render-only", action="store_true")
-    parser.add_argument("--draw-order", choices=DRAW_ORDERS, default="reference-last")
+    parser.add_argument("--draw-order", choices=DRAW_ORDERS, default=DEFAULT_DRAW_ORDER)
+    return parser
+
+
+def main():
+    parser = build_argument_parser()
     arguments = parser.parse_args()
     if arguments.render_only:
         receipt_path = arguments.output / "terminal-state-trip-arms.json"

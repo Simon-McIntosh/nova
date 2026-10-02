@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="75">
+<meta name="plan-version" content="76">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -682,7 +682,10 @@
     <div class="r-comment-body"><p>no record: the local worker went silent during the 2026-09-23 storage stall</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name" data-who="reckon-build" data-when="2026-10-02T23:05:36.145Z">
-    <div class="r-comment-body"><p>Renamed SLICE1_SOURCE (a stage-numbered constant holding the capacity-scan revision&#x27;s fixed_point path) to CAPACITY_SCAN_SOURCE at its definition and both uses in diverted_trace.py, with the adjacent comment; gate: no SLICE1 in benchmarks/tests/nova/scripts/docs/figures, py_compile exit 0, naming checks 1/2a/2b/3 clean; commit 3236cac96.</p></div>
+    <div class="r-comment-body"><p>Renamed SLICE1_SOURCE (a stage-numbered constant holding the capacity-scan revision's fixed_point path) to CAPACITY_SCAN_SOURCE at its definition and both uses in diverted_trace.py, with the adjacent comment; gate: no SLICE1 in benchmarks/tests/nova/scripts/docs/figures, py_compile exit 0, naming checks 1/2a/2b/3 clean; commit 3236cac96.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261002T230651854393-review-of-fsri-krylov-capacity-scan-symbol-name" data-who="reckon-build" data-when="2026-10-02T23:12:19Z">
+    <div class="r-comment-body"><p>Parsed review for c6604c8d stored at the generic and revision-pinned review paths; verdict pass-with-follow-on, total 84/100.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260923T054725981050-fsri-prewarm-pin-covers-the-lane-programs" data-who="reckon-ship" data-when="2026-09-23T10:56:04.745Z">
     <div class="r-comment-body"><p>compile-row refusal fix (958f5722b) and pin census on the worktree, not merged; lane submission missed the pin (hits 1158, misses 679, compile 458 s) because the pin is revision-keyed; land-or-drop in f-fsri-prewarm-pin-land-or-drop</p></div>

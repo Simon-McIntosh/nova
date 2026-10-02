@@ -11,7 +11,7 @@ import time
 import jax
 import jax.numpy as jnp
 import numpy as np
-from scipy.sparse.linalg import LinearOperator, eigs, gmres
+from scipy.sparse.linalg import LinearOperator, gmres
 
 from benchmarks import centroid_constrained_fixture_receipt as fixture
 from benchmarks.plasma_cell_map_fidelity import (
@@ -134,6 +134,7 @@ def response(context, centroid_receipt):
         return jnp.stack((row.centroid_r, row.centroid_z))
 
     started = time.perf_counter()
+    print("linearizing map and centroid observation", flush=True)
     base_map, tangent_map = jax.linearize(mapped, state)
     base_centroid, tangent_centroid = jax.linearize(observed, state)
     tangent_map = jax.jit(tangent_map)
@@ -153,7 +154,6 @@ def response(context, centroid_receipt):
         return value - jacobian_product(value)
 
     operator_a = LinearOperator((n, n), matvec=a_product, dtype=np.float64)
-    operator_j = LinearOperator((n, n), matvec=jacobian_product, dtype=np.float64)
     diagnostics = []
 
     def solve(rhs, label):
@@ -184,11 +184,20 @@ def response(context, centroid_receipt):
             raise RuntimeError(
                 f"linear response did not converge for {label}: {diagnostics[-1]}"
             )
+        print(f"solved {label}: {diagnostics[-1]}", flush=True)
         return solution
 
     # The direct arm is the declared negative control for the inverse response.
     direct = np.column_stack([centroid_product(columns[:, i]) for i in range(3)])
-    zero_jacobian_control = direct.copy()
+    zero_states = np.linalg.solve(np.eye(n), columns).T
+    zero_jacobian_control = np.column_stack(
+        [centroid_product(value) for value in zero_states]
+    )
+    if not np.allclose(zero_jacobian_control, direct, rtol=1e-10, atol=1e-10):
+        raise RuntimeError("zero-Jacobian control did not recover direct leverage")
+    if abs(direct[0, 0] - 1.62922526181) > 0.01:
+        raise RuntimeError("direct radial leverage missed its historical control")
+    print(f"direct response {direct.tolist()}", flush=True)
     coupled_states = np.column_stack(
         [solve(columns[:, i], f"column_{i}") for i in range(3)]
     )
@@ -201,11 +210,35 @@ def response(context, centroid_receipt):
     baseline = np.asarray(centroid_receipt["analytic"]["production_offset_m"])
     field_only = np.linalg.solve(coupled[:, :2], -baseline)
     with_residual = np.linalg.solve(coupled[:, :2], -baseline - residual_centroid)
-    eigenvalues = eigs(
-        operator_j, k=6, which="LM", return_eigenvectors=False, tol=1e-5, maxiter=500
+    source_receipt = json.loads(
+        (
+            Path(__file__).resolve().parents[2]
+            / "cap-factor-repair/control-positive.json"
+        ).read_text()
     )
-    near_one = min(eigenvalues, key=lambda value: abs(value - 1.0))
-    return {
+    observed_amplitudes = np.asarray(
+        source_receipt["solve"]["compensating_amplitudes"], dtype=np.float64
+    )
+    terminal = np.load(STATE_PATH, allow_pickle=False)
+    predicted = (
+        np.asarray(state) + residual_state + coupled_states @ observed_amplitudes
+    )
+    observed_delta = terminal - np.asarray(state)
+    predicted_delta = predicted - np.asarray(state)
+    anchor = int(
+        np.argmin(
+            np.linalg.norm(
+                np.asarray(context["coordinates"]) - np.asarray((6.2, 0.0)), axis=1
+            )
+        )
+    )
+    observed_shape = observed_delta - observed_delta[anchor]
+    predicted_shape = predicted_delta - predicted_delta[anchor]
+    shape_error = predicted_shape - observed_shape
+    shape_rmse = float(np.sqrt(np.mean(shape_error**2)))
+    observed_shape_rmse = float(np.sqrt(np.mean(observed_shape**2)))
+    shape_correlation = float(np.corrcoef(predicted_shape, observed_shape)[0, 1])
+    result = {
         "direct_centroid_response_m_per_unit": direct.tolist(),
         "zero_jacobian_control_m_per_unit": zero_jacobian_control.tolist(),
         "coupled_centroid_response_m_per_unit": coupled.tolist(),
@@ -214,17 +247,65 @@ def response(context, centroid_receipt):
         "field_only_cancellation_t": field_only.tolist(),
         "residual_corrected_cancellation_t": with_residual.tolist(),
         "observed_terminal_field_t": -0.021255810528996315,
+        "observed_terminal_amplitudes": observed_amplitudes.tolist(),
         "direct_radial_field_prediction_t": float(-baseline[0] / direct[0, 0]),
-        "jacobian_eigenvalues_largest_magnitude": [
-            [float(v.real), float(v.imag)] for v in eigenvalues
+        "linear_terminal_shape_anchor_index": anchor,
+        "linear_terminal_shape_rmse_wb": shape_rmse,
+        "observed_terminal_shape_rmse_wb": observed_shape_rmse,
+        "linear_terminal_shape_error_over_observed": shape_rmse / observed_shape_rmse,
+        "linear_terminal_shape_correlation": shape_correlation,
+        "linear_terminal_shape_error_sup_wb": float(np.max(np.abs(shape_error))),
+        "linear_terminal_shape_predicted_range_wb": [
+            float(np.min(predicted_shape)),
+            float(np.max(predicted_shape)),
         ],
-        "eigenvalue_closest_to_one_among_computed": [
-            float(near_one.real),
-            float(near_one.imag),
+        "linear_terminal_shape_observed_range_wb": [
+            float(np.min(observed_shape)),
+            float(np.max(observed_shape)),
         ],
         "linear_solve_diagnostics": diagnostics,
         "elapsed_seconds": time.perf_counter() - started,
     }
+    partial = OUTPUT / "response-partial.json"
+    partial.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
+    print(
+        f"wrote {partial}; assembling Jacobian for condition and eigenvalues",
+        flush=True,
+    )
+    basis = np.eye(n, dtype=np.float64)
+    jacobian = np.empty((n, n), dtype=np.float64)
+    for index in range(n):
+        jacobian[:, index] = jacobian_product(basis[:, index])
+        if (index + 1) % 64 == 0:
+            print(f"Jacobian columns {index + 1}/{n}", flush=True)
+    fixed_point_matrix = np.eye(n) - jacobian
+    eigenvalues = np.linalg.eigvals(jacobian)
+    nearest = min(eigenvalues, key=lambda value: abs(value - 1.0))
+    result.update(
+        {
+            "fixed_point_matrix_condition_2": float(np.linalg.cond(fixed_point_matrix)),
+            "fixed_point_matrix_smallest_singular_value": float(
+                np.linalg.svd(fixed_point_matrix, compute_uv=False)[-1]
+            ),
+            "jacobian_spectral_radius": float(np.max(np.abs(eigenvalues))),
+            "jacobian_eigenvalue_nearest_one": [
+                float(nearest.real),
+                float(nearest.imag),
+            ],
+            "jacobian_eigenvalue_nearest_one_distance": float(abs(nearest - 1.0)),
+            "jacobian_dense_solve_residual_relative": [
+                float(
+                    np.linalg.norm(
+                        fixed_point_matrix @ coupled_states[:, i] - columns[:, i]
+                    )
+                    / np.linalg.norm(columns[:, i])
+                )
+                for i in range(3)
+            ],
+            "elapsed_seconds": time.perf_counter() - started,
+        }
+    )
+    return result
 
 
 def main():

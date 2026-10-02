@@ -1,0 +1,70 @@
+{
+  "state_digest": "d2c980a88374751bb6e4af9305ae9ad39bc0f19bb7f954654c08d6fa8862f8f2",
+  "column_order": [
+    "vertical_t",
+    "radial_t",
+    "level_wb"
+  ],
+  "field_column_units": "Wb per tesla for vertical and radial; Wb per weber for level",
+  "closed_form_column_sup_error_wb_per_unit": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "finite_difference_step": 1e-06,
+  "row_native_centroid_m": [
+    6.057360565263903,
+    3.9416927558886143e-13
+  ],
+  "row_native_jvp_m_per_unit": [
+    [
+      0.8368701054503016,
+      -6.986375009282954e-10,
+      -4.350489620702227e-33
+    ],
+    [
+      -7.824759610831571e-12,
+      -3.0256044780031215,
+      3.9641200056699575e-33
+    ]
+  ],
+  "row_native_central_m_per_unit": [
+    [
+      1.6292252480454295,
+      1.021405182655144e-08,
+      -6.661338147750939e-09
+    ],
+    [
+      -8.562692445816333e-11,
+      -4.917235859519576,
+      3.624873135393511e-09
+    ]
+  ],
+  "requested_limited_jvp_m_per_unit": [
+    [
+      0.8368701054503016,
+      -6.986375009282954e-10,
+      -4.350489620702227e-33
+    ],
+    [
+      -7.824759610831571e-12,
+      -3.0256044780031215,
+      3.9641200056699575e-33
+    ]
+  ],
+  "requested_limited_central_m_per_unit": [
+    [
+      1.6292252480454295,
+      1.021405182655144e-08,
+      -6.661338147750939e-09
+    ],
+    [
+      -8.562692445816333e-11,
+      -4.917235859519576,
+      3.624873135393511e-09
+    ]
+  ],
+  "historical_radial_response_m_per_t": 1.62922526181,
+  "active_support_and_normalisation": "pending",
+  "row_source": "nova/equilibrium/constraint.py::CurrentCentroidConstraint.observed"
+}

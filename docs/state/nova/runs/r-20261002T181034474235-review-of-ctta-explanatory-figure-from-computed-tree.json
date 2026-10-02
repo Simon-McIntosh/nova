@@ -1,0 +1,344 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-terra",
+  "base_sha": "54b55f57c00fff705701b4f7bd491d3ddf2230c5",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 2970624,
+      "cached_input_tokens_cumulative": 2970624,
+      "input_tokens": 3113995,
+      "input_tokens_cumulative": 3113995,
+      "output_tokens": 18294,
+      "output_tokens_cumulative": 18294,
+      "reasoning_output_tokens": 5110,
+      "reasoning_output_tokens_cumulative": 5110
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-02T18:19:03Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T18:10:59Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "receipt/artifacts"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "contour-tree-topology-authority",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 4.022911200620819,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T18:55:37.481775+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": "2026-10-02T18:10:36Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T10:39:36Z",
+    "seconds_until_reset": 577739,
+    "state": "quiet",
+    "utilisation_pct": 18.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T18:10:36Z",
+    "read_at": "2026-10-02T18:10:37Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 18.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T18:19:03Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181034474235-review-of-ctta-explanatory-figure-from-computed-tree/manifest.md",
+  "member": "disposable-r-20261002T181034474235-review-of-ctta-explanatory-figure-from-computed-tree",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-ctta-explanatory-figure-from-computed-tree",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2288,
+          "cached_input_tokens": 741045,
+          "input_tokens": 743335,
+          "output_tokens": 1910,
+          "reasoning_output_tokens": 878,
+          "total_tokens": 745245,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the review for r-20261002T164824351467-ctta-explanatory-figure-from-computed-tree stores a parsed record at head e3ee1c90a4e2f2d22321d3acaff9cb918715b9c0 scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own gate logs. It checks contour-tree-computed.png against the repository plotting rules (AGENTS.md) and the data-ink rules: the right-hand tree graph plots the virtual outside node at its sentinel -1.0 Wb while every real node lies within about 0.01 Wb of zero, so the sentinel sets the axis and flattens the tree; state whether the sentinel should be omitted or the axis broken. It also judges whether the straight dotted tree edges drawn across the poloidal panel read as spatial paths, and whether the caption explains them. It confirms the figure-matches-receipt test and its negative control; the turn ends once that record is stored and the manifest reads complete with status: complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261002T164824351467-ctta-explanatory-figure-from-computed-tree",
+    "id": "review-of-ctta-explanatory-figure-from-computed-tree",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T18:10:36Z",
+      "read_at": "2026-10-02T18:10:37Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 18.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181034474235-review-of-ctta-explanatory-figure-from-computed-tree/manifest.md",
+    "negative_control": "",
+    "plan": "contour-tree-topology-authority",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T164824351467-ctta-explanatory-figure-from-computed-tree.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T164824351467-ctta-explanatory-figure-from-computed-tree.at-e3ee1c90a4e2f2d22321d3acaff9cb918715b9c0.json"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 4.022053689291707,
+      "derived": 0.04922858203687188,
+      "drain_hours": 168.0,
+      "effective_limit": 0.04922858203687188,
+      "elapsed_fraction": 0.04475325639715625,
+      "elapsed_hours": 7.51854707472225,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-02T18:10:41+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.8200000000000001,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T10:39:35Z",
+      "state": "observed",
+      "utilisation": 0.18,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.085536,
+      "decided_by": "window",
+      "margin": 0.5394639999999999,
+      "name": "review-of-ctta-explanatory-figure-from-computed-tree",
+      "score": 0.625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.18
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.769469,
+        "observed_at": "2026-10-02T18:10:41+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T10:39:35Z",
+        "state": "observed",
+        "utilisation": 0.18,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "review-of-ctta-explanatory-figure-from-computed-tree",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-02T18:10:41.769469+00:00",
+    "score": 0.625,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "plan": "contour-tree-topology-authority",
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "54b55f57c00fff705701b4f7bd491d3ddf2230c5",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "role": "review",
+  "run_id": "r-20261002T181034474235-review-of-ctta-explanatory-figure-from-computed-tree",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fdd0-10ff-71f3-b2dd-f44eea767f38",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 2970624,
+    "cumulative_input_tokens": 6084619,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 23404
+  },
+  "time_budget": "45m",
+  "tool_steps": 30.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 484,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T18:19:07Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T18:11:04Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T181034474235-review-of-ctta-explanatory-figure-from-computed-tree",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 103,
+    "worker_pid": 3157011
+  },
+  "worker_seconds": 484,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

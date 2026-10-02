@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="42">
+<meta name="plan-version" content="43">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -264,6 +264,11 @@
     <h4 class="r-fu-title">Regenerate the two exact-clip low-state figures with the repaired check</h4>
     <div class="r-fu-body"><p>The low-state check repair landed at 80022a503. It prints the full level array and every panel's residual and converged flag, and the test asserts the recorded titles. The two named figures under docs/figures/cut-cell-current-attribution/exact-clip-low-state are still the pre-repair images. The solve that would regenerate them died on the cold-seed amplitude nan at forward_operator.py current_normalisation_amplitude, which was the moment-bank overflow repaired at 1542d6df6. tests/test_exact_clip_low_state_render.py::test_receipt_records_the_render_only_route stays red until both figures render. One H200 job (betelgeuse, gpu_0003_grpA, account grpa, 8 cores, 64G) runs the exact_clip_low_state_discriminator solve, then renders on the login node. Held behind the map-fidelity gate, because these panels draw the certificate forward state.</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit</pre>
+    </article>
+<article class="r-fu" data-id="f-fsa-production-solver-receipt-writer-revision" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-02" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the production-solver receipt writer emit source_revision itself</h4>
+    <div class="r-fu-body">docs/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json carries a source_revision field that was added by hand, with a value matching the receipt's own revision key, while its writer docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py does not emit the key. The test pinning source_revision now asserts it on that committed receipt, so regenerating the receipt would drop the field and turn the test red. Route measure.py's payload through the same stamp the benchmark writers use, so the field is written where the receipt is written, and regenerate nothing until a measurement needs it.</div>
+    <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: make docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py stamp source_revision on its receipt payload.</pre>
     </article>
 </section>
 

@@ -33,6 +33,11 @@ MAST_VERTEX_CAPACITY = 646
 MAST_EDGE_CAPACITY = 2048
 MAST_TRIANGLE_CAPACITY = 2048
 MAST_ROWS = ((27079, 16), (22475, 50))
+CERTIFICATE_RUNG_PATHS = (
+    (340, "diverted-single-null-production-route-cells-300.json"),
+    (550, "diverted-single-null-production-route-cells-500.json"),
+    (1074, "diverted-single-null-production-route-cells-1000.json"),
+)
 
 
 @dataclass(frozen=True)
@@ -67,6 +72,36 @@ def certificate_fixtures() -> tuple[Fixture, ...]:
         if mesh.overflow:
             raise RuntimeError(f"certificate mesh capacity refused: {path.name}")
         fixtures.append(Fixture(payload["case"], mesh))
+    return tuple(fixtures)
+
+
+def certificate_rung_fixtures() -> tuple[Fixture, ...]:
+    """Read persisted certificate carriers at the available production rungs."""
+
+    fixtures = []
+    for rung, filename in CERTIFICATE_RUNG_PATHS:
+        path = PART_ROOT / filename
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        render = payload["render_data"]
+        count = int(payload["realised_cells"])
+        if count != rung:
+            raise RuntimeError(
+                f"certificate rung mismatch: {path.name} has {count} cells"
+            )
+        coordinate = np.asarray(render["coordinates_rz_m"], dtype=np.float64)[:count]
+        flux = np.asarray(render["terminal_flux_wb"], dtype=np.float64)[:count]
+        wall = np.asarray(render["wall_units_rz_m"][0], dtype=np.float64)
+        mesh = build_contour_mesh(
+            coordinate,
+            flux,
+            [vessel_unit(wall[:, 0], wall[:, 1], name=payload["case"])],
+            vertex_capacity=2 * count,
+            edge_capacity=6 * count,
+            triangle_capacity=4 * count,
+        )
+        if mesh.overflow:
+            raise RuntimeError(f"certificate mesh capacity refused: {path.name}")
+        fixtures.append(Fixture(f"{payload['case']}-{rung}-cells", mesh))
     return tuple(fixtures)
 
 

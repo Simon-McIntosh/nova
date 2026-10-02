@@ -21,6 +21,7 @@ import pytest
 from benchmarks.contour_tree_brute_force import (
     batched_identical,
     certificate_fixtures,
+    certificate_rung_fixtures,
     compare,
     mast_fixtures,
     standalone_rows,
@@ -69,6 +70,16 @@ def test_batched_certificate_trees_match_independent_builds(fixtures):
     """The fixed-capacity batch result is identical to per-field receipts."""
 
     assert batched_identical(fixtures)
+
+
+def test_production_certificate_rungs_match_independent_components():
+    """Every persisted production-resolution certificate stays qualified."""
+
+    for fixture in certificate_rung_fixtures():
+        result = compare(fixture.mesh, corrupt=_corrupt())
+        assert not bool(np.asarray(result["tree"].overflow))
+        assert result["node_count"] - result["edge_count"] == 1
+        assert all(row["tree"] == row["brute_force"] for row in result["rows"])
 
 
 def test_mast_standalone_superlevel_counts_are_well_formed(mast):

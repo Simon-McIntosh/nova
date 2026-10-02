@@ -1,0 +1,57 @@
+{
+  "any_row_refuses_a_cell": false,
+  "bound": "one-arc (traced_polygon_vertex_capacity at the one-run default)",
+  "cell_counts": [
+    110,
+    300,
+    1000
+  ],
+  "diverted_rows_in_bank": [
+    "diverted-single-null"
+  ],
+  "double_null_diverted_row_in_bank": false,
+  "refusing_rows": [],
+  "rows": [
+    {
+      "arc_sample_count": 128,
+      "case": "diverted-single-null",
+      "included_cells": 86,
+      "one_arc_bound": 162,
+      "realised_cells": 132,
+      "realised_maximum_vertex_count": 134,
+      "refused_cell_count": 0,
+      "refused_cells": [],
+      "requested_cells": 110,
+      "schema": "nova.exact-clip-one-arc-census.v1",
+      "straight_vertex_capacity": 34
+    },
+    {
+      "arc_sample_count": 128,
+      "case": "diverted-single-null",
+      "included_cells": 212,
+      "one_arc_bound": 154,
+      "realised_cells": 340,
+      "realised_maximum_vertex_count": 134,
+      "refused_cell_count": 0,
+      "refused_cells": [],
+      "requested_cells": 300,
+      "schema": "nova.exact-clip-one-arc-census.v1",
+      "straight_vertex_capacity": 26
+    },
+    {
+      "arc_sample_count": 128,
+      "case": "diverted-single-null",
+      "included_cells": 652,
+      "one_arc_bound": 148,
+      "realised_cells": 1074,
+      "realised_maximum_vertex_count": 134,
+      "refused_cell_count": 0,
+      "refused_cells": [],
+      "requested_cells": 1000,
+      "schema": "nova.exact-clip-one-arc-census.v1",
+      "straight_vertex_capacity": 20
+    }
+  ],
+  "schema": "nova.exact-clip-one-arc-census-receipt.v1",
+  "verdict": "no diverted row refuses a cell at any sampled cell count: the held two-run wiring is retired and the mechanism stays at its one-run default"
+}

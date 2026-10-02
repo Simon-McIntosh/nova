@@ -1,0 +1,70 @@
+<section id="ecq-one-arc-census-diverted-rows">
+  <h3>One-arc census on the diverted certificate row</h3>
+
+  <p><strong>Node</strong> <code>ecq-one-arc-census-diverted-rows</code>, plan
+  <code>nova:exact-clip-moment-quadrature</code> §5, base
+  <code>b12cb22cc</code> on <code>main</code>. The per-layout capacity
+  mechanism is merged at <code>8ee75d50b</code> and the production two-run
+  wiring <code>61b291089</code> is not applied, so every row below is measured
+  under the one-arc bound (the one-run default). No product source and no test
+  is touched; the writes are two scripts, the census receipt, this fragment and
+  the report.</p>
+
+  <p><strong>Measure.</strong>
+  <code>docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/one_arc_census.py</code>
+  builds the diverted analytic certificate row through
+  <code>benchmarks.exact_clip_moment_floor._build</code> at 110, 300 and 1000
+  requested cells, each in its own fresh process on the fleet compute node
+  (<code>JAX_PLATFORMS=cpu</code>, root interpreter invoked directly, job
+  <code>1277272</code>). It calls the same clip the committed
+  <code>realised_layout_census.py</code> does, but per cell count and with the
+  refused cell indices recovered by rebuilding each row under a raised capacity
+  and differencing the supports — the packer zeroes a refused cell, so
+  <code>vertex_count.max()</code> alone cannot name it. The analytic bank
+  carries one diverted row, <code>diverted-single-null</code>, and no
+  double-null diverted row, which the receipt records explicitly.</p>
+
+  <table>
+    <tr><th>case</th><th>cells</th><th>realised</th><th>included</th>
+        <th>straight</th><th>one-arc bound</th><th>max live</th>
+        <th>refused</th></tr>
+    <tr><td>diverted-single-null</td><td>110</td><td>132</td><td>86</td>
+        <td>34</td><td>162</td><td>134</td><td>0</td></tr>
+    <tr><td>diverted-single-null</td><td>300</td><td>340</td><td>212</td>
+        <td>26</td><td>154</td><td>134</td><td>0</td></tr>
+    <tr><td>diverted-single-null</td><td>1000</td><td>1074</td><td>652</td>
+        <td>20</td><td>148</td><td>134</td><td>0</td></tr>
+  </table>
+
+  <p><strong>Verdict.</strong> No diverted certificate row refuses a cell at any
+  of the three requested cell counts; the realised maximum live vertex count is
+  134 on every row against one-arc bounds of 162, 154 and 148. By the §5 rule,
+  a refusing row is the positive control that would land the held two-run wiring
+  and no refusal retires it, so <strong>the held wiring
+  <code>61b291089</code> is retired and the mechanism stays at its one-run
+  default.</strong> The committed census receipt for the same row at 110 cells
+  reported one refused cell because it predates <code>c00300b91</code>; the
+  regenerated row refuses none.</p>
+
+  <p><strong>Instrument control.</strong> The zero is an absence claim, so
+  <code>refusal_detector_control.py</code> forces the bound below the realised
+  134: at bound 100 the same detector reports 38 refused cells and names them
+  (<code>[4, 9, 11, …]</code>), and at the true bound 162 it reports none. The
+  detector can see a refusal that is known to be present.</p>
+
+  <p><strong>Saddle wedges.</strong> <code>_expand_spline_saddle_wedges</code>
+  (<code>nova/equilibrium/separatrix_clip.py:1930</code>) keeps the one-run
+  default: it threads one traced level run per wedge — a 65-sample
+  <code>first_half</code> plus a 63-sample <code>second_half</code> (128 arc
+  samples) joined to at most <code>straight - 2</code> straight vertices, so a
+  wedge carries at most <code>capacity - 2</code> and cannot present two level
+  runs. Verified numerically for straight chains 34, 26, 20 (wedge maxima 160,
+  152, 146 against capacities 162, 154, 148). The census itself builds no wedge
+  (the exact-clip path traces through <code>_traced_clip</code>, not the wedge
+  expansion; instrumentation records 0 calls), so this is a property of the
+  construction rather than an observation of a diverted wedge.</p>
+
+  <p><strong>Receipt.</strong>
+  <code>docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/one-arc-census-receipt.json</code>;
+  report <code>reports/nova/s22/ecq-one-arc-census-diverted-rows.md</code>.</p>
+</section>

@@ -1,0 +1,15 @@
+[
+  {
+    "arc_sample_count": 128,
+    "case": "diverted-single-null",
+    "included_cells": 86,
+    "one_arc_bound": 162,
+    "realised_cells": 132,
+    "realised_maximum_vertex_count": 134,
+    "refused_cell_count": 0,
+    "refused_cells": [],
+    "requested_cells": 110,
+    "schema": "nova.exact-clip-one-arc-census.v1",
+    "straight_vertex_capacity": 34
+  }
+]

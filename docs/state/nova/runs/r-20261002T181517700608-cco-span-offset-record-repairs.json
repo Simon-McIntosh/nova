@@ -1,0 +1,355 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 480000,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 480000
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "5ad2f3555804ed87ee28ce5e439837dcda46447b",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 12021527,
+      "input_tokens_cumulative": 12021527,
+      "output_tokens": 47457,
+      "output_tokens_cumulative": 47457,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 98,
+    "files": 4,
+    "removed": 8
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "e40342d3a41aeafdaac57604e31c1327ea2bd12a",
+    "8647f5e2de2af235e98d6962482ff16e7ef5bd02",
+    "6b8d62e94851645122537da00d1dd8c1be749802"
+  ],
+  "completed_at": "2026-10-02T18:57:58.662Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-02T18:15:40Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-span-offset-record-repairs JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m benchmarks.centroid_constrained_fixture_receipt --span-offset-receipt",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181517700608-cco-span-offset-record-repairs/span-offset-cpu.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8,
+    "plan": "centroid-constrained-oracle-solve",
+    "reason": "corrective-run:repairs:r-20261002T170146477909-cco-converged-span-offset",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-02T18:45:20.398431+00:00",
+    "horizon_seconds": 1800,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-02T18:15:20Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 15,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 10,
+    "headroom": 4,
+    "mean_context": 148000,
+    "observed_at": "2026-10-02T18:15:05Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T18:57:58.662Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181517700608-cco-span-offset-record-repairs/manifest.md",
+  "member": "disposable-r-20261002T181517700608-cco-span-offset-record-repairs",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "cco-span-offset-record-repairs",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2135,
+          "cached_input_tokens": 577566,
+          "input_tokens": 579703,
+          "output_tokens": 1776,
+          "reasoning_output_tokens": 698,
+          "total_tokens": 581479,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Per review r-20261002T170146477909-cco-converged-span-offset.json, on main: (1) docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html writes the second banked receipt's span offset as -0.8267 Wb, not -0.8267e-2, and quotes the compensator over-drive as 8.5x on the solved-span basis (2.717e-2 against 3.2e-3) and 9.3x on the analytic-span basis, naming the basis each time; (2) DEFAULT_SPAN_OFFSET_RECEIPT in benchmarks/centroid_constrained_fixture_receipt.py resolves the committed receipt through the module's ROOT rather than an absolute home path; (3) docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/span-offset/span-offset.json records the landing merge b470e1fbb beside its source_revision; (4) the gate re-runs python -m benchmarks.centroid_constrained_fixture_receipt --span-offset-receipt with JAX_PLATFORMS=cpu in place, writing a log whose first lines name the revision, the tree and the command, and reproduces offset_wb=+4.517667660e+00. No number in the receipt changes. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-span-offset-record-repairs.md.",
+    "estimated_hours": null,
+    "goal": "correct the span-offset record's two number slips, its hard-coded receipt path and its provenance",
+    "id": "cco-span-offset-record-repairs",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-02T18:15:20Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 15,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 10,
+      "headroom": 4,
+      "mean_context": 148000,
+      "observed_at": "2026-10-02T18:15:05Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181517700608-cco-span-offset-record-repairs/manifest.md",
+    "negative_control": "running the default receipt path from a checkout other than the operator's main tree raises FileNotFoundError before the repair and resolves after it",
+    "plan": "centroid-constrained-oracle-solve",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "30m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/centroid_constrained_fixture_receipt.py",
+      "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html",
+      "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/span-offset",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-span-offset-record-repairs.md",
+      "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-span-offset-record-repairs.html",
+      "docs/figures/centroid-constrained-oracle-solve/cco-span-offset-record-repairs"
+    ]
+  },
+  "orientation_input_tokens": 2795804.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "cco-span-offset-record-repairs",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T18:15:24.349787+00:00",
+    "score": 0.56875,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": null,
+  "plan": "centroid-constrained-oracle-solve",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "6b8d62e94851645122537da00d1dd8c1be749802",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "5ad2f3555804ed87ee28ce5e439837dcda46447b",
+    "reviewed_head_sha": "6b8d62e94851645122537da00d1dd8c1be749802",
+    "scores": {
+      "durability": 14,
+      "evidence": 15,
+      "fit": 17,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 85
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T181517700608-cco-span-offset-record-repairs",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "29201d46-9ebc-4023-999a-e627e0d77045",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 12021527,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+    "elapsed_seconds": 2528.609,
+    "generated_tokens": 47457,
+    "generation_seconds": 1809.431,
+    "input_budget_tokens": 480000,
+    "input_utilisation_pct": 37.2,
+    "machine_seconds": 719.178,
+    "peak_input_tokens": 178612,
+    "tokens_per_second": 26.23,
+    "wall_tokens_per_second": 18.77
+  },
+  "time_budget": "30m",
+  "tool_steps": 90.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 2538,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T18:58:00Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-02T18:15:45Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T181517700608-cco-span-offset-record-repairs",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 7774,
+    "worker_pid": 3192616
+  },
+  "worker_seconds": 2499,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

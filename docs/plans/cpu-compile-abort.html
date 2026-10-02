@@ -23,9 +23,9 @@
   <title>The CPU Lane Aborts In Compilation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-01">
+<meta name="plan-modified" content="2026-10-02">
 <meta name="plan-impl" content="0.87">
-<meta name="plan-version" content="20">
+<meta name="plan-version" content="21">
 </head>
 <body>
   <main class="plan-doc">
@@ -133,10 +133,11 @@
     <pre class="r-fu-prompt">/reckon-build cpu-compile-abort §1</pre>
     <p class="r-fu-outcome">Reproduced and explained, landed at 812f6906, merged at 12c83165. The abort came back: the driver died inside the fourth certificate row after 192 section-memory refusals in nine milliseconds, with the mapping count last read at 54,147 against the 65,530 cap and resident memory at 12.25 GB of a 64 GB request. The shortfall of 11,383 is not the finding and the node said so. The finding is the step size: one certificate program load adds between 16,789 and 17,620 mappings, measured five times across two runs, so a fourth load from 54,147 cannot complete without crossing the cap by about five thousand. A second run at a fifth-second tick completed all four rows only because it returned 16,178 mappings to the kernel before its fourth load, which the first did not. Nothing else the sampler watched came near a bound. The crossing itself is inferred rather than observed and the record is explicit about that: the last sample fell 0.78 seconds before the refusal, and a rise of that size was measured inside one fifth-second interval, so the gap is traversable in about a tenth of a second and a one-second series cannot settle it in either direction. That is the right way to report it.</p>
     </article>
-<article class="r-fu" data-id="f-cca-one-row-per-process-until-the-program-shrinks" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-20" data-recommends-skill="/reckon-build cpu-compile-abort §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cca-one-row-per-process-until-the-program-shrinks" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-20" data-recommends-skill="/reckon-build cpu-compile-abort §2" data-resolved-at="2026-10-02T13:45:26+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Run each certificate row in its own process, so no process loads more programs than it can map</h4>
     <div class="r-fu-body"><p>The interim half of the lead's ruling. One program load costs about seventeen thousand mappings against a cap of 65,530, so three loads fit and the certificate asks for four; the run that completed did so only because it released a program before its fourth load. Giving each row its own process makes that release unconditional. It changes no solver code and it unblocks the two unmeasured certificate rows, the coil-edit regeneration and the centroid positive arm while the program-size work on the route-integrity plan does the real repair.</p><p>The certificate driver already persists each row's receipt as it lands, so the per-process shape costs nothing in recoverability. The regeneration sweep and the centroid arm need the same treatment and are named here so they are not forgotten when the certificate is done.</p></div>
     <pre class="r-fu-prompt">/reckon-build cpu-compile-abort §2</pre>
+    <p class="r-fu-outcome">Landed at 2710b2ea1, on main: _certificate_rows_as_processes in benchmarks/solve_program_size_gate.py runs each certificate row in its own process, and the centroid arm runs as its own job per arm. Of the two rows it unblocked, the centroid positive arm is being re-measured on H200 by node cco-cap-factor-finite-tangent after the cap-factor derivative repair; the coil-edit regeneration row is carried by f-cca-coil-edit-regeneration-row.</p>
     </article>
 <article class="r-fu" data-id="f-fsa-audit-probe-exit-status" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="solver census-and-certificate-drivers review (codex luna)" data-written-at="2026-09-21" data-recommends-skill="/reckon-build cpu-compile-abort" data-resolved-at="2026-09-22T21:24:52+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Propagate compile-abort child failure in the sampler exit status</h4>
@@ -144,16 +145,22 @@
     <pre class="r-fu-prompt">/reckon-build cpu-compile-abort</pre>
     <p class="r-fu-outcome">Already repaired on main at c1af3a06d (2026-09-21): benchmarks/compile_abort_probe.py returns the child status, and tests/test_compile_abort_probe.py pins both directions. Re-confirmed by cpu-probe-returns-the-child-exit-status (merged 98707eebc, review 92), which adds an arbitrary-status case. That node's new test file duplicates two existing tests; folding it is followup f-cca-fold-duplicate-probe-exit-tests.</p>
     </article>
-<article class="r-fu" data-id="f-fsa-audit-certificate-receipt-provenance" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="solver census-and-certificate-drivers review (codex luna)" data-written-at="2026-09-21" data-recommends-skill="/reckon-build cpu-compile-abort" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-audit-certificate-receipt-provenance" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="solver census-and-certificate-drivers review (codex luna)" data-written-at="2026-09-21" data-recommends-skill="/reckon-build cpu-compile-abort" data-resolved-at="2026-10-02T13:45:26+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Make per-row certificate receipts relocatable and status-faithful</h4>
     <div class="r-fu-body"><p>From review <code>solver census-and-certificate-drivers review (codex luna)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-census-and-certificate-drivers</code>.</p><p>Unpromoted run r-20260920T180231259880-cca-one-certificate-row-per-process, commit 2710b2ea1, benchmarks/solve_program_size_gate.py:1737 and :2165, writes candidate_state_array_path as an absolute worktree path and calls the probe wrapper result exit_code even though the child status is only probe_exit_code; the run manifest names both follow-ons. Repair receipt paths relative to the receipt/state directory and distinguish wrapper exit from child exit in the schema and gate. recommends_skill=/reckon-ship cpu-compile-abort §2.</p></div>
     <pre class="r-fu-prompt">/reckon-build cpu-compile-abort</pre>
+    <p class="r-fu-outcome">Repaired at a6b251732, on main: the persister writes candidate_state_array_path relative to the receipt directory (benchmarks/solve_program_size_gate.py, the path.relative_to(directory) write and the persisted['path'] read), and the row descriptor separates the child's exit_code, taken from the probe's recorded child status, from the wrapper's probe_wrapper_exit. Verified at f44843248 by the S22 triage node (s22-triage-rest).</p>
     </article>
 <article class="r-fu" data-id="f-cca-fold-duplicate-probe-exit-tests" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-22" data-recommends-skill="/reckon-build cpu-compile-abort §2" data-resolved-at="2026-09-23T01:16:07+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Fold the exit-3 case into test_compile_abort_probe.py and delete the duplicate test module</h4>
     <div class="r-fu-body">tests/test_compile_abort_probe_exit.py repeats _sample_a_child, test_failed_child_fails_the_wrapper and test_successful_child_leaves_the_wrapper_at_zero verbatim from tests/test_compile_abort_probe.py. Move only test_the_wrapper_carries_an_arbitrary_child_status into the existing module and delete the new file.</div>
     <pre class="r-fu-prompt">/reckon-build cpu-compile-abort §2</pre>
     <p class="r-fu-outcome">Landed at b2c31c324 (cpu-fold-duplicate-probe-exit-tests, review 99): the exit-3 case lives in tests/test_compile_abort_probe.py and the duplicate module is deleted.</p>
+    </article>
+<article class="r-fu" data-id="f-cca-coil-edit-regeneration-row" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-02" data-recommends-skill="/reckon-build cpu-compile-abort" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Measure the coil-edit regeneration certificate row in its own process</h4>
+    <div class="r-fu-body">The one-row-per-process mechanism (2710b2ea1) unblocked two certificate rows that had never been measured: the coil-edit regeneration and the centroid positive arm. The centroid arm is being re-measured after the cap-factor derivative repair. The coil-edit regeneration row still has no per-row receipt. Run it once through _certificate_rows_as_processes, persist its receipt beside the other rows with a receipt-relative state path and both exit fields, and record whether it completes, its mapping count at the program load, and its solve wall.</div>
+    <pre class="r-fu-prompt">/reckon-build cpu-compile-abort: measure the coil-edit regeneration certificate row in its own process and persist its per-row receipt.</pre>
     </article>
 </section>
 

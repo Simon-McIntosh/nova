@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="152">
+<meta name="plan-version" content="153">
 </head>
 <body>
 <main class="plan-doc">
@@ -496,6 +496,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T141354001490-review-of-msc-figure-cohort-cite-or-retire" data-who="reckon-build" data-when="2026-10-02T14:44:56.017Z">
     <div class="r-comment-body"><p>Independent review of r-20261002T134117794154-msc-figure-cohort-cite-or-retire at head 6d99b59ba stored; scores goal_fidelity 18, evidence 17, scope_discipline 19, durability 15, fit 17, total 86 of 100; the 67-to-26 and 45-to-0 citation contraction reproduced with the same src/href instrument; three follow-on findings recorded.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T134117794154-msc-figure-cohort-cite-or-retire" data-who="reckon-build" data-when="2026-10-02T15:15:14.812Z">
+    <div class="r-comment-body"><p>Repointed or marked every committed reference to the 41 figures retired at 6d99b59ba: 43 receipt path keys dropped, two generator defaults fixed, four sentences of the landed record no longer name a retired SVG twin; the deleted-reference scan contracts from 44 in-scope hits at base 6d99b59ba to 0 at head, and the served-citation scan stays FIGURES=26 CITED=26 UNCITED=0. Evidence anchor docs/evidence/fragments/millisecond-converged-solve/msc-figure-cohort-cite-or-retire.html.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T163422200795" data-who="coordinator" data-when="2026-09-04T16:36:00Z">
     <div class="r-comment-body"><p>§2 first restructure landed on solver-convergence-regression at <code>72ae8431</code>: one topology read per active-set trip (receipt <code>docs/figures/millisecond-converged-solve/trip-quantum/one-read/profile.json</code>, H200 job 1262715). It is behaviour-preserving and removes the redundant reads, but it does not move the per-trip wall: 5.83 s against 5.85 s on 22086/43 pure. The trip-quantum picture changes accordingly: the isolated components (84 residual evaluations, 144 Jacobian-vector products, one read, GMRES, line search) sum to 0.20 s per trip, and 5.63 s (96.6 percent) is a fused-device or synchronisation remainder the isolated probes cannot see; the earlier 63 percent topology attribution is withdrawn. The closed jaxpr has zero host callbacks, the static census gives an 0.09 s scan floor, and the CUPTI replay dies inside the Jacobi SVD, so the candidates are recompilation per trip, dynamic while loops far beyond the static count, and the 126 SVDs per trip. <code>msc-trip-remainder-attribution</code> measures which with an nsys device trace, an ablation ladder (condition estimates, line-search grades, flood and reachability loops) and a recompile count, so the repair toward one millisecond per fixed point is aimed by measurement.</p></div>

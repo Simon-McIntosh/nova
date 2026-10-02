@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="plasma-cell-read-fidelity">
+<meta name="plan-evidence-for" content="plasma-cell-read-fidelity">
+<title>Terminal-state analytic-panel draw-order guard (landing record)</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Terminal-state analytic-panel draw-order guard</h1></header>
+<section id="landing">
+<p>Adds <code>tests/test_plasma_cell_terminal_state_draw_order.py</code>, a committed pytest that renders the terminal-state figure from the committed receipt <code>docs/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.json</code> with no solve and asserts, on the pixel census the benchmark computes from that render itself, that the small panel-state markers do not overpaint the large reference markers on the analytic panel.</p>
+<p>The census counts each marker style's pixels inside the box (halfwidth 16&nbsp;px) centred on the analytic saddle cluster. Because the census is read from the render the test performs, the guard derives it rather than reading the hand-assembled <code>terminal-state-markers-census.json</code>. No benchmark change was needed: <code>render</code> and <code>_cluster_pixel_census</code> are already callable, so the benchmark is unchanged and the committed figure is not re-rendered by this node.</p>
+<p><strong>Measure</strong> (fleet allocation node cn&nbsp;98dci4-clu-2018, job 1277272, <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>, no solve). Under the committed order <code>reference-last</code> the analytic panel of case 0 (<code>diverted-single-null</code>) reads <code>reference_pixels=675, panel_pixels=0</code>: the reference markers are present and detected (675&nbsp;px, so the box is a positive control that the instrument sees known-present paint) and no panel-state pixel lands on them. <a href="/nova/figures/plasma-cell-read-fidelity/terminal-state-markers/draw-order-guard/pass.log">pass.log</a> (<code>EXIT=0</code>)</p>
+<p><strong>Negative control</strong> (declared: draw the panel-state markers after the reference markers; the overpaint assertion must fail). Setting <code>NOVA_TERMINAL_STATE_DRAW_ORDER=panel-last</code> draws the panel-state markers last; the analytic panel then reads <code>reference_pixels=300, panel_pixels=333</code> and the same assertion fails with <code>AssertionError: 333 panel-state pixels overpaint the analytic reference markers</code>. <a href="/nova/figures/plasma-cell-read-fidelity/terminal-state-markers/draw-order-guard/negative-control-panel-last.log">negative-control-panel-last.log</a> (<code>EXIT=1</code>, one failing test id).</p>
+</section>
+</main></body>
+</html>

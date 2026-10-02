@@ -62,7 +62,11 @@ with skip_import("jax"):
     from nova.equilibrium.forward import ForwardEquilibrium, ForwardProfile
     from nova.equilibrium.forward_operator import ForwardTopologyState
     from nova.equilibrium.observation import MomentEnforcementError, MomentTargets
-    from nova.equilibrium.source import DomainProfile, ForwardSource
+    from nova.equilibrium.source import (
+        DomainProfile,
+        ForwardSource,
+        _FluxSelectedProfile,
+    )
     from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
     from nova.jax.config import configure_dtypes
 
@@ -305,7 +309,13 @@ def _with_direct_samples(profile, seed):
 
 
 def test_solve_path_current_moments_match_profile_owned_support(machine):
-    """Solve moments equal direct integration on profile-owned support."""
+    """Solve moments equal direct integration of the flux-selected profile.
+
+    Both arms integrate the same ``_FluxSelectedProfile`` the solve path
+    builds, and with no scrape-off-layer current declared it carries no
+    current above the separatrix, so a straddling cell contributes only its
+    confined part.
+    """
     profile, seed, _vacuum = machine
     operator, seed = _with_direct_samples(profile, seed)
     masks, topology = operator.read(seed)
@@ -319,7 +329,7 @@ def test_solve_path_current_moments_match_profile_owned_support(machine):
     sample_flux = operator.sample_node_flux(seed)
     sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
     direct = operator.support_current_moments(
-        operator.source.core,
+        _FluxSelectedProfile(operator.source.core, operator.source.common_sol),
         masks.psi_norm,
         sample_psi_norm,
         profile_support,

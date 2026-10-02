@@ -1,0 +1,8 @@
+REVISION=878018cd28c009792cc51307219c9d4dc94ef9f6
+TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-contour-tree-edge-invariant-repair
+COMMAND=in-memory base-source regression arm for tests/test_contour_tree_merge.py::test_regular_triangle_cycle_does_not_create_a_saddle
+MODULE=git:878018cd28c009792cc51307219c9d4dc94ef9f6:nova/equilibrium/contour_tree.py
+CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-contour-tree-edge-invariant-repair
+FAILED tests/test_contour_tree_merge.py::test_regular_triangle_cycle_does_not_create_a_saddle
+base nodes={0: 2, 2: 1, 3: 1} edges=[[0, 2], [2, 3], [0, 3]] invariant=0
+EXIT=1

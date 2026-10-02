@@ -1,0 +1,5 @@
+fixture | valid | wall | interior | join_arcs | split_arcs | maxima | minima | join_saddles | split_saddles | wall_joins | nodes | edges | overflow
+diverted-single-null | 140 | 8 | 132 | 287 | 239 | 2 | 5 | 119 | 98 | 1 | 138 | 255 | True
+moderate-rotation-conventional-static | 136 | 0 | 136 | 262 | 255 | 3 | 6 | 110 | 103 | 0 | 135 | 255 | True
+strong-rotation-compact-static | 135 | 0 | 135 | 287 | 265 | 4 | 8 | 115 | 109 | 0 | 135 | 255 | True
+weak-rotation-reactor-static | 135 | 0 | 135 | 257 | 269 | 2 | 8 | 110 | 108 | 0 | 133 | 255 | True

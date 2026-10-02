@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Contour-tree edge-invariant repair evidence</title>
+</head>
+<body>
+  <article>
+    <h3>Critical-node contour receipts</h3>
+    <p>
+      The base sweep overwrote active union-find parents through inactive padded
+      edge slots. It consequently treated regular triangular-mesh vertices as
+      saddles, emitted both unmerged arc sets, exhausted 255 edges, and refused
+      every certificate. The repair updates each active root once, identifies
+      the final usable vertex rather than the padded array tail, and subdivides
+      join arcs for split-only events.
+    </p>
+    <table>
+      <thead>
+        <tr><th>fixture</th><th>valid / wall / interior</th><th>base join / split arcs</th><th>base nodes / edges / overflow</th><th>repaired join / split arcs</th><th>repaired critical nodes / edges</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>diverted-single-null</td><td>140 / 8 / 132</td><td>287 / 239</td><td>138 / 255 / true</td><td>4 / 9</td><td>13 / 12</td></tr>
+        <tr><td>moderate-rotation-conventional-static</td><td>136 / 0 / 136</td><td>262 / 255</td><td>135 / 255 / true</td><td>5 / 11</td><td>16 / 15</td></tr>
+        <tr><td>strong-rotation-compact-static</td><td>135 / 0 / 135</td><td>287 / 265</td><td>135 / 255 / true</td><td>7 / 15</td><td>22 / 21</td></tr>
+        <tr><td>weak-rotation-reactor-static</td><td>135 / 0 / 135</td><td>257 / 269</td><td>133 / 255 / true</td><td>3 / 15</td><td>18 / 17</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Repaired maxima / minima / saddles / wall joins are respectively 2 / 5 /
+      6 / 1, 3 / 6 / 7 / 0, 4 / 8 / 10 / 0, and 2 / 8 / 8 / 0. All four
+      receipts have <code>nodes - edges = 1</code>, no overflow, and zero
+      component-count mismatches against the independent traversal.
+    </p>
+  </article>
+</body>
+</html>

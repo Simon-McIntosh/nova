@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="47">
+<meta name="plan-version" content="48">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -190,6 +190,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T204631767757-review-of-cco-root-cause-flux-map-gallery" data-who="reckon-build" data-when="2026-10-02T20:57:55Z">
     <div class="r-comment-body"><p>Reviewed r-20261002T202608289672-cco-root-cause-flux-map-gallery at base 11985735c020a39df74f76c75cbe6354e0e67d36 and head d64a5b27b0d4ed9fd126e1d0843b789447537336; parsed review total 79/100, verdict fail because the committed 613400-byte PNG and 769215-byte SVG breach the 300000-byte data-file cap; direct-array wall-contact/RMS and compensator checks pass, with zero suite failures measurable because no baseline or after suite arm was recorded.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T202646209095-cco-root-cause-map-and-compensator-closed-forms" data-who="reckon-build" data-when="2026-10-02T20:50:48Z">
+    <div class="r-comment-body"><p>At source 11985735c the 135-cell analytic map sup is 0.008246175112624599 Wb (1.65922892567e-4 relative), reproducing the prior measurement; vertical and radial flux_delta columns match closed forms exactly, with full-exterior error &lt;=2.84217e-14 Wb. Historical local cancellation +3.764539 mT (fresh +3.786836 mT) versus converged -21.255811 mT, ratio -5.6463. Receipts and wall-bearing panels: /nova/evidence/fragments/centroid-constrained-oracle-solve/cco-root-cause-map-and-compensator-closed-forms#map-and-compensator-closed-forms. No solver fix or ladder; interpretation of the coupled terminal state remains open.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T053656352101-review-of-cco-bounded-row-step-control" data-who="s19c-review-cco-c" data-when="2026-09-17T06:45:40.145Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T205409901465-cco-bounded-row-step-control stored at the fence path, total 84, findings recorded on the reviewed run's completion</p></div>

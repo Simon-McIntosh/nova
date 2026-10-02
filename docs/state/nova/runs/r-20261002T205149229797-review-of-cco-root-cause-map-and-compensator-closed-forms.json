@@ -513,6 +513,32 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "d8d417286ec7e0c0ade25d03ef714a4cdeb34814",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5053,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261002T205149229797-review-of-cco-root-cause-map-and-compensator-closed-forms",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/review-of-cco-root-cause-map-and-compensator-closed-forms"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "none",

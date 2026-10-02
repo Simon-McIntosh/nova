@@ -20,8 +20,8 @@ are merged. It changes no source and fixes nothing.</p>
   <tr><th scope="row">1280477</th><td>sirius, CPU, <code>--timeout 10000</code></td><td><code>test_the_accelerator_routes_agree_on_the_fixed_point</code></td><td><code>1 passed</code>; <code>EXIT=0</code></td><td>2344.83&nbsp;s (0:39:04)</td></tr>
   <tr><th scope="row">1280474</th><td>all_debug, CPU</td><td>vacuum field, several seeds, batched ensemble, topology portfolio</td><td><code>2 passed</code> (vacuum, several seeds); <code>2 not run</code> (batched ensemble killed mid-test, portfolio never started); TIMEOUT at the 59&nbsp;min limit</td><td>3548&nbsp;s (0:59:08)</td></tr>
   <tr><th scope="row">1280476</th><td>all_debug, CPU</td><td>moment map, solve/plasma-current gradients, moment refusal, external flux map</td><td><code>3 failed, 2 passed</code>; <code>EXIT=1</code></td><td>2907.47&nbsp;s (0:48:27)</td></tr>
-  <tr><th scope="row">1280481</th><td>sirius, CPU</td><td><code>test_the_batched_ensemble_solve_matches_the_per_slice_solve</code></td><td>running at handoff</td><td>&mdash;</td></tr>
-  <tr><th scope="row">1280482</th><td>sirius, CPU</td><td><code>test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap</code></td><td>running at handoff</td><td>&mdash;</td></tr>
+  <tr><th scope="row">1280481</th><td>sirius, CPU</td><td><code>test_the_batched_ensemble_solve_matches_the_per_slice_solve</code></td><td><code>1 passed</code>; <code>EXIT=0</code></td><td>2374.93&nbsp;s (0:39:34)</td></tr>
+  <tr><th scope="row">1280482</th><td>sirius, CPU</td><td><code>test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap</code></td><td><code>1 passed</code>; <code>EXIT=0</code></td><td>177.63&nbsp;s (0:02:57)</td></tr>
   </tbody>
 </table>
 
@@ -57,9 +57,9 @@ value to the printed digits, so none is a device artefact of the CUDA lane:</p>
 whole-file job reports is reproduced by a CPU shard, so the device is not the
 separating factor for any of the four.</p>
 
-<p><strong>Outstanding.</strong> The batched-ensemble and topology-portfolio
-tests did not complete on the 59-minute CPU partition; jobs
-<code>1280481</code> and <code>1280482</code> re-run each alone on
-<code>sirius</code> with an explicit <code>--time</code> and <code>--mem</code>.
-Their outcome is pending and will be appended here.</p>
+<p><strong>Outstanding: none.</strong> The batched-ensemble and topology-portfolio
+tests, which the 59-minute CPU partition killed, both pass when re-run alone on
+<code>sirius</code> (<code>1280481</code>: 2374.93&nbsp;s; <code>1280482</code>:
+177.63&nbsp;s). Every one of the 29 collected ids now has an outcome: 25 pass
+and the same four fail on both devices.</p>
 </section>

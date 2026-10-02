@@ -32,8 +32,10 @@ control:</p>
   the box keeps).</li>
   <li><strong>(c)</strong> Euler characteristic <code>V - E + T = 1</code> on
   the simply connected clipped domain.</li>
-  <li><strong>(d)</strong> an over-capacity input sets <code>overflow</code>;
-  a generous capacity on the same input does not.</li>
+  <li><strong>(d)</strong> an over-capacity input sets <code>overflow</code>
+  and leaves every validity mask empty with no valid triangle or edge indexing
+  past the vertex array (refusal, not truncation); a generous capacity on the
+  same input does not overflow.</li>
   <li><strong>(e)</strong> the mesh is a fixed-capacity jax pytree: a jitted
   reduction over it traces and matches the eager result.</li>
 </ul>
@@ -55,7 +57,9 @@ Applied in place, <code>negative-control-nearest-centre.log</code> records
 <code>EXIT=1</code> with
 <code>test_wall_vertex_flux_is_linear_interpolation</code> failing (max error
 0.185 Wb against the 1e-12 bound) and the other 7 passing; the source was
-restored byte-identical afterwards.</p>
+restored byte-identical afterwards. A second control restores the truncating
+build (overflow masking disabled): <code>test_over_capacity_sets_overflow_flag</code>
+fails, <code>negative-control-overflow-truncation.log</code>, <code>EXIT=1</code>.</p>
 
 <h3>Reuse</h3>
 <p>Per <a href="/nova/evidence/contour-tree-topology-authority/reuse-map.md">reuse-map</a>

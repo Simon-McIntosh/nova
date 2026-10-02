@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="31">
+<meta name="plan-version" content="32">
 </head>
 <body>
   <main class="plan-doc">
@@ -419,6 +419,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T181034474235-review-of-ctta-explanatory-figure-from-computed-tree" data-who="reckon-build" data-when="2026-10-02T18:19:03Z">
     <div class="r-comment-body"><p>Parsed fail review (55/100) stored for d0f91aa521b789a900fd5ff425cb712f60114edf through e3ee1c90a4e2f2d22321d3acaff9cb918715b9c0, recommending omission of the outside sentinel from the numeric flux axis rather than an axis break.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T164903995177-ctta-virtual-node-not-a-critical-point" data-who="reckon-build" data-when="2026-10-02T18:35:08.823Z">
+    <div class="r-comment-body"><p>Closed - the virtual outside node stays in the receipt with its arc (one tree, node minus edge one), is typed CRITICAL_TYPE_OUTSIDE instead of minimum, is documented on the module and receipt, and dd_emittable_nodes gives the DD-emittable rows that drop it; four-file gate 32 passed EXIT=0, and per-fixture minima fall by one (cert 5 to 4, MAST 27079 row 16 22 to 21).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261001T215539964290-review-3-of-contour-tree-topology-authority" data-who="reckon-build" data-when="2026-10-01T22:36:28.181Z">
     <div class="r-comment-body"><p>review-3 restates nova:contour-tree-topology-authority (revision e4fedfd80 / HEAD b2cc96f45, plan blob 1b01505b8, plan digest sha256:9ad6ead9...) at its margin revision: intent in the reviewer's own words, the one open decision field-representation-on-hex-cells with all three options, and all five done-whens; 125 prose sentences enumerated, 5 flagged with two-or-more readings (040, 043, 065, 088, 097); no plan file edited.</p></div>

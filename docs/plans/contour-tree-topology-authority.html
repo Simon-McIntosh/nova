@@ -120,13 +120,16 @@
       containment over the multi-unit wall, never by a bounding box. The wall polyline is
       the domain boundary, and its vertices belong to the domain as boundary
       vertices.</li>
-      <li><strong>Carrier.</strong> The hex plasma cells, with the flux valued at their
-      centres. Nothing in the read resamples onto a raster.</li>
+      <li><strong>Carrier.</strong> The lattice of hex-cell centres: one flux value per hex
+      plasma cell, at its centre. Nothing in the read resamples onto a raster.</li>
       <li><strong>Output.</strong> A mapping onto DD 4.1.0, written under COCOS 17 as that
       version declares:
         <ul>
           <li>the tree as <code>contour_tree.node</code> and <code>contour_tree.edges</code>,
-          with <code>critical_type</code> reported on raw ψ;</li>
+          with each node's <code>psi</code> stored as raw ψ in webers under COCOS 17 and its
+          <code>critical_type</code> classified on raw ψ. Under σ = −1 the current-carrying
+          axis is therefore a minimum of raw ψ (<code>critical_type</code> 0); under
+          σ = +1 it is a maximum (2);</li>
           <li>the class as <code>boundary.type</code> (0 limiter, 1 diverted);</li>
           <li>the boundary level as <code>boundary.psi</code>;</li>
           <li>the axis level as <code>global_quantities.psi_magnetic_axis</code>;</li>
@@ -163,8 +166,11 @@
       appears in the join tree as its join with the outside node, at the level of the
       highest wall vertex in that region: the first one met as the level descends.</li>
       <li><strong>Tracing.</strong> The construction is fixed-shape and traceable under
-      <code>jit</code> and <code>vmap</code>, with the node and edge capacities stated
-      and any overflow refused visibly on the receipt.</li>
+      <code>jit</code> and <code>vmap</code>, with the node and edge capacities stated.
+      An overflow is recorded as a named refusal flag on the receipt that marks the
+      state's topology unqualified. Nothing raises inside the traced read, so one
+      overflowing state never aborts a batch. The only exception that can be raised is
+      §1's host-side convention check, which runs before tracing.</li>
     </ul>
     <p><strong>Done when:</strong></p>
     <ul>
@@ -207,10 +213,11 @@
       necessarily the global maximum), the one whose tree branch holds the largest share
       of the plasma current. The current is summed over the hex cells of that branch down
       to its first event, which is the higher of its first interior saddle and its first
-      join with the outside node. A tie raises the same named error as §1's convention
-      check.</li>
-      <li><strong>Plasma region:</strong> the axis component of the superlevel set of σψ,
-      followed down the tree from the primary O-point.</li>
+      join with the outside node. A tie is recorded as a named refusal flag on the receipt
+      and marks the topology unqualified, like every refusal inside the traced read.</li>
+      <li><strong>Plasma region:</strong> the superlevel component of σψ that contains the
+      primary O-point, followed down the tree from it. The magnetic axis is the primary
+      O-point by definition.</li>
       <li><strong>The first event</strong> is read only along the primary O-point's own
       path down the join tree. "First" always means the highest σψ level, the first one
       met as the level descends from the axis. It is the larger of two levels:
@@ -233,7 +240,8 @@
       touch the wall outside the divertor's private flux. <code>σψ_x</code> is the
       primary X-point's level as defined above, so a limited state with an in-vessel
       saddle on its path still has one. The margin is positive for diverted states and
-      negative for limited ones, finite on both sides, and independent of the solve box.
+      negative for limited states whose path carries an in-vessel saddle; it is finite
+      wherever it is defined, and independent of the solve box.
       A state whose path carries no in-vessel saddle at all is limited and has no
       margin: the receipt records <code>margin: none (no in-vessel saddle)</code>
       instead of an infinity.</li>

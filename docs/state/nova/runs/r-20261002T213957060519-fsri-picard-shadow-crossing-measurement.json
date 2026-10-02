@@ -1,0 +1,616 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-terra",
+  "base_sha": "d8bc23881be8933ef969ee4148458053e2fbc3bc",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 12480384,
+      "cached_input_tokens_cumulative": 12480384,
+      "input_tokens": 12685391,
+      "input_tokens_cumulative": 12685391,
+      "output_tokens": 34280,
+      "output_tokens_cumulative": 34280,
+      "reasoning_output_tokens": 10468,
+      "reasoning_output_tokens_cumulative": 10468
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 363,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "03c745932160aee6e29acc5e67630c4876b1f968"
+  ],
+  "completed_at": "2026-10-02T22:08:55Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T21:41:00Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "Picard/adjoint"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 7.588456712672522,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-02T22:40:08.897252+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T21:40:07Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 603206,
+    "state": "quiet",
+    "utilisation_pct": 2.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T21:40:07Z",
+    "read_at": "2026-10-02T21:40:08Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 2.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T22:08:55Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T213957060519-fsri-picard-shadow-crossing-measurement/manifest.md",
+  "member": "disposable-r-20261002T213957060519-fsri-picard-shadow-crossing-measurement",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsri-picard-shadow-crossing-measurement",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1499,
+          "cached_input_tokens": 917540,
+          "input_tokens": 919041,
+          "output_tokens": 2395,
+          "reasoning_output_tokens": 875,
+          "total_tokens": 921436,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "On the three tests' own fixtures and perturbations, record per perturbation sign and step: the terminal shadow mask, its Hamming distance from the unperturbed terminal mask, the Picard trip count, and the terminal residual, and decompose each finite difference into the part with the mask held at the unperturbed terminal mask and the part due to mask changes. State from the measurement whether the reverse derivative agrees with the mask-held finite difference: if it does, the mechanism is confirmed; if it does not, the mechanism is refuted and the evidence names what else differs. Include a data-ink figure of finite-difference value against step, mask-held beside live, with the reverse derivative as a reference line, under docs/figures/forward-solver-route-integrity/picard-shadow-crossing/. Measurement only: change no solver source; a benchmark script under benchmarks/ is yours. Run CPU work in place with JAX_PLATFORMS=cpu; for H200 work the coordinator authorises RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh (H200 rung, betelgeuse gpu_0003_grpA, one card, explicit --mem, JAX_PLATFORMS=cuda, shared interpreter, no uv on the compute node); the general srun/sbatch/salloc fence does not forbid that path. The worktree registry is read-only in your fence, so if you need another revision use git archive into a directory under /tmp, never git worktree. While a SLURM job runs write status: blocked with a valid wait_probe and wait_terminal COMPLETED. Every uv command carries --no-sync and nothing runs uv sync. The manifest status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Measure whether the residual-shadow selection on the Picard route explains the three derivative-test failures in tests/test_equilibrium_forward_solve.py (moment-map ladder analytic maximum 0.7598863825 against > 1 with central-difference errors near 3.15 at every step; flux-current relative error 63.478750931; plasma-current relative error 11.313969220), which run r-20261002T211102441480-fsri-derivative-tests-root-cause showed predate today's merges. Its proposed mechanism: fixed_point.picard carries the boolean previous_shadow and refreshes it after each relaxed state, ForwardFluxOperator._exclude_shadow_residual returns jnp.where(shadow, psi, mapped), and reverse mode differentiates the selected continuous branch while a finite perturbation can change the discrete selection.",
+    "id": "fsri-picard-shadow-crossing-measurement",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T21:40:07Z",
+      "read_at": "2026-10-02T21:40:08Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 2.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T213957060519-fsri-picard-shadow-crossing-measurement/manifest.md",
+    "negative_control": "hold the mask fixed in both the reverse and the finite-difference arms; if the mechanism is right the two then agree within the test tolerances",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§1",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/picard_shadow_crossing.py",
+      "docs/figures/forward-solver-route-integrity/picard-shadow-crossing",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-picard-shadow-crossing-measurement.html",
+      "docs/figures/forward-solver-route-integrity/fsri-picard-shadow-crossing-measurement"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 7.523856423569144,
+      "derived": 0.0029240324059192652,
+      "drain_hours": 168.0,
+      "effective_limit": 0.0029240324059192652,
+      "elapsed_fraction": 0.0026582112781084227,
+      "elapsed_hours": 0.44657949472221503,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-02T21:40:21+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.98,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.02,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.001184,
+      "decided_by": "window",
+      "margin": 0.7363160000000001,
+      "name": "fsri-picard-shadow-crossing-measurement",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.02
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.686181,
+        "observed_at": "2026-10-02T21:40:21+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.02,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "fsri-picard-shadow-crossing-measurement",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-02T21:40:21.686181+00:00",
+    "score": 0.7375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "claude-opus",
+    "comment": "",
+    "confidence": 0.23,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "unavailable",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 1.3472948747800926,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 6,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 22,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 23
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 15,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unavailable",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "availability: unavailable"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "claude",
+    "jev_latency_ms": 347.468,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 3269.392,
+    "model": "claude-opus-5-5",
+    "offered": [
+      {
+        "availability": "served",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 1.3472948747800926,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude-opus": 0.61,
+      "hold": 0.39
+    },
+    "rendered_token_estimate": 800,
+    "usage": {
+      "cost": 6.8082e-05,
+      "input_tokens": 1621,
+      "output_tokens": 37
+    }
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "03c745932160aee6e29acc5e67630c4876b1f968",
+  "resume_waiver": null,
+  "review": {
+    "absent": [
+      "The reviewed manifest has empty baseline_suite and after_suite fields, and the CPU reproduction log stops after collection without a pytest summary. There is no paired, completed suite comparison from which a failure-id delta can be calculated.",
+      "The benchmark records terminal residual-shadow Hamming distances, not the shadow-mask history at each of the 80 Picard trips. Its matched live and fixed-shadow arms nevertheless bound the net effect of any unrecorded transient selection for these fixtures."
+    ],
+    "reviewed_base_sha": "d8bc23881be8933ef969ee4148458053e2fbc3bc",
+    "reviewed_head_sha": "03c745932160aee6e29acc5e67630c4876b1f968",
+    "scores": {
+      "durability": 17,
+      "evidence": 18,
+      "fit": 17,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 91
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T213957060519-fsri-picard-shadow-crossing-measurement",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fe90-648e-7c23-9b7c-b32903849926",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 12480384,
+    "cumulative_input_tokens": 25165775,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 44748
+  },
+  "time_budget": "60m",
+  "tool_steps": 80.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1675,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T22:09:00Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T21:41:08Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T213957060519-fsri-picard-shadow-crossing-measurement",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 278,
+    "worker_pid": 651463
+  },
+  "worker_seconds": 1675,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

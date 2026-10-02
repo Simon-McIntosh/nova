@@ -25,8 +25,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="70">
+<meta name="plan-modified" content="2026-10-03">
+<meta name="plan-version" content="71">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -587,6 +587,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261002T214019409831-review-of-fsri-derivative-tests-root-cause" data-who="reckon-build" data-when="2026-10-02T21:47:47Z">
     <div class="r-comment-body"><p>Independent review passes at 93/100; five H200 logs prove both candidate merges predate the three failures, while direct shadow-selection instrumentation remains a follow-on.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261002T213957060519-fsri-picard-shadow-crossing-measurement" data-who="reckon-build" data-when="2026-10-02T22:08:55Z">
+    <div class="r-comment-body"><p>Committed 03c745932160aee6e29acc5e67630c4876b1f968; terminal residual-shadow Hamming distance was zero for all perturbations, live and held finite differences coincided, and held reverse errors remained 63.4787509305 and 11.3139692204.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-fsri-compile-blocks-a-cpu-control" data-who="coordinator" data-when="2026-09-19T16:55:00Z">
     <div class="r-comment-body"><p>The program size this section owns now blocks another plan's evidence, measured 2026-09-19 on the centroid-constrained positive control. Two all_debug jobs aborted inside LLVM compiling <code>jit_scan</code>, the first at 64G and the second at 180G, both with <code>allocateMappedMemory failed</code> and a core dump at exit 134, the second after a slow-compile alarm and 38 minutes. Tripling the allocation changed nothing, so the constraint is the compiled module rather than the job's memory request. Two things follow for this section. The gate for section 2 should include a CPU arm, since an executable that cannot be compiled on a 180G node is a failure a device-only budget would not catch. And the scheduler signal is not trustworthy here: <code>sacct</code> reported <code>COMPLETED 0:0</code> for both jobs and for every sub-step while the payload aborted, so the payload log is the only evidence of what happened. The centroid plan's positive control waits on this section rather than on its own node.</p></div>

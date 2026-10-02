@@ -188,42 +188,44 @@
       },
       "state_panel": {
         "png": {
-          "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21978-35-state.png",
+          "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21978-35-state.png",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21978-35-state.png",
-          "sha256": "c3311889ef0b7ecc239ad824aa21982ed2136fa4ebb23778bca9dd06694e3f9d"
+          "sha256": "286b0b60e1edafd59ce5f14efc7437e999dcd57ecec60d0a26921639ab39c27e"
         },
         "svg": {
-          "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21978-35-state.svg",
+          "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21978-35-state.svg",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21978-35-state.svg",
-          "sha256": "4c4b40eecf2e046d6ed1263b9982a55ddc52b733b05039ac992dda6bd8c4da2f"
+          "sha256": "5bbcd9f4d7453ddf70e0f483618006575aeaa9c2c78dd90696ae4371efb4c7e3"
         },
         "levels_wb": [
-          -0.9837653608617356,
-          -0.8658140708512605,
-          -0.7478627808407853,
-          -0.6299114908303101,
-          -0.511960200819835,
-          -0.39400891080935985,
-          -0.27605762079888463,
-          -0.1581063307884094,
-          -0.0401550407779343,
-          0.0777962492325408,
-          0.1957475392430159,
-          0.3136988292534912
+          -0.06831344688047811,
+          -0.0335618537862864,
+          0.0011897393079053076,
+          0.035941332402097015,
+          0.07069292549628872,
+          0.10544451859048043,
+          0.14019611168467214,
+          0.17494770477886384,
+          0.20969929787305555,
+          0.2444508909672473,
+          0.279202484061439,
+          0.3139540771556307
         ],
         "topology": {
           "read_status": "qualified",
           "class": "1",
           "axis_rz_m": [
             0.9045122442030371,
-            0.00042113145414409884
+            0.00042113145414409873
           ],
           "x_point_rz_m": [
             [
               0.5693290433074584,
               -1.2376221618468375
             ]
-          ]
+          ],
+          "axis_flux_wb": 0.3139540771556307,
+          "boundary_flux_wb": -0.06831344688047811
         },
         "wall_unit_count": 1
       }
@@ -326,42 +328,44 @@
       },
       "state_panel": {
         "png": {
-          "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21983-35-state.png",
+          "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21983-35-state.png",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21983-35-state.png",
-          "sha256": "2f9f91c07d9d758ff98feb7e42586e69e6b45170f21318fbcd6415fdbad4f263"
+          "sha256": "bf2c2461fe7fb9a88145c55bfddd0cedb022385240648dc25961df80298af5fd"
         },
         "svg": {
-          "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21983-35-state.svg",
+          "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21983-35-state.svg",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21983-35-state.svg",
-          "sha256": "f306f7c87a09df98f1184f8a29e62b461a4e4169779b0399a6afe3bf357ed50e"
+          "sha256": "92aa2ccd3336537e949d28c76f5bc451111674acd651334bd246c07c3bf29d55"
         },
         "levels_wb": [
-          -1.0437949259791552,
-          -0.9211882012813841,
-          -0.7985814765836131,
-          -0.6759747518858421,
-          -0.553368027188071,
-          -0.43076130249029987,
-          -0.30815457779252886,
-          -0.18554785309475785,
-          -0.06294112839698673,
-          0.059665596300784385,
-          0.1822723209985555,
-          0.30487904569632646
+          -0.10345884149130553,
+          -0.06631018144390027,
+          -0.029161521396495027,
+          0.007987138650910233,
+          0.04513579869831548,
+          0.08228445874572073,
+          0.119433118793126,
+          0.15658177884053126,
+          0.1937304388879365,
+          0.23087909893534175,
+          0.268027758982747,
+          0.30517641903015225
         ],
         "topology": {
           "read_status": "qualified",
           "class": "1",
           "axis_rz_m": [
             0.9043885191307982,
-            0.004807763029699158
+            0.0048077630296991586
           ],
           "x_point_rz_m": [
             [
               0.54609502386733,
-              -1.2299497761535778
+              -1.2299497761535776
             ]
-          ]
+          ],
+          "axis_flux_wb": 0.30517641903015225,
+          "boundary_flux_wb": -0.10345884149130553
         },
         "wall_unit_count": 1
       }
@@ -464,42 +468,44 @@
       },
       "state_panel": {
         "png": {
-          "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.png",
+          "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.png",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.png",
-          "sha256": "c560abd93bd58aa1796713a511b35e2ef112011b1b669ebbc76b9de09ecd6b84"
+          "sha256": "a491bf268085c201434e4d23eea88a79147f5004c9b8e05e593955a2d2839425"
         },
         "svg": {
-          "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
+          "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
-          "sha256": "ebce4040f935cdfdf0ce39ef88bad4d083a4b2b9e887ef231151b3b31dc20eb5"
+          "sha256": "07819499d9402fb65313e215327e0aa64b21abdc0271a864a61fe0b2a7668cb7"
         },
         "levels_wb": [
-          -1.461588756167263,
-          -1.2979570988172424,
-          -1.134325441467222,
-          -0.9706937841172016,
-          -0.8070621267671811,
-          -0.6434304694171606,
-          -0.47979881206714026,
-          -0.31616715471711987,
-          -0.15253549736709937,
-          0.011096159982921128,
-          0.17472781733294163,
-          0.338359474682962
+          -0.21935554785766842,
+          -0.168588557032942,
+          -0.11782156620821563,
+          -0.06705457538348925,
+          -0.016287584558762835,
+          0.034479406265963575,
+          0.08524639709068993,
+          0.13601338791541634,
+          0.18678037874014275,
+          0.23754736956486916,
+          0.28831436038959557,
+          0.3390813512143219
         ],
         "topology": {
           "read_status": "qualified",
           "class": "1",
           "axis_rz_m": [
             0.8993211781585156,
-            0.004630443500216432
+            0.004630443500216437
           ],
           "x_point_rz_m": [
             [
-              0.5587266601714519,
-              -1.1259795343799603
+              0.5587266601714503,
+              -1.1259795343799515
             ]
-          ]
+          ],
+          "axis_flux_wb": 0.3390813512143219,
+          "boundary_flux_wb": -0.21935554785766842
         },
         "wall_unit_count": 1
       }
@@ -602,28 +608,28 @@
       },
       "state_panel": {
         "png": {
-          "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.png",
+          "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.png",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.png",
-          "sha256": "eb0636b9b470a90b48c225cc3ba8b675d2d2e42b9494b81f8cc691f330ad5490"
+          "sha256": "623592bdd5851d3105646c305886a69ab2f134bce744363b8f69a36ec4ce5ff4"
         },
         "svg": {
-          "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.svg",
+          "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.svg",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.svg",
-          "sha256": "b4d3af97b5937546dbc7e96c2ab64606fcf7936f8fbb29ad1bea3ab9474988fe"
+          "sha256": "41e72dee269faad37a0516d24c8e0bccc9a18c05b26705c2691d66e8b98f94ed"
         },
         "levels_wb": [
-          -1.2802685464673298,
-          -1.1326400244593984,
-          -0.985011502451467,
-          -0.8373829804435357,
-          -0.6897544584356042,
-          -0.5421259364276728,
-          -0.3944974144197415,
-          -0.2468688924118101,
-          -0.09924037040387867,
-          0.04838815160405274,
-          0.19601667361198416,
-          0.3436451956199157
+          -0.17700265611346355,
+          -0.12941998715609437,
+          -0.08183731819872521,
+          -0.034254649241356044,
+          0.013328019716013134,
+          0.06091068867338231,
+          0.10849335763075146,
+          0.15607602658812064,
+          0.20365869554548982,
+          0.251241364502859,
+          0.2988240334602282,
+          0.34640670241759725
         ],
         "topology": {
           "read_status": "qualified",
@@ -637,7 +643,9 @@
               0.6239136979258002,
               1.1931233368463523
             ]
-          ]
+          ],
+          "axis_flux_wb": 0.34640670241759725,
+          "boundary_flux_wb": -0.17700265611346355
         },
         "wall_unit_count": 1
       }
@@ -740,42 +748,44 @@
       },
       "state_panel": {
         "png": {
-          "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21989-55-state.png",
+          "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21989-55-state.png",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21989-55-state.png",
-          "sha256": "670af06934753b766857c242ba5a5c7406a6efd4421b2a4d29c84723c580ddcd"
+          "sha256": "fc6526c3af6994374020150725e13a5d7075be23e3df208f2d498f5e09dd5067"
         },
         "svg": {
-          "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21989-55-state.svg",
+          "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21989-55-state.svg",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21989-55-state.svg",
-          "sha256": "8c776bcaada7ac3aac923929c3d8e442e670fdaef1eb0c095c47a5fbc0865364"
+          "sha256": "d987ca5b39761c8216327cca0723ddcf332abc01c8773bb0fe7624bc4144b09c"
         },
         "levels_wb": [
-          -1.4491271700394828,
-          -1.2872425797486404,
-          -1.125357989457798,
-          -0.9634733991669556,
-          -0.8015888088761133,
-          -0.6397042185852709,
-          -0.4778196282944285,
-          -0.31593503800358613,
-          -0.1540504477127438,
-          0.007834142578098557,
-          0.1697187328689409,
-          0.33160332315978325
+          -0.21315064928426178,
+          -0.16358462949256047,
+          -0.11401860970085914,
+          -0.06445258990915784,
+          -0.014886570117456505,
+          0.03467944967424483,
+          0.0842454694659461,
+          0.13381148925764744,
+          0.18337750904934877,
+          0.2329435288410501,
+          0.28250954863275146,
+          0.3320755684244527
         ],
         "topology": {
           "read_status": "qualified",
           "class": "1",
           "axis_rz_m": [
             0.9149487916552259,
-            0.010971555461230605
+            0.010971555461230572
           ],
           "x_point_rz_m": [
             [
               0.5780605238446869,
               1.135421566982319
             ]
-          ]
+          ],
+          "axis_flux_wb": 0.3320755684244527,
+          "boundary_flux_wb": -0.21315064928426178
         },
         "wall_unit_count": 1
       }
@@ -878,42 +888,44 @@
       },
       "state_panel": {
         "png": {
-          "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-22086-43-state.png",
+          "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-22086-43-state.png",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-22086-43-state.png",
-          "sha256": "2e8ff3d2a473ba355a7ae250e1ffc367b415bf4c984ea6f1b0e08182db26430e"
+          "sha256": "376d1c66af1dbbb6430a75a7cbbd8cd79b530886726a097c840b43665176a0e6"
         },
         "svg": {
-          "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-22086-43-state.svg",
+          "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-22086-43-state.svg",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-22086-43-state.svg",
-          "sha256": "815af7c59f9cf89809c22c7418c2061dc7ce2e6c568f428b86c2330b68cc31d4"
+          "sha256": "d71ee77f7292e3e3311dd62522eea443a94d47323d9d57c91e5c20b2ddb3cdce"
         },
         "levels_wb": [
-          -1.219954543261922,
-          -1.0779602809870101,
-          -0.9359660187120984,
-          -0.7939717564371865,
-          -0.6519774941622747,
-          -0.5099832318873628,
-          -0.367988969612451,
-          -0.22599470733753912,
-          -0.08400044506262727,
-          0.05799381721228469,
-          0.19998807948719644,
-          0.3419823417621081
+          -0.12933198764991055,
+          -0.08645529929995582,
+          -0.043578610950001095,
+          -0.0007019226000463674,
+          0.04217476574990836,
+          0.08505145409986309,
+          0.12792814244981782,
+          0.17080483079977254,
+          0.21368151914972727,
+          0.256558207499682,
+          0.29943489584963673,
+          0.34231158419959146
         ],
         "topology": {
           "read_status": "qualified",
           "class": "1",
           "axis_rz_m": [
             0.9052605679418458,
-            0.0034524725279145934
+            0.003452472527914593
           ],
           "x_point_rz_m": [
             [
               0.5862131601685471,
               -1.1966931466743165
             ]
-          ]
+          ],
+          "axis_flux_wb": 0.34231158419959146,
+          "boundary_flux_wb": -0.12933198764991055
         },
         "wall_unit_count": 1
       }
@@ -965,15 +977,27 @@
   },
   "figure": {
     "png": {
-      "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.png",
+      "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.png",
       "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.png",
       "sha256": "4af6761c35fcf04631fd9634f8cfef5be42822704a53756eb877b2e2df363278"
     },
     "svg": {
-      "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.svg",
+      "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.svg",
       "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.svg",
-      "sha256": "92ba3d6f9dcc087b5974be214c07212e5fa3e9369b96e90a6a2c1c14e48753fc"
+      "sha256": "76b7247baacb84f235b25a839aa9b588850128ec8fe6587af33caa0ba200a65a"
     },
     "source_revision": "c3f82561e4582b8b37023337e336237c1b912ff2"
+  },
+  "render": {
+    "cache_version": "runtime-ea5c55820be3d80549fe",
+    "rows_redrawn": [
+      "21978/35",
+      "21983/35",
+      "21985/51",
+      "21986/46",
+      "21989/55",
+      "22086/43"
+    ],
+    "solve_policy": "no new solve: the panels are drawn from the banked state"
   }
 }

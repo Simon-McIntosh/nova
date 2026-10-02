@@ -818,26 +818,28 @@
     obtain. The receipt records it per row as <code>scale_alone_closes_the_gap</code>.</p>
     <figure>
       <img src="/nova/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.png"
-           alt="For MAST 21978 row 35: extracted and projected pressure gradient against normalised flux, extracted and projected FF prime against normalised flux, each with the freed-scale variant; and the terminal poloidal flux as line contours on the reference's own levels with the wall and both null sets.">
+           alt="For MAST 21978 row 35: extracted and projected pressure gradient against normalised flux, extracted and projected FF prime against normalised flux, each with the freed-scale variant; and the reference state's poloidal flux as line contours on its own levels with the wall and the reference null set.">
       <figcaption>MAST 21978/35, the one row the run completed. Left and centre: the extracted profile (grey), the order-2 projected profile
       (blue) and the freed-scale variant at its own terminal amplitude (dashed), on shared axes; the percentage in each legend is the amplitude
-      fraction the solve reached, and the reader sees directly that a scaled curve does not become the target curve. Right: the terminal
-      poloidal flux as unfilled line contours on the reference's own level array, the wall drawn from the operator's typed units, and both
-      null sets — the reference state's and the terminal state's — in the committed null vocabulary. Both arms terminated unconverged with
-      <code>active_set_cycle_detected</code>; terminal residuals 0.0507 (pressure-gradient arm) and 0.2242 (<code>FF&#8242;</code> arm), with the caption
+      fraction the solve reached, and the reader sees directly that a scaled curve does not become the target curve. Right: the reference
+      state's poloidal flux as unfilled line contours on its own level array, the wall drawn from the operator's typed units, and the
+      reference state's own null set in the committed null vocabulary — the terminal flux field is not persisted, so no terminal flux is
+      drawn. Both arms terminated unconverged with
+      <code>active_set_cycle_detected</code>; terminal residuals 0.0507 (pressure-gradient arm) and 0.2242 (<code>FF&#8242;</code> arm), with the title
       and legend carrying the same figures. The panel set is produced by the committed
-      <code>nova.media</code> painters on an H200 node.
+      <code>nova.media</code> painters.
       The vector companion <a href="/nova/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.svg"><code>row-21978-35.svg</code></a>
       is published beside the raster, so a reader that cannot open a PNG still reads the two component panels, the fitted orders, the
-      condition numbers and the caption. It was redrawn on a CPU <code>all_debug</code> allocation from the persisted receipt rather than by
-      the lane that produced the raster: no solve runs for the component panels, only the row's profiles re-extracted and re-projected, and
+      condition numbers and the title. Both the raster and the vector companion were redrawn on a CPU allocation from the persisted receipt
+      rather than by
+      the lane that produced the originals: no solve runs, only the row's profiles re-extracted and re-projected, and
       each freed-scale curve drawn at the amplitude the banked solve reported. Before anything is written the redraw re-derives the fit and
       refuses the row unless the order, the basis, the SI scale, the condition number and the relative residual all reproduce the receipt to
       <code>rtol=1e-9</code>; this row reproduced all five compared quantities per component (order and basis, then si_scale, condition number and relative residual), which is why the companion is evidence about the same projection, but the identity
-      is a comparison against the record — not a byte identity with the raster. Only the raster's third panel carries the terminal state:
-      the receipt persists the terminal residual and the converged flag but <em>not</em> the terminal flux field, so the redraw has nothing
-      to redraw there and its third panel carries the reference state alone, saying so in its own title. The two figures must therefore be
-      read as one measurement with one panel short of the other, and the caption each carries states the same two terminal residuals.</figcaption>
+      is a comparison against the record — not a byte identity with the raster. Because the receipt persists the terminal residual and the converged flag but <em>not</em> the
+      terminal flux field, neither figure draws a terminal flux: both third panels carry the reference state alone and say so in their own
+      titles, and both titles carry each arm's own verdict — <code>converged: false, terminal residual 5.07e-02, active_set_cycle_detected</code>
+      for the pressure-gradient arm and the same termination with a 2.24e-01 residual for the <code>FF&#8242;</code> arm.</figcaption>
     </figure>
     <p><strong>What the run cost, and what it did not reach.</strong> One H200 job (betelgeuse 1273593, <code>gpu_0003_grpA</code>, one
     card, 8 CPUs, 128G, the root environment's interpreter running the worktree through <code>PYTHONPATH</code>, versioned persistent

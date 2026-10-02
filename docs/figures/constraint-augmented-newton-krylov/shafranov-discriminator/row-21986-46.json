@@ -96,28 +96,28 @@
   },
   "state_panel": {
     "png": {
-      "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.png",
+      "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.png",
       "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.png",
-      "sha256": "eb0636b9b470a90b48c225cc3ba8b675d2d2e42b9494b81f8cc691f330ad5490"
+      "sha256": "623592bdd5851d3105646c305886a69ab2f134bce744363b8f69a36ec4ce5ff4"
     },
     "svg": {
-      "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.svg",
+      "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.svg",
       "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.svg",
-      "sha256": "b4d3af97b5937546dbc7e96c2ab64606fcf7936f8fbb29ad1bea3ab9474988fe"
+      "sha256": "41e72dee269faad37a0516d24c8e0bccc9a18c05b26705c2691d66e8b98f94ed"
     },
     "levels_wb": [
-      -1.2802685464673298,
-      -1.1326400244593984,
-      -0.985011502451467,
-      -0.8373829804435357,
-      -0.6897544584356042,
-      -0.5421259364276728,
-      -0.3944974144197415,
-      -0.2468688924118101,
-      -0.09924037040387867,
-      0.04838815160405274,
-      0.19601667361198416,
-      0.3436451956199157
+      -0.17700265611346355,
+      -0.12941998715609437,
+      -0.08183731819872521,
+      -0.034254649241356044,
+      0.013328019716013134,
+      0.06091068867338231,
+      0.10849335763075146,
+      0.15607602658812064,
+      0.20365869554548982,
+      0.251241364502859,
+      0.2988240334602282,
+      0.34640670241759725
     ],
     "topology": {
       "read_status": "qualified",
@@ -131,7 +131,9 @@
           0.6239136979258002,
           1.1931233368463523
         ]
-      ]
+      ],
+      "axis_flux_wb": 0.34640670241759725,
+      "boundary_flux_wb": -0.17700265611346355
     },
     "wall_unit_count": 1
   }

@@ -1,0 +1,33 @@
+<section id="carrier-adjacency-index-dtype">
+  <h3>Carrier adjacency indices and tables share one integer dtype</h3>
+  <p>The carrier adjacency sweep read `left, right` straight from the caller's
+  edge array and scattered them into int32 tables (<code>neighbours</code>,
+  <code>counts</code>). Under extended precision the caller's edge array is
+  int64, so the scatter traced <code>int64 -&gt; int32</code> and JAX raised
+  <code>FutureWarning: scatter inputs have incompatible types</code>, which a
+  later JAX makes a hard error. <code>_carrier_adjacency</code> now casts its
+  edge array once to <code>CARRIER_INDEX_DTYPE</code> (int32) and builds both
+  tables at that dtype, so the indices and every table they scatter into carry
+  one integer dtype. Carrier vertex indices are bounded by the mesh size, so
+  the narrow integer is exact.</p>
+  <p>The two capacity tests are marked
+  <code>filterwarnings("error::FutureWarning")</code>, so the warning fails
+  them durably. At the dispatch base both fail under the mark
+  (<code>base-repro.log</code>, <code>EXIT=1</code>); after the change both
+  pass (<code>head-carrier-adjacency.log</code>, <code>EXIT=0</code>). The
+  negative control restores <code>edges.astype(jnp.int64)</code> in
+  <code>_carrier_adjacency</code>, which fails both tests on the same
+  FutureWarning (<code>negative-control.log</code>, <code>EXIT=1</code>).</p>
+  <table>
+    <thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
+    <tbody>
+      <tr><td>test_contour_tree_merge.py</td><td>11 passed</td><td>11 passed</td></tr>
+      <tr><td>test_contour_tree_mesh.py</td><td>8 passed</td><td>8 passed</td></tr>
+      <tr><td>test_contour_tree_conventions.py</td><td>6 passed</td><td>6 passed</td></tr>
+      <tr><td>test_contour_tree_brute_force.py</td><td>8 passed</td><td>8 passed</td></tr>
+    </tbody>
+  </table>
+  <p>Each gate file ran with <code>JAX_PLATFORMS=cpu</code> in its own fresh
+  pytest process in place on the fleet allocation; the four-file set adds no
+  failure against the dispatch base.</p>
+</section>

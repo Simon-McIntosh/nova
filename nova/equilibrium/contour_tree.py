@@ -45,6 +45,16 @@ critical point of the field, so it is typed outside the DD critical vocabulary
 and :func:`dd_emittable_nodes` drops it from the ``contour_tree`` mapping.
 """
 
+CARRIER_INDEX_DTYPE = jnp.int32
+"""Integer dtype shared by the carrier adjacency index arrays and their tables.
+
+The adjacency tables are fixed-shape integer arrays, and a scatter whose value
+dtype differs from the table's is refused under a warnings-as-errors gate and
+becomes an error in a later JAX, so the endpoint indices and the tables they
+write take this one dtype.  Carrier vertex indices are bounded by the mesh size,
+so the narrow integer is exact rather than an approximation.
+"""
+
 
 class FluxCurrentSignError(ValueError):
     """The current sign and raw flux ordering disagree with declared COCOS."""
@@ -190,14 +200,17 @@ def _carrier_adjacency(
 
     edge_count = edges.shape[0]
     neighbour_capacity = 16 if edge_count > 2 * vertex_count else edge_count
-    neighbours = jnp.zeros((vertex_count, neighbour_capacity), dtype=jnp.int32)
+    carrier_edges = edges.astype(CARRIER_INDEX_DTYPE)
+    neighbours = jnp.zeros(
+        (vertex_count, neighbour_capacity), dtype=CARRIER_INDEX_DTYPE
+    )
     neighbour_valid = jnp.zeros((vertex_count, neighbour_capacity), dtype=bool)
-    counts = jnp.zeros(vertex_count, dtype=jnp.int32)
+    counts = jnp.zeros(vertex_count, dtype=CARRIER_INDEX_DTYPE)
     overflow = jnp.asarray(False)
 
     def append(edge_index: int, state):
         table, valid, counts, overflow = state
-        left, right = edges[edge_index]
+        left, right = carrier_edges[edge_index]
         write = edge_valid[edge_index]
         left_slot = counts[left]
         right_slot = counts[right]

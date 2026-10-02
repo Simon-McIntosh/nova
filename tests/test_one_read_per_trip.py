@@ -57,19 +57,21 @@ def _partitioned_solver(
     return result, counts
 
 
-def test_a_hooked_map_takes_one_partition_for_the_whole_newton_solve():
-    """A map carrying the frozen-partition protocol freezes after one read.
+def test_a_hooked_map_refreezes_after_its_terminal_partition_changes():
+    """A changed terminal partition starts one further frozen Newton pass.
 
-    The parked topology cannot react to a state change inside the solve, so
-    the route takes a single trip and reads the partition once on entry and
-    once more when it re-qualifies the terminal state.
+    Each pass reads its partition once, then requalifies its terminal state.
+    The first terminal read changes the partition; the bounded second pass
+    confirms that its terminal partition is stable.
     """
     configure_dtypes()
     result, counts = _partitioned_solver(count_reads=True)
 
-    np.testing.assert_array_equal(result.active_set_mask_differences, [1])
-    assert int(result.active_set_iterations) == 1
-    assert counts == {"initial": 1, "boundary": 1}
+    np.testing.assert_array_equal(result.active_set_mask_differences, [1, 0, -1])
+    assert int(result.active_set_iterations) == 2
+    assert int(result.frozen_partition_reads) == 3
+    assert int(result.frozen_partition_refreezes) == 1
+    assert counts == {"initial": 1, "boundary": 2}
 
 
 def test_the_warmed_route_reads_the_partition_once_after_its_warmup():
@@ -82,12 +84,15 @@ def test_the_warmed_route_reads_the_partition_once_after_its_warmup():
     result, counts = _partitioned_solver(count_reads=True, warmup=3)
 
     assert int(result.active_set_iterations) == 1
+    assert int(result.frozen_partition_reads) == 2
+    assert int(result.frozen_partition_refreezes) == 0
     assert counts == {"initial": 1, "boundary": 1}
 
 
 def test_frozen_partition_is_bit_identical_when_the_mask_never_changes():
     configure_dtypes()
-    frozen, _counts = _partitioned_solver(changing_mask=False)
+    frozen, _counts = _partitioned_solver(changing_mask=False, active_set_steps=1)
+    frozen = frozen._replace(frozen_partition_reads=0, frozen_partition_refreezes=0)
 
     def stable_mask(state):
         return jnp.zeros_like(state, dtype=bool)

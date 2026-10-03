@@ -1,0 +1,12 @@
+<section id="fsapi-clip-mode-tests" data-node="fsapi-clip-mode-tests">
+  <h2>Seven forward test modules carry the clip mode explicitly</h2>
+  <p>The seven modules that set the process-global support clip mode now pass the
+  mode on the object each test builds. Exact-mode fixtures set
+  <code>clip_mode</code> on the operator they construct (or call
+  <code>with_clip_mode</code> on a driver-built operator); the certificate
+  helpers receive <code>clip_mode</code> as a keyword; the memory module drops
+  the monkeypatches of helpers it no longer calls. The only residual failure
+  shared with the dispatch base is the source-scan allowlist in
+  <code>test_solve_path_census_inputs</code> and the pytest-timeout in the
+  342-cell seed-bracket test, both unchanged by this migration.</p>
+</section>

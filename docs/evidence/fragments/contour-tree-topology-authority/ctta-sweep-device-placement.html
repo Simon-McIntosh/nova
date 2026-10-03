@@ -1,0 +1,41 @@
+<section id="sweep-device-placement">
+  <h3>Contour-tree sweep placement</h3>
+  <p>The benchmark holds the carrier arrays fixed across placements: 12 persisted
+  certificate rungs (340, 550 and 1074 cells) and the two MAST carriers.  It
+  compares serial host calls, a device <code>vmap</code> of the existing sweep,
+  and a benchmark-only device union-find prototype that pointer-jumps the full
+  parent table at each visit.  CPU-built carrier arrays are persisted before
+  the H200 arms so the placement comparison does not include a backend-specific
+  mesh-construction roundoff.</p>
+  <table>
+    <thead><tr><th>placement</th><th>batch</th><th>mean warm execute [s]</th><th>largest warm execute [s]</th><th>mean compile [s]</th></tr></thead>
+    <tbody>
+      <tr><td>host serial</td><td>1</td><td>0.225</td><td>0.455</td><td>1.153</td></tr>
+      <tr><td>host serial</td><td>8</td><td>1.793</td><td>3.687</td><td>0.001</td></tr>
+      <tr><td>host serial</td><td>64</td><td>14.484</td><td>29.334</td><td>0.001</td></tr>
+      <tr><td>H200 vmap</td><td>1</td><td>1.675</td><td>3.555</td><td>1.427</td></tr>
+      <tr><td>H200 vmap</td><td>8</td><td>1.748</td><td>3.612</td><td>1.267</td></tr>
+      <tr><td>H200 vmap</td><td>64</td><td>1.894</td><td>3.967</td><td>1.294</td></tr>
+      <tr><td>H200 parallel union-find</td><td>1</td><td>0.370</td><td>0.623</td><td>1.443</td></tr>
+      <tr><td>H200 parallel union-find</td><td>8</td><td>0.407</td><td>0.670</td><td>1.294</td></tr>
+      <tr><td>H200 parallel union-find</td><td>64</td><td>0.461</td><td>0.741</td><td>1.270</td></tr>
+    </tbody>
+  </table>
+  <figure>
+    <img src="/nova/figures/contour-tree-topology-authority/ctta-sweep-device-placement/execute-wall-by-carrier.png" alt="Warm contour-tree execute walls by live vertex count for host serial, H200 vmap and H200 parallel union-find placements at batch sizes 1, 8 and 64">
+    <figcaption>Warm execute wall against carrier size. The H200 values are from one H200 card; the CPU values run in the fleet allocation. Direct labels identify every placement. The parallel prototype removes the batch-growth visible in host serial execution, whereas a vmap of the existing data-dependent sweep remains launch-latency bound.</figcaption>
+  </figure>
+  <p><strong>Placement:</strong> keep a single solve on the host CPU (0.225 s
+  mean versus 0.370 s for the H200 prototype); use the H200 parallel
+  union-find formulation for a labeller batch (0.407 s at eight fields versus
+  1.793 s serial) and for a census (0.461 s at 64 fields versus 14.484 s
+  serial).  Do not use device <code>vmap</code> alone: it is slower than the
+  host for one field and slower than the parallel prototype at every measured
+  batch.</p>
+  <p>The committed comparator reports zero mismatches for every receipt field
+  (<code>node_vertex</code>, <code>node_psi</code>, <code>node_valid</code>,
+  <code>critical_type</code>, <code>edges</code>, <code>edge_valid</code> and
+  <code>overflow</code>) for CPU versus both H200 placements. Compile walls
+  are reported per arm; CPU arms were intentionally bounded per carrier, so
+  their cold setup is not a process-amortised deployment estimate.</p>
+</section>

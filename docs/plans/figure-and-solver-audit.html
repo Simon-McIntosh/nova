@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="69">
+<meta name="plan-version" content="70">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -501,7 +501,10 @@
     <div class="r-comment-body"><p>tests/renderer_wall_scan.py now reports repository-relative paths, treats a wall passed positionally as guarded, and documents every NON_RENDERER_CALLS entry; tests/test_renderer_wall_scan.py keeps the five named controls, adds a crafted positional-wall control, and drops the inventory/total-count snapshot; the corpus reconciliation moves to docs/figures/figure-and-solver-audit/fsa-renderer-wall-scanner-guard-form/reconcile_wall_scan_sites.py, which prints 82 current sites with relative paths and exits 0.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261003T165406822040-review-of-fsa-renderer-wall-scanner-guard-form" data-who="reckon-build" data-when="2026-10-03T17:04:54.893Z">
-    <div class="r-comment-body"><p>Independent review of run r-20261003T162104611350-fsa-renderer-wall-scanner-guard-form (node fsa-renderer-wall-scanner-guard-form, base 58d361d2c82c7017a2a79bea5028910cfc0b72f4, head 08869d26d7251d8078bcbd7e2538db2022cefbf8) stored parsed at both granted paths: 5 dimensions scored 0..20 (goal_fidelity 18, evidence 17, scope_discipline 19, durability 16, fit 18; total 88; verdict pass), reviewed_base_sha 58d361d2c82c7017a2a79bea5028910cfc0b72f4, reviewed_head_sha 08869d26d7251d8078bcbd7e2538db2022cefbf8, added_failure_count 0 with added_failure_ids [] derived from the reviewed run&#x27;s own baseline_suite (2 failed) and after_suite (0 failed) arms; two follow-on findings recorded.</p></div>
+    <div class="r-comment-body"><p>Independent review of run r-20261003T162104611350-fsa-renderer-wall-scanner-guard-form (node fsa-renderer-wall-scanner-guard-form, base 58d361d2c82c7017a2a79bea5028910cfc0b72f4, head 08869d26d7251d8078bcbd7e2538db2022cefbf8) stored parsed at both granted paths: 5 dimensions scored 0..20 (goal_fidelity 18, evidence 17, scope_discipline 19, durability 16, fit 18; total 88; verdict pass), reviewed_base_sha 58d361d2c82c7017a2a79bea5028910cfc0b72f4, reviewed_head_sha 08869d26d7251d8078bcbd7e2538db2022cefbf8, added_failure_count 0 with added_failure_ids [] derived from the reviewed run's own baseline_suite (2 failed) and after_suite (0 failed) arms; two follow-on findings recorded.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261003T171127557457-fsa-wall-mask-centroid-drivers" data-who="reckon-build" data-when="2026-10-03T17:24:21.145Z">
+    <div class="r-comment-body"><p>Routed the four unguarded scattered-field renderer calls in the three centroid-constrained drivers through the wall mask by passing wall=wall (the wall each driver already held) to draw_flux_contours; the gate tests/renderer_wall_scan.py over those files now exits 0 (was 1 listing four sites).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

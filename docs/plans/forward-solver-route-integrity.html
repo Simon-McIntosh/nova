@@ -26,9 +26,9 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="96">
+<meta name="plan-version" content="97">
 <meta name="plan-blocks" content="millisecond-converged-solve">
-<meta name="plan-impl" content="0.65">
+<meta name="plan-impl" content="0.66">
 </head>
 <body>
   <main class="plan-doc">
@@ -494,10 +494,11 @@
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
     <p class="r-fu-outcome">Merged at 4bd81d199 (run r-20260923T163850406961, claude-opus 5.5, review 89). A while loop ends the stream when every member is done. A custom_vmap rule for _qualified_krylov_step keeps the stream predicate unbatched and writes the basis in place under a member mask. The operator closure is traced with make_jaxpr and passed as explicit arguments. Width-16 vmapped H200 cost is 0.98x and 0.92x the per-site base in the same process (control 1.73x), and the unbatched program is 261,735 instructions. Tests: single-site 5 passed; fixed_point 45 passed; reduced_newton shows the same four base failures. The diverted terminal is 0.06326 on main's operator. Open items go to f-fsri-krylov-slice-2-review-findings.</p>
     </article>
-<article class="r-fu" data-id="f-fsri-ladder-census-counts-every-entry" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-ladder-census-counts-every-entry" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="2026-10-03T12:09:31+00:00" data-resolved-by="s21-nova">
     <h4 class="r-fu-title">Make the recovery-ladder census count all five entries and fail on a renamed rung</h4>
     <div class="r-fu-body"><p>From the review of the recovery-ladder census (72): benchmarks/recovery_ladder_census.py counts two of the five promotion and recovery entries defined in nova/equilibrium/fixed_point.py, so the report's 19.03 percent share is a lower bound. Its instrumented() also skips a counted path absent from the module, so a rename reads as zero executions rather than failing. The report names revision db634db22, one commit behind the tree that carries it. The census module benchmarks/recovery_ladder_telemetry.py was committed outside its fence and is accepted at promotion. Repair: count every entry, raise on a counted path that is absent, stamp the committing revision, and add a test that fails on a renamed rung. This is program-shape measurement, so it is not held by the map-fidelity gate. Benchmarks and tests only.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
+    <p class="r-fu-outcome">Merged at 1ab7d00fd (review 93). The census enumerates all five ladder entries by naming convention, raises on a renamed, added or absent rung, and stamps the committing revisions. Its runtime execution counts still read zero while solver telemetry records a promotion attempt; that gap is carried by f-fsri-ladder-census-runtime-counts-are-live. Evidence: forward-solver-route-integrity-landed.html#ladder-census-counts-every-entry.</p>
     </article>
 <article class="r-fu" data-id="f-fsri-krylov-slice-2-review-findings" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="2026-10-03T03:02:34+00:00" data-resolved-by="nova-s21">
     <h4 class="r-fu-title">Close the slice-2 review findings: a fail-open identity witness, a plan-labelled symbol, and the missing reverse-mode rule</h4>
@@ -531,6 +532,11 @@
 <article class="r-fu" data-id="f-fsri-forward-solve-tests-fit-their-bound" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build forward-solver-route-integrity §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Give every long forward-solve test a measured per-test timeout on the lane that runs it</h4>
     <div class="r-fu-body"><p>pyproject.toml sets <code>timeout = 300</code> for every test. tests/test_equilibrium_forward_solve.py carries no per-test override, and neither the standing suite nor the H200 launcher passes <code>--timeout</code>. Two tests in that file run past the bound. The moment-map finite-difference test measured 869 s on CPU on 2026-10-03. The accelerator-routes test measures 749 s on the H200, per the standing suite's own routing comment. In the standing suite, pytest-timeout therefore kills both, whatever their numerics. Repair: measure each test's wall on the H200 lane, then either mark it <code>@pytest.mark.timeout(N)</code> with N taken from the measurement and its basis stated beside the mark, or reduce the work to fit the bound. Nothing else is raised, and the global default stays at 300 s.</p></div>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §2</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-ladder-census-runtime-counts-are-live" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build forward-solver-route-integrity §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the ladder census&#x27;s runtime execution counts register the ladder calls the solver makes</h4>
+    <div class="r-fu-body"><p>From the merge of the recovery-ladder census (1ab7d00fd, review 93). On the diverted-single-null 300-cell row, all five per-solve execution counts read zero while the solver telemetry for the same solve records one promotion attempt. <code>instrumented()</code> patches module globals, and the ladder calls made inside the active-set route do not reach the patched names, although the trip entry does. That is an inert instrument.</p><p>Repair, all three in this node:</p><ol><li>Find how the active-set route reaches the ladder entries (a captured reference, a dispatch table, or a closure), and count at a point every call passes through.</li><li>Prove it with a row whose telemetry records a promotion: its census count must be nonzero and agree with the telemetry.</li><li>Fix the two review follow-ons. <code>test_module_under_test_is_the_imported_copy</code> asserts only that <code>fixed_point.__file__</code> is truthy, which no regression can fail. The committed report.json names census_commit 5721de656 while the raw run log names 419152362, so the report cannot be tied to the run that produced it.</li></ol><p>Benchmarks and tests only.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §2</pre>
     </article>
 </section>

@@ -17,6 +17,7 @@ import numpy as np
 
 from benchmarks import centroid_constrained_fixture_receipt as fixture
 from nova.equilibrium import ForwardProfile
+from nova.equilibrium.solve_request import ForwardSolveRequest
 from nova.jax.config import configure_dtypes, configure_persistent_compilation_cache
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 
@@ -86,6 +87,9 @@ def _measure(
     exact_tolerance: np.ndarray,
     exact_state_digest: str | None,
     output: Path,
+    *,
+    trips: int | None = None,
+    preflight: bool = False,
 ) -> dict:
     requested_mode = "exact" if support == "exact" else "chord"
     _require_support_mode(
@@ -93,7 +97,7 @@ def _measure(
     )
     request_factory = fixture.certificate._certificate_solve_request
     pair_factory = fixture._certificate_pairs
-    solve = context["profile"].solve
+    solve = ForwardProfile.solve
     request_modes: list[str] = []
     realised_modes: list[str] = []
 
@@ -114,14 +118,15 @@ def _measure(
         )
         return (centroid, *pairs[1:])
 
-    def checked_solve(request):
+    def checked_solve(self, initial_flux, *args, **kwargs):
+        if not isinstance(initial_flux, ForwardSolveRequest):
+            return solve(self, initial_flux, *args, **kwargs)
+        request = initial_flux
         _require_support_mode(requested_mode, request.clip_mode, "typed solve request")
-        receipt = solve(request)
-        realised_mode = (
-            context["profile"]
-            ._with_source(request.source_profile, clip_mode=request.clip_mode)
-            .operator.clip_mode
-        )
+        receipt = solve(self, initial_flux, *args, **kwargs)
+        realised_mode = self._with_source(
+            request.source_profile, clip_mode=request.clip_mode
+        ).operator.clip_mode
         _require_support_mode(requested_mode, receipt.clip_mode, "solve receipt")
         _require_support_mode(requested_mode, realised_mode, "realised operator")
         realised_modes.append(realised_mode)
@@ -145,12 +150,13 @@ def _measure(
                 fixture.certificate, "_certificate_solve_request", explicit_request
             ),
             patch.object(fixture, "_certificate_pairs", shared_row_tolerance),
-            patch.object(context["profile"], "solve", checked_solve),
+            patch.object(ForwardProfile, "solve", checked_solve),
         ):
             result, state = fixture._solve(
                 context,
                 context["seed"],
                 constrained=True,
+                trips=trips,
                 field_scale_t=fixture.DEFAULT_FIELD_BOUND_T,
                 initial_level_wb=initial_level,
             )
@@ -158,6 +164,12 @@ def _measure(
         compiler.compile_or_get_cached = original
     if request_modes != [requested_mode] or realised_modes != [requested_mode]:
         raise RuntimeError("typed request and realised support mode were not observed")
+    if preflight:
+        return {
+            "requested_clip_mode": request_modes[0],
+            "clip_mode": realised_modes[0],
+            "solve": result,
+        }
     _require_distinct_states(exact_state_digest, result["state_sha256_binary64"])
 
     pair = fixture._certificate_pairs(
@@ -238,19 +250,60 @@ def _measure(
     return receipt
 
 
+def _preflight(output: Path) -> None:
+    case = "weak-rotation-reactor-static"
+    exact = fixture._context(case, -110, clip_mode="exact")
+    level = fixture._seed_level_offset_wb(exact, exact["seed"])
+    exact_tolerance = np.asarray(
+        fixture._certificate_pairs(
+            exact, level=True, field_scale_t=fixture.DEFAULT_FIELD_BOUND_T
+        )[0].binding.tolerance,
+        dtype=np.float64,
+    )
+    whole = _whole_cell_context(exact)
+    readings = []
+    for support, context in (("exact", exact), ("whole-cell", whole)):
+        reading = _measure(
+            context,
+            support,
+            level["initial_level_wb"],
+            exact_tolerance,
+            None,
+            output / f"{case}-110-{support}.json",
+            trips=1,
+            preflight=True,
+        )
+        print(
+            f"PREFLIGHT_ARM {support} requested={reading['requested_clip_mode']} "
+            f"realised={reading['clip_mode']} "
+            f"accepted={reading['solve']['newton_history']['accepted_newton_promotions']}",
+            flush=True,
+        )
+        readings.append(reading)
+    if readings[0]["clip_mode"] == readings[1]["clip_mode"]:
+        raise RuntimeError("preflight arms realised the same operator support mode")
+    print("PREFLIGHT_COMPLETE", flush=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--preflight", action="store_true")
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     print(
         f"REVISION {fixture._revision()} TREE {fixture.ROOT} COMMAND {__file__} "
-        f"--output {output}",
+        f"--output {output}{' --preflight' if args.preflight else ''}",
         flush=True,
     )
     configure_dtypes()
     assert jax.config.jax_enable_x64
+    if args.preflight:
+        if os.environ.get("JAX_PLATFORMS") != "cpu":
+            raise RuntimeError("CPU preflight requires JAX_PLATFORMS=cpu")
+        _preflight(output)
+        return
     configure_persistent_compilation_cache(
         fixture.default_forward_compilation_cache_root()
     )

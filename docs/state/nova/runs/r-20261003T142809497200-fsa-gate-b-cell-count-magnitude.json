@@ -521,6 +521,61 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 5027,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261003T142809497200-fsa-gate-b-cell-count-magnitude",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-gate-b-cell-count-magnitude",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-03T14:46:01.698Z",
+            "session_id": "5d36407a-f66f-4bd4-aca1-3f1be58081db",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-gate-b-cell-count-magnitude"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 5d36407a-f66f-4bd4-aca1-3f1be58081db"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-03T14:46:01.698Z",
+      "session_id": "5d36407a-f66f-4bd4-aca1-3f1be58081db",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-gate-b-cell-count-magnitude"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 5d36407a-f66f-4bd4-aca1-3f1be58081db"
+  },
   "resume_waiver": {
     "reason": "the repair needs benchmarks/frozen_current_flux_image_gate.py, which exists only on refs/s19-tips/cca-gate-b-frozen-current-flux-image (e7e6cb392) beside unmerged forward_operator changes; landing or retiring that tip is folded into an inventory of all 33 s19 tips, so this run has nothing to resume into",
     "session_id": "5d36407a-f66f-4bd4-aca1-3f1be58081db",

@@ -1,0 +1,40 @@
+<section id="cank-shafranov-strip-title-and-separatrix-finish">
+    <h2>The Shafranov row separatrix reaches every marked saddle, and the combination strip title fits its canvas</h2>
+    <p><strong>Node:</strong> <code>cank-shafranov-strip-title-and-separatrix-finish</code>. Continues from
+    <code>89f181b1e</code>, which added the anchored-saddle contour and the wrapped strip title but did not re-render
+    the artifacts. Both figure sets are re-rendered from their committed receipts and banked states; no equilibrium is
+    solved.</p>
+    <p><strong>The row panels.</strong> The six
+    <code>docs/figures/constraint-augmented-newton-krylov/shafranov/row-*.{png,json}</code> panels are redrawn through
+    <code>render_row_panels</code>. The separatrix level is named to the level builder and the admitted saddle is carried
+    as an interpolation anchor, but the contour is traced on a regular display raster, so the saddle-to-contour gap is
+    quantized by the grid step rather than falling smoothly: at <code>RASTER_SAMPLES = 181</code> two rows stood more than
+    a canvas pixel from their separatrix (21985/51 at 1.393 px, 21986/46 at 1.0698 px). A probe across resolutions showed
+    the gap is non-monotone in the sample count, so the resolution is set from the measured grid step: at
+    <code>RASTER_SAMPLES = 601</code> the step is about 0.8 canvas px and every row is inside one pixel. The measured
+    gap per row, recorded in each <code>row-*.json</code> as <code>figure.saddle_contour_distance_px</code>: 21978/35
+    <strong>0.0847</strong>, 21983/35 <strong>0.2420</strong>, 21985/51 <strong>0.1233</strong>, 21986/46
+    <strong>0.0605</strong>, 21989/55 <strong>0.0445</strong>, 22086/43 <strong>0.2626</strong> — every row below 1.0 px,
+    against the base where two rows exceeded it. The panel draws the reference flux as line contours on shared levels,
+    the magnetic axis as a solid triangle and the admitted saddle as a filled cross, with the vessel drawn
+    unit-faithfully; the saddle now sits on a drawn contour in each panel.</p>
+    <p><strong>The combination strip.</strong> Re-rendered through
+    <code>python -m benchmarks.shafranov_combination_discriminator --render-directory
+    docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator</code>, so
+    <code>figure.suptitle_lines</code> and <code>figure.suptitle_widest_inches</code> now sit in the receipt. The title
+    wraps to two lines and the widest measures <strong>6.7206 in</strong> against a <strong>7.2 in</strong> canvas, so the
+    strip title is confirmed inside the canvas rather than assumed. The re-render also refreshed the six
+    <code>row-*-state</code> panels and the five-reading strip under the boundary-flux contour naming the strip code
+    already carried; the strip draws the identical magnetics pair once and names the equality, with the row-kernel
+    versus circular residual 0.0 on every row.</p>
+    <p><strong>Gate.</strong> <code>JAX_PLATFORMS=cpu pytest -p no:cacheprovider
+    tests/test_shafranov_discriminator_render.py tests/test_shafranov_pair_receipt.py
+    tests/test_shafranov_combination_discriminator.py</code>: <strong>51 passed, EXIT=0</strong>. The base carried two
+    saddle failures and no strip-title measurement, so this change adds no failure it does not remove.</p>
+    <p><strong>Negative control.</strong> The render tests run against the <code>12a894f23</code> figures reconstructed
+    into a scratch root through <code>NOVA_SHAFRANOV_FIGURE_ROOT</code> are red: <strong>7 failed, 23 passed,
+    EXIT=1</strong> — the six <code>test_shafranov_row_panel_separatrix_reaches_the_marked_saddle</code> rows (the base
+    receipts carry no <code>reference_topology</code> or saddle gap) and
+    <code>test_combination_strip_suptitle_fits_the_canvas</code> (the base strip receipt carries no
+    <code>suptitle_lines</code>).</p>
+  </section>

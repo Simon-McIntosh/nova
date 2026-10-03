@@ -281,6 +281,32 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "4654eb30106d68b092116b5700c35871c2c63cb0",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5040,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261003T000252251974-review-of-ctta-carrier-adjacency-index-dtype",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-ctta-carrier-adjacency-index-dtype"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "full",

@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="94">
+<meta name="plan-version" content="95">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -528,6 +528,11 @@
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity</pre>
     <p class="r-fu-outcome">Equals-form regression test and log whitespace landed at e82b70cf1 (forward-solver-route-integrity-landed#lane-launcher-test-timeout); re-review 96/100.</p>
     </article>
+<article class="r-fu" data-id="f-fsri-forward-solve-tests-fit-their-bound" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build forward-solver-route-integrity §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Give every long forward-solve test a measured per-test timeout on the lane that runs it</h4>
+    <div class="r-fu-body"><p>pyproject.toml sets <code>timeout = 300</code> for every test. tests/test_equilibrium_forward_solve.py carries no per-test override, and neither the standing suite nor the H200 launcher passes <code>--timeout</code>. Two tests in that file run past the bound. The moment-map finite-difference test measured 869 s on CPU on 2026-10-03. The accelerator-routes test measures 749 s on the H200, per the standing suite's own routing comment. In the standing suite, pytest-timeout therefore kills both, whatever their numerics. Repair: measure each test's wall on the H200 lane, then either mark it <code>@pytest.mark.timeout(N)</code> with N taken from the measurement and its basis stated beside the mark, or reduce the work to fit the bound. Nothing else is raised, and the global default stays at 300 s.</p></div>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §2</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-fsri-nk-attempt-fence" data-who="coordinator" data-when="2026-09-19T13:55:00Z">
@@ -664,6 +669,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260924T123622035161" data-who="" data-when="">
     <div class="r-comment-body"></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-moment-map-contract-on-the-combined-head" data-who="s21-nova" data-when="2026-10-03T12:20:00Z">
+    <div class="r-comment-body"><p>The moment-map derivative contract holds at the combined head 3825858f2. That head merges S22's moving clip-vertex tangent repair (the <code>_quadratic_support_vertices</code> JVP contracts both tangents through <code>jacfwd</code> with <code>argnums=(0, 1)</code>) on top of the structured boundary-flux envelope derivative from 38465cf46. S22 measured on that head and nova-49 reported the readings:</p><ul><li><code>benchmarks/moment_map_derivative_contract.py</code> runs clean. Relative errors: smooth control 9.9e-11, axis flux 8.3e-10, held-point boundary flux 5.4e-12. The largest stage left is the support partition and clip weights, at 9.2e-5, and it shrinks with the step.</li><li>The radial centroid JVP at the analytic centroid state moves from 0.837 to 1.623 m/T against a 1.629 central difference. The 0.39% residual is consistent with the 0.8% outer-geometry mismatch seen earlier.</li><li><code>test_the_moment_map_is_differentiable_against_finite_differences</code> passes, taking 869 s on CPU. It needed <code>--timeout=900</code>, above the 300 s per-test default: see f-fsri-forward-solve-tests-fit-their-bound.</li></ul></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-coord-20260922-s3-third-attempt-refused" data-who="reckon-ship" data-when="2026-09-22T12:10:00Z">
     <div class="r-comment-body"><p>Third attempt on the strongest lane (astra, run r-20260922T103934949557, promoted failed as a correct refusal). Design landed in the worktree, not merged: an explicit request enum with a fixed payload, one lax.switch live map and JVP body, request streams consumed by the fixed-point candidate scoring, reconciliation and the reduced residual and Jacobian columns; the Krylov solve stays outside the body. Measured on one all_debug allocation: optimised instruction counts fall from the banked baseline 342,055 and 344,858 to <strong>302,553 and 304,913</strong> at 300 and 1000 cells against the section ceiling 203,078 and 204,531, so the gate refuses; the per-request control grows to 532,366, confirming the mechanism. test_fixed_point 44 passed (42 at base); the reduced-Newton file aborts at exit 134 in both trees with one suite-only added failure (test_ladder_scoring_evaluates_one_map_per_accepted_step) that passes alone. Distinct caller streams still inline distinct bodies, so whole-solve request scheduling is the unimplemented remainder. The section contract said a third attempt routes to a stronger class; none exists, so the next step is a lead decision (followup below), not a fourth attempt.</p></div>

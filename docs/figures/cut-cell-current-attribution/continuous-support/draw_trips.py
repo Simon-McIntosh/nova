@@ -69,7 +69,9 @@ def main():
             (analytic, certificate.ANALYTIC_INK_COLOR),
             (solved, certificate.SOLVED_INK_COLOR),
         ):
-            poloidal.draw_flux_contours(ax, radial, height, field, levels, color=color)
+            poloidal.draw_flux_contours(
+                ax, radial, height, field, levels, color=color, wall=wall
+            )
         units = (wall,)
         poloidal.draw_wall(ax, units=units)
         poloidal.draw_nulls(

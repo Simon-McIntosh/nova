@@ -5,11 +5,13 @@ from __future__ import annotations
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
 
 from benchmarks.picard_derivative_contract import (
     _central_difference_steps,
     _selected_probe,
 )
+from nova.equilibrium import fixed_point
 from nova.equilibrium.fixed_point import picard
 from nova.jax.config import configure_dtypes
 
@@ -92,3 +94,28 @@ def test_derivative_witness_selection_preserves_the_default_and_an_explicit_prob
         _central_difference_steps(conductor, 0, None), (0.46, 0.138, 0.046)
     )
     assert _central_difference_steps(conductor, 3, requested) == requested
+
+
+def test_picard_tangent_uses_a_matrix_free_transpose_solve(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """The terminal tangent supplies an explicit transpose linear solve."""
+    configure_dtypes()
+    original = fixed_point.jax.lax.custom_linear_solve
+    calls = []
+
+    def observed(*args, **kwargs):
+        calls.append(kwargs)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(fixed_point.jax.lax, "custom_linear_solve", observed)
+    control = jnp.asarray([2.0])
+    _, tangent = jax.jvp(
+        lambda value: _solve(value).state,
+        (control,),
+        (jnp.ones_like(control),),
+    )
+
+    np.testing.assert_allclose(tangent, jnp.asarray([1.25]), atol=1.0e-10)
+    assert len(calls) == 1
+    assert calls[0]["transpose_solve"] is not None

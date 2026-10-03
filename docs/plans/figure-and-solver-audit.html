@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="55">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -272,10 +272,21 @@
     <div class="r-fu-body">docs/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json carries a source_revision field that was added by hand, with a value matching the receipt's own revision key, while its writer docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py does not emit the key. The test pinning source_revision now asserts it on that committed receipt, so regenerating the receipt would drop the field and turn the test red. Route measure.py's payload through the same stamp the benchmark writers use, so the field is written where the receipt is written, and regenerate nothing until a measurement needs it.</div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: make docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py stamp source_revision on its receipt payload.</pre>
     </article>
-<article class="r-fu" data-id="f-fsa-s19-tips-inventory" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-s19-tips-inventory" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-03T15:42:20+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Inventory the 33 unmerged refs/s19-tips and decide which land and which retire</h4>
     <div class="r-fu-body"><p>The repository carries 33 refs under refs/s19-tips that are not ancestors of main. At least one holds the only copy of a driver whose figures are banked on main: refs/s19-tips/cca-gate-b-frozen-current-flux-image (e7e6cb392) has benchmarks/frozen_current_flux_image_gate.py, which drew docs/figures/cut-cell-current-attribution/gate-b, beside unmerged changes to nova/equilibrium/forward_operator.py and observation.py. So committed figures on main cannot be regenerated, and a fix to them cannot land. For each tip, record its head, whether it is patch-equivalent to work already on main (git cherry), the files it changes beyond main, whether main carries figures or receipts it produced, and whether a later commit superseded it. Recommend land, extract only the driver, or retire. Done when every tip has a row and a recommendation, and the tips that strand banked figures are named.</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: inventory refs/s19-tips against main and recommend land, extract or retire for each</pre>
+    <p class="r-fu-outcome">Inventoried (r-20261003T144829404370, review 95; report at ~/.config/reckon/crew/reports/nova/s22/fsa-s19-tips-inventory.md, whose addendum supersedes eight table rows). Most of the 33 tips are already ancestors of main, patch-equivalent to it, or superseded by later commits on main, so they retire. Two strand artifacts that main's own reports reference: #29 msc-compile-host-memory (compile-memory.svg) and #33 msc-solve-profile-kernel-count (solve-profile JSON and SVG files). One driver, benchmarks/frozen_current_flux_image_gate.py, exists only on eleven tips, yet the gate-b, cut-cell-coupling and first-order-coupling figures on main were drawn by it. The three outcomes are split into separate followups.</p>
+    </article>
+<article class="r-fu" data-id="f-fsa-restore-msc-figure-artifacts" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Restore the figure artifacts that main&#x27;s millisecond-solve reports reference but main lacks</h4>
+    <div class="r-fu-body"><p>docs/figures/millisecond-converged-solve/compile-memory/report.md:73 references compile-memory.svg. solve-profile/report.md:7-10 references solve-profile.json, solve-profile-300.json, solve-profile-1000.json, solve-profile-300.svg and solve-profile-1000.svg. None of those files is on main. They exist only on refs/s19-tips/msc-compile-host-memory (a799465ff) and refs/s19-tips/msc-solve-profile-kernel-count (7d3c7e757). Bring exactly those referenced artifacts onto main, taken from the tip blobs, and check that every file the two reports reference then exists.</p></div>
+    <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: restore the millisecond-solve figure artifacts held only on two s19 tips</pre>
+    </article>
+<article class="r-fu" data-id="f-fsa-extract-stranded-figure-drivers" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Bring the frozen-current flux-image gate driver onto main so the figures it drew can be regenerated</h4>
+    <div class="r-fu-body"><p>benchmarks/frozen_current_flux_image_gate.py drew the banked gate-b, cut-cell-coupling and first-order-coupling figures on main, but it exists only on eleven s19 tips. The gate-b receipt's measurement_driver_revision cites 48a5764b5 (refs/s19-tips/cca-gate-b-finish-and-attribute). Extract that driver and any benchmark modules it imports that are also absent from main, adapting them to today's API without solver changes. Done when it imports at HEAD, and a render-only run from the committed gate-b receipt reproduces the gate-b panels. Its first use is the gate-b title sign repair, which was not landable without it.</p></div>
+    <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: extract benchmarks/frozen_current_flux_image_gate.py onto main and prove a render-only reproduction of the gate-b panels</pre>
     </article>
 </section>
 

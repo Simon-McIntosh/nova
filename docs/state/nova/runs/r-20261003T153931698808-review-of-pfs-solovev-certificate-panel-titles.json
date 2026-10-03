@@ -524,6 +524,33 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "63a12e2516bf19604caec9fb9293593a9395a3d0",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5042,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261003T153931698808-review-of-pfs-solovev-certificate-panel-titles",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/review-of-pfs-solovev-certificate-panel-titles",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "none",

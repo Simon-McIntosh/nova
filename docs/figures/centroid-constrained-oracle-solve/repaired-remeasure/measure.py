@@ -130,6 +130,7 @@ def arm(
         state=state,
         figure=None,
     )
+    receipt["field_identity"]["field_scale_t"] = fixture.DEFAULT_FIELD_BOUND_T
     receipt["terminal_state_path"] = str(state_path)
     receipt["requested_clip_mode"] = "exact"
     pair = fixture._certificate_pairs(
@@ -141,7 +142,20 @@ def arm(
     receipt["analytic_row_observation_m"] = np.asarray(
         pair.binding.payload, dtype=np.float64
     ).tolist()
+    assert receipt["row_tolerance_pitches"][0] > 0.0
     receipt["span"] = None if not constrained else span(context, result)
+    difference = np.asarray(state) - np.asarray(context["analytic"])
+    cell_count = len(context["machine"].node)
+    wall_count = len(context["machine"].wall_node)
+    wall_difference = difference[cell_count : cell_count + wall_count]
+    receipt["map_difference"] = {
+        "sample_count": int(difference.size),
+        "rms_wb": float(np.sqrt(np.mean(np.square(difference)))),
+        "maximum_absolute_wb": float(np.max(np.abs(difference))),
+        "wall_min_wb": float(np.min(wall_difference)),
+        "wall_max_wb": float(np.max(wall_difference)),
+        "wall_sample_count": int(wall_count),
+    }
     record(f"{name}.json", receipt)
     return receipt, state
 

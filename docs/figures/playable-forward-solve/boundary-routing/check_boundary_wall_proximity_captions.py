@@ -22,6 +22,7 @@ import json
 import math
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -114,7 +115,10 @@ def main(argv: list[str] | None = None) -> int:
         )
     except OSError:
         revision = "unknown"
-    print(f"# revision={revision} tree={REPO_ROOT} fragment={fragment}")
+    print(
+        f"# cmd={' '.join(sys.argv)} revision={revision} "
+        f"tree={REPO_ROOT} fragment={fragment}"
+    )
 
     if not fragment.is_file():
         print(f"FAIL fragment-present missing {fragment}")

@@ -1,0 +1,77 @@
+{
+  "case": "weak-rotation-reactor-static",
+  "clip_mode": "exact",
+  "figure": {
+    "analytic_axis_marker": "large hollow circle",
+    "bytes": 215754,
+    "sha256": "7ac145f833083275f020216aad7768a2239593099d004600b8ad4cac7a8d75b1",
+    "shared_levels_wb": [
+      -19.51415956145873,
+      -13.222772377442507,
+      -6.931385193426285,
+      -0.6399980094100641,
+      5.651389174606159,
+      11.942776358622382,
+      18.2341635426386,
+      24.525550726654824,
+      30.816937910671047,
+      37.108325094687274,
+      43.39971227870349,
+      49.69109946271971
+    ],
+    "solved_axis_marker": "filled triangle",
+    "src": "/nova/figures/centroid-constrained-oracle-solve/row-history-receipt/flux-panels.png"
+  },
+  "lane": {
+    "allocated_cpus": 8,
+    "device": "NVIDIA H200 NVL",
+    "jax_enable_x64": true,
+    "jax_platforms": "cuda,cpu",
+    "job_id": 1280642,
+    "lane_requirement": "h200",
+    "memory_mb": 131072,
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "platform": "gpu",
+    "scientific_receipt": true,
+    "tmpdir": "/tmp"
+  },
+  "realised_cells": 135,
+  "requested_cells": -110,
+  "row_tolerance_pitches": [
+    0.0001660182523605324,
+    1.485437260277217e-12
+  ],
+  "rows": [
+    {
+      "accepted_newton_promotions": 1,
+      "committed_history_prefix_matches": false,
+      "committed_promotion_global_residual": 0.0008289742994991965,
+      "compensating_amplitudes": [
+        0.00012838401689622362,
+        -1.0921369935674612e-13,
+        -0.10073345599652714
+      ],
+      "first_moment_row_residual_components_pitches": [
+        2.457120184682511e-05,
+        -1.097657633715186e-12
+      ],
+      "first_moment_row_residual_pitches": 2.457120184682513e-05,
+      "global_residual": 0.0008591728369518826,
+      "promotion": 1,
+      "promotion_global_residual": 0.0008591728369518826,
+      "row_tolerance_pitches": [
+        0.0001660182523605324,
+        1.485437260277217e-12
+      ],
+      "state_sha256_binary64": "a24df76c3b12d6ded1bafe61e48802315e0f4ff21b001f4807b0d08470257165",
+      "stopping_tolerance": 0.001657948598998393
+    }
+  ],
+  "schema": "nova.centroid-row-promotion-history",
+  "seed_sha256_binary64": "062b465a7364914f13d383bb10e5a9dbdc7c18dc2dc803584d43ab6851c7ce5d",
+  "source_receipt": "repaired-remeasure-receipt/positive.json",
+  "source_revision": "f0dc3c879434b96dc3f1c55c0dd9e5ba703b8717",
+  "status": "history_mismatch",
+  "terminal_state_sha256_binary64": "0196d8cce7b0f3c5b7852bcc0e42ecd7ac154a3b5e11f81fedea8fe6bd77e04b"
+}

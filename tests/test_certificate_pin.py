@@ -30,6 +30,37 @@ def test_pinned_certificate_retains_its_census_and_render_integrity() -> None:
     """Keep the published receipt internally consistent while it remains data."""
 
     receipt = _receipt()
+    assert receipt["verdict"] == {
+        "all_locked_recovery_bounds_reproduced": True,
+        "all_rows_retained": True,
+        "case_count": 4,
+        "qualified_rows": 1,
+        "residual_only_qualified_rows": 3,
+        "resolution_rows": 16,
+        "schema_valid": True,
+        "unqualified_rows": 15,
+    }
+    production_run = receipt["production_run"]
+    assert production_run["jax_platforms"] == "cuda,cpu"
+    assert production_run["jax_default_backend"] == "gpu"
+    assert production_run["precision"] == "float64"
+    assert production_run["measurement_scheduler"] == {
+        "aggregation": "same_job_after_all_row_workers_succeed",
+        "gpu_count": 2,
+        "job_id": "1268058",
+        "row_assignment": "round_robin_over_case_table",
+        "shape": "single_slurm_job",
+        "worker_processes": 2,
+    }
+    assert production_run["thread_counts"] == {
+        "mkl_num_threads": "4",
+        "numexpr_num_threads": "4",
+        "omp_num_threads": "4",
+        "openblas_num_threads": "4",
+        "slurm_cpus_per_worker": 4,
+        "threads_per_worker": 4,
+        "xla_flags": None,
+    }
     expected_convergence = {
         "diverted-single-null": [True, True, True, False],
         "moderate-rotation-conventional-static": [False, False, False, False],
@@ -48,6 +79,7 @@ def test_pinned_certificate_retains_its_census_and_render_integrity() -> None:
             coordinate_count = len(render_data["coordinates_rz_m"])
             assert coordinate_count == len(render_data["terminal_flux_wb"])
             assert coordinate_count == len(render_data["analytic_flux_wb"])
+            assert len(render_data["wall_units_rz_m"]) == 1
             figure = row["figure"]
             assert figure["project_absolute_src"].startswith(
                 "/nova/figures/gs-absolute-accuracy/solovev/"

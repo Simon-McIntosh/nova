@@ -681,10 +681,22 @@ def _draw_row_figure(
         overlay_axis = axes[row_index, 0]
         difference_axis = axes[row_index, 1]
         poloidal.draw_flux_contours(
-            overlay_axis, radial, height, analytic_field, shared_levels, color="#3366cc"
+            overlay_axis,
+            radial,
+            height,
+            analytic_field,
+            shared_levels,
+            color="#3366cc",
+            wall=wall_units,
         )
         poloidal.draw_flux_contours(
-            overlay_axis, radial, height, field, shared_levels, color="#cc7722"
+            overlay_axis,
+            radial,
+            height,
+            field,
+            shared_levels,
+            color="#cc7722",
+            wall=wall_units,
         )
         difference = (field - analytic_field) / span
         poloidal.draw_flux_contours(
@@ -694,6 +706,7 @@ def _draw_row_figure(
             difference,
             FIXED_DIFFERENCE_LEVELS,
             color="#7a3e9d",
+            wall=wall_units,
         )
         terminal_topology = arm["terminal"]["topology"]
         drawn: dict[str, dict[str, int]] = {}

@@ -729,6 +729,7 @@ def render(rows, output):
                 flux_levels,
                 color=colour,
                 linewidth=0.7,
+                wall=units,
             )
         axes[0].set_title("Analytic / exact map\nshared flux levels")
         cells = row["modes"]["exact"]["cells"]
@@ -753,7 +754,14 @@ def render(rows, output):
                 method="linear",
             )
             poloidal.draw_flux_contours(
-                axis, radius, height, field, levels, color="#a34828", linewidth=0.8
+                axis,
+                radius,
+                height,
+                field,
+                levels,
+                color="#a34828",
+                linewidth=0.8,
+                wall=units,
             )
             peak = float(np.max(np.abs(quantity)) / target * 100)
             axis.set_title(title + f"\n% target/cell; max magnitude {peak:.3g}")

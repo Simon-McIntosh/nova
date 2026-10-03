@@ -1,0 +1,27 @@
+<section id="fsa-wall-mask-exact-and-centroid">
+  <h2>fsa-wall-mask-exact-and-centroid</h2>
+  <p>
+    Routed every unguarded scattered-field renderer call in this batch through
+    the wall mask. The renderer wall scanner
+    (<code>tests/renderer_wall_scan.py</code>) reported <b>18</b> unguarded
+    <code>draw_flux_contours</code> calls across the six drivers at base
+    <code>68762d36</code>; the same scan over the same files at the head exits
+    <code>0</code> listing none.
+  </p>
+  <p>
+    Each change adds one <code>wall=</code> keyword to an existing
+    <code>nova.media.poloidal.draw_flux_contours</code> call, handed the wall
+    the driver already loads. No source under <code>nova/</code> and no test
+    file is edited. Sites: <code>exact_clip_low_state_discriminator.py</code>
+    683/686/690; <code>exact_clip_seed_amplitude.py</code> 345/349/429/432/438;
+    <code>exact_support_floor_attribution.py</code> 724/755;
+    <code>fixture_positional_stiffness.py</code> 580/583;
+    <code>centroid_constrained_fixture_receipt.py</code> 1011/1014/1086/1097;
+    <code>centroid_field_response_probe.py</code> 259/262.
+  </p>
+  <p>
+    Negative control: the base-arm scanner run exits 1 printing exactly those
+    18 sites (<code>logs/negative_control_base.log</code>); the head-arm run
+    exits 0 (<code>logs/gate_scan.log</code>).
+  </p>
+</section>

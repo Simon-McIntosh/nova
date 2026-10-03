@@ -1009,9 +1009,17 @@ def _draw_control(
     ):
         topology = oracle_probe._topology(context["profile"].operator, state)
         poloidal.draw_flux_contours(
-            axis, radial, height, analytic_field, levels, color="#3366cc"
+            axis,
+            radial,
+            height,
+            analytic_field,
+            levels,
+            color="#3366cc",
+            wall=(wall,),
         )
-        poloidal.draw_flux_contours(axis, radial, height, field, levels, color=color)
+        poloidal.draw_flux_contours(
+            axis, radial, height, field, levels, color=color, wall=(wall,)
+        )
         poloidal.draw_wall(axis, units=(wall,))
         poloidal.draw_nulls(
             axis,
@@ -1090,6 +1098,7 @@ def _draw_state(
         analytic_field,
         levels,
         color=ANALYTIC_INK,
+        wall=(wall,),
         linewidth=2.4,
     )
     if state is not None:
@@ -1101,6 +1110,7 @@ def _draw_state(
             field,
             levels,
             color=TERMINAL_INK,
+            wall=(wall,),
             linewidth=1.2,
         )
     poloidal.draw_wall(axis, units=(wall,))

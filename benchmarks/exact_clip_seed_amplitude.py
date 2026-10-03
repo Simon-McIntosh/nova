@@ -118,12 +118,8 @@ def _historical_rows() -> dict[tuple[str, int], dict[str, Any]]:
     }
 
 
-def _problem(
-    case_name: str, requested_cells: int, *, clip_mode: str | None = None
-):
-    carrier_case, source_case, exact = certificate._case(
-        case_name, clip_mode=clip_mode
-    )
+def _problem(case_name: str, requested_cells: int, *, clip_mode: str | None = None):
+    carrier_case, source_case, exact = certificate._case(case_name, clip_mode=clip_mode)
     machine = certificate._case_machine(
         case_name, carrier_case, exact, requested_cells, clip_mode=clip_mode
     )
@@ -304,9 +300,7 @@ def _figure_title(part: dict[str, Any], suffix: str) -> str:
     """Compose the one title line that states this panel's terminal state."""
 
     residual, converged = _row_terminal(part)
-    return (
-        f"{part['case']} · {suffix} · residual={residual!r} · converged={converged}"
-    )
+    return f"{part['case']} · {suffix} · residual={residual!r} · converged={converged}"
 
 
 def _draw_production_route(part: dict[str, Any], path: Path) -> dict[str, Any]:
@@ -343,11 +337,23 @@ def _draw_production_route(part: dict[str, Any], path: Path) -> dict[str, Any]:
         np.concatenate((solved.ravel(), analytic.ravel())), count=12
     )
     poloidal.draw_flux_contours(
-        flux_axis, radial, height, analytic, levels, color=ANALYTIC_INK_COLOR
+        flux_axis,
+        radial,
+        height,
+        analytic,
+        levels,
+        color=ANALYTIC_INK_COLOR,
+        wall=wall_units,
     )
     poloidal.draw_wall(flux_axis, units=wall_units)
     poloidal.draw_flux_contours(
-        flux_axis, radial, height, solved, levels, color=SOLVED_INK_COLOR
+        flux_axis,
+        radial,
+        height,
+        solved,
+        levels,
+        color=SOLVED_INK_COLOR,
+        wall=wall_units,
     )
     poloidal.draw_boundary(
         flux_axis, boundary[:, 0], boundary[:, 1], color=ANALYTIC_INK_COLOR
@@ -427,16 +433,34 @@ def _draw_solve_comparison(part: dict[str, Any], path: Path) -> dict[str, Any]:
     figure, axes = plt.subplots(1, 2, figsize=(11.0, 5.2), constrained_layout=True)
     wall_units = (wall,)
     poloidal.draw_flux_contours(
-        axes[0], radial, height, analytic, shared_levels, color=ANALYTIC_INK_COLOR
+        axes[0],
+        radial,
+        height,
+        analytic,
+        shared_levels,
+        color=ANALYTIC_INK_COLOR,
+        wall=wall_units,
     )
     poloidal.draw_flux_contours(
-        axes[0], radial, height, solved, shared_levels, color=SOLVED_INK_COLOR
+        axes[0],
+        radial,
+        height,
+        solved,
+        shared_levels,
+        color=SOLVED_INK_COLOR,
+        wall=wall_units,
     )
     poloidal.draw_boundary(
         axes[0], boundary[:, 0], boundary[:, 1], color=ANALYTIC_INK_COLOR
     )
     poloidal.draw_flux_contours(
-        axes[1], radial, height, difference, difference_levels, color="#7a3e9d"
+        axes[1],
+        radial,
+        height,
+        difference,
+        difference_levels,
+        color="#7a3e9d",
+        wall=wall_units,
     )
     panels: list[dict[str, Any]] = []
     for panel_name, axis in (("shared_levels", axes[0]), ("difference", axes[1])):

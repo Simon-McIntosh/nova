@@ -239,9 +239,7 @@ def _operator_with_both_exteriors(
 def _build_context(
     case_name: str, requested_cells: int, *, clip_mode: str | None = None
 ) -> dict[str, Any]:
-    carrier_case, source_case, exact = certificate._case(
-        case_name, clip_mode=clip_mode
-    )
+    carrier_case, source_case, exact = certificate._case(case_name, clip_mode=clip_mode)
     machine = certificate._case_machine(
         case_name, carrier_case, exact, requested_cells, clip_mode=clip_mode
     )
@@ -578,10 +576,22 @@ def _draw_translated_panel(path: Path, payload: dict[str, Any]) -> dict[str, Any
             )
             axis = axes[row_index, column]
             poloidal.draw_flux_contours(
-                axis, radial, height, analytic_field, level_array, color="#3366cc"
+                axis,
+                radial,
+                height,
+                analytic_field,
+                level_array,
+                color="#3366cc",
+                wall=(wall,),
             )
             poloidal.draw_flux_contours(
-                axis, radial, height, translated_field, level_array, color="#cc7722"
+                axis,
+                radial,
+                height,
+                translated_field,
+                level_array,
+                color="#cc7722",
+                wall=(wall,),
             )
             poloidal.draw_wall(axis, units=(wall,))
             analytic_set = poloidal.draw_nulls(
@@ -1037,9 +1047,7 @@ def run(output_root: Path, report_path: Path) -> dict[str, Any]:
     _write_json(receipt_path, receipt)
     contexts = []
     for case_name, requested_cells in ROWS:
-        context = _build_context(
-            case_name, requested_cells, clip_mode="exact"
-        )
+        context = _build_context(case_name, requested_cells, clip_mode="exact")
         contexts.append(context)
         row_slug = f"{case_name}-cells-{abs(requested_cells)}"
         for direction_name, direction in DIRECTIONS.items():

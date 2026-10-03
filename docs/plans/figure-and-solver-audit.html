@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="60">
+<meta name="plan-version" content="61">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -267,10 +267,11 @@
     <div class="r-fu-body"><p>The low-state check repair landed at 80022a503. It prints the full level array and every panel's residual and converged flag, and the test asserts the recorded titles. The two named figures under docs/figures/cut-cell-current-attribution/exact-clip-low-state are still the pre-repair images. The solve that would regenerate them died on the cold-seed amplitude nan at forward_operator.py current_normalisation_amplitude, which was the moment-bank overflow repaired at 1542d6df6. tests/test_exact_clip_low_state_render.py::test_receipt_records_the_render_only_route stays red until both figures render. One H200 job (betelgeuse, gpu_0003_grpA, account grpa, 8 cores, 64G) runs the exact_clip_low_state_discriminator solve, then renders on the login node. Held behind the map-fidelity gate, because these panels draw the certificate forward state.</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit</pre>
     </article>
-<article class="r-fu" data-id="f-fsa-production-solver-receipt-writer-revision" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-02" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-production-solver-receipt-writer-revision" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-02" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-03T16:15:29+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Make the production-solver receipt writer emit source_revision itself</h4>
     <div class="r-fu-body">docs/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json carries a source_revision field that was added by hand, with a value matching the receipt's own revision key, while its writer docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py does not emit the key. The test pinning source_revision now asserts it on that committed receipt, so regenerating the receipt would drop the field and turn the test red. Route measure.py's payload through the same stamp the benchmark writers use, so the field is written where the receipt is written, and regenerate nothing until a measurement needs it.</div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: make docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py stamp source_revision on its receipt payload.</pre>
+    <p class="r-fu-outcome">Landed at e1f1d725c; review 92, then 96 after the repair round. docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py now builds its payload through the shared source-revision stamp. tests/test_production_solver_receipt_stamp.py asserts the key on a payload built without a solve. The repair round made the recorded revision independent of the stamp call it checks. 18 passed, and the stamp-removed control fails.</p>
     </article>
 <article class="r-fu" data-id="f-fsa-s19-tips-inventory" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-03T15:42:20+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Inventory the 33 unmerged refs/s19-tips and decide which land and which retire</h4>
@@ -283,10 +284,11 @@
     <div class="r-fu-body"><p>docs/figures/millisecond-converged-solve/compile-memory/report.md:73 references compile-memory.svg. solve-profile/report.md:7-10 references solve-profile.json, solve-profile-300.json, solve-profile-1000.json, solve-profile-300.svg and solve-profile-1000.svg. None of those files is on main. They exist only on refs/s19-tips/msc-compile-host-memory (a799465ff) and refs/s19-tips/msc-solve-profile-kernel-count (7d3c7e757). Bring exactly those referenced artifacts onto main, taken from the tip blobs, and check that every file the two reports reference then exists.</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: restore the millisecond-solve figure artifacts held only on two s19 tips</pre>
     </article>
-<article class="r-fu" data-id="f-fsa-extract-stranded-figure-drivers" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-extract-stranded-figure-drivers" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-03T16:15:29+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Bring the frozen-current flux-image gate driver onto main so the figures it drew can be regenerated</h4>
     <div class="r-fu-body"><p>benchmarks/frozen_current_flux_image_gate.py drew the banked gate-b, cut-cell-coupling and first-order-coupling figures on main, but it exists only on eleven s19 tips. The gate-b receipt's measurement_driver_revision cites 48a5764b5 (refs/s19-tips/cca-gate-b-finish-and-attribute). Extract that driver and any benchmark modules it imports that are also absent from main, adapting them to today's API without solver changes. Done when it imports at HEAD, and a render-only run from the committed gate-b receipt reproduces the gate-b panels. Its first use is the gate-b title sign repair, which was not landable without it.</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: extract benchmarks/frozen_current_flux_image_gate.py onto main and prove a render-only reproduction of the gate-b panels</pre>
+    <p class="r-fu-outcome">Landed at f0b389834 (review 92). benchmarks/frozen_current_flux_image_gate.py was taken from 48a5764b5, the revision the gate-b receipt cites. A render-only run from the committed gate-b receipt reproduces every contour, wall path, label, null position and level in both panels. Only metadata and the current null glyphs differ. The reproductions sit under docs/figures/figure-and-solver-audit/fsa-extract-frozen-current-gate-driver/. tests/test_frozen_current_flux_image_gate.py passes 3 of 3, and a receipt with a row removed fails it. The gate-b title repair is now unblocked.</p>
     </article>
 </section>
 
@@ -520,7 +522,7 @@
     <div class="r-comment-body"><p>Recovered the receipt-cited frozen-current driver at 0f8f89c9ca3835816233cf3416c8778d7a744a70 with render-only validation; 3/3 committed-head CPU tests pass, 0 added failures, and the missing-row mutation fails the reproduction test (1 failed, 2 passed); both SVGs reproduce all contour/wall paths, labels, null positions and levels, differing only in metadata/generated ids and current null glyph shapes.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261003T160025011278-review-of-fsa-extract-frozen-current-gate-driver" data-who="reckon-build" data-when="2026-10-03T16:11:48.255Z">
-    <div class="r-comment-body"><p>Independent review of r-20261003T154320591361-fsa-extract-frozen-current-gate-driver (base f2ea3fc1511f3deddce9328f7dff4f72771c7af5..head 0f8f89c9ca3835816233cf3416c8778d7a744a70) stored at total 92/100, verdict pass, with 1 follow-on finding and added_failure_count 0 against the reviewed run&#x27;s base 3 failed / after 0 failed gate logs.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261003T154320591361-fsa-extract-frozen-current-gate-driver (base f2ea3fc1511f3deddce9328f7dff4f72771c7af5..head 0f8f89c9ca3835816233cf3416c8778d7a744a70) stored at total 92/100, verdict pass, with 1 follow-on finding and added_failure_count 0 against the reviewed run's base 3 failed / after 0 failed gate logs.</p></div>
 </div>
 </section>
   </main>

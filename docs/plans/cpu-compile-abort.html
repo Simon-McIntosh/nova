@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.87">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 </head>
 <body>
   <main class="plan-doc">
@@ -157,10 +157,11 @@
     <pre class="r-fu-prompt">/reckon-build cpu-compile-abort §2</pre>
     <p class="r-fu-outcome">Landed at b2c31c324 (cpu-fold-duplicate-probe-exit-tests, review 99): the exit-3 case lives in tests/test_compile_abort_probe.py and the duplicate module is deleted.</p>
     </article>
-<article class="r-fu" data-id="f-cca-coil-edit-regeneration-row" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-02" data-recommends-skill="/reckon-build cpu-compile-abort" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cca-coil-edit-regeneration-row" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-02" data-recommends-skill="/reckon-build cpu-compile-abort" data-resolved-at="2026-10-03T16:16:10+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Measure the coil-edit regeneration certificate row in its own process</h4>
     <div class="r-fu-body">The one-row-per-process mechanism (2710b2ea1) unblocked two certificate rows that had never been measured: the coil-edit regeneration and the centroid positive arm. The centroid arm is being re-measured after the cap-factor derivative repair. The coil-edit regeneration row still has no per-row receipt. Run it once through _certificate_rows_as_processes, persist its receipt beside the other rows with a receipt-relative state path and both exit fields, and record whether it completes, its mapping count at the program load, and its solve wall.</div>
     <pre class="r-fu-prompt">/reckon-build cpu-compile-abort: measure the coil-edit regeneration certificate row in its own process and persist its per-row receipt.</pre>
+    <p class="r-fu-outcome">Measured at f7d78b395 (review 77) on H200 job 1280643, under the mapping sampler, in its own process. The row completes with 20 edits. Peak maps reach 3538 against a 1048576 cap, so the map limit does not bind this row. Its terminal verdict is the driver's own latency gate, FAIL (exit 2), which is a measured result, not a crash. The row receipt is under docs/figures/cpu-compile-abort/coil-edit-regeneration-row/. It ran through compile_abort_probe, not _certificate_rows_as_processes, because the coil-edit regeneration is a separate driver that the certificate-row iteration cannot carry. It ran without the shared compilation cache, so its compile wall is a cold compile.</p>
     </article>
 </section>
 

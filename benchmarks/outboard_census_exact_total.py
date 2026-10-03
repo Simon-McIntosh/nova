@@ -208,6 +208,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--head", default="main")
+    parser.add_argument("--revision", action="append")
     arguments = parser.parse_args()
     scratch = Path(
         tempfile.mkdtemp(prefix="outboard-census-", dir=os.environ["TMPDIR"])
@@ -220,24 +221,37 @@ def main() -> None:
             ["git", "-C", str(ROOT), "rev-parse", f"{RESPONSIBLE_REVISION}^"],
             text=True,
         ).strip()
-        revisions = (PINNED_REVISION, parent, RESPONSIBLE_REVISION, head)
+        revisions = arguments.revision or (
+            PINNED_REVISION,
+            parent,
+            RESPONSIBLE_REVISION,
+            head,
+        )
         rows = [_measure(revision, scratch) for revision in revisions]
         by_revision = {row["revision"]: row for row in rows}
-        reference = by_revision[head]["quadrature_reference_a"]
+        current = by_revision.get(head)
+        pinned = by_revision.get(PINNED_REVISION)
         payload = {
             "revisions": rows,
             "responsible_commit": RESPONSIBLE_REVISION,
             "responsible_parent": parent,
             "current_matches_reference": (
-                by_revision[head]["exact_relative_difference"] <= 1.0e-9
+                None
+                if current is None
+                else current["exact_relative_difference"] <= 1.0e-9
             ),
             "pinned_matches_reference": (
-                by_revision[PINNED_REVISION]["exact_relative_difference"] <= 1.0e-9
+                None
+                if pinned is None
+                else pinned["exact_relative_difference"] <= 1.0e-9
             ),
-            "reference_a": reference,
+            "reference_a": (
+                None if current is None else current["quadrature_reference_a"]
+            ),
             "recommendation": (
                 "re-pin"
-                if by_revision[head]["exact_relative_difference"] <= 1.0e-9
+                if current is not None
+                and current["exact_relative_difference"] <= 1.0e-9
                 else "repair"
             ),
         }

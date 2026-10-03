@@ -41,18 +41,28 @@
   <h3>Measure</h3>
   <p>Gate <code>JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider
   tests/test_production_solver_receipt_stamp.py tests/test_production_solver_receipt_trip_alignment.py</code>:
-  <strong>17 passed, EXIT=0</strong> at revision <code>53bab014c</code>. The new test builds the
-  payload without running the solve (the measure module is loaded by
-  <code>spec_from_file_location</code>) and asserts the key is present, that it is a 40-hex sha,
-  and that it equals the payload's <code>revision</code> key.</p>
+  <strong>18 passed, EXIT=0</strong> at the repair head. The tests build the payload without
+  running the solve (the measure module is loaded by <code>spec_from_file_location</code>) and
+  assert the key is present, that it is a 40-hex sha, that it equals the payload's
+  <code>revision</code> key, and — pinning against the live tree — that the stamped value is
+  re-derived rather than echoed from the <code>revision</code> argument (built with a sentinel
+  revision, the stamped key equals <code>certificate._source_revision()</code> and differs from
+  the sentinel).</p>
+
+  <p>An arm was also run literally at the reviewed tree head <code>d90730fad</code> (17 passed,
+  EXIT=0), so the result is not carried across a docs-only commit.</p>
 
   <h3>Negative control</h3>
   <p>Declared mutation: remove the source-revision stamp call from
   <code>measure.py</code>'s payload construction. Applied, the gate reddens to
-  <strong>2 failed, 15 passed, EXIT=1</strong> — the two stamp cases fail
+  <strong>3 failed, 15 passed, EXIT=1</strong> — the three stamp cases fail
   (<code>test_payload_carries_a_source_revision</code>,
-  <code>test_source_revision_equals_the_recorded_revision</code>) and no other test does. The
-  mutation was reverted; the committed tree is clean at <code>53bab014c</code>.</p>
+  <code>test_source_revision_is_rederived_not_echoed_from_the_revision_argument</code>,
+  <code>test_source_revision_equals_the_recorded_revision</code>) and no other test does. A
+  second mutation echoing the <code>revision</code> argument into
+  <code>source_revision</code> reddens exactly the re-derivation case,
+  <strong>1 failed, 17 passed, EXIT=1</strong>. Both mutations were reverted; the committed tree
+  is clean.</p>
 
   <p>Baseline arm at revision <code>a42dc665c</code> (the pre-existing trip-alignment module,
   unchanged by this node): 15 passed, EXIT=0. No added failures.</p>

@@ -22,11 +22,11 @@ def _measure_module():
     return module
 
 
-def _payload():
+def _payload(revision=None):
     """Build the receipt payload without running the solve."""
     module = _measure_module()
     return module.build_payload(
-        revision=certificate._source_revision(),
+        revision=(certificate._source_revision() if revision is None else revision),
         case="weak-rotation-reactor-static",
         requested_cells=300,
         realised_cells=300,
@@ -51,6 +51,20 @@ def test_payload_carries_a_source_revision():
     assert SOURCE_REVISION.fullmatch(revision), (
         f"source_revision is not a 40-hex sha: {revision!r}"
     )
+
+
+def test_source_revision_is_rederived_not_echoed_from_the_revision_argument():
+    """The stamp sources the revision from the writer's tree, not the caller.
+
+    A caller that assembled ``revision`` from a different tree must not have
+    its value stamped through as the source revision, so the payload is built
+    with a sentinel revision and the stamped key is pinned against the live
+    tree independently of the argument.
+    """
+    sentinel = "0" * 40
+    payload = _payload(revision=sentinel)
+    assert payload["source_revision"] == certificate._source_revision()
+    assert payload["source_revision"] != sentinel
 
 
 def test_source_revision_equals_the_recorded_revision():

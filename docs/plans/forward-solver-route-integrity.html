@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="90">
+<meta name="plan-version" content="91">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -499,10 +499,11 @@
     <div class="r-fu-body"><p>From the review of the recovery-ladder census (72): benchmarks/recovery_ladder_census.py counts two of the five promotion and recovery entries defined in nova/equilibrium/fixed_point.py, so the report's 19.03 percent share is a lower bound. Its instrumented() also skips a counted path absent from the module, so a rename reads as zero executions rather than failing. The report names revision db634db22, one commit behind the tree that carries it. The census module benchmarks/recovery_ladder_telemetry.py was committed outside its fence and is accepted at promotion. Repair: count every entry, raise on a counted path that is absent, stamp the committing revision, and add a test that fails on a renamed rung. This is program-shape measurement, so it is not held by the map-fidelity gate. Benchmarks and tests only.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-krylov-slice-2-review-findings" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-krylov-slice-2-review-findings" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="2026-10-03T03:02:34+00:00" data-resolved-by="nova-s21">
     <h4 class="r-fu-title">Close the slice-2 review findings: a fail-open identity witness, a plan-labelled symbol, and the missing reverse-mode rule</h4>
     <div class="r-fu-body"><p>From the review of the slice-2 run (89). (1) The toy-operator identity witness under docs/figures/forward-solver-route-integrity/single-site-krylov only counts mismatches and exits 0, and np.array_equal(equal_nan=True) accepts different signed zeros and NaN representations. The reviewer ran it on 1.0 against 2.0 and it printed identical. Make it fail closed on the bit pattern. (2) The benchmark symbol SLICE1_SOURCE carries a plan-stage label; name it by the capacity-scan mechanism. (3) custom_vmap has no reverse-mode rule, so anything that reverse-differentiates through _qualified_krylov_step needs a custom_vjp. Add a test that fails if a reverse-mode caller appears without one. Local lane after RESUME.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
+    <p class="r-fu-outcome">All three findings landed. (1) The toy identity witnesses compare raw bit patterns and exit nonzero on any difference, merged at d5378ec87 (review 95). Under the stricter check, the dense arm is bit-identical in 6 of 8 cases against the unfenced base and 8 of 8 against the fenced one. (2) SLICE1_SOURCE is renamed CAPACITY_SCAN_SOURCE, merged at c259f97ab (review 84). (3) tests/test_krylov_reverse_mode_guard.py runs a call-site census over nova/ that fails any reverse-mode caller of _qualified_krylov_step outside a derivative rule, with the implicit picard derivative as its positive case, merged at 3aac8599f (review 95). Records: forward-solver-route-integrity-landed#toy-witness-fail-closed, #capacity-scan-source-name and #krylov-reverse-mode-guard.</p>
     </article>
 <article class="r-fu" data-id="f-fsri-prewarm-pin-land-or-drop" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-24" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Land the pre-warm compile-row refusal from 89fe2174d, or drop it, and decide whether a revision-keyed pin is worth keeping</h4>

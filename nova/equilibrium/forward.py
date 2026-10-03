@@ -2066,6 +2066,9 @@ class ForwardProfile:
         if route == "newton_krylov":
             newton_shadowed_map = _shared_shadowed_map(shadowed_map)
 
+            def live_shadowed_map(*arguments):
+                return shadowed_map(*arguments)
+
             def solve(
                 initial_flux,
                 external,
@@ -2076,7 +2079,11 @@ class ForwardProfile:
                     return fixed_point.newton_krylov(
                         mapped,
                         initial_flux,
+                        shadow_mask_fn=shadow_mask,
+                        promoted_shadow_mask_fn=promoted_shadow_mask,
+                        shadowed_map_fn=live_shadowed_map,
                         map_arguments=(external, operator, target_value),
+                        callback_arguments=(operator,),
                         **{"newton_steps": self.newton_steps, **options, "warmup": 0},
                     )
                 return fixed_point.newton_krylov(

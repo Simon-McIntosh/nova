@@ -1,0 +1,38 @@
+<!-- node: fsri-live-read-fallback-acceptance | plan: forward-solver-route-integrity §1 -->
+<section id="fsri-live-read-fallback-acceptance">
+<h3>Live-read recovery retains the frozen route acceptance callbacks</h3>
+
+<p>Commit <code>3c0ddf7f3</code> gives the live-read Newton recovery the
+shadow mask, promoted shadow mask, shadowed map, and callback arguments used
+by the frozen Newton route. The focused control reproduces the former refusal
+with <code>own_mask acceptance requires promoted shadow masks</code>; the
+committed arm passes its receipt, fallback dispatch, convergence, and
+live-partition-read assertions.</p>
+
+<p>H200 job <code>1280532</code> ran the diverted jump-bearing reduced row.
+Its copied receipt records terminal residual <strong>5.291367049957982e-15</strong>
+and <code>converged=true</code>. The receipt JSON has no
+<code>live_partition_reads</code> field, so this record makes no count claim.
+The job's PNG, SVG, and JSON are preserved under this node's run directory;
+the earlier tracked certificate paths were restored after copying.</p>
+
+<p>The dispatch-base H200 arm imported the archived
+<code>a51a137af4b354968bdc5f371842a1f57c686398</code> source and completed all
+33 selected ids: <code>33 passed, 2 warnings, 1322.88 s</code>. The matching
+head arm initially isolated one changed result:
+<code>test_the_accelerator_routes_agree_on_the_fixed_point</code> reported
+<code>2.3728714792309975e-06</code> against the <code>1e-6</code> bound. That
+showed the fallback was carrying frozen-partition capabilities. Commit
+<code>f56b62a6b</code> retains the acceptance map while removing those
+capabilities from the live fallback; the H200 recheck passes the formerly
+failing id in <code>689.02 s</code>.</p>
+
+<p>The regression now invokes the fallback shadow map under two authorities:
+the live path produces <code>[1.0]</code>, while a scratch-tree mutation that
+substitutes <code>newton_shadowed_map</code> selects its frozen path and returns
+<code>[2.0]</code>, failing the assertion. That control imports
+<code>/tmp/fsri-live-read-frozen-control.dVt4fI/nova/equilibrium/forward.py</code>
+under pytest importlib mode. The final H200 arm at <code>da5e37812</code>
+passes all 33 selected ids in <code>845.12 s</code> with one SciPy warning and
+no failures.</p>
+</section>

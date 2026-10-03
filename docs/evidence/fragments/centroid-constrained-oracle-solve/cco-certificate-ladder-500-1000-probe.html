@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="centroid-constrained-oracle-solve">
+<title>Large-mesh exact-clip certificate probe</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="cco-certificate-ladder-500-1000-probe" id="admission">
+  <h2 id="large-mesh-probe">Large-mesh certificate probe</h2>
+  <p>Job <code>1280644</code> completed on one H200 in 39m59s with one card, 8 CPUs, 192 GB, exact clipping, the production seed and the first-moment centroid row. Three 1000-cell rows returned complete receipts and contour panels. The single-null 500 control returned from its solve, but the original receipt's analytic-span reader called its flux method with the rotating-case signature and raised <code>CerfonFreidbergSingleNull.flux() takes 2 positional arguments but 3 were given</code>. Its original <code>compile-failed</code> label is an instrument error: it records 366.56 seconds in JAX compilation and reached post-solve readout. The old receipt and log are preserved in the run directory. Bounded single-null recovery job <code>1280651</code> completed in 5m31s using the repaired case adapter, producing the fourth complete receipt and panel.</p>
+  <p>The certificate limits are max solved-minus-analytic / analytic span ≤ <code>0.0011</code>, axis error ≤ <code>0.1</code> pitch, net boundary-span error ≤ <code>0.001</code>, and both terminal and row scaled residuals ≤ <code>1e-12</code>. A returned solve state is called <code>solved</code> here even when its <code>converged</code> flag is false.</p>
+  <table>
+    <caption>Scientific clauses from the terminal receipts</caption>
+    <thead><tr><th>Case</th><th>Requested → realised cells</th><th>State</th><th>Converged</th><th>Max map / span</th><th>Axis [pitches]</th><th>Net boundary / span</th><th>Fields [vertical, radial] T</th><th>Level Wb</th><th>Global residual</th><th>Row residual</th></tr></thead>
+    <tbody>
+      <tr><td><a href="/nova/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/weak-rotation-reactor-static-1000.json">Weak reactor</a></td><td>-1000 → 1072</td><td>solved</td><td>false</td><td>1.31884</td><td>0.277775</td><td>+1.50439</td><td>[0, 0]</td><td>0</td><td>1.0</td><td>65.7287</td></tr>
+      <tr><td><a href="/nova/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/moderate-rotation-conventional-static-1000.json">Moderate conventional</a></td><td>-1000 → 1070</td><td>solved</td><td>false</td><td>1.24829</td><td>0.242970</td><td>+1.42328</td><td>[0, 0]</td><td>0</td><td>1.0</td><td>1.72083</td></tr>
+      <tr><td><a href="/nova/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/strong-rotation-compact-static-1000.json">Strong compact</a></td><td>-1000 → 1069</td><td>solved</td><td>true</td><td>0.0619093</td><td>0.0210191</td><td>-0.0274005</td><td>[2.73614e-4, -1.96460e-7]</td><td>0.00423926</td><td>1.59545e-15</td><td>2.07386e-16</td></tr>
+      <tr><td><a href="/nova/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/diverted-single-null-500.json">Diverted single-null</a></td><td>-500 → 550</td><td>solved</td><td>false</td><td>10.80159</td><td>0.00597294</td><td>+1.80677</td><td>[0, 0]</td><td>0</td><td>1.0</td><td>1.99352</td></tr>
+    </tbody>
+  </table>
+  <p>Weak, moderate and single-null accepted zero Newton promotions, so their zero field amplitudes show no demonstrated refinement trend. Strong accepted seven promotions and met the axis and residual clauses, but its map error is 56 times the allowed ratio and its boundary-span error is 27 times the allowed ratio. Single-null meets the axis clause while its centroid row, map, boundary and global residual clauses fail. None of the four rows qualifies the complete certificate.</p>
+  <table>
+    <caption>Execution measurements; program size is the largest executable available to the driver</caption>
+    <thead><tr><th>Case</th><th>Compile s</th><th>Remaining solve-call s</th><th>Total row s</th><th>Program MiB</th><th>Peak host RSS GiB</th></tr></thead>
+    <tbody>
+      <tr><td>Weak reactor</td><td>367.667</td><td>79.013</td><td>553.103</td><td>106.710</td><td>13.749</td></tr>
+      <tr><td>Moderate conventional</td><td>370.552</td><td>86.512</td><td>563.017</td><td>106.245</td><td>13.782</td></tr>
+      <tr><td>Strong compact</td><td>370.076</td><td>159.259</td><td>633.816</td><td>105.983</td><td>13.744</td></tr>
+      <tr><td>Diverted single-null, recovery</td><td>159.160</td><td>82.666</td><td>313.020</td><td>32.928</td><td>10.023</td></tr>
+    </tbody>
+  </table>
+  <p>Compile time measures JAX's compile/cache entry point. The remaining solve-call wall includes tracing, lowering and execution; the total also includes context setup and rendering. A tiny JIT positive control fired the timer before every solve. The recovery read a warmed compilation cache; its 159.160-second compile entry time is reported separately from the initial single-null attempt's 366.560 seconds, 541.035 total seconds and 13.409 GiB peak RSS. Each row's full JSON receipt is linked from the table and is byte-identical to its run receipt; headered logs and the initial single-null failure record remain under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T142002106912-cco-certificate-ladder-500-1000-probe/measure/</code>. The strong row's nonzero field and seven promotions are the positive control for the zero-field readings in the three nonconverged rows.</p>
+  <figure><img src="/nova/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/weak-rotation-reactor-static-1000.png" alt="Weak reactor solved and analytic flux contours beside their difference, with wall and null markers"><figcaption>Weak reactor, 1072 realised cells: solved (orange) over analytic (blue) on shared physical levels, then solved-minus-analytic contours; both null sets and the wall are shown. Terminal residual 1.0, converged false, row residual 65.7287. The large displacement and difference agree with the failed clauses.</figcaption></figure>
+  <figure><img src="/nova/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/moderate-rotation-conventional-static-1000.png" alt="Moderate conventional solved and analytic flux contours beside their difference, with wall and null markers"><figcaption>Moderate conventional, 1070 realised cells: solved (orange) over analytic (blue) on shared physical levels, then solved-minus-analytic contours; both null sets and the wall are shown. Terminal residual 1.0, converged false, row residual 1.72083.</figcaption></figure>
+  <figure><img src="/nova/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/strong-rotation-compact-static-1000.png" alt="Strong compact solved and analytic flux contours beside their difference, with wall and null markers"><figcaption>Strong compact, 1069 realised cells: solved (orange) over analytic (blue) on shared physical levels, then solved-minus-analytic contours; both null sets and the wall are shown. Terminal residual 1.59545e-15, converged true, row residual 2.07386e-16. The close axes do not remove the 0.0619-of-span map error.</figcaption></figure>
+  <figure><img src="/nova/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/diverted-single-null-500.png" alt="Single-null solved and analytic flux contours beside their difference, with vessel and null markers"><figcaption>Diverted single-null, 550 realised cells: solved (orange) over analytic (blue) on shared physical levels, then solved-minus-analytic contours; both null sets and the wall are shown. Terminal residual 1.0, converged false, row residual 1.99352. The axis is within 0.006 pitch while the map error is 10.8 times the analytic span.</figcaption></figure>
+  <p>The first H200 and titan submissions were cancelled while pending and spent zero GPU time. The completed four-row job used 39m59s of one card, and the single-null recovery used 5m31s; actual cumulative spend was 45m30s of the authorized one card-hour. The first job was scheduler-COMPLETED with exit zero even though the original single-null row failed in readout, so the batch driver now exits nonzero on a row process or receipt failure. The scientific verdict comes from the row receipts, not the scheduler completion. The final four-row record spans the batch and a targeted repair job, so the literal one-job provenance condition remains unmet pending coordinator adjudication or a clean all-row rerun.</p>
+</article>
+</main>
+</body>
+</html>

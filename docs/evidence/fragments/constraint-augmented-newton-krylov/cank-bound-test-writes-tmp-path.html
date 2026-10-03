@@ -1,0 +1,53 @@
+<section>
+<h2 id="cank-bound-test-writes-tmp-path-cank-bound-test-writes-tmp-path">Compensator-bound test writes under tmp_path</h2>
+<p><strong>Node</strong> cank-bound-test-writes-tmp-path · <strong>plan</strong> constraint-augmented-newton-krylov §4 · <strong>role</strong> implement</p>
+
+<h3>The change</h3>
+<p><code>tests/test_reduced_newton_constraint_bounds.py</code> wrote its admission receipt to the
+committed path <code>docs/figures/constraint-augmented-newton-krylov/compensator-bound/receipt.json</code> on every run,
+so a full run dirtied a committed evidence file outside the node's scope. The writer now writes beneath the
+pytest <code>tmp_path</code>, and the test asserts the committed receipt is byte-identical after the solve
+(<code>RECEIPT_PATH.read_bytes() == committed</code>). The committed receipt is not regenerated.</p>
+
+<h3>Reproduction (defect present, before the fix)</h3>
+<p>Unmodified test, base <code>0dfce2a0d</code>, CPU, log
+<code>scratch/repro-docs-write.log</code>: after the run
+<code>git status --porcelain docs/</code> reported
+<code>M docs/figures/constraint-augmented-newton-krylov/compensator-bound/receipt.json</code>. The value it overwrote was
+<code>maximum_compensating_current_a = 54.64758697677363</code> against the committed
+<code>40.85566932623417</code>.</p>
+
+<h3>Head arm (after the fix)</h3>
+<p>Gate <code>JAX_PLATFORMS=cpu …/python -m pytest -p no:cacheprovider tests/test_reduced_newton_constraint_bounds.py</code>
+at <code>0dfce2a0d</code> plus the fix: <strong>2 passed in 165.44s</strong>, and post-run
+<code>git status --porcelain docs/</code> is empty (log <code>scratch/gate-head.log</code>).</p>
+
+<h3>Negative control</h3>
+<p>Declared mutation — restore the write to
+<code>docs/figures/constraint-augmented-newton-krylov/compensator-bound/receipt.json</code>. Applied by pointing the
+writer back at <code>RECEIPT_PATH.parent</code>. Log <code>scratch/negative-control.log</code>: first test fails
+(<code>F</code>) and the run exits <code>EXIT=134</code>, with post-run
+<code>git status --porcelain docs/</code> showing the receipt modified (`M …receipt.json`). The run then aborted inside a JAX
+compile of the second test instead of printing its summary line, so the first test's id is carried by the progress
+marker rather than a <code>FAILED</code> line.</p>
+
+<h3>Attribution of the over-ceiling compensating current</h3>
+<table>
+<thead><tr><th>arm</th><th>revision</th><th>maximum_compensating_current_a</th></tr></thead>
+<tbody>
+<tr><td>base run 1</td><td>0dfce2a0d</td><td>54.64758697677363</td></tr>
+<tr><td>base run 2</td><td>0dfce2a0d</td><td>54.64758697677363</td></tr>
+<tr><td>writer revision</td><td>d884fe594</td><td>40.8556693262511</td></tr>
+</tbody>
+</table>
+<p>The two base runs agree exactly and differ from the writer revision, so the move from <strong>40.86 → 54.65 A is a code
+change</strong> between <code>d884fe594</code> and the base revision, not nondeterminism. The writer revision was extracted
+with <code>git archive</code> (only <code>nova/</code> and the two test modules) into
+<code>scratch/writer/</code>, never a checkout in the shared tree.</p>
+
+<h3>Note on the gate's cold compile</h3>
+<p>The CPU backend cold-compiles the fixture for ~390 s, over the repository's 300 s per-test
+<code>pytest-timeout</code> default, so the first runs timed out in <code>backend.compile_and_load</code>. A persistent JAX
+compilation cache was enabled for the runs (<code>JAX_COMPILATION_CACHE_DIR</code> under the run's scratch), which brings the
+file to ~165 s and under the default timeout.</p>
+</section>

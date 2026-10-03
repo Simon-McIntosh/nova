@@ -1,0 +1,104 @@
+<section id="ecq-fence-in-moment-l2">
+  <h3>Re-judging the five fallback rows against the fan's refinement floor</h3>
+
+  <p><strong>Node</strong> <code>ecq-fence-in-moment-l2</code>, plan
+  <code>nova:exact-clip-moment-quadrature</code> §3, base
+  <code>a42dc665c</code>. Discharges followup <code>f-ecq-fence-in-moment-l2</code>
+  and applies the locked decision <code>fallback-fence-norm</code> to the five
+  fallback rows. No product source and no test is touched.</p>
+
+  <p><strong>What this replaces.</strong> The five fallback rows — the rows with
+  no independent coupling error term — were previously read against two fences,
+  neither of which is the retained fan's refinement floor. Both are retired
+  here:</p>
+
+  <ul>
+    <li><strong>one tenth of the fan refinement floor</strong>
+    (<code>fan-floor-tenth</code>, current <code>2.924e-17</code>, radial
+    <code>5.109e-16</code>, vertical <code>5.064e-16</code>) — a budget, not the
+    floor, and it re-imports the tenth the decision removed;</li>
+    <li><strong>the closed-form round-off envelope</strong>
+    (<code>closed-form-envelope</code>, current <code>2.038e-16</code>, radial
+    <code>2.060e-15</code>, vertical <code>4.789e-16</code>) — a property of the
+    closed-form route's own accumulated round-off, so comparing the route against
+    it measures the route against itself rather than against the fan's
+    refinement.</li>
+  </ul>
+
+  <p><strong>What replaces them.</strong> Decision
+  <code>fallback-fence-norm</code> is locked to <code>moment-relative-l2</code>:
+  the fence is the retained fan's own refinement floor,
+  <code>(4/3)·||fan@order16 − fan@order8||₂ / ||fan@order8||₂</code> on the three
+  moment integrals, measured on the weak 110 row and shared by every fallback
+  row — the same instrument that supplies each row's reference. At base
+  <code>a42dc665c</code> that is <code>current 2.26749e-16</code>,
+  <code>radial 4.44149e-15</code>, <code>vertical 5.06496e-15</code>. A row's
+  error is the closed-form route's moment relative L2 against the retained fan at
+  the clip's native arc resolution of 128 segments.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>fallback row</th><th>cuts</th><th>current</th><th>radial</th>
+        <th>vertical</th><th>verdict</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>weak-rotation-reactor-static @ 1000</td><td>131</td>
+        <td>2.01362e-16</td><td>1.69513e-15</td><td>1.70405e-15</td>
+        <td><strong>pass</strong></td>
+      </tr>
+      <tr>
+        <td>moderate-rotation-conventional-static @ 1000</td><td>136</td>
+        <td>2.29975e-16</td><td>2.19660e-15</td><td>1.30226e-15</td>
+        <td><strong>fail</strong> (current)</td>
+      </tr>
+      <tr>
+        <td>strong-rotation-compact-static @ 110</td><td>44</td>
+        <td>2.96282e-16</td><td>1.10522e-15</td><td>1.61798e-15</td>
+        <td><strong>fail</strong> (current)</td>
+      </tr>
+      <tr>
+        <td>strong-rotation-compact-static @ 300</td><td>73</td>
+        <td>1.73051e-16</td><td>2.05311e-15</td><td>1.17388e-15</td>
+        <td><strong>pass</strong></td>
+      </tr>
+      <tr>
+        <td>strong-rotation-compact-static @ 1000</td><td>129</td>
+        <td>2.06993e-16</td><td>1.88437e-15</td><td>1.49006e-15</td>
+        <td><strong>pass</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Three pass, two fail, and every failure is the current
+  moment alone</strong> — radial and vertical sit below the fence on all five
+  rows. <code>strong-rotation-compact-static @ 110</code> is the clear failure,
+  its current error 31% over the fence, and no swept arc count (8 through 128)
+  brings it under, so the polyline is not what limits it.
+  <code>moderate-rotation-conventional-static @ 1000</code> fails by 1.4%
+  (<code>2.29975e-16</code> against <code>2.26749e-16</code>). That margin is one
+  part in seventy at the round-off scale; the ordering is not physically
+  meaningful on its own and this row should be read as <em>marginal</em> rather
+  than settled.</p>
+
+  <p><strong>The fence's own value moved with the clip's arc sampling.</strong>
+  The fan-floor study recorded <code>current 2.92403e-16</code> at revision
+  <code>d9b594b2</code>; measured here at <code>a42dc665c</code> it is
+  <code>2.26749e-16</code>. The floor is a property of the fan arm on the
+  geometry the rows are built on, and that geometry changed between the two
+  revisions, so the fence moved with it. The verdicts above use the fence
+  measured in the same process as the rows — the only pairing in which a row
+  error and its fence describe the same instrument. Read against the recorded
+  floor instead, <code>moderate-rotation-conventional-static @ 1000</code> would
+  sit just under it and pass, and the strong-110 failure is unchanged.</p>
+
+  <p><strong>Receipt.</strong>
+  <code>docs/figures/exact-clip-moment-quadrature/fence-in-moment-l2/receipt.json</code>
+  (machine record, with the full swept series at arc counts 8, 16, 32, 64, 128)
+  and <code>receipt.md</code> beside it. Driver
+  <code>rejudge_fallback_rows.py</code>; run on the fleet node in one process,
+  JAX backend <code>cpu</code>, binary64, job <code>1277272</code>. No product
+  source and no test is touched by this node.</p>
+</section>

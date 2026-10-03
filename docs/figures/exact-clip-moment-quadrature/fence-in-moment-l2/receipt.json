@@ -1,0 +1,270 @@
+{
+  "created_at": "2026-10-03T15:02:40.680791+00:00",
+  "decision": {
+    "choice": "moment-relative-l2",
+    "key": "fallback-fence-norm"
+  },
+  "fence": {
+    "current": 2.2674921935424707e-16,
+    "radial": 4.441488294803437e-15,
+    "vertical": 5.0649569403891024e-15
+  },
+  "fence_definition": "(4/3) * |fan at order 16 - fan at order 8| as a relative L2 on the three moment integrals, measured on the weak 110 row and shared by every fallback row",
+  "fence_source": "retained fan refinement floor, measured in this run",
+  "host": "98dci4-clu-2018.iter.org",
+  "job_id": "1277272",
+  "native_arc_count": 128,
+  "norm": "moment relative L2 against the retained fan",
+  "rows": [
+    {
+      "case": "weak-rotation-reactor-static",
+      "cut_cells": 131,
+      "error_at_native_count": {
+        "current": 2.013615453836503e-16,
+        "radial": 1.6951277232215857e-15,
+        "vertical": 1.7040460875325853e-15
+      },
+      "error_at_native_count_verdict": {
+        "current": true,
+        "radial": true,
+        "vertical": true
+      },
+      "error_by_count": {
+        "128": {
+          "current": 2.013615453836503e-16,
+          "radial": 1.6951277232215857e-15,
+          "vertical": 1.7040460875325853e-15
+        },
+        "16": {
+          "current": 3.770738168522633e-05,
+          "radial": 4.800012138878512e-05,
+          "vertical": 9.47961517929476e-05
+        },
+        "32": {
+          "current": 8.977967669414134e-06,
+          "radial": 1.1428599562579492e-05,
+          "vertical": 2.2570654635328017e-05
+        },
+        "64": {
+          "current": 1.7955945163343241e-06,
+          "radial": 2.285719885957646e-06,
+          "vertical": 4.514138060081317e-06
+        },
+        "8": {
+          "current": 0.0001526237803285947,
+          "radial": 0.00019428632127786583,
+          "vertical": 0.00038368912851530484
+        }
+      },
+      "realised_cells": 1072,
+      "requested_cells": -1000,
+      "smallest_count_meeting_fence": 128,
+      "verdict": "pass"
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "cut_cells": 136,
+      "error_at_native_count": {
+        "current": 2.299749963716477e-16,
+        "radial": 2.1965990220896507e-15,
+        "vertical": 1.30225532674504e-15
+      },
+      "error_at_native_count_verdict": {
+        "current": false,
+        "radial": true,
+        "vertical": true
+      },
+      "error_by_count": {
+        "128": {
+          "current": 2.299749963716477e-16,
+          "radial": 2.1965990220896507e-15,
+          "vertical": 1.30225532674504e-15
+        },
+        "16": {
+          "current": 3.5445287941224246e-05,
+          "radial": 4.541755915574279e-05,
+          "vertical": 6.900309404789956e-05
+        },
+        "32": {
+          "current": 8.439371520737165e-06,
+          "radial": 1.0813827098813871e-05,
+          "vertical": 1.642978580189272e-05
+        },
+        "64": {
+          "current": 1.6878751665454055e-06,
+          "radial": 2.162771560369755e-06,
+          "vertical": 3.2859810655915617e-06
+        },
+        "8": {
+          "current": 0.000143467849792543,
+          "radial": 0.00018382471815222258,
+          "vertical": 0.0002792658656836018
+        }
+      },
+      "realised_cells": 1070,
+      "requested_cells": -1000,
+      "smallest_count_meeting_fence": null,
+      "verdict": "fail"
+    },
+    {
+      "case": "strong-rotation-compact-static",
+      "cut_cells": 44,
+      "error_at_native_count": {
+        "current": 2.9628224968949354e-16,
+        "radial": 1.1052249818698176e-15,
+        "vertical": 1.6179826867805437e-15
+      },
+      "error_at_native_count_verdict": {
+        "current": false,
+        "radial": true,
+        "vertical": true
+      },
+      "error_by_count": {
+        "128": {
+          "current": 2.9628224968949354e-16,
+          "radial": 1.1052249818698176e-15,
+          "vertical": 1.6179826867805437e-15
+        },
+        "16": {
+          "current": 0.00010198778353297916,
+          "radial": 0.00012558874314135552,
+          "vertical": 0.0002925304312948035
+        },
+        "32": {
+          "current": 2.428425056531694e-05,
+          "radial": 2.990104678969524e-05,
+          "vertical": 6.958721182257961e-05
+        },
+        "64": {
+          "current": 4.855616041279191e-06,
+          "radial": 5.977794946325085e-06,
+          "vertical": 1.3914284072523718e-05
+        },
+        "8": {
+          "current": 0.00041278983942164146,
+          "radial": 0.0005086195843385979,
+          "vertical": 0.001181603105635754
+        }
+      },
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "smallest_count_meeting_fence": null,
+      "verdict": "fail"
+    },
+    {
+      "case": "strong-rotation-compact-static",
+      "cut_cells": 73,
+      "error_at_native_count": {
+        "current": 1.7305052626266358e-16,
+        "radial": 2.0531053367070323e-15,
+        "vertical": 1.1738806179149428e-15
+      },
+      "error_at_native_count_verdict": {
+        "current": true,
+        "radial": true,
+        "vertical": true
+      },
+      "error_by_count": {
+        "128": {
+          "current": 1.7305052626266358e-16,
+          "radial": 2.0531053367070323e-15,
+          "vertical": 1.1738806179149428e-15
+        },
+        "16": {
+          "current": 6.398270528758217e-05,
+          "radial": 9.002723720364001e-05,
+          "vertical": 0.00015681095511505512
+        },
+        "32": {
+          "current": 1.5235348113711379e-05,
+          "radial": 2.1437908971297284e-05,
+          "vertical": 3.735277897575819e-05
+        },
+        "64": {
+          "current": 3.046896802363381e-06,
+          "radial": 4.2870669955545176e-06,
+          "vertical": 7.466539367620621e-06
+        },
+        "8": {
+          "current": 0.00025896139684737564,
+          "radial": 0.0003644186224907074,
+          "vertical": 0.0006344433306730411
+        }
+      },
+      "realised_cells": 341,
+      "requested_cells": -300,
+      "smallest_count_meeting_fence": 128,
+      "verdict": "pass"
+    },
+    {
+      "case": "strong-rotation-compact-static",
+      "cut_cells": 129,
+      "error_at_native_count": {
+        "current": 2.0699308290582528e-16,
+        "radial": 1.884374921863769e-15,
+        "vertical": 1.4900601101335326e-15
+      },
+      "error_at_native_count_verdict": {
+        "current": true,
+        "radial": true,
+        "vertical": true
+      },
+      "error_by_count": {
+        "128": {
+          "current": 2.0699308290582528e-16,
+          "radial": 1.884374921863769e-15,
+          "vertical": 1.4900601101335326e-15
+        },
+        "16": {
+          "current": 3.9247803052960134e-05,
+          "radial": 4.927647620858615e-05,
+          "vertical": 8.452724415215134e-05
+        },
+        "32": {
+          "current": 9.347390748072124e-06,
+          "radial": 1.1771199058810198e-05,
+          "vertical": 2.0129946151115612e-05
+        },
+        "64": {
+          "current": 1.870749477012858e-06,
+          "radial": 2.3726771558553305e-06,
+          "vertical": 4.0281540529032645e-06
+        },
+        "8": {
+          "current": 0.0001590056378205949,
+          "radial": 0.00020151444370435862,
+          "vertical": 0.00034207753968680304
+        }
+      },
+      "realised_cells": 1069,
+      "requested_cells": -1000,
+      "smallest_count_meeting_fence": 128,
+      "verdict": "pass"
+    }
+  ],
+  "schema": "nova.exact-clip-fence-in-moment-l2.v1",
+  "source_revision": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+  "summary": {
+    "fail": [
+      "moderate-rotation-conventional-static 1000",
+      "strong-rotation-compact-static 110"
+    ],
+    "pass": [
+      "weak-rotation-reactor-static 1000",
+      "strong-rotation-compact-static 300",
+      "strong-rotation-compact-static 1000"
+    ]
+  },
+  "superseded_fences": {
+    "closed_form_round_off_envelope": {
+      "current": 2.038e-16,
+      "radial": 2.06e-15,
+      "vertical": 4.789e-16
+    },
+    "one_tenth_of_the_fan_refinement_floor": {
+      "current": 2.924e-17,
+      "radial": 5.109e-16,
+      "vertical": 5.064e-16
+    }
+  }
+}

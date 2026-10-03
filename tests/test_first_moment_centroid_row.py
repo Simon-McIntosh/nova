@@ -87,12 +87,25 @@ def test_analytic_first_moment_centroid_has_derived_tolerance(analytic_row):
     target = float(np.asarray(pair.binding.target)[0])
     tolerance = float(np.asarray(pair.binding.tolerance)[0])
     analytic = float(np.asarray(pair.binding.payload)[0])
+    analytic_observed = pair.functional.observed(
+        profile,
+        ConstraintContext(
+            flux=jnp.asarray(context["analytic"]),
+            requested_class=stiffness.REQUESTED_CLASS,
+            target_current=context["target_current"],
+            shadow=None,
+        ),
+        pair.binding.payload,
+    )
+    np.testing.assert_allclose(
+        analytic_observed, pair.binding.payload, rtol=0.0, atol=0.0
+    )
     assert abs(centre_only - target) > 6.0e-3
     assert 5.0e-5 < abs(analytic - target) < 1.0e-4
     np.testing.assert_allclose(
         tolerance, abs(analytic - target), rtol=0.0, atol=1.0e-14
     )
-    assert abs(analytic - target) <= tolerance
+    assert abs(float(np.asarray(analytic_observed)[0]) - target) <= tolerance
 
     displacement = np.asarray((2.0 * np.sign(analytic - target) * tolerance, 0.0))
     displaced = stiffness._translated_state(context, displacement)

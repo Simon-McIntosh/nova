@@ -1,0 +1,68 @@
+{
+  "analysis_revision": "36b67cef4",
+  "clip_mode": "exact",
+  "compensating_field_unavailable": true,
+  "figure": {
+    "bytes": 215715,
+    "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-repaired-constrained-remeasure/docs/figures/centroid-constrained-oracle-solve/repaired-remeasure/flux-panels.png",
+    "sha256": "43cd3f3088b6333c083338262ac9eedee4fc9859213bb2845efc970cbc866002",
+    "shared_levels_wb": [
+      -19.51415956145873,
+      -13.222772377442507,
+      -6.931385193426285,
+      -0.6399980094100641,
+      5.651389174606159,
+      11.942776358622382,
+      18.2341635426386,
+      24.525550726654824,
+      30.816937910671047,
+      37.108325094687274,
+      43.39971227870349,
+      49.69109946271971
+    ],
+    "src": "/nova/figures/centroid-constrained-oracle-solve/repaired-remeasure/flux-panels.png"
+  },
+  "maximum_absolute_error_wb": 0.17771499128058155,
+  "realised_cells": 135,
+  "rms_error_wb": 0.09236011386139067,
+  "sample_count": 772,
+  "schema": "nova.centroid-saved-state-read",
+  "source_job": 1280613,
+  "source_revision": "5d2d5eaf1f0921f326eb2eb40103eaaf10c9886a",
+  "state_sha256_binary64": "0196d8cce7b0f3c5b7852bcc0e42ecd7ac154a3b5e11f81fedea8fe6bd77e04b",
+  "topology": {
+    "axis_flux_wb": 49.94113518550184,
+    "axis_rz_m": [
+      6.194802566671738,
+      0.00013770471514484105
+    ],
+    "boundary_flux_wb": 0.03408855834986748,
+    "boundary_rz_m": [
+      7.801395788267687,
+      -1.5753610993789073e-08
+    ],
+    "class": "limited",
+    "exception_text": null,
+    "gauge_free_span_wb": 49.90704662715198,
+    "o_candidate_count": 1,
+    "o_second_best_flux_margin_wb": null,
+    "read_status": "qualified_axis",
+    "wall_contact_rz_m": [
+      7.801395788267687,
+      -1.5753610993789073e-08
+    ],
+    "x_candidate_count": 0,
+    "x_point_flux_wb": null,
+    "x_point_rz_m": null,
+    "x_second_best_flux_margin_wb": null
+  },
+  "uncompensated_span_read": {
+    "analytic_span_wb": 49.940309388804806,
+    "gauge_free_flux_offset_of_analytic_span": -0.0006660503721325574,
+    "gauge_free_flux_offset_wb": -0.03326276165282849,
+    "meaning": "raw solved-minus-analytic span at the same points; field amplitude unavailable, so this is not the net-of-compensator clause"
+  },
+  "wall_max_error_wb": 0.1760153259173518,
+  "wall_min_error_wb": 0.03408855834986585,
+  "wall_sample_count": 121
+}

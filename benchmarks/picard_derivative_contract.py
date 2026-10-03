@@ -103,6 +103,24 @@ def _fixed_point_tangent(mapping, terminal_flux, conductor, direction):
     return solution, int(np.asarray(information)), float(jnp.max(jnp.abs(residual)))
 
 
+def _selected_probe(reverse, requested: int | None) -> int:
+    """Keep automatic witness selection unless a physical component is pinned."""
+    if requested is None:
+        return int(np.argmax(np.abs(np.asarray(reverse))))
+    if not 0 <= requested < reverse.size:
+        raise ValueError(f"probe {requested} is outside conductor width {reverse.size}")
+    return requested
+
+
+def _central_difference_steps(
+    conductor, probe: int, requested: tuple[float, ...] | None
+) -> tuple[float, ...]:
+    """Resolve explicit absolute steps or the established relative ladder."""
+    if requested is not None:
+        return requested
+    return tuple(fraction * float(jnp.abs(conductor[probe])) for fraction in STEPS)
+
+
 def _scalar_methods(
     profile,
     seed,
@@ -129,12 +147,7 @@ def _scalar_methods(
             ).moments.plasma_current
 
         reverse = jax.grad(flux_function)(conductor)
-        if probe is None:
-            probe = int(np.argmax(np.abs(np.asarray(reverse))))
-        if not 0 <= probe < conductor.size:
-            raise ValueError(
-                f"probe {probe} is outside conductor width {conductor.size}"
-            )
+        probe = _selected_probe(reverse, probe)
         direction = jnp.zeros_like(conductor).at[probe].set(1.0)
         _, forward = jax.jvp(flux_function, (conductor,), (direction,))
         _, current_forward = jax.jvp(current_function, (conductor,), (direction,))
@@ -152,11 +165,7 @@ def _scalar_methods(
             (fixed_tangent,),
         )[1]
         rows = []
-        deltas = (
-            tuple(fraction * float(jnp.abs(conductor[probe])) for fraction in STEPS)
-            if steps is None
-            else steps
-        )
+        deltas = _central_difference_steps(conductor, probe, steps)
         for delta in deltas:
             flux_fd = (
                 flux_function(conductor + delta * direction)

@@ -6,6 +6,10 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+from benchmarks.picard_derivative_contract import (
+    _central_difference_steps,
+    _selected_probe,
+)
 from nova.equilibrium.fixed_point import picard
 from nova.jax.config import configure_dtypes
 
@@ -74,3 +78,17 @@ def test_picard_no_selection_control_agrees_to_machine_precision():
     _, forward = jax.jvp(response, (control,), (jnp.ones_like(control),))
 
     np.testing.assert_allclose(reverse, forward, rtol=0.0, atol=1.0e-10)
+
+
+def test_derivative_witness_selection_preserves_the_default_and_an_explicit_probe():
+    """A named physical witness cannot be replaced by the largest response."""
+    reverse = jnp.asarray([4.0, -2.0, 1.0, -3.0])
+    conductor = jnp.asarray([460.0, 200.0, 90.0, 293.0])
+    requested = (293.18627897744824, 87.95588369323447, 29.318627897744825)
+
+    assert _selected_probe(reverse, None) == 0
+    assert _selected_probe(reverse, 3) == 3
+    np.testing.assert_allclose(
+        _central_difference_steps(conductor, 0, None), (0.46, 0.138, 0.046)
+    )
+    assert _central_difference_steps(conductor, 3, requested) == requested

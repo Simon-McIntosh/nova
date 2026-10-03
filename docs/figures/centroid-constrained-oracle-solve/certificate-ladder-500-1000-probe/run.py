@@ -22,6 +22,7 @@ ROWS = (
 def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    any_failed = False
     for case, cells in ROWS:
         stem = f"{case}-{abs(cells)}"
         receipt_path = OUTPUT / f"{stem}.json"
@@ -79,7 +80,10 @@ def main() -> None:
         row["log_path"] = str(log_path)
         receipt_path.write_text(json.dumps(row, indent=2, sort_keys=True) + "\n")
         print(f"ROW {stem} {row['status']} EXIT={completed.returncode}", flush=True)
+        any_failed |= completed.returncode != 0 or row["status"] != "solved"
     print("MEASUREMENT_COMPLETE", flush=True)
+    if any_failed:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

@@ -47,19 +47,30 @@ def test_scanner_is_importable_and_typed():
     assert str(record) == "a.py:3: tricontour"
 
 
-def test_control_flags_certificate_painter_without_wall():
-    # Control site: benchmarks/plasma_cell_fixed_point_attribution.py:424,
-    # a draw_flux_contours over a _raster_field raster passed no wall.
-    assert (
-        "benchmarks/plasma_cell_fixed_point_attribution.py",
-        424,
-    ) in _sites(_records())
+def test_flags_a_painter_over_a_scattered_raster_without_wall(tmp_path):
+    # A certificate painter drawing a _raster_field raster with no wall was a
+    # real unguarded site; it is now repaired, so this control is crafted and
+    # must redden if the painter rule is removed, rather than depending on an
+    # unrepaired site remaining in the tree.
+    sites = _scan_source(
+        tmp_path,
+        "radial, height, raster = certificate._raster_field(coords, values, wall)\n"
+        "driver.poloidal.draw_flux_contours(\n"
+        "    axis, radial, height, raster, levels, color=color\n"
+        ")\n",
+    )
+    assert sites == {("module.py", 2)}
 
 
-def test_control_flags_direct_tricontour_on_scattered_nodes():
-    # Control site: benchmarks/sol_ledger_current_census.py:415, an Axes
-    # tricontour over scattered nodes drawn straight to the figure.
-    assert ("benchmarks/sol_ledger_current_census.py", 415) in _sites(_records())
+def test_flags_a_direct_tricontour_on_scattered_nodes(tmp_path):
+    # A ledger panel drawing an Axes tricontour over scattered nodes straight to
+    # the figure was a real unguarded site; it is now repaired, so this control
+    # is crafted and must redden if the tricontour rule is removed.
+    sites = _scan_source(
+        tmp_path,
+        "axes.tricontour(node[:, 0], node[:, 1], grid_flux, levels)\n",
+    )
+    assert sites == {("module.py", 1)}
 
 
 def test_control_does_not_flag_painter_that_passes_a_wall_argument():
@@ -118,6 +129,28 @@ def test_reports_a_wall_less_painter(tmp_path):
         "draw_flux_contours(axes, radius, height, raster, levels)\n",
     )
     assert sites == {("module.py", 2)}
+
+
+def test_reports_a_painter_that_passes_wall_none(tmp_path):
+    # An explicit wall=None does not guard: the painter blanks nothing, so the
+    # call is reported exactly as if the argument were absent. This control
+    # reddens if wall=None is treated as a wall.
+    sites = _scan_source(
+        tmp_path,
+        "raster = _raster_field(coordinates, values)\n"
+        "draw_flux_contours(axes, radius, height, raster, levels, wall=None)\n",
+    )
+    assert sites == {("module.py", 2)}
+
+
+def test_does_not_report_a_painter_that_passes_a_real_wall(tmp_path):
+    # The companion to the wall=None control: a non-null wall is a guard.
+    sites = _scan_source(
+        tmp_path,
+        "raster = _raster_field(coordinates, values)\n"
+        "draw_flux_contours(axes, radius, height, raster, levels, wall=units)\n",
+    )
+    assert sites == set()
 
 
 def test_clean_tree_reports_nothing(tmp_path):

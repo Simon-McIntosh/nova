@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<title>Outboard exact booking census</title>
+</head>
+<body>
+<main>
+<h1>Outboard exact booking census</h1>
+<p>The persisted weak-rotation terminal state was evaluated from isolated Git
+archives on the CPU backend. Each arm records its archive path, imported
+<code>forward_operator</code> path and selected clip-mode interface. The
+archive directories were removed after their receipts were written. The final
+paired receipt records its generating commit inside the JSON payload.</p>
+
+<figure>
+<img src="/nova/figures/forward-solve-api/fsapi-outboard-census-exact-total/terminal-state-contours.png" alt="Shared analytic and terminal poloidal flux contours with the vessel, nulls, and ten changed supports">
+<figcaption>Terminal state from the persisted weak-rotation control receipt.
+Blue is the analytic reference and ochre is the terminal flux, on shared Wb
+levels; their null vocabularies are marked in the matching colours. The black
+line is the vessel. Red outlines and labels mark the ten supports that change
+booking at <code>38b441dad</code>. The terminal fixed-point residual is
+0.007447526861632619 and the stored state is unqualified, active-set-settled.</figcaption>
+</figure>
+
+<h2>Persisted-state provenance and open gate</h2>
+<p>The terminal control receipt was last written by commit
+<code>8e5f8690b38a5b4e2b303e9656e1e990d6d2c571</code> at
+2026-09-10 03:14:05+02:00. It records a
+<code>profile.solve(ForwardSolveRequest)</code> call, but does not persist a
+solve clip mode; the <code>exact</code> mode in this record is the explicit
+mode of the later booking measurement, not an assertion about the terminal
+solve. The gate remains red until its pin is updated: its present exact
+expectation is 14,013,835.437176 A while the measured booking is
+15,491,539.124767 A. Re-pin that test in its separately scoped verification
+node, without widening tolerance, then run it against this persisted state.</p>
+
+<h2>Booked totals</h2>
+<table>
+<thead><tr><th>Revision</th><th>Clip selection</th><th>Chord [A]</th><th>Exact [A]</th></tr></thead>
+<tbody>
+<tr><td><code>247e5aa4a</code></td><td><code>set_support_clip_mode</code></td><td>15,875,439.764504</td><td>14,013,835.437170</td></tr>
+<tr><td><code>a28a3e880</code></td><td><code>set_support_clip_mode</code></td><td>15,875,439.764504</td><td>14,013,835.437170</td></tr>
+<tr><td><code>38b441dad</code></td><td><code>set_support_clip_mode</code></td><td>15,875,439.764504</td><td>15,491,539.124767</td></tr>
+<tr><td><code>main</code></td><td><code>with_clip_mode</code></td><td>15,875,439.764504</td><td>15,491,539.124767</td></tr>
+</tbody>
+</table>
+<p>The chord total is invariant. The exact total increases by 1,477,703.687597 A
+at <code>38b441dad</code> and remains at that value on <code>main</code>.</p>
+
+<h2>Independent exact-support reference</h2>
+<p>Only the ten cells whose exact bookings differ across the bracket were
+integrated: 5, 7, 30, 65, 74, 78, 87, 110, 119 and 124. Each emitted clipped
+polygon was triangulated, evaluated by the symmetric three-point triangle rule,
+and uniformly subdivided until two levels agreed within 1e-8 relative. Every
+cell converged at level 1 or 2.</p>
+<table>
+<thead><tr><th>Cell</th><th>Before booking [A]</th><th>After booking [A]</th><th>Triangle reference [A]</th><th>Final Δ [A]</th><th>Final level</th></tr></thead>
+<tbody>
+<tr><td>5</td><td>0.000000</td><td>155,777.459352</td><td>155,777.459398</td><td>0.000508</td><td>1</td></tr>
+<tr><td>7</td><td>0.000000</td><td>151,338.595255</td><td>151,338.595316</td><td>0.000749</td><td>2</td></tr>
+<tr><td>30</td><td>0.000000</td><td>130,914.909252</td><td>130,914.908678</td><td>0.001140</td><td>2</td></tr>
+<tr><td>65</td><td>0.000000</td><td>130,914.909251</td><td>130,914.908534</td><td>0.001020</td><td>1</td></tr>
+<tr><td>74</td><td>0.000000</td><td>151,338.595248</td><td>151,338.595216</td><td>0.000652</td><td>1</td></tr>
+<tr><td>78</td><td>0.000000</td><td>124,146.374713</td><td>124,146.374724</td><td>0.000380</td><td>1</td></tr>
+<tr><td>87</td><td>0.000000</td><td>176,674.505243</td><td>176,674.505228</td><td>0.000542</td><td>1</td></tr>
+<tr><td>110</td><td>0.000000</td><td>176,674.505238</td><td>176,674.505235</td><td>0.000361</td><td>2</td></tr>
+<tr><td>119</td><td>0.000000</td><td>124,146.374705</td><td>124,146.374722</td><td>0.000292</td><td>2</td></tr>
+<tr><td>124</td><td>0.000000</td><td>155,777.459341</td><td>155,777.459313</td><td>0.000606</td><td>2</td></tr>
+</tbody>
+</table>
+<p>The current selected-booking sum is 1,477,703.687597 A; the independent sum
+is 1,477,703.686365 A, a 0.001232 A difference (8.34e-10 relative). Its stated
+tolerance is 0.006251 A: the measured sum of the absolute difference between
+the last two refinement levels in every row above. The current booking is
+therefore within that measured tolerance. The pinned selected-booking sum is
+0.000000001 A, 1,477,703.686365 A from the same reference (relative difference
+approximately one), and is outside it. These two comparisons derive the
+<code>re-pin</code> verdict; they are not a preset recommendation.</p>
+<p>Each final ladder step is below 1e-8 relative, and the <code>Final Δ</code>
+column is the recorded per-cell quadrature error bound rather than a literal
+placeholder.</p>
+
+<h2>Cause and recommendation</h2>
+<p><code>38b441dad</code> changes the primal routing in
+<code>nova/equilibrium/clip_quadrature.py</code> at lines 516–521 and 731–736:
+supports with more than the whole-cell vertex capacity are classified as
+boundaries and sent through compact cut-cell integration instead of the
+whole-cell route. This is not the <code>custom_jvp</code> beginning later in the
+file. Re-pin the exact booking to 15,491,539.124767 A; do not repair the
+primal routing or widen the gate tolerance.</p>
+
+<h2>Receipts</h2>
+<ul>
+<li><code>paired-final-head.log</code> and <code>paired-final-head.json</code>;
+this final paired booking/reference receipt records its generating commit and
+the comparisons used above.</li>
+</ul>
+</main>
+</body>
+</html>

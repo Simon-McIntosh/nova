@@ -50,7 +50,6 @@ def _draw(context: dict, receipt: dict, state: np.ndarray, path: Path) -> None:
         levels,
         color=fixture.ANALYTIC_INK,
         linewidth=2.4,
-        linestyles="dashed",
         wall=(wall,),
     )
     poloidal.draw_flux_contours(
@@ -104,7 +103,7 @@ def _draw(context: dict, receipt: dict, state: np.ndarray, path: Path) -> None:
     axes[0].text(
         0.03,
         0.95,
-        "analytic dashed · solved solid",
+        "analytic blue · solved orange",
         transform=axes[0].transAxes,
         va="top",
         fontsize=20,

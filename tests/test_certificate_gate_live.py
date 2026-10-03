@@ -179,7 +179,7 @@ def _render_terminal_state(
             marks=pytest.mark.xfail(
                 strict=True,
                 reason=(
-                    "weak exact 300-cell residual 0.03741195763896904; "
+                    "weak exact 300-cell residual about 0.0374; "
                     "forward-solver-route-integrity §1 Newton-Krylov termination defect"
                 ),
             ),

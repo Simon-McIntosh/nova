@@ -29,6 +29,7 @@ from nova.biot.polygon import pack_section, pad_batch
 from nova.biot.polygonanalytic import _edge_flux, packed_analytic_greens
 from nova.frame.coilset import CoilSet
 from nova.jax.config import configure_dtypes
+from nova.media import poloidal
 from scripts.analytic_oracle_fixtures import measure as fixture
 from tests.rotating_equilibrium_references import reference_cases
 
@@ -56,6 +57,7 @@ class Carrier:
     area: np.ndarray
     polygons: tuple[np.ndarray, ...]
     cut: np.ndarray
+    wall: np.ndarray
 
 
 def _source_revision() -> str:
@@ -101,6 +103,7 @@ def _material_geometry(case, requested_cells: int, tiling: str) -> Carrier:
             area=np.asarray(machine.area, dtype=np.float64),
             polygons=polygons,
             cut=cut,
+            wall=np.asarray(wall, dtype=np.float64),
         )
 
     coilset = CoilSet(dplasma=-requested_cells, tplasma="rectangle")
@@ -124,6 +127,7 @@ def _material_geometry(case, requested_cells: int, tiling: str) -> Carrier:
         area=np.asarray([item.poly.area for item in material], dtype=np.float64),
         polygons=polygons,
         cut=cut,
+        wall=np.asarray(wall, dtype=np.float64),
     )
 
 
@@ -424,13 +428,15 @@ def _plot(carriers, maps, output: Path) -> None:
     levels = np.geomspace(lower, upper, 9) if upper > lower else np.asarray([upper])
     figure, axes = plt.subplots(2, 2, figsize=(10.0, 8.0), constrained_layout=True)
     for axis, carrier, error in zip(axes.ravel(), carriers, maps, strict=True):
-        axis.tricontour(
+        poloidal.draw_scattered_contours(
+            axis,
             carrier.node[:, 0],
             carrier.node[:, 1],
             np.maximum(np.abs(error), lower),
-            levels=levels,
-            linewidths=0.8,
-            colors="C3",
+            levels,
+            carrier.wall,
+            linewidth=0.8,
+            color="C3",
         )
         axis.set_aspect("equal")
         axis.set_title(

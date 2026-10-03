@@ -875,12 +875,13 @@ def _quadratic_support_vertices_jvp(primals, tangents):
         return value, value
 
     # Forward differentiation selects only live roots before transposition.
-    # A six-column local Jacobian avoids undefined inactive-root cotangents
-    # without forming a cell-by-cell dense Jacobian or freezing boundary motion.
-    jacobian, value = jax.vmap(jax.jacfwd(one_cell, argnums=0, has_aux=True))(
-        coefficient, vertices, count, centres, origin, scale, selected
-    )
-    tangent = jnp.einsum("nvdk,nk->nvd", jacobian, tangents[0])
+    # Local Jacobians avoid undefined inactive-root cotangents without forming
+    # a cell-by-cell dense Jacobian or freezing either source of boundary motion.
+    (coefficient_jacobian, vertex_jacobian), value = jax.vmap(
+        jax.jacfwd(one_cell, argnums=(0, 1), has_aux=True)
+    )(coefficient, vertices, count, centres, origin, scale, selected)
+    tangent = jnp.einsum("nvdk,nk->nvd", coefficient_jacobian, tangents[0])
+    tangent += jnp.einsum("nvdpk,npk->nvd", vertex_jacobian, tangents[1])
     return value, tangent
 
 

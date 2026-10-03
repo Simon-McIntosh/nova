@@ -262,7 +262,7 @@ def measure(input_root: Path, output: Path, fragment: Path, base_sha: str) -> di
                 ),
                 "source": "nova/equilibrium/forward_operator.py:_profile_support",
             }
-        write(output / f"{row['mode']}-{row['realised_cells']}.json", result)
+        write(output / f"{row['clip_mode']}-{row['realised_cells']}.json", result)
         results.append(result)
     report = {
         "measurement_revision": receipt["source_revision"],

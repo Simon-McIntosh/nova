@@ -19,10 +19,18 @@ PANELS = {
     "absolute_error": ("absolute-flux-error.svg", 6),
     "weak_110_comparison": ("weak-110-frozen-prediction-analytic-terminal.svg", 3),
 }
+#: A negative integer that is not part of a scientific-notation exponent, so
+#: ``e-05`` is not read as a negative cell count.
+NEGATIVE_CELL_COUNT = re.compile(r"(?<![0-9eE.])-\d+")
 
 
 def _driver():
     return importlib.import_module("benchmarks.frozen_current_flux_image_gate")
+
+
+def _panel_directory():
+    override = os.environ.get("NOVA_FROZEN_CURRENT_PANEL_DIR")
+    return Path(override) if override else FIGURES
 
 
 def _receipt_path():
@@ -109,3 +117,14 @@ def test_render_refuses_a_missing_receipt_row_before_drawing(tmp_path):
             partial, output, parts_directory=FIGURES / "parts"
         )
     assert not output.exists()
+
+
+def test_no_drawn_title_prints_a_negative_cell_count():
+    """The cell count is a magnitude; a leading minus in a title is a defect."""
+    directory = _panel_directory()
+    offenders = {}
+    for name, _count in PANELS.values():
+        for line in _drawing(directory / name)[2]:
+            if NEGATIVE_CELL_COUNT.search(line):
+                offenders.setdefault(name, []).append(line.strip())
+    assert not offenders, f"drawn titles carry a negative cell count: {offenders}"

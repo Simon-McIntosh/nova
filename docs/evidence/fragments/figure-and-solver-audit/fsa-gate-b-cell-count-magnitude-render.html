@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="figure-and-solver-audit">
+<title>The gate-b panels print the cell count as a magnitude — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsa-gate-b-cell-count-magnitude-render"
+         data-test-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T161635421340-fsa-gate-b-cell-count-magnitude-render/after-suite.log"
+         data-negative-control-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T161635421340-fsa-gate-b-cell-count-magnitude-render/negative-control.log">
+
+  <h2>The gate-b panels print the cell count as a magnitude</h2>
+
+  <p>The frozen-current gate driver
+  (<code>benchmarks/frozen_current_flux_image_gate.py</code>, on main since the merge
+  <code>f0b389834</code> that restored it) composed both cell-count-bearing titles from the
+  signed row key <code>requested_cells</code>: the six error-panel titles
+  (<code>{case} {requested_cells}</code>) and the comparison suptitle
+  (<code>{case} {requested_cells}: frozen-exact-current image, …</code>). The committed panels
+  therefore drew <code>weak-rotation-reactor-static -110</code>,
+  <code>diverted-single-null -300</code> and the like, while the case keys, the parts and the
+  per-row report already carried the magnitude. This is the gate-b half of the same finding the
+  moment-order repair closed on main at <code>dd32c8332</code>, which composed its titles from
+  <code>abs(requested_cells)</code>.</p>
+
+  <p>Both title sites now compose <code>abs(row['requested_cells'])</code>; the signed
+  <code>requested_cells</code> field stays the data of record in the parts and the receipt, so
+  only what is drawn changed. The panels were regenerated through the driver's render-only path
+  (<code>--render-only</code>) from the committed <code>receipt.json</code> and
+  <code>parts/</code>, with no solve. Reading the title comments back out of the two SVGs (the
+  SVG is drawn with glyph outlines, so the title strings survive as matplotlib's text
+  comments):</p>
+
+  <ul>
+    <li><code>absolute-flux-error.svg</code> — six panel titles changed:
+      <code>weak-rotation-reactor-static -110</code> → <code>… 110</code>,
+      <code>moderate-rotation-conventional-static -110</code> → <code>… 110</code>,
+      <code>strong-rotation-compact-static -110</code> → <code>… 110</code>,
+      <code>diverted-single-null -110</code> → <code>… 110</code>,
+      <code>weak-rotation-reactor-static -300</code> → <code>… 300</code>,
+      <code>diverted-single-null -300</code> → <code>… 300</code>.</li>
+    <li><code>weak-110-frozen-prediction-analytic-terminal.svg</code> — one suptitle changed:
+      <code>weak-rotation-reactor-static -110: frozen-exact-current image, …</code> →
+      <code>… 110: …</code>. Its three panel titles (<code>frozen-current prediction</code>,
+      <code>analytic flux</code>, <code>committed terminal state</code>) carry no cell count and
+      are unchanged.</li>
+  </ul>
+
+  <p>The error magnitudes in every title (<code>max |error| … Wb = … span</code>) are unchanged,
+  which is the expected reading: the repair touches only how the cell count is printed.</p>
+
+  <h3>Check and negative control</h3>
+
+  <p><code>tests/test_frozen_current_flux_image_gate.py</code> gains
+  <code>test_no_drawn_title_prints_a_negative_cell_count</code>: it reads every drawn title
+  comment from both panels and refuses a negative integer that is not a scientific-notation
+  exponent (<code>(?&lt;![0-9eE.])-\d+</code>), so <code>e-05</code> is not misread as a cell
+  count. The panel directory is overridable through
+  <code>NOVA_FROZEN_CURRENT_PANEL_DIR</code> (mirroring the existing
+  <code>NOVA_FROZEN_CURRENT_RECEIPT</code> override), which lets the declared control run the
+  same assertion against the committed pre-repair panels.</p>
+
+  <p>The head arm passes four tests in 8.13 s
+  (<code>after-suite.log</code>, <code>EXIT=0</code>); the base arm at
+  <code>18c30b9a6</code> passes its three tests in 109.57 s
+  (<code>baseline-suite.log</code>, <code>EXIT=0</code>), so the change adds no failure. The
+  declared control — run the title assertion against the committed pre-repair gate-b panels —
+  is red: <code>1 failed</code>, <code>EXIT=1</code>, on
+  <code>FAILED tests/test_frozen_current_flux_image_gate.py::test_no_drawn_title_prints_a_negative_cell_count</code>,
+  the assertion listing all six signed error titles and the signed comparison suptitle it read
+  from the base panels.</p>
+
+</article>
+</main>
+</body>
+</html>

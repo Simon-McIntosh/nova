@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="48">
+<meta name="plan-version" content="49">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -456,6 +456,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261003T142809497200-fsa-gate-b-cell-count-magnitude" data-who="reckon-build" data-when="2026-10-03T14:46:01.698Z">
     <div class="r-comment-body"><p>blocked — the driver that drew the gate-b panels is benchmarks/frozen_current_flux_image_gate.py, outside this node's gate-b write scope and not present in HEAD; no in-scope re-render is possible, so the two committed panels still print "-110"/"-300" (7 signed titles) and no corrected artifact was produced</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261003T145322223884-review-of-fsa-receipt-writer-stamps-revision" data-who="reckon-build" data-when="2026-10-03T15:05:21.971Z">
+    <div class="r-comment-body"><p>Independent review of r-20261003T143107300336-fsa-receipt-writer-stamps-revision stored at the two granted review paths: status parsed, 5 dimensions scored 0..20 (goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 19; total 92; verdict pass), reviewed_base_sha a42dc665cf41a4a698ba95df16fee43cfe3c4a32 and reviewed_head_sha d90730fad49120cdc5b8278691f4e8f5d6b5e148, added_failure_count 0 with added_failure_ids [] derived from the reviewed run&#x27;s baseline_suite and after_suite logs.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

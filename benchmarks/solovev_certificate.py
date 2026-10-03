@@ -620,8 +620,6 @@ def _closed_form_current_target(
     source_case: RotatingEquilibrium,
     operator: Any,
     exact_physical: Any,
-    *,
-    clip_mode: str | None = None,
 ) -> tuple[float, np.ndarray, dict[str, Any]]:
     """Return the declared current and centroid used by the production seed."""
 
@@ -2298,7 +2296,6 @@ def _measure(
             source_case,
             operator,
             exact_physical,
-            clip_mode=clip_mode,
         )
         seed, requested_class, seed_receipt = _production_seed(
             profile,
@@ -3774,7 +3771,6 @@ def _certificate_compile_problem(
         source_case,
         operator,
         exact_physical,
-        clip_mode=clip_mode,
     )
     seed, _requested_class, _seed_receipt = _production_seed(
         profile, case_name, target_current, centroid, current_receipt

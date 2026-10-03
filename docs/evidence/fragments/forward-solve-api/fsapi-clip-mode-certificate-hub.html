@@ -6,5 +6,42 @@
 <meta name="reckon-type" content="evidence">
 <title>Clip mode certificate hub</title>
 </head>
-<body></body>
+<body>
+<main>
+<h1>Certificate clip-mode migration</h1>
+<p>Certificate and fixture code no longer mutates the process-global support clip
+mode. A concrete mode is held by the operator that evaluates support, and a
+certificate solve request receives the same mode when it is constructed.</p>
+
+<h2>Former global sites</h2>
+<table>
+<thead><tr><th>Former site</th><th>Mode</th><th>Explicit destination</th></tr></thead>
+<tbody>
+<tr><td><code>_fixture_floor_mode</code></td><td>per-row exact or chord</td><td><code>operator.with_clip_mode(mode)</code> before moment, map, and support reads</td></tr>
+<tr><td><code>_measure_reposed_fixture</code></td><td>per combination</td><td>the fixture-floor helper owns the four operator-local combinations</td></tr>
+<tr><td><code>_identify_solve_memory</code></td><td>exact and chord</td><td><code>_compile_solve_memory(..., clip_mode=mode)</code>, then its operator and request</td></tr>
+<tr><td><code>_measure_reposed_certificate_500</code></td><td>exact</td><td><code>_measure(..., clip_mode=&quot;exact&quot;)</code></td></tr>
+<tr><td><code>_measure_reposed_certificate_recovery</code></td><td>exact</td><td>the memory-scaling compiler arm receives <code>clip_mode=&quot;exact&quot;</code></td></tr>
+<tr><td><code>_measure_reposed_certificate</code></td><td>exact</td><td>machine construction and every certificate-row request receive the explicit mode</td></tr>
+<tr><td><code>_analytic_profile_support</code></td><td>exact</td><td><code>operator.with_clip_mode(&quot;exact&quot;)._profile_support(...)</code></td></tr>
+<tr><td><code>whole_cell_current_moments</code></td><td>chord</td><td><code>operator.with_clip_mode(&quot;chord&quot;)._support_partition(...)</code></td></tr>
+</tbody>
+</table>
+
+<h2>Paired arms and verification</h2>
+<p>The fixture floor keeps two exterior arms crossed with exact and chord mode,
+for four rows per fixture case. The memory diagnosis keeps its two explicit
+arms, exact-clip and whole-cell. The importing-test audit ran 26 isolated CPU
+modules at the archived base and 26 at the migrated head; the run manifest
+records the per-module logs and failure identifiers.</p>
+
+<h2>Row gate</h2>
+<p>The archived chord-row attempt stopped before serialising a receipt because
+the live-read fallback omitted promoted shadow masks while own-mask acceptance
+was enabled. That blocker is resolved by <code>8130fed42</code>. The merged
+measurement session runs the chord comparison and exact-operator capture from
+<code>c090222b2</code>; this migration node deliberately does not rerun either
+measurement.</p>
+</main>
+</body>
 </html>

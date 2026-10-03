@@ -598,6 +598,9 @@ def test_the_conservation_receipt_meets_its_registered_tolerances(converged):
     assert float(ledger.relative_force) < FORCE_TOLERANCE
 
 
+# measured 312.57 s call on the H200 lane (job 1280609, pinned-cache revision
+# mismatch so the wall includes compilation); bound 2x rounded up to 60 s
+@pytest.mark.timeout(660)
 def test_the_accelerator_routes_agree_on_the_fixed_point(machine, converged):
     """Every accelerated route drives the shared map to one equilibrium."""
     profile, seed, _vacuum = machine

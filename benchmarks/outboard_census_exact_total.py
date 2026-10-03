@@ -103,7 +103,8 @@ def _exact_support_current(case: Any, polygon: np.ndarray) -> tuple[float, float
         breaks.append(axis)
     total = 0.0
     error = 0.0
-    for start, stop in zip(sorted(set(breaks)), sorted(set(breaks))[1:], strict=True):
+    intervals = sorted(set(breaks))
+    for start, stop in zip(intervals, intervals[1:]):
         value, estimate = quad(
             density,
             start,

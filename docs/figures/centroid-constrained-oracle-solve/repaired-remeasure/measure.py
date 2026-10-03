@@ -215,10 +215,23 @@ def main() -> None:
     )
     lane = fixture._lane("h200")
     context = fixture._context("weak-rotation-reactor-static", -110, clip_mode="exact")
+    context["operator"] = context["profile"].operator
     assert context["profile"].operator.clip_mode == "exact"
     assert len(context["machine"].node) == 135
     seed = fixture._translated_state(context)
     assert fixture._digest(seed).startswith(fixture.UNIT_LEVERAGE_SEED_DIGEST)
+    preflight = fixture.control_receipt(
+        context,
+        arm="preflight",
+        constrained=False,
+        lane=lane,
+        displaced=seed,
+        result={},
+        state=seed,
+        figure=None,
+    )
+    assert preflight["clip_mode"] == "exact"
+    print("RECEIPT_PREFLIGHT exact", flush=True)
     level = fixture._seed_level_offset_wb(context, seed)["initial_level_wb"]
     request = json.loads((OUT / "request.json").read_text())
     assert request["clip_mode_requested"] == "exact"

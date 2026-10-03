@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="93">
+<meta name="plan-version" content="94">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -581,7 +581,10 @@
     <div class="r-comment-body"><p>No source edited and no commit made (read-only test role). The named seed-bracket test passes at both revisions of the exact-and-centroid wall-mask batch: base 68762d363 = 1 passed in 333.80 s EXIT=0, head 11541380e = 1 passed in 328.97 s EXIT=0, each in its own git-archive tree with a verified module.__file__ under that tree; the reported failure is NOT reproduced, so it is neither pre-existing at base nor added by the batch. Report: /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-seed-bracket-attribution.md</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261003T184504557180-review-of-fsa-seed-bracket-attribution" data-who="reckon-build" data-when="2026-10-03T18:51:59.265Z">
-    <div class="r-comment-body"><p>review-of-fsa-seed-bracket-attribution: independent review of run r-20261003T181955895750-fsa-seed-bracket-attribution stored as a parsed five-dimension record scoring 86/100 (goal_fidelity 18, evidence 17, scope_discipline 20, durability 12, fit 19), reviewed_base_sha = reviewed_head_sha = b4a5897f0124cbaab701273cf3851bed68c61a32 (the read-only run&#x27;s own worktree head; the measured pair 68762d363..11541380e is recorded in the findings), added_failure_count 0 with no added ids derived from the run&#x27;s own baseline_suite/after_suite; two follow-on findings on the attribution report&#x27;s under-qualified &quot;not reproduced&quot; claim and its unquoted original failure message.</p></div>
+    <div class="r-comment-body"><p>review-of-fsa-seed-bracket-attribution: independent review of run r-20261003T181955895750-fsa-seed-bracket-attribution stored as a parsed five-dimension record scoring 86/100 (goal_fidelity 18, evidence 17, scope_discipline 20, durability 12, fit 19), reviewed_base_sha = reviewed_head_sha = b4a5897f0124cbaab701273cf3851bed68c61a32 (the read-only run's own worktree head; the measured pair 68762d363..11541380e is recorded in the findings), added_failure_count 0 with no added ids derived from the run's own baseline_suite/after_suite; two follow-on findings on the attribution report's under-qualified "not reproduced" claim and its unquoted original failure message.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261003T184731236639-fsa-renderer-wall-guard-test" data-who="reckon-build" data-when="2026-10-03T19:01:38.491Z">
+    <div class="r-comment-body"><p>Added tests/test_renderer_contours_inside_wall.py, a tree-wide guard that scans benchmarks/ and docs/figures/ for unguarded scattered-field contour calls and asserts an empty result; made an explicit wall=None on draw_flux_contours unguarded (keyword and positional) with controls, and recast the two stale positive controls that pinned now-repaired sites as crafted sources; gate 14 passed (base 2 failed / 9 passed), negative control removes the wall from a scratch copy and the guard fails naming the file and line.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

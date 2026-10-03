@@ -1817,10 +1817,22 @@ def _render_newton_terminal(
     )
     wall_units = (wall,)
     poloidal.draw_flux_contours(
-        axis, analytic_r, analytic_z, analytic_field, levels, color="#3366cc"
+        axis,
+        analytic_r,
+        analytic_z,
+        analytic_field,
+        levels,
+        wall=wall_units,
+        color="#3366cc",
     )
     poloidal.draw_flux_contours(
-        axis, terminal_r, terminal_z, terminal_field, levels, color="#cc7722"
+        axis,
+        terminal_r,
+        terminal_z,
+        terminal_field,
+        levels,
+        wall=wall_units,
+        color="#cc7722",
     )
     poloidal.draw_boundary(axis, boundary[:, 0], boundary[:, 1], color="#3366cc")
     poloidal.draw_wall(axis, units=wall_units)

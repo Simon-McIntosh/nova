@@ -277,6 +277,20 @@ def _raster_field(
     return radial, height, np.asarray(raster, dtype=np.float64)
 
 
+def _masked_field(
+    radial: np.ndarray,
+    height: np.ndarray,
+    field: np.ndarray,
+    wall_units: tuple[np.ndarray, ...],
+) -> np.ndarray:
+    """Blank a raster outside the wall units so no contour leaves the vessel."""
+    grid_r, grid_z = np.meshgrid(radial, height)
+    inside = poloidal.inside_wall_units(
+        np.column_stack((grid_r.ravel(), grid_z.ravel())), wall_units
+    ).reshape(np.asarray(field).shape)
+    return np.where(inside, np.asarray(field, dtype=np.float64), np.nan)
+
+
 def _outboard_wall_radius(
     axis_rz: np.ndarray, wall_units: tuple[np.ndarray, ...]
 ) -> float:
@@ -428,6 +442,7 @@ def _draw_field(
         height,
         field,
         levels,
+        wall=wall_units,
         color=color,
         linewidth=0.55,
     )
@@ -690,6 +705,7 @@ def _draw_oracle_overlay(axis, metric: dict[str, Any]) -> np.ndarray:
         height,
         analytic,
         levels,
+        wall=wall_units,
         color="#3366cc",
         linewidth=0.62,
     )
@@ -699,6 +715,7 @@ def _draw_oracle_overlay(axis, metric: dict[str, Any]) -> np.ndarray:
         height,
         solved,
         levels,
+        wall=wall_units,
         color="#cc7722",
         linewidth=0.58,
     )
@@ -741,6 +758,7 @@ def _draw_difference_panel(axis, metric: dict[str, Any]) -> list[float]:
             height,
             difference,
             negative,
+            wall=wall_units,
             color="#cc7722",
             linewidth=0.62,
         )
@@ -751,16 +769,18 @@ def _draw_difference_panel(axis, metric: dict[str, Any]) -> list[float]:
             height,
             difference,
             positive,
+            wall=wall_units,
             color="#b13f8c",
             linewidth=0.62,
         )
+    masked = _masked_field(radial, height, difference, wall_units)
     floor = float(metric["roundoff_floor_over_span"])
     floor_levels = [level for level in (-floor, floor) if lower <= level <= upper]
     if floor_levels:
         axis.contour(
             radial,
             height,
-            difference,
+            masked,
             levels=floor_levels,
             colors="#555555",
             linewidths=0.7,

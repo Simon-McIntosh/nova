@@ -591,7 +591,13 @@ def _render_panels(
                 f"({payload.get('reference_receipt')})"
             )
         poloidal.draw_flux_contours(
-            flux_axis, radial, height, flux, flux_level_array, color="#5a6bd6"
+            flux_axis,
+            radial,
+            height,
+            flux,
+            flux_level_array,
+            wall=wall_units,
+            color="#5a6bd6",
         )
         poloidal.draw_wall(flux_axis, units=wall_units)
         poloidal.draw_boundary(
@@ -632,7 +638,13 @@ def _render_panels(
             f"{name} |map-state|/|span|  levels={len(residual_level_array)}"
         )
         poloidal.draw_flux_contours(
-            residual_axis, radial, height, rel, residual_level_array, color="#7a3e9d"
+            residual_axis,
+            radial,
+            height,
+            rel,
+            residual_level_array,
+            wall=wall_units,
+            color="#7a3e9d",
         )
         poloidal.draw_wall(residual_axis, units=wall_units)
         poloidal.draw_boundary(

@@ -736,7 +736,9 @@ def _render(output_root: Path, rows: list[dict[str, Any]]) -> dict[str, Any]:
             radial, height, field = certificate._raster_field(
                 row["coordinates"], row[state_name], row["wall"]
             )
-            poloidal.draw_flux_contours(axis, radial, height, field, levels)
+            poloidal.draw_flux_contours(
+                axis, radial, height, field, levels, wall=row["wall"]
+            )
             poloidal.draw_wall(axis, units=(row["wall"],))
             poloidal.draw_boundary(axis, row["boundary"][:, 0], row["boundary"][:, 1])
             topology = row[f"{state_name}_census"]["topology"]
@@ -980,6 +982,7 @@ def _draw_error_panel(
             height,
             field,
             levels,
+            wall=wall,
             color="#7a3e9d",
             linewidth=0.65,
         )
@@ -1059,10 +1062,16 @@ def _draw_shadow_panel(
         dtype=np.float64,
     )
     poloidal.draw_flux_contours(
-        flux_axis, radial, height, reference, levels, color=ANALYTIC_RENDER_COLOR
+        flux_axis,
+        radial,
+        height,
+        reference,
+        levels,
+        wall=wall,
+        color=ANALYTIC_RENDER_COLOR,
     )
     poloidal.draw_flux_contours(
-        flux_axis, radial, height, solved, levels, color=SOLVED_RENDER_COLOR
+        flux_axis, radial, height, solved, levels, wall=wall, color=SOLVED_RENDER_COLOR
     )
     poloidal.draw_boundary(
         flux_axis, boundary[:, 0], boundary[:, 1], color=ANALYTIC_RENDER_COLOR

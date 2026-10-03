@@ -91,6 +91,7 @@ __all__ = [
     "clipped_support_quadrature",
     "moment_residual",
     "observe_current_moments",
+    "recover_physical_first_moments",
     "observe_moments",
     "reject_unsupported_enforcement",
     "summation_error_bound",
@@ -276,10 +277,27 @@ class CurrentMomentObservation(NamedTuple):
         return getattr(self, name)
 
 
+def recover_physical_first_moments(
+    second_moment, coupled_radial, coupled_vertical
+) -> tuple[jax.Array, jax.Array]:
+    """Recover physical within-cell moments from the linear coupling basis."""
+    second = jnp.asarray(second_moment)
+    radial = jnp.asarray(coupled_radial)
+    vertical = jnp.asarray(coupled_vertical)
+    if second.shape != (radial.size, 3) or radial.shape != vertical.shape:
+        raise ValueError("coupled moments and cell second moments must align")
+    return (
+        second[:, 0] * radial + second[:, 2] * vertical,
+        second[:, 2] * radial + second[:, 1] * vertical,
+    )
+
+
 def observe_current_moments(
     cell_current,
     coordinate,
     *,
+    radial_moment=None,
+    vertical_moment=None,
     core_mask,
     support: MomentIntegralSupport,
 ) -> CurrentMomentObservation:
@@ -293,14 +311,26 @@ def observe_current_moments(
     point = jnp.asarray(coordinate)
     if current.ndim != 1 or point.shape != (current.size, 2):
         raise ValueError("cell current and R-Z coordinates must align")
+    if (radial_moment is None) != (vertical_moment is None):
+        raise ValueError("both within-cell current moments must be supplied together")
+    first = (
+        jnp.zeros_like(point)
+        if radial_moment is None
+        else jnp.stack(
+            (jnp.asarray(radial_moment), jnp.asarray(vertical_moment)), axis=1
+        )
+    )
+    if first.shape != point.shape:
+        raise ValueError("within-cell current moments and coordinates must align")
     if support is MomentIntegralSupport.CONFINED_CORE:
         selected = jnp.asarray(core_mask, dtype=bool)
         current = jnp.where(selected, current, 0.0)
+        first = jnp.where(selected[:, None], first, 0.0)
     elif support is not MomentIntegralSupport.ALL_DOMAIN:
         raise TypeError("support must be a MomentIntegralSupport")
     total = jnp.sum(current)
     safe_total = jnp.where(jnp.abs(total) > 0.0, total, 1.0)
-    centroid = jnp.sum(current[:, None] * point, axis=0) / safe_total
+    centroid = jnp.sum(current[:, None] * point + first, axis=0) / safe_total
     return CurrentMomentObservation(total, centroid[0], centroid[1], support)
 
 

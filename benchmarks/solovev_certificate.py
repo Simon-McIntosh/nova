@@ -49,7 +49,6 @@ from nova.equilibrium import (
     SaddleSeedGeometry,
 )
 from nova.equilibrium.forward import RasterFluxReceiptStatus
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.equilibrium import clip_quadrature, separatrix_clip
 from nova.equilibrium.analytic_single_null import (
     CerfonFreidbergSingleNull,
@@ -621,6 +620,8 @@ def _closed_form_current_target(
     source_case: RotatingEquilibrium,
     operator: Any,
     exact_physical: Any,
+    *,
+    clip_mode: str | None = None,
 ) -> tuple[float, np.ndarray, dict[str, Any]]:
     """Return the declared current and centroid used by the production seed."""
 
@@ -1211,7 +1212,9 @@ def _nan_census(case_name: str) -> dict[str, Any]:
     return receipt
 
 
-def _case(case_name: str) -> tuple[RotatingEquilibrium, RotatingEquilibrium, Any]:
+def _case(
+    case_name: str, *, clip_mode: str | None = None
+) -> tuple[RotatingEquilibrium, RotatingEquilibrium, Any]:
     if _is_diverted_case(case_name):
         exact = DIVERTED_REFERENCE
         return (
@@ -1238,6 +1241,8 @@ def _case_machine(
     carrier_case: RotatingEquilibrium,
     exact: Any,
     requested_cells: int,
+    *,
+    clip_mode: str | None = None,
 ) -> Any:
     """Load the case carrier with its declared wall identity."""
     wall = _diverted_wall(exact) if _is_diverted_case(case_name) else None
@@ -2192,9 +2197,13 @@ def _certificate_solve_request(
     target_current: float,
     *,
     carrier_identity: str,
+    clip_mode: str | None = None,
 ) -> ForwardSolveRequest:
     """Declare the certificate tolerance against the public solve policy."""
 
+    inputs: dict[str, object] = {}
+    if clip_mode is not None:
+        inputs["clip_mode"] = clip_mode
     return ForwardSolveRequest.from_defaults(
         carrier_identity=carrier_identity,
         source_profile=profile.source,
@@ -2207,10 +2216,13 @@ def _certificate_solve_request(
             "qualification_tolerance": TERMINAL_RESIDUAL_BOUND,
         },
         target_current=target_current,
+        **inputs,
     )
 
 
-def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
+def _measure(
+    case_name: str, requested_cells: int, *, clip_mode: str | None = None
+) -> dict[str, Any]:
     part = _part_path(case_name, requested_cells)
     if part.exists():
         persisted = json.loads(part.read_text(encoding="utf-8"))
@@ -2243,8 +2255,14 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         case_name=case_name,
         requested_cells=requested_cells,
     ):
-        carrier_case, source_case, exact = _case(case_name)
-        machine = _case_machine(case_name, carrier_case, exact, requested_cells)
+        carrier_case, source_case, exact = _case(case_name, clip_mode=clip_mode)
+        machine = _case_machine(
+            case_name,
+            carrier_case,
+            exact,
+            requested_cells,
+            clip_mode=clip_mode,
+        )
 
     with _timed_stage(
         "operator_and_seed",
@@ -2257,6 +2275,8 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         )
         oracle_state = _exact_state(case_name, exact, coordinates)
         empty_operator = oracle_fixture.forward_operator(source_case, machine)
+        if clip_mode is not None:
+            empty_operator = empty_operator.with_clip_mode(clip_mode)
         exact_physical, fixture_exterior, fixture_cache = (
             oracle_fixture.cached_fixture_exterior(
                 source_case, exact, machine, empty_operator, oracle_state
@@ -2265,6 +2285,8 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         operator = oracle_fixture.forward_operator(
             source_case, machine, fixture_exterior
         )
+        if clip_mode is not None:
+            operator = operator.with_clip_mode(clip_mode)
         mesh = StencilMesh(machine.node, machine.stencil, machine.area)
         profile = ForwardProfile(
             operator,
@@ -2272,7 +2294,11 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             newton_steps=recovery.NEWTON_STEPS,
         )
         target_current, current_centroid, current_receipt = _closed_form_current_target(
-            case_name, source_case, operator, exact_physical
+            case_name,
+            source_case,
+            operator,
+            exact_physical,
+            clip_mode=clip_mode,
         )
         seed, requested_class, seed_receipt = _production_seed(
             profile,
@@ -2299,6 +2325,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             seed,
             target_current,
             carrier_identity=f"solovev:{case_name}:{requested_cells}",
+            clip_mode=clip_mode,
         )
         solve_receipt = profile.solve(request)
         equilibrium = solve_receipt.equilibrium
@@ -3169,7 +3196,7 @@ def _fixture_floor_mode(
     machine: Any,
 ) -> tuple[dict[str, Any], np.ndarray, np.ndarray]:
     """Measure one exterior and booking pair at the analytic state."""
-    set_support_clip_mode(mode)
+    operator = operator.with_clip_mode(mode)
     moments = operator.cell_current_moments(jnp.asarray(analytic), requested_class)
     booked = float(np.sum(np.asarray(moments.cell_current)))
     amplitude = float(operator.current_normalisation_amplitude(target_current, booked))
@@ -3219,7 +3246,7 @@ def _fixture_floor_mode(
         "requested_cells": requested_cells,
         "realised_cells": grid_count,
         "exterior": exterior_name,
-        "mode": mode,
+        "mode": operator.clip_mode,
         "map_floor": _fixture_floor_norms(grid_residual, span),
         "booked_current_a": booked,
         "analytic_current_a": target_current,
@@ -3281,85 +3308,77 @@ def _measure_reposed_fixture(output: Path) -> dict[str, Any]:
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("the fixture-floor measurement requires binary64")
-    original_mode = support_clip_mode()
     rows = []
-    try:
-        for case_name, requested_cells in REPOSED_FIXTURE_ROWS:
-            carrier_case, source_case, exact = _case(case_name)
-            machine = _case_machine(case_name, carrier_case, exact, requested_cells)
-            coordinates = np.vstack(
-                (machine.node, machine.wall_node, machine.sample_coordinates)
+    for case_name, requested_cells in REPOSED_FIXTURE_ROWS:
+        carrier_case, source_case, exact = _case(case_name)
+        machine = _case_machine(case_name, carrier_case, exact, requested_cells)
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
+        )
+        analytic = _exact_state(case_name, exact, coordinates)
+        empty_operator = oracle_fixture.forward_operator(source_case, machine)
+        clipped_physical, clipped_exterior, cache = (
+            oracle_fixture.cached_fixture_exterior(
+                source_case, exact, machine, empty_operator, analytic
             )
-            analytic = _exact_state(case_name, exact, coordinates)
-            empty_operator = oracle_fixture.forward_operator(source_case, machine)
-            clipped_physical, clipped_exterior, cache = (
-                oracle_fixture.cached_fixture_exterior(
-                    source_case, exact, machine, empty_operator, analytic
+        )
+        whole_physical = oracle_fixture.whole_cell_current_moments(
+            source_case, empty_operator, analytic
+        )
+        clipped_coefficients = empty_operator.coupling_current_moments(clipped_physical)
+        whole_coefficients = empty_operator.coupling_current_moments(whole_physical)
+        whole_exterior = analytic - oracle_fixture._internal_flux_image(
+            empty_operator, whole_coefficients
+        )
+        target_current, _centroid, target_receipt = _closed_form_current_target(
+            case_name, source_case, empty_operator, clipped_physical
+        )
+        requested_class = int(
+            TopologyClass.DIVERTED
+            if _is_diverted_case(case_name)
+            else TopologyClass.LIMITED
+        )
+        boundary = _boundary(case_name, exact)
+        combinations = []
+        traces = []
+        for exterior_name, exterior in (
+            ("analytic-clipped", clipped_exterior),
+            ("whole-cell", whole_exterior),
+        ):
+            operator = oracle_fixture.forward_operator(source_case, machine, exterior)
+            for mode in ("exact", "chord"):
+                record, distance, floor = _fixture_floor_mode(
+                    case_name=case_name,
+                    requested_cells=requested_cells,
+                    exterior_name=exterior_name,
+                    mode=mode,
+                    operator=operator,
+                    analytic=analytic,
+                    clipped_coefficients=clipped_coefficients,
+                    target_current=target_current,
+                    requested_class=requested_class,
+                    boundary=boundary,
+                    machine=machine,
                 )
-            )
-            whole_physical = oracle_fixture.whole_cell_current_moments(
-                source_case, empty_operator, analytic
-            )
-            clipped_coefficients = empty_operator.coupling_current_moments(
-                clipped_physical
-            )
-            whole_coefficients = empty_operator.coupling_current_moments(whole_physical)
-            whole_exterior = analytic - oracle_fixture._internal_flux_image(
-                empty_operator, whole_coefficients
-            )
-            target_current, _centroid, target_receipt = _closed_form_current_target(
-                case_name, source_case, empty_operator, clipped_physical
-            )
-            requested_class = int(
-                TopologyClass.DIVERTED
-                if _is_diverted_case(case_name)
-                else TopologyClass.LIMITED
-            )
-            boundary = _boundary(case_name, exact)
-            combinations = []
-            traces = []
-            for exterior_name, exterior in (
-                ("analytic-clipped", clipped_exterior),
-                ("whole-cell", whole_exterior),
-            ):
-                operator = oracle_fixture.forward_operator(
-                    source_case, machine, exterior
-                )
-                for mode in ("exact", "chord"):
-                    record, distance, floor = _fixture_floor_mode(
-                        case_name=case_name,
-                        requested_cells=requested_cells,
-                        exterior_name=exterior_name,
-                        mode=mode,
-                        operator=operator,
-                        analytic=analytic,
-                        clipped_coefficients=clipped_coefficients,
-                        target_current=target_current,
-                        requested_class=requested_class,
-                        boundary=boundary,
-                        machine=machine,
-                    )
-                    combinations.append(record)
-                    traces.append((f"{exterior_name} / {mode}", distance, floor))
-            figure = _render_fixture_floor(case_name, requested_cells, traces)
-            row = {
-                "case": case_name,
-                "requested_cells": requested_cells,
-                "realised_cells": len(machine.node),
-                "fixture_exterior_cache": cache,
-                "analytic_current_target": target_receipt,
-                "combinations": combinations,
-                "figure": str(figure),
-            }
-            rows.append(row)
-            _write_json(
-                REPOSED_FIXTURE_ROOT
-                / "parts"
-                / f"{case_name}-cells-{abs(requested_cells)}.json",
-                row,
-            )
-    finally:
-        set_support_clip_mode(original_mode)
+                combinations.append(record)
+                traces.append((f"{exterior_name} / {mode}", distance, floor))
+        figure = _render_fixture_floor(case_name, requested_cells, traces)
+        row = {
+            "case": case_name,
+            "requested_cells": requested_cells,
+            "realised_cells": len(machine.node),
+            "fixture_exterior_cache": cache,
+            "analytic_current_target": target_receipt,
+            "combinations": combinations,
+            "figure": str(figure),
+        }
+        rows.append(row)
+        _write_json(
+            REPOSED_FIXTURE_ROOT
+            / "parts"
+            / f"{case_name}-cells-{abs(requested_cells)}.json",
+            row,
+        )
     exact_primary = [
         combination
         for row in rows
@@ -3720,28 +3739,42 @@ def _largest_hlo_arrays(hlo: str, *, limit: int = 16) -> list[dict[str, Any]]:
 
 
 def _certificate_compile_problem(
-    case_name: str, requested_cells: int
+    case_name: str, requested_cells: int, *, clip_mode: str | None = None
 ) -> tuple[Any, np.ndarray, ForwardSolveRequest, dict[str, Any]]:
     """Construct the public certificate problem without executing its solve."""
 
-    carrier_case, source_case, exact = _case(case_name)
-    machine = _case_machine(case_name, carrier_case, exact, requested_cells)
+    carrier_case, source_case, exact = _case(case_name, clip_mode=clip_mode)
+    machine = _case_machine(
+        case_name,
+        carrier_case,
+        exact,
+        requested_cells,
+        clip_mode=clip_mode,
+    )
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     analytic = _exact_state(case_name, exact, coordinates)
     empty_operator = oracle_fixture.forward_operator(source_case, machine)
+    if clip_mode is not None:
+        empty_operator = empty_operator.with_clip_mode(clip_mode)
     exact_physical, fixture_exterior, _cache = oracle_fixture.cached_fixture_exterior(
         source_case, exact, machine, empty_operator, analytic
     )
     operator = oracle_fixture.forward_operator(source_case, machine, fixture_exterior)
+    if clip_mode is not None:
+        operator = operator.with_clip_mode(clip_mode)
     profile = ForwardProfile(
         operator,
         StencilMesh(machine.node, machine.stencil, machine.area),
         newton_steps=recovery.NEWTON_STEPS,
     )
     target_current, centroid, current_receipt = _closed_form_current_target(
-        case_name, source_case, operator, exact_physical
+        case_name,
+        source_case,
+        operator,
+        exact_physical,
+        clip_mode=clip_mode,
     )
     seed, _requested_class, _seed_receipt = _production_seed(
         profile, case_name, target_current, centroid, current_receipt
@@ -3751,6 +3784,7 @@ def _certificate_compile_problem(
         seed,
         target_current,
         carrier_identity=f"solovev-memory:{case_name}:{requested_cells}",
+        clip_mode=clip_mode,
     )
     atomic_mesh = operator.moment_geometry.atomic_mesh
     chord_capacity = int(atomic_mesh.support_capacity)
@@ -3794,12 +3828,13 @@ def _compile_solve_memory(
     *,
     arm: str | None = None,
     compiler_artifact_root: Path | None = None,
+    clip_mode: str | None = None,
 ) -> dict[str, Any]:
     """Compile, but never execute, one production-equivalent solve graph."""
 
     started = perf_counter()
     profile, seed, request, dimensions = _certificate_compile_problem(
-        case_name, requested_cells
+        case_name, requested_cells, clip_mode=clip_mode
     )
     mapped = profile.flux_map(
         request.current,
@@ -3886,7 +3921,11 @@ def _measure_solve_memory_scaling(output: Path) -> dict[str, Any]:
     rows = []
     for requested_cells in (-300, -500):
         rows.append(
-            _compile_solve_memory("weak-rotation-reactor-static", requested_cells)
+            _compile_solve_memory(
+                "weak-rotation-reactor-static",
+                requested_cells,
+                clip_mode="exact",
+            )
         )
         _write_json(
             output,
@@ -4143,36 +4182,32 @@ def _identify_solve_memory(
         default_persistent_compilation_cache_root()
     )
     scaling = json.loads(REPOSED_CERTIFICATE_SCALING_OUTPUT.read_text(encoding="utf-8"))
-    original_mode = support_clip_mode()
     arms = []
-    try:
-        for mode, arm in (("exact", "exact-clip"), ("chord", "whole-cell")):
-            set_support_clip_mode(mode)
-            row = _compile_solve_memory(
-                "weak-rotation-reactor-static",
-                -300,
-                arm=arm,
-                compiler_artifact_root=hlo_root,
-            )
-            arms.append(row)
-            _write_json(
-                output,
-                {
-                    "schema": "nova.forward-solve-memory-identification",
-                    "source_revision": _source_revision(),
-                    "lane": _lane(),
-                    "persistent_compilation_cache": compilation_cache.receipt(),
-                    "arms": arms,
-                    "completed": False,
-                    "certificate_disposition": {
-                        "fixture_delivered": True,
-                        "certificate_rows_above_300": "blocked_on_memory_scaling_fix",
-                        "certificate_500_attempted": False,
-                    },
+    for mode, arm in (("exact", "exact-clip"), ("chord", "whole-cell")):
+        row = _compile_solve_memory(
+            "weak-rotation-reactor-static",
+            -300,
+            arm=arm,
+            compiler_artifact_root=hlo_root,
+            clip_mode=mode,
+        )
+        arms.append(row)
+        _write_json(
+            output,
+            {
+                "schema": "nova.forward-solve-memory-identification",
+                "source_revision": _source_revision(),
+                "lane": _lane(),
+                "persistent_compilation_cache": compilation_cache.receipt(),
+                "arms": arms,
+                "completed": False,
+                "certificate_disposition": {
+                    "fixture_delivered": True,
+                    "certificate_rows_above_300": "blocked_on_memory_scaling_fix",
+                    "certificate_500_attempted": False,
                 },
-            )
-    finally:
-        set_support_clip_mode(original_mode)
+            },
+        )
     receipt = json.loads(output.read_text(encoding="utf-8"))
     receipt["completed"] = True
     receipt["measured_solve_temporaries"] = {
@@ -4318,7 +4353,6 @@ def _measure_reposed_certificate_500(
 
     global FIGURE_ROOT, PART_ROOT
 
-    original_mode = support_clip_mode()
     original_figure_root = FIGURE_ROOT
     original_part_root = PART_ROOT
     FIGURE_ROOT = REPOSED_CERTIFICATE_ROOT / "cells-500" / "panels"
@@ -4337,15 +4371,13 @@ def _measure_reposed_certificate_500(
         "completed": False,
     }
     try:
-        set_support_clip_mode("exact")
         for case_name, requested_cells in REPOSED_CERTIFICATE_500_ROWS:
-            row = _measure(case_name, requested_cells)
+            row = _measure(case_name, requested_cells, clip_mode="exact")
             solved_rows.append(_certificate_acceptance_row(row))
             receipt["completed"] = len(solved_rows) == len(REPOSED_CERTIFICATE_500_ROWS)
             _write_json(output, receipt)
             _write_recovery_report(report, scaling, receipt)
     finally:
-        set_support_clip_mode(original_mode)
         FIGURE_ROOT = original_figure_root
         PART_ROOT = original_part_root
     print("REPOSED_CERTIFICATE_500_EXIT=0", flush=True)
@@ -4358,14 +4390,9 @@ def _measure_reposed_certificate_recovery(output: Path, report: Path) -> dict[st
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("the re-posed certificate requires binary64")
-    original_mode = support_clip_mode()
-    try:
-        set_support_clip_mode("exact")
-        scaling = _measure_solve_memory_scaling(REPOSED_CERTIFICATE_SCALING_OUTPUT)
-        _write_recovery_report(report, scaling)
-        return _measure_reposed_certificate_500(output, scaling, report)
-    finally:
-        set_support_clip_mode(original_mode)
+    scaling = _measure_solve_memory_scaling(REPOSED_CERTIFICATE_SCALING_OUTPUT)
+    _write_recovery_report(report, scaling)
+    return _measure_reposed_certificate_500(output, scaling, report)
 
 
 def _measure_reposed_certificate(output: Path) -> dict[str, Any]:
@@ -4375,7 +4402,6 @@ def _measure_reposed_certificate(output: Path) -> dict[str, Any]:
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("the re-posed certificate requires binary64")
-    original_mode = support_clip_mode()
     original_figure_root = FIGURE_ROOT
     original_part_root = PART_ROOT
     FIGURE_ROOT = REPOSED_CERTIFICATE_ROOT / "panels"
@@ -4383,11 +4409,16 @@ def _measure_reposed_certificate(output: Path) -> dict[str, Any]:
     build_rows = []
     solved_rows: list[dict[str, Any]] = []
     try:
-        set_support_clip_mode("exact")
         for case_name in CASE_NAMES:
-            carrier_case, _source_case, exact = _case(case_name)
+            carrier_case, _source_case, exact = _case(case_name, clip_mode="exact")
             started = perf_counter()
-            machine = _case_machine(case_name, carrier_case, exact, -2500)
+            machine = _case_machine(
+                case_name,
+                carrier_case,
+                exact,
+                -2500,
+                clip_mode="exact",
+            )
             build_rows.append(
                 {
                     "case": case_name,
@@ -4407,7 +4438,7 @@ def _measure_reposed_certificate(output: Path) -> dict[str, Any]:
                 },
             )
         for case_name, requested_cells in REPOSED_CERTIFICATE_ROWS:
-            row = _measure(case_name, requested_cells)
+            row = _measure(case_name, requested_cells, clip_mode="exact")
             solved_rows.append(_certificate_acceptance_row(row))
             _write_json(
                 output,
@@ -4422,7 +4453,6 @@ def _measure_reposed_certificate(output: Path) -> dict[str, Any]:
                 },
             )
     finally:
-        set_support_clip_mode(original_mode)
         FIGURE_ROOT = original_figure_root
         PART_ROOT = original_part_root
     receipt = json.loads(output.read_text(encoding="utf-8"))

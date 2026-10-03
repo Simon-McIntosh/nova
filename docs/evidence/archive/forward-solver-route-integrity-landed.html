@@ -1970,6 +1970,14 @@ Receipt: <code>/nova/figures/forward-solver-route-integrity/single-site-krylov/b
     <p><strong>Review follow-ons.</strong> The gate ran through an uncommitted scratch driver that hardcodes the worktree path, and no committed test asserts the staged errors. The finite-difference test guards the contract end to end, but not each stage.</p>
   </section>
 
+  <section id="forward-solve-tests-fit-their-bound">
+    <h2>§2 — the forward-solve tests already fit the H200 lane's bound; no per-test mark</h2>
+    <p>Run <code>r-20261003T120048839648-fsri-forward-solve-tests-fit-their-bound</code> (local lane), merged at <code>346fc8dfa</code>. Review: 81, pass with follow-ons. The test file is byte-identical to its base, and the measurement lands as evidence only.</p>
+    <p><strong>Correction to the followup's premise.</strong> The followup assumed nothing passed <code>--timeout</code> on the H200 lane, so the standing suite would cut the long tests at the 300 s ini default. That was wrong. Since <code>55bca9b99</code> and <code>75495edb0</code> (2026-10-02), <code>scripts/nova_lane/run.sh</code> injects <code>--timeout ${NOVA_LANE_TEST_TIMEOUT:-3600}</code> into any pytest payload that carries none. The standing suite routes this file through that launcher, and <code>conftest.py</code> keeps it out of the default <code>-m 'not slow'</code> lane. The 300 s default applies only to a direct run that names the file outside the launcher.</p>
+    <p><strong>Measurement.</strong> H200 lane job 1280609 ran the whole file with the bound disabled: 29 passed in 665.5 s. The slowest test, <code>test_the_accelerator_routes_agree_on_the_fixed_point</code>, took 312.6 s, well inside 3600 s. The moment-map finite-difference test, which needed 869 s on CPU, stays under 200 s on the H200. The run served a mismatched pin (<code>eb565ed4c</code>) and the cache guard never loaded, so these walls include compilation and are upper bounds on a warm lane.</p>
+    <p>A <code>@pytest.mark.timeout(660)</code> mark was measured and then withdrawn: pytest-timeout's marker overrides the command line, so it would have lowered that test's lane bound from 3600 s to 660 s. The confirm job 1280612 ran under that mark. The negative-control jobs were cancelled once the premise fell, so no red arm exists, and none is needed for a node that lands no check. Per-test table: <code>docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-tests-fit-their-bound.html</code>.</p>
+  </section>
+
 </main>
 </body>
 </html>

@@ -324,6 +324,91 @@ def _measure(
         sys.modules.update(modules)
 
 
+def _render_terminal_panel(path: Path) -> dict[str, Any]:
+    """Render the persisted terminal state, reference state and changed supports."""
+
+    import jax.numpy as jnp
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    from benchmarks import solovev_certificate as certificate
+    from benchmarks import unit_amplitude_current_census as census
+    from nova.media import poloidal
+    from nova.media.ink import DEFAULT_INK, poloidal_axes
+
+    control = census._read_control_row()
+    context = census._build_context(control)
+    state = np.asarray(control["terminal_flux_wb"], dtype=np.float64)
+    operator = context["operator"].with_clip_mode("exact")
+    partition = _full_state_partition(operator, state, jnp)
+    coordinates = np.asarray(control["coordinates_rz_m"], dtype=np.float64)
+    wall = np.asarray(context["machine"].wall_node, dtype=np.float64)
+    analytic_state = certificate._exact_state(
+        census.CASE_NAME, context["exact"], coordinates
+    )
+    radial, height, terminal = certificate._raster_field(coordinates, state, wall)
+    _radial, _height, analytic = certificate._raster_field(
+        coordinates, analytic_state, wall
+    )
+    levels = poloidal.contour_levels(
+        np.concatenate((terminal.ravel(), analytic.ravel())), count=12
+    )
+    figure, axis = plt.subplots(figsize=(14, 9), dpi=100)
+    wall_units = (wall,)
+    poloidal.draw_flux_contours(
+        axis, radial, height, analytic, levels, color="#31759f", wall=wall_units
+    )
+    poloidal.draw_flux_contours(
+        axis, radial, height, terminal, levels, color="#a85d30", wall=wall_units
+    )
+    poloidal.draw_wall(axis, units=wall_units)
+    poloidal.draw_nulls(
+        axis,
+        magnetic_axis=certificate.AXIS_M,
+        x_points=np.asarray(certificate.X_POINT_M, dtype=np.float64)[None, :],
+        style=DEFAULT_INK.variant(axis_color="#31759f", xpoint_color="#31759f"),
+        contain=wall_units,
+    )
+    topology = partition["topology"]
+    poloidal.draw_nulls(
+        axis,
+        magnetic_axis=np.asarray(topology.axis, dtype=np.float64),
+        x_points=np.asarray(topology.x_point, dtype=np.float64)[None, :],
+        style=DEFAULT_INK.variant(axis_color="#a85d30", xpoint_color="#a85d30"),
+        contain=wall_units,
+    )
+    changed_cells = (5, 7, 30, 65, 74, 78, 87, 110, 119, 124)
+    support = partition["profile_support"]
+    vertices = np.asarray(support.support_vertices, dtype=np.float64)
+    count = np.asarray(support.vertex_count, dtype=np.int32)
+    for cell in changed_cells:
+        polygon = vertices[cell, : count[cell]]
+        axis.plot(
+            *np.vstack((polygon, polygon[0])).T,
+            color="#b33939",
+            linewidth=1.4,
+            zorder=10,
+        )
+        centre = polygon.mean(axis=0)
+        axis.text(centre[0], centre[1], str(cell), color="#b33939", fontsize=11)
+    poloidal_axes(axis)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=100)
+    plt.close(figure)
+    return {
+        "figure": str(path),
+        "terminal_residual": float(
+            json.loads(census.CONTROL_PART.read_text(encoding="utf-8"))["solver"][
+                "terminal_fixed_point_residual"
+            ]
+        ),
+        "terminal_status": "unqualified active-set-settled",
+        "changed_cells": list(changed_cells),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
@@ -333,11 +418,20 @@ def main() -> None:
         "--component", choices=("full", "booking", "reference"), default="full"
     )
     parser.add_argument("--reference-cells")
+    parser.add_argument("--terminal-panel", type=Path)
     arguments = parser.parse_args()
     scratch = Path(
         tempfile.mkdtemp(prefix="outboard-census-", dir=os.environ["TMPDIR"])
     )
     try:
+        if arguments.terminal_panel is not None:
+            payload = _render_terminal_panel(arguments.terminal_panel)
+            arguments.output.parent.mkdir(parents=True, exist_ok=True)
+            arguments.output.write_text(
+                json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+            )
+            print(json.dumps(payload, indent=2, sort_keys=True))
+            return
         head = subprocess.check_output(
             ["git", "-C", str(ROOT), "rev-parse", arguments.head], text=True
         ).strip()

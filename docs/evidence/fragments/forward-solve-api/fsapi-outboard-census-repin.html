@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<title>Outboard census gate re-pin</title>
+</head>
+<body>
+<main>
+<h1>Outboard census gate re-pin</h1>
+<p>The outboard-hole census gate pinned the exact booked total at
+14,013,835.43717596 A, a value that predates the exact-clip routing at
+38b441dad. On the committed weak-rotation-reactor-static terminal state the
+current code books 15,491,539.124767259 A for the exact clip and
+15,875,439.764504185 A for the chord clip, read through the gate's own
+terminal-state reader in a fresh CPU process. The chord total is unchanged, and
+the five outboard-hole per-cell bookings (cells 83, 104, 106, 108, 116) are
+unchanged; the routing moved the exact total through the ten supports it began
+booking, not through those five.</p>
+<p>The re-pinned exact total is independently supported by the census receipt.
+Its current selected-booking sum, 1,477,703.687597 A over the ten supports the
+routing moved, agrees with a triangle quadrature reference of
+1,477,703.686365 A within a measured 0.006251 A refinement bound, while the
+older pinned sum of 0.000000001 A does not. The receipt derives its
+<code>re-pin</code> verdict from that pair rather than from a preset value.
+<code>tests/test_outboard_census_receipt_consistency.py</code> pins that verdict
+derivation on synthetic inputs and reconciles the committed receipt with the
+numbers this record cites.</p>
+<p>Gate, run in place on the fleet allocation with JAX_PLATFORMS=cpu in fresh
+processes: at the dispatch base 22faa10eb the gate fails
+(<code>test_booked_totals_reproduce_the_committed_state</code>: exact
+15,491,539.124767 A outside 1e-06 of the stale 14,013,835.43717596 A pin,
+EXIT=1); at the re-pinned head it passes three tests, EXIT=0. The consistency
+test passes nine tests.</p>
+</main>
+</body>
+</html>

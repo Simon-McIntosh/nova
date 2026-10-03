@@ -117,8 +117,13 @@ TARGET_CURRENT_A = 16_314_773.311828371
 RECEIPT_TOTALS_A = {"chord": 15_540_896.52, "exact": 15_148_862.10}
 
 #: Booked totals this revision produces on the same committed terminal state,
-#: in amperes, one per clip mode.
-BOOKED_TOTALS_A = {"chord": 15_875_439.764504185, "exact": 14_013_835.43717596}
+#: in amperes, one per clip mode.  The exact total moved to this value at
+#: 38b441dad, whose exact-clip routing sends supports above the whole-cell
+#: vertex capacity through compact cut-cell integration, booking ten outboard
+#: supports that previously booked zero; the chord route is unchanged.  The
+#: value is measured and independently integrated in
+#: docs/evidence/fragments/forward-solve-api/fsri-outboard-census-exact-total.html.
+BOOKED_TOTALS_A = {"chord": 15_875_439.764504185, "exact": 15_491_539.124767259}
 
 #: Cut cells the receipt booked zero current for in either clip mode.  Their
 #: centroids sit on the outboard side of the machine, where the separatrix
@@ -145,8 +150,9 @@ BOOKING_RELATIVE_TOLERANCE = 1.0e-6
 _BRIDGE_MARKER = "_outboard_hole_census_gate_bridge"
 
 
-def _profile_support_with_absent_saddle(self, masks, topology, physical,
-                                        sample_psi_norm, **kwargs):
+def _profile_support_with_absent_saddle(
+    self, masks, topology, physical, sample_psi_norm, **kwargs
+):
     """Supply the absent-saddle sentinel the analytic fixture does not carry.
 
     The fixture topology has no ``x_point``; the exact branch reads it

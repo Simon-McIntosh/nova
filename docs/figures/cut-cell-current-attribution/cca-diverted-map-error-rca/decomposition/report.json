@@ -1,0 +1,654 @@
+{
+  "measurement_revision": "372c604914acda4cf25bfca797a1d95e6afae8ee",
+  "analysis_revision": "96a59e98ec7e4fd1a8d034dab0a8fc1ecb825612",
+  "input_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-diverted-map-error-rca/docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/map-fidelity-stable/map-fidelity.json",
+  "completed": true,
+  "rows": [
+    {
+      "cells": 132,
+      "mode": "exact",
+      "production": {
+        "sup_relative": 0.18056762361844786,
+        "rms_relative": 0.16320251494171925,
+        "dR_m": 0.01188513501422328,
+        "dZ_m": 0.11507597111551116
+      },
+      "classes": {
+        "X-point": {
+          "cell_count": 1,
+          "projection_share": -0.02178999306194583,
+          "map_sup_relative": 0.022712172897269265,
+          "dominant_cells": [
+            9
+          ],
+          "dominant_current_error_a": [
+            -36.01816966445048
+          ]
+        },
+        "private flux": {
+          "cell_count": 46,
+          "projection_share": 0.2957256021951133,
+          "map_sup_relative": 0.24284694060576972,
+          "dominant_cells": [
+            2,
+            7,
+            0,
+            1,
+            3
+          ],
+          "dominant_current_error_a": [
+            229.3807546340988,
+            162.92443813092052,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "boundary cut": {
+          "cell_count": 35,
+          "projection_share": 0.17448043400615085,
+          "map_sup_relative": 0.0325014824116151,
+          "dominant_cells": [
+            69,
+            73,
+            97,
+            110,
+            109
+          ],
+          "dominant_current_error_a": [
+            -6.980417883274299,
+            -6.590960596859986,
+            -6.572569231266357,
+            -5.982027899381933,
+            -5.745278232331316
+          ]
+        },
+        "interior": {
+          "cell_count": 50,
+          "projection_share": 0.5515839568606805,
+          "map_sup_relative": 0.09527728618407541,
+          "dominant_cells": [
+            80,
+            94,
+            77,
+            74,
+            82
+          ],
+          "dominant_current_error_a": [
+            -7.18612090563613,
+            -7.18612090563613,
+            -7.186120905636017,
+            -6.615829192944943,
+            -6.615829192944943
+          ]
+        }
+      },
+      "dominant_cells": [
+        {
+          "cell": 2,
+          "class": "private flux",
+          "analytic_area_fraction": 0.0,
+          "current_error_a": 229.3807546340988
+        },
+        {
+          "cell": 7,
+          "class": "private flux",
+          "analytic_area_fraction": 0.0,
+          "current_error_a": 162.92443813092052
+        },
+        {
+          "cell": 9,
+          "class": "X-point",
+          "analytic_area_fraction": 0.022095545864138685,
+          "current_error_a": -36.01816966445048
+        },
+        {
+          "cell": 80,
+          "class": "interior",
+          "analytic_area_fraction": 1.0,
+          "current_error_a": -7.18612090563613
+        },
+        {
+          "cell": 94,
+          "class": "interior",
+          "analytic_area_fraction": 1.0,
+          "current_error_a": -7.18612090563613
+        },
+        {
+          "cell": 77,
+          "class": "interior",
+          "analytic_area_fraction": 1.0,
+          "current_error_a": -7.186120905636017
+        },
+        {
+          "cell": 69,
+          "class": "boundary cut",
+          "analytic_area_fraction": 0.5790140024635162,
+          "current_error_a": -6.980417883274299
+        },
+        {
+          "cell": 74,
+          "class": "interior",
+          "analytic_area_fraction": 0.9999999999999999,
+          "current_error_a": -6.615829192944943
+        }
+      ],
+      "xpoint_wedge": {
+        "sup_relative": 0.1799812358443686,
+        "rms_relative": 0.16175841812891456,
+        "dR_m": 0.012206525212579367,
+        "dZ_m": 0.11469001810249324,
+        "lambda": 0.990871869433073,
+        "production_apex_rz_m": [
+          1.5107863810710611,
+          -1.0275005315610446
+        ],
+        "analytic_apex_rz_m": [
+          1.5025279999999999,
+          -1.01728
+        ],
+        "executed": true,
+        "source": "nova/equilibrium/forward_operator.py:_profile_support"
+      },
+      "analytic_membership": {
+        "sup_relative": 0.071236818634126,
+        "rms_relative": 0.06619153388513321,
+        "dR_m": 0.024250017948920677,
+        "dZ_m": 0.005943350176422335,
+        "lambda": 1.0042364954949987,
+        "clip_mode": "exact",
+        "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
+        "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
+      },
+      "contour_tree_region": {
+        "sup_relative": 0.18056762361783077,
+        "rms_relative": 0.16320251494111235,
+        "dR_m": 0.011885135014019,
+        "dZ_m": 0.11507597111495838,
+        "lambda": 0.9907796670532908,
+        "membership_difference_count": 1,
+        "executed": true,
+        "source": "nova/equilibrium/forward_operator.py:_fixed_design_read"
+      }
+    },
+    {
+      "cells": 132,
+      "mode": "chord",
+      "production": {
+        "sup_relative": 0.0950848225228153,
+        "rms_relative": 0.06196529984358766,
+        "dR_m": 0.01164761068006448,
+        "dZ_m": 0.06202268271350475
+      },
+      "classes": {
+        "X-point": {
+          "cell_count": 1,
+          "projection_share": -0.1980988767634936,
+          "map_sup_relative": 0.06503207174348664,
+          "dominant_cells": [
+            9
+          ],
+          "dominant_current_error_a": [
+            -107.63454517987535
+          ]
+        },
+        "private flux": {
+          "cell_count": 46,
+          "projection_share": 0.6186087004037686,
+          "map_sup_relative": 0.1583760823184258,
+          "dominant_cells": [
+            2,
+            0,
+            1,
+            3,
+            5
+          ],
+          "dominant_current_error_a": [
+            236.20509859734904,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "boundary cut": {
+          "cell_count": 35,
+          "projection_share": 0.10350654569419436,
+          "map_sup_relative": 0.009121772392411694,
+          "dominant_cells": [
+            97,
+            73,
+            21,
+            109,
+            110
+          ],
+          "dominant_current_error_a": [
+            -2.821239673371224,
+            -2.716631076276826,
+            -2.617685654640127,
+            -2.4286395631247615,
+            -2.246073746534421
+          ]
+        },
+        "interior": {
+          "cell_count": 50,
+          "projection_share": 0.47598363066552934,
+          "map_sup_relative": 0.036350770443764176,
+          "dominant_cells": [
+            80,
+            94,
+            77,
+            74,
+            82
+          ],
+          "dominant_current_error_a": [
+            -2.7416926098969725,
+            -2.7416926098969725,
+            -2.741692609896859,
+            -2.5241114427134335,
+            -2.5241114427134335
+          ]
+        }
+      },
+      "dominant_cells": [
+        {
+          "cell": 2,
+          "class": "private flux",
+          "analytic_area_fraction": 0.0,
+          "current_error_a": 236.20509859734904
+        },
+        {
+          "cell": 9,
+          "class": "X-point",
+          "analytic_area_fraction": 0.022095545864138685,
+          "current_error_a": -107.63454517987535
+        },
+        {
+          "cell": 97,
+          "class": "boundary cut",
+          "analytic_area_fraction": 0.8496985792766878,
+          "current_error_a": -2.821239673371224
+        },
+        {
+          "cell": 80,
+          "class": "interior",
+          "analytic_area_fraction": 1.0,
+          "current_error_a": -2.7416926098969725
+        },
+        {
+          "cell": 94,
+          "class": "interior",
+          "analytic_area_fraction": 1.0,
+          "current_error_a": -2.7416926098969725
+        },
+        {
+          "cell": 77,
+          "class": "interior",
+          "analytic_area_fraction": 1.0,
+          "current_error_a": -2.741692609896859
+        },
+        {
+          "cell": 73,
+          "class": "boundary cut",
+          "analytic_area_fraction": 0.8605964472212009,
+          "current_error_a": -2.716631076276826
+        },
+        {
+          "cell": 21,
+          "class": "boundary cut",
+          "analytic_area_fraction": 0.8372222157089728,
+          "current_error_a": -2.617685654640127
+        }
+      ],
+      "xpoint_wedge": {
+        "sup_relative": null,
+        "dZ_m": null,
+        "finding": "not active in chord mode",
+        "source": "nova/equilibrium/forward_operator.py:_profile_support"
+      },
+      "analytic_membership": {
+        "sup_relative": 0.06119079826580562,
+        "rms_relative": 0.05662118146553904,
+        "dR_m": 0.02057448383037408,
+        "dZ_m": 0.0025649314606468465,
+        "lambda": 1.003486775536206,
+        "clip_mode": "chord",
+        "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
+        "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
+      },
+      "contour_tree_region": {
+        "sup_relative": 0.09508482252281729,
+        "rms_relative": 0.06196529984359127,
+        "dR_m": 0.011647610680066256,
+        "dZ_m": 0.06202268271350886,
+        "lambda": 0.9964822024242458,
+        "membership_difference_count": 0,
+        "executed": true,
+        "source": "nova/equilibrium/forward_operator.py:_fixed_design_read"
+      }
+    },
+    {
+      "cells": 550,
+      "mode": "exact",
+      "production": {
+        "sup_relative": 0.1384568621521094,
+        "rms_relative": 0.11095610572225183,
+        "dR_m": 0.008078252529768237,
+        "dZ_m": 0.06695029174161415
+      },
+      "classes": {
+        "X-point": {
+          "cell_count": 1,
+          "projection_share": -0.001582415377898139,
+          "map_sup_relative": 0.015380784493450822,
+          "dominant_cells": [
+            8
+          ],
+          "dominant_current_error_a": [
+            -17.32096201176028
+          ]
+        },
+        "private flux": {
+          "cell_count": 213,
+          "projection_share": 0.11433417992079205,
+          "map_sup_relative": 0.1859784565921302,
+          "dominant_cells": [
+            5,
+            4,
+            62,
+            64,
+            3
+          ],
+          "dominant_current_error_a": [
+            81.81821246730445,
+            65.50311393834002,
+            56.12657931578144,
+            42.709613311223166,
+            8.60555668459072
+          ]
+        },
+        "boundary cut": {
+          "cell_count": 75,
+          "projection_share": 0.23756738186369034,
+          "map_sup_relative": 0.027002531873688125,
+          "dominant_cells": [
+            80,
+            227,
+            473,
+            21,
+            18
+          ],
+          "dominant_current_error_a": [
+            -2.8076490282293136,
+            -2.342494703120437,
+            -2.336498151179512,
+            -2.00054889528964,
+            -1.8523474096502683
+          ]
+        },
+        "interior": {
+          "cell_count": 261,
+          "projection_share": 0.6496808535934171,
+          "map_sup_relative": 0.06759800630063544,
+          "dominant_cells": [
+            271,
+            276,
+            280,
+            245,
+            269
+          ],
+          "dominant_current_error_a": [
+            -0.8767775157747337,
+            -0.8767775157747337,
+            -0.8767775157747337,
+            -0.8767775157747053,
+            -0.8767775157747053
+          ]
+        }
+      },
+      "dominant_cells": [
+        {
+          "cell": 5,
+          "class": "private flux",
+          "analytic_area_fraction": 0.0,
+          "current_error_a": 81.81821246730445
+        },
+        {
+          "cell": 4,
+          "class": "private flux",
+          "analytic_area_fraction": 0.0,
+          "current_error_a": 65.50311393834002
+        },
+        {
+          "cell": 62,
+          "class": "private flux",
+          "analytic_area_fraction": 0.0,
+          "current_error_a": 56.12657931578144
+        },
+        {
+          "cell": 64,
+          "class": "private flux",
+          "analytic_area_fraction": 0.0,
+          "current_error_a": 42.709613311223166
+        },
+        {
+          "cell": 8,
+          "class": "X-point",
+          "analytic_area_fraction": 0.3782957935250032,
+          "current_error_a": -17.32096201176028
+        },
+        {
+          "cell": 3,
+          "class": "private flux",
+          "analytic_area_fraction": 0.0,
+          "current_error_a": 8.60555668459072
+        },
+        {
+          "cell": 80,
+          "class": "boundary cut",
+          "analytic_area_fraction": 0.3020374146541351,
+          "current_error_a": -2.8076490282293136
+        },
+        {
+          "cell": 227,
+          "class": "boundary cut",
+          "analytic_area_fraction": 0.6173141478863178,
+          "current_error_a": -2.342494703120437
+        }
+      ],
+      "xpoint_wedge": {
+        "sup_relative": 0.13845686214883815,
+        "rms_relative": 0.11095610571905488,
+        "dR_m": 0.00807825252998673,
+        "dZ_m": 0.06695029173949563,
+        "lambda": 0.9949982883504518,
+        "production_apex_rz_m": [
+          1.5011136054305771,
+          -1.02364125030317
+        ],
+        "analytic_apex_rz_m": [
+          1.5025279999999999,
+          -1.01728
+        ],
+        "executed": true,
+        "source": "nova/equilibrium/forward_operator.py:_profile_support"
+      },
+      "analytic_membership": {
+        "sup_relative": 0.015252286478994938,
+        "rms_relative": 0.014151849550114783,
+        "dR_m": 0.0005043264415320881,
+        "dZ_m": 0.016946423206432915,
+        "lambda": 1.0018370593174948,
+        "clip_mode": "exact",
+        "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
+        "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
+      },
+      "contour_tree_region": {
+        "sup_relative": 0.13845686214883815,
+        "rms_relative": 0.11095610571905488,
+        "dR_m": 0.00807825252998673,
+        "dZ_m": 0.06695029173949563,
+        "lambda": 0.9949982883504518,
+        "membership_difference_count": 3,
+        "executed": true,
+        "source": "nova/equilibrium/forward_operator.py:_fixed_design_read"
+      }
+    },
+    {
+      "cells": 550,
+      "mode": "chord",
+      "production": {
+        "sup_relative": 0.033867325392280156,
+        "rms_relative": 0.017880476893632744,
+        "dR_m": 0.005897273653852286,
+        "dZ_m": 0.026992139537305282
+      },
+      "classes": {
+        "X-point": {
+          "cell_count": 1,
+          "projection_share": -0.019493510075453427,
+          "map_sup_relative": 0.004160318011042718,
+          "dominant_cells": [
+            8
+          ],
+          "dominant_current_error_a": [
+            -4.689779911728092
+          ]
+        },
+        "private flux": {
+          "cell_count": 213,
+          "projection_share": 0.34766426528424016,
+          "map_sup_relative": 0.04532230468132509,
+          "dominant_cells": [
+            64,
+            3,
+            7,
+            0,
+            1
+          ],
+          "dominant_current_error_a": [
+            43.153397908988666,
+            8.648570304996754,
+            0.21866774983250672,
+            0.0,
+            0.0
+          ]
+        },
+        "boundary cut": {
+          "cell_count": 75,
+          "projection_share": 0.6533847256977836,
+          "map_sup_relative": 0.01453912322611178,
+          "dominant_cells": [
+            80,
+            18,
+            21,
+            85,
+            86
+          ],
+          "dominant_current_error_a": [
+            -2.4418980510553965,
+            -1.7748736699505754,
+            -1.4804004604123833,
+            -1.2706530102047395,
+            -1.1442816455264762
+          ]
+        },
+        "interior": {
+          "cell_count": 261,
+          "projection_share": 0.018444519093434072,
+          "map_sup_relative": 0.00038356730811324983,
+          "dominant_cells": [
+            271,
+            276,
+            280,
+            245,
+            269
+          ],
+          "dominant_current_error_a": [
+            -0.004970990217884719,
+            -0.004970990217884719,
+            -0.004970990217884719,
+            -0.004970990217856297,
+            -0.004970990217856297
+          ]
+        }
+      },
+      "dominant_cells": [
+        {
+          "cell": 64,
+          "class": "private flux",
+          "analytic_area_fraction": 0.0,
+          "current_error_a": 43.153397908988666
+        },
+        {
+          "cell": 3,
+          "class": "private flux",
+          "analytic_area_fraction": 0.0,
+          "current_error_a": 8.648570304996754
+        },
+        {
+          "cell": 8,
+          "class": "X-point",
+          "analytic_area_fraction": 0.3782957935250032,
+          "current_error_a": -4.689779911728092
+        },
+        {
+          "cell": 80,
+          "class": "boundary cut",
+          "analytic_area_fraction": 0.3020374146541351,
+          "current_error_a": -2.4418980510553965
+        },
+        {
+          "cell": 18,
+          "class": "boundary cut",
+          "analytic_area_fraction": 0.08415803243318166,
+          "current_error_a": -1.7748736699505754
+        },
+        {
+          "cell": 21,
+          "class": "boundary cut",
+          "analytic_area_fraction": 0.6583136765185147,
+          "current_error_a": -1.4804004604123833
+        },
+        {
+          "cell": 85,
+          "class": "boundary cut",
+          "analytic_area_fraction": 0.7914055517347337,
+          "current_error_a": -1.2706530102047395
+        },
+        {
+          "cell": 86,
+          "class": "boundary cut",
+          "analytic_area_fraction": 0.5057759399171379,
+          "current_error_a": -1.1442816455264762
+        }
+      ],
+      "xpoint_wedge": {
+        "sup_relative": null,
+        "dZ_m": null,
+        "finding": "not active in chord mode",
+        "source": "nova/equilibrium/forward_operator.py:_profile_support"
+      },
+      "analytic_membership": {
+        "sup_relative": 0.007046062864358472,
+        "rms_relative": 0.008169592903928647,
+        "dR_m": 0.0012303712830870062,
+        "dZ_m": 0.01030250079736672,
+        "lambda": 1.0012957886080531,
+        "clip_mode": "chord",
+        "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
+        "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
+      },
+      "contour_tree_region": {
+        "sup_relative": 0.033867325392281704,
+        "rms_relative": 0.01788047689363212,
+        "dR_m": 0.0058972736538529524,
+        "dZ_m": 0.02699213953730717,
+        "lambda": 0.9999716422248102,
+        "membership_difference_count": 0,
+        "executed": true,
+        "source": "nova/equilibrium/forward_operator.py:_fixed_design_read"
+      }
+    }
+  ]
+}

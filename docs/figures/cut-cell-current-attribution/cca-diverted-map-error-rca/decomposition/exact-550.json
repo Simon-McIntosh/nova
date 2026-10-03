@@ -1,0 +1,167 @@
+{
+  "cells": 550,
+  "mode": "exact",
+  "production": {
+    "sup_relative": 0.1384568621521094,
+    "rms_relative": 0.11095610572225183,
+    "dR_m": 0.008078252529768237,
+    "dZ_m": 0.06695029174161415
+  },
+  "classes": {
+    "X-point": {
+      "cell_count": 1,
+      "projection_share": -0.001582415377898139,
+      "map_sup_relative": 0.015380784493450822,
+      "dominant_cells": [
+        8
+      ],
+      "dominant_current_error_a": [
+        -17.32096201176028
+      ]
+    },
+    "private flux": {
+      "cell_count": 213,
+      "projection_share": 0.11433417992079205,
+      "map_sup_relative": 0.1859784565921302,
+      "dominant_cells": [
+        5,
+        4,
+        62,
+        64,
+        3
+      ],
+      "dominant_current_error_a": [
+        81.81821246730445,
+        65.50311393834002,
+        56.12657931578144,
+        42.709613311223166,
+        8.60555668459072
+      ]
+    },
+    "boundary cut": {
+      "cell_count": 75,
+      "projection_share": 0.23756738186369034,
+      "map_sup_relative": 0.027002531873688125,
+      "dominant_cells": [
+        80,
+        227,
+        473,
+        21,
+        18
+      ],
+      "dominant_current_error_a": [
+        -2.8076490282293136,
+        -2.342494703120437,
+        -2.336498151179512,
+        -2.00054889528964,
+        -1.8523474096502683
+      ]
+    },
+    "interior": {
+      "cell_count": 261,
+      "projection_share": 0.6496808535934171,
+      "map_sup_relative": 0.06759800630063544,
+      "dominant_cells": [
+        271,
+        276,
+        280,
+        245,
+        269
+      ],
+      "dominant_current_error_a": [
+        -0.8767775157747337,
+        -0.8767775157747337,
+        -0.8767775157747337,
+        -0.8767775157747053,
+        -0.8767775157747053
+      ]
+    }
+  },
+  "dominant_cells": [
+    {
+      "cell": 5,
+      "class": "private flux",
+      "analytic_area_fraction": 0.0,
+      "current_error_a": 81.81821246730445
+    },
+    {
+      "cell": 4,
+      "class": "private flux",
+      "analytic_area_fraction": 0.0,
+      "current_error_a": 65.50311393834002
+    },
+    {
+      "cell": 62,
+      "class": "private flux",
+      "analytic_area_fraction": 0.0,
+      "current_error_a": 56.12657931578144
+    },
+    {
+      "cell": 64,
+      "class": "private flux",
+      "analytic_area_fraction": 0.0,
+      "current_error_a": 42.709613311223166
+    },
+    {
+      "cell": 8,
+      "class": "X-point",
+      "analytic_area_fraction": 0.3782957935250032,
+      "current_error_a": -17.32096201176028
+    },
+    {
+      "cell": 3,
+      "class": "private flux",
+      "analytic_area_fraction": 0.0,
+      "current_error_a": 8.60555668459072
+    },
+    {
+      "cell": 80,
+      "class": "boundary cut",
+      "analytic_area_fraction": 0.3020374146541351,
+      "current_error_a": -2.8076490282293136
+    },
+    {
+      "cell": 227,
+      "class": "boundary cut",
+      "analytic_area_fraction": 0.6173141478863178,
+      "current_error_a": -2.342494703120437
+    }
+  ],
+  "xpoint_wedge": {
+    "sup_relative": 0.13845686214883815,
+    "rms_relative": 0.11095610571905488,
+    "dR_m": 0.00807825252998673,
+    "dZ_m": 0.06695029173949563,
+    "lambda": 0.9949982883504518,
+    "production_apex_rz_m": [
+      1.5011136054305771,
+      -1.02364125030317
+    ],
+    "analytic_apex_rz_m": [
+      1.5025279999999999,
+      -1.01728
+    ],
+    "executed": true,
+    "source": "nova/equilibrium/forward_operator.py:_profile_support"
+  },
+  "analytic_membership": {
+    "sup_relative": 0.015252286478994938,
+    "rms_relative": 0.014151849550114783,
+    "dR_m": 0.0005043264415320881,
+    "dZ_m": 0.016946423206432915,
+    "lambda": 1.0018370593174948,
+    "clip_mode": "exact",
+    "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
+    "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
+  },
+  "contour_tree_region": {
+    "sup_relative": 0.13845686214883815,
+    "rms_relative": 0.11095610571905488,
+    "dR_m": 0.00807825252998673,
+    "dZ_m": 0.06695029173949563,
+    "lambda": 0.9949982883504518,
+    "membership_difference_count": 3,
+    "executed": true,
+    "source": "nova/equilibrium/forward_operator.py:_fixed_design_read"
+  }
+}

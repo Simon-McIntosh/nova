@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="55">
 </head>
 <body>
   <main class="plan-doc">
@@ -358,9 +358,15 @@
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
     <p class="r-fu-outcome">Items 1, 2 and 4 landed. (1) The receipt comparator merged at a1c63dd82 (review 94): --compare checks all seven receipt fields, and the field set is an explicit argument with no environment switch. The performance guard was already durable as test_sweep_execute_bound. (2) Carrier indices and tables share int32, merged at ce663e84e (review 92). (4) The product combines duplicate roots last-write-wins under a same-value invariant, not by a maximum scatter. That invariant is pinned by edge-order invariance tests, merged at 823ada8b5 (review 92). Item (3), device placement, carries forward as f-ctta-sweep-device-placement. Records: contour-tree-topology-authority-landed#receipt-comparator, #carrier-index-dtype and #duplicate-root-combine.</p>
     </article>
-<article class="r-fu" data-id="f-ctta-sweep-device-placement" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-03" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ctta-sweep-device-placement" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-03" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="2026-10-03T03:35:38+00:00" data-resolved-by="nova-s21">
     <h4 class="r-fu-title">Decide from measurement where the contour-tree sweep runs</h4>
     <div class="r-fu-body"><p>Carried from item (3) of f-ctta-sweep-durability-and-placement. On the H200 the near-linear sweep is launch-latency bound: a fori_loop of vertex visits, each a data-dependent while_loop, takes 2.772 s at 1089 vertices against 0.490 s on CPU. Measure three placements on the certificate rungs and the MAST carriers, at batch sizes 1, 8 and 64: one field host-side, batched fields on the device with vmap, and a parallel union-find formulation on the device. Report compile and execute walls per placement, then recommend one per use: single solve, labeller batch and census. The receipt fields must stay bit-identical across placements, checked with the committed --compare mode.</p></div>
+    <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
+    <p class="r-fu-outcome">Merged at fb9337c3a (review 96): one field runs fastest on the host CPU (0.225 s mean); batches of 8 and 64 run fastest with a parallel union-find prototype on the H200 (0.407 s and 0.461 s, against 1.793 s and 14.484 s serial); a vmap of the existing sweep wins no use. All seven receipt fields match across placements. Record contour-tree-topology-authority-landed#sweep-device-placement; promotion of the prototype is f-ctta-parallel-union-find-production.</p>
+    </article>
+<article class="r-fu" data-id="f-ctta-parallel-union-find-production" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-03" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Promote the parallel union-find sweep into nova for batched use</h4>
+    <div class="r-fu-body"><p>The placement measurement (merged fb9337c3a, benchmarks/contour_tree_sweep_placement.py) found a benchmark-only parallel union-find formulation, which pointer-jumps the full parent table at each visit, fastest for batched fields on the H200: 0.407 s at 8 fields and 0.461 s at 64, against 1.793 s and 14.484 s serial on CPU. Move it into nova/equilibrium/contour_tree.py as a batched sweep beside the serial one, which stays the single-field path. Gate it on the committed --compare mode: bit-identical receipts against the serial sweep on the twelve certificate rungs and both MAST carriers, built from carrier arrays persisted from one backend. Add tests for a saturated vertex, an isolated vertex and repeated edges. Report compile and execute walls at batches 8 and 64 on the H200.</p></div>
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
     </article>
 </section>

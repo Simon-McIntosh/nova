@@ -113,6 +113,19 @@
     <p>The first version let an environment variable drop a field from the production comparison, so a stray value could turn a real mismatch into a pass. The coordinator held the merge, and the comparison now takes its field set as an explicit argument defaulting to every field. <code>tests/test_contour_tree_receipt_comparator.py</code> passes 17 tests, one of which round-trips a tree built by <code>build_contour_tree</code> through the receipt writer and loader. The brute-force suite reads 0 failures at base and head. The review's remaining follow-on is a test of <code>--write</code> over a fixture carrier.</p>
   </section>
 
+  <section id="sweep-device-placement">
+    <h2>Where the sweep runs: CPU for one field, a parallel union-find on the H200 for batches</h2>
+    <p>Run <code>r-20261003T022349310426-ctta-sweep-device-placement</code> (codex-terra), merged at <code>fb9337c3a</code>, review 96 of 100, answers item (3) of the sweep followup. <code>benchmarks/contour_tree_sweep_placement.py</code> holds the carrier arrays fixed across the twelve persisted certificate rungs and the two MAST carriers, and it times three placements at batches of 1, 8 and 64. Mean warm execute walls:</p>
+    <table>
+      <tr><th>placement</th><th>1 field</th><th>8 fields</th><th>64 fields</th></tr>
+      <tr><td>host serial (CPU)</td><td>0.225 s</td><td>1.793 s</td><td>14.484 s</td></tr>
+      <tr><td>H200 vmap of the existing sweep</td><td>1.675 s</td><td>1.748 s</td><td>1.894 s</td></tr>
+      <tr><td>H200 parallel union-find prototype</td><td>0.370 s</td><td>0.407 s</td><td>0.461 s</td></tr>
+    </table>
+    <p>A single solve stays on the host CPU. A labeller batch or a census belongs on the H200 with the parallel formulation, which pointer-jumps the whole parent table at each visit. A vmap of the existing data-dependent sweep wins no use, because it stays launch-latency bound. The committed comparator finds zero mismatches in all seven receipt fields between the CPU and both H200 placements, once the carrier arrays are persisted from the CPU build. Built separately on each backend, the meshes differ in node flux by one ulp at 15 nodes. The prototype lives in the benchmark. Its promotion into <code>nova/</code> is open as f-ctta-parallel-union-find-production.</p>
+    <figure><img src="/nova/figures/contour-tree-topology-authority/ctta-sweep-device-placement/execute-wall-by-carrier.png" alt="Warm execute wall against carrier size for the three sweep placements"><figcaption>Warm execute wall against carrier size, H200 on one card and CPU in the fleet allocation. The parallel prototype removes the batch growth of host serial execution; the vmap of the existing sweep stays launch-latency bound.</figcaption></figure>
+  </section>
+
   <section id="duplicate-root-combine">
     <h2>The sweep's duplicate-root combine is pinned on the product</h2>
     <p>Run <code>r-20261002T233222856971-ctta-scatter-segmented-max-equivalence</code> (local lane), merged at <code>823ada8b5</code>, review 92 of 100 after one rework, closes item (4) of f-ctta-sweep-durability-and-placement. The item described a duplicate-index maximum scatter. The product has none. The sweep combines duplicate neighbour roots with <code>parents.at[neighbour_root].set(...)</code>, last write wins, and that is deterministic only because every duplicate root written in one visit carries the same value. The first delivery tested a maximum helper defined in the test file and never touched nova, so it was held and reworked.</p>

@@ -147,6 +147,25 @@ def _profile_density_sampler(jax: Any, field: Any, profile: Any):
     return sample
 
 
+def _full_state_partition(operator: Any, state: np.ndarray, jnp: Any) -> dict[str, Any]:
+    """Read every support operand from the persisted, unsliced terminal state."""
+
+    physical = jnp.asarray(state)
+    base_masks, topology, _connected, _admitted = operator._fixed_design_read(physical)
+    sample_flux = operator.sample_node_flux(physical)
+    sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+    profile_support = operator._profile_support(
+        base_masks, topology, physical, sample_psi_norm
+    )
+    return {
+        "base_masks": base_masks,
+        "topology": topology,
+        "sample_psi_norm": sample_psi_norm,
+        "profile_support": profile_support,
+        "moment_masks": operator._moment_support_masks(base_masks, profile_support),
+    }
+
+
 @contextmanager
 def _operator_clip_mode(forward_operator: Any, operator: Any, mode: str):
     """Yield an operator configured by the interface present in its revision."""
@@ -180,6 +199,7 @@ def _measure(
             sys.modules.pop(name, None)
         sys.path.insert(0, str(tree))
         import jax
+        import jax.numpy as jnp
         import nova.equilibrium.forward_operator as forward_operator
         from benchmarks import unit_amplitude_current_census as census
         from nova.jax.config import configure_dtypes
@@ -204,34 +224,24 @@ def _measure(
         booked = None
         exact_cell_current = None
         if component != "reference":
-            with _operator_clip_mode(forward_operator, operator, "exact") as (
-                exact_operator,
-                mode_strategy,
-            ):
-                probe = census._partition_probe(exact_operator, state, "exact")
-                curve = census._curve_probe(
-                    exact_operator,
-                    probe["base_masks"],
-                    probe["topology"],
-                    probe["sample_psi_norm"],
-                )
-            analytic = census._cell_analysis(
-                context["machine"], context["exact"], context["target_current"]
-            )
             try:
-                booking_census = census._state_census(
-                    operator,
-                    context["machine"],
-                    state,
-                    "terminal",
-                    context["target_current"],
-                    analytic,
-                    curve,
-                )
-                booked = booking_census["unit_amplitude_totals_a"]
-                exact_cell_current = [
-                    float(row["exact_current_a"]) for row in booking_census["per_cell"]
-                ]
+                mode_current = {}
+                for mode in ("chord", "exact"):
+                    with _operator_clip_mode(forward_operator, operator, mode) as (
+                        selected_operator,
+                        _selection_strategy,
+                    ):
+                        mode_current[mode] = np.asarray(
+                            selected_operator.cell_current_moments(
+                                jnp.asarray(state)
+                            ).cell_current,
+                            dtype=np.float64,
+                        )
+                booked = {
+                    mode: float(np.sum(current))
+                    for mode, current in mode_current.items()
+                }
+                exact_cell_current = mode_current["exact"].tolist()
             finally:
                 if legacy_mode is not None:
                     forward_operator.set_support_clip_mode(legacy_mode)
@@ -243,7 +253,7 @@ def _measure(
                 exact_operator,
                 _reference_mode_strategy,
             ):
-                exact_probe = census._partition_probe(exact_operator, state, "exact")
+                exact_probe = _full_state_partition(exact_operator, state, jnp)
                 exact_field = forward_operator.flux_field_polynomial(
                     exact_operator._support_moment_stencils,
                     exact_probe["moment_masks"].psi_norm,

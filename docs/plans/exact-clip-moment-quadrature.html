@@ -28,7 +28,7 @@
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.99">
-<meta name="plan-version" content="83">
+<meta name="plan-version" content="84">
 </head>
 <body>
   <main class="plan-doc">
@@ -294,6 +294,11 @@ matrix. Record: <a href="/nova/evidence/archive/exact-clip-moment-quadrature-lan
     <div class="r-fu-body">The one-arc census that retired the two-run wiring measured the analytic bank's only diverted row, diverted-single-null, at three resolutions; the bank carries no double-null diverted row and no production geometry. Its spline saddle wedges reached 160, 152 and 146 vertices against one-run capacities of 162, 154 and 148, a two-vertex margin, and the logs carrying those maxima have no revision or command header. Run docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/one_arc_census.py, with a provenance header on every log, over the production diverted rows the forward lanes solve (MAST and DIII-D diverted slices in the bank) at their production cell counts, recording realised maximum vertices, saddle-wedge maxima and refused cells per row. If any row refuses a cell, land 61b291089 from refs/held/ecq-level-run-wiring with that row as its positive control; if none does, delete the ref.</div>
     <pre class="r-fu-prompt">/reckon-build exact-clip-moment-quadrature: census the production diverted layouts against the one-arc traced bound and record the saddle-wedge margin.</pre>
     <p class="r-fu-outcome">Merged at 8c9f7cb42 (commits 1024be47a, 80d20b80c, 06a15267b, d7e48acc0; review 91/100). All eleven production diverted rows, the six MAST production moment-seed slices (21978/35, 21983/35, 21985/51, 21986/46, 21989/55, 22086/43) and the five DIII-D forward-gate frames, refuse no cell at their 1089-cell production layout under the one-run bound: realised maximum 132 live vertices against capacity 136 (headroom 4), largest spline saddle wedge 131 (margin 5). Every row log carries its revision, tree and command. The two-run wiring 61b291089 is retired and refs/held/ecq-level-run-wiring is deleted. The evaluated banks hold single-null and limited diverted layouts only; a double-null diverted row added later is unmeasured and would need its own census.</p>
+    </article>
+<article class="r-fu" data-id="f-ecq-seed-bracket-test-outruns-suite-timeout" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build exact-clip-moment-quadrature" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The 342-cell seed-bracket test takes 330 s and fails every suite run at the 300 s per-test timeout</h4>
+    <div class="r-fu-body"><p>tests/test_exact_clip_seed_bracket.py::test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier passes on its own at both 68762d363 and 11541380e, in 333.8 s and 329.0 s (run r-20261003T181955895750). In a full-suite run it fails with "Failed: Timeout (&gt;300.0s) from pytest-timeout", because the default per-test timeout is 300 s. It therefore reads as a red test in every suite gate, regardless of the change under test, and it misled the exact-and-centroid wall-mask batch until it was attributed. Give it an explicit timeout marker sized to its measured wall, or mark it slow so the default lane skips it. Alternatively, shrink the carrier it builds so it finishes inside the default. Do not raise the suite-wide default to fit one test.</p></div>
+    <pre class="r-fu-prompt">/reckon-build exact-clip-moment-quadrature: make the 342-cell seed-bracket test fit or opt out of the 300 s suite timeout</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

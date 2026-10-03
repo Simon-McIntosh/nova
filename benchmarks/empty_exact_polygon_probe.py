@@ -45,10 +45,7 @@ import jax.numpy as jnp  # noqa: E402
 
 import benchmarks.unit_amplitude_current_census as census  # noqa: E402
 from nova.equilibrium import separatrix_clip as clip_module  # noqa: E402
-from nova.equilibrium.forward_operator import (  # noqa: E402
-    _ExactClipLevel,
-    set_support_clip_mode,
-)
+from nova.equilibrium.forward_operator import _ExactClipLevel  # noqa: E402
 
 OUT = Path(__file__).resolve().parents[1] / (
     "docs/figures/cut-cell-current-attribution/empty-exact-polygon"
@@ -127,7 +124,7 @@ def _full_probe(operator, state: np.ndarray) -> dict[str, Any]:
     the grid flux, so the state is passed whole; the census's own partition
     probe slices it and is not usable here.
     """
-    set_support_clip_mode("exact")
+    operator = operator.with_clip_mode("exact")
     physical = jnp.asarray(state)
     base_masks, topology, _connected, _admitted = operator._fixed_design_read(physical)
     sample_flux = operator.sample_node_flux(jnp.asarray(state))

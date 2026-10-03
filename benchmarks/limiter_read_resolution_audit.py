@@ -17,7 +17,6 @@ without sharing a mutable receipt.
 from __future__ import annotations
 
 import argparse
-from contextlib import contextmanager
 import hashlib
 import inspect
 import json
@@ -27,7 +26,7 @@ from pathlib import Path
 import socket
 import subprocess
 from time import perf_counter
-from typing import Any, Callable, Iterator
+from typing import Any, Callable
 import uuid
 
 import jax
@@ -43,11 +42,7 @@ from scipy.optimize import minimize_scalar
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import forward_operator as forward_operator_module
 from nova.equilibrium.connectivity_boundary import wall_height_shadow_mask
-from nova.equilibrium.forward_operator import (
-    ForwardFluxOperator,
-    set_support_clip_mode,
-    support_clip_mode,
-)
+from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.topology import Topology, TopologyClass
 from nova.jax.config import (
     configure_dtypes,
@@ -193,18 +188,6 @@ def _allocation() -> dict[str, Any]:
         "jax_default_backend": jax.default_backend(),
         "tmpdir": os.environ.get("TMPDIR"),
     }
-
-
-@contextmanager
-def _support_mode(mode: str) -> Iterator[None]:
-    """Select one benchmark-only support mode and restore the process default."""
-
-    previous = support_clip_mode()
-    set_support_clip_mode(mode)
-    try:
-        yield
-    finally:
-        set_support_clip_mode(previous)
 
 
 def _row_slug(case_name: str, requested_cells: int, wall_nodes: int) -> str:
@@ -560,11 +543,12 @@ def _map_floor(
 ) -> dict[str, Any]:
     """Measure one target-normalised exact-clip map application."""
 
-    empty_operator = oracle_fixture.forward_operator(source_case, machine)
-    with _support_mode("chord"):
-        exact_physical = oracle_fixture.exact_current_moments(
-            source_case, empty_operator, analytic
-        )
+    empty_operator = oracle_fixture.forward_operator(
+        source_case, machine
+    ).with_clip_mode("chord")
+    exact_physical = oracle_fixture.exact_current_moments(
+        source_case, empty_operator, analytic
+    )
     exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
     exact_internal = np.asarray(
         oracle_fixture._internal_flux_image(empty_operator, exact_coefficients),
@@ -572,24 +556,23 @@ def _map_floor(
     )
     operator = oracle_fixture.forward_operator(
         source_case, machine, analytic - exact_internal
-    )
+    ).with_clip_mode("exact")
     target_current, _centroid, target_receipt = certificate._closed_form_current_target(
         case_name, source_case, empty_operator, exact_physical
     )
     _masks, topology = operator.read(jnp.asarray(analytic))
     span = abs(float(topology.axis_flux) - float(topology.boundary_flux))
     requested = int(TopologyClass.LIMITED)
-    with _support_mode("exact"):
-        mapped = np.asarray(
-            _block_tree(
-                operator.flux_map(
-                    requested_class=requested,
-                    target_current=target_current,
-                )(jnp.asarray(analytic))
-            ),
-            dtype=np.float64,
-        )
-        moments = operator.cell_current_moments(jnp.asarray(analytic), requested)
+    mapped = np.asarray(
+        _block_tree(
+            operator.flux_map(
+                requested_class=requested,
+                target_current=target_current,
+            )(jnp.asarray(analytic))
+        ),
+        dtype=np.float64,
+    )
+    moments = operator.cell_current_moments(jnp.asarray(analytic), requested)
     grid_delta = mapped[: len(machine.node)] - analytic[: len(machine.node)]
     return {
         "mode": "exact",

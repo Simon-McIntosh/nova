@@ -25,7 +25,6 @@ from benchmarks import oracle_start_newton_probe as oracle_probe
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.constraint import ConstraintContext
 from nova.equilibrium.forward import ForwardProfile
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import (
     configure_dtypes,
@@ -393,128 +392,121 @@ def run(output_root: Path, report_path: Path) -> dict[str, Any]:
     if not jax.config.jax_enable_x64:
         raise RuntimeError("the response probe requires extended precision")
     lane = _lane()
-    previous_mode = support_clip_mode()
-    set_support_clip_mode("exact")
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
     )
     started = perf_counter()
-    try:
-        context = stiffness._build_context(CASE_NAME, REQUESTED_CELLS)
-        operator = context["operator"]
-        baseline_external = operator.external()
-        baseline_centroid = _centroid(
-            operator, context["analytic"], context["target_current"]
+    context = stiffness._build_context(CASE_NAME, REQUESTED_CELLS, clip_mode="exact")
+    operator = context["operator"]
+    baseline_external = operator.external()
+    baseline_centroid = _centroid(
+        operator, context["analytic"], context["target_current"]
+    )
+    baseline_centroid_error = baseline_centroid - context["current_centroid"]
+    if not np.all(np.isfinite(baseline_centroid_error)):
+        raise RuntimeError("the analytic centroid baseline is not finite")
+    pitch = float(np.sqrt(np.median(np.asarray(context["machine"].area))))
+    context["pitch"] = pitch
+    pair = centroid_constraint_pair(
+        context["current_centroid"],
+        pitch=pitch,
+        components=("centroid_r", "centroid_z"),
+    )
+    profile = ForwardProfile(
+        operator,
+        StencilMesh(
+            context["machine"].node,
+            context["machine"].stencil,
+            context["machine"].area,
+        ),
+        newton_steps=certificate.recovery.NEWTON_STEPS,
+    )
+    directional_response = np.column_stack(
+        tuple(
+            _directional_constraint_response(context, profile, pair, index)
+            for index in range(len(EXTERIOR_FIELD_COMPONENTS))
         )
-        baseline_centroid_error = baseline_centroid - context["current_centroid"]
-        if not np.all(np.isfinite(baseline_centroid_error)):
-            raise RuntimeError("the analytic centroid baseline is not finite")
-        pitch = float(np.sqrt(np.median(np.asarray(context["machine"].area))))
-        context["pitch"] = pitch
-        pair = centroid_constraint_pair(
-            context["current_centroid"],
-            pitch=pitch,
-            components=("centroid_r", "centroid_z"),
-        )
-        profile = ForwardProfile(
-            operator,
-            StencilMesh(
-                context["machine"].node,
-                context["machine"].stencil,
-                context["machine"].area,
-            ),
-            newton_steps=certificate.recovery.NEWTON_STEPS,
-        )
-        directional_response = np.column_stack(
-            tuple(
-                _directional_constraint_response(context, profile, pair, index)
-                for index in range(len(EXTERIOR_FIELD_COMPONENTS))
-            )
-        )
-        production_map = jax.jit(
-            operator.traced_flux_map(REQUESTED_CLASS, context["target_current"])
-        )
-        baseline_external = jax.block_until_ready(baseline_external)
-        receipt_path = output_root / "receipt.json"
-        receipt: dict[str, Any] = {
-            "$id": "nova.weak-fixture-uniform-field-response",
-            "revision": _revision(),
-            "driver": {
-                "path": str(Path(__file__).relative_to(ROOT)),
-                "sha256": _file_digest(Path(__file__)),
-            },
-            "lane": lane,
-            "case": CASE_NAME,
-            "requested_cells": REQUESTED_CELLS,
-            "realised_cells": len(context["machine"].node),
-            "clip_mode": "exact",
-            "persistent_compilation_cache": cache.receipt(),
-            "compiled_map_reused_for_every_increment": True,
-            "field_components": list(EXTERIOR_FIELD_COMPONENTS),
-            "field_amplitudes_t": FIELD_AMPLITUDES_T,
-            "target_centroid_m": context["current_centroid"],
-            "baseline_centroid_m": baseline_centroid,
-            "baseline_centroid_error_from_analytic_target_m": baseline_centroid_error,
-            "characteristic_pitch_m": pitch,
-            "cached_exterior": context["exteriors"]["analytic_clipped"],
-            "baseline_external_sha256_binary64": _digest(baseline_external),
-            "baseline_external_current": np.asarray(operator.external_current),
-            "prescribed_field_current_at_baseline": np.asarray(
-                operator.prescribed_current_field.current
-            ),
-            "response_sha256_binary64": _digest(
-                operator.prescribed_current_field.response
-            ),
-            "constraint_response_sha256_binary64": _digest(directional_response),
-            "prediction_method": (
-                "central directional difference of CurrentCentroidConstraint "
-                "along each prescribed exterior response column at 1 microtesla"
-            ),
-            "rows": [],
-            "panels": [],
-            "completed": False,
-        }
-        _write_json(receipt_path, receipt)
-        panel_states: dict[str, np.ndarray] = {}
-        for component in EXTERIOR_FIELD_COMPONENTS:
-            for amplitude_t in FIELD_AMPLITUDES_T:
-                row, one_map_state = _measure_row(
-                    context,
-                    production_map,
-                    profile,
-                    pair,
-                    directional_response,
-                    component,
-                    float(amplitude_t),
-                    baseline_external,
-                    output_root,
-                )
-                receipt["rows"].append(row)
-                if amplitude_t == 1.0e-2:
-                    panel_states[component] = one_map_state
-                _write_json(receipt_path, receipt)
-        for component in EXTERIOR_FIELD_COMPONENTS:
-            state = panel_states.get(component)
-            if state is None:
-                raise RuntimeError(f"missing +10 mT state for {component}")
-            panel = _draw_panel(
+    )
+    production_map = jax.jit(
+        operator.traced_flux_map(REQUESTED_CLASS, context["target_current"])
+    )
+    baseline_external = jax.block_until_ready(baseline_external)
+    receipt_path = output_root / "receipt.json"
+    receipt: dict[str, Any] = {
+        "$id": "nova.weak-fixture-uniform-field-response",
+        "revision": _revision(),
+        "driver": {
+            "path": str(Path(__file__).relative_to(ROOT)),
+            "sha256": _file_digest(Path(__file__)),
+        },
+        "lane": lane,
+        "case": CASE_NAME,
+        "requested_cells": REQUESTED_CELLS,
+        "realised_cells": len(context["machine"].node),
+        "clip_mode": operator.clip_mode,
+        "persistent_compilation_cache": cache.receipt(),
+        "compiled_map_reused_for_every_increment": True,
+        "field_components": list(EXTERIOR_FIELD_COMPONENTS),
+        "field_amplitudes_t": FIELD_AMPLITUDES_T,
+        "target_centroid_m": context["current_centroid"],
+        "baseline_centroid_m": baseline_centroid,
+        "baseline_centroid_error_from_analytic_target_m": baseline_centroid_error,
+        "characteristic_pitch_m": pitch,
+        "cached_exterior": context["exteriors"]["analytic_clipped"],
+        "baseline_external_sha256_binary64": _digest(baseline_external),
+        "baseline_external_current": np.asarray(operator.external_current),
+        "prescribed_field_current_at_baseline": np.asarray(
+            operator.prescribed_current_field.current
+        ),
+        "response_sha256_binary64": _digest(operator.prescribed_current_field.response),
+        "constraint_response_sha256_binary64": _digest(directional_response),
+        "prediction_method": (
+            "central directional difference of CurrentCentroidConstraint "
+            "along each prescribed exterior response column at 1 microtesla"
+        ),
+        "rows": [],
+        "panels": [],
+        "completed": False,
+    }
+    _write_json(receipt_path, receipt)
+    panel_states: dict[str, np.ndarray] = {}
+    for component in EXTERIOR_FIELD_COMPONENTS:
+        for amplitude_t in FIELD_AMPLITUDES_T:
+            row, one_map_state = _measure_row(
                 context,
+                production_map,
+                profile,
+                pair,
+                directional_response,
                 component,
-                1.0e-2,
-                state,
-                output_root / "panels" / f"{component}-plus-10mt.png",
+                float(amplitude_t),
+                baseline_external,
+                output_root,
             )
-            receipt["panels"].append(panel)
+            receipt["rows"].append(row)
+            if amplitude_t == 1.0e-2:
+                panel_states[component] = one_map_state
             _write_json(receipt_path, receipt)
-        receipt["headline"] = _headline(receipt["rows"])
-        receipt["elapsed_seconds"] = perf_counter() - started
-        receipt["completed"] = True
+    for component in EXTERIOR_FIELD_COMPONENTS:
+        state = panel_states.get(component)
+        if state is None:
+            raise RuntimeError(f"missing +10 mT state for {component}")
+        panel = _draw_panel(
+            context,
+            component,
+            1.0e-2,
+            state,
+            output_root / "panels" / f"{component}-plus-10mt.png",
+        )
+        receipt["panels"].append(panel)
         _write_json(receipt_path, receipt)
-        report_path.parent.mkdir(parents=True, exist_ok=True)
-        report_path.write_text(_report(receipt), encoding="utf-8")
-        return receipt
-    finally:
-        set_support_clip_mode(previous_mode)
+    receipt["headline"] = _headline(receipt["rows"])
+    receipt["elapsed_seconds"] = perf_counter() - started
+    receipt["completed"] = True
+    _write_json(receipt_path, receipt)
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(_report(receipt), encoding="utf-8")
+    return receipt
 
 
 def main() -> None:

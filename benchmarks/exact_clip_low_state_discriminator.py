@@ -38,7 +38,6 @@ from benchmarks import oracle_start_newton_probe as oracle_probe
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import ForwardProfile
 from nova.equilibrium.fixed_point import FixedPointTerminationReason
-from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import (
@@ -196,18 +195,26 @@ def _load_reference_part(
     return row, path
 
 
-def _build_context(requested_cells: int) -> dict[str, Any]:
-    carrier_case, source_case, exact = certificate._case(CASE_NAME)
-    machine = certificate._case_machine(CASE_NAME, carrier_case, exact, requested_cells)
+def _build_context(
+    requested_cells: int, *, clip_mode: str | None = None
+) -> dict[str, Any]:
+    carrier_case, source_case, exact = certificate._case(CASE_NAME, clip_mode=clip_mode)
+    machine = certificate._case_machine(
+        CASE_NAME, carrier_case, exact, requested_cells, clip_mode=clip_mode
+    )
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     analytic = certificate._exact_state(CASE_NAME, exact, coordinates)
     empty = oracle_fixture.forward_operator(source_case, machine)
+    if clip_mode is not None:
+        empty = empty.with_clip_mode(clip_mode)
     analytic_moments, exterior, exterior_cache = oracle_fixture.cached_fixture_exterior(
         source_case, exact, machine, empty, analytic
     )
     operator = oracle_fixture.forward_operator(source_case, machine, exterior)
+    if clip_mode is not None:
+        operator = operator.with_clip_mode(clip_mode)
     profile = ForwardProfile(
         operator,
         StencilMesh(machine.node, machine.stencil, machine.area),
@@ -1004,7 +1011,6 @@ def run(
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("the discriminator requires extended precision")
-    set_support_clip_mode("exact")
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
     )
@@ -1028,7 +1034,7 @@ def run(
     render_inputs_path = output_root / RENDER_INPUTS_NAME
     render_rows: list[dict[str, Any]] = []
     for requested_cells in REQUESTED_ROWS:
-        context = _build_context(requested_cells)
+        context = _build_context(requested_cells, clip_mode="exact")
         context["requested_cells"] = requested_cells
         reference, reference_path = _load_reference_part(
             reference_parts, requested_cells

@@ -451,7 +451,6 @@ def _stage_census(
 def measure(case_name, requested_cells, output):
     import jax
     from benchmarks import solovev_certificate as certificate
-    from nova.equilibrium.forward_operator import set_support_clip_mode
     from scripts.analytic_oracle_fixtures import measure as fixture
 
     started = time.monotonic()
@@ -461,14 +460,13 @@ def measure(case_name, requested_cells, output):
     base_exact = base_row["modes"]["exact"]
     carrier, source, exact = certificate._case(case_name)
     machine = certificate._case_machine(case_name, carrier, exact, -requested_cells)
-    operator = fixture.forward_operator(source, machine)
+    operator = fixture.forward_operator(source, machine).with_clip_mode("exact")
     with np.load(
         ROOT
         / "docs/figures/plasma-cell-read-fidelity/map-fidelity"
         / f"{label}-exact.npz"
     ) as bank:
         state = bank["analytic"]
-    set_support_clip_mode("exact")
     jax.clear_caches()
     incoming, effective, production, field, topology, selected, profile = (
         _evaluate_path(operator, state)

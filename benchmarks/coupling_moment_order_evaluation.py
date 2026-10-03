@@ -16,7 +16,6 @@ reference capable of failing rather than silently defining itself as exact.
 from __future__ import annotations
 
 import argparse
-from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 import json
@@ -37,7 +36,6 @@ from benchmarks import solovev_certificate as certificate
 from nova.biot.greens import section_centroid, traced_filament_greens
 from nova.biot.second_moment_kernel import flux_density_columns
 from nova.equilibrium.domain import PlasmaDomain
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
@@ -335,17 +333,6 @@ def _density_flux(
     return xp.einsum("...q,q,q->...", kernel, density, area_weight)
 
 
-@contextmanager
-def _selected_support_mode(mode: str):
-    """Select one benchmark-only support mode and restore the process default."""
-    previous = support_clip_mode()
-    set_support_clip_mode(mode)
-    try:
-        yield
-    finally:
-        set_support_clip_mode(previous)
-
-
 def _cellwise_response(
     polygons: np.ndarray,
     centres: np.ndarray,
@@ -615,9 +602,8 @@ def measure_row(case_name: str, requested_cells: int) -> tuple[dict, dict]:
     span = float(np.ptp(oracle_state[layout.slices["grid"]]))
     if not span > 0.0:
         raise RuntimeError("the analytic grid flux span must be positive")
-    operator = oracle_fixture.forward_operator(source, machine)
-    with _selected_support_mode("exact"):
-        partition = operator._support_partition(jnp.asarray(oracle_state))
+    operator = oracle_fixture.forward_operator(source, machine).with_clip_mode("exact")
+    partition = operator._support_partition(jnp.asarray(oracle_state))
     support = partition[3]
     labels = np.asarray(partition[0].label)
     support_vertices = np.asarray(support.support_vertices, dtype=np.float64)

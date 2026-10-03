@@ -42,10 +42,7 @@ from nova.equilibrium.clip_quadrature import (
     clipped_support_quadrature,
 )
 from nova.equilibrium.domain import PlasmaDomain
-from nova.equilibrium.forward_operator import (
-    flux_field_polynomial,
-    set_support_clip_mode,
-)
+from nova.equilibrium.forward_operator import flux_field_polynomial
 from nova.equilibrium.source import _FluxSelectedProfile
 from scripts.analytic_oracle_fixtures import measure as fixture
 
@@ -384,11 +381,12 @@ def measure(requested: int, output: Path) -> dict[str, object]:
     physical, fixture_external, cache = fixture.cached_fixture_exterior(
         source, exact, machine, empty, analytic
     )
-    operator = fixture.forward_operator(source, machine, fixture_external)
+    operator = fixture.forward_operator(
+        source, machine, fixture_external
+    ).with_clip_mode("chord")
     target, _, target_receipt = certificate._closed_form_current_target(
         CASE, source, operator, physical
     )
-    set_support_clip_mode("chord")
     partition = operator._support_partition(jnp.asarray(analytic), None)
     masks, _, sample_psi_norm, profile_support = partition
     field = flux_field_polynomial(

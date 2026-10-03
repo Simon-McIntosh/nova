@@ -17,8 +17,8 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-effort-hours" content="10.0">
-<meta name="plan-impl" content="0.85">
-<meta name="plan-version" content="65">
+<meta name="plan-impl" content="0.9">
+<meta name="plan-version" content="66">
 <meta name="plan-tags" content="topology,equilibrium,convergence">
 <meta name="plan-blocks" content="single-grid-solver-cutover">
 <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
@@ -270,10 +270,11 @@
     <pre class="r-fu-prompt">/reckon-build plasma-cell-read-fidelity</pre>
     <p class="r-fu-outcome"><p><strong>Verdict: node pcrf-vertical-constraint-on-the-certificate-route is retired.</strong> The missing vertical constraint was not the cause of the 35 mm offset.</p><p>Measured on the map evaluated once at the analytic Solov'ev state, with no solve, at current main after the chord-membership revert: H200 job 1280601, source revision 372c60491 (which contains the revert 2992599ff), merged 6cb5b3e25, review 83. The receipt is <code>docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/map-fidelity-stable/map-fidelity.json</code>. On weak-rotation-reactor-static in exact clip mode, the map passes the 1e-2 bound at every rung (sup 1.66e-4, 1.43e-3, 5.9e-5, 1.8e-4, 6.2e-5 at 135, 342, 555, 1072 and 2608 realised cells). The booked-minus-analytic support-current centroid dZ is −2.7e-11, 0.567, 1.5e-12, −0.027 and 5.5e-11 mm: the 35 mm displacement seen before the exact moment repair 427f05e10 is gone on a passing footing.</p><p>On diverted-single-null exact the vertical centroid offset remains (−11.1, −8.4, −7.4, −4.8, −3.2 mm from 132 to 2616 cells), but on a map that fails at every rung (sup 0.181 to 0.066). It is therefore a map-fidelity defect, not a missing constraint. The same run's decomposition attributes it to private-flux membership: analytic membership cuts exact 132 from 0.181 to 0.071, and neither the contour-tree region nor the analytic-apex wedge moves it. It is owned by cut-cell-current-attribution §11, not by a vertical-constraint node. Done — no followup on this item; the diverted work continues under cut-cell §11.</p></p>
     </article>
-<article class="r-fu" data-id="f-pcrf-005" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build plasma-cell-read-fidelity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pcrf-005" data-status="resolved" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build plasma-cell-read-fidelity" data-resolved-at="2026-10-03T13:55:15+00:00" data-resolved-by="s21-nova">
     <h4 class="r-fu-title">Make the certificate gate a live test and stop pinning failed states</h4>
     <div class="r-fu-body">Node pcrf-certificate-gate-is-a-live-test. An H200-lane test solves the certificate production route at a rung where map fidelity passes, and asserts in order: map fidelity at the analytic state below 1e-2; convergence under the certificate default policy; the terminal X-point inside the position bound. tests/test_certificate_pin.py is rewritten so an unqualified row fails rather than being pinned; the receipt's facts stay as data. The test must refuse a row that benchmarks/solovev_certificate._measure re-rendered from a persisted PART_ROOT row, by requiring a fresh job id and revision per row. It must also require the map-fidelity audit's displacement control to have fired, which the committed audit.py does not. Negative control: the map evaluated at a one-pitch vertically shifted analytic state fails the first assertion. Done when: the test runs green on the H200 lane at the passing rung, red under the negative control, and the rewritten pin fails on an unqualified row, with all three logs recorded.</div>
     <pre class="r-fu-prompt">/reckon-build plasma-cell-read-fidelity</pre>
+    <p class="r-fu-outcome">Merged at 4942b8031 (re-review 83 at 2dcc3196e). tests/test_certificate_gate_live.py solves the production route live on the H200 at the weak exact 300-cell rung: map fidelity passes (sup 1.43e-3), the one-pitch control is rejected (sup 0.249), and the solve stops at residual 0.0374 against 1e-12. That assertion is a strict xfail naming the forward-solver-route-integrity §1 Newton-Krylov termination defect, and a run without a GPU skips. tests/test_certificate_pin.py keeps the receipt's facts and refuses its 15 unqualified rows, visibly red by design. Evidence: plasma-cell-read-fidelity-landed.html#certificate-gate-is-a-live-test.</p>
     </article>
 </section>
 

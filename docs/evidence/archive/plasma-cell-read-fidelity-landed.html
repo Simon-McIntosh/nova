@@ -419,4 +419,35 @@
     <p>Run <code>r-20261001T211540931442-pcrf-shadow-telemetry-node-flux</code> (local lane), merged at <code>68d3f260f</code> from <code>8fe7445e5</code>; review 18/16/19/19/19, no added failure. <code>tests/test_plasma_cell_shadow_telemetry.py</code> already asserts the wall-node private shadow read from the node's own flux (the §2 rule) at HEAD, so no test change was needed. The run records that the default fast lane collects it, that its gate is green, and that substituting the retired label-owned rule makes it fail (logs under <a href="/nova/figures/plasma-cell-read-fidelity/shadow-telemetry/shadow-telemetry-gate.log">shadow-telemetry/</a>). Review follow-on: the test reads the private <code>operator._wall_carrier_index</code>, so retiring the carrier index needs a companion edit here.</p>
   </section>
 
+  <section id="certificate-gate-is-a-live-test">
+    <h2>The certificate gate is a live test of the production route</h2>
+    <p>Run <code>r-20261003T111631231719-pcrf-certificate-gate-is-a-live-test</code> (codex-terra), merged at <code>4942b8031</code>. Re-review: 83, at head <code>2dcc3196e</code>, read rather than carried forward. The first review (82) found three defects, all fixed before merge: a strict xfail that also absorbed a missing GPU, receipt pins dropped by the rewrite, and a stale residual in the xfail reason.</p>
+    <p><code>tests/test_certificate_gate_live.py</code> solves the certificate production route fresh on the H200, at the weak exact 300-cell rung, where the map is qualified.</p>
+    <ul>
+      <li><strong>Map fidelity:</strong> passes, sup 1.43e-3.</li>
+      <li><strong>Vertically shifted control:</strong> rejected, sup 0.249.</li>
+      <li><strong>Production solve:</strong> stops at residual 0.0374 against the 1e-12 bound. That is the forward-solver-route-integrity §1 Newton-Krylov termination defect, now a critical-path blocker.</li>
+    </ul>
+    <p>The residual assertion carries <code>xfail(strict=True)</code>, so the test reports XFAIL today and fails as XPASS the day production converges. Without an accelerator the live route is SKIPPED, not XFAIL. Logs:</p>
+    <ul>
+      <li>H200 job 1280625 at <code>5346e9258</code>: 1 xfailed; terminal residual 0.03741195763932729; control sup 0.2486673925769485.</li>
+      <li>Job 1280614, run with <code>--runxfail</code> and a one-pitch shift: fails at the map assertion.</li>
+    </ul>
+    <p><code>tests/test_certificate_pin.py</code> keeps the published receipt's facts and adds a refusal. Kept:</p>
+    <ul>
+      <li>the verdict;</li>
+      <li>the production platforms, backend, float64 precision, scheduler and thread counts;</li>
+      <li>the per-case census;</li>
+      <li>the render-data schema and length equalities;</li>
+      <li>the figure source prefix and sha256.</li>
+    </ul>
+    <p>The added refusal fails visibly on the receipt's 15 unqualified rows. A plain <code>pytest</code> of that file therefore reads 1 failed by design, until the receipt is regenerated from a converged route.</p>
+    <figure><img src="/nova/figures/plasma-cell-read-fidelity/pcrf-certificate-gate-is-a-live-test/weak-exact-300-terminal.png" alt="Live weak exact 300-cell terminal state against the analytic state"><figcaption>Weak exact clip at 300 requested cells: the live production terminal state, not converged (residual 0.0374, bound 1e-12). Analytic contours in blue and solved in ochre share levels, with both null sets and the wall. The other three panels give the absolute flux, gradient and Hessian error as line contours on their stated levels. The left panel's title is clipped at its left edge.</figcaption></figure>
+    <p>Review follow-ons not repaired here:</p>
+    <ul>
+      <li>the negative control ran in place rather than from a full-tree copy, though its red is genuine and differs from the head arm;</li>
+      <li>the declared gate arms measured different files.</li>
+    </ul>
+  </section>
+
 </main></body></html>

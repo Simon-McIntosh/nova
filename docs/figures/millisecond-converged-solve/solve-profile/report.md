@@ -4,8 +4,8 @@ Case `weak-rotation-reactor-static`, whole-cell mode (`set_support_clip_mode("ch
 at 300 and 1000 cells on the reserved H200 (betelgeuse, `gpu_0003_grpA`).
 Each cell count: one warm solve (compiles and runs the production program once),
 then the same already-compiled program re-executes inside `jax.profiler.trace`.
-Receipt: `docs/figures/millisecond-converged-solve/solve-profile/solve-profile.json`
-(per-cell parts `solve-profile-300.json`, `solve-profile-1000.json`), with a
+Receipt: `docs/figures/millisecond-converged-solve/solve-profile/solve-profile.json.gz`
+(per-cell parts `solve-profile-300.json.gz`, `solve-profile-1000.json.gz`), with a
 cumulative-kernel-time SVG per cell count (`solve-profile-300.svg`,
 `solve-profile-1000.svg`).
 

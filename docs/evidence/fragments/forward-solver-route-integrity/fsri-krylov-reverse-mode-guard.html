@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-evidence-for" content="forward-solver-route-integrity">
+  <title>Krylov reverse-mode guard — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsri-krylov-reverse-mode-guard">
+  <p><code>tests/test_krylov_reverse_mode_guard.py</code> guards the reverse-mode
+  boundary of <code>_qualified_krylov_step</code>. That step is served by a
+  <code>jax.custom_batching.custom_vmap</code> stream: the stream carries a
+  batching rule and no derivative rule, so a caller that
+  reverse-differentiates through it fails to linearise rather than returning the
+  step's derivative. Five tests pin the boundary:</p>
+  <ol>
+    <li>the implicit Picard route is the reverse-mode positive case:
+    <code>jax.grad</code> of the converged fixture (imported from
+    <code>tests/test_picard_implicit_derivative.py</code>) returns the finite
+    implicit tangent <code>1.25</code>;</li>
+    <li>every function that calls <code>_qualified_krylov_step</code> across
+    every module under <code>nova/</code> is enumerated by parsing the package
+    with <code>ast</code> and must either be covered by a derivative rule or be
+    named in <code>_FORWARD_ONLY_CALLERS</code> with a one-line reason, so an
+    unclassified caller fails the test naming itself. <strong>Coverage is
+    classified by call site</strong>: a call counts only when it sits lexically
+    inside a function that is itself the rule's subject — a function decorated
+    with <code>custom_jvp</code> or <code>custom_vjp</code>, a function
+    registered as that rule's <code>defjvp</code>/<code>defvjp</code> function,
+    or a function passed as the <code>matvec</code>, <code>solve</code> or
+    <code>transpose_solve</code> argument of
+    <code>jax.lax.custom_linear_solve</code>. A rule merely invoked somewhere
+    else in the enclosing body does not cover the call. The four forward-only
+    callers are <code>_manifold_newton_krylov.newton_body.attempt_step</code>,
+    <code>_newton_krylov_inner.newton_body.attempt_step</code>,
+    <code>kink_aware_newton_krylov.krylov_step</code> and
+    <code>kink_aware_newton_krylov.newton_body.clarke_step</code>;</li>
+    <li>a direct <code>jax.grad</code> through the raw step raises
+    (<code>ValueError: Linearization failed to produce known values for all
+    output primals</code>), documenting the missing rule;</li>
+    <li>synthetic classifier controls prove the census can see coverage it must
+    see: a rule-subject decorated function and a function passed as a
+    <code>custom_linear_solve</code> argument both report covered, so the
+    absence checks below mean something;</li>
+    <li>a synthetic falsifying case — a function that invokes a linear-solve
+    rule in its body but calls the step outside that rule's subject — reports
+    uncovered, which is the regression the earlier fail-open classifier
+    admitted.</li>
+  </ol>
+  <p>Tests and benchmarks are out of scope: the census reads the
+  <code>nova</code> package only.</p>
+  <p>Head arm (JAX_PLATFORMS=cpu on the fleet allocation):
+  <strong>5 passed, EXIT=0</strong>. <code>tests/test_picard_implicit_derivative.py</code>
+  adds no failure (<strong>5 passed, EXIT=0</strong>).</p>
+  <p>Two negative controls, each run from a full scratch copy of <code>nova/</code>
+  reached through <code>--import-mode=importlib</code> with
+  <code>PYTHONPATH</code> naming the scratch tree; the imported module's
+  <code>__file__</code> is printed on the log's <code>module_file</code> header
+  line:</p>
+  <ul>
+    <li><strong>NC1 — unclassified caller.</strong> A module-level function,
+    <code>_unclassified_krylov_caller</code>, calls the step with no derivative
+    rule. The census fails and names it — <code>FAILED
+    tests/test_krylov_reverse_mode_guard.py::test_every_krylov_census_is_clean</code>,
+    <strong>1 failed, EXIT=1</strong> — with
+    <code>Unclassified caller(s) of _qualified_krylov_step:
+    equilibrium/fixed_point.py::_unclassified_krylov_caller (lines [5646])</code>.</li>
+    <li><strong>NC2 — rule elsewhere in the body.</strong> A function,
+    <code>_differentiates_step_though_a_rule_is_present</code>, invokes
+    <code>jax.lax.custom_linear_solve</code> in its body but calls the step
+    outside the rule's subject. It fails and is named — <strong>1 failed,
+    EXIT=1</strong> — with <code>Unclassified caller(s) of
+    _qualified_krylov_step:
+    equilibrium/fixed_point.py::_differentiates_step_though_a_rule_is_present
+    (lines [5651])</code>. Under the earlier classifier, which accepted any rule
+    call anywhere in the enclosing function, this case passed.</li>
+  </ul>
+  <p>Receipts under
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T012237519319-fsri-krylov-reverse-mode-guard/logs/</code>:
+  <code>krylov-reverse-mode-guard-head.log</code>,
+  <code>krylov-reverse-mode-guard-negative-control.log</code>,
+  <code>krylov-reverse-mode-guard-negative-control-2.log</code>,
+  <code>picard-implicit-derivative.log</code>.</p>
+</article>
+</main>
+</body>
+</html>

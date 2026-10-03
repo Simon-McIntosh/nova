@@ -32,7 +32,6 @@ from PIL import Image
 from benchmarks import oracle_start_newton_probe as oracle_probe
 from benchmarks import solovev_certificate as certificate
 from nova.biot.target import FluxTarget
-from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import (
     configure_dtypes,
@@ -209,10 +208,14 @@ def _operator_with_both_exteriors(
     machine: Any,
     analytic_clipped: np.ndarray,
     whole_cell: np.ndarray,
+    *,
+    clip_mode: str | None = None,
 ):
     operator = oracle_fixture.forward_operator(
         source_case, machine, np.zeros_like(analytic_clipped)
     )
+    if clip_mode is not None:
+        operator = operator.with_clip_mode(clip_mode)
     grid_count = len(machine.node)
     wall_count = len(machine.wall_node)
     grid_slice = slice(0, grid_count)
@@ -233,14 +236,22 @@ def _operator_with_both_exteriors(
     )
 
 
-def _build_context(case_name: str, requested_cells: int) -> dict[str, Any]:
-    carrier_case, source_case, exact = certificate._case(case_name)
-    machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
+def _build_context(
+    case_name: str, requested_cells: int, *, clip_mode: str | None = None
+) -> dict[str, Any]:
+    carrier_case, source_case, exact = certificate._case(
+        case_name, clip_mode=clip_mode
+    )
+    machine = certificate._case_machine(
+        case_name, carrier_case, exact, requested_cells, clip_mode=clip_mode
+    )
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     analytic = certificate._exact_state(case_name, exact, coordinates)
     empty = oracle_fixture.forward_operator(source_case, machine)
+    if clip_mode is not None:
+        empty = empty.with_clip_mode(clip_mode)
     exact_moments, analytic_clipped, clipped_cache = (
         oracle_fixture.cached_fixture_exterior(
             source_case, exact, machine, empty, analytic
@@ -254,7 +265,7 @@ def _build_context(case_name: str, requested_cells: int) -> dict[str, Any]:
         empty, whole_coefficients
     )
     operator = _operator_with_both_exteriors(
-        source_case, machine, analytic_clipped, whole_cell
+        source_case, machine, analytic_clipped, whole_cell, clip_mode=clip_mode
     )
     target_current, centroid, current_receipt = certificate._closed_form_current_target(
         case_name, source_case, operator, exact_moments
@@ -1001,7 +1012,6 @@ def run(output_root: Path, report_path: Path) -> dict[str, Any]:
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("the stiffness measure requires extended precision")
-    set_support_clip_mode("exact")
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
     )
@@ -1027,7 +1037,9 @@ def run(output_root: Path, report_path: Path) -> dict[str, Any]:
     _write_json(receipt_path, receipt)
     contexts = []
     for case_name, requested_cells in ROWS:
-        context = _build_context(case_name, requested_cells)
+        context = _build_context(
+            case_name, requested_cells, clip_mode="exact"
+        )
         contexts.append(context)
         row_slug = f"{case_name}-cells-{abs(requested_cells)}"
         for direction_name, direction in DIRECTIONS.items():

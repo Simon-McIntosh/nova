@@ -258,7 +258,6 @@ def measure(case_name, rung, output):
     import jax.numpy as jnp
     from shapely.geometry import Point, Polygon
     from benchmarks import solovev_certificate as certificate
-    from nova.equilibrium.forward_operator import set_support_clip_mode
     from scripts.analytic_oracle_fixtures import measure as fixture
 
     start = time.monotonic()
@@ -333,7 +332,7 @@ def measure(case_name, rung, output):
     results = {}
     for mode in ("exact", "chord"):
         print(f"EVALUATE {label} {mode}", flush=True)
-        set_support_clip_mode(mode)
+        mode_operator = operator.with_clip_mode(mode)
         jax.clear_caches()
 
         @jax.jit
@@ -361,7 +360,7 @@ def measure(case_name, rung, output):
             )
 
         support, physical, coefficients, topology, field_centres, field_scales = (
-            jax.device_get(evaluate(jnp.asarray(state), operator))
+            jax.device_get(evaluate(jnp.asarray(state), mode_operator))
         )
         physical = np.asarray(physical)
         assert np.isfinite(physical).all()

@@ -41,7 +41,6 @@ import numpy as np
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import ForwardProfile
-from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import configure_dtypes
 from nova.media import poloidal
@@ -119,18 +118,28 @@ def _historical_rows() -> dict[tuple[str, int], dict[str, Any]]:
     }
 
 
-def _problem(case_name: str, requested_cells: int):
-    carrier_case, source_case, exact = certificate._case(case_name)
-    machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
+def _problem(
+    case_name: str, requested_cells: int, *, clip_mode: str | None = None
+):
+    carrier_case, source_case, exact = certificate._case(
+        case_name, clip_mode=clip_mode
+    )
+    machine = certificate._case_machine(
+        case_name, carrier_case, exact, requested_cells, clip_mode=clip_mode
+    )
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     analytic = certificate._exact_state(case_name, exact, coordinates)
     empty = oracle_fixture.forward_operator(source_case, machine)
+    if clip_mode is not None:
+        empty = empty.with_clip_mode(clip_mode)
     exact_physical, exterior, _cache = oracle_fixture.cached_fixture_exterior(
         source_case, exact, machine, empty, analytic
     )
     operator = oracle_fixture.forward_operator(source_case, machine, exterior)
+    if clip_mode is not None:
+        operator = operator.with_clip_mode(clip_mode)
     profile = ForwardProfile(
         operator,
         StencilMesh(machine.node, machine.stencil, machine.area),
@@ -155,6 +164,8 @@ def _seed_row(
     case_name: str,
     requested_cells: int,
     historical: dict[str, Any],
+    *,
+    clip_mode: str | None = None,
 ) -> dict[str, Any]:
     started = perf_counter()
     (
@@ -166,7 +177,7 @@ def _seed_row(
         target_current,
         centroid,
         current_receipt,
-    ) = _problem(case_name, requested_cells)
+    ) = _problem(case_name, requested_cells, clip_mode=clip_mode)
     seed, requested_class, seed_receipt = certificate._production_seed(
         profile, case_name, target_current, centroid, current_receipt
     )
@@ -576,7 +587,6 @@ def run(output_root: Path, *, solve: bool) -> dict[str, Any]:
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("exact-clip seed measurement requires extended precision")
-    set_support_clip_mode("exact")
     _configure_certificate_output(output_root)
     historical = _historical_rows()
     receipt: dict[str, Any] = {
@@ -598,10 +608,14 @@ def run(output_root: Path, *, solve: bool) -> dict[str, Any]:
             row_path = (
                 output_root / "seed-parts" / f"{case_name}-{abs(requested_cells)}.json"
             )
-            row = _seed_row(case_name, requested_cells, historical[key])
+            row = _seed_row(
+                case_name, requested_cells, historical[key], clip_mode="exact"
+            )
             _write_json(row_path, row)
             if solve:
-                solved = certificate._measure(case_name, requested_cells)
+                solved = certificate._measure(
+                    case_name, requested_cells, clip_mode="exact"
+                )
                 comparison_path = (
                     output_root
                     / "panels"

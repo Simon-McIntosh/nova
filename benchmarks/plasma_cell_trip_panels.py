@@ -104,7 +104,6 @@ def measure_arm(args):
     assert jax.default_backend() == "gpu"
     assert Path(nova.__file__).resolve().is_relative_to(Path.cwd())
     configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
-    driver.set_support_clip_mode(args.clip)
     row = {
         "revision": args.revision,
         "nova_file": nova.__file__,
@@ -119,7 +118,9 @@ def measure_arm(args):
     path = args.output / f"{args.revision[:9]}-{args.clip}.json"
     write_json(path, row)
     print(f"BUILD {args.revision} {args.clip}", flush=True)
-    built = build_construction(driver, "diverted-single-null", "production")
+    built = build_construction(
+        driver, "diverted-single-null", "production", clip_mode=args.clip
+    )
     operator, request = built["operator"], built["request"]
     if args.clip == "chord":
         request = replace(request, policy=replace(request.policy, active_set_steps=1))

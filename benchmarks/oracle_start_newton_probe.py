@@ -36,8 +36,6 @@ from nova.equilibrium import fixed_point
 from nova.equilibrium import ForwardProfile
 from nova.equilibrium.forward_operator import (
     ForwardFluxOperator,
-    set_support_clip_mode,
-    support_clip_mode,
 )
 from nova.equilibrium.source import CurrentNormalisationError
 from nova.equilibrium.stencil_mesh import StencilMesh
@@ -819,9 +817,7 @@ def _mode_measure(
     exact_internal: np.ndarray,
 ) -> dict[str, Any]:
     started = perf_counter()
-    set_support_clip_mode(mode)
-    if support_clip_mode() != mode:
-        raise RuntimeError(f"clip-mode setter did not select {mode}")
+    operator = operator.with_clip_mode(mode)
 
     external = np.asarray(operator.external(), dtype=np.float64)
     analytic_moment_map = external + exact_internal
@@ -972,9 +968,7 @@ def _mode_measure_decomposed(
 ) -> dict[str, Any]:
     """Measure and persist one mode, retaining normalisation refusals."""
     started = perf_counter()
-    set_support_clip_mode(mode)
-    if support_clip_mode() != mode:
-        raise RuntimeError(f"clip-mode setter did not select {mode}")
+    operator = operator.with_clip_mode(mode)
 
     state = jnp.asarray(analytic)
     topology = _topology(operator, analytic)
@@ -1434,108 +1428,104 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
     )
-    original_mode = support_clip_mode()
     rows = []
-    try:
-        for case_name, requested_cells in ROWS:
-            carrier_case, source_case, exact = certificate._case(case_name)
-            machine = certificate._case_machine(
-                case_name, carrier_case, exact, requested_cells
+    for case_name, requested_cells in ROWS:
+        carrier_case, source_case, exact = certificate._case(case_name)
+        machine = certificate._case_machine(
+            case_name, carrier_case, exact, requested_cells
+        )
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
+        )
+        analytic = certificate._exact_state(case_name, exact, coordinates)
+        empty_operator = oracle_fixture.forward_operator(source_case, machine)
+        exact_physical = oracle_fixture.exact_current_moments(
+            source_case, empty_operator, analytic
+        )
+        exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
+        fixture_exact_internal = np.asarray(
+            oracle_fixture._internal_flux_image(empty_operator, exact_coefficients),
+            dtype=np.float64,
+        )
+        operator = oracle_fixture.forward_operator(
+            source_case,
+            machine,
+            analytic - fixture_exact_internal,
+        )
+        exact_internal = np.asarray(
+            operator.current_moment_image(exact_coefficients), dtype=np.float64
+        )
+        target_current, _centroid, target_receipt = (
+            certificate._closed_form_current_target(
+                case_name, source_case, operator, exact_physical
             )
-            coordinates = np.vstack(
-                (machine.node, machine.wall_node, machine.sample_coordinates)
+        )
+        requested_class = int(
+            TopologyClass.DIVERTED
+            if certificate._is_diverted_case(case_name)
+            else TopologyClass.LIMITED
+        )
+        topology = _topology(operator, analytic)
+        if topology["axis_flux_wb"] is None:
+            raise RuntimeError(
+                f"the analytic topology instrument could not read {case_name}"
             )
-            analytic = certificate._exact_state(case_name, exact, coordinates)
-            empty_operator = oracle_fixture.forward_operator(source_case, machine)
-            exact_physical = oracle_fixture.exact_current_moments(
-                source_case, empty_operator, analytic
+        span = abs(
+            float(topology["axis_flux_wb"]) - float(topology["boundary_flux_wb"])
+        )
+        if not np.isfinite(span) or span <= 0.0:
+            raise RuntimeError(f"the analytic flux span is invalid for {case_name}")
+        modes = {}
+        for mode in MODES:
+            modes[mode] = _mode_measure_decomposed(
+                output,
+                case_name,
+                requested_cells,
+                mode,
+                operator,
+                analytic,
+                coordinates,
+                len(machine.node),
+                span,
+                requested_class,
+                target_current,
+                exact_internal,
+                exact_physical,
+                exact_coefficients,
+                machine.cell_polygons,
+                (
+                    np.asarray(certificate.X_POINT_M, dtype=np.float64)
+                    if certificate._is_diverted_case(case_name)
+                    else None
+                ),
             )
-            exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
-            fixture_exact_internal = np.asarray(
-                oracle_fixture._internal_flux_image(empty_operator, exact_coefficients),
-                dtype=np.float64,
-            )
-            operator = oracle_fixture.forward_operator(
-                source_case,
-                machine,
-                analytic - fixture_exact_internal,
-            )
-            exact_internal = np.asarray(
-                operator.current_moment_image(exact_coefficients), dtype=np.float64
-            )
-            target_current, _centroid, target_receipt = (
-                certificate._closed_form_current_target(
-                    case_name, source_case, operator, exact_physical
-                )
-            )
-            requested_class = int(
-                TopologyClass.DIVERTED
-                if certificate._is_diverted_case(case_name)
-                else TopologyClass.LIMITED
-            )
-            topology = _topology(operator, analytic)
-            if topology["axis_flux_wb"] is None:
-                raise RuntimeError(
-                    f"the analytic topology instrument could not read {case_name}"
-                )
-            span = abs(
-                float(topology["axis_flux_wb"]) - float(topology["boundary_flux_wb"])
-            )
-            if not np.isfinite(span) or span <= 0.0:
-                raise RuntimeError(f"the analytic flux span is invalid for {case_name}")
-            modes = {}
-            for mode in MODES:
-                modes[mode] = _mode_measure_decomposed(
-                    output,
-                    case_name,
-                    requested_cells,
-                    mode,
-                    operator,
-                    analytic,
-                    coordinates,
-                    len(machine.node),
-                    span,
-                    requested_class,
-                    target_current,
-                    exact_internal,
-                    exact_physical,
-                    exact_coefficients,
-                    machine.cell_polygons,
-                    (
-                        np.asarray(certificate.X_POINT_M, dtype=np.float64)
-                        if certificate._is_diverted_case(case_name)
-                        else None
-                    ),
-                )
-            row = {
-                "case": case_name,
-                "requested_cells": requested_cells,
-                "realised_cells": len(machine.node),
-                "state_dimension": len(analytic),
-                "analytic_flux_span_wb": span,
-                "analytic_current_target_a": target_current,
-                "analytic_current_target_receipt": target_receipt,
-                "interaction_matrix_cache": machine.cache,
-                "interaction_matrix_construction_count": 1,
-                "fixture_and_same_operator_exact_image": {
-                    "fixture_sha256": _array_digest(fixture_exact_internal),
-                    "same_operator_sha256": _array_digest(exact_internal),
-                    "absolute_sup_delta_wb": float(
-                        np.max(np.abs(fixture_exact_internal - exact_internal))
-                    ),
-                },
-                "modes": modes,
-                "explanation": _row_explanation_decomposed(modes),
-            }
-            rows.append(row)
-            _write_json(
-                output.parent
-                / PART_DIRECTORY_NAME
-                / f"{_row_slug(case_name, requested_cells)}.json",
-                row,
-            )
-    finally:
-        set_support_clip_mode(original_mode)
+        row = {
+            "case": case_name,
+            "requested_cells": requested_cells,
+            "realised_cells": len(machine.node),
+            "state_dimension": len(analytic),
+            "analytic_flux_span_wb": span,
+            "analytic_current_target_a": target_current,
+            "analytic_current_target_receipt": target_receipt,
+            "interaction_matrix_cache": machine.cache,
+            "interaction_matrix_construction_count": 1,
+            "fixture_and_same_operator_exact_image": {
+                "fixture_sha256": _array_digest(fixture_exact_internal),
+                "same_operator_sha256": _array_digest(exact_internal),
+                "absolute_sup_delta_wb": float(
+                    np.max(np.abs(fixture_exact_internal - exact_internal))
+                ),
+            },
+            "modes": modes,
+            "explanation": _row_explanation_decomposed(modes),
+        }
+        rows.append(row)
+        _write_json(
+            output.parent
+            / PART_DIRECTORY_NAME
+            / f"{_row_slug(case_name, requested_cells)}.json",
+            row,
+        )
     receipt = {
         "schema": "nova.oracle-start-map-decomposition",
         "version": 2,
@@ -1871,8 +1861,9 @@ def _build_newton_operator(
     )
     analytic = certificate._exact_state(case_name, exact, coordinates)
 
-    set_support_clip_mode("chord")
-    empty_operator = oracle_fixture.forward_operator(source_case, machine)
+    empty_operator = oracle_fixture.forward_operator(
+        source_case, machine
+    ).with_clip_mode("chord")
     fixture_physical = oracle_fixture.exact_current_moments(
         source_case, empty_operator, analytic
     )
@@ -1883,7 +1874,7 @@ def _build_newton_operator(
     fixture_external = analytic - fixture_internal
     fixture_operator = oracle_fixture.forward_operator(
         source_case, machine, fixture_external
-    )
+    ).with_clip_mode("chord")
     target_current, _centroid, target_receipt = certificate._closed_form_current_target(
         case_name, source_case, fixture_operator, fixture_physical
     )
@@ -1896,7 +1887,7 @@ def _build_newton_operator(
     if exterior_kind == "fixture_exterior_control":
         external = fixture_external
         closure_internal = fixture_internal
-        operator = fixture_operator
+        operator = fixture_operator.with_clip_mode(mode)
         exterior_receipt = {
             "kind": exterior_kind,
             "certificate_changed": False,
@@ -1907,24 +1898,26 @@ def _build_newton_operator(
             "analytic_booking_amplitude": 1.0,
         }
     else:
-        set_support_clip_mode("exact")
-        allocation_topology = _topology(fixture_operator, analytic)
-        booked = fixture_operator.cell_current_moments(
+        exact_fixture_operator = fixture_operator.with_clip_mode("exact")
+        allocation_topology = _topology(exact_fixture_operator, analytic)
+        booked = exact_fixture_operator.cell_current_moments(
             jnp.asarray(analytic), requested_class
         )
         booked_total = float(jnp.sum(booked.cell_current))
         amplitude = float(
-            fixture_operator.current_normalisation_amplitude(
+            exact_fixture_operator.current_normalisation_amplitude(
                 target_current, booked_total
             )
         )
-        normalised = fixture_operator.scaled_current_moments(booked, amplitude)
+        normalised = exact_fixture_operator.scaled_current_moments(booked, amplitude)
         exact_booking_internal = np.asarray(
-            fixture_operator.current_moment_image(normalised), dtype=np.float64
+            exact_fixture_operator.current_moment_image(normalised), dtype=np.float64
         )
         external = analytic - exact_booking_internal
         closure_internal = exact_booking_internal
-        operator = oracle_fixture.forward_operator(source_case, machine, external)
+        operator = oracle_fixture.forward_operator(
+            source_case, machine, external
+        ).with_clip_mode(mode)
         exterior_receipt = {
             "kind": exterior_kind,
             "certificate_changed": False,
@@ -1938,7 +1931,6 @@ def _build_newton_operator(
             "analytic_booking_amplitude": amplitude,
         }
 
-    set_support_clip_mode(mode)
     analytic_read = _topology(operator, analytic)
     span = abs(
         float(analytic_read["axis_flux_wb"]) - float(analytic_read["boundary_flux_wb"])
@@ -2062,6 +2054,7 @@ def _measure_newton_row(
             carrier_identity=(
                 f"oracle-start:{exterior_kind}:{case_name}:{requested_cells}"
             ),
+            clip_mode=mode,
         )
         request = replace(
             request,
@@ -2335,27 +2328,23 @@ def run_newton_probe(output: Path, report_directory: Path) -> dict[str, Any]:
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
     )
-    original_mode = support_clip_mode()
     rows = [_completed_fixture_control(output)]
-    try:
-        for exterior_kind, case_name, requested_cells, mode in NEWTON_ROWS:
-            row = _measure_newton_row(
-                output, exterior_kind, case_name, requested_cells, mode
-            )
-            rows.append(row)
-            _write_json(
-                output,
-                {
-                    "schema": "nova.oracle-start-newton-contraction",
-                    "version": 1,
-                    "source_revision": _source_revision(),
-                    "production_code_modified": False,
-                    "rows": rows,
-                    "completed": False,
-                },
-            )
-    finally:
-        set_support_clip_mode(original_mode)
+    for exterior_kind, case_name, requested_cells, mode in NEWTON_ROWS:
+        row = _measure_newton_row(
+            output, exterior_kind, case_name, requested_cells, mode
+        )
+        rows.append(row)
+        _write_json(
+            output,
+            {
+                "schema": "nova.oracle-start-newton-contraction",
+                "version": 1,
+                "source_revision": _source_revision(),
+                "production_code_modified": False,
+                "rows": rows,
+                "completed": False,
+            },
+        )
     receipt = {
         "schema": "nova.oracle-start-newton-contraction",
         "version": 1,

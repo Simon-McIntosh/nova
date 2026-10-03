@@ -16,9 +16,8 @@ participation labels are.
 The two states are the identical seed of the certificate's chord row (the
 seed is regenerated through the production cold-seed portfolio and verified
 against the banked state digest) and the committed chord terminal state
-persisted by that row.  The clip-mode setters are the explicit benchmark
-selection endpoints: ``set_support_clip_mode`` leaves the production default
-untouched.
+persisted by that row.  The clip mode is threaded to each probe as an explicit
+argument, so the process-wide production default is never mutated.
 
 The unit-amplitude convention is the operator's own: ``cell_current_moments``
 returns the clipped zeroth moments without any declared-current scaling, so a
@@ -52,7 +51,6 @@ from scipy.integrate import IntegrationWarning
 from benchmarks import solovev_certificate as certificate
 from benchmarks.solovev_cut_cell_moments import _exact_cell_integral
 from nova.equilibrium import ForwardProfile
-from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.equilibrium.separatrix_clip import _traced_quadratic_value
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import (
@@ -299,7 +297,7 @@ def _partition_probe(operator, state: np.ndarray, mode: str) -> dict[str, Any]:
     physical node count drops the sampling rows and the own-node null census
     refuses it.
     """
-    set_support_clip_mode(mode)
+    operator = operator.with_clip_mode(mode)
     physical = jnp.asarray(state)
     base_masks, topology, _connected, _admitted = operator._fixed_design_read(physical)
     sample_flux = operator.sample_node_flux(jnp.asarray(state))
@@ -482,7 +480,7 @@ def _cell_analysis(machine, exact, target_current: float) -> dict[str, Any]:
 
 
 def _mode_current(operator, state: np.ndarray, mode: str) -> np.ndarray:
-    set_support_clip_mode(mode)
+    operator = operator.with_clip_mode(mode)
     moments = operator.cell_current_moments(jnp.asarray(state))
     return np.asarray(moments.cell_current, dtype=np.float64)
 

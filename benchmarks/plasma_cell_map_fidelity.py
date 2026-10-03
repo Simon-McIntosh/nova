@@ -242,7 +242,6 @@ def measure_pair(case_name, requested, output, cpu_preflight=False):
     import numpy as np
     from matplotlib.path import Path as PolygonPath
     from benchmarks import solovev_certificate as certificate
-    from nova.equilibrium.forward_operator import set_support_clip_mode
     from scripts.analytic_oracle_fixtures import measure as fixture
 
     if cpu_preflight:
@@ -297,17 +296,17 @@ def measure_pair(case_name, requested, output, cpu_preflight=False):
     ]
     for mode in MODES:
         started = time.monotonic()
-        set_support_clip_mode(mode)
+        mode_operator = operator.with_clip_mode(mode)
         jax.clear_caches()
         print(f"MAP case={case_name} requested={requested} mode={mode}", flush=True)
-        traced = operator.traced_flux_map(requested_class, target)
+        traced = mode_operator.traced_flux_map(requested_class, target)
         evaluate = jax.jit(traced)
         mapped = np.asarray(
             jax.block_until_ready(
                 evaluate(
                     jnp.asarray(analytic),
                     jnp.asarray(external),
-                    operator,
+                    mode_operator,
                     jnp.asarray(target),
                 )
             )
@@ -330,7 +329,7 @@ def measure_pair(case_name, requested, output, cpu_preflight=False):
             )
 
         core, area, moments, amplitude, plasma, shadow = jax.device_get(
-            support(jnp.asarray(analytic), operator)
+            support(jnp.asarray(analytic), mode_operator)
         )
         raw = external + plasma
         mismatch = norms(mapped - analytic, analytic)
@@ -340,7 +339,7 @@ def measure_pair(case_name, requested, output, cpu_preflight=False):
                 evaluate(
                     jnp.asarray(shifted),
                     jnp.asarray(external),
-                    operator,
+                    mode_operator,
                     jnp.asarray(target),
                 )
             )
@@ -360,7 +359,7 @@ def measure_pair(case_name, requested, output, cpu_preflight=False):
         plasma_error = norms(plasma - analytic_plasma, analytic_plasma)
         support_cells = np.asarray(area) > 0
         centroid_offset = support_current_centroid_offset_mm(
-            operator, moments, amplitude, physical_array
+            mode_operator, moments, amplitude, physical_array
         )
         label = f"{case_name}-cells-{abs(requested)}-{mode}"
         row = {
@@ -442,7 +441,7 @@ def measure_pair(case_name, requested, output, cpu_preflight=False):
                 else "not-supported: declared measure does not raise both mismatches",
             },
             "reference_nulls": reference_nulls,
-            "mapped_nulls": nulls(operator, mapped),
+            "mapped_nulls": nulls(mode_operator, mapped),
             "wall_units": wall_units,
             "fixture_cache": cache,
             "jax_backend": jax.default_backend(),

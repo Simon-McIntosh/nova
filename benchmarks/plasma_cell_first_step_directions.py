@@ -296,9 +296,10 @@ def measure(output):
     jax.effects_barrier()
     assert observed == [2.0], observed
     receipt["gpu_callback_positive_control"] = observed
-    driver.set_support_clip_mode("exact")
     print("BUILD production", flush=True)
-    built = build_construction(driver, "diverted-single-null", "production")
+    built = build_construction(
+        driver, "diverted-single-null", "production", clip_mode="exact"
+    )
     operator, request = built["operator"], built["request"]
     seed = jnp.asarray(request.seed_policy.state)
     target = request.target_current

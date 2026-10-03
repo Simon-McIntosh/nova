@@ -198,9 +198,9 @@ def main() -> None:
             "",
             _markdown_table(verdict_headers, verdict_rows),
             "",
-            "The centroid column reports radial and vertical absolute errors "
-            "in pitches, each divided by its own analytic-state-derived "
-            "tolerance. The boundary value is net of the compensator flux. "
+            "The centroid column reports radial and vertical absolute "
+            "error/derived-tolerance pairs in pitches. The boundary value "
+            "is net of the compensator flux. "
             "Whole-cell control requires movement to the oracle centroid "
             "alongside a retained booking error; the matching terminal hashes "
             "and failed centroid clauses mean it did not fire.",
@@ -233,10 +233,17 @@ def main() -> None:
             "exterior, weak chord support had map-floor RMS 0.129 of span "
             "against 3.58e-5 for exact support. The present terminal states "
             "do not reproduce the requested roughly 0.2-of-span separated "
-            "booking error. A follow-on must investigate why the production "
-            "seed stalls and verify that each solve actually exercises its "
-            "declared support mode before treating the paired states as a "
-            "negative control.",
+            "booking error. The driver selected exact or chord mode on its "
+            "operator, but the fixture solve helper built a typed request "
+            "without an explicit clip_mode field. The request-level explicit "
+            "mode requirement was therefore not met. Also, the whole-cell "
+            "pair recomputed its derived centroid tolerance under chord "
+            "support (weak-110 radial 1.97e-4 versus 1.66e-4 pitches), so it "
+            "did not enforce the identical numerical row clause. These "
+            "implementation deviations make the paired control diagnostic "
+            "only. A corrected request and shared row tolerance require a "
+            "separate measurement; the present failed rows must "
+            "not be promoted as a certificate.",
             "",
             f"Log: `{args.receipts.parent / 'certificate.log'}`. "
             "Banked support control: "
@@ -266,7 +273,12 @@ def main() -> None:
             "previous qualifying receipt started from a displaced analytic "
             "seed, a materially different start. A banked analytic-state "
             "control sees whole-cell booking at 1000 cells, but these "
-            "nonconverged terminal states do not establish it.</p>",
+            "nonconverged terminal states do not establish it. The solve helper "
+            "left the typed request clip_mode unset, even though the operator "
+            "carried the requested mode. Whole-cell derived centroid tolerances "
+            "also differ from exact-support tolerances, so this attempt does "
+            "not meet the explicit request-mode and identical-row-control "
+            "requirements; the paired control is diagnostic only.</p>",
             "<h3>Terminal flux panels</h3>",
             *figure_html,
             "</section>",

@@ -285,6 +285,10 @@ def _certificate_pairs(
         field_scale_t=field_scale_t,
         initial_field_t=initial_field_t,
         initial_level_wb=initial_level_wb,
+        analytic_profile=context["profile"],
+        analytic_flux=context["analytic"],
+        requested_class=context["requested_class"],
+        target_current=context["target_current"],
     )
     return pairs if level else (pairs[0],)
 

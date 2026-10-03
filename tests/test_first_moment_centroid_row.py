@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from benchmarks import fixture_positional_stiffness as stiffness
+from benchmarks import centroid_constrained_fixture_receipt as fixture_receipt
 from nova.equilibrium.constraint import ConstraintContext
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.observation import (
@@ -120,3 +121,26 @@ def test_analytic_first_moment_centroid_has_derived_tolerance(analytic_row):
         pair.binding.payload,
     )
     assert abs(float(np.asarray(observed)[0]) - target) > tolerance
+
+
+def test_certificate_pair_carries_analytic_first_moment_tolerance():
+    context = fixture_receipt._context(
+        "weak-rotation-reactor-static", -110, clip_mode="exact"
+    )
+    (pair,) = fixture_receipt._certificate_pairs(context, level=False)
+    assert len(np.asarray(context["profile"].operator.grid.coordinate)) == 135
+    analytic = pair.functional.observed(
+        context["profile"],
+        ConstraintContext(
+            flux=jnp.asarray(context["analytic"]),
+            requested_class=context["requested_class"],
+            target_current=context["target_current"],
+            shadow=None,
+        ),
+        pair.binding.payload,
+    )
+    np.testing.assert_allclose(pair.binding.payload, analytic, rtol=0.0, atol=0.0)
+    residual = np.abs(np.asarray(analytic) - np.asarray(pair.binding.target))
+    tolerance = np.asarray(pair.binding.tolerance)
+    np.testing.assert_allclose(tolerance[0], residual[0], rtol=0.0, atol=1.0e-14)
+    assert 5.0e-5 < tolerance[0] < 1.0e-4

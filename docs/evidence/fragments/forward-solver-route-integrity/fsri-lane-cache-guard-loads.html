@@ -1,0 +1,73 @@
+<!-- fragment: fsri-lane-cache-guard-loads -->
+<section id="fsri-lane-cache-guard-loads">
+<h3>The payload prelude now reaches pytest, so the cache guard loads on the lane</h3>
+
+<p>The lane launcher ran its payload prelude as
+<code>bash -euo pipefail -c "${prelude}"</code>, a subshell. The H200 lane's
+prelude sets the environment the target runs under, and every export in it
+(<code>PYTEST_ADDOPTS</code> carrying <code>-p cache_guard</code>,
+<code>JAX_COMPILATION_CACHE_DIR</code>, and the cache flags) died when the
+subshell exited. The fix evaluates the prelude in the payload shell itself
+(<code>{ eval "${prelude}"; }</code>), so the target inherits the environment
+the prelude sets. Commit <code>b091aa8d8996de2b8e98a974b0f40b4b098f256e</code>
+carries the launcher change and the regression case in
+<code>tests/test_nova_lane_launcher.py</code>.</p>
+
+<p><strong>Did <code>JAX_COMPILATION_CACHE_DIR</code> reach the tests before the
+repair?</strong> No. The prelude exported it in the subshell on every lane run,
+so pytest never received it, never loaded <code>cache_guard</code>, and the
+served directory the guard reports was never set for the tests. The new test
+proves the mechanism: the prelude exports a probe, and the target records the
+value it was given. At the base revision
+(<code>9300a771470c97ca268927933c98d9ead604cd09</code>) the target records
+<code>MISSING</code> and the case fails; at the fixed head it records
+<code>delivered</code> and the case passes.</p>
+
+<table>
+<tr><th>arm</th><th>tree</th><th>command</th><th>result</th></tr>
+<tr><td>base</td><td>scratch checkout of the base scripts</td>
+<td><code>pytest tests/test_nova_lane_launcher.py</code></td>
+<td>1 failed, 8 passed, exit 1 — the failing id is
+<code>test_payload_prelude_exports_reach_the_target</code></td></tr>
+<tr><td>head</td><td>this worktree at <code>b091aa8d8</code></td>
+<td><code>pytest tests/test_nova_lane_launcher.py</code></td>
+<td>9 passed, exit 0</td></tr>
+</table>
+
+<p><strong>Positive lane run (titan, job 1280629).</strong> With the pin present
+the guard loads and accounts for the run: the prelude emits the cache header
+(<code>CACHE_GUARD_DIRECTORY</code>, <code>CACHE_GUARD_SERVED</code>), and the
+session finish prints per-program rows and
+<code>CACHE_GUARD_MARKER=wall-clock-reliable misses=13 budget=100000</code>
+with <code>EXIT_STATUS=0</code>. The guard was inactive on the lane before the
+repair, so this marker had never been printed.</p>
+
+<p><strong>Negative control (titan, job 1280631).</strong> Budget 0 against a
+served directory that lacks the programs
+(<code>source_revision=000…0</code>, empty directory) forces a miss. The run
+ends
+<code>CACHE_GUARD_MARKER=WALL-CLOCK-UNRELIABLE misses=13 budget=0</code> with
+<code>EXIT_STATUS=1</code>: the guard refuses a timing result it cannot support.
+Before the repair the guard never loaded, so this refusal could not fire. The
+first negative attempt against the real pin reported <code>misses=0</code>
+because the earlier positive run had written its programs into the shared pin
+directory, which is the persistent-cache behaviour; the controlled empty
+directory removes that dependence.</p>
+
+<p><strong>Rung.</strong> Both lane jobs ran on <code>titan</code>. The H200
+reservation was fully allocated for the whole window (all eight
+<code>gpu:h200</code> cards held by other jobs), and submissions queued
+<code>PENDING (Resources)</code>; titan is the next rung under the compute
+hierarchy and carries the same launcher path, so the mechanism it exercises is
+identical. An H200-specific rerun is listed under follow-ons.</p>
+
+<p><strong>One correction to the expected criterion.</strong> The guard is
+loaded with <code>-p cache_guard</code>, and pytest does not name a
+<code>-p</code>-loaded plugin on its <code>plugins:</code> line — that line
+lists installed entry-point plugins only. Demonstrated directly: a dummy plugin
+passed with <code>-p dummy_plugin</code> prints its header but does not appear
+on the <code>plugins:</code> line, and <code>cache_guard</code> behaves the
+same while plainly running (it emits the header, the rows and the marker, and
+enforces the budget). The guard's loading is therefore evidenced by its header,
+rows and marker lines, not by the <code>plugins:</code> line.</p>
+</section>

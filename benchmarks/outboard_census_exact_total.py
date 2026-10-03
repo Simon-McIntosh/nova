@@ -64,7 +64,10 @@ _TRIANGLE_RULE = np.asarray(
 
 def _triangle_area(triangle: np.ndarray) -> float:
     first, second, third = triangle
-    return abs(float(np.cross(second - first, third - first))) / 2.0
+    first_edge = second - first
+    second_edge = third - first
+    cross = first_edge[0] * second_edge[1] - first_edge[1] * second_edge[0]
+    return abs(float(cross)) / 2.0
 
 
 def _refined_triangles(triangle: np.ndarray, refinement: int) -> np.ndarray:

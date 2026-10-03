@@ -160,7 +160,7 @@ def _operator_clip_mode(forward_operator: Any, operator: Any, mode: str):
         forward_operator.set_support_clip_mode(previous)
 
 
-def _measure(revision: str, scratch: Path) -> dict[str, Any]:
+def _measure(revision: str, scratch: Path, component: str) -> dict[str, Any]:
     tree = _archive_tree(revision, scratch)
     previous = list(sys.path)
     prefixes = ("nova.", "benchmarks.", "scripts.")
@@ -190,67 +190,77 @@ def _measure(revision: str, scratch: Path) -> dict[str, Any]:
             if hasattr(operator, "with_clip_mode")
             else forward_operator.support_clip_mode()
         )
-        with _operator_clip_mode(forward_operator, operator, "exact") as (
-            exact_operator,
-            mode_strategy,
-        ):
-            probe = census._partition_probe(exact_operator, state, "exact")
-            curve = census._curve_probe(
-                exact_operator,
-                probe["base_masks"],
-                probe["topology"],
-                probe["sample_psi_norm"],
-            )
-        analytic = census._cell_analysis(
-            context["machine"], context["exact"], context["target_current"]
+        mode_strategy = (
+            "with_clip_mode"
+            if hasattr(operator, "with_clip_mode")
+            else "set_support_clip_mode"
         )
-        try:
-            booked = census._state_census(
-                operator,
-                context["machine"],
-                state,
-                "terminal",
-                context["target_current"],
-                analytic,
-                curve,
-            )["unit_amplitude_totals_a"]
-        finally:
-            if legacy_mode is not None:
-                forward_operator.set_support_clip_mode(legacy_mode)
-        with _operator_clip_mode(forward_operator, operator, "exact") as (
-            exact_operator,
-            _reference_mode_strategy,
-        ):
-            exact_probe = census._partition_probe(exact_operator, state, "exact")
-            exact_field = forward_operator.flux_field_polynomial(
-                exact_operator._support_moment_stencils,
-                exact_probe["moment_masks"].psi_norm,
-                exact_probe["sample_psi_norm"],
-            )
-            profile = _FluxSelectedProfile(
-                exact_operator.source.core, exact_operator.source.common_sol
-            )
-            density_sampler = _profile_density_sampler(jax, exact_field, profile)
-            support_vertices = np.asarray(
-                exact_probe["profile_support"].support_vertices
-            )
-            support_count = np.asarray(exact_probe["profile_support"].vertex_count)
-            selected = np.asarray(exact_field.active) & np.asarray(
-                exact_probe["moment_masks"].profile_participation
-            )
-            reference_values = [
-                _exact_support_current(
-                    support_vertices[cell, : support_count[cell]],
-                    density_sampler,
-                    cell,
+        booked = None
+        if component != "reference":
+            with _operator_clip_mode(forward_operator, operator, "exact") as (
+                exact_operator,
+                mode_strategy,
+            ):
+                probe = census._partition_probe(exact_operator, state, "exact")
+                curve = census._curve_probe(
+                    exact_operator,
+                    probe["base_masks"],
+                    probe["topology"],
+                    probe["sample_psi_norm"],
                 )
-                if selected[cell] and support_count[cell] >= 3
-                else (0.0, 0.0)
-                for cell in range(len(support_vertices))
-            ]
-        reference = float(sum(value for value, _error in reference_values))
-        error_bound = float(sum(error for _value, error in reference_values))
-        exact = float(booked["exact"])
+            analytic = census._cell_analysis(
+                context["machine"], context["exact"], context["target_current"]
+            )
+            try:
+                booked = census._state_census(
+                    operator,
+                    context["machine"],
+                    state,
+                    "terminal",
+                    context["target_current"],
+                    analytic,
+                    curve,
+                )["unit_amplitude_totals_a"]
+            finally:
+                if legacy_mode is not None:
+                    forward_operator.set_support_clip_mode(legacy_mode)
+        reference = None
+        error_bound = None
+        if component != "booking":
+            with _operator_clip_mode(forward_operator, operator, "exact") as (
+                exact_operator,
+                _reference_mode_strategy,
+            ):
+                exact_probe = census._partition_probe(exact_operator, state, "exact")
+                exact_field = forward_operator.flux_field_polynomial(
+                    exact_operator._support_moment_stencils,
+                    exact_probe["moment_masks"].psi_norm,
+                    exact_probe["sample_psi_norm"],
+                )
+                profile = _FluxSelectedProfile(
+                    exact_operator.source.core, exact_operator.source.common_sol
+                )
+                density_sampler = _profile_density_sampler(jax, exact_field, profile)
+                support_vertices = np.asarray(
+                    exact_probe["profile_support"].support_vertices
+                )
+                support_count = np.asarray(exact_probe["profile_support"].vertex_count)
+                selected = np.asarray(exact_field.active) & np.asarray(
+                    exact_probe["moment_masks"].profile_participation
+                )
+                reference_values = [
+                    _exact_support_current(
+                        support_vertices[cell, : support_count[cell]],
+                        density_sampler,
+                        cell,
+                    )
+                    if selected[cell] and support_count[cell] >= 3
+                    else (0.0, 0.0)
+                    for cell in range(len(support_vertices))
+                ]
+            reference = float(sum(value for value, _error in reference_values))
+            error_bound = float(sum(error for _value, error in reference_values))
+        exact = None if booked is None else float(booked["exact"])
         return {
             "revision": revision,
             "archive_tree": str(tree),
@@ -259,12 +269,17 @@ def _measure(revision: str, scratch: Path) -> dict[str, Any]:
             "cwd": str(Path.cwd().resolve()),
             "mode_strategy": mode_strategy,
             "solving_operator_mode": "exact",
+            "component": component,
             "jax_backend": jax.default_backend(),
-            "chord_booked_a": float(booked["chord"]),
+            "chord_booked_a": None if booked is None else float(booked["chord"]),
             "exact_booked_a": exact,
             "quadrature_reference_a": reference,
             "quadrature_error_bound_a": error_bound,
-            "exact_relative_difference": abs(exact - reference) / abs(reference),
+            "exact_relative_difference": (
+                None
+                if exact is None or reference is None
+                else abs(exact - reference) / abs(reference)
+            ),
         }
     finally:
         sys.path[:] = previous
@@ -279,6 +294,9 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--head", default="main")
     parser.add_argument("--revision", action="append")
+    parser.add_argument(
+        "--component", choices=("full", "booking", "reference"), default="full"
+    )
     arguments = parser.parse_args()
     scratch = Path(
         tempfile.mkdtemp(prefix="outboard-census-", dir=os.environ["TMPDIR"])
@@ -297,7 +315,9 @@ def main() -> None:
             RESPONSIBLE_REVISION,
             head,
         )
-        rows = [_measure(revision, scratch) for revision in revisions]
+        rows = [
+            _measure(revision, scratch, arguments.component) for revision in revisions
+        ]
         by_revision = {row["revision"]: row for row in rows}
         current = by_revision.get(head)
         pinned = by_revision.get(PINNED_REVISION)
@@ -308,12 +328,14 @@ def main() -> None:
             "current_matches_reference": (
                 None
                 if current is None
-                else current["exact_relative_difference"] <= 1.0e-9
+                else current["exact_relative_difference"] is not None
+                and current["exact_relative_difference"] <= 1.0e-9
             ),
             "pinned_matches_reference": (
                 None
                 if pinned is None
-                else pinned["exact_relative_difference"] <= 1.0e-9
+                else pinned["exact_relative_difference"] is not None
+                and pinned["exact_relative_difference"] <= 1.0e-9
             ),
             "reference_a": (
                 None if current is None else current["quadrature_reference_a"]
@@ -321,6 +343,7 @@ def main() -> None:
             "recommendation": (
                 "re-pin"
                 if current is not None
+                and current["exact_relative_difference"] is not None
                 and current["exact_relative_difference"] <= 1.0e-9
                 else "repair"
             ),

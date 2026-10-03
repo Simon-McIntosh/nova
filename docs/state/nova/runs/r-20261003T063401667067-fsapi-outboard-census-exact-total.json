@@ -1,0 +1,407 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 5,
+  "attempt_kind": "resume",
+  "backend": "codex-terra",
+  "base_sha": "406b740b1ac26c285cbc2c9a5dbd1daea0e39219",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 89408256,
+      "cached_input_tokens_cumulative": 89408256,
+      "input_tokens": 90419716,
+      "input_tokens_cumulative": 90419716,
+      "output_tokens": 179626,
+      "output_tokens_cumulative": 179626,
+      "reasoning_output_tokens": 46384,
+      "reasoning_output_tokens_cumulative": 46384
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 711,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 120,
+        "name": "main",
+        "path": "tests/measure_external_wall_correction.py"
+      },
+      "run_function": {
+        "line": 496,
+        "name": "main",
+        "path": "benchmarks/outboard_census_exact_total.py"
+      },
+      "window_line": 592
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "a7d6e0e3959d975de76d4335f104ce40105890d2",
+    "5d71b1f8e2838d9180b6fb66cbf0036f1616ce3b",
+    "78de04310e354bf48539e10dc735cff045e8cbcc",
+    "e86b19e8d976b5969b7c939f3191a0b41a8ddc9b",
+    "0a12f31ee440a10c87c3e893793ae3b3618e2732",
+    "eb8220f077f449baad94d5177975a3fbcb641eeb",
+    "cdae411cd3ab9d15998fd5581aca693ee4105b67",
+    "9d6c3ad9abb838448a31fc041b8d89a11c8af992",
+    "a61e3922f1561489e77a9fa605f6d6a6d1cfd18c",
+    "4877bfd34092104b505ee8566bc8296f6f4edbc9",
+    "e78e8b73f3771dea0b5dbf69baac8dc2742c90c2",
+    "4177f36ee93fcd9a46d40b65ba217feddaa96009",
+    "6e2fc140ae6dc61f7a84c7aa252e81d5c4c96289",
+    "558cdffd3db1424ac6ca7945623fe3e0478a0de6",
+    "a57f6c2033e6eabf1872270031b97d494c307f5b",
+    "60baa8ee703d247dd418c542cf637b81fb00169b",
+    "88597fb7b5b1d2030724e3e74c4e82c53e127840",
+    "a732e262e5de3b6f00ad01d77b41ea7594467459",
+    "9d8c870cf884d2bf50b111718851403fd759a6b7",
+    "314e8aaaad3fae301dbc30f087650a25066f878d"
+  ],
+  "completed_at": "2026-10-03T10:15:17Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-03T06:34:32Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests/test_outboard_hole_census_gate.py"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.985,
+    "plan": "forward-solve-api",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 1.7983408165085786,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-terra' is projected to exhaust at 2026-10-06T22:47:32Z, which is after this node's 3600s horizon ending 2026-10-03T07:34:05.724211+00:00",
+    "horizon_ends_at": "2026-10-03T07:34:05.724211+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-03T06:34:04Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-06T22:47:32Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 571169,
+    "state": "quiet",
+    "utilisation_pct": 10.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-03T06:34:04Z",
+    "read_at": "2026-10-03T06:34:05Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 10.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T10:15:17Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T063401667067-fsapi-outboard-census-exact-total/manifest.md",
+  "member": "disposable-r-20261003T063401667067-fsapi-outboard-census-exact-total",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsapi-outboard-census-exact-total",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2149,
+          "cached_input_tokens": 707951,
+          "input_tokens": 710102,
+          "output_tokens": 1338,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 711440,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: followup f-fsapi-outboard-census-exact-total. tests/test_outboard_hole_census_gate.py::test_booked_totals_reproduce_the_committed_state fails at main: the exact booked total over the committed weak-rotation-reactor-static chord terminal state is 15491539.124767 A, against the pinned 14013835.43717596 A, a relative gap of 0.105 against a 1e-6 bound. The pin was set at 247e5aa4a on 2026-09-23 ('re-pin the outboard booking gate to the repaired terminal totals'), so the clip-mode regression window from 2026-10-02 is not its origin, and a later change to nova/ moved the exact booking. Deliverable, a measurement with no edits to nova/ or tests/: benchmarks/outboard_census_exact_total.py, which (1) recomputes the chord and exact booked totals on the same committed terminal state at 247e5aa4a and at main, from git archive trees restricted to nova tests benchmarks scripts under /tmp and removed afterwards; (2) for the exact total, computes an independent reference: the plasma current density integrated over the exact clipped support by an adaptive quadrature that does not use nova's cut-cell moment code, to a stated tolerance; and (3) names which of the two values agrees with the reference. Establish the path of the change from git log -- nova/equilibrium between the two revisions, reading the moment and clip changes, and confirm the responsible commit by measuring the totals at that commit and its parent, without a bisect. Evidence: the fragment docs/evidence/fragments/forward-solve-api/fsri-outboard-census-exact-total.html, with the totals table, the reference, the responsible change by file and line, and a recommendation: re-pin, if the current value is right, or repair, naming the file. S22 is repairing a custom_jvp in nova/equilibrium/clip_quadrature.py, so state whether this primal change touches that file. Run in place with JAX_PLATFORMS=cpu; any step over ten minutes goes through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh --rungs h200 --force-submit, authorised. Every uv command carries --no-sync and nothing runs uv sync. Write the manifest before any long step, with empty wait fields unless a wait_probe names a job id and wait_terminal names a job state; its status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Measure the outboard census exact booked total at 247e5aa4a and at main against an independent quadrature reference",
+    "id": "fsapi-outboard-census-exact-total",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-03T06:34:04Z",
+      "read_at": "2026-10-03T06:34:05Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 10.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T063401667067-fsapi-outboard-census-exact-total/manifest.md",
+    "negative_control": "",
+    "plan": "forward-solve-api",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "open",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/outboard_census_exact_total.py",
+      "docs/evidence/fragments/forward-solve-api/fsri-outboard-census-exact-total.html",
+      "docs/evidence/fragments/forward-solve-api/fsapi-outboard-census-exact-total.html",
+      "docs/figures/forward-solve-api/fsapi-outboard-census-exact-total"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.7980304318995655,
+      "derived": 0.06117805241137565,
+      "drain_hours": 168.0,
+      "effective_limit": 0.06117805241137565,
+      "elapsed_fraction": 0.05561641128306877,
+      "elapsed_hours": 9.343557095555553,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-03T06:34:10+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.9,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.1,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.028000000000000004,
+      "decided_by": "window",
+      "margin": 0.87825,
+      "name": "fsapi-outboard-census-exact-total",
+      "score": 0.90625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.1
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.805544,
+        "observed_at": "2026-10-03T06:34:10+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.1,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "fsapi-outboard-census-exact-total",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-03T06:34:10.805544+00:00",
+    "score": 0.90625,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.018,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solve-api",
+  "plan_impl_at_dispatch": 0.985,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "314e8aaaad3fae301dbc30f087650a25066f878d",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a57f6c2033e6eabf1872270031b97d494c307f5b",
+    "reviewed_head_sha": "314e8aaaad3fae301dbc30f087650a25066f878d",
+    "scores": {
+      "durability": 9,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 82
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T063401667067-fsapi-outboard-census-exact-total",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a10078-cc83-7d20-8715-8d62d234130f",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "open",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 89408256,
+    "cumulative_input_tokens": 179827972,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 226010
+  },
+  "time_budget": "60m",
+  "tool_steps": 98.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 13245,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 5,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T10:15:21Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T09:26:11Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T063401667067-fsapi-outboard-census-exact-total",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1536,
+    "worker_pid": 3971822
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}

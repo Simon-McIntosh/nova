@@ -2,54 +2,66 @@
 
 ``_qualified_krylov_step`` (``nova/equilibrium/fixed_point.py``) is built on a
 ``jax.custom_batching.custom_vmap`` stream: it carries a batching rule but no
-derivative rule. A caller that reverse-differentiates through it does not get
-the step's derivative -- linearisation fails. Every call site must therefore
-either sit under an explicit derivative rule (``custom_jvp``, ``custom_vjp`` or
-``custom_linear_solve``) or belong to a forward-only route listed in
-``_FORWARD_ONLY_CALLERS`` with a one-line reason. A new caller that does
-neither fails :func:`test_every_krylov_caller_is_classified`, which names it,
-until it is classified.
+derivative rule, so a caller that reverse-differentiates through it does not get
+the step's derivative -- linearisation fails. This module censuses every module
+in the ``nova`` package and requires each call to the step to be *covered*.
+
+A call is covered only when it sits lexically inside a function that is itself
+the subject of a derivative rule: a function decorated with ``custom_jvp`` or
+``custom_vjp``, a function registered as that rule's ``defjvp``/``defvjp`` (fwd
+or bwd) function, or a function passed as the ``matvec``, ``solve`` or
+``transpose_solve`` argument of ``jax.lax.custom_linear_solve``. A rule merely
+called somewhere in an enclosing function's body does not cover a call, because
+that call is still differentiated unless it sits inside the rule's own subject.
+An uncovered caller must be named in ``_FORWARD_ONLY_CALLERS`` with a one-line
+reason, or :func:`test_every_krylov_census_is_clean` fails and names it.
+
+Tests and benchmarks are out of scope: this census reads the ``nova`` package
+only.
 """
 
 from __future__ import annotations
 
 import ast
-import inspect
+import pathlib
 
 import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from nova.equilibrium import fixed_point
-from nova.equilibrium.fixed_point import _qualified_krylov_step, picard
+import nova
+from nova.equilibrium.fixed_point import _qualified_krylov_step
 from nova.jax.config import configure_dtypes
+from tests.test_picard_implicit_derivative import _solve
 
 _KRYLOV_STEP_NAME = "_qualified_krylov_step"
-_DERIVATIVE_RULE_DECORATORS = frozenset(
-    {"custom_jvp", "custom_vjp", "custom_linear_solve"}
-)
+_RULE_DECORATORS = frozenset({"custom_jvp", "custom_vjp"})
+_REGISTERING_DECORATORS = frozenset({"defjvp", "defvjp"})
+_LINEAR_SOLVE_ARGS = frozenset({"matvec", "solve", "transpose_solve"})
 
 # Functions that call ``_qualified_krylov_step`` on a forward-only route: the
 # enclosing solve never reverse- or forward-differentiates the step, so no
-# derivative rule is required. A caller absent from this mapping must sit under
-# a derivative rule, or the census fails and names it.
+# derivative rule is required. A caller absent from this mapping must be covered
+# by a derivative rule, or the census fails and names it.
 _FORWARD_ONLY_CALLERS = {
-    "_manifold_newton_krylov.newton_body.attempt_step": (
+    "equilibrium/fixed_point.py::_manifold_newton_krylov.newton_body.attempt_step": (
         "forward-only: the manifold Newton route reports terminal states, never "
         "differentiates them"
     ),
-    "_newton_krylov_inner.newton_body.attempt_step": (
+    "equilibrium/fixed_point.py::_newton_krylov_inner.newton_body.attempt_step": (
         "forward-only: Newton-Krylov's exact-tangent route carries no reverse"
     ),
-    "kink_aware_newton_krylov.krylov_step": (
+    "equilibrium/fixed_point.py::kink_aware_newton_krylov.krylov_step": (
         "forward-only: the kink-aware route reports the promoted state"
     ),
-    "kink_aware_newton_krylov.newton_body.clarke_step": (
+    "equilibrium/fixed_point.py::kink_aware_newton_krylov.newton_body.clarke_step": (
         "forward-only: the Clarke averaged-tangent step is promoted, not read "
         "for a derivative"
     ),
 }
+
+_KNOWN_CALLERS = frozenset(_FORWARD_ONLY_CALLERS)
 
 
 def _called_name(call: ast.Call) -> str | None:
@@ -70,63 +82,92 @@ def _parent_map(tree: ast.AST) -> dict[ast.AST, ast.AST]:
     return parents
 
 
+def _is_function_node(node: ast.AST) -> bool:
+    return isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda)
+
+
 def _enclosing_functions(
     node: ast.AST, parents: dict[ast.AST, ast.AST]
-) -> list[ast.FunctionDef | ast.AsyncFunctionDef]:
+) -> list[ast.AST]:
     """The function chain around ``node``, innermost first."""
-    chain: list[ast.FunctionDef | ast.AsyncFunctionDef] = []
+    chain: list[ast.AST] = []
     cursor = parents.get(node)
-    while cursor is not None:
-        if isinstance(cursor, ast.FunctionDef | ast.AsyncFunctionDef):
+    while cursor is not None and cursor is not node:
+        if _is_function_node(cursor):
             chain.append(cursor)
         cursor = parents.get(cursor)
     return chain
 
 
-def _dotted_name(
-    node: ast.FunctionDef | ast.AsyncFunctionDef,
-    parents: dict[ast.AST, ast.AST],
-) -> str:
-    parts = [node.name]
+def _dotted_name(node: ast.AST, parents: dict[ast.AST, ast.AST]) -> str:
+    if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+        parts = [node.name]
+    else:
+        parts = ["<lambda>"]
     cursor = parents.get(node)
-    while cursor is not None:
+    while cursor is not None and cursor is not node:
         if isinstance(cursor, ast.FunctionDef | ast.AsyncFunctionDef):
             parts.append(cursor.name)
         cursor = parents.get(cursor)
     return ".".join(reversed(parts))
 
 
-def _names_a_derivative_rule(
-    node: ast.FunctionDef | ast.AsyncFunctionDef,
-) -> bool:
-    """Whether ``node`` is decorated with, or contains, a derivative rule."""
-    for decorator in node.decorator_list:
-        cursor = decorator
+def _decorator_terminals(node: ast.AST) -> set[str]:
+    """Terminal names of a function's decorators (``@a.b`` yields ``b`` and ``a``)."""
+    terminals: set[str] = set()
+    for decorator in getattr(node, "decorator_list", []):
+        cursor: ast.AST = decorator
         while isinstance(cursor, ast.Attribute):
-            if cursor.attr in _DERIVATIVE_RULE_DECORATORS:
-                return True
+            terminals.add(cursor.attr)
             cursor = cursor.value
-        if isinstance(cursor, ast.Name) and cursor.id in _DERIVATIVE_RULE_DECORATORS:
-            return True
-    for child in ast.walk(node):
-        if isinstance(child, ast.Call):
-            name = _called_name(child)
-            if name in _DERIVATIVE_RULE_DECORATORS:
-                return True
-    return False
+        if isinstance(cursor, ast.Name):
+            terminals.add(cursor.id)
+    return terminals
 
 
-def _krylov_calls() -> dict[str, dict]:
-    """Classify each caller of the Krylov step by its call sites.
+def _rule_subject_ids(tree: ast.AST) -> set[int]:
+    """Ids of functions that are themselves the subject of a derivative rule."""
+    subjects: set[int] = set()
+    defs_by_name: dict[str, ast.AST] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            defs_by_name.setdefault(node.name, node)
+            terminals = _decorator_terminals(node)
+            if terminals & (_RULE_DECORATORS | _REGISTERING_DECORATORS):
+                subjects.add(id(node))
+    linear_solve_names: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if _called_name(node) != "custom_linear_solve":
+            continue
+        arguments = list(node.args[:1]) + [
+            keyword.value
+            for keyword in node.keywords
+            if keyword.arg in _LINEAR_SOLVE_ARGS
+        ]
+        for argument in arguments:
+            if isinstance(argument, ast.Lambda):
+                subjects.add(id(argument))
+            elif isinstance(argument, ast.Name):
+                linear_solve_names.add(argument.id)
+            elif isinstance(argument, ast.Attribute):
+                linear_solve_names.add(argument.attr)
+    for name in linear_solve_names:
+        subject = defs_by_name.get(name)
+        if subject is not None:
+            subjects.add(id(subject))
+    return subjects
 
-    Returns ``{dotted name: {"lines": [...], "under_rule": bool}}`` for every
-    function (or ``<module>``) that calls ``_qualified_krylov_step``, where
-    ``under_rule`` records whether the call sits under a ``custom_jvp``,
-    ``custom_vjp`` or ``custom_linear_solve`` rule.
+
+def _module_calls(relative_path: str, source: str) -> dict[str, dict]:
+    """Classify each Krylov-step call in one module's source.
+
+    Returns ``{module-qualified caller: {"lines": [...], "covered": bool}}``.
     """
-    source = inspect.getsource(fixed_point)
     tree = ast.parse(source)
     parents = _parent_map(tree)
+    subjects = _rule_subject_ids(tree)
     calls: dict[str, dict] = {}
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -135,27 +176,26 @@ def _krylov_calls() -> dict[str, dict]:
             continue
         chain = _enclosing_functions(node, parents)
         if chain:
-            name = _dotted_name(chain[0], parents)
-            under_rule = any(_names_a_derivative_rule(member) for member in chain)
+            name = f"{relative_path}::{_dotted_name(chain[0], parents)}"
         else:
-            name = "<module>"
-            under_rule = False
-        entry = calls.setdefault(name, {"lines": [], "under_rule": under_rule})
+            name = f"{relative_path}::<module>"
+        covered = any(id(member) in subjects for member in chain)
+        entry = calls.setdefault(name, {"lines": [], "covered": covered})
         entry["lines"].append(node.lineno)
-        entry["under_rule"] = entry["under_rule"] or under_rule
+        entry["covered"] = entry["covered"] or covered
     return calls
 
 
-def _picard_solve(control, *, evaluations: int = 80):
-    """Converge a scalar contraction while keeping the control explicit."""
-    return picard(
-        lambda state, value: 0.2 * state + value,
-        jnp.zeros(1),
-        evaluations=evaluations,
-        relaxation=0.7,
-        map_arguments=(control,),
-        implicit_tolerance=1.0e-12,
-    )
+def _census_calls() -> dict[str, dict]:
+    """Classify every Krylov-step call across the ``nova`` package."""
+    root = pathlib.Path(nova.__file__).resolve().parent
+    calls: dict[str, dict] = {}
+    for path in sorted(root.rglob("*.py")):
+        if "__pycache__" in path.parts:
+            continue
+        relative_path = path.relative_to(root).as_posix()
+        calls.update(_module_calls(relative_path, path.read_text()))
+    return calls
 
 
 def test_picard_route_reverse_mode_returns_finite_gradients():
@@ -164,11 +204,11 @@ def test_picard_route_reverse_mode_returns_finite_gradients():
     control = jnp.asarray([2.0])
 
     def response(value):
-        return _picard_solve(value).state[0]
+        return _solve(value).state[0]
 
     gradient = jax.grad(response)(control)
 
-    assert bool(_picard_solve(control).converged)
+    assert bool(_solve(control).converged)
     assert bool(jnp.all(jnp.isfinite(gradient)))
     np.testing.assert_allclose(gradient, jnp.asarray([1.25]), atol=1.0e-10)
 
@@ -194,19 +234,52 @@ def test_reverse_mode_through_the_raw_krylov_step_refuses():
     assert "lineariz" in message or "differentiat" in message
 
 
-def test_every_krylov_caller_is_classified():
-    """Every Krylov caller is under a derivative rule or on the forward list."""
-    known = {
-        "_manifold_newton_krylov.newton_body.attempt_step",
-        "_newton_krylov_inner.newton_body.attempt_step",
-        "kink_aware_newton_krylov.krylov_step",
-        "kink_aware_newton_krylov.newton_body.clarke_step",
-    }
-    calls = _krylov_calls()
+def test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step():
+    """A rule called in the body leaves a step outside it uncovered."""
+    source = (
+        "def _rule_elsewhere_but_uncovered(vector):\n"
+        "    jax.lax.custom_linear_solve(\n"
+        "        lambda value: value,\n"
+        "        vector,\n"
+        "        solve=lambda matvec, rhs: matvec(rhs),\n"
+        "    )\n"
+        "    return _qualified_krylov_step(lambda value: value, vector)\n"
+    )
+    calls = _module_calls("synthetic.py", source)
+    entry = calls["synthetic.py::_rule_elsewhere_but_uncovered"]
+    assert entry["covered"] is False
 
-    # Liveness: the census must see the callers known to be present, so a
-    # parser that silently finds nothing cannot pass an absence check.
-    missed = known - set(calls)
+
+def test_a_rule_subject_covers_a_step_inside_it():
+    """The classifier sees coverage so its absence checks mean something."""
+    decorated = (
+        "@jax.custom_jvp\n"
+        "def _rule_subject(vector):\n"
+        "    return _qualified_krylov_step(lambda value: value, vector)\n"
+    )
+    covered = _module_calls("synthetic.py", decorated)
+    assert covered["synthetic.py::_rule_subject"]["covered"] is True
+
+    registered = (
+        "def _solve_step(matvec, rhs):\n"
+        "    return _qualified_krylov_step(lambda value: value, rhs)\n"
+        "\n"
+        "def _route(vector):\n"
+        "    return jax.lax.custom_linear_solve(\n"
+        "        lambda value: value, vector, solve=_solve_step\n"
+        "    )\n"
+    )
+    covered = _module_calls("synthetic.py", registered)
+    assert covered["synthetic.py::_solve_step"]["covered"] is True
+
+
+def test_every_krylov_census_is_clean():
+    """Every Krylov caller is covered by a rule or on the forward-only list."""
+    calls = _census_calls()
+
+    # Liveness: the census must see the callers known to be present, so a parser
+    # that silently finds nothing cannot pass an absence check.
+    missed = _KNOWN_CALLERS - set(calls)
     assert not missed, (
         f"census missed known {_KRYLOV_STEP_NAME} callers: {sorted(missed)}"
     )
@@ -222,14 +295,14 @@ def test_every_krylov_caller_is_classified():
     offenders = {
         name: entry["lines"]
         for name, entry in calls.items()
-        if not entry["under_rule"] and name not in _FORWARD_ONLY_CALLERS
+        if not entry["covered"] and name not in _FORWARD_ONLY_CALLERS
     }
     assert not offenders, (
         f"Unclassified caller(s) of {_KRYLOV_STEP_NAME}: "
         + ", ".join(
             f"{name} (lines {lines})" for name, lines in sorted(offenders.items())
         )
-        + ". Each caller must sit under a custom_jvp, custom_vjp or "
+        + ". Each caller must be the subject of a custom_jvp, custom_vjp or "
         "custom_linear_solve rule, or be named in _FORWARD_ONLY_CALLERS with a "
         "one-line reason."
     )

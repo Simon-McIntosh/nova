@@ -417,7 +417,13 @@ def render_row_figure(
 
     for axis in (full, close):
         poloidal.draw_flux_contours(
-            axis, radial, height, solved, levels, color=RING_COLOURS["solved"]
+            axis,
+            radial,
+            height,
+            solved,
+            levels,
+            wall=wall,
+            color=RING_COLOURS["solved"],
         )
         poloidal.draw_wall(axis, units=(wall,), linewidth=0.5)
 

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="figure-and-solver-audit">
+<title>The limited-shadow renderers draw no field outside the vessel — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsa-wall-mask-limited-and-residual"
+         data-test-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T170849683435-fsa-wall-mask-limited-and-residual/scratch/head_scan.log"
+         data-negative-control-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T170849683435-fsa-wall-mask-limited-and-residual/scratch/base_scan.log">
+
+  <h2>The limited-shadow renderers draw no field outside the vessel</h2>
+
+  <p>Fifteen scattered-field renderer calls across five benchmark drivers contoured
+  a raster interpolated from scattered nodes without masking it to the wall, so a
+  contour could bridge a re-entrant first-wall gap on the node convex hull. Each
+  now passes the wall its driver already holds: <code>draw_flux_contours(...,
+  wall=...)</code> at <code>limited_row_shadow_census.py</code> 739/977/1061/1064,
+  <code>limited_shadow_before_after.py</code> 425/687/696/738/748,
+  <code>zero_residual_check.py</code> 593/634,
+  <code>null_census_assertion.py</code> 419, and
+  <code>oracle_start_newton_probe.py</code> 1819/1822. The single direct
+  <code>axis.contour</code> at <code>limited_shadow_before_after.py</code> 760 — the
+  dotted round-off-floor line, kept a grid contour per the plotting rules — draws a
+  raster blanked by a new file-local <code>_masked_field</code> helper.</p>
+
+  <p>The renderer wall scanner reports zero records for the batch
+  (<code>EXIT=0</code>), and the same command against the five base files exits 1
+  listing exactly those fifteen sites. No figure was re-rendered in this node; the
+  driver-by-driver figure paths and their solve requirement are in the node report
+  for a later regeneration wave.</p>
+
+</article>
+</main>
+</body>
+</html>

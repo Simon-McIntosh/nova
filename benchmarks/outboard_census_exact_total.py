@@ -27,8 +27,7 @@ CONTROL_PART = (
 ARCHIVE_PATHS = ("nova", "tests", "benchmarks", "scripts")
 PINNED_REVISION = "247e5aa4a"
 RESPONSIBLE_REVISION = "38b441dad1dea2b10b684fa612b8802ef0973b86"
-RELATIVE_TOLERANCE = 5.0e-13
-RECOMMENDATION = "re-pin"
+TRIANGLE_CONVERGENCE_RELATIVE_TOLERANCE = 1.0e-8
 
 
 def _git_text(revision: str, path: str) -> str:
@@ -119,10 +118,18 @@ def _triangle_reference(
         ladder.append(
             {"level": refinement, "current_a": total, "relative_change": relative}
         )
-        if relative is not None and relative <= 1.0e-8:
+        if relative is not None and relative <= TRIANGLE_CONVERGENCE_RELATIVE_TOLERANCE:
             return total, ladder
         previous = total
     raise RuntimeError(f"triangle reference did not converge for cell {cell}: {ladder}")
+
+
+def _refinement_error_bound(ladder: list[dict[str, float | None]]) -> float | None:
+    """Return the observed final refinement change for one polygon integral."""
+
+    if len(ladder) < 2:
+        return None
+    return abs(float(ladder[-1]["current_a"]) - float(ladder[-2]["current_a"]))
 
 
 def _install_absent_saddle_bridge(forward_operator: Any) -> None:
@@ -187,7 +194,11 @@ def _operator_clip_mode(forward_operator: Any, operator: Any, mode: str):
 
 
 def _measure(
-    revision: str, scratch: Path, component: str, reference_cells: set[int] | None
+    revision: str,
+    scratch: Path,
+    component: str,
+    reference_cells: set[int] | None,
+    generating_commit: str,
 ) -> dict[str, Any]:
     tree = _archive_tree(revision, scratch)
     previous = list(sys.path)
@@ -251,6 +262,7 @@ def _measure(
                     forward_operator.set_support_clip_mode(legacy_mode)
         reference = None
         error_bound = None
+        error_bound_reason = None
         reference_cell_rows = None
         if component != "booking":
             with _operator_clip_mode(forward_operator, operator, "exact") as (
@@ -289,14 +301,33 @@ def _measure(
                         )
                     else:
                         value, ladder = 0.0, []
+                    cell_error_bound = _refinement_error_bound(ladder)
                     reference_cell_rows.append(
-                        {"cell": cell, "current_a": value, "refinement": ladder}
+                        {
+                            "cell": cell,
+                            "current_a": value,
+                            "quadrature_error_bound_a": cell_error_bound,
+                            "refinement": ladder,
+                        }
                     )
             reference = float(sum(row["current_a"] for row in reference_cell_rows))
-            error_bound = None
+            bounds = [row["quadrature_error_bound_a"] for row in reference_cell_rows]
+            if all(bound is not None for bound in bounds):
+                error_bound = float(sum(float(bound) for bound in bounds))
+            else:
+                error_bound_reason = (
+                    "At least one selected cell has no pair of refinement levels, so a "
+                    "summed adjacent-level difference is unavailable."
+                )
         exact = None if booked is None else float(booked["exact"])
+        selected_exact = (
+            None
+            if exact_cell_current is None or reference_cells is None
+            else float(sum(exact_cell_current[cell] for cell in reference_cells))
+        )
         return {
             "revision": revision,
+            "generating_commit": generating_commit,
             "archive_tree": str(tree),
             "module": str(Path(census.__file__).resolve()),
             "forward_operator_module": str(Path(forward_operator.__file__).resolve()),
@@ -308,13 +339,15 @@ def _measure(
             "chord_booked_a": None if booked is None else float(booked["chord"]),
             "exact_booked_a": exact,
             "exact_cell_current_a": exact_cell_current,
+            "selected_exact_booked_a": selected_exact,
             "quadrature_reference_a": reference,
             "quadrature_error_bound_a": error_bound,
+            "quadrature_error_bound_reason": error_bound_reason,
             "quadrature_cells": reference_cell_rows,
             "exact_relative_difference": (
                 None
-                if exact is None or reference is None
-                else abs(exact - reference) / abs(reference)
+                if selected_exact is None or reference is None
+                else abs(selected_exact - reference) / abs(reference)
             ),
         }
     finally:
@@ -410,6 +443,56 @@ def _render_terminal_panel(path: Path) -> dict[str, Any]:
     }
 
 
+def _reference_comparison(row: dict[str, Any] | None) -> dict[str, Any]:
+    """Compare the booking and reference over the same selected support cells."""
+
+    if row is None:
+        return {
+            "available": False,
+            "reason": "No receipt was generated for this revision.",
+        }
+    booking = row["selected_exact_booked_a"]
+    reference = row["quadrature_reference_a"]
+    bound = row["quadrature_error_bound_a"]
+    if booking is None or reference is None or bound is None:
+        return {
+            "available": False,
+            "booking_a": booking,
+            "reference_a": reference,
+            "tolerance_a": bound,
+            "tolerance_basis": row["quadrature_error_bound_reason"],
+            "reason": (
+                "A booking, reference, or measured refinement bound is unavailable."
+            ),
+        }
+    difference = abs(float(booking) - float(reference))
+    return {
+        "available": True,
+        "booking_a": float(booking),
+        "reference_a": float(reference),
+        "absolute_difference_a": difference,
+        "relative_difference": difference / max(abs(float(reference)), 1.0),
+        "tolerance_a": float(bound),
+        "tolerance_basis": (
+            "Sum of the absolute differences between the last two triangle-rule "
+            "refinement levels for every selected clipped polygon."
+        ),
+        "within_tolerance": difference <= float(bound),
+    }
+
+
+def _recommendation(current: dict[str, Any], pinned: dict[str, Any]) -> str:
+    """Select the disposition from the paired measurements, not a preset verdict."""
+
+    current_matches = current.get("within_tolerance")
+    pinned_matches = pinned.get("within_tolerance")
+    if current_matches is True and pinned_matches is False:
+        return "re-pin"
+    if current_matches is False and pinned_matches is True:
+        return "repair"
+    return "undetermined"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
@@ -419,6 +502,7 @@ def main() -> None:
         "--component", choices=("full", "booking", "reference"), default="full"
     )
     parser.add_argument("--reference-cells")
+    parser.add_argument("--reference-revision", action="append")
     parser.add_argument("--terminal-panel", type=Path)
     arguments = parser.parse_args()
     scratch = Path(
@@ -436,6 +520,9 @@ def main() -> None:
         head = subprocess.check_output(
             ["git", "-C", str(ROOT), "rev-parse", arguments.head], text=True
         ).strip()
+        generating_commit = subprocess.check_output(
+            ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
+        ).strip()
         parent = subprocess.check_output(
             ["git", "-C", str(ROOT), "rev-parse", f"{RESPONSIBLE_REVISION}^"],
             text=True,
@@ -451,37 +538,43 @@ def main() -> None:
             if arguments.reference_cells is None
             else {int(cell) for cell in arguments.reference_cells.split(",") if cell}
         )
-        rows = [
-            _measure(revision, scratch, arguments.component, reference_cells)
-            for revision in revisions
-        ]
+        reference_revisions = set(arguments.reference_revision or revisions)
+        rows = []
+        for revision in revisions:
+            component = arguments.component
+            if component == "full" and revision not in reference_revisions:
+                component = "booking"
+            rows.append(
+                _measure(
+                    revision,
+                    scratch,
+                    component,
+                    reference_cells,
+                    generating_commit,
+                )
+            )
         by_revision = {row["revision"]: row for row in rows}
         current = by_revision.get(head)
         pinned = by_revision.get(PINNED_REVISION)
+        current_comparison = _reference_comparison(current)
+        pinned_comparison = _reference_comparison(pinned)
         payload = {
+            "generating_commit": generating_commit,
             "revisions": rows,
             "responsible_commit": RESPONSIBLE_REVISION,
             "responsible_parent": parent,
-            "current_matches_reference": (
-                None
-                if current is None
-                else current["exact_relative_difference"] is not None
-                and current["exact_relative_difference"] <= 1.0e-9
-            ),
-            "pinned_matches_reference": (
-                None
-                if pinned is None
-                else pinned["exact_relative_difference"] is not None
-                and pinned["exact_relative_difference"] <= 1.0e-9
-            ),
+            "current_comparison": current_comparison,
+            "pinned_comparison": pinned_comparison,
+            "current_matches_reference": current_comparison.get("within_tolerance"),
+            "pinned_matches_reference": pinned_comparison.get("within_tolerance"),
             "reference_a": (
                 None if current is None else current["quadrature_reference_a"]
             ),
-            "recommendation": RECOMMENDATION,
+            "recommendation": _recommendation(current_comparison, pinned_comparison),
             "recommendation_basis": (
-                "The archive-isolated candidate booking and the triangle-reference "
-                "receipt establish that the post-candidate exact total is correct; "
-                "a staged component may omit one side of that comparison."
+                "Derived from current_comparison.within_tolerance and "
+                "pinned_comparison.within_tolerance over the same selected "
+                "support cells."
             ),
         }
         arguments.output.parent.mkdir(parents=True, exist_ok=True)

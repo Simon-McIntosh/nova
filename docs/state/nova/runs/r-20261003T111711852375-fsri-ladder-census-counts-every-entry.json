@@ -1,0 +1,617 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "8f475ae23620206e833b7f92347dccf64a7e46d3",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 12805248,
+      "input_tokens_cumulative": 12805248,
+      "output_tokens": 61795,
+      "output_tokens_cumulative": 61795,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 298,
+    "files": 6,
+    "removed": 19
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "4191523625b873f9a3dca83657d673e1fbef1d1e",
+    "5721de656b968e95ec150603911c8fe29e6a4ba5",
+    "a90d04c14b54a55eabce135cfbbcc3cb87a13a5c"
+  ],
+  "completed_at": "2026-10-03T11:58:41.817Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-03T11:17:37Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu PYTHONPATH=$PWD ~/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -s tests/test_recovery_ladder_census.py -v",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T111711852375-fsri-ladder-census-counts-every-entry/head-test.log"
+  },
+  "impl_move": {
+    "at_complete": 0.66,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "verdict": "moved"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-03T12:02:14.883729+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-03T11:17:14Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 9,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 4,
+    "headroom": 12,
+    "mean_context": 140000,
+    "observed_at": "2026-10-03T11:17:05Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T11:58:41.817Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T111711852375-fsri-ladder-census-counts-every-entry/manifest.md",
+  "member": "disposable-r-20261003T111711852375-fsri-ladder-census-counts-every-entry",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_recovery_ladder_census.py::test_counted_entries_match_the_module",
+      "tests/test_recovery_ladder_census.py::test_enumeration_finds_exactly_the_ladder_entries",
+      "tests/test_recovery_ladder_census.py::test_renamed_entry_fails_naming_it"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_recovery_ladder_census.py::test_counted_entries_match_the_module",
+      "tests/test_recovery_ladder_census.py::test_enumeration_finds_exactly_the_ladder_entries",
+      "tests/test_recovery_ladder_census.py::test_renamed_entry_fails_naming_it"
+    ],
+    "declaration": "rename one recovery entry in a scratch copy of fixed_point.py; the census test must fail naming it",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T111711852375-fsri-ladder-census-counts-every-entry/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T111711852375-fsri-ladder-census-counts-every-entry/negative-control.log",
+    "test_paths": [
+      "tests/test_recovery_ladder_census.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fsri-ladder-census-counts-every-entry",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2781,
+          "cached_input_tokens": 930876,
+          "input_tokens": 933659,
+          "output_tokens": 2222,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 935881,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: followup f-fsri-ladder-census-counts-every-entry in forward-solver-route-integrity. benchmarks/recovery_ladder_census.py counts two of the five promotion and recovery entries defined in nova/equilibrium/fixed_point.py, so its reported 19.03 percent instruction share is a lower bound. Its instrumented() skips a counted path absent from the module, so a renamed rung reads as zero executions rather than failing, and the report names a revision one commit behind the tree that carries it. Repair: count every promotion and recovery entry fixed_point.py defines, enumerated from the module rather than hand-listed where possible; raise naming any counted path that is absent; and stamp the committing revision in the report. Add tests/test_recovery_ladder_census.py, which fails when a counted rung is renamed. Gate, logged under the run directory: the new test passes with JAX_PLATFORMS=cpu in place on this fleet allocation, and fails under the negative control run from a full tree copy with --import-mode=importlib and the module __file__ printed. The repaired census re-runs on one certificate row and reports the five entries with per-solve execution counts and instruction shares. Benchmarks and tests only, no edit to nova/. Every uv command carries --no-sync and nothing runs uv sync. The manifest's status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Make the recovery-ladder census count every promotion and recovery entry and fail on a renamed rung",
+    "id": "fsri-ladder-census-counts-every-entry",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-03T11:17:14Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 9,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 4,
+      "headroom": 12,
+      "mean_context": 140000,
+      "observed_at": "2026-10-03T11:17:05Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T111711852375-fsri-ladder-census-counts-every-entry/manifest.md",
+    "negative_control": "rename one recovery entry in a scratch copy of fixed_point.py; the census test must fail naming it",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/recovery_ladder_census.py",
+      "benchmarks/recovery_ladder_telemetry.py",
+      "tests/test_recovery_ladder_census.py",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-ladder-census-counts-every-entry.html",
+      "docs/figures/forward-solver-route-integrity/fsri-ladder-census-counts-every-entry"
+    ]
+  },
+  "orientation_input_tokens": 2971388.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsri-ladder-census-counts-every-entry",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-03T11:17:19.574872+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.62,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 351.808,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1889.736,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.7797551915625001,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.7797551915625001,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 4,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 17,
+          "passed": 100,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 31
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.13,
+      "claude-haiku": 0,
+      "claude-opus": 0.01,
+      "clive": 0.66,
+      "codex": 0.03,
+      "codex-astra": 0.04,
+      "codex-luna": 0.01,
+      "codex-terra": 0.06,
+      "hold": 0.06
+    },
+    "rendered_token_estimate": 1337,
+    "usage": {
+      "cost": 0.00014952,
+      "input_tokens": 3560,
+      "output_tokens": 99
+    }
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "a90d04c14b54a55eabce135cfbbcc3cb87a13a5c",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "8f475ae23620206e833b7f92347dccf64a7e46d3",
+    "reviewed_head_sha": "a90d04c14b54a55eabce135cfbbcc3cb87a13a5c",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 93
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T111711852375-fsri-ladder-census-counts-every-entry",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "cf581746-0dd6-45f7-a1b1-5b2b0bc802a0",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 12805248,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2451.753,
+    "generated_tokens": 61795,
+    "generation_seconds": 758.301,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 84.0,
+    "machine_seconds": 1693.452,
+    "peak_input_tokens": 193287,
+    "tokens_per_second": 81.49,
+    "wall_tokens_per_second": 25.2
+  },
+  "time_budget": "45m",
+  "tool_steps": 97.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2464,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T11:58:45Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-03T11:17:43Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T111711852375-fsri-ladder-census-counts-every-entry",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 15232,
+    "worker_pid": 631282
+  },
+  "worker_seconds": 2424,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

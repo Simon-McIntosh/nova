@@ -355,7 +355,7 @@ def render(receipt, output, draw_order=DEFAULT_DRAW_ORDER):
                     coordinates, state, wall
                 )
                 contour = poloidal.draw_flux_contours(
-                    axis, radial, height, raster, levels, color="#444444"
+                    axis, radial, height, raster, levels, color="#444444", wall=units
                 )
                 segments = sum(
                     len(part) > 1 for group in contour.allsegs for part in group

@@ -524,7 +524,7 @@ def render(row, output):
             )
             radial, height, raster = certificate._raster_field(coordinates, field, wall)
             contours = poloidal.draw_flux_contours(
-                axis, radial, height, raster, local_levels, color="#444444"
+                axis, radial, height, raster, local_levels, color="#444444", wall=units
             )
             assert any(len(part) > 1 for group in contours.allsegs for part in group)
             poloidal.draw_wall(axis, units=units)

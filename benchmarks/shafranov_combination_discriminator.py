@@ -111,6 +111,16 @@ READING_LABELS: dict[str, str] = {
     "magnetics_elongated": "magnetics (a sqrt k)",
     "magnetics_discrete": "magnetics (row kernel)",
 }
+#: Legend labels the combination strip draws.  The row-kernel reading equals the
+#: circular reading to machine zero on every bank row, so the strip draws that
+#: shared value once and names the equality rather than advertising a series a
+#: reader can never see under the marker drawn on top of it.
+STRIP_LABELS: dict[str, str] = {
+    "efit_own": READING_LABELS["efit_own"],
+    "profiles": READING_LABELS["profiles"],
+    "magnetics_circular": f"{READING_LABELS['magnetics_circular']} == row kernel",
+    "magnetics_elongated": READING_LABELS["magnetics_elongated"],
+}
 #: What each magnetics reading is, so the labels cannot be read as independence.
 MAGNETICS_PROVENANCE: dict[str, str] = {
     "magnetics_circular": (
@@ -925,7 +935,8 @@ def _render_state_panel(
     axis.set_title(f"{title}\n{note}", fontsize=8)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
-    figure.savefig(path.with_suffix(".svg"))
+    with plt.rc_context({"svg.fonttype": "none"}):
+        figure.savefig(path.with_suffix(".svg"))
     plt.close(figure)
     return {
         "png": {
@@ -965,14 +976,12 @@ def _draw_panel(receipt: dict[str, Any], path: Path, *, source: str) -> dict[str
         "profiles": "#8c2d04",
         "magnetics_circular": "#3366cc",
         "magnetics_elongated": "#2a9d8f",
-        "magnetics_discrete": "#cc7722",
     }
     markers = {
         "efit_own": "D",
         "profiles": "o",
         "magnetics_circular": "v",
         "magnetics_elongated": "^",
-        "magnetics_discrete": "s",
     }
     figure, axes = plt.subplots(
         len(rows),
@@ -982,16 +991,18 @@ def _draw_panel(receipt: dict[str, Any], path: Path, *, source: str) -> dict[str
         constrained_layout=True,
     )
     axes = np.atleast_1d(axes)
+    drawn_keys = ("efit_own", "profiles", "magnetics_circular", "magnetics_elongated")
     spans = [
         value
         for row in rows
-        for value in (row["readings"][key]["combination"] for key in READING_KEYS)
+        for value in (row["readings"][key]["combination"] for key in drawn_keys)
         if value is not None
     ]
     low, high = min(spans), max(spans)
     pad = 0.08 * (high - low if high > low else 1.0)
+    residual = max(row["row_kernel_versus_circular_residual"] for row in rows)
     for axis, row in zip(axes, rows, strict=True):
-        for key in READING_KEYS:
+        for key in drawn_keys:
             value = row["readings"][key]["combination"]
             if value is None:
                 continue
@@ -1002,7 +1013,7 @@ def _draw_panel(receipt: dict[str, Any], path: Path, *, source: str) -> dict[str
                 color=palette[key],
                 markersize=7,
                 linestyle="none",
-                label=READING_LABELS[key] if axis is axes[0] else None,
+                label=STRIP_LABELS[key] if axis is axes[0] else None,
             )
         profiles = row["readings"]["profiles"]["combination"]
         own = row["readings"]["efit_own"]["combination"]
@@ -1019,17 +1030,19 @@ def _draw_panel(receipt: dict[str, Any], path: Path, *, source: str) -> dict[str
             fontsize=8,
             loc="left",
         )
-    axes[0].legend(fontsize=6, ncol=5, loc="lower center", frameon=False)
+    axes[0].legend(fontsize=6, ncol=4, loc="lower center", frameon=False)
     axes[-1].set_xlabel(r"$\beta_p + l_i/2$", fontsize=8)
     axes[-1].set_xlim(low - pad, high + pad)
     figure.suptitle(
         "beta_p + l_i/2 on the MAST bank rows: EFIT's own value, the extracted "
-        "profiles, and the magnetics read three ways",
+        "profiles, and the magnetics read two ways (the row kernel equals the "
+        f"circular reading, residual {residual:.1f})",
         fontsize=8,
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
-    figure.savefig(path.with_suffix(".svg"))
+    with plt.rc_context({"svg.fonttype": "none"}):
+        figure.savefig(path.with_suffix(".svg"))
     plt.close(figure)
     return {
         "png": {
@@ -1049,6 +1062,15 @@ def _draw_panel(receipt: dict[str, Any], path: Path, *, source: str) -> dict[str
             "sha256": hashlib.sha256(path.with_suffix(".svg").read_bytes()).hexdigest(),
         },
         "source_revision": source,
+        "series_policy": {
+            "drawn_series": list(drawn_keys),
+            "merged_series": ["magnetics_circular", "magnetics_discrete"],
+            "merge_reason": (
+                "the row-kernel reading equals the circular reading on every "
+                "row, so the two are one value drawn once and named as equal"
+            ),
+            "row_kernel_versus_circular_residual_max": residual,
+        },
     }
 
 

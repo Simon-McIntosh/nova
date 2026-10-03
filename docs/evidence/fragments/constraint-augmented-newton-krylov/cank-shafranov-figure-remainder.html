@@ -1,0 +1,38 @@
+<section id="cank-shafranov-figure-remainder">
+    <h2>The remaining Shafranov figure repairs: a legible refusal subtitle, one drawn magnetics pair, reference contours</h2>
+    <p><strong>Node:</strong> <code>cank-shafranov-figure-remainder</code>. Every figure was re-rendered from its committed
+    receipt through <code>benchmarks/shafranov_pair_receipt.py</code> and
+    <code>benchmarks/shafranov_combination_discriminator.py</code>; no equilibrium was solved.</p>
+
+    <p><strong>The six refused-row panels.</strong> The subtitle that keeps a refused row honest — <code>reference state
+    alone: the row is refused on this profile, so no terminal state exists</code> — was drawn as one unbroken line and ran off
+    both edges of the 4.8&nbsp;in canvas, unreadable at either end. It is now wrapped to
+    <code>CAPTION_WRAP_CHARACTERS</code> and the panel records the wrapped lines with the measured text extent of the widest
+    one (2.50&nbsp;in) against the canvas width (4.80&nbsp;in), so the legibility is a recorded measurement rather than a guess.
+    The panel draws the reference flux as unfilled line contours, the vessel, the magnetic axis as a solid triangle and the
+    admitted saddle as a filled cross.</p>
+    <p><img src="/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21978-35.png"
+        alt="MAST 21978/35 Shafranov row: reference flux line contours, wrapped refusal subtitle, wall, axis triangle and saddle cross" width="520" />
+    <br /><em><code>shafranov/row-21978-35.png</code>: the refusal sentence now wraps to lines that fit the canvas; one of six
+    identical repairs.</em></p>
+
+    <p><strong>The combination strip.</strong> The strip advertised five series, including a <code>magnetics (row kernel)</code>
+    down-triangle that no reader could see: the row-kernel reading equals the circular reading to machine zero on all six bank
+    rows (<code>.row_kernel_versus_circular_residual = 0.0</code>), so the marker drawn for one sat exactly on the other. The
+    strip now draws that shared value once, labels it <code>magnetics (a) == row kernel</code>, and says in its title that the
+    row kernel equals the circular reading at residual 0.0 — four series, not five.</p>
+    <p><img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.svg"
+        alt="Combination strip: EFIT, profiles, magnetics (a) == row kernel, magnetics (a sqrt k) on six bank rows" width="720" /></p>
+
+    <p><strong>The projected flux-function fit.</strong> The panel's titled state is the reference flux, drawn as unfilled line
+    contours on its own levels with the reference nulls and the wall; the title no longer claims a terminal flux that the
+    receipt cannot persist, the fitted curves are visible (projected solid, extracted dashed, freed scale dotted), the suptitle
+    and the panel title wrap to fit their canvas, and the vector twin now emits text rather than glyph outlines.</p>
+    <p><img src="/nova/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.png"
+        alt="MAST 21978/35 projected flux-function fit: p-prime and FF-prime curves beside the reference flux panel" width="900" /></p>
+
+    <p><strong>Gate.</strong> <code>JAX_PLATFORMS=cpu pytest tests/test_shafranov_discriminator_render.py
+    tests/test_shafranov_pair_receipt.py tests/test_shafranov_combination_discriminator.py</code>: <strong>44 passed</strong>.
+    The negative control runs the render tests against the pre-repair figures and is red on the clipped subtitle and the hidden
+    series.</p>
+  </section>

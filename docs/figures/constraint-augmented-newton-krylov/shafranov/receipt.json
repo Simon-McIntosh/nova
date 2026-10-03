@@ -103,9 +103,17 @@
       "converged": false,
       "termination": null,
       "figure": {
-        "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-pair/docs/figures/constraint-augmented-newton-krylov/shafranov/row-21978-35.png",
+        "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21978-35.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21978-35.png",
-        "sha256": "b2eca0045439e2220bff3bc9c5b630785b026b3e6965c47b56214947d8c746b1"
+        "sha256": "c7bf636755b38bd076bf20c01b519063da1e758720ec66367ad4f42cbbda2808",
+        "caption_lines": [
+          "MAST 21978/35: beta_p + l_i/2 row",
+          "reference state alone: the row is refused on",
+          "this profile, so no terminal state exists,",
+          "shared levels"
+        ],
+        "caption_widest_inches": 2.5,
+        "canvas_width_inches": 4.8
       }
     },
     {
@@ -128,9 +136,17 @@
       "converged": false,
       "termination": null,
       "figure": {
-        "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-pair/docs/figures/constraint-augmented-newton-krylov/shafranov/row-21983-35.png",
+        "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21983-35.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21983-35.png",
-        "sha256": "498c3c5c2f869e779785f284d9bc48397ecc438bf2101519d8ba9d5e0b6ff943"
+        "sha256": "b0c9b849f5188f8024c99cf02f874a1f6d3317cb31059446933f9391f3a780cd",
+        "caption_lines": [
+          "MAST 21983/35: beta_p + l_i/2 row",
+          "reference state alone: the row is refused on",
+          "this profile, so no terminal state exists,",
+          "shared levels"
+        ],
+        "caption_widest_inches": 2.5,
+        "canvas_width_inches": 4.8
       }
     },
     {
@@ -153,9 +169,17 @@
       "converged": false,
       "termination": null,
       "figure": {
-        "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-pair/docs/figures/constraint-augmented-newton-krylov/shafranov/row-21985-51.png",
+        "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21985-51.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21985-51.png",
-        "sha256": "7f6180d35563b39670cdaf02a3a2273fcf0defb3a73c3a3477ef44d621f53864"
+        "sha256": "c1156452f26877d030aabdc5857314b9ee3465e0637d6d88029b19bef57253ec",
+        "caption_lines": [
+          "MAST 21985/51: beta_p + l_i/2 row",
+          "reference state alone: the row is refused on",
+          "this profile, so no terminal state exists,",
+          "shared levels"
+        ],
+        "caption_widest_inches": 2.5,
+        "canvas_width_inches": 4.8
       }
     },
     {
@@ -178,9 +202,17 @@
       "converged": false,
       "termination": null,
       "figure": {
-        "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-pair/docs/figures/constraint-augmented-newton-krylov/shafranov/row-21986-46.png",
+        "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21986-46.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21986-46.png",
-        "sha256": "54f1ac1cba565fcf5226d2297856ad1d6c54a437b3700178d6579aacc00223ed"
+        "sha256": "9cee3cadac21fa47fae3491799c5228d7f4f46fdf2ad6392c5ba9c4a49404996",
+        "caption_lines": [
+          "MAST 21986/46: beta_p + l_i/2 row",
+          "reference state alone: the row is refused on",
+          "this profile, so no terminal state exists,",
+          "shared levels"
+        ],
+        "caption_widest_inches": 2.5,
+        "canvas_width_inches": 4.8
       }
     },
     {
@@ -203,9 +235,17 @@
       "converged": false,
       "termination": null,
       "figure": {
-        "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-pair/docs/figures/constraint-augmented-newton-krylov/shafranov/row-21989-55.png",
+        "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21989-55.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21989-55.png",
-        "sha256": "f1cce1a47c594458ddb7240301503a1ed2ac12b896e285a1a6779f4fd0e78820"
+        "sha256": "76b08d6a486d0cbbf8bf1f90619b803d0c40edaab6d175c4a4b6770259655022",
+        "caption_lines": [
+          "MAST 21989/55: beta_p + l_i/2 row",
+          "reference state alone: the row is refused on",
+          "this profile, so no terminal state exists,",
+          "shared levels"
+        ],
+        "caption_widest_inches": 2.5,
+        "canvas_width_inches": 4.8
       }
     },
     {
@@ -228,9 +268,17 @@
       "converged": false,
       "termination": null,
       "figure": {
-        "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-pair/docs/figures/constraint-augmented-newton-krylov/shafranov/row-22086-43.png",
+        "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-22086-43.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-22086-43.png",
-        "sha256": "2c7753cf05ffb1f16c76bcc5e5962640fa32ebfd7b392db4dcfa8c9383873a3a"
+        "sha256": "3b62229112bb3830bf907b1642ba58525345003a7a8c1cd4f2368f694b415c39",
+        "caption_lines": [
+          "MAST 22086/43: beta_p + l_i/2 row",
+          "reference state alone: the row is refused on",
+          "this profile, so no terminal state exists,",
+          "shared levels"
+        ],
+        "caption_widest_inches": 2.5,
+        "canvas_width_inches": 4.8
       }
     }
   ]

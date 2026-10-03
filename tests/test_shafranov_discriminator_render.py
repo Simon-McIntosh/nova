@@ -32,15 +32,22 @@ ROOT = Path(__file__).resolve().parents[1]
 #: revision's figures, so a reverted painter is shown to fail them.
 FIGURE_ROOT = Path(os.environ.get("NOVA_SHAFRANOV_FIGURE_ROOT", str(ROOT)))
 DISCRIMINATOR = (
-    FIGURE_ROOT / "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator"
+    FIGURE_ROOT
+    / "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator"
 )
-FLUX_FIT = FIGURE_ROOT / "docs/figures/constraint-augmented-newton-krylov/flux-function-fit"
+FLUX_FIT = (
+    FIGURE_ROOT / "docs/figures/constraint-augmented-newton-krylov/flux-function-fit"
+)
 MANDATED_ARM_VERDICT = (
     "converged: false, terminal residual 5.07e-02, active_set_cycle_detected"
 )
 
 _PATH = re.compile(r'<path[^>]*d="([^"]+)"[^>]*style="([^"]*)"')
 STATE_PANELS = sorted(DISCRIMINATOR.glob("row-*-state.svg"))
+SHAFRANOV = FIGURE_ROOT / "docs/figures/constraint-augmented-newton-krylov/shafranov"
+SHAFRANOV_ROWS = sorted(SHAFRANOV.glob("row-*.json"))
+STRIP_SVG = DISCRIMINATOR / "shafranov-combination-discriminator.svg"
+STRIP_RECEIPT = DISCRIMINATOR / "receipt.json"
 
 
 def marker_shapes(svg_text: str, color: str) -> dict[str, int]:
@@ -113,3 +120,67 @@ def test_flux_function_fit_title_carries_each_arms_verdict() -> None:
     )
     assert needle in svg_text
     assert needle in entry["figure"]["title"]
+
+
+@pytest.mark.parametrize("receipt_path", SHAFRANOV_ROWS, ids=lambda path: path.name)
+def test_shafranov_row_panel_subtitle_fits_the_canvas(receipt_path: Path) -> None:
+    """The subtitle that keeps a refused row honest is wrapped to fit.
+
+    An unbroken refusal sentence runs off both edges of the panel canvas and is
+    unreadable at either end, so the receiver records the wrapped lines and the
+    measured text extent, and each is required to sit inside the canvas.
+    """
+    figure = json.loads(receipt_path.read_text(encoding="utf-8"))["figure"]
+    lines = figure["caption_lines"]
+    assert len(lines) >= 2
+    joined = " ".join(lines)
+    assert "refused on this profile" in joined
+    assert joined.endswith("shared levels")
+    # The widest wrapped line is measured, not guessed: it must fit the canvas.
+    assert figure["caption_widest_inches"] < figure["canvas_width_inches"]
+
+
+def test_combination_strip_does_not_advertise_the_covered_series() -> None:
+    """The strip draws the identical magnetics pair once and names the equality.
+
+    The row-kernel reading equals the circular reading on every bank row, so the
+    marker drawn for one sits exactly on the other and a legend entry for it
+    advertises a series no reader can see.  The strip names the pair as one value.
+    """
+    svg_text = STRIP_SVG.read_text(encoding="utf-8")
+    assert "magnetics (row kernel)" not in svg_text
+    assert "magnetics (a) == row kernel" in svg_text
+    assert "equals the circular reading, residual 0.0" in svg_text
+    assert "read three ways" not in svg_text
+
+
+def test_combination_strip_receipt_records_the_merged_series() -> None:
+    """The receipt states the merge and the equality it rests on, on every row."""
+    receipt = json.loads(STRIP_RECEIPT.read_text(encoding="utf-8"))
+    policy = receipt["figure"]["series_policy"]
+    assert policy["merged_series"] == ["magnetics_circular", "magnetics_discrete"]
+    assert len(policy["drawn_series"]) == 4
+    assert policy["row_kernel_versus_circular_residual_max"] == 0.0
+    for row in receipt["rows_receipt"]:
+        assert row["row_kernel_versus_circular_residual"] == 0.0
+        assert (
+            row["readings"]["magnetics_circular"]["combination"]
+            == row["readings"]["magnetics_discrete"]["combination"]
+        )
+
+
+def test_flux_function_fit_draws_the_reference_contours() -> None:
+    """The fit's titled state is the reference flux, drawn as line contours.
+
+    The receipt persists no terminal field, so the panel draws the reference
+    state's flux and titles it as the reference; a title claiming a terminal
+    flux with only the reference drawn is the defect this pins.
+    """
+    svg_text = re.sub(
+        r"\s+",
+        " ",
+        (FLUX_FIT / "row-21978-35.svg").read_text(encoding="utf-8"),
+    )
+    assert "reference flux" in svg_text
+    assert "terminal flux" not in svg_text
+    assert "extracted" in svg_text and "projected" in svg_text

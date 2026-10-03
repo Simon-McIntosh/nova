@@ -18,8 +18,16 @@
   "converged": false,
   "termination": null,
   "figure": {
-    "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-pair/docs/figures/constraint-augmented-newton-krylov/shafranov/row-21986-46.png",
+    "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21986-46.png",
     "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21986-46.png",
-    "sha256": "54f1ac1cba565fcf5226d2297856ad1d6c54a437b3700178d6579aacc00223ed"
+    "sha256": "9cee3cadac21fa47fae3491799c5228d7f4f46fdf2ad6392c5ba9c4a49404996",
+    "caption_lines": [
+      "MAST 21986/46: beta_p + l_i/2 row",
+      "reference state alone: the row is refused on",
+      "this profile, so no terminal state exists,",
+      "shared levels"
+    ],
+    "caption_widest_inches": 2.5,
+    "canvas_width_inches": 4.8
   }
 }

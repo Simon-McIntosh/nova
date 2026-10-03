@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="55">
+<meta name="plan-version" content="56">
 </head>
 <body>
   <main class="plan-doc">
@@ -502,6 +502,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20261003T015520623481-review-of-ctta-scatter-segmented-max-equivalence" data-who="reckon-build" data-when="2026-10-03T02:17:28.919Z">
     <div class="r-comment-body"><p>Reviewed run r-20261002T233222856971-ctta-scatter-segmented-max-equivalence at head 93da36c7be39e44bf84376696a48130684c8f77d (base f7f823c667f9b65740a04d5de40d991e60a2cd4e, three commits, tests/test_contour_tree_scatter_equivalence.py + docs/evidence/fragments/contour-tree-topology-authority/ctta-scatter-segmented-max-equivalence.html, +250/-0). The prior review's central finding is repaired: the test now imports and drives the product sweep (_sweep_tree, build_contour_tree, _carrier_adjacency) instead of a test-local scatter. Stored a parsed record scoring all five dimensions: pass-with-follow-ons, 92/100; added_failure_count 0 (both armed suite arms 8 passed EXIT=0); two follow-ons, no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20261003T022349310426-ctta-sweep-device-placement" data-who="reckon-build" data-when="2026-10-03T03:15:20Z">
+    <div class="r-comment-body"><p>Measured 14 carriers at batches 1, 8 and 64: CPU wins one field (0.225 s mean), while the H200 parallel prototype wins batches 8 (0.407 s) and 64 (0.461 s), with two all-field receipt comparisons reporting zero mismatches.</p></div>
 </div>
 </section>
 </main>

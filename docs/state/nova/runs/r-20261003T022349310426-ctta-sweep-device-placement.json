@@ -1,0 +1,427 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-terra",
+  "base_sha": "83f2de99eebcdfb9565e89b176ab694d3d521e11",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 21004032,
+      "cached_input_tokens_cumulative": 21004032,
+      "input_tokens": 21274043,
+      "input_tokens_cumulative": 21274043,
+      "output_tokens": 52395,
+      "output_tokens_cumulative": 52395,
+      "reasoning_output_tokens": 15382,
+      "reasoning_output_tokens_cumulative": 15382
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 685,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_receipt",
+        "path": "tests/test_contour_tree_explanatory_figure.py"
+      },
+      "run_function": {
+        "line": 319,
+        "name": "_arguments",
+        "path": "benchmarks/contour_tree_sweep_placement.py"
+      },
+      "window_line": 326
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "test_virtual_slot_is_typed_outside_and_excluded_from_dd",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 319,
+        "name": "_arguments",
+        "path": "benchmarks/contour_tree_sweep_placement.py"
+      },
+      "window_line": 326
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_receipt",
+        "path": "tests/test_contour_tree_explanatory_figure.py"
+      },
+      "run_function": {
+        "line": 412,
+        "name": "_measure_cpu",
+        "path": "benchmarks/contour_tree_sweep_placement.py"
+      },
+      "window_line": 417
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "test_virtual_slot_is_typed_outside_and_excluded_from_dd",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 412,
+        "name": "_measure_cpu",
+        "path": "benchmarks/contour_tree_sweep_placement.py"
+      },
+      "window_line": 417
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "4b55fc0a057be6d08a15e0d3c4a07855da48e589"
+  ],
+  "completed_at": "2026-10-03T03:15:20Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-03T02:24:39Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "contour-tree-topology-authority",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 2.922523489932886,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-03T03:23:59.665557+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-03T02:23:58Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 586175,
+    "state": "quiet",
+    "utilisation_pct": 9.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-03T02:23:58Z",
+    "read_at": "2026-10-03T02:23:59Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 9.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T03:15:20Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T022349310426-ctta-sweep-device-placement/manifest.md",
+  "member": "disposable-r-20261003T022349310426-ctta-sweep-device-placement",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "ctta-sweep-device-placement",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 550,
+          "cached_input_tokens": 563298,
+          "input_tokens": 563850,
+          "output_tokens": 1359,
+          "reasoning_output_tokens": 169,
+          "total_tokens": 565209,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: followup f-ctta-sweep-device-placement. The near-linear contour-tree sweep (nova/equilibrium/contour_tree.py, merged 4db6fb357) is launch-latency bound on the H200: a fori_loop of vertex visits, each a data-dependent while_loop, takes 2.772 s at 1089 vertices against 0.490 s on CPU. Deliverable: benchmarks/contour_tree_sweep_placement.py, which measures three placements on the twelve certificate rungs and the two MAST carriers that tests/test_contour_tree_brute_force.py builds, at batch sizes 1, 8 and 64. The placements are (a) one field host-side on CPU, (b) batched fields on the H200 with vmap over the existing sweep, and (c) a parallel union-find formulation on the device, written in the benchmark as a prototype and not in nova/. It reports compile and execute walls per placement and batch, and checks with benchmarks/contour_tree_brute_force.py --compare that every placement's receipt fields are bit-identical to the CPU single-field receipt. Evidence: the fragment at docs/evidence/fragments/contour-tree-topology-authority/ctta-sweep-device-placement.html, with one figure of execute wall against vertex count per placement (data-ink style, direct labels) and a recommended placement for each of three uses: single solve, labeller batch and census. Read a titan or H200 number as that device's number. Run on the H200 through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh --rungs h200 --force-submit; the coordinator authorises this launch path, and the general fence does not forbid it. The CPU arm runs in place on this fleet allocation. No nova/ source change in this node. Every uv command carries --no-sync and nothing runs uv sync. Write the manifest before any long step, with empty wait fields unless a wait_probe names a job id and wait_terminal names a state the probe prints; its status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Measure where the contour-tree sweep should run for single, batched and census use",
+    "id": "ctta-sweep-device-placement",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-03T02:23:58Z",
+      "read_at": "2026-10-03T02:23:59Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 9.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T022349310426-ctta-sweep-device-placement/manifest.md",
+    "negative_control": "",
+    "plan": "contour-tree-topology-authority",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "open",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/contour_tree_sweep_placement.py",
+      "docs/evidence/fragments/contour-tree-topology-authority/ctta-sweep-device-placement.html",
+      "docs/figures/contour-tree-topology-authority/ctta-sweep-device-placement"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.9212319368318433,
+      "derived": 0.033889811607142786,
+      "drain_hours": 168.0,
+      "effective_limit": 0.033889811607142786,
+      "elapsed_fraction": 0.030808919642857074,
+      "elapsed_hours": 5.175898499999988,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-03T02:24:07+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.91,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.09,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.022841999999999998,
+      "decided_by": "window",
+      "margin": 0.808408,
+      "name": "ctta-sweep-device-placement",
+      "score": 0.83125,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.09
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.2346,
+        "observed_at": "2026-10-03T02:24:07+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.09,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "ctta-sweep-device-placement",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-03T02:24:07.234600+00:00",
+    "score": 0.83125,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.235,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "contour-tree-topology-authority",
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "4b55fc0a057be6d08a15e0d3c4a07855da48e589",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "83f2de99eebcdfb9565e89b176ab694d3d521e11",
+    "reviewed_head_sha": "4b55fc0a057be6d08a15e0d3c4a07855da48e589",
+    "scores": {
+      "durability": 19,
+      "evidence": 19,
+      "fit": 18,
+      "goal_fidelity": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 96
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T022349310426-ctta-sweep-device-placement",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0ff94-1fc0-7550-aafa-5fe8e3e865f7",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "open",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 21004032,
+    "cumulative_input_tokens": 42278075,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 67777
+  },
+  "time_budget": "60m",
+  "tool_steps": 168.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3041,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T03:15:24Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T02:24:49Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T022349310426-ctta-sweep-device-placement",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 470,
+    "worker_pid": 4080052
+  },
+  "worker_seconds": 3041,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

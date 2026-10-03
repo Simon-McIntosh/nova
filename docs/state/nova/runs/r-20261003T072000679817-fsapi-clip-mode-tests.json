@@ -1,0 +1,585 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "d45234f11e70ed2fa2a24d181909c518e1c9f8f4",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 11412263,
+      "input_tokens_cumulative": 11412263,
+      "output_tokens": 55819,
+      "output_tokens_cumulative": 55819,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 104,
+    "files": 8,
+    "removed": 129
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_run_terminal_driver",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "run_function": {
+        "line": 115,
+        "name": "_run_driver",
+        "path": "tests/test_equilibrium_forward_operator.py"
+      },
+      "window_line": 125
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "_run_driver",
+        "path": "tests/test_forward_support_clip_mode.py"
+      },
+      "run_function": {
+        "line": 115,
+        "name": "_run_driver",
+        "path": "tests/test_equilibrium_forward_operator.py"
+      },
+      "window_line": 125
+    },
+    {
+      "existing_function": {
+        "line": 127,
+        "name": "test_support_clip_mode_defaults_to_chord_on_import",
+        "path": "tests/test_forward_support_clip_mode.py"
+      },
+      "run_function": {
+        "line": 115,
+        "name": "_run_driver",
+        "path": "tests/test_equilibrium_forward_operator.py"
+      },
+      "window_line": 125
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "_run_driver",
+        "path": "tests/test_equilibrium_forward_operator.py"
+      },
+      "run_function": {
+        "line": 105,
+        "name": "_run_terminal_driver",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "_run_driver",
+        "path": "tests/test_forward_support_clip_mode.py"
+      },
+      "run_function": {
+        "line": 105,
+        "name": "_run_terminal_driver",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 127,
+        "name": "test_support_clip_mode_defaults_to_chord_on_import",
+        "path": "tests/test_forward_support_clip_mode.py"
+      },
+      "run_function": {
+        "line": 105,
+        "name": "_run_terminal_driver",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 386,
+        "name": "test_cell_banked_field_integrals_are_bit_identical",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "run_function": {
+        "line": 357,
+        "name": "test_cell_banked_current_moments_are_bit_identical",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "window_line": 359
+    },
+    {
+      "existing_function": {
+        "line": 357,
+        "name": "test_cell_banked_current_moments_are_bit_identical",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "run_function": {
+        "line": 386,
+        "name": "test_cell_banked_field_integrals_are_bit_identical",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "window_line": 388
+    },
+    {
+      "existing_function": {
+        "line": 534,
+        "name": "test_whole_cell_terminal_state_ignores_polish_jvp",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "run_function": {
+        "line": 502,
+        "name": "test_exact_clip_terminal_state_matches_reference_fixed_point",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "window_line": 513
+    },
+    {
+      "existing_function": {
+        "line": 502,
+        "name": "test_exact_clip_terminal_state_matches_reference_fixed_point",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "run_function": {
+        "line": 534,
+        "name": "test_whole_cell_terminal_state_ignores_polish_jvp",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "window_line": 547
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_nonexact_seed_is_bit_identical_and_does_not_read_operator",
+        "path": "tests/test_exact_clip_seed.py"
+      },
+      "run_function": {
+        "line": 52,
+        "name": "test_exact_clip_seed_solves_boundary_level_for_unit_amplitude",
+        "path": "tests/test_exact_clip_seed.py"
+      },
+      "window_line": 53
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "test_exact_clip_seed_solves_boundary_level_for_unit_amplitude",
+        "path": "tests/test_exact_clip_seed.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "test_nonexact_seed_is_bit_identical_and_does_not_read_operator",
+        "path": "tests/test_exact_clip_seed.py"
+      },
+      "window_line": 69
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "_certificate_row",
+        "path": "tests/test_forward_compile_identity.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier",
+        "path": "tests/test_exact_clip_seed_bracket.py"
+      },
+      "window_line": 32
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_reduced_hex_request_receipt_records_absent_raster_flux",
+        "path": "tests/test_forward_receipt_raster.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier",
+        "path": "tests/test_exact_clip_seed_bracket.py"
+      },
+      "window_line": 33
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "integral_state",
+        "path": "tests/test_forward_moment_class.py"
+      },
+      "run_function": {
+        "line": 71,
+        "name": "integral_state",
+        "path": "tests/test_forward_moment_class.py"
+      },
+      "window_line": 77
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "integral_state",
+        "path": "tests/test_forward_moment_class.py"
+      },
+      "run_function": {
+        "line": 103,
+        "name": "integral_state",
+        "path": "tests/test_forward_moment_class.py"
+      },
+      "window_line": 106
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "52200fd9b071fbf98eb84fb5a14a078e84b4f728",
+    "c207418833dc20e58f41169219372eb69cbce533"
+  ],
+  "completed_at": "2026-10-03T08:11:29.623Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-03T07:20:22Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest process",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests/test_exact_clip_memory.py",
+    "tests/test_solve_path_census_inputs.py::test_solve_path_prefix_slices_do_not_feed_the_null_census",
+    "nova/equilibrium/reduced_newton.py.",
+    "tests/test_exact_clip_seed_bracket.py::test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.985,
+    "plan": "forward-solve-api",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-03T08:20:02.671713+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-03T07:20:02Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 8,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 13,
+    "mean_context": 160000,
+    "observed_at": "2026-10-03T07:19:54Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T08:11:29.623Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T072000679817-fsapi-clip-mode-tests/manifest.md",
+  "member": "disposable-r-20261003T072000679817-fsapi-clip-mode-tests",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/test_equilibrium_forward_operator.py",
+      "tests/test_exact_clip_memory.py",
+      "tests/test_exact_clip_seed.py",
+      "tests/test_exact_clip_seed_bracket.py",
+      "tests/test_exact_moment_reduction_cut_cells.py",
+      "tests/test_forward_moment_class.py",
+      "tests/test_solve_path_census_inputs.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsapi-clip-mode-tests",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1307,
+          "cached_input_tokens": 738943,
+          "input_tokens": 740252,
+          "output_tokens": 2019,
+          "reasoning_output_tokens": 644,
+          "total_tokens": 742271,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: the process-global support clip mode (nova/equilibrium/forward_operator.py _SUPPORT_CLIP_MODE, set_support_clip_mode and support_clip_mode) is being retired. Every benchmark has migrated: the certificate hub, the shared helpers and the leaves now thread an explicit mode through ForwardFluxOperator.with_clip_mode, ForwardSolveRequest(clip_mode=...) and the helpers' clip_mode keyword. This node migrates the seven test modules that still set the global: test_equilibrium_forward_operator, test_exact_clip_memory, test_exact_clip_seed, test_exact_clip_seed_bracket, test_exact_moment_reduction_cut_cells, test_forward_moment_class and test_solve_path_census_inputs. tests/test_forward_support_clip_mode.py, tests/test_forward_solve_clip_mode_request.py and tests/test_forward_solve_clip_mode_bridge.py test the global itself and stay for the deletion node. Rules: every set_support_clip_mode call, and every fixture that sets and restores the global, becomes an explicit mode on the operator or request the test builds, or the clip_mode keyword of the benchmark helper it calls. Each test asserts the same thing it asserted before, under the same mode. Gate, logged under the run directory: (1) grep finds no set_support_clip_mode or support_clip_mode in the seven files; (2) the seven modules, run with JAX_PLATFORMS=cpu and -m 'slow or not slow' in one fresh pytest process per file, add no failure by test id against the dispatch base. Run any module over ten minutes through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh --rungs h200 --force-submit, authorised. Record baseline_suite and after_suite as single JSON objects with literal commands and failure_ids. For the base arm use a git archive of the dispatch base restricted to nova tests benchmarks scripts under /tmp, removed before the manifest is written. Every uv command carries --no-sync and nothing runs uv sync. The manifest's status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Move the seven test modules that set the global clip mode onto explicit operator and request modes",
+    "id": "fsapi-clip-mode-tests",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-03T07:20:02Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 8,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 13,
+      "mean_context": 160000,
+      "observed_at": "2026-10-03T07:19:54Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T072000679817-fsapi-clip-mode-tests/manifest.md",
+    "negative_control": "in a scratch full-tree copy, drop the explicit exact mode from the operator one migrated exact-mode test builds; that test must fail, run with --import-mode=importlib and the copy's module __file__ printed",
+    "plan": "forward-solve-api",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/test_equilibrium_forward_operator.py",
+      "tests/test_exact_clip_memory.py",
+      "tests/test_exact_clip_seed.py",
+      "tests/test_exact_clip_seed_bracket.py",
+      "tests/test_exact_moment_reduction_cut_cells.py",
+      "tests/test_forward_moment_class.py",
+      "tests/test_solve_path_census_inputs.py",
+      "docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-tests.html",
+      "docs/figures/forward-solve-api/fsapi-clip-mode-tests"
+    ]
+  },
+  "orientation_input_tokens": 2951119.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsapi-clip-mode-tests",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-03T07:20:05.915148+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.083,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solve-api",
+  "plan_impl_at_dispatch": 0.985,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "c207418833dc20e58f41169219372eb69cbce533",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "d45234f11e70ed2fa2a24d181909c518e1c9f8f4",
+    "reviewed_head_sha": "c207418833dc20e58f41169219372eb69cbce533",
+    "scores": {
+      "durability": 17,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 88
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "run_id": "r-20261003T072000679817-fsapi-clip-mode-tests",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "ce3f8f7e-a060-42cb-b6be-1ebd1f2d6f0f",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 11412263,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 3057.032,
+    "generated_tokens": 55819,
+    "generation_seconds": 677.549,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 80.3,
+    "machine_seconds": 2379.483,
+    "peak_input_tokens": 184841,
+    "tokens_per_second": 82.38,
+    "wall_tokens_per_second": 18.26
+  },
+  "time_budget": "60m",
+  "tool_steps": 100.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 3067,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T08:11:32Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-03T07:20:28Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T072000679817-fsapi-clip-mode-tests",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 10767,
+    "worker_pid": 2889361
+  },
+  "worker_seconds": 3030,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

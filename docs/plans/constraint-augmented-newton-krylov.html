@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="109">
+<meta name="plan-version" content="110">
 <meta name="plan-impl" content="0.96">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8,84b23ee6,0081c3e9,4264668e,595cdd0f,6b9c4f25,989d561c,a283f243,5dd6b790,04ea37b0">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py,tests/test_wall_null_flux_tangent.py,nova/geometry/select.py,tests/test_wall_polish_continuity.py,benchmarks/constraint_shape_receipt.py,tests/test_shape_constraints.py,docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png,docs/figures/constraint-augmented-newton-krylov/shape-control/two-arms.json,docs/figures/constraint-augmented-newton-krylov/shape-control/vertical-shift.json,docs/figures/constraint-augmented-newton-krylov/shape-control/elongation-raise.json,docs/figures/constraint-augmented-newton-krylov/shape-control/converged.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png">
@@ -659,6 +659,9 @@ number and residual.</p>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261002T150135853683-review-of-cank-discriminator-and-fit-panels" data-who="reckon-build" data-when="2026-10-02T15:11:02.417Z">
     <div class="r-comment-body"><p>reviewed r-20261002T140840326701-cank-discriminator-and-fit-panels at base f8136784c..head 2e2000428: verdict pass, 88/100 (goal_fidelity 19, evidence 17, scope_discipline 20, durability 16, fit 16); independently reproduced the render gate (14 passed) and the base-arm refusal (13 failed, 1 passed, EXIT=1), and confirmed by direct parse that each state panel carries one #3366cc triangle and one #3366cc filled cross with the recorded boundary flux among its levels and both fit titles carry the arm verdicts</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261003T143831229519-cank-shafranov-figure-remainder" data-who="reckon-build" data-when="2026-10-03T15:20:10.587Z">
+    <div class="r-comment-body"><p>Regenerated the six Shafranov row panels with a wrapped refusal subtitle (widest line measured at 2.50 in against the 4.80 in canvas), the combination strip now drawing the identical magnetics pair once (four series, merge residual 0.0 on all six rows) and the projected fit with reference contours, a wrapped title and a visible extracted curve; gate 44 passed, negative control 8 failed EXIT=1 on the pre-repair figures.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260923T003137764402-review-of-cna-edge-contours-print-exponent-errors" data-who="reckon-ship" data-when="2026-09-23T01:37:08.211Z">
     <div class="r-comment-body"><p>review stored</p></div>

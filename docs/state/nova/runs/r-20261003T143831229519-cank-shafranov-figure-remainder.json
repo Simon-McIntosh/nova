@@ -1,0 +1,1633 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "0dfce2a0d1b3bfe8592c88601ef48f0cf49ffeb2",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 15541417,
+      "input_tokens_cumulative": 15541417,
+      "output_tokens": 56003,
+      "output_tokens_cumulative": 56003,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 3500,
+    "files": 35,
+    "removed": 11835
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 378,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 429
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 378,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 425
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 378,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 426
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 378,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 426
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 378,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 426
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1077,
+        "name": "commensurability_summary",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1093
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1077,
+        "name": "commensurability_summary",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1090
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1077,
+        "name": "commensurability_summary",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1090
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 1077,
+        "name": "commensurability_summary",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1096
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1153,
+        "name": "measure",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1170
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1153,
+        "name": "measure",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1171
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "measure_production_receipt",
+        "path": "tests/test_conditioning_shrinkage.py"
+      },
+      "run_function": {
+        "line": 1153,
+        "name": "measure",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1168
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 582
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 582
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 579
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 579
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 582
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 582
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 553,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 580
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "12a894f23214f20db840ace6e8ab272d9f2a6eb4"
+  ],
+  "completed_at": "2026-10-03T15:20:10.587Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-03T14:38:54Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_shafranov_discriminator_render.py tests/test_shafranov_pair_receipt.py tests/test_shafranov_combination_discriminator.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143831229519-cank-shafranov-figure-remainder/logs/after_gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.96,
+    "at_dispatch": 0.96,
+    "plan": "constraint-augmented-newton-krylov",
+    "reason": "figure repair; the plan implementation fraction counts the constraint library, not its panels",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-03T15:38:32.702466+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-03T14:38:32Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 17,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 9,
+    "headroom": 6,
+    "mean_context": 135000,
+    "observed_at": "2026-10-03T14:38:15Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T15:20:10.587Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143831229519-cank-shafranov-figure-remainder/manifest.md",
+  "member": "disposable-r-20261003T143831229519-cank-shafranov-figure-remainder",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_shafranov_discriminator_render.py::test_combination_strip_does_not_advertise_the_covered_series",
+      "tests/test_shafranov_discriminator_render.py::test_combination_strip_receipt_records_the_merged_series",
+      "tests/test_shafranov_discriminator_render.py::test_shafranov_row_panel_subtitle_fits_the_canvas[row-21978-35.json]",
+      "tests/test_shafranov_discriminator_render.py::test_shafranov_row_panel_subtitle_fits_the_canvas[row-21983-35.json]",
+      "tests/test_shafranov_discriminator_render.py::test_shafranov_row_panel_subtitle_fits_the_canvas[row-21985-51.json]",
+      "tests/test_shafranov_discriminator_render.py::test_shafranov_row_panel_subtitle_fits_the_canvas[row-21986-46.json]",
+      "tests/test_shafranov_discriminator_render.py::test_shafranov_row_panel_subtitle_fits_the_canvas[row-21989-55.json]",
+      "tests/test_shafranov_discriminator_render.py::test_shafranov_row_panel_subtitle_fits_the_canvas[row-22086-43.json]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_shafranov_discriminator_render.py::test_combination_strip_does_not_advertise_the_covered_series",
+      "tests/test_shafranov_discriminator_render.py::test_combination_strip_receipt_records_the_merged_series",
+      "tests/test_shafranov_discriminator_render.py::test_shafranov_row_panel_subtitle_fits_the_canvas[row-21978-35.json]",
+      "tests/test_shafranov_discriminator_render.py::test_shafranov_row_panel_subtitle_fits_the_canvas[row-21983-35.json]",
+      "tests/test_shafranov_discriminator_render.py::test_shafranov_row_panel_subtitle_fits_the_canvas[row-21985-51.json]",
+      "tests/test_shafranov_discriminator_render.py::test_shafranov_row_panel_subtitle_fits_the_canvas[row-21986-46.json]",
+      "tests/test_shafranov_discriminator_render.py::test_shafranov_row_panel_subtitle_fits_the_canvas[row-21989-55.json]",
+      "tests/test_shafranov_discriminator_render.py::test_shafranov_row_panel_subtitle_fits_the_canvas[row-22086-43.json]"
+    ],
+    "declaration": "run the render tests against the committed pre-repair shafranov row panels and combination strip; they must fail on the clipped subtitle and the hidden series",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143831229519-cank-shafranov-figure-remainder/logs/negative_control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143831229519-cank-shafranov-figure-remainder/logs/negative_control.log",
+    "test_paths": [
+      "tests/test_shafranov_combination_discriminator.py",
+      "tests/test_shafranov_discriminator_render.py",
+      "tests/test_shafranov_pair_receipt.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cank-shafranov-figure-remainder",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 4860,
+          "cached_input_tokens": 283839,
+          "input_tokens": 288701,
+          "output_tokens": 174,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 288875,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "The earlier node cank-discriminator-and-fit-panels (merged fb92581fc, review 88) repaired the six shafranov-discriminator state glyphs and the row-21978-35 fit title; the plan comment c-cank-panels-partial-20261002 lists what remains. This node closes it: the six shafranov/ row panels get a subtitle that fits the canvas and stays legible; the shafranov-discriminator combination strip no longer advertises the magnetics (a) series that the discrete square hides; the remaining audited figures in those directories are repaired as the followups state; and the flux-function-fit panels draw the reference contours that followup asks for. Gate: JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_shafranov_discriminator_render.py tests/test_shafranov_pair_receipt.py tests/test_shafranov_combination_discriminator.py passes with zero added failures against the base; the test asserts the regenerated titles and receipt keys, and fails on the pre-repair figures or receipt (the negative control). Read the followup f-fsa-figrepair-shafranov, f-fsa-figrepair-shafranov-discriminator and f-fsa-figrepair-flux-function-fit in docs/plans/constraint-augmented-newton-krylov.html in full first; it names each defective figure, its receipt, the defect and the repair. Regenerate through the committed nova.media painters, never recaption around a defect: flux maps keep the draw_nulls vocabulary (solid triangle axis, filled cross admitted saddle, hollow other nulls), draw_wall over the unit collection, unfilled line contours on stated levels, and a non-converged state shows its terminal residual and converged flag. Every number a regenerated title or caption states re-derives from a committed receipt by a named JSON path; where no receipt exists, the driver writes one beside the figure. Open every regenerated PNG and state in the manifest what it shows. The corrected captions go in the fragment docs/evidence/fragments/constraint-augmented-newton-krylov/cank-shafranov-figure-remainder.html with project-absolute src, not into the archive. Re-render from persisted receipts and states where they exist; a solve that is genuinely needed runs as ONE H200 job (betelgeuse, reservation gpu_0003_grpA, one card, 8 CPUs, --mem=64G, TMPDIR=/tmp in submit and payload, the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python without uv, RECKON_ALLOW_NESTED_LAUNCH=1 sbatch, which is a separate job and not a step of the fleet allocation, and is authorised; never srun or salloc), and if it outlasts your turn, commit, write status waiting with the sacct probe and job id, and end the turn. If the driver that draws a figure is outside your write paths, stop and report its path as a blocker. Keep scratch under the run directory, not /tmp, which is at 91 percent. This gate measures only this node; a failure outside its scope goes under follow_ons.",
+    "estimated_hours": null,
+    "goal": "finish the Shafranov figure repairs the earlier node left open",
+    "id": "cank-shafranov-figure-remainder",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-03T14:38:32Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 17,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 9,
+      "headroom": 6,
+      "mean_context": 135000,
+      "observed_at": "2026-10-03T14:38:15Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143831229519-cank-shafranov-figure-remainder/manifest.md",
+    "negative_control": "run the render tests against the committed pre-repair shafranov row panels and combination strip; they must fail on the clipped subtitle and the hidden series",
+    "plan": "constraint-augmented-newton-krylov",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/shafranov_pair_receipt.py",
+      "benchmarks/shafranov_combination_discriminator.py",
+      "docs/figures/constraint-augmented-newton-krylov/shafranov",
+      "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator",
+      "docs/figures/constraint-augmented-newton-krylov/flux-function-fit",
+      "tests/test_shafranov_discriminator_render.py",
+      "tests/test_shafranov_pair_receipt.py",
+      "tests/test_shafranov_combination_discriminator.py",
+      "docs/evidence/fragments/constraint-augmented-newton-krylov/cank-shafranov-figure-remainder.html",
+      "docs/figures/constraint-augmented-newton-krylov/cank-shafranov-figure-remainder"
+    ]
+  },
+  "orientation_input_tokens": 3325328.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "cank-shafranov-figure-remainder",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-03T14:38:36.911268+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.72,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 391.323,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2303.384,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.6399618284606481,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.6399618284606481,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 9,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 3,
+          "not-run": 16,
+          "passed": 90,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 20
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.08,
+      "claude-haiku": 0.01,
+      "claude-opus": 0.04,
+      "clive": 0.75,
+      "codex": 0.03,
+      "codex-astra": 0.02,
+      "codex-luna": 0,
+      "codex-terra": 0.01,
+      "hold": 0.06
+    },
+    "rendered_token_estimate": 1714,
+    "usage": {
+      "cost": 0.000167664,
+      "input_tokens": 3992,
+      "output_tokens": 99
+    }
+  },
+  "plan": "constraint-augmented-newton-krylov",
+  "plan_impl_at_dispatch": 0.96,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "12a894f23214f20db840ace6e8ab272d9f2a6eb4",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "0dfce2a0d1b3bfe8592c88601ef48f0cf49ffeb2",
+    "reviewed_head_sha": "12a894f23214f20db840ace6e8ab272d9f2a6eb4",
+    "scores": {
+      "durability": 16,
+      "evidence": 17,
+      "fit": 16,
+      "goal_fidelity": 15,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 83
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T143831229519-cank-shafranov-figure-remainder",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "1508d313-3087-4b7e-a86f-7069e14217ec",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 15739482,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2465.662,
+    "generated_tokens": 61661,
+    "generation_seconds": 1229.695,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.5,
+    "machine_seconds": 1235.967,
+    "peak_input_tokens": 196765,
+    "tokens_per_second": 50.14,
+    "wall_tokens_per_second": 25.01
+  },
+  "time_budget": "60m",
+  "tool_steps": 109.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 3457,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: One authorised H200 allocation failed after saving only the positive flux; another allocation for the complete receipt awaits the coordinator's answer to the pending requeue request.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 7057,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-03T13:17:05Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-03T12:41:19Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261003T121637673965-cco-repaired-constrained-remeasure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 622,
+          "worker_pid": 1900222
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "One authorised H200 allocation failed after saving only the positive flux; another allocation for the complete receipt awaits the coordinator's answer to the pending requeue request.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-03T13:17:05Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 4893,
+        "log_fresh": false,
+        "manifest_commits": [
+          "564030e5f",
+          "6e70eb4c8",
+          "5d2d5eaf1",
+          "36b67cef4",
+          "0a688b2e3",
+          "9ca7d87ae",
+          "35baa7c1b"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "236b85c2787ca10988bf9978a5afabd01df21f6190cefd17258a0551024f17ff",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T121637673965-cco-repaired-constrained-remeasure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T121637673965-cco-repaired-constrained-remeasure/manifest.md; resolve the blocker before resuming the run",
+        "node": "cco-repaired-constrained-remeasure",
+        "phase": "blocked",
+        "plan": "centroid-constrained-oracle-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261003T121637673965-cco-repaired-constrained-remeasure",
+        "session": "s22-nova",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261003T121637673965-cco-repaired-constrained-remeasure",
+          "session_id": "01a101b2-58ed-77d2-abdb-f7301461ca90",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 4952,
+        "terminal_at": "2026-10-03T13:16:02Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-repaired-constrained-remeasure"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 1095,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but the attached review is parsed; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 4695,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-03T13:50:56Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-03T13:20:31Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 379,
+          "worker_pid": 2206741
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-03T13:50:56Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 2863,
+        "log_fresh": false,
+        "manifest_commits": [
+          "11006b4b6",
+          "10c9f66f4",
+          "9e642988c",
+          "7cfda7880"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "8f9bc6db36ce40d4eed6f6b5d8f36f0b946f64a17efdfb7cb25654c03cd7d4f5",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --plan centroid-constrained-oracle-solve --section '§3' --role review --spec-level exact --node review-of-cco-repaired-constrained-remeasure-receipt --goal 'attach an independent review to run r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt' --done-when 'the review for r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt stores a parsed record scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt.at-7cfda7880b5da4a29e9b383f823f6d309c840ad1.json --time-budget 60m --session s22-nova --allow-unreconciled-runs --backend codex",
+        "node": "cco-repaired-constrained-remeasure-receipt",
+        "phase": "complete",
+        "plan": "centroid-constrained-oracle-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_status": "parsed",
+        "run_id": "r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt",
+        "session": "s22-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 2990,
+        "terminal_at": "2026-10-03T13:48:44Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-repaired-constrained-remeasure-receipt"
+      }
+    ]
+  },
+  "wall_seconds": 2476,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T15:20:13Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-03T14:39:01Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T143831229519-cank-shafranov-figure-remainder",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 9587,
+    "worker_pid": 3125627
+  },
+  "worker_seconds": 2431,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

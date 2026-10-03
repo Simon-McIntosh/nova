@@ -1,0 +1,720 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "9300a771470c97ca268927933c98d9ead604cd09",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 10110019,
+      "input_tokens_cumulative": 10110019,
+      "output_tokens": 56500,
+      "output_tokens_cumulative": 56500,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 102,
+    "files": 3,
+    "removed": 1
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "test_dry_run_prints_a_submission_line_for_every_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "test_payload_prelude_exports_reach_the_target",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 190
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_dry_run_pytest_keeps_the_callers_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "test_payload_prelude_exports_reach_the_target",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 190
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_dry_run_pytest_keeps_the_callers_equals_form_timeout",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "test_payload_prelude_exports_reach_the_target",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 190
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "test_payload_prelude_exports_reach_the_target",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 189
+    },
+    {
+      "existing_function": {
+        "line": 231,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 172,
+        "name": "test_payload_prelude_exports_reach_the_target",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 189
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_mem_zero_is_refused",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 231,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 249
+    },
+    {
+      "existing_function": {
+        "line": 151,
+        "name": "test_h200_payload_keeps_sampler_and_pin_diagnostic",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 231,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 250
+    },
+    {
+      "existing_function": {
+        "line": 172,
+        "name": "test_payload_prelude_exports_reach_the_target",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "run_function": {
+        "line": 231,
+        "name": "test_pending_resource_reason_falls_to_next_rung",
+        "path": "tests/test_nova_lane_launcher.py"
+      },
+      "window_line": 249
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "b091aa8d8996de2b8e98a974b0f40b4b098f256e",
+    "09ac4b0adb0ad84476f7554dd8e392432bf21869",
+    "2e1ffb4e576c9bf9dc260c518152293cfec5db5d"
+  ],
+  "completed_at": "2026-10-03T13:48:41.436Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-03T13:03:53Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest plugins",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "negative-polluted-pin.log"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_nova_lane_launcher.py -q",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T130331364525-fsri-lane-cache-guard-loads/gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.67,
+    "at_dispatch": 0.66,
+    "plan": "forward-solver-route-integrity",
+    "verdict": "moved"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-03T14:03:32.553276+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-03T13:03:32Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 5,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 6,
+    "headroom": 8,
+    "mean_context": 140000,
+    "observed_at": "2026-10-03T13:03:27Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T13:48:41.436Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T130331364525-fsri-lane-cache-guard-loads/manifest.md",
+  "member": "disposable-r-20261003T130331364525-fsri-lane-cache-guard-loads",
+  "negative_control": {
+    "added_failure_ids": [],
+    "baseline_failure_ids": [
+      "test_payload_prelude_exports_reach_the_target"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [],
+    "declaration": "One H200 lane job with NOVA_CACHE_MISS_BUDGET=0 against a pin compiled for another revision must end with WALL-CLOCK-UNRELIABLE and a nonzero exit, logged to ~/.cache/nova-lane-cache-guard/negative.log",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.cache/nova-lane-cache-guard/negative-h200.log",
+    "reason": "the declared mutation fails at the session level, not at a test id: negative-h200.log (H200 job 1280632) records CACHE_GUARD_MARKER=WALL-CLOCK-UNRELIABLE misses=13 budget=0 and EXIT_STATUS=1 while its four tests pass, because the cache guard refuses at session finish; the unit-level red is the launcher test failing at base 9300a7714 (base-focused.log, 1 failed / 8 passed)",
+    "resolved_log": "/home/ITER/mcintos/.cache/nova-lane-cache-guard/negative-h200.log",
+    "test_paths": [
+      "tests/test_nova_lane_launcher.py"
+    ],
+    "verdict": "waived"
+  },
+  "no_commit": null,
+  "node": "fsri-lane-cache-guard-loads",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1236,
+          "cached_input_tokens": 422356,
+          "input_tokens": 423594,
+          "output_tokens": 1322,
+          "reasoning_output_tokens": 31,
+          "total_tokens": 424916,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Follow f-fsri-lane-cache-guard-loads: scripts/nova_lane/run.sh delivers the prelude environment to the payload process; tests/test_nova_lane_launcher.py gains a case that fails at base 9300a7714 and passes after; one H200 lane job (RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log ~/.cache/nova-lane-cache-guard/positive.log --wait) shows cache_guard on the pytest plugins line with per-program hit or miss rows and the marker; the evidence fragment states whether JAX_COMPILATION_CACHE_DIR reached the tests before the repair",
+    "estimated_hours": 1.5,
+    "goal": "Make the H200 lane payload prelude exports reach the pytest process so the cache guard plugin loads",
+    "id": "fsri-lane-cache-guard-loads",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-03T13:03:32Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 5,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 6,
+      "headroom": 8,
+      "mean_context": 140000,
+      "observed_at": "2026-10-03T13:03:27Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T130331364525-fsri-lane-cache-guard-loads/manifest.md",
+    "negative_control": "One H200 lane job with NOVA_CACHE_MISS_BUDGET=0 against a pin compiled for another revision must end with WALL-CLOCK-UNRELIABLE and a nonzero exit, logged to ~/.cache/nova-lane-cache-guard/negative.log",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/nova_lane/run.sh",
+      "scripts/h200_test_lane/run.sh",
+      "tests/test_nova_lane_launcher.py",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-lane-cache-guard-loads.html",
+      "docs/figures/forward-solver-route-integrity/fsri-lane-cache-guard-loads"
+    ]
+  },
+  "orientation_input_tokens": 947418.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsri-lane-cache-guard-loads",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-03T13:03:36.234048+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.71,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 320.3,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 4793.002,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.7059595164351852,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.7059595164351852,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 7,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 2,
+          "passed": 23,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 33
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 15,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 8,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.04,
+      "claude-haiku": 0,
+      "claude-opus": 0.01,
+      "clive": 0.75,
+      "codex": 0.1,
+      "codex-astra": 0.04,
+      "codex-luna": 0.01,
+      "codex-terra": 0.01,
+      "hold": 0.04
+    },
+    "rendered_token_estimate": 1133,
+    "usage": {
+      "cost": 0.00014322,
+      "input_tokens": 3410,
+      "output_tokens": 99
+    }
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.66,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "2e1ffb4e576c9bf9dc260c518152293cfec5db5d",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "9300a771470c97ca268927933c98d9ead604cd09",
+    "reviewed_head_sha": "2e1ffb4e576c9bf9dc260c518152293cfec5db5d",
+    "scores": {
+      "durability": 19,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 91
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T130331364525-fsri-lane-cache-guard-loads",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "3bed3c21-37a3-4340-8395-d91a6ea8056d",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 10110019,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2680.064,
+    "generated_tokens": 56500,
+    "generation_seconds": 993.908,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 78.4,
+    "machine_seconds": 1686.156,
+    "peak_input_tokens": 180537,
+    "tokens_per_second": 56.85,
+    "wall_tokens_per_second": 21.08
+  },
+  "time_budget": "60m",
+  "tool_steps": 75.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2688,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T13:48:44Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-03T13:03:57Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T130331364525-fsri-lane-cache-guard-loads",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 11985,
+    "worker_pid": 2112385
+  },
+  "worker_seconds": 2653,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

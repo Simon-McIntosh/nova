@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="108">
+<meta name="plan-version" content="109">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.67">
 </head>
@@ -825,6 +825,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261003T134919876724-review-of-fsri-lane-cache-guard-loads" data-who="reckon-build" data-when="2026-10-03T13:58:04.114Z">
     <div class="r-comment-body"><p>Reviewed fsri-lane-cache-guard-loads at head 2e1ffb4e5 (base 9300a7714): scripts/nova_lane/run.sh:160 delivers the payload prelude environment to the pytest target; paired arms move 1 failed/8 passed -&gt; 9 passed; H200 jobs 1280627 (marker wall-clock-reliable misses=13 budget=100000, exit 0) and 1280632 (WALL-CLOCK-UNRELIABLE misses=13 budget=0, exit 1) verified; scored goal_fidelity 18, evidence 17, scope_discipline 19, durability 19, fit 18, total 91, added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261003T130331364525-fsri-lane-cache-guard-loads" data-who="reckon-build" data-when="2026-10-03T13:48:41.436Z">
+    <div class="r-comment-body"><p>Evaluate the payload prelude in the payload shell instead of `bash -c` so its exports reach pytest; the launcher test fails at base 9300a7714 (1 failed/8 passed) and passes at head b091aa8d8 (9 passed), and an H200 lane run now loads the guard (job 1280627, CACHE_GUARD_MARKER=wall-clock-reliable misses=13, budget=100000) while budget 0 against a served directory lacking the programs ends WALL-CLOCK-UNRELIABLE misses=13 with EXIT_STATUS=1 (job 1280632).</p></div>
 </div>
 </section>
 </main>

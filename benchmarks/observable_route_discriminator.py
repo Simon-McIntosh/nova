@@ -33,6 +33,7 @@ from nova.equilibrium.conservation import (
     _axisymmetric_divergence,
 )
 from nova.equilibrium.observation import declared_field_function_squared
+from nova.equilibrium.topology import NoQualifiedAxisError
 from nova.jax.config import configure_dtypes
 
 
@@ -348,7 +349,14 @@ def _localise(profile, flux, target_current, observable: str) -> dict[str, Any]:
     else:
         trace = _conservation_trace
         operation_order = CONSERVATION_OPERATION_ORDER
-    scalar_trace = trace(profile, flux, target_current)
+    try:
+        scalar_trace = trace(profile, flux, target_current)
+    except NoQualifiedAxisError as error:
+        return {
+            "outcome": "no_qualified_axis",
+            "exception_class": type(error).__name__,
+            "exception_message": str(error),
+        }
     transformed_trace = jax.jit(
         jax.vmap(lambda state, target: trace(profile, state, target))
     )(flux[jnp.newaxis, ...], jnp.asarray([target_current]))

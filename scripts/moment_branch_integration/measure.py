@@ -8,6 +8,7 @@ from pathlib import Path
 import jax.numpy as jnp
 import numpy as np
 
+from nova.equilibrium.topology import NoQualifiedAxisError
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import measure as fixture
 
@@ -31,8 +32,8 @@ def _internal_image(operator, coefficients) -> np.ndarray:
 
 def _production_physical_moments(operator, state):
     """Evaluate the sole production moment route on one support partition."""
-    masks, _topology, sample_flux, profile_support = (
-        operator._support_partition(jnp.asarray(state))
+    masks, _topology, sample_flux, profile_support = operator._support_partition(
+        jnp.asarray(state)
     )
     return operator.source.current_moments(
         masks,
@@ -161,7 +162,20 @@ def measure() -> dict[str, object]:
 
 
 def main() -> None:
-    report = measure()
+    try:
+        report = measure()
+    except NoQualifiedAxisError as error:
+        print(
+            json.dumps(
+                {
+                    "outcome": "no_qualified_axis",
+                    "exception_class": type(error).__name__,
+                    "exception_message": str(error),
+                },
+                sort_keys=True,
+            )
+        )
+        return
     (OUTPUT / "results.json").write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )

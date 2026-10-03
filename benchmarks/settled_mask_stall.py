@@ -1388,33 +1388,44 @@ def measure(
     for key in TARGETS:
         print(f"MEASURING {key[0]}/{key[1]} source={source_label}", flush=True)
         row, qualification = selected[key]
-        measured = _measure_row(
-            row,
-            qualification,
-            response_cache,
-            banked[key],
-            require_bank_match=require_bank_match,
-        )
+        try:
+            measured = _measure_row(
+                row,
+                qualification,
+                response_cache,
+                banked[key],
+                require_bank_match=require_bank_match,
+            )
+        except NoQualifiedAxisError as error:
+            measured = {
+                "identity": f"{key[0]}/{key[1]}",
+                "outcome": "no_qualified_axis",
+                "exception_class": type(error).__name__,
+                "exception_message": str(error),
+            }
         rows.append(measured)
-        print(
-            "MEASURED "
-            + json.dumps(
-                {
-                    "identity": measured["identity"],
-                    "smooth_terminal": measured["frozen_mask_smooth_solve"][
-                        "terminal_residual"
-                    ],
-                    "fd_disagreement": [
-                        item["residual_jvp_relative_disagreement"]
-                        for item in measured["jacobian_consistency"][
-                            "finite_difference_checks"
-                        ]
-                    ],
-                },
-                sort_keys=True,
-            ),
-            flush=True,
-        )
+        if measured.get("outcome") == "no_qualified_axis":
+            print("MEASURED " + json.dumps(measured, sort_keys=True), flush=True)
+        else:
+            print(
+                "MEASURED "
+                + json.dumps(
+                    {
+                        "identity": measured["identity"],
+                        "smooth_terminal": measured["frozen_mask_smooth_solve"][
+                            "terminal_residual"
+                        ],
+                        "fd_disagreement": [
+                            item["residual_jvp_relative_disagreement"]
+                            for item in measured["jacobian_consistency"][
+                                "finite_difference_checks"
+                            ]
+                        ],
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
     receipt = {
         "artifact": "settled residual-mask smooth-solve diagnosis",
         "source_label": source_label,

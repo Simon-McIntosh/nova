@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="85">
+<meta name="plan-version" content="86">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -620,6 +620,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261002T230005440753-fsri-picard-implicit-derivative" data-who="reckon-build" data-when="2026-10-03T00:41:14Z">
     <div class="r-comment-body"><p>Implicit terminal-map tangent landed with H200 reverse/JVP derivative tests green (2 passed, 165.04 s) and a published derivative-estimates figure; the archived unrolled control is red at 11.313969220425736 plasma-current relative error.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261003T011325372435-review-of-fsri-picard-implicit-derivative" data-who="reckon-build" data-when="2026-10-03T01:20:40Z">
+    <div class="r-comment-body"><p>Parsed review stored at the canonical record and the f2ca6aa0 revision record; no plan file changed.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-fsri-compile-blocks-a-cpu-control" data-who="coordinator" data-when="2026-09-19T16:55:00Z">
     <div class="r-comment-body"><p>The program size this section owns now blocks another plan's evidence, measured 2026-09-19 on the centroid-constrained positive control. Two all_debug jobs aborted inside LLVM compiling <code>jit_scan</code>, the first at 64G and the second at 180G, both with <code>allocateMappedMemory failed</code> and a core dump at exit 134, the second after a slow-compile alarm and 38 minutes. Tripling the allocation changed nothing, so the constraint is the compiled module rather than the job's memory request. Two things follow for this section. The gate for section 2 should include a CPU arm, since an executable that cannot be compiled on a 180G node is a failure a device-only budget would not catch. And the scheduler signal is not trustworthy here: <code>sacct</code> reported <code>COMPLETED 0:0</code> for both jobs and for every sub-step while the payload aborted, so the payload log is the only evidence of what happened. The centroid plan's positive control waits on this section rather than on its own node.</p></div>

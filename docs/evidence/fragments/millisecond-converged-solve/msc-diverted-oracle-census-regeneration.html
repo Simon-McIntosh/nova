@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="msc-diverted-oracle-census-regeneration">
+  <meta name="plan-title" content="The diverted-oracle census panel regenerated under the null vocabulary, with the receipt its caption reads from">
+  <meta name="plan-summary" content="The diverted-oracle census panel is regenerated through the nova.media painters so the read axis is a solid triangle and the other qualified nulls hollow crosses, the wall is the fixture's own closed limiter contour, and a receipt beside the PNG carries every number the caption quotes under a named JSON path. One caption number, the read axis, is corrected to the regenerated read.">
+  <meta name="plan-evidence-for" content="millisecond-converged-solve">
+  <title>Diverted-oracle census regeneration | nova</title>
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>The diverted-oracle census panel regenerated under the null vocabulary, with its receipt</h1>
+    <p class="lede">The panel is drawn through <code>nova.media.poloidal</code> and the census is
+    measured from the committed fixture; the receipt
+    <code>diverted-oracle-census.json</code> beside the PNG carries every number the caption
+    quotes, each under a named JSON path.</p>
+  </header>
+
+  <section id="corrected-caption">
+    <h2>The caption, corrected</h2>
+    <figure>
+      <img src="/nova/figures/millisecond-converged-solve/diverted-oracle-census/diverted-oracle-census-fine.png" alt="A poloidal panel: unfilled line contours of the exact diverted single-null flux on stated levels, the closed first-wall contour, a solid triangle at the read magnetic axis, and hollow crosses at the analytic axis and the analytic X-point.">
+      <figcaption>The fine rung (-300, 342 cells): the exact diverted flux as unfilled line
+      contours on 25 stated levels with the zero level added (26 levels, psi from -0.021932 to
+      0.005710 Wb), the first wall, and the null vocabulary. Solid triangle: the read axis at
+      (1.78656, 0.04671) m. Hollow crosses: the reference nulls, the analytic axis at
+      (1.78706, 0.04677) m and the analytic X-point at (1.50253, -1.01728) m. The read x-point is
+      non-finite and is dropped rather than drawn, so no filled cross appears — the absence is the
+      row's result, not a missing overlay.</figcaption>
+    </figure>
+    <p>The one correction to the archived caption is the read axis: it reads <strong>(1.78656,
+    0.04671) m</strong>, not the archived <strong>(1.78507, 0.04669) m</strong>. The read moved
+    because the linear read's magnetic-axis qualification landed after the archived rendering was
+    captured, so the regenerated read reports a different axis while the analytic reference and the
+    non-finite read x-point are unchanged.</p>
+  </section>
+
+  <section id="derivation">
+    <h2>Every quoted number, by named JSON path</h2>
+    <p>Source artifact:
+    <code>docs/figures/millisecond-converged-solve/diverted-oracle-census/diverted-oracle-census.json</code>.</p>
+    <table>
+      <thead><tr><th scope="col">Caption number</th><th scope="col">JSON path</th><th scope="col">Value</th></tr></thead>
+      <tbody>
+        <tr><td>342 cells</td><td><code>rung.realised_cells</code></td><td>342</td></tr>
+        <tr><td>25 stated levels</td><td><code>flux.levels.stated</code></td><td>25</td></tr>
+        <tr><td>26 levels</td><td><code>flux.levels.count</code></td><td>26</td></tr>
+        <tr><td>psi min -0.021932 Wb</td><td><code>flux.psi_wb.min</code></td><td>-0.021932</td></tr>
+        <tr><td>psi max 0.005710 Wb</td><td><code>flux.psi_wb.max</code></td><td>0.00571</td></tr>
+        <tr><td>read axis (1.78656, 0.04671) m</td><td><code>axis.read_rz_m</code></td><td>[1.786557, 0.046707]</td></tr>
+        <tr><td>analytic axis (1.78706, 0.04677) m</td><td><code>reference_null.axis_rz_m</code></td><td>[1.787065, 0.046774]</td></tr>
+        <tr><td>analytic X-point (1.50253, -1.01728) m</td><td><code>reference_null.x_point_rz_m</code></td><td>[1.502528, -1.01728]</td></tr>
+        <tr><td>read x-point non-finite, no filled cross</td><td><code>x_point.read_rz_m</code></td><td>[null, null]</td></tr>
+        <tr><td>two hollow crosses drawn</td><td><code>null_vocabulary.other_drawn</code></td><td>2</td></tr>
+      </tbody>
+    </table>
+    <p>The vocabulary the panel actually drew is recorded beside the caption:
+    <code>null_vocabulary.axis_marker</code> <code>"solid triangle"</code> with
+    <code>axis_drawn</code> <code>true</code>, <code>saddle_drawn</code> <code>false</code> with
+    <code>x_points_drawn</code> <code>0</code> (the read x-point is non-finite and dropped), and
+    <code>other_drawn</code> <code>2</code> hollow crosses at the reference nulls. The wall is the
+    fixture's own closed limiter contour (<code>wall.nodes</code> 121, <code>wall.closed</code>
+    <code>true</code>), the same coordinate set that enters the census computation, drawn by
+    <code>draw_wall</code>.</p>
+  </section>
+</main>
+</body>
+</html>

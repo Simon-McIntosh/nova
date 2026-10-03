@@ -1,0 +1,113 @@
+{
+  "axis": {
+    "read_rz_m": [
+      1.786557,
+      0.046707
+    ]
+  },
+  "case": "diverted-jump-bearing",
+  "diverted": false,
+  "figure": {
+    "painters": [
+      "nova.media.poloidal.draw_flux_contours",
+      "nova.media.poloidal.draw_wall",
+      "nova.media.poloidal.draw_nulls"
+    ],
+    "path": "diverted-oracle-census-fine.png"
+  },
+  "flux": {
+    "levels": {
+      "count": 26,
+      "levels_wb": [
+        -0.021932,
+        -0.02078,
+        -0.019629,
+        -0.018477,
+        -0.017325,
+        -0.016173,
+        -0.015022,
+        -0.01387,
+        -0.012718,
+        -0.011566,
+        -0.010415,
+        -0.009263,
+        -0.008111,
+        -0.00696,
+        -0.005808,
+        -0.004656,
+        -0.003504,
+        -0.002353,
+        -0.001201,
+        -4.9e-05,
+        0.0,
+        0.001103,
+        0.002254,
+        0.003406,
+        0.004558,
+        0.00571
+      ],
+      "stated": 25,
+      "zero_added": true
+    },
+    "psi_wb": {
+      "max": 0.00571,
+      "min": -0.021932
+    }
+  },
+  "null_vocabulary": {
+    "axis_drawn": true,
+    "axis_marker": "solid triangle",
+    "other_drawn": 2,
+    "other_marker": "hollow cross",
+    "saddle_drawn": false,
+    "saddle_marker": "filled cross",
+    "x_points_drawn": 0,
+    "x_points_dropped_outside_wall": 0
+  },
+  "reference_null": {
+    "axis_rz_m": [
+      1.787065,
+      0.046774
+    ],
+    "x_point_rz_m": [
+      1.502528,
+      -1.01728
+    ]
+  },
+  "rung": {
+    "pitch_m": 0.079733,
+    "realised_cells": 342,
+    "requested_cells": -300
+  },
+  "topology": {
+    "candidate_count_o_x": [
+      1,
+      0
+    ],
+    "capacity_o_x": [
+      30,
+      30
+    ],
+    "overflow": 0,
+    "raw_ring_count_o_x": [
+      1,
+      0
+    ],
+    "value_histogram": {
+      "0": 1,
+      "2": 341
+    }
+  },
+  "wall": {
+    "closed": true,
+    "nodes": 121,
+    "source": "carrier limiter contour (oracle_fixture.limiter_contour)",
+    "units": 1
+  },
+  "x_point": {
+    "read_rz_m": [
+      null,
+      null
+    ]
+  }
+}

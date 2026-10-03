@@ -1,0 +1,123 @@
+<section id="fsa-renderer-wall-scanner">
+<h2>A source scanner for wall-unmasked scattered-field renders</h2>
+
+<p>
+A field sampled at scattered nodes and interpolated onto a raster is finite
+across the whole convex hull of those nodes, so a contour drawn from it crosses
+a concave first wall unless the raster or the node triangulation is first masked
+to the wall units. Two painter routes enforce the mask:
+<code>nova.media.poloidal.draw_scattered_contours</code> requires a
+<code>wall</code> and masks the triangles that leave the vessel, and
+<code>draw_flux_contours</code> accepts an optional <code>wall</code> and blanks
+every grid point outside it. This node lands a reusable scanner that reports
+every call reaching a contouring routine on scattered data while passing
+neither.
+</p>
+
+<h3>What was built</h3>
+
+<ul>
+<li><code>tests/renderer_wall_scan.py</code> — an importable module exposing
+<code>scan_paths(paths)</code> (one
+<code>UnmaskedCall(path, line, kind)</code> per unguarded call) and a
+<code>main(argv)</code> CLI that prints those records and exits nonzero when any
+exist. It is a read-only AST scan: per-scope name binding, alias resolution,
+receipt-dict key provenance, and loop-tuple provenance, so a raster read from a
+built record or iterated out of a tuple of solved fields is resolved to its
+producer.</li>
+<li><code>tests/test_renderer_wall_scan.py</code> — pins the rule on named
+controls and on the base count.</li>
+</ul>
+
+<h3>Rule (as implemented)</h3>
+
+<ul>
+<li>A <code>draw_scattered_contours</code> call is never reported: its wall is
+required.</li>
+<li>A <code>draw_flux_contours</code> call is reported when it passes no
+<code>wall=</code> and an argument traces to a scattered producer
+(<code>_raster_field</code>, <code>_state_raster</code>, <code>_raster</code>,
+<code>_structured_flux</code>, <code>LinearNDInterpolator</code>,
+<code>griddata</code>) and the raster is not already blanked to the wall
+(<code>_masked_field</code>, <code>_blanked_field</code>, or a raster formed
+through <code>inside_wall_units</code>).</li>
+<li>An <code>Axes.tricontour</code>/<code>tricontourf</code> call is reported
+wherever it draws a figure, because triangulation of scattered nodes is
+scattered by construction; a fixed set of non-renderer probe calls is
+exempt.</li>
+<li>An <code>Axes.contour</code>/<code>contourf</code> call is reported only
+when its value argument traces to a scattered producer, because a regular-grid
+field needs no wall mask.</li>
+</ul>
+
+<h3>Named controls</h3>
+
+<table>
+<tr><th>Call</th><th>Expected</th><th>Observed</th></tr>
+<tr><td><code>benchmarks/plasma_cell_fixed_point_attribution.py:424</code></td><td>flagged</td><td>flagged</td></tr>
+<tr><td><code>benchmarks/sol_ledger_current_census.py:415</code></td><td>flagged</td><td>flagged</td></tr>
+<tr><td><code>docs/figures/centroid-constrained-oracle-solve/root-cause/closed-forms/render.py:52</code></td><td>not flagged (passes a wall)</td><td>not flagged</td></tr>
+<tr><td><code>benchmarks/plasma_cell_trip_panels.py:406</code></td><td>not flagged (post-filtered probe)</td><td>not flagged</td></tr>
+</table>
+
+<h3>Base count and the inventory</h3>
+
+<p>
+Run over <code>benchmarks/</code> and <code>docs/figures/</code> at this base,
+the scanner reports <strong>80 records</strong>: every one of the
+<strong>78</strong> reviewed inventory sites
+(<code>.config/reckon/crew/reports/nova/s22/fsa-renderer-call-sites-inside-wall.md</code>,
+reviewed 92) is reproduced, and it adds <strong>two</strong> sites the inventory
+predates. Both added sites are ordinary unguarded painters whose raster comes
+from <code>certificate._raster_field</code> and which pass no <code>wall</code>:
+</p>
+
+<table>
+<tr><th>Added site</th><th>Why the inventory omits it</th></tr>
+<tr><td><code>docs/figures/centroid-constrained-oracle-solve/repaired-remeasure/measure.py:70</code></td><td>file absent at the inventory revision</td></tr>
+<tr><td><code>docs/figures/centroid-constrained-oracle-solve/repaired-remeasure-receipt/measure.py:70</code></td><td>file absent at the inventory revision</td></tr>
+</table>
+
+<p>
+Both files were confirmed absent at the inventory revision
+(<code>git cat-file -e &lt;inventory-rev&gt;:&lt;path&gt;</code> fails) and
+present at base; each is structurally identical to
+<code>docs/figures/cut-cell-current-attribution/continuous-support/draw_trips.py:72</code>,
+which the inventory does carry. The count is therefore
+<em>78 inventory + 2 post-inventory</em>, not 78, and this is recorded as a
+deviation rather than hidden: the test asserts the 78 are all present and that
+the only extras are the two named sites.
+</p>
+
+<h3>Excluded by an explicit allowlist</h3>
+
+<p>
+Two calls are exempt and named in the module: the post-filtered probe at
+<code>plasma_cell_trip_panels.py:406</code>, which extracts polylines only to
+reject every curve with a vertex outside the wall and closes the figure without
+drawing it; and the analytic regular-grid panel at
+<code>render_mechanism_evidence.py:510</code>, whose value is the exact analytic
+flux on a regular mesh (its sibling at 511 draws the interpolated solved field
+and is reported).
+</p>
+
+<h3>Negative control</h3>
+
+<p>
+Declared mutation: make the scanner accept a <code>draw_flux_contours</code>
+call without <code>wall=</code>. Applied, it turns
+<code>test_flags_certificate_painter_without_wall</code> red and the gate exits
+nonzero (<code>EXIT=1</code>, 2 failed); reverted, the committed scanner is
+green. Log:
+</p>
+
+<pre>negative-control-renderer-wall-scan.log</pre>
+
+<h3>Gate</h3>
+
+<p>
+<code>JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider
+tests/test_renderer_wall_scan.py — 11 passed</code>, zero added failures
+against base. Log: <code>gate-renderer-wall-scan.log</code>.
+</p>
+</section>

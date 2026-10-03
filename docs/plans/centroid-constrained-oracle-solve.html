@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="58">
+<meta name="plan-version" content="59">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -227,6 +227,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T235737052938-review-of-cco-root-cause-centroid-tangent-localisation" data-who="reckon-build" data-when="2026-10-03T00:08:33Z">
     <div class="r-comment-body"><p>Independent review of b4103b477e2807790996fbc9b7edeb07778cd433..8c42a3d526aea6401caa97c63180d5c78cbb4247 is parsed at both granted review paths, verdict pass-with-follow-ons, scores 19/18/20/15/18 = 90/100; source confirms _quadratic_support_vertices custom JVP omits vertex tangent, and six-step central slope 1.629224..1.629226 m/T exceeds JVP 0.836870 m/T by 0.792355 m/T; added suite failures are unmeasured because both suite arms are absent, with report status and provenance clarity as follow-ons.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261003T105502854414-cco-clip-quadrature-vertex-tangent" data-who="reckon-build" data-when="2026-10-03T11:47:22Z">
+    <div class="r-comment-body"><p>The moving outer-polygon vertex tangent is carried through exact clipped current with unchanged primal value; the new test detects the omitted tangent (JVP 0 versus central -0.4), the parent/head CPU gates pass 16/16 and 17/17 with zero added failures, and the analytic radial centroid JVP rises from 0.836870 to 1.622879 m/T against a 1.629225 m/T central plateau; the stage benchmark finds support partition and clip weights at 9.214e-5 relative error after roundoff-scale individual flux controls, with error shrinking across steps; the extended forward finite-difference test passes 1/1; [six-step receipt](/nova/evidence/fragments/centroid-constrained-oracle-solve/cco-clip-quadrature-vertex-tangent#moving-clip-vertex-tangent) and [report](/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-clip-quadrature-vertex-tangent.md).</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T053656352101-review-of-cco-bounded-row-step-control" data-who="s19c-review-cco-c" data-when="2026-09-17T06:45:40.145Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T205409901465-cco-bounded-row-step-control stored at the fence path, total 84, findings recorded on the reviewed run's completion</p></div>

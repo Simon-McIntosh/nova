@@ -14,6 +14,28 @@ archives on the CPU backend. Each arm records its archive path, imported
 <code>forward_operator</code> path and selected clip-mode interface. The
 archive directories were removed after their receipts were written.</p>
 
+<figure>
+<img src="/nova/figures/forward-solve-api/fsapi-outboard-census-exact-total/terminal-state-contours.png" alt="Shared analytic and terminal poloidal flux contours with the vessel, nulls, and ten changed supports">
+<figcaption>Terminal state from the persisted weak-rotation control receipt.
+Blue is the analytic reference and ochre is the terminal flux, on shared Wb
+levels; their null vocabularies are marked in the matching colours. The black
+line is the vessel. Red outlines and labels mark the ten supports that change
+booking at <code>38b441dad</code>. The terminal fixed-point residual is
+0.007447526861632619 and the stored state is unqualified, active-set-settled.</figcaption>
+</figure>
+
+<h2>Persisted-state provenance and open gate</h2>
+<p>The terminal control receipt was last written by commit
+<code>8e5f8690b38a5b4e2b303e9656e1e990d6d2c571</code> at
+2026-09-10 03:14:05+02:00. It records a
+<code>profile.solve(ForwardSolveRequest)</code> call, but does not persist a
+solve clip mode; the <code>exact</code> mode in this record is the explicit
+mode of the later booking measurement, not an assertion about the terminal
+solve. The gate remains red until its pin is updated: its present exact
+expectation is 14,013,835.437176 A while the measured booking is
+15,491,539.124775 A. Re-pin that test in its separately scoped verification
+node, without widening tolerance, then run it against this persisted state.</p>
+
 <h2>Booked totals</h2>
 <table>
 <thead><tr><th>Revision</th><th>Clip selection</th><th>Chord [A]</th><th>Exact [A]</th></tr></thead>
@@ -53,6 +75,10 @@ cell converged at level 1 or 2.</p>
 sum is 6.15e-10 A. The current exact booking therefore agrees with the
 independent reference for every changed support, while the pinned booking
 omits them.</p>
+<p>The triangle receipt reports no scalar quadrature error bound: its former
+literal zero has been removed. The per-cell refinement ladders are the actual
+convergence evidence and each ends with adjacent-level relative change below
+1e-8.</p>
 
 <h2>Cause and recommendation</h2>
 <p><code>38b441dad</code> changes the primal routing in

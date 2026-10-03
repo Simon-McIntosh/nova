@@ -133,8 +133,8 @@ def _records_identical(left, right) -> bool:
     return True
 
 
-def _write_receipt(over_ceiling, unbounded, in_bound) -> None:
-    """Persist both admission outcomes alongside the constrained-route evidence."""
+def _write_receipt(over_ceiling, unbounded, in_bound, directory) -> None:
+    """Persist both admission outcomes beneath ``directory`` for this run."""
     receipt = {
         "receipt": "constrained reduced-route compensator admission",
         "source": {
@@ -172,17 +172,27 @@ def _write_receipt(over_ceiling, unbounded, in_bound) -> None:
             ),
         },
     }
-    RECEIPT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    RECEIPT_PATH.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "receipt.json").write_text(
+        json.dumps(receipt, indent=2, sort_keys=True) + "\n"
+    )
 
 
-def test_compensator_ceiling_refuses_without_changing_an_in_bound_receipt(prepared):
+def test_compensator_ceiling_refuses_without_changing_an_in_bound_receipt(
+    prepared, tmp_path
+):
     """A physical ceiling rejects excess current while safe commands are identical."""
     profile, free, pair = prepared
+    committed = RECEIPT_PATH.read_bytes() if RECEIPT_PATH.exists() else None
     unbounded = _solve(profile, free, pair, None)
     in_bound = _solve(profile, free, pair, IN_BOUND_CEILING_A)
     over_ceiling = _solve(profile, free, pair, CEILING_A)
-    _write_receipt(over_ceiling, unbounded, in_bound)
+    _write_receipt(over_ceiling, unbounded, in_bound, tmp_path)
+
+    assert (tmp_path / "receipt.json").is_file()
+    if committed is not None:
+        assert RECEIPT_PATH.read_bytes() == committed
 
     assert unbounded.converged
     assert unbounded.qualified

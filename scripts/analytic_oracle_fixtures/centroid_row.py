@@ -17,6 +17,7 @@ import jax.numpy as jnp
 from nova.equilibrium.constraint import (
     BoundedExteriorFieldUnknown,
     ConstraintBinding,
+    ConstraintContext,
     ConstraintPair,
     CurrentCentroidConstraint,
     FluxLevelConstraint,
@@ -68,6 +69,10 @@ def centroid_constraint_pair(
     field_bound_t: float = DEFAULT_FIELD_BOUND_T,
     step_limit: float = DEFAULT_STEP_LIMIT,
     initial_field_t=None,
+    analytic_profile=None,
+    analytic_flux=None,
+    requested_class=None,
+    target_current=None,
 ) -> ConstraintPair:
     """Bind analytic centroid targets to bounded uniform exterior fields.
 
@@ -91,11 +96,31 @@ def centroid_constraint_pair(
         if initial_field_t is None
         else jnp.atleast_1d(jnp.asarray(initial_field_t)) / field_scale
     )
+    functional = CurrentCentroidConstraint(
+        components=selected,
+        support=MomentIntegralSupport.ALL_DOMAIN,
+    )
+    if (analytic_profile is None) != (analytic_flux is None):
+        raise ValueError("analytic profile and flux must be supplied together")
+    analytic_observation = None
+    tolerance = scale * 1.0e-12
+    if analytic_profile is not None:
+        analytic_observation = functional.observed(
+            analytic_profile,
+            ConstraintContext(
+                flux=jnp.asarray(analytic_flux),
+                requested_class=requested_class,
+                target_current=target_current,
+                shadow=None,
+            ),
+            None,
+        )
+        tolerance = jnp.maximum(
+            jnp.abs(analytic_observation - target_value),
+            8.0 * jnp.finfo(target_value.dtype).eps * scale,
+        )
     return ConstraintPair(
-        functional=CurrentCentroidConstraint(
-            components=selected,
-            support=MomentIntegralSupport.ALL_DOMAIN,
-        ),
+        functional=functional,
         unknown=BoundedExteriorFieldUnknown(
             direction=_field_direction(selected),
             field_scale=field_scale,
@@ -104,10 +129,10 @@ def centroid_constraint_pair(
         ),
         binding=ConstraintBinding(
             target=target_value,
-            tolerance=scale * 1.0e-12,
+            tolerance=tolerance,
             scale=scale,
             initial_unknown=initial,
-            payload=None,
+            payload=analytic_observation,
             policy="imposed",
         ),
     )
@@ -173,6 +198,10 @@ def fixture_constraint_pairs(
     step_limit: float = DEFAULT_STEP_LIMIT,
     initial_field_t=None,
     initial_level_wb=None,
+    analytic_profile=None,
+    analytic_flux=None,
+    requested_class=None,
+    target_current=None,
 ) -> tuple[ConstraintPair, ConstraintPair]:
     """Assembling builder: the centroid pair and the flux-level pair.
 
@@ -190,6 +219,10 @@ def fixture_constraint_pairs(
             field_bound_t=field_bound_t,
             step_limit=step_limit,
             initial_field_t=initial_field_t,
+            analytic_profile=analytic_profile,
+            analytic_flux=analytic_flux,
+            requested_class=requested_class,
+            target_current=target_current,
         ),
         level_constraint_pair(
             level_point,

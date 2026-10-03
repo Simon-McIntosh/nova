@@ -147,6 +147,7 @@ from nova.equilibrium.observation import (
     core_pressure,
     moment_residual,
     observe_current_moments,
+    recover_physical_first_moments,
     observe_moments,
     reject_unsupported_enforcement,
 )
@@ -1253,9 +1254,21 @@ class ForwardProfile:
         current, _integrals, masks, _topology, _amplitude = self._integral_state(
             flux, requested_class=requested_class, target_current=target_current
         )
+        geometry = self.operator.moment_geometry
+        if geometry is None:
+            radial_moment = jnp.zeros_like(current.cell_current)
+            vertical_moment = radial_moment
+        else:
+            radial_moment, vertical_moment = recover_physical_first_moments(
+                geometry.second_moment,
+                current.radial_moment,
+                current.vertical_moment,
+            )
         return observe_current_moments(
             current.cell_current,
             self.operator.grid.coordinate,
+            radial_moment=radial_moment,
+            vertical_moment=vertical_moment,
             core_mask=masks.core,
             support=support,
         )

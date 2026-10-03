@@ -285,6 +285,10 @@ def _certificate_pairs(
         field_scale_t=field_scale_t,
         initial_field_t=initial_field_t,
         initial_level_wb=initial_level_wb,
+        analytic_profile=context["profile"],
+        analytic_flux=context["analytic"],
+        requested_class=context["requested_class"],
+        target_current=context["target_current"],
     )
     return pairs if level else (pairs[0],)
 
@@ -1810,12 +1814,11 @@ DEFAULT_SPAN_OFFSET_ROOT = ROOT / (
 def _landing_merge(revision: str | None) -> str | None:
     """The merge that first landed *revision* on the current branch.
 
-    A receipt records the code revision that generated it, so a reader
-    reconciling the receipt against the merge named in the plan's done-when sees
-    two hashes with nothing tying them together.  The earliest merge on the
-    revision's ancestry path to the current tip is that landing merge; when the
-    revision is unknown to the checkout or git is unavailable the field is left
-    unset rather than failing the read.
+    A receipt records the code revision that generated it, while branch history
+    identifies the merge that landed that revision. The earliest merge on the
+    revision's ancestry path to the current tip ties the two hashes together;
+    when the revision is unknown to the checkout or git is unavailable, the
+    field is left unset rather than failing the read.
     """
     if not revision:
         return None

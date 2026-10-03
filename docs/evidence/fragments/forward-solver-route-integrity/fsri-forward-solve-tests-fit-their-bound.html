@@ -1,0 +1,101 @@
+<!-- fragment: fsri-forward-solve-tests-fit-their-bound -->
+<section id="fsri-forward-solve-tests-fit-their-bound">
+<h3>No per-test timeout mark is needed on the H200 lane</h3>
+
+<p>The node premise was that the project's <code>timeout = 300</code> ini default
+governs the forward-solve tests and must be raised per test. The measurement
+refutes it. Since <code>55bca9b99</code>/<code>75495edb0</code>,
+<code>scripts/nova_lane/run.sh</code> in pytest mode appends
+<code>--timeout ${NOVA_LANE_TEST_TIMEOUT:-3600}</code> whenever the payload
+carries no <code>--timeout</code>, so every test routed through the H200 lane is
+already bounded at 3600 s. The slowest test in the file measures 312.57 s, well
+inside that bound. A <code>@pytest.mark.timeout(660)</code> mark would
+<em>lower</em> that test's lane bound from 3600 s to 660 s and is therefore
+withdrawn; the file at this node's head is byte-identical to the base.</p>
+
+<h4>Measurement</h4>
+<p>One H200 lane job (job <code>1280609</code>, betelgeuse) over the whole file
+with the per-test bound disabled so raw walls are visible:
+<code>pytest tests/test_equilibrium_forward_solve.py -p no:cacheprovider
+--timeout=0 --durations=0 -m "slow or not slow"</code>. Result:
+<code>29 passed in 665.51 s (0:11:05)</code>, <code>EXIT_STATUS=0</code>, on an
+allocated <code>NVIDIA_H200_NVL</code>. The lane bound actually in force for an
+ordinary lane run is the launcher's injected <code>--timeout 3600</code>
+(<code>PYTEST_TIMEOUT=3600</code>, pytest header <code>timeout: 3600.0s</code>),
+shown by the confirm job <code>1280612</code> over the one slowest node id:
+<code>1 passed in 378.95 s</code>, <code>EXIT_STATUS=0</code>, zero Timeout
+failures.</p>
+
+<p>Every collected item, in file order. Phases below pytest's 0.005 s report
+threshold are shown as <code>&lt;0.005</code>; item wall is setup + call +
+teardown. The two parametrizations of the flux-resolution test are separate
+items.</p>
+
+<table>
+  <thead><tr><th>test id (tests/test_equilibrium_forward_solve.py::)</th>
+    <th>setup [s]</th><th>call [s]</th><th>teardown [s]</th>
+    <th>item wall [s]</th></tr></thead>
+  <tbody>
+  <tr><td>test_solve_path_current_moments_match_profile_owned_support</td><td>24.43</td><td>40.38</td><td>&lt;0.005</td><td>64.81</td></tr>
+  <tr><td>test_unclipped_support_uses_the_own_node_profile_for_every_cell</td><td>&lt;0.005</td><td>4.09</td><td>&lt;0.005</td><td>4.09</td></tr>
+  <tr><td>test_linear_moment_construction_requires_direct_sample_targets</td><td>&lt;0.005</td><td>0.22</td><td>&lt;0.005</td><td>0.22</td></tr>
+  <tr><td>test_receipts_and_integral_observation_share_solve_current_moments</td><td>&lt;0.005</td><td>26.40</td><td>&lt;0.005</td><td>26.40</td></tr>
+  <tr><td>test_prescribed_current_field_is_explicit_and_additive</td><td>&lt;0.005</td><td>0.78</td><td>&lt;0.005</td><td>0.78</td></tr>
+  <tr><td>test_the_accelerated_solve_reaches_its_fixed_point</td><td>16.73</td><td>&lt;0.005</td><td>&lt;0.005</td><td>16.73</td></tr>
+  <tr><td>test_forward_equilibrium_names_the_public_topology_state_type</td><td>&lt;0.005</td><td>&lt;0.005</td><td>&lt;0.005</td><td>&lt;0.005</td></tr>
+  <tr><td>test_the_receipt_records_an_untouched_absolute_source</td><td>&lt;0.005</td><td>&lt;0.005</td><td>&lt;0.005</td><td>&lt;0.005</td></tr>
+  <tr><td>test_current_uses_profile_support_and_pointwise_open_selection</td><td>&lt;0.005</td><td>0.05</td><td>&lt;0.005</td><td>0.05</td></tr>
+  <tr><td>test_the_topology_read_publishes_every_domain</td><td>&lt;0.005</td><td>5.68</td><td>&lt;0.005</td><td>5.68</td></tr>
+  <tr><td>test_a_terminal_class_contradiction_stays_in_its_branch_receipt</td><td>2.18</td><td>0.29</td><td>&lt;0.005</td><td>2.47</td></tr>
+  <tr><td>test_an_unavailable_requested_class_is_explicitly_non_converged</td><td>&lt;0.005</td><td>4.96</td><td>&lt;0.005</td><td>4.96</td></tr>
+  <tr><td>test_the_conservation_receipt_meets_its_registered_tolerances</td><td>&lt;0.005</td><td>&lt;0.005</td><td>&lt;0.005</td><td>&lt;0.005</td></tr>
+  <tr><td>test_the_accelerator_routes_agree_on_the_fixed_point</td><td>&lt;0.005</td><td>312.57</td><td>&lt;0.005</td><td>312.57</td></tr>
+  <tr><td>test_the_host_iteration_reproduces_the_traced_ladder</td><td>&lt;0.005</td><td>12.43</td><td>&lt;0.005</td><td>12.43</td></tr>
+  <tr><td>test_the_flux_resolution_is_a_magnitude_on_either_axis_flux_sign[float32]</td><td>&lt;0.005</td><td>&lt;0.005</td><td>&lt;0.005</td><td>&lt;0.005</td></tr>
+  <tr><td>test_the_flux_resolution_is_a_magnitude_on_either_axis_flux_sign[float64]</td><td>&lt;0.005</td><td>&lt;0.005</td><td>&lt;0.005</td><td>&lt;0.005</td></tr>
+  <tr><td>test_the_relaxed_iteration_floors_at_the_flux_resolution</td><td>18.04</td><td>&lt;0.005</td><td>&lt;0.005</td><td>18.04</td></tr>
+  <tr><td>test_the_host_iteration_exits_early_on_the_shared_residual</td><td>&lt;0.005</td><td>3.50</td><td>&lt;0.005</td><td>3.50</td></tr>
+  <tr><td>test_the_host_root_find_holds_the_equilibrium_it_is_seeded_on</td><td>&lt;0.005</td><td>1.77</td><td>&lt;0.005</td><td>1.77</td></tr>
+  <tr><td>test_the_vacuum_field_is_a_second_fixed_point</td><td>&lt;0.005</td><td>9.68</td><td>&lt;0.005</td><td>9.68</td></tr>
+  <tr><td>test_the_solve_reaches_one_equilibrium_from_several_seeds</td><td>&lt;0.005</td><td>16.62</td><td>&lt;0.005</td><td>16.62</td></tr>
+  <tr><td>test_the_batched_ensemble_solve_matches_the_per_slice_solve</td><td>&lt;0.005</td><td>38.42</td><td>&lt;0.005</td><td>38.42</td></tr>
+  <tr><td>test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap</td><td>&lt;0.005</td><td>32.11</td><td>&lt;0.005</td><td>32.11</td></tr>
+  <tr><td>test_the_moment_map_is_differentiable_against_finite_differences</td><td>&lt;0.005</td><td>15.10</td><td>&lt;0.005</td><td>15.10</td></tr>
+  <tr><td>test_the_solve_is_differentiable_in_the_conductor_current</td><td>&lt;0.005</td><td>54.55</td><td>&lt;0.005</td><td>54.55</td></tr>
+  <tr><td>test_the_plasma_current_is_differentiable_in_the_conductor_current</td><td>&lt;0.005</td><td>10.17</td><td>&lt;0.005</td><td>10.17</td></tr>
+  <tr><td>test_the_solve_refuses_to_enforce_a_moment</td><td>&lt;0.005</td><td>5.54</td><td>&lt;0.005</td><td>5.54</td></tr>
+  <tr><td>test_an_externally_supplied_flux_map_is_qualified_by_the_same_receipt</td><td>&lt;0.005</td><td>0.23</td><td>&lt;0.005</td><td>0.23</td></tr>
+  </tbody>
+</table>
+
+<p>Only one test exceeds the 200 s figure that motivated the node:
+<code>test_the_accelerator_routes_agree_on_the_fixed_point</code> at 312.57 s
+call. Every other item is under 65 s. Because the lane bound is 3600 s, no item
+needs a per-test override. The moment-map finite-difference test, cited at 869 s
+on CPU in the followup, measures 15.10 s on the H200 lane; its CPU wall is not
+reached through this lane.</p>
+
+<h4>Cache</h4>
+<p>The lane's compilation cache was served from
+<code>/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05</code>
+with <code>MISS_BUDGET=0</code>, and the header records
+<code>PINNED_REVISION_MISMATCH pinned=eb565ed4... serving=8b149152a</code>, so
+the served directory was compiled for another revision. No per-run hit/miss
+receipt was emitted: the cache guard's <code>pytest_sessionfinish</code> never
+ran because the plugin did not load. The launcher prints the guard header from
+its prelude subshell whose
+<code>export PYTEST_ADDOPTS=... -p cache_guard</code> is confined to that
+subshell, so pytest is started without <code>-p cache_guard</code>; the pytest
+header lists no <code>cache_guard</code> plugin and no
+<code>CACHE_GUARD_MARKER</code> appears in any lane log. The measured walls are
+therefore compile-inclusive but their hit/miss split is unrecorded. Reported as
+a follow-on.</p>
+
+<h4>Conclusion</h4>
+<p>No per-test <code>timeout</code> mark is required for
+<code>tests/test_equilibrium_forward_solve.py</code> on the H200 lane; the
+injected 3600 s bound already covers every test. The 300 s ini default governs
+only direct pytest runs outside the launcher, and no test's H200 wall approaches
+it. The timeout mark added at <code>4a441e717</code> was withdrawn in
+<code>d5ec45fd7</code>; <code>git diff 8b149152a HEAD -- tests/</code> is empty.</p>
+</section>

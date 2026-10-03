@@ -1,0 +1,26 @@
+<section id="fsapi-route-request-fixture-null" data-node="fsapi-route-request-fixture-null">
+  <h2>The route-request fixture now supplies the host geometry its solver reads</h2>
+  <p><code>test_request_execution_is_bit_identical_to_the_keyword_fixture</code>
+  failed at the dispatch base with <code>AttributeError: '_LinearTarget' object
+  has no attribute 'null'</code>. The failure was on the keyword arm:
+  <code>ForwardProfile.solve</code> flattens the operator for jit, which reaches
+  <code>_compute_geometry_identity</code>, which reads the stationary-point
+  locator and precedence/area entries the lightweight fixture never set.</p>
+  <p>The test module now completes its own fixture before solving, leaving the
+  product and the shared <code>test_prescribed_current_solve</code> fixture
+  untouched. A local <code>_RouteLinearTarget</code> gives each target the
+  <code>null</code> locator (None — a linear conductor admits no stationary
+  point) and is registered as a JAX pytree so the operator can be a jit
+  argument. The operator receives the dynamic geometry members the identity
+  digests (<code>area</code>, the cell-average and material entries, the wall
+  unit triples) with neutral values. <code>configure_dtypes()</code> is called
+  before any array is built, which also removes the f32/f64 mismatch between the
+  fixture's single-precision responses and the float64 seed.</p>
+  <p>The test keeps asserting bit identity between request execution and the
+  keyword fixture on real arrays. Gate (<code>JAX_PLATFORMS=cpu</code>, fresh
+  process, this node's allocation):
+  <code>tests/test_route_solve_requests.py</code> runs 8 passed against a base of
+  1 failed / 7 passed, so the node fixes one failure and adds none. The
+  negative control removes the added fixture attributes and restores the
+  original <code>AttributeError</code> (EXIT=1).</p>
+</section>

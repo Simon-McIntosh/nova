@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import dataclasses
 import inspect
 import json
 
+import jax
 import jax.numpy as jnp
 import numpy as np
 
@@ -23,12 +25,62 @@ from nova.equilibrium.solve_request import (
     ForwardSolveRequest,
     ResolvedForwardSolveDefaults,
 )
+from nova.jax.config import configure_dtypes
 from scripts.oracle_rebaseline import measure as oracle_recovery
+from tests import test_prescribed_current_solve as _prescribed_current_solve
 from tests.test_prescribed_current_solve import _profile
+
+
+@dataclasses.dataclass(frozen=True)
+class _RouteLinearTarget:
+    """Linear conductor target carrying the stationary-point locator it omits."""
+
+    response: jax.Array
+    null: object = None
+
+    @property
+    def node_number(self) -> int:
+        return self.response.shape[0]
+
+    def external(self, current) -> jax.Array:
+        return self.response @ current
+
+
+jax.tree_util.register_pytree_node(
+    _RouteLinearTarget,
+    lambda target: ((target.response,), target.null),
+    lambda null, children: _RouteLinearTarget(response=children[0], null=null),
+)
 
 
 def _deviations(request: ForwardSolveRequest) -> dict[str, object]:
     return dict(ResolvedForwardSolveDefaults.from_policy(request.policy).deviations)
+
+
+def _completed_route_profile(monkeypatch):
+    """Return the shared linear fixture with the host geometry it omits.
+
+    The lightweight operator is built with ``object.__new__`` and carries only
+    the members the arithmetic touches, so the stationary-point locator each
+    target owns and the precedence/area entries the geometry identity reads are
+    absent. Supply them with values consistent with a linear conductor target
+    that admits no stationary point and a single polarity.
+    """
+    monkeypatch.setattr(_prescribed_current_solve, "_LinearTarget", _RouteLinearTarget)
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    profile, ordinary_response, prescribed_response = _profile()
+    operator = profile.operator
+    operator.area = jnp.zeros(operator.grid.node_number)
+    operator.cell_average_stencil = None
+    operator.cell_average_weight = None
+    operator.inside_material = None
+    operator.moment_geometry = None
+    operator.use_linear_moments = False
+    operator.wall_unit_offsets = None
+    operator.wall_unit_closed = None
+    operator.wall_unit_kinds = None
+    return profile, ordinary_response, prescribed_response
 
 
 def test_exact_bank_replay_request_names_every_policy_deviation():
@@ -123,8 +175,10 @@ def test_solovev_current_pin_request_records_only_an_opt_out():
     assert unpinned.target_current is None
 
 
-def test_request_execution_is_bit_identical_to_the_keyword_fixture():
-    profile, _ordinary_response, _prescribed_response = _profile()
+def test_request_execution_is_bit_identical_to_the_keyword_fixture(monkeypatch):
+    profile, _ordinary_response, _prescribed_response = _completed_route_profile(
+        monkeypatch
+    )
     seed = np.zeros(4)
     request = ForwardSolveRequest.from_defaults(
         carrier_identity="cpu-route-fixture",

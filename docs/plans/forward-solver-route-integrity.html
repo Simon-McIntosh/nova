@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="93">
+<meta name="plan-version" content="94">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.65">
 </head>
@@ -516,10 +516,11 @@
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity</pre>
     <p class="r-fu-outcome">Landed at 8b5e5f33b: scripts/nova_lane/run.sh carries the compute hierarchy and the SLURM rules, and scripts/h200_test_lane/run.sh calls it (re-review 19/16/19/17/19). Briefs cite scripts/nova_lane/run.sh from now on.</p>
     </article>
-<article class="r-fu" data-id="f-fsri-implement-live-warmup-frozen-newton" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-implement-live-warmup-frozen-newton" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="2026-10-03T11:18:14+00:00" data-resolved-by="nova-s21">
     <h4 class="r-fu-title">Implement the locked third repair: live topology reads through the warmup, then a frozen Newton partition</h4>
     <div class="r-fu-body"><p>Decision <code>newton-krylov-third-repair</code> is locked to <code>live-warmup-frozen-newton</code>. Start from the six unmerged commits on the run worktree <code>msc-newton-krylov-route-regression</code> at <code>8e0f3bbc</code> (attempt two, every read live). Keep the live reads only through the Picard warmup. Take the Newton partition once, from the warmed state, and hold it fixed for every Newton step. Re-qualify it at the terminal state.</p><p><strong>Done when:</strong> the exact route test completes inside its existing performance fence in one all_debug job (attempt two timed out at 59:25 in job 1273996); the focused refusal test passes; the NoQualifiedAxisError of attempt one (job 1273977) does not recur; the receipt records partition reads per solve (one during Newton); and no failure is added in tests/test_fixed_point.py or tests/test_reduced_newton.py in fresh processes against a stated base. Negative control: re-reading the partition on every Newton step brings the timeout back.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity</pre>
+    <p class="r-fu-outcome">Implemented and merged as the frozen-Newton settle lineage (db580bec8). Topology is read live through the warmup, the Newton partition is then frozen per pass and re-read live between passes, and termination is judged on the live residual and live partition, with a bounded live-read fallback compiled as a separate program. Its fallback later gained the acceptance policy and live reads at 8130fed42. Record: forward-solver-route-integrity-landed#frozen-route-settle-merged and #live-read-fallback-acceptance.</p>
     </article>
 <article class="r-fu" data-id="f-fsri-lane-timeout-equals-form-test" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="2026-10-02T09:13:25+00:00" data-resolved-by="nova-s21">
     <h4 class="r-fu-title">Commit the --timeout=value regression test and strip evidence-log trailing whitespace</h4>

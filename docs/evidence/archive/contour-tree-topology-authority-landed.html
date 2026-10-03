@@ -106,6 +106,12 @@
     <p>Run <code>r-20261002T233111531441-ctta-carrier-adjacency-index-dtype</code> (local lane), merged at <code>ce663e84e</code>, review 92 of 100, closes item (2) of f-ctta-sweep-durability-and-placement. <code>_carrier_adjacency</code> now casts the edge endpoints once to <code>CARRIER_INDEX_DTYPE</code> (int32) and builds the neighbour and count tables at that dtype, so no scatter mixes integer widths. Carrier vertex indices are bounded by the mesh size, so the narrower type is exact.</p>
     <p>The two capacity tests in <code>tests/test_contour_tree_merge.py</code> carry <code>filterwarnings("error::FutureWarning")</code>. With the warning promoted to an error, both fail at the dispatch base and pass at the merge. Restoring the int64 cast fails them again. The four contour-tree test files pass unchanged: merge 11, mesh 8, conventions 6 and brute-force 8, the same at base and head.</p>
   </section>
+
+  <section id="receipt-comparator">
+    <h2>A committed comparator for every receipt field</h2>
+    <p>Run <code>r-20261002T233146735382-ctta-sweep-receipt-comparator</code> (local lane), merged at <code>a1c63dd82</code>, review 94 of 100 after one rework. It closes the comparator half of item (1) of f-ctta-sweep-durability-and-placement. The performance half is already durable, as <code>test_sweep_execute_bound</code> in <code>tests/test_contour_tree_merge.py</code>. <code>benchmarks/contour_tree_brute_force.py --compare BASE HEAD</code> loads two receipt files and prints one line per field, with its mismatch count, for node vertices, node values, node masks, critical types, compact edges, edge masks and the overflow flag. It exits nonzero on any mismatch.</p>
+    <p>The first version let an environment variable drop a field from the production comparison, so a stray value could turn a real mismatch into a pass. The coordinator held the merge, and the comparison now takes its field set as an explicit argument defaulting to every field. <code>tests/test_contour_tree_receipt_comparator.py</code> passes 17 tests, one of which round-trips a tree built by <code>build_contour_tree</code> through the receipt writer and loader. The brute-force suite reads 0 failures at base and head. The review's remaining follow-on is a test of <code>--write</code> over a fixture carrier.</p>
+  </section>
 </main>
 </body>
 </html>

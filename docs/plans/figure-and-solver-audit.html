@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="77">
+<meta name="plan-version" content="78">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -526,6 +526,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261003T170849683435-fsa-wall-mask-limited-and-residual" data-who="reckon-build" data-when="2026-10-03T17:33:35.672Z">
     <div class="r-comment-body"><p>routed 15 unguarded scattered-field renderer calls across 5 limited-shadow/census benchmark drivers through the wall mask (draw_flux_contours wall= on 14, blanked raster on the 1 direct grid contour); tests/renderer_wall_scan.py exits 0 on the batch and exits 1 listing exactly those 15 sites against the base files, commit f8ea2245a.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261003T171000163776-fsa-wall-mask-current-and-allocation" data-who="reckon-build" data-when="2026-10-03T17:34:12.569Z">
+    <div class="r-comment-body"><p>fsa-wall-mask-current-and-allocation guarded the five unguarded scattered-field renderer calls (unit_amplitude_current_census.py:681,689; sol_ledger_current_census.py:415; xpoint_cell_allocation_rca.py:1493,1531) by routing them through nova.media.poloidal.draw_scattered_contours with the driver&#x27;s wall or, for the draw_flux_contours call, passing wall=wall; scanner gate exits 0 on these three files where base exits 1 listing exactly these five sites.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

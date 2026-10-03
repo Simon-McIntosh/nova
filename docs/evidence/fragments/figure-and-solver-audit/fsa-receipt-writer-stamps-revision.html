@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="figure-and-solver-audit">
+<title>The production-solver receipt writer stamps source_revision itself — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsa-receipt-writer-stamps-revision"
+         data-test-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143107300336-fsa-receipt-writer-stamps-revision/after_suite.log"
+         data-negative-control-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143107300336-fsa-receipt-writer-stamps-revision/negative-control.log">
+
+  <h2>The production-solver receipt writer stamps source_revision itself</h2>
+
+  <p>The writer at
+  <code>docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py</code> recorded
+  the running revision under its own <code>revision</code> key but assembled the payload by hand
+  and never applied the source-revision stamp that every benchmark receipt writer routes through
+  (<code>solovev_certificate.stamp_source_revision</code>). A reader could not name the tree the
+  measurement ran at from the payload alone, and the revision key stood in for a fact nobody had
+  stamped.</p>
+
+  <p>The payload assembly is factored into a <code>build_payload</code> builder that returns
+  <code>certificate.stamp_source_revision(payload)</code>, so the persisted receipt carries
+  <code>source_revision</code> equal to its <code>revision</code> key with no hand edit.
+  <code>main</code> reads the revision through <code>certificate._source_revision()</code> so the
+  key and the stamp share one source.</p>
+
+  <h3>Pre-existing break repaired to make the module importable</h3>
+  <p>The base revision's <code>measure.py</code> still imported
+  <code>set_support_clip_mode</code> from <code>nova.equilibrium.forward_operator</code>, a
+  process-global selector removed when clipping became request-owned state
+  (commit <code>f80a679b9</code>, today). The module was unimportable at base with
+  <code>ImportError: cannot import name 'set_support_clip_mode'</code>, reproduced in the first
+  head-arm log. The repair carries <code>clip_mode="chord"</code> on the
+  <code>ForwardSolveRequest</code> instead, matching the production default.</p>
+
+  <h3>Measure</h3>
+  <p>Gate <code>JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider
+  tests/test_production_solver_receipt_stamp.py tests/test_production_solver_receipt_trip_alignment.py</code>:
+  <strong>17 passed, EXIT=0</strong> at revision <code>53bab014c</code>. The new test builds the
+  payload without running the solve (the measure module is loaded by
+  <code>spec_from_file_location</code>) and asserts the key is present, that it is a 40-hex sha,
+  and that it equals the payload's <code>revision</code> key.</p>
+
+  <h3>Negative control</h3>
+  <p>Declared mutation: remove the source-revision stamp call from
+  <code>measure.py</code>'s payload construction. Applied, the gate reddens to
+  <strong>2 failed, 15 passed, EXIT=1</strong> — the two stamp cases fail
+  (<code>test_payload_carries_a_source_revision</code>,
+  <code>test_source_revision_equals_the_recorded_revision</code>) and no other test does. The
+  mutation was reverted; the committed tree is clean at <code>53bab014c</code>.</p>
+
+  <p>Baseline arm at revision <code>a42dc665c</code> (the pre-existing trip-alignment module,
+  unchanged by this node): 15 passed, EXIT=0. No added failures.</p>
+
+  <p>The committed <code>receipt.json</code> is not regenerated; this node changes the writer, not
+  the persisted receipt. Merged-head verification belongs to a separately dispatched test node.</p>
+
+</article>
+</main>
+</body>
+</html>

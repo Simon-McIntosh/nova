@@ -67,6 +67,7 @@ def _public_observation_profile():
     )
     profile.operator = SimpleNamespace(
         grid=SimpleNamespace(coordinate=coordinate),
+        moment_geometry=None,
         read=lambda _state, _requested_class=None: (masks, topology),
         source=SimpleNamespace(closure_degrees=0),
     )

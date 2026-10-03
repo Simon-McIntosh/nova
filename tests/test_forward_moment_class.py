@@ -65,7 +65,9 @@ def _refusing_read_profile():
     """
     profile = object.__new__(ForwardProfile)
     profile.operator = SimpleNamespace(
-        grid=SimpleNamespace(coordinate=COORDINATE), use_linear_moments=False
+        grid=SimpleNamespace(coordinate=COORDINATE),
+        moment_geometry=None,
+        use_linear_moments=False,
     )
 
     def integral_state(flux, requested_class=None, target_current=None):
@@ -96,7 +98,9 @@ def _recording_read_profile():
     """
     profile = object.__new__(ForwardProfile)
     profile.operator = SimpleNamespace(
-        grid=SimpleNamespace(coordinate=COORDINATE), use_linear_moments=False
+        grid=SimpleNamespace(coordinate=COORDINATE),
+        moment_geometry=None,
+        use_linear_moments=False,
     )
     seen: list[object] = []
 

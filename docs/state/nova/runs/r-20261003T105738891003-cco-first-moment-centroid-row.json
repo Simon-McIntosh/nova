@@ -1,0 +1,449 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "3c026a1562263e24be178eb34e1e56d76929d4e6",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 30338048,
+      "cached_input_tokens_cumulative": 30338048,
+      "input_tokens": 30550300,
+      "input_tokens_cumulative": 30550300,
+      "output_tokens": 61214,
+      "output_tokens_cumulative": 61214,
+      "reasoning_output_tokens": 21736,
+      "reasoning_output_tokens_cumulative": 21736
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 238,
+    "files": 5,
+    "removed": 13
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1695,
+        "name": "reread_gauge_readings",
+        "path": "benchmarks/centroid_constrained_fixture_receipt.py"
+      },
+      "window_line": 1773
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1695,
+        "name": "reread_gauge_readings",
+        "path": "benchmarks/centroid_constrained_fixture_receipt.py"
+      },
+      "window_line": 1773
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_structured_read_consumes_retained_rows_without_repolishing",
+        "path": "tests/test_structured_read_census_rows.py"
+      },
+      "run_function": {
+        "line": 205,
+        "name": "_shared_shadowed_map",
+        "path": "nova/equilibrium/forward.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "correction_document",
+        "path": "tests/calibrate/test_promotion_route.py"
+      },
+      "run_function": {
+        "line": 237,
+        "name": "reader_identity",
+        "path": "scripts/analytic_oracle_fixtures/centroid_row.py"
+      },
+      "window_line": 245
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 237,
+        "name": "reader_identity",
+        "path": "scripts/analytic_oracle_fixtures/centroid_row.py"
+      },
+      "window_line": 246
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "327cb34cb018608fd9b562073f6a39753b0a646a",
+    "e7355c0ba90fd500491f6806c4c778f9088dd801",
+    "220e6d51b8f1df7ac5d6c3693dfc91f16bbe143d",
+    "aa60b1f4999c6529dff20fcc947b89bc2740eed9"
+  ],
+  "completed_at": "2026-10-03T12:00:02Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-03T10:58:02Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest of",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "benchmarks/centroid_field_response_probe.py"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-centroid-row /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-centroid-row/tests/test_forward_constraints.py /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-centroid-row/tests/test_first_moment_centroid_row.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105738891003-cco-first-moment-centroid-row/after-caller-head.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8,
+    "plan": "centroid-constrained-oracle-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.8346916900924222,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-06T23:02:35Z, which is after this node's 3600s horizon ending 2026-10-03T11:57:41.436575+00:00",
+    "horizon_ends_at": "2026-10-03T11:57:41.436575+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-03T10:57:40Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-06T23:02:35Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 555353,
+    "state": "quiet",
+    "utilisation_pct": 15.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-03T10:57:40Z",
+    "read_at": "2026-10-03T10:57:41Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 15.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T12:00:02Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105738891003-cco-first-moment-centroid-row/manifest.md",
+  "member": "disposable-r-20261003T105738891003-cco-first-moment-centroid-row",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_first_moment_centroid_row.py::test_analytic_first_moment_centroid_has_derived_tolerance"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_first_moment_centroid_row.py::test_analytic_first_moment_centroid_has_derived_tolerance"
+    ],
+    "declaration": "restoring the cell-centre centroid makes the analytic-state tolerance test fail by the measured 6.17 mm",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105738891003-cco-first-moment-centroid-row/negative-control-head.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105738891003-cco-first-moment-centroid-row/negative-control-head.log",
+    "test_paths": [
+      "tests/test_first_moment_centroid_row.py",
+      "tests/test_forward_constraints.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cco-first-moment-centroid-row",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1972,
+          "cached_input_tokens": 828740,
+          "input_tokens": 830714,
+          "output_tokens": 1511,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 832225,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Lead decision centroid-row-definition = first-moments-derived-tolerance (plan centroid-constrained-oracle-solve, recorded at 3c026a156). Today ForwardProfile.current_moment_observation (nova/equilibrium/forward.py:1238-1261) hands observe_current_moments (nova/equilibrium/observation.py:279) only cell currents at cell centres, so CurrentCentroidConstraint (nova/equilibrium/constraint.py:934) places the exact analytic state 6.17 mm off its continuous target at 135 cells; adding each cell's within-cell first moment recovers 98.75 percent of that (/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-centroid-moment-contract.md, merged 96d8d4c46). (1) Move the first-moment recovery that benchmarks/plasma_cell_map_fidelity.py performs (recover_physical_first_moments and current_centroid) into the library, make the centroid observation the row reads use it, and keep the computation differentiable. (2) The row's clause becomes a discretisation tolerance: the analytic state's own first-moment centroid residual at the row's resolution, computed by the same row code and recorded with the row (in scripts/analytic_oracle_fixtures/centroid_row.py), replacing the fixed 1e-12-pitch clause for analytic-fixture rows; a test asserts that the analytic state passes it and that a state displaced by twice that residual fails. (3) A test pins the first-moment centroid of the analytic weak-rotation-reactor-static -110 state at 135 cells within its recorded tolerance of the continuous target (the measured residual was 77 micrometres). (4) No solve and no H200 job in this node; the constrained re-measure waits for both derivative repairs. Pass clip_mode='exact' explicitly anywhere a mode is needed; the process-global mode no longer exists. Gate: JAX_PLATFORMS=cpu pytest of tests/test_forward_constraints.py and the new test file, in place on the fleet allocation, delta against the parent; a baseline arm extracts only the subtrees it imports and removes them before the manifest. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-first-moment-centroid-row.md, with any other caller of CurrentCentroidConstraint whose behaviour changes listed.",
+    "estimated_hours": null,
+    "goal": "make the centroid row measure the first-moment current centroid and judge it against a tolerance derived from the analytic state",
+    "id": "cco-first-moment-centroid-row",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-03T10:57:40Z",
+      "read_at": "2026-10-03T10:57:41Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 15.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105738891003-cco-first-moment-centroid-row/manifest.md",
+    "negative_control": "restoring the cell-centre centroid makes the analytic-state tolerance test fail by the measured 6.17 mm",
+    "plan": "centroid-constrained-oracle-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/observation.py",
+      "nova/equilibrium/constraint.py",
+      "nova/equilibrium/forward.py",
+      "scripts/analytic_oracle_fixtures/centroid_row.py",
+      "tests/test_forward_constraints.py",
+      "tests/test_first_moment_centroid_row.py",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-first-moment-centroid-row.md",
+      "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-first-moment-centroid-row.html",
+      "docs/figures/centroid-constrained-oracle-solve/cco-first-moment-centroid-row",
+      "benchmarks/centroid_constrained_fixture_receipt.py"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex",
+    "member": null,
+    "node": "cco-first-moment-centroid-row",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-03T10:57:45.379305+00:00",
+    "score": 0.5875,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.24,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "centroid-constrained-oracle-solve",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "aa60b1f4999c6529dff20fcc947b89bc2740eed9",
+  "resume_waiver": null,
+  "review": {
+    "absent": [
+      "Complete inventory in the report of callers whose centroid values change"
+    ],
+    "reviewed_base_sha": "3c026a1562263e24be178eb34e1e56d76929d4e6",
+    "reviewed_head_sha": "aa60b1f4999c6529dff20fcc947b89bc2740eed9",
+    "scores": {
+      "durability": 18,
+      "evidence": 18,
+      "fit": 15,
+      "goal_fidelity": 16,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 87
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T105738891003-cco-first-moment-centroid-row",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a1016a-0c76-7f21-85a5-b9350433bc4e",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 30338048,
+    "cumulative_input_tokens": 60888348,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 82950
+  },
+  "time_budget": "60m",
+  "tool_steps": 160.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3720,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T12:00:06Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T11:41:44Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T105738891003-cco-first-moment-centroid-row",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 655,
+    "worker_pid": 940703
+  },
+  "worker_seconds": 3720,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

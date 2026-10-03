@@ -1,0 +1,66 @@
+{
+  "estimated_span": {
+    "method_limit": "field inferred by least-squares from a saved, potentially nonconverged state; not the solve receipt amplitude",
+    "net_offset_of_analytic_span": -0.00040827690886256296,
+    "reading": {
+      "analytic_axis_flux_wb": 49.94030946106932,
+      "analytic_boundary_flux_wb": 7.226451584728141e-08,
+      "analytic_span_wb": 49.940309388804806,
+      "compensator_flux_at_axis_wb": -3.6880937863956526e-05,
+      "compensator_flux_at_boundary_wb": 0.012836405570063273,
+      "compensator_flux_at_contact_radius_wb": 0.012836405570063273,
+      "compensator_span_contribution_wb": -0.01287328650792723,
+      "contact_radius_m": 7.801395788267687,
+      "gauge_free_flux_offset_less_compensator_wb": -0.02038947514490126,
+      "gauge_free_flux_offset_of_span": -0.0006660503721325574,
+      "gauge_free_flux_offset_wb": -0.03326276165282849,
+      "reference_radius_m": 6.2,
+      "solved_axis_flux_wb": 49.94113518550184,
+      "solved_boundary_flux_wb": 0.03408855834986748,
+      "solved_span_wb": 49.90704662715198
+    }
+  },
+  "method": "least-squares projection of state minus zero-compensator flux map onto the three closed-form response columns, on unshadowed rows",
+  "old_control_receipt": "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json",
+  "results": {
+    "old": {
+      "active_count": 772,
+      "amplitudes": [
+        -0.021255810526299015,
+        -7.58326734739967e-12,
+        -13.498416329573677
+      ],
+      "fit_max_abs_wb": 3.836415629621115e-10,
+      "fit_rms_wb": 1.205500559487896e-10,
+      "rank": 3,
+      "singular_values": [
+        2332.59248487725,
+        1317.7863695565445,
+        27.38816075986949
+      ],
+      "vs_banked_amplitude_delta": [
+        2.6973007161146256e-12,
+        -4.22820736759719e-15,
+        6.287770304425067e-11
+      ]
+    },
+    "repaired": {
+      "active_count": 772,
+      "amplitudes": [
+        0.00018223153916676794,
+        -5.305478278927467e-14,
+        0.0965680739945654
+      ],
+      "fit_max_abs_wb": 0.0034488172718275117,
+      "fit_rms_wb": 0.001733851894395811,
+      "rank": 3,
+      "singular_values": [
+        2332.59248487725,
+        1317.7863695565445,
+        27.38816075986949
+      ]
+    }
+  },
+  "schema": "nova.saved-state-compensator-recovery",
+  "source_revision": "5d2d5eaf1f0921f326eb2eb40103eaaf10c9886a"
+}

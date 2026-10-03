@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -52,8 +51,6 @@ RECEIPT_FIELDS = (
     "edge_valid",
     "overflow",
 )
-# A named field omitted from comparison, selecting the declared negative control.
-RECEIPT_SKIP_ENV = "CONTOUR_TREE_RECEIPT_SKIP"
 
 
 @dataclass(frozen=True)
@@ -417,26 +414,25 @@ def write_receipts(directory: Path, fixtures: tuple[Fixture, ...]) -> Path:
     return write_receipt_file(payload, Path(directory) / "receipts.json")
 
 
-def _compared_fields() -> tuple[str, ...]:
-    """Receipt fields compared, minus any field the negative control skips."""
-
-    skipped = os.environ.get(RECEIPT_SKIP_ENV)
-    return tuple(name for name in RECEIPT_FIELDS if name != skipped)
-
-
 def compare_receipts(
     base: Mapping[str, Mapping[str, object]],
     head: Mapping[str, Mapping[str, object]],
+    fields: tuple[str, ...] | None = None,
 ) -> list[FieldComparison]:
-    """Compare every receipt field across the two loaded receipt files.
+    """Compare receipt fields across the two loaded receipt files.
+
+    Every receipt field is compared by default; a caller may name a narrower
+    field set, but the CLI never does, so a real mismatch cannot be turned into
+    a pass by any process-wide switch.
 
     A fixture present in only one file, or a field missing from either, counts
     as a mismatch for that field, so a dropped fixture is never read as equal.
     """
 
+    compared = RECEIPT_FIELDS if fields is None else tuple(fields)
     names = sorted(set(base) | set(head))
     comparisons = []
-    for field in _compared_fields():
+    for field in compared:
         mismatches = 0
         for name in names:
             left = base.get(name, {}).get(field)

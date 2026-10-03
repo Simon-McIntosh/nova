@@ -3,11 +3,14 @@
 Two receipt files written by ``benchmarks.contour_tree_brute_force`` compare
 equal only when every receipt field matches. A receipt differing in exactly one
 field must fail naming that field, once for each compared field, so a
-comparator that silently drops a field is caught by the field it dropped.
+comparator that silently drops a field is caught by the field it dropped. The
+comparison takes its field set as an explicit argument defaulting to every
+field; a test may narrow that set only to show the negative control, and the
+CLI never does.
 
-``CONTOUR_TREE_RECEIPT_SKIP=<field>`` applies the declared negative control: the
-named field is omitted from comparison, so the test for that field must fail.
-That run is the negative-control log.
+The declared negative control mutates the default field set to omit the
+edge-mask field; the ``edge_valid`` case below then fails on receipts that
+differ only there.
 """
 
 from __future__ import annotations
@@ -15,6 +18,7 @@ from __future__ import annotations
 import copy
 from types import SimpleNamespace
 
+import jax.numpy as jnp
 import numpy as np
 import pytest
 
@@ -25,6 +29,11 @@ from benchmarks.contour_tree_brute_force import (
     receipt_from_tree,
     write_receipt_file,
 )
+from nova.equilibrium.contour_tree import build_contour_tree
+from nova.jax.config import configure_dtypes
+
+
+configure_dtypes()
 
 
 def _receipt() -> dict[str, object]:
@@ -92,4 +101,52 @@ def test_single_field_difference_names_that_field(tmp_path, field, capsys):
     }
     assert mismatched == {field}
     assert code != 0
+    assert f"{field}:" in printed
+
+
+def test_narrowed_field_set_hides_its_omitted_field():
+    """A narrowed field set cannot see a difference outside it.
+
+    This is the mechanism the negative control relies on: only a comparison
+    told to drop the edge-mask field misses an edge-mask-only difference.
+    """
+
+    base = _receipt()
+    head = _altered(base, "edge_valid")
+    reduced = tuple(name for name in RECEIPT_FIELDS if name != "edge_valid")
+    assert all(
+        item.mismatches == 0 for item in compare_receipts(base, head, fields=reduced)
+    )
+    assert any(item.mismatches for item in compare_receipts(base, head))
+
+
+def test_real_tree_receipt_round_trips_through_writer_and_loader(tmp_path, capsys):
+    """A tree built by the solver round-trips through the receipt files.
+
+    Identical receipts compare equal with a zero exit; a receipt differing in
+    one field exits nonzero and names that field.
+    """
+
+    tree = build_contour_tree(
+        jnp.asarray([3.0, 1.0, 2.0, 0.5, 1.5, -1.0], dtype=jnp.float64),
+        jnp.ones(6, dtype=bool),
+        jnp.zeros(6, dtype=bool),
+        jnp.asarray([[0, 1], [1, 2], [2, 3], [3, 4], [4, 5]], dtype=jnp.int32),
+        jnp.ones(5, dtype=bool),
+        jnp.asarray(1, dtype=jnp.int32),
+    )
+    receipt = receipt_from_tree(tree)
+    base = write_receipt_file({"fixture": receipt}, tmp_path / "base.json")
+    head = write_receipt_file(
+        {"fixture": copy.deepcopy(receipt)}, tmp_path / "head.json"
+    )
+    assert main(["--compare", str(base), str(head)]) == 0
+
+    field = "critical_type"
+    bad = write_receipt_file(
+        _altered({"fixture": receipt}, field), tmp_path / "bad.json"
+    )
+    code = main(["--compare", str(base), str(bad)])
+    printed = capsys.readouterr().out
+    assert code == 1
     assert f"{field}:" in printed

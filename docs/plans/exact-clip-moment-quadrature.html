@@ -23,12 +23,12 @@
   <title>Exact-clip moment quadrature | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-02">
+<meta name="plan-modified" content="2026-10-03">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.99">
-<meta name="plan-version" content="80">
+<meta name="plan-version" content="81">
 </head>
 <body>
   <main class="plan-doc">
@@ -283,10 +283,11 @@ matrix. Record: <a href="/nova/evidence/archive/exact-clip-moment-quadrature-lan
     <pre class="r-fu-prompt">/reckon-build exact-clip-moment-quadrature</pre>
     <p class="r-fu-outcome">The mechanism landed at merge 8ee75d50b (commits 5b84f5bcb, 7cac24526). traced_polygon_vertex_capacity(straight, level_run_count=1) returns level_run_count times 128 plus straight. A two-run layout declared with two runs is admitted at 260 vertices with zero refused cells, and under the one-arc bound the same layout is refused visibly. The module gate passes 28. The production wiring (61b291089) is held by the lead's ruling, because the cell-9 defect does not reproduce at base: the diverted 110-cell row peaks at 134 vertices against 162. The re-measurement that decides the wiring is section 5.</p>
     </article>
-<article class="r-fu" data-id="f-ecq-fence-in-moment-l2" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build exact-clip-moment-quadrature" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ecq-fence-in-moment-l2" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build exact-clip-moment-quadrature" data-resolved-at="2026-10-03T15:33:34+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Re-judge the five fallback rows against the fan floor in the moment relative L2 norm</h4>
     <div class="r-fu-body"><p>Decision <code>fallback-fence-norm</code> is locked to <code>moment-relative-l2</code>. Re-express the retained fan's refinement floor in the moment relative L2 norm and judge each of the five fallback rows against it.</p><p><strong>Done when:</strong> the receipt states, per row, its error and the fence in that one norm, with a pass or fail verdict; the evidence record replaces the two superseded fences with this one; and the module test passes in one fresh all_debug process with the default route bit-identical to base.</p></div>
     <pre class="r-fu-prompt">/reckon-build exact-clip-moment-quadrature</pre>
+    <p class="r-fu-outcome">Re-judged in the moment relative L2 norm (merged 7eaf33a7b; receipt docs/figures/exact-clip-moment-quadrature/fence-in-moment-l2/receipt.json; review 86). The retained fan's floor is 2.27e-16 on the current moment, 4.4e-15 radial and 5.1e-15 vertical. The five fallback row errors are 1.73e-16, 2.01e-16, 2.07e-16, 2.30e-16 and 2.96e-16. Three rows fall under the fence and two above, but every value is within about one machine epsilon, so the split reflects floating-point ordering, not representation error. All five fallback rows agree with the fan to round-off. This one fence replaces the two superseded ones. The exact-clip module passes 13 of 13 in one fresh process, and the default route is bit-identical to base.</p>
     </article>
 <article class="r-fu" data-id="f-ecq-production-diverted-one-arc-census" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-02" data-recommends-skill="/reckon-build exact-clip-moment-quadrature" data-resolved-at="2026-10-02T20:28:16+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Census the production diverted layouts against the one-arc bound, and watch the saddle-wedge margin</h4>

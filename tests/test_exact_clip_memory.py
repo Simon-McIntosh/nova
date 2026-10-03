@@ -46,7 +46,6 @@ import jax
 import numpy as np
 
 from benchmarks import solovev_certificate as certificate
-from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.jax.config import configure_dtypes
 
 
@@ -63,6 +62,11 @@ def main() -> int:
 
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
+    clip_mode = (
+        "chord"
+        if arguments.mode in ("whole_cell", "whole_cell_guard")
+        else arguments.mode
+    )
     if arguments.mode in ("whole_cell", "whole_cell_guard"):
         from benchmarks import limited_row_shadow_census
 
@@ -76,11 +80,8 @@ def main() -> int:
                 raise AssertionError("whole-cell solve traversed exact root polish")
 
             forward_operator._implicit_traced_level_arc = refuse_polished_arc
-        set_support_clip_mode("chord")
-    else:
-        set_support_clip_mode(arguments.mode)
     profile, seed, request, dimensions = certificate._certificate_compile_problem(
-        arguments.case, arguments.requested_cells
+        arguments.case, arguments.requested_cells, clip_mode=clip_mode
     )
     solved = profile.solve(request).equilibrium
     jax.block_until_ready(solved.flux)
@@ -159,8 +160,6 @@ def test_scaling_exponent_refuses_nonpositive_measurements(value):
 def test_measure_uses_the_current_quadrature_node_owner(monkeypatch, tmp_path):
     """The memory probe reaches compilation after the quadrature module split."""
     monkeypatch.setattr(memory_scaling, "configure_dtypes", lambda: None)
-    monkeypatch.setattr(memory_scaling, "support_clip_mode", lambda: "chord")
-    monkeypatch.setattr(memory_scaling, "set_support_clip_mode", lambda _mode: None)
     monkeypatch.setattr(memory_scaling.certificate, "_source_revision", lambda: "abc")
     monkeypatch.setattr(
         memory_scaling.certificate, "_lane", lambda: {"platform": "cpu"}
@@ -200,8 +199,6 @@ def test_the_memory_probe_reads_the_node_constant_from_its_owning_module():
 def test_measure_can_bank_memory_without_serializing_hlo(monkeypatch, tmp_path):
     """A protobuf-sized program still yields its executable memory receipt."""
     monkeypatch.setattr(memory_scaling, "configure_dtypes", lambda: None)
-    monkeypatch.setattr(memory_scaling, "support_clip_mode", lambda: "chord")
-    monkeypatch.setattr(memory_scaling, "set_support_clip_mode", lambda _mode: None)
     monkeypatch.setattr(memory_scaling.certificate, "_source_revision", lambda: "abc")
     monkeypatch.setattr(
         memory_scaling.certificate, "_lane", lambda: {"platform": "gpu"}
@@ -255,8 +252,6 @@ class _MeasuredDevice:
 
 def _mock_production_solve(monkeypatch, peak_bytes: int) -> None:
     monkeypatch.setattr(memory_scaling, "configure_dtypes", lambda: None)
-    monkeypatch.setattr(memory_scaling, "support_clip_mode", lambda: "chord")
-    monkeypatch.setattr(memory_scaling, "set_support_clip_mode", lambda _mode: None)
     monkeypatch.setattr(
         memory_scaling.jax, "devices", lambda: [_MeasuredDevice(peak_bytes)]
     )
@@ -265,7 +260,7 @@ def _mock_production_solve(monkeypatch, peak_bytes: int) -> None:
         memory_scaling.certificate, "_lane", lambda: {"platform": "gpu"}
     )
 
-    def measured(_case, requested_cells):
+    def measured(_case, requested_cells, **_kwargs):
         row = {
             "realised_cells": 1065,
             "solver": {"terminal_fixed_point_residual": 1.25e-8},

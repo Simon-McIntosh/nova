@@ -157,76 +157,70 @@ def analytic_carrier(request):
     assert jax.config.jax_enable_x64 is True
     from benchmarks import solovev_certificate as certificate
     from nova.equilibrium.forward import ForwardProfile
-    from nova.equilibrium.forward_operator import (
-        set_support_clip_mode,
-        support_clip_mode,
-    )
     from nova.equilibrium.stencil_mesh import StencilMesh
     from scripts.analytic_oracle_fixtures import measure as oracle_fixture
     from scripts.oracle_rebaseline import measure as recovery
 
-    previous_mode = support_clip_mode()
-    set_support_clip_mode("exact")
-    try:
-        case_name = request.param
-        if case_name == "diverted-single-null":
-            case_name = certificate.DIVERTED_CASE_NAME
-        requested_cells = -110
-        carrier_case, source_case, exact = certificate._case(case_name)
-        machine = certificate._case_machine(
-            case_name, carrier_case, exact, requested_cells
+    case_name = request.param
+    if case_name == "diverted-single-null":
+        case_name = certificate.DIVERTED_CASE_NAME
+    requested_cells = -110
+    carrier_case, source_case, exact = certificate._case(case_name)
+    machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = certificate._exact_state(case_name, exact, coordinates)
+    empty = oracle_fixture.forward_operator(source_case, machine).with_clip_mode(
+        "exact"
+    )
+    moments, exterior, _cache = oracle_fixture.cached_fixture_exterior(
+        source_case, exact, machine, empty, analytic
+    )
+    operator = oracle_fixture.forward_operator(
+        source_case, machine, exterior
+    ).with_clip_mode("exact")
+    profile = ForwardProfile(
+        operator,
+        StencilMesh(machine.node, machine.stencil, machine.area),
+        newton_steps=recovery.NEWTON_STEPS,
+    )
+    target_current, _centroid, _current_receipt = (
+        certificate._closed_form_current_target(
+            case_name, source_case, operator, moments
         )
-        coordinates = np.vstack(
-            (machine.node, machine.wall_node, machine.sample_coordinates)
-        )
-        analytic = certificate._exact_state(case_name, exact, coordinates)
-        empty = oracle_fixture.forward_operator(source_case, machine)
-        moments, exterior, _cache = oracle_fixture.cached_fixture_exterior(
-            source_case, exact, machine, empty, analytic
-        )
-        operator = oracle_fixture.forward_operator(source_case, machine, exterior)
-        profile = ForwardProfile(
-            operator,
-            StencilMesh(machine.node, machine.stencil, machine.area),
-            newton_steps=recovery.NEWTON_STEPS,
-        )
-        target_current, _centroid, _current_receipt = (
-            certificate._closed_form_current_target(
-                case_name, source_case, operator, moments
-            )
-        )
-        solve_request = certificate._certificate_solve_request(
-            profile,
-            jnp.asarray(analytic, dtype=jnp.float64),
-            float(target_current),
-            carrier_identity=f"analytic-hex:{case_name}:{requested_cells}",
-        )
-        solve_request = replace(
-            solve_request, policy=replace(solve_request.policy, active_set_steps=1)
-        )
-        positive = operator._fixed_design_topology.grid.candidate_table_status(
-            operator.null_flux_pool(jnp.asarray(analytic))
-        )
-        assert int(positive["retained_count"][0]) > 0
-        print(
-            f"SOLVE_INPUT_CONTROL case={case_name} realised={len(machine.node)} "
-            f"state_values={len(analytic)} "
-            f"physical_values={operator.physical_node_number} "
-            f"retained={np.asarray(positive['retained_count']).tolist()}",
-            flush=True,
-        )
-        yield SimpleNamespace(
-            case_name=case_name,
-            machine=machine,
-            coordinates=coordinates,
-            analytic=analytic,
-            operator=operator,
-            profile=profile,
-            solve_request=solve_request,
-            positive=positive,
-        )
-    finally:
-        set_support_clip_mode(previous_mode)
+    )
+    solve_request = certificate._certificate_solve_request(
+        profile,
+        jnp.asarray(analytic, dtype=jnp.float64),
+        float(target_current),
+        carrier_identity=f"analytic-hex:{case_name}:{requested_cells}",
+        clip_mode="exact",
+    )
+    solve_request = replace(
+        solve_request, policy=replace(solve_request.policy, active_set_steps=1)
+    )
+    positive = operator._fixed_design_topology.grid.candidate_table_status(
+        operator.null_flux_pool(jnp.asarray(analytic))
+    )
+    assert int(positive["retained_count"][0]) > 0
+    print(
+        f"SOLVE_INPUT_CONTROL case={case_name} realised={len(machine.node)} "
+        f"state_values={len(analytic)} "
+        f"physical_values={operator.physical_node_number} "
+        f"retained={np.asarray(positive['retained_count']).tolist()}",
+        flush=True,
+    )
+    yield SimpleNamespace(
+        case_name=case_name,
+        machine=machine,
+        coordinates=coordinates,
+        analytic=analytic,
+        operator=operator,
+        profile=profile,
+        solve_request=solve_request,
+        positive=positive,
+    )
 
 
 def _finite_polish_count(polish):

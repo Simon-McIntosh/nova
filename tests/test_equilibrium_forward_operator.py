@@ -22,7 +22,10 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.equilibrium.forward_operator import ForwardFluxOperator, PrescribedCurrentField
+from nova.equilibrium.forward_operator import (
+    ForwardFluxOperator,
+    PrescribedCurrentField,
+)
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.jax.config import configure_dtypes
 
@@ -74,7 +77,7 @@ def main() -> int:
     from nova.equilibrium import forward_operator as fo
 
     operator, state = build()
-    fo.set_support_clip_mode(arguments.mode)
+    operator = operator.with_clip_mode(arguments.mode)
 
     observed: list[str] = []
     original = fo._traced_clip

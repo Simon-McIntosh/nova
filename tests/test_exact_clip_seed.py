@@ -9,20 +9,9 @@ import numpy as np
 import pytest
 
 from nova.equilibrium.forward import ForwardProfile
-from nova.equilibrium.forward_operator import (
-    set_support_clip_mode,
-    support_clip_mode,
-)
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes
-
-
-@pytest.fixture(autouse=True)
-def _restore_clip_mode():
-    previous = support_clip_mode()
-    yield
-    set_support_clip_mode(previous)
 
 
 class _BoundaryLevelOperator:
@@ -30,9 +19,17 @@ class _BoundaryLevelOperator:
     grid = SimpleNamespace(node_number=2)
     physical_node_number = 4
 
-    def __init__(self, slope: float = 25.0):
+    def __init__(self, slope: float = 25.0, clip_mode: str = "exact"):
         self.slope = float(slope)
+        self.clip_mode = clip_mode
         self.read_count = 0
+
+    def __getattr__(self, name: str):
+        # ``_clip_consistent_seed`` reads the operator's active clip mode under a
+        # name ending in ``clip_mode``; the fake exposes its own explicitly.
+        if name.endswith("clip_mode"):
+            return self.clip_mode
+        raise AttributeError(name)
 
     def read(self, _state, _requested_class):
         self.read_count += 1
@@ -54,8 +51,7 @@ def _profile(operator: _BoundaryLevelOperator) -> ForwardProfile:
 
 def test_exact_clip_seed_solves_boundary_level_for_unit_amplitude() -> None:
     configure_dtypes()
-    set_support_clip_mode("exact")
-    operator = _BoundaryLevelOperator()
+    operator = _BoundaryLevelOperator(clip_mode="exact")
     seed = jnp.asarray([4.0, 3.0, 0.0, 0.0, 8.0], dtype=jnp.float64)
 
     adjusted = _profile(operator)._clip_consistent_seed(
@@ -71,8 +67,7 @@ def test_exact_clip_seed_solves_boundary_level_for_unit_amplitude() -> None:
 
 def test_nonexact_seed_is_bit_identical_and_does_not_read_operator() -> None:
     configure_dtypes()
-    set_support_clip_mode("chord")
-    operator = _BoundaryLevelOperator()
+    operator = _BoundaryLevelOperator(clip_mode="chord")
     seed = jnp.asarray([4.0, 3.0, 0.0, 0.0, 8.0], dtype=jnp.float64)
 
     adjusted = _profile(operator)._clip_consistent_seed(
@@ -85,8 +80,7 @@ def test_nonexact_seed_is_bit_identical_and_does_not_read_operator() -> None:
 
 def test_exact_clip_seed_refuses_an_unbracketed_current() -> None:
     configure_dtypes()
-    set_support_clip_mode("exact")
-    operator = _BoundaryLevelOperator(slope=0.0)
+    operator = _BoundaryLevelOperator(slope=0.0, clip_mode="exact")
     seed = jnp.asarray([4.0, 3.0, 0.0, 0.0, 8.0], dtype=jnp.float64)
 
     with pytest.raises(

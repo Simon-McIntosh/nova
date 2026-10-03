@@ -9,25 +9,13 @@ import pytest
 
 from benchmarks import exact_clip_seed_amplitude as benchmark
 from benchmarks import solovev_certificate as certificate
-from nova.equilibrium.forward_operator import (
-    set_support_clip_mode,
-    support_clip_mode,
-)
 from nova.jax.config import configure_dtypes
-
-
-@pytest.fixture(autouse=True)
-def _restore_clip_mode():
-    previous = support_clip_mode()
-    yield
-    set_support_clip_mode(previous)
 
 
 @pytest.mark.slow
 def test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier() -> None:
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
-    set_support_clip_mode("exact")
     case_name = "weak-rotation-reactor-static"
     requested_cells = -300
     (
@@ -39,7 +27,7 @@ def test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier() -> None:
         target_current,
         centroid,
         current_receipt,
-    ) = benchmark._problem(case_name, requested_cells)
+    ) = benchmark._problem(case_name, requested_cells, clip_mode="exact")
 
     seed, requested_class, _seed_receipt = certificate._production_seed(
         profile,

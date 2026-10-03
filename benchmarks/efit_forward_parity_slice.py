@@ -76,6 +76,7 @@ from nova.jax.config import (
     default_persistent_compilation_cache_root,
 )
 from nova.geometry.hexstencil import hex_stencil
+from nova.media import poloidal
 
 matplotlib.use("Agg")
 
@@ -3335,15 +3336,15 @@ def _attribution_figure(fields: dict[str, Any], path: Path) -> None:
             1.0e-15,
         )
         levels = np.linspace(-limit, limit, 25)
-        image = axis.tricontourf(
+        poloidal.draw_scattered_contours(
+            axis,
             fields["grid_coordinate"][:, 0],
             fields["grid_coordinate"][:, 1],
             grid_value,
-            levels=levels,
-            cmap="coolwarm",
-            extend="both",
+            levels,
+            fields["wall_coordinate"],
         )
-        axis.scatter(
+        image = axis.scatter(
             fields["wall_coordinate"][:, 0],
             fields["wall_coordinate"][:, 1],
             c=wall_value,
@@ -3434,15 +3435,15 @@ def _composition_figure(fields: tuple[dict, dict], path: Path) -> None:
             1.0e-15,
         )
         levels = np.linspace(-limit, limit, 25)
-        image = axis.tricontourf(
+        poloidal.draw_scattered_contours(
+            axis,
             field["grid_coordinate"][:, 0],
             field["grid_coordinate"][:, 1],
             grid_value,
-            levels=levels,
-            cmap="coolwarm",
-            extend="both",
+            levels,
+            field["wall_coordinate"],
         )
-        axis.scatter(
+        image = axis.scatter(
             field["wall_coordinate"][:, 0],
             field["wall_coordinate"][:, 1],
             c=wall_value,
@@ -3681,15 +3682,15 @@ def _passive_inclusive_figure(
         1.0e-15,
     )
     levels = np.linspace(-limit, limit, 25)
-    image = axes[0].tricontourf(
+    poloidal.draw_scattered_contours(
+        axes[0],
         fields["grid_coordinate"][:, 0],
         fields["grid_coordinate"][:, 1],
         update_grid,
-        levels=levels,
-        cmap="coolwarm",
-        extend="both",
+        levels,
+        fields["wall_coordinate"],
     )
-    axes[0].scatter(
+    image = axes[0].scatter(
         fields["wall_coordinate"][:, 0],
         fields["wall_coordinate"][:, 1],
         c=update_wall,

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="centroid-constrained-oracle-solve">
+<title>Certificate probe admission record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="cco-certificate-ladder-500-1000-probe" id="admission">
+  <h2>The larger certificate rows remain unmeasured</h2>
+  <p>The bounded exact-clip driver was committed at <code>93d138b48</code>. H200 job <code>1280638</code> requested one card, 8 CPUs and 192 GB for one hour, and was still pending on <code>Resources</code> after the required minute. All eight H200 cards were allocated. The job was cancelled by its own id before fallback. Titan job <code>1280639</code> requested the same CPU, memory and time shape with one card. It was also pending on <code>Resources</code>: titan had 74 GB and 6 CPUs free, below the request. Its scheduler start projection was 16:29 UTC, after this worker's 15:20 UTC deadline, so it too was cancelled by its own id. Neither job entered an allocation; GPU use was zero card-hours against the authorized one-hour job.</p>
+  <table>
+    <thead><tr><th>Case</th><th>Requested cells</th><th>Measured state</th></tr></thead>
+    <tbody>
+      <tr><td>weak-rotation-reactor-static</td><td>-1000</td><td>unmeasured</td></tr>
+      <tr><td>moderate-rotation-conventional-static</td><td>-1000</td><td>unmeasured</td></tr>
+      <tr><td>strong-rotation-compact-static</td><td>-1000</td><td>unmeasured</td></tr>
+      <tr><td>diverted-single-null</td><td>-500</td><td>unmeasured</td></tr>
+    </tbody>
+  </table>
+  <p>No compile, solve, or certificate clause is inferred from scheduler refusal. The next action is to dispatch the committed driver at its exact resource request after capacity opens, then write the row receipts and required poloidal panels. A smaller titan memory request would make a memory failure ambiguous as a program-size result.</p>
+</article>
+</main>
+</body>
+</html>

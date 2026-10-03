@@ -533,6 +533,12 @@ def main() -> None:
             RESPONSIBLE_REVISION,
             head,
         )
+        resolved_revisions = {
+            revision: subprocess.check_output(
+                ["git", "-C", str(ROOT), "rev-parse", revision], text=True
+            ).strip()
+            for revision in revisions
+        }
         reference_cells = (
             None
             if arguments.reference_cells is None
@@ -546,25 +552,28 @@ def main() -> None:
                 for revision in arguments.reference_revision
             }
             if arguments.reference_revision
-            else set(revisions)
+            else set(resolved_revisions.values())
         )
         rows = []
         for revision in revisions:
             component = arguments.component
-            if component == "full" and revision not in reference_revisions:
+            if (
+                component == "full"
+                and resolved_revisions[revision] not in reference_revisions
+            ):
                 component = "booking"
-            rows.append(
-                _measure(
-                    revision,
-                    scratch,
-                    component,
-                    reference_cells,
-                    generating_commit,
-                )
+            row = _measure(
+                revision,
+                scratch,
+                component,
+                reference_cells,
+                generating_commit,
             )
-        by_revision = {row["revision"]: row for row in rows}
+            row["resolved_revision"] = resolved_revisions[revision]
+            rows.append(row)
+        by_revision = {row["resolved_revision"]: row for row in rows}
         current = by_revision.get(head)
-        pinned = by_revision.get(PINNED_REVISION)
+        pinned = by_revision.get(resolved_revisions[PINNED_REVISION])
         current_comparison = _reference_comparison(current)
         pinned_comparison = _reference_comparison(pinned)
         payload = {

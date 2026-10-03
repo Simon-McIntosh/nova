@@ -17,7 +17,6 @@ import jax  # noqa: E402
 
 from benchmarks import exact_cut_cell_moment_stages as stages  # noqa: E402
 from benchmarks import solovev_certificate as certificate  # noqa: E402
-from nova.equilibrium.forward_operator import set_support_clip_mode  # noqa: E402
 from scripts.analytic_oracle_fixtures import measure as fixture  # noqa: E402
 
 
@@ -35,7 +34,7 @@ RECORDED_CUT_CELLS = (
 def _recorded_row(case_name: str, requested_cells: int):
     carrier, source, exact = certificate._case(case_name)
     machine = certificate._case_machine(case_name, carrier, exact, -requested_cells)
-    operator = fixture.forward_operator(source, machine)
+    operator = fixture.forward_operator(source, machine).with_clip_mode("exact")
     label = f"{case_name}-cells-{requested_cells}"
     with np.load(
         ROOT
@@ -43,7 +42,6 @@ def _recorded_row(case_name: str, requested_cells: int):
         / f"{label}-exact.npz"
     ) as bank:
         state = bank["analytic"]
-    set_support_clip_mode("exact")
     jax.clear_caches()
     return stages._evaluate_path(operator, state)
 

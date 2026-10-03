@@ -23,11 +23,7 @@ import numpy as np
 import pytest
 
 from nova.equilibrium.forward import ForwardProfile
-from nova.equilibrium.forward_operator import (
-    ForwardFluxOperator,
-    set_support_clip_mode,
-    support_clip_mode,
-)
+from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.observation import (
     ConstraintPinSet,
@@ -38,14 +34,6 @@ from nova.equilibrium.observation import (
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.equilibrium.separatrix_clip import AtomicCellMesh
 from nova.jax.config import configure_dtypes
-
-
-@pytest.fixture(autouse=True)
-def _restore_support_clip_mode_default():
-    """Return the clip mode to the module default after each test."""
-    previous = support_clip_mode()
-    yield
-    set_support_clip_mode(previous)
 
 
 COORDINATE = np.asarray([[0.8, -0.1], [1.0, 0.0], [1.2, 0.1], [1.4, 0.0]])
@@ -212,7 +200,6 @@ def test_constraint_residual_forwards_the_solved_class():
 def test_curved_boundary_support_promotes_every_cut_cell_before_moment_selection():
     """A centroid-excluded cell cut by the curve still carries current."""
     configure_dtypes()
-    set_support_clip_mode("exact")
     cells = (
         np.asarray([[0.5, -0.5], [1.5, -0.5], [1.5, 0.5], [0.5, 0.5]]),
         np.asarray([[1.5, -0.5], [2.5, -0.5], [2.5, 0.5], [1.5, 0.5]]),
@@ -220,6 +207,7 @@ def test_curved_boundary_support_promotes_every_cut_cell_before_moment_selection
     centres = np.asarray([[1.0, 0.0], [2.0, 0.0]])
     atomic_mesh = AtomicCellMesh.from_cells(cells, centroids=centres)
     operator = object.__new__(ForwardFluxOperator)
+    operator.clip_mode = "exact"
     operator.polarity = 1
     operator.grid = SimpleNamespace(coordinate=centres)
     operator.moment_geometry = SimpleNamespace(atomic_mesh=atomic_mesh)
@@ -231,7 +219,10 @@ def test_curved_boundary_support_promotes_every_cut_cell_before_moment_selection
     )
     labels = jnp.asarray([0, 1], dtype=jnp.int8)
     masks = DomainMasks(label=labels, psi_norm=jnp.asarray([0.0, 1.0]))
-    topology = SimpleNamespace(boundary_flux=jnp.asarray(0.0))
+    topology = SimpleNamespace(
+        boundary_flux=jnp.asarray(0.0),
+        x_point=jnp.asarray([jnp.nan, jnp.nan]),
+    )
     physical = jnp.asarray(1.0 - atomic_mesh.node_coordinates[:, 0])
 
     support = ForwardFluxOperator._profile_support(
@@ -241,7 +232,7 @@ def test_curved_boundary_support_promotes_every_cut_cell_before_moment_selection
     assert bool(support.boundary[0])
     assert bool(support.included[0])
     assert float(support.area[0]) > 0.0
-    promoted = ForwardFluxOperator._moment_support_masks(masks, support)
+    promoted = operator._moment_support_masks(masks, support)
     assert bool(promoted.profile_participation[0])
 
 

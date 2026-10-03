@@ -1,0 +1,670 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "03aa9c24f252594dded610d0d443e155e060a76b",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 4357376,
+      "cached_input_tokens_cumulative": 4357376,
+      "input_tokens": 4484543,
+      "input_tokens_cumulative": 4484543,
+      "output_tokens": 20321,
+      "output_tokens_cumulative": 20321,
+      "reasoning_output_tokens": 7762,
+      "reasoning_output_tokens_cumulative": 7762
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-03T14:10:35Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-03T13:59:26Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8,
+    "plan": "centroid-constrained-oracle-solve",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.3233564938535545,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-06T07:00:28Z, which is after this node's 2400s horizon ending 2026-10-03T14:31:26.605057+00:00",
+    "horizon_ends_at": "2026-10-03T14:31:26.605057+00:00",
+    "horizon_seconds": 2400,
+    "metered": true,
+    "observed_at": "2026-10-03T13:51:25Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-06T07:00:28Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 544928,
+    "state": "quiet",
+    "utilisation_pct": 23.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-03T13:51:25Z",
+    "read_at": "2026-10-03T13:51:26Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 23.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T14:10:35Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T135124142622-review-of-cco-repaired-constrained-remeasure-receipt/manifest.md",
+  "member": "disposable-r-20261003T135124142622-review-of-cco-repaired-constrained-remeasure-receipt",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "review run: the parsed review record is its deliverable",
+  "node": "review-of-cco-repaired-constrained-remeasure-receipt",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1376,
+          "cached_input_tokens": 962823,
+          "input_tokens": 964201,
+          "output_tokens": 347,
+          "reasoning_output_tokens": 46,
+          "total_tokens": 964548,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "the review for r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt stores a parsed record scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the reviewer opens repaired-remeasure-receipt/flux-panels.png itself and checks that the terminal map matches the analytic contours, that both null sets and the wall are drawn, and that the qualification verdict follows from the recorded residuals, tolerance and net span; it also reviews the blocked predecessor run r-20261003T121637673965-cco-repaired-constrained-remeasure, whose commits this node builds on; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt",
+    "id": "review-of-cco-repaired-constrained-remeasure-receipt",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-03T13:51:25Z",
+      "read_at": "2026-10-03T13:51:26Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 23.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T135124142622-review-of-cco-repaired-constrained-remeasure-receipt/manifest.md",
+    "negative_control": "",
+    "plan": "centroid-constrained-oracle-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "40m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt.at-7cfda7880b5da4a29e9b383f823f6d309c840ad1.json"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex",
+    "member": null,
+    "node": "review-of-cco-repaired-constrained-remeasure-receipt",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-03T13:58:59.899463+00:00",
+    "score": 0.625,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.59,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.6726573610532408,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.6726573610532408,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "review-excluded-backend",
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 322.109,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1697.092,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "served",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 8,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 154,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 10
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 7,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 7,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 25,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "clive": 0.65,
+      "codex": 0.11,
+      "codex-astra": 0.02,
+      "codex-luna": 0.02,
+      "codex-terra": 0.09,
+      "hold": 0.11
+    },
+    "rendered_token_estimate": 874,
+    "usage": {
+      "cost": 0.000107688,
+      "input_tokens": 2564,
+      "output_tokens": 71
+    }
+  },
+  "plan": "centroid-constrained-oracle-solve",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "03aa9c24f252594dded610d0d443e155e060a76b",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "none",
+  "role": "review",
+  "run_id": "r-20261003T135124142622-review-of-cco-repaired-constrained-remeasure-receipt",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a10210-2c50-77f0-b9d4-73ebccbd64c7",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 4357376,
+    "cumulative_input_tokens": 8841919,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 28083
+  },
+  "time_budget": "40m",
+  "tool_steps": 64.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_seconds": 631,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: One authorised H200 allocation failed after saving only the positive flux; another allocation for the complete receipt awaits the coordinator's answer to the pending requeue request.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 4231,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-03T13:17:05Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-03T12:41:19Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261003T121637673965-cco-repaired-constrained-remeasure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 622,
+          "worker_pid": 1900222
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "One authorised H200 allocation failed after saving only the positive flux; another allocation for the complete receipt awaits the coordinator's answer to the pending requeue request.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-03T13:17:05Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 2068,
+        "log_fresh": false,
+        "manifest_commits": [
+          "564030e5f",
+          "6e70eb4c8",
+          "5d2d5eaf1",
+          "36b67cef4",
+          "0a688b2e3",
+          "9ca7d87ae",
+          "35baa7c1b"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "236b85c2787ca10988bf9978a5afabd01df21f6190cefd17258a0551024f17ff",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T121637673965-cco-repaired-constrained-remeasure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T121637673965-cco-repaired-constrained-remeasure/manifest.md; resolve the blocker before resuming the run",
+        "node": "cco-repaired-constrained-remeasure",
+        "phase": "blocked",
+        "plan": "centroid-constrained-oracle-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261003T121637673965-cco-repaired-constrained-remeasure",
+        "session": "s22-nova",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261003T121637673965-cco-repaired-constrained-remeasure",
+          "session_id": "01a101b2-58ed-77d2-abdb-f7301461ca90",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 2127,
+        "terminal_at": "2026-10-03T13:16:02Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-repaired-constrained-remeasure"
+      }
+    ]
+  },
+  "wall_seconds": 669,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T14:10:47Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T13:59:34Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T135124142622-review-of-cco-repaired-constrained-remeasure-receipt",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 183,
+    "worker_pid": 2713361
+  },
+  "worker_seconds": 669,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

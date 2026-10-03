@@ -26,4 +26,13 @@ showed the fallback was carrying frozen-partition capabilities. Commit
 <code>f56b62a6b</code> retains the acceptance map while removing those
 capabilities from the live fallback; the H200 recheck passes the formerly
 failing id in <code>689.02 s</code>.</p>
+
+<p>The regression now invokes the fallback shadow map under two authorities:
+the live path produces <code>[1.0]</code>, while a scratch-tree mutation that
+substitutes <code>newton_shadowed_map</code> selects its frozen path and returns
+<code>[2.0]</code>, failing the assertion. That control imports
+<code>/tmp/fsri-live-read-frozen-control.dVt4fI/nova/equilibrium/forward.py</code>
+under pytest importlib mode. The final H200 arm at <code>da5e37812</code>
+passes all 33 selected ids in <code>845.12 s</code> with one SciPy warning and
+no failures.</p>
 </section>

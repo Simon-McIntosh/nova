@@ -1,0 +1,619 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "codex-terra",
+  "base_sha": "8f475ae23620206e833b7f92347dccf64a7e46d3",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 58219520,
+      "cached_input_tokens_cumulative": 58219520,
+      "input_tokens": 58674346,
+      "input_tokens_cumulative": 58674346,
+      "output_tokens": 89899,
+      "output_tokens_cumulative": 89899,
+      "reasoning_output_tokens": 19957,
+      "reasoning_output_tokens_cumulative": 19957
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 13869,
+    "files": 5,
+    "removed": 53
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "aa4d362a598f99dc8d8fe9d3aa5e3ba23d34d057",
+    "a0f653a267622eba890ea6c02d03cad3135aa185",
+    "f8980091b943cbe4f81f101fb035831a993bb4dc",
+    "f18479fbeec6c28603fe1e134a62ac0db3d49944",
+    "b8661a082f9b84b6c4fa5529db2995fa64c6f0eb",
+    "5346e9258fef241528a37a5cbe9a579cd90136b4",
+    "cfcb691895ece4ab5383e090b751a1eb40f0a55c",
+    "2dcc3196e9b72db80bbefeefdd26a6e7066ea605"
+  ],
+  "completed_at": "2026-10-03T13:38:22Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-03T11:17:01Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.85,
+    "plan": "plasma-cell-read-fidelity",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 1.793594306049822,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-terra' is projected to exhaust at 2026-10-07T01:06:32Z, which is after this node's 3600s horizon ending 2026-10-03T12:16:34.422233+00:00",
+    "horizon_ends_at": "2026-10-03T12:16:34.422233+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-03T11:16:33Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-07T01:06:32Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 554220,
+    "state": "quiet",
+    "utilisation_pct": 15.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-03T11:16:33Z",
+    "read_at": "2026-10-03T11:16:34Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 15.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T13:38:22Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T111631231719-pcrf-certificate-gate-is-a-live-test/manifest.md",
+  "member": "disposable-r-20261003T111631231719-pcrf-certificate-gate-is-a-live-test",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/test_certificate_gate_live.py",
+      "tests/test_certificate_pin.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "pcrf-certificate-gate-is-a-live-test",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2781,
+          "cached_input_tokens": 930876,
+          "input_tokens": 933659,
+          "output_tokens": 2222,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 935881,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: followup f-pcrf-005 in plasma-cell-read-fidelity. weak-rotation-reactor-static exact passes map fidelity at every certificate rung (remeasure-2026-10-02: 6e-5 to 1.4e-3, dZ ≈ 0). A current-main re-measure is running in node cca-diverted-map-error-rca. The certificate gate today is a pinned receipt that stays green on failed states. Deliverables: (1) A new H200-lane test, tests/test_certificate_gate_live.py. It solves the certificate production route for weak-rotation-reactor-static in exact mode at a rung where map fidelity passes, and asserts in order: map fidelity at the analytic state below 1e-2; convergence under the certificate default policy; and the terminal magnetic axis, plus the admitted X-point where the case has one, inside the position bound. It refuses a row that benchmarks/solovev_certificate._measure re-rendered from a persisted PART_ROOT row, by requiring a fresh job id and revision per row, and requires the map-fidelity audit's displacement control to have fired. The certificate-hub gate measured the smallest weak exact rung ending unqualified (terminal residual about 0.078). So first measure which rungs converge, and choose one that passes all three assertions. If none does, report each rung's three values and stop, rather than relaxing an assertion. (2) Rewrite tests/test_certificate_pin.py so that an unqualified row fails rather than being pinned, keeping the receipt's facts as data. Negative control: the map evaluated at a one-pitch vertically shifted analytic state fails the first assertion. Diverted rows are reported in the test output but not gated, until the diverted map RCA lands. Gate, logged under the run directory: the live test green on the H200 lane at the chosen rung through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh --rungs h200 --force-submit (authorised); red under the negative control, run from a full tree copy with --import-mode=importlib and the module __file__ printed; and the rewritten pin test failing on an unqualified row. All three logs recorded. Every uv command carries --no-sync and nothing runs uv sync. Write the manifest before each long step, with empty wait fields unless a wait_probe names a job id and wait_terminal names job states; its status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Replace the pinned certificate receipt with a live H200 gate test on the weak exact row",
+    "id": "pcrf-certificate-gate-is-a-live-test",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-03T11:16:33Z",
+      "read_at": "2026-10-03T11:16:34Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 15.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T111631231719-pcrf-certificate-gate-is-a-live-test/manifest.md",
+    "negative_control": "evaluate the map at a one-pitch vertically shifted analytic state; the first assertion of the live test must fail",
+    "plan": "plasma-cell-read-fidelity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/test_certificate_gate_live.py",
+      "tests/test_certificate_pin.py",
+      "docs/evidence/fragments/plasma-cell-read-fidelity/pcrf-certificate-gate-is-a-live-test.html",
+      "docs/figures/plasma-cell-read-fidelity/pcrf-certificate-gate-is-a-live-test"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.7934042150600125,
+      "derived": 0.09200379848247353,
+      "drain_hours": 168.0,
+      "effective_limit": 0.09200379848247353,
+      "elapsed_fraction": 0.08363981680224866,
+      "elapsed_hours": 14.051489222777775,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-03T11:16:39+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.85,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.15,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.06075,
+      "decided_by": "window",
+      "margin": 0.6767500000000001,
+      "name": "pcrf-certificate-gate-is-a-live-test",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.15
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.361202,
+        "observed_at": "2026-10-03T11:16:39+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.15,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "pcrf-certificate-gate-is-a-live-test",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-03T11:16:39.361202+00:00",
+    "score": 0.7375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.68,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 392.994,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1666.239,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.7802140250810186,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.7802140250810186,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 4,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 2,
+          "passed": 23,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 27
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 15,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 8,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.03,
+      "claude-haiku": 0,
+      "claude-opus": 0.07,
+      "clive": 0.71,
+      "codex": 0.06,
+      "codex-astra": 0.09,
+      "codex-luna": 0.01,
+      "codex-terra": 0.01,
+      "hold": 0.02
+    },
+    "rendered_token_estimate": 1568,
+    "usage": {
+      "cost": 0.000159768,
+      "input_tokens": 3804,
+      "output_tokens": 99
+    }
+  },
+  "plan": "plasma-cell-read-fidelity",
+  "plan_impl_at_dispatch": 0.85,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "2dcc3196e9b72db80bbefeefdd26a6e7066ea605",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "8f475ae23620206e833b7f92347dccf64a7e46d3",
+    "reviewed_head_sha": "2dcc3196e9b72db80bbefeefdd26a6e7066ea605",
+    "scores": {
+      "durability": 16,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 15,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 83
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T111631231719-pcrf-certificate-gate-is-a-live-test",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a1017b-6f9d-7522-a4ee-44970585a71f",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 58219520,
+    "cumulative_input_tokens": 116893866,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 109856
+  },
+  "time_budget": "60m",
+  "tool_steps": 124.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 8481,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T13:38:25Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T13:35:31Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T111631231719-pcrf-certificate-gate-is-a-live-test",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 759,
+    "worker_pid": 2402111
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}

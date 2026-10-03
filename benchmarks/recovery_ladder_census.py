@@ -102,11 +102,16 @@ def _wrap(name, function):
     return counted
 
 
+def wrapped_paths(module=fixed_point):
+    """The trip entry plus every counted ladder entry, wrapped at trace time."""
+    return (TRIP, *counted_entries(module))
+
+
 @contextlib.contextmanager
 def instrumented(module=None):
     module = fixed_point if module is None else module
     saved = {}
-    for name in counted_entries(module):
+    for name in wrapped_paths(module):
         function = getattr(module, name, None)
         if function is None:
             raise RuntimeError(

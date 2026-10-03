@@ -1156,7 +1156,7 @@ def _draw_error_figure(rows: list[dict[str, Any]], output: Path) -> dict[str, An
         span = row["flux_span_wb"]
         maximum = float(np.max(absolute))
         panel.set_title(
-            f"{row['case']} {row['requested_cells']}\n"
+            f"{row['case']} {abs(row['requested_cells'])}\n"
             f"max |error| {maximum:.4g} Wb = {maximum / span:.3g} span",
             fontsize=7,
         )
@@ -1217,7 +1217,7 @@ def _draw_comparison_panel(row: dict[str, Any], output: Path) -> dict[str, Any]:
         poloidal.draw_nulls(panel, magnetic_axis=axis_rz, x_points=x_points)
         panel.set_title(name, fontsize=8)
     figure.suptitle(
-        f"{row['case']} {row['requested_cells']}: frozen-exact-current image, "
+        f"{row['case']} {abs(row['requested_cells'])}: frozen-exact-current image, "
         "analytic flux and committed terminal state on shared Wb levels "
         "(blue contours; the frozen-current image is the coupling without "
         "iteration)",

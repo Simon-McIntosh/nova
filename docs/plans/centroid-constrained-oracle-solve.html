@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -74,6 +74,16 @@
       <button class="r-opt" data-value="relax-to-1e-11">relax the row clause to 1e-11 by ruling</button>
       </p>
     <p class="r-dec-rat">Lead decision 2026-10-02. The row lagging a passing global norm points to the solver stopping on the global residual one Newton step early, given the row&#x27;s 1/286 leverage. Making the row clause part of the stop test and measuring once tells the cases apart: under quadratic convergence one more step passes the clause outright, and a stall near 1e-11 is the row&#x27;s measured round-off floor, from which the clause is restated using the shipped roundoff-scale-acceptance-bounds method. Deriving a floor now could set a looser bound than needed. Relaxing to 1e-11 widens a tolerance to absorb a result, which nova&#x27;s precision rule forbids. The boundary-level clause is judged net of the compensator&#x27;s closed-form flux, which is known analytically, because at 135 cells it is unreachable by construction. SEQUENCING (lead to S22, 2026-10-02 18:16Z, on the span offset of 8.3e-2 of span with the compensator at -2.1e-2 T, 5.6x the baseline need and reversed): &#x27;dispatch a series of root cause investigations, it is likely that we are generating bogus flux maps, plot examples and review them, examine the plots themselves and look for clear errors. fix and then and only then run the ladder.&#x27; The re-measure this decision calls for therefore runs only after those root-cause fixes land. Accepted cost: one node and one H200 job after the root-cause work.</p>
+    </div>
+<div class="r-dec" data-key="centroid-row-definition" data-choice="first-moments-derived-tolerance" data-by="Simon McIntosh" data-when="2026-10-03T10:50:00+00:00">
+    <p class="r-dec-q">The production centroid row weights cell centres only, which places the exact analytic state 6.17 mm off its continuous target at 135 cells, so the constrained solve distorts the equilibrium to satisfy the row. A first-moment row reduces that to 77 micrometres, still far outside a 1e-12-pitch clause. How is the row defined and judged?</p>
+    <p class="r-dec-ctx">Root-cause series 2026-10-02/03, all merged: flux-map gallery 6a59ca9be, closed-form checks e31903b52, centroid moments and coupled response 96d8d4c46, tangent localisation cc84f65ed. Within-cell first moments recover 98.75 percent of the cell-centre offset; the converged state meets the cell-centre row to picometres while its first-moment centroid is 3.89 mm outward.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="first-moments-derived-tolerance">first-moment row with a discretisation tolerance taken from the analytic state&#x27;s own residual at each resolution</button>
+      <button class="r-opt" data-value="discrete-target-keep-1e-12">keep the cell-centre row with a target computed from the analytic state by the same definition, and keep 1e-12</button>
+      <button class="r-opt" data-value="first-moments-exact-quadrature">first-moment row with within-cell quadrature accurate to round-off, and keep 1e-12</button>
+      </p>
+    <p class="r-dec-rat">Lead decision 2026-10-03. The row adds each cell&#x27;s within-cell first moment, the measure a measured centroid needs in production, and its clause becomes a discretisation tolerance derived from the analytic state&#x27;s own residual at each resolution (77 micrometres at 135 cells), expected to shrink with refinement; the resolution ladder checks that shrinkage. The fix runs only after the two derivative defects are repaired, per the root-cause ruling.</p>
     </div>
 </section>
 

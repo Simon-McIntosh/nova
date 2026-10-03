@@ -1,0 +1,395 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "codex-terra",
+  "base_sha": "f3ce0410b179d816220384eea0dea946a870154b",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 37272448,
+      "cached_input_tokens_cumulative": 37272448,
+      "input_tokens": 37645854,
+      "input_tokens_cumulative": 37645854,
+      "output_tokens": 84799,
+      "output_tokens_cumulative": 84799,
+      "reasoning_output_tokens": 24774,
+      "reasoning_output_tokens_cumulative": 24774
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 376,
+    "files": 5,
+    "removed": 51
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "1b3b277a95607bb7b3e6a97e0765d447900ad68d",
+    "4badca0e62a2f227b8a2ca2e2a4e7389dcc5bfd7",
+    "d97e67092fe485534a04b8b4c5a6f427d0871000",
+    "95c465731d8ae5a525308aa6f818b0236f584ed5",
+    "c35a30c219d87e86c85801039389611c1faf5737",
+    "c75057d59d9a4a4baaf0fcf9e38ba2b3bf43c65b",
+    "db2812cdc819af61172578acb6c00ae99d011741",
+    "f3a1f8e302b00ff0650aae021a1a236165242522",
+    "3b4902e9e2f951afc0ebe64aa07b7f3b76ad30bb",
+    "4d319ffcc0a12d1b5bf8390759bc4b1154fdfc3b",
+    "58c44f09338334c5eb537fb1d9fea6666974f885",
+    "f2ca6aa0e0c86d525480795c6d2c0de1fc48f7f7"
+  ],
+  "completed_at": "2026-10-03T00:41:14Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T23:00:39Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "3.19177",
+    "3.14823",
+    "3.14745",
+    "0.18544",
+    "0.18618",
+    "0.18619"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 4.72869429241595,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-03T00:00:08.934659+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T23:00:08Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 598405,
+    "state": "quiet",
+    "utilisation_pct": 5.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T23:00:08Z",
+    "read_at": "2026-10-02T23:00:08Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 5.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T00:41:14Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T230005440753-fsri-picard-implicit-derivative/manifest.md",
+  "member": "disposable-r-20261002T230005440753-fsri-picard-implicit-derivative",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/test_picard_implicit_derivative.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsri-picard-implicit-derivative",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1559,
+          "cached_input_tokens": 226494,
+          "input_tokens": 228055,
+          "output_tokens": 3602,
+          "reasoning_output_tokens": 1904,
+          "total_tokens": 231657,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Root cause (run r-20261002T221031289251, merged 8dcd60bd5, benchmarks/picard_derivative_contract.py): fixed_point.picard returns a jax.lax.fori_loop (nova/equilibrium/fixed_point.py:2918-2942) with no derivative rule, so reverse mode and the JVP differentiate the 80 relaxed updates. The explicit terminal tangent (I - dG/dpsi)x = dG/dtheta v brings the plasma-current derivative to 0.0045 of central differences, against 11.31 unrolled. Three locked decisions require implicit differentiation of converged solves, never differentiation through the loop: flux-function-forward-transport loop-differentiability and gradient-scope, and separatrix-spline-extraction polish-termination. Contract: (1) the implicit rule applies only at a converged fixed point; a non-converged picard state yields a flagged or refused derivative (for example NaN tangents beside the converged flag), never a silent implicit tangent; (2) topology masks and partitions are frozen at the terminal state, consistent with the locked live-warmup-frozen-newton decision; (3) the adjoint is a forward linear solve inside the derivative rule, on the transpose obtained from jax.vjp of the map at the frozen terminal state, and never reverse-differentiates _qualified_krylov_step; the custom_vmap reverse-mode guard in followup f-fsri-krylov-slice-2-review-findings lands after this node and takes this rule as its positive case; (4) both reverse mode and jax.jvp return the implicit tangent (a custom_linear_solve or custom_root formulation gives both). Gate: (a) a new tests/test_picard_implicit_derivative.py asserts, on a converged small fixture, that reverse, JVP and the implicit tangent agree to 1e-10 and match central differences within a bound stated with its step, that a non-converged state is flagged or refused, and that the no-selection scalar control agrees to 1e-10; it fails at the dispatch base. (b) benchmarks/picard_derivative_contract.py re-run at this node's committed revision, with a SHA-256 of the driver source printed in the receipt, shows reverse equal to the implicit tangent with the plasma-current error near 0.0045. (c) The three tests test_the_solve_is_differentiable_in_the_conductor_current, test_the_plasma_current_is_differentiable_in_the_conductor_current and test_the_moment_map_is_differentiable_against_finite_differences in tests/test_equilibrium_forward_solve.py are run with their values reported. Do not widen any tolerance; where one still fails, state why, citing the RCA's linked-flux nonsmooth residue (0.53) or the finite-difference step. (d) tests/test_equilibrium_forward_solve.py and tests/test_fixed_point.py add no failure against the dispatch base. Re-render the derivative-estimates figure into this node's figures directory with uncropped axis labels, per the data-ink plot rules. Run GPU and long gates through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh --rungs h200 --force-submit; the coordinator authorises this launch path, and the general fence does not forbid it. For a base-revision tree, use git archive extracted under /tmp with PYTHONPATH pointing there, because .git/worktrees is read-only in this fence. Every uv command carries --no-sync and nothing runs uv sync. Write the manifest before any long step; its status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Differentiate a converged picard solve by the implicit fixed-point tangent instead of through its unrolled loop",
+    "id": "fsri-picard-implicit-derivative",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T23:00:08Z",
+      "read_at": "2026-10-02T23:00:08Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 5.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T230005440753-fsri-picard-implicit-derivative/manifest.md",
+    "negative_control": "restore differentiation through the unrolled fori_loop in fixed_point.picard; the new implicit-versus-finite-difference test must fail with the unrolled 11.31 relative error",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§1",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/fixed_point.py",
+      "nova/equilibrium/forward.py",
+      "benchmarks/picard_derivative_contract.py",
+      "tests/test_picard_implicit_derivative.py",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-picard-implicit-derivative.html",
+      "docs/figures/forward-solver-route-integrity/fsri-picard-implicit-derivative"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 4.725282681176427,
+      "derived": 0.011639515286375834,
+      "drain_hours": 168.0,
+      "effective_limit": 0.011639515286375834,
+      "elapsed_fraction": 0.01058137753306894,
+      "elapsed_hours": 1.7776714255555817,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-02T23:00:13+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.95,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.05,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.007250000000000001,
+      "decided_by": "window",
+      "margin": 0.65525,
+      "name": "fsri-picard-implicit-derivative",
+      "score": 0.6625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.05
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.617132,
+        "observed_at": "2026-10-02T23:00:13+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.05,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "fsri-picard-implicit-derivative",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-02T23:00:13.617132+00:00",
+    "score": 0.6625,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.945,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f2ca6aa0e0c86d525480795c6d2c0de1fc48f7f7",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "4d319ffcc0a12d1b5bf8390759bc4b1154fdfc3b",
+    "reviewed_head_sha": "f2ca6aa0e0c86d525480795c6d2c0de1fc48f7f7",
+    "scores": {
+      "durability": 18,
+      "evidence": 20,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 96
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T230005440753-fsri-picard-implicit-derivative",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fed9-4972-7173-a9fe-34ccf34ed349",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 37272448,
+    "cumulative_input_tokens": 74918302,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 109573
+  },
+  "time_budget": "60m",
+  "tool_steps": 213.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 6035,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T00:41:17Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T00:37:41Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T230005440753-fsri-picard-implicit-derivative",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 760,
+    "worker_pid": 3250054
+  },
+  "worker_seconds": 6035,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

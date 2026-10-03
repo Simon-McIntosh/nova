@@ -23,9 +23,9 @@
   <title>Figure And Solver Audit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-02">
+<meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="46">
+<meta name="plan-version" content="47">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -447,6 +447,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261002T115150153972-fsa-ledger-rows-in-schema-fields" data-who="reckon-build" data-when="2026-10-02T12:09:31Z">
     <div class="r-comment-body"><p>Corrected two historical promotion rows: both commands and after-suite observations round-trip unchanged, with the failed row retaining exit 1 and all 3 failure ids and the passing row retaining its verified after-suite digest.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261003T142809497200-fsa-gate-b-cell-count-magnitude" data-who="reckon-build" data-when="2026-10-03T14:46:01.698Z">
+    <div class="r-comment-body"><p>blocked — the driver that drew the gate-b panels is benchmarks/frozen_current_flux_image_gate.py, outside this node&#x27;s gate-b write scope and not present in HEAD; no in-scope re-render is possible, so the two committed panels still print &quot;-110&quot;/&quot;-300&quot; (7 signed titles) and no corrected artifact was produced</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

@@ -1,0 +1,776 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 1559527,
+      "input_tokens_cumulative": 1559527,
+      "output_tokens": 6523,
+      "output_tokens_cumulative": 6523,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 119,
+    "files": 7,
+    "removed": 29
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1705,
+        "name": "reread_gauge_readings",
+        "path": "benchmarks/centroid_constrained_fixture_receipt.py"
+      },
+      "window_line": 1783
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1705,
+        "name": "reread_gauge_readings",
+        "path": "benchmarks/centroid_constrained_fixture_receipt.py"
+      },
+      "window_line": 1783
+    },
+    {
+      "existing_function": {
+        "line": 16,
+        "name": "test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier",
+        "path": "tests/test_exact_clip_seed_bracket.py"
+      },
+      "run_function": {
+        "line": 159,
+        "name": "_seed_row",
+        "path": "benchmarks/exact_clip_seed_amplitude.py"
+      },
+      "window_line": 167
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 794,
+        "name": "summarize",
+        "path": "benchmarks/exact_support_floor_attribution.py"
+      },
+      "window_line": 817
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "_fixture_summary",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 794,
+        "name": "summarize",
+        "path": "benchmarks/exact_support_floor_attribution.py"
+      },
+      "window_line": 819
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "measure_production_receipt",
+        "path": "tests/test_conditioning_shrinkage.py"
+      },
+      "run_function": {
+        "line": 794,
+        "name": "summarize",
+        "path": "benchmarks/exact_support_floor_attribution.py"
+      },
+      "window_line": 815
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 890,
+        "name": "_verdict",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 919
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 890,
+        "name": "_verdict",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 917
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 1020,
+        "name": "run",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 1080
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 1020,
+        "name": "run",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 1080
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_treats_a_positionally_passed_wall_as_guarded",
+        "path": "tests/test_renderer_wall_scan.py"
+      },
+      "run_function": {
+        "line": 1020,
+        "name": "run",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 1088
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 1020,
+        "name": "run",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 1080
+    },
+    {
+      "existing_function": {
+        "line": 559,
+        "name": "test_mast_efm_geometry_matches_host_contour_route",
+        "path": "tests/test_transport_geometry_reference.py"
+      },
+      "run_function": {
+        "line": 1020,
+        "name": "run",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 1080
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "11541380efc7ea9c2aeaec2ddf37dca31b03e16f"
+  ],
+  "completed_at": "2026-10-03T18:16:37.313Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-03T17:08:39Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python tests/renderer_wall_scan.py benchmarks/exact_clip_low_state_discriminator.py benchmarks/exact_clip_seed_amplitude.py benchmarks/exact_support_floor_attribution.py benchmarks/fixture_positional_stiffness.py benchmarks/centroid_constrained_fixture_receipt.py benchmarks/centroid_field_response_probe.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T170817801139-fsa-wall-mask-exact-and-centroid/logs/gate_scan.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 1.0,
+    "plan": "figure-and-solver-audit",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-03T18:08:21.509701+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-03T17:08:21Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 5,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 5,
+    "mean_context": 150000,
+    "observed_at": "2026-10-03T17:08:16Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T18:16:37.313Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T170817801139-fsa-wall-mask-exact-and-centroid/manifest.md",
+  "member": "disposable-r-20261003T170817801139-fsa-wall-mask-exact-and-centroid",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsa-wall-mask-exact-and-centroid",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 5880,
+          "cached_input_tokens": 667040,
+          "input_tokens": 672922,
+          "output_tokens": 284,
+          "reasoning_output_tokens": 46,
+          "total_tokens": 673206,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "The renderer wall scanner (tests/renderer_wall_scan.py, on main since 8a83014b2) lists 18 unguarded calls in this batch at main: benchmarks/exact_clip_low_state_discriminator.py lines 683 (draw_flux_contours), 686 (draw_flux_contours), 690 (draw_flux_contours); benchmarks/exact_clip_seed_amplitude.py lines 345 (draw_flux_contours), 349 (draw_flux_contours), 429 (draw_flux_contours), 432 (draw_flux_contours), 438 (draw_flux_contours); benchmarks/exact_support_floor_attribution.py lines 724 (draw_flux_contours), 755 (draw_flux_contours); benchmarks/fixture_positional_stiffness.py lines 580 (draw_flux_contours), 583 (draw_flux_contours); benchmarks/centroid_constrained_fixture_receipt.py lines 1011 (draw_flux_contours), 1014 (draw_flux_contours), 1086 (draw_flux_contours), 1097 (draw_flux_contours); benchmarks/centroid_field_response_probe.py lines 259 (draw_flux_contours), 262 (draw_flux_contours). Each goes through the wall mask: a direct tricontour, tricontourf, contour or contourf on scattered data moves to nova.media.poloidal.draw_scattered_contours with the wall, and a draw_flux_contours call fed by an interpolated scattered field passes the wall the driver already holds, or loads it from the fixture or machine description the driver already uses. Filled contours of a scalar map become unfilled line contours on stated levels. Gate: `JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python tests/renderer_wall_scan.py benchmarks/exact_clip_low_state_discriminator.py benchmarks/exact_clip_seed_amplitude.py benchmarks/exact_support_floor_attribution.py benchmarks/fixture_positional_stiffness.py benchmarks/centroid_constrained_fixture_receipt.py benchmarks/centroid_field_response_probe.py` exits 0 (log ends EXIT=0), and the same command at the base exits 1 listing exactly these sites, logged as the negative control. Every existing test file that imports a changed module passes with zero added failures against the base (name them and log both arms). Do not re-render committed figures in this node: the report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-wall-mask-exact-and-centroid.md lists, per changed driver, the committed figure paths it writes and whether regenerating them needs a solve, for a later regeneration wave. No source under nova/ is edited. Keep scratch under the run directory.",
+    "estimated_hours": null,
+    "goal": "route every unguarded scattered-field renderer call in this batch through the wall mask so no figure draws field outside the vessel",
+    "id": "fsa-wall-mask-exact-and-centroid",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-03T17:08:21Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 5,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 5,
+      "mean_context": 150000,
+      "observed_at": "2026-10-03T17:08:16Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T170817801139-fsa-wall-mask-exact-and-centroid/manifest.md",
+    "negative_control": "",
+    "plan": "figure-and-solver-audit",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/exact_clip_low_state_discriminator.py",
+      "benchmarks/exact_clip_seed_amplitude.py",
+      "benchmarks/exact_support_floor_attribution.py",
+      "benchmarks/fixture_positional_stiffness.py",
+      "benchmarks/centroid_constrained_fixture_receipt.py",
+      "benchmarks/centroid_field_response_probe.py",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-wall-mask-exact-and-centroid.md",
+      "docs/evidence/fragments/figure-and-solver-audit/fsa-wall-mask-exact-and-centroid.html",
+      "docs/figures/figure-and-solver-audit/fsa-wall-mask-exact-and-centroid"
+    ]
+  },
+  "orientation_input_tokens": 3208083.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsa-wall-mask-exact-and-centroid",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-03T17:08:24.592288+00:00",
+    "score": 0.71875,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.68,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 345.007,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 787.21,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.5359342181828703,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.5359342181828703,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 1,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 19,
+          "passed": 96,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 33
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 1,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.07,
+      "claude-haiku": 0.01,
+      "claude-opus": 0.01,
+      "clive": 0.72,
+      "codex": 0.03,
+      "codex-astra": 0.05,
+      "codex-luna": 0,
+      "codex-terra": 0.02,
+      "hold": 0.09
+    },
+    "rendered_token_estimate": 1591,
+    "usage": {
+      "cost": 0.000163128,
+      "input_tokens": 3884,
+      "output_tokens": 99
+    }
+  },
+  "plan": "figure-and-solver-audit",
+  "plan_impl_at_dispatch": 1.0,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "11541380efc7ea9c2aeaec2ddf37dca31b03e16f",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+    "reviewed_head_sha": "11541380efc7ea9c2aeaec2ddf37dca31b03e16f",
+    "scores": {
+      "durability": 15,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 88
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T170817801139-fsa-wall-mask-exact-and-centroid",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "fb5fd049-f8d4-4a6d-b61d-cfeec665691c",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 13938670,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 243.48,
+    "generated_tokens": 50974,
+    "generation_seconds": 124.879,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 76.8,
+    "machine_seconds": 118.601,
+    "peak_input_tokens": 176640,
+    "tokens_per_second": 408.19,
+    "wall_tokens_per_second": 209.36
+  },
+  "time_budget": "60m",
+  "tool_steps": 96.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 4078,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T18:17:00Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-03T18:12:47Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T170817801139-fsa-wall-mask-exact-and-centroid",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 8071,
+    "worker_pid": 1275497
+  },
+  "worker_seconds": 4037,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

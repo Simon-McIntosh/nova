@@ -1,0 +1,39 @@
+{
+  "method": "one-step continuation; separate from primary full-budget solve",
+  "rows": [
+    {
+      "compensating_field_t": [
+        0.00019815603173812567,
+        -3.219725926671117e-13
+      ],
+      "global_residual": 2.680990791396626e-14,
+      "level_amplitude_wb": 0.0978473347360623,
+      "net_span": {
+        "analytic_axis_flux_wb": 49.94030946106932,
+        "analytic_boundary_flux_wb": 7.226451584728143e-08,
+        "analytic_span_wb": 49.940309388804806,
+        "compensator_flux_at_axis_wb": -4.010381697404772e-05,
+        "compensator_flux_at_boundary_wb": 0.01395812822069808,
+        "compensator_flux_at_contact_radius_wb": 0.01395812822069808,
+        "compensator_span_contribution_wb": -0.013998232037672127,
+        "contact_radius_m": 7.801395788267687,
+        "gauge_free_flux_offset_less_compensator_wb": -0.019264529615177675,
+        "gauge_free_flux_offset_of_span": -0.0006660503721329842,
+        "gauge_free_flux_offset_wb": -0.033262761652849804,
+        "net_clause": true,
+        "net_offset_of_solved_span": -0.00038600820760042326,
+        "net_offset_wb": -0.019264529615177675,
+        "reference_radius_m": 6.2,
+        "solved_axis_flux_wb": 49.94113518550182,
+        "solved_boundary_flux_wb": 0.03408855834986747,
+        "solved_span_wb": 49.907046627151956
+      },
+      "row_qualified": true,
+      "row_residual_pitches": [
+        9.52851478962376e-15,
+        9.186188247679189e-17
+      ],
+      "step": 1
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "cells": 550,
+  "mode": "exact",
+  "production": {
+    "sup_relative": 0.1384568621521094,
+    "rms_relative": 0.11095610572225183,
+    "dR_m": 0.008078252529768237,
+    "dZ_m": 0.06695029174161415
+  },
+  "classes": {
+    "X-point": {
+      "cell_count": 1,
+      "projection_share": -0.001582415377898139,
+      "map_sup_relative": 0.015380784493450822,
+      "dominant_cells": [
+        8
+      ],
+      "dominant_current_error_a": [
+        -17.32096201176028
+      ]
+    },
+    "private flux": {
+      "cell_count": 213,
+      "projection_share": 0.11433417992079205,
+      "map_sup_relative": 0.1859784565921302,
+      "dominant_cells": [
+        5,
+        4,
+        62,
+        64,
+        3
+      ],
+      "dominant_current_error_a": [
+        81.81821246730445,
+        65.50311393834002,
+        56.12657931578144,
+        42.709613311223166,
+        8.60555668459072
+      ]
+    },
+    "boundary cut": {
+      "cell_count": 75,
+      "projection_share": 0.23756738186369034,
+      "map_sup_relative": 0.027002531873688125,
+      "dominant_cells": [
+        80,
+        227,
+        473,
+        21,
+        18
+      ],
+      "dominant_current_error_a": [
+        -2.8076490282293136,
+        -2.342494703120437,
+        -2.336498151179512,
+        -2.00054889528964,
+        -1.8523474096502683
+      ]
+    },
+    "interior": {
+      "cell_count": 261,
+      "projection_share": 0.6496808535934171,
+      "map_sup_relative": 0.06759800630063544,
+      "dominant_cells": [
+        271,
+        276,
+        280,
+        245,
+        269
+      ],
+      "dominant_current_error_a": [
+        -0.8767775157747337,
+        -0.8767775157747337,
+        -0.8767775157747337,
+        -0.8767775157747053,
+        -0.8767775157747053
+      ]
+    }
+  },
+  "dominant_cells": [
+    {
+      "cell": 5,
+      "class": "private flux",
+      "analytic_area_fraction": 0.0,
+      "current_error_a": 81.81821246730445
+    },
+    {
+      "cell": 4,
+      "class": "private flux",
+      "analytic_area_fraction": 0.0,
+      "current_error_a": 65.50311393834002
+    },
+    {
+      "cell": 62,
+      "class": "private flux",
+      "analytic_area_fraction": 0.0,
+      "current_error_a": 56.12657931578144
+    },
+    {
+      "cell": 64,
+      "class": "private flux",
+      "analytic_area_fraction": 0.0,
+      "current_error_a": 42.709613311223166
+    },
+    {
+      "cell": 8,
+      "class": "X-point",
+      "analytic_area_fraction": 0.3782957935250032,
+      "current_error_a": -17.32096201176028
+    },
+    {
+      "cell": 3,
+      "class": "private flux",
+      "analytic_area_fraction": 0.0,
+      "current_error_a": 8.60555668459072
+    },
+    {
+      "cell": 80,
+      "class": "boundary cut",
+      "analytic_area_fraction": 0.3020374146541351,
+      "current_error_a": -2.8076490282293136
+    },
+    {
+      "cell": 227,
+      "class": "boundary cut",
+      "analytic_area_fraction": 0.6173141478863178,
+      "current_error_a": -2.342494703120437
+    }
+  ],
+  "contour_tree_region": {
+    "sup_relative": 0.1384568621521094,
+    "dZ_m": 0.06695029174161415,
+    "finding": "production-equivalent: chord support is qualified by the fixed-design contour-tree profile label",
+    "source": "nova/equilibrium/forward_operator.py:_profile_support"
+  },
+  "xpoint_wedge": {
+    "sup_relative": 0.1384568621521094,
+    "dZ_m": 0.06695029174161415,
+    "finding": "exact support supplies topology.x_point as saddle_vertex to the traced clip",
+    "source": "nova/equilibrium/forward_operator.py:_profile_support"
+  }
+}

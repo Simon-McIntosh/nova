@@ -277,7 +277,7 @@ def measure(input_root: Path, output: Path, fragment: Path, base_sha: str) -> di
 
 
 def write_fragment(rows: list[dict], fragment: Path) -> None:
-    table = "".join(
+    map_table = "".join(
         "<tr>"
         f"<td>{row['cells']}</td>"
         f"<td>{html.escape(row['mode'])}</td>"
@@ -288,6 +288,29 @@ def write_fragment(rows: list[dict], fragment: Path) -> None:
         "</tr>"
         for row in rows
     )
+    rows_132 = [row for row in rows if row["cells"] == 132]
+    class_table = "".join(
+        "<tr>"
+        f"<td>{html.escape(row['mode'])}</td>"
+        f"<td>{html.escape(label)}</td>"
+        f"<td>{values['cell_count']}</td>"
+        f"<td>{values['projection_share']:.6g}</td>"
+        f"<td>{values['map_sup_relative']:.6g}</td>"
+        f"<td>{', '.join(map(str, values['dominant_cells']))}</td>"
+        "</tr>"
+        for row in rows_132
+        for label, values in row["classes"].items()
+    )
+    substitution_table = "".join(
+        "<tr>"
+        f"<td>{row['cells']}</td>"
+        f"<td>{html.escape(row['mode'])}</td>"
+        f"<td>{row['contour_tree_region']['sup_relative']:.6g}</td>"
+        f"<td>{row['xpoint_wedge']['sup_relative']}</td>"
+        f"<td>{row.get('analytic_membership', {}).get('sup_relative')}</td>"
+        "</tr>"
+        for row in rows
+    )
     fragment.parent.mkdir(parents=True, exist_ok=True)
     fragment.write_text(
         "<section><h2>Diverted analytic-state map decomposition</h2>"
@@ -295,15 +318,33 @@ def write_fragment(rows: list[dict], fragment: Path) -> None:
         "before its support substitutions. The contour-tree region arm is "
         "production-equivalent; the exact arm is the available saddle-vertex "
         "X-point-wedge route.</p>"
-        "<table><thead><tr><th>cells</th><th>mode</th><th>sup relative</th>"
+        "<p>No tested substitution puts diverted exact below the 1e-2 bound. "
+        "Analytic membership improves chord at 550 cells below the bound but "
+        "does not alter the exact saddle-vertex route.</p>"
+        "<h3>Map receipt</h3><table><thead><tr><th>cells</th><th>mode</th>"
+        "<th>sup relative</th>"
         "<th>rms relative</th><th>dR [m]</th><th>dZ [m]</th></tr></thead>"
-        f"<tbody>{table}</tbody></table>"
+        f"<tbody>{map_table}</tbody></table>"
+        "<h3>132-cell current-image classes</h3><table><thead><tr><th>mode</th>"
+        "<th>class</th><th>cells</th><th>projection share</th><th>map sup relative</th>"
+        f"<th>dominant indices</th></tr></thead><tbody>{class_table}</tbody></table>"
+        "<h3>Oracle support substitutions</h3><table><thead><tr><th>cells</th>"
+        "<th>base mode</th><th>contour-tree region sup</th><th>X-point wedge sup</th>"
+        "<th>analytic-membership sup</th></tr></thead>"
+        f"<tbody>{substitution_table}</tbody></table>"
         "<figure><img src='/nova/figures/cut-cell-current-attribution/"
-        "cca-diverted-map-error-rca/map-fidelity/"
+        "cca-diverted-map-error-rca/map-fidelity-stable/"
         "diverted-single-null-cells-110-chord.png' "
         "alt='Shared-level analytic and chord contour panels at 132 cells'>"
         "<figcaption>Analytic and production-chord poloidal contours share "
         "levels; each panel includes the vessel and the available null read."
+        "</figcaption></figure>"
+        "<figure><img src='/nova/figures/cut-cell-current-attribution/"
+        "cca-diverted-map-error-rca/map-fidelity-stable/"
+        "diverted-single-null-cells-110-exact.png' "
+        "alt='Shared-level analytic and exact-support contour panels at 132 cells'>"
+        "<figcaption>Analytic and saddle-vertex exact-support poloidal contours "
+        "share levels; the exact route does not meet the certificate bound."
         "</figcaption></figure></section>\n",
         encoding="utf-8",
     )

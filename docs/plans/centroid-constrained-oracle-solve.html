@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="74">
+<meta name="plan-version" content="75">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -292,6 +292,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261003T162923723516-review-of-cco-certificate-ladder-500-1000-probe" data-who="reckon-build" data-when="2026-10-03T16:39:59.129Z">
     <div class="r-comment-body"><p>Reviewed r-20261003T142002106912-cco-certificate-ladder-500-1000-probe (base 7cfda7880, head 1646daee2, nine commits): all four exact-clip rows solved and reported, none qualifies the full section 3 certificate; score 86/100 pass, no blocking finding, two durability/fit follow-ons. [Review record](/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T142002106912-cco-certificate-ladder-500-1000-probe.json).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s22-large-mesh-probe-20261003" data-who="" data-when="">
+    <div class="r-comment-body"><p>The large-mesh rungs do not qualify on today's solver. The probe merged at ffe786fd6 (review 86) ran on H200 job 1280644, with the single-null readout recovered in job 1280651. Every exact-clip row compiles and returns a solve state, so compile size is not the blocker at 1000 cells. Weak-1000 and moderate-1000 accept zero Newton promotions. Strong-1000 reaches global 1.60e-15 and row 2.07e-16, but misses the map and boundary-level clauses. Single-null-500 misses its fixed-point clauses. Receipts and panels are at /nova/evidence/fragments/centroid-constrained-oracle-solve/cco-certificate-ladder-500-1000-probe. With Newton-Krylov patches halted, these four rows now feed the solve rework (S21) as acceptance rows. Strong-1000 is the case for judging a solve on the residual together with the map and boundary clauses. The 110 and 300 rungs are being written up from titan job 1280637.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260919T065922634567-review-of-cco-flux-level-compensating-term-2" data-who="reckon-ship" data-when="2026-09-19T07:12:54.415Z">
     <div class="r-comment-body"><p>Review stored: 79/100, four findings</p></div>

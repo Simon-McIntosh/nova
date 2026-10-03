@@ -1,0 +1,658 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "codex-terra",
+  "base_sha": "8f475ae23620206e833b7f92347dccf64a7e46d3",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 39732736,
+      "cached_input_tokens_cumulative": 39732736,
+      "input_tokens": 40161950,
+      "input_tokens_cumulative": 40161950,
+      "output_tokens": 84368,
+      "output_tokens_cumulative": 84368,
+      "reasoning_output_tokens": 19000,
+      "reasoning_output_tokens_cumulative": 19000
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 5865,
+    "files": 11,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 292,
+        "name": "analytic_membership",
+        "path": "benchmarks/diverted_map_error_decomposition.py"
+      },
+      "window_line": 343
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 472,
+        "name": "write_fragment",
+        "path": "benchmarks/diverted_map_error_decomposition.py"
+      },
+      "window_line": 507
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 472,
+        "name": "write_fragment",
+        "path": "benchmarks/diverted_map_error_decomposition.py"
+      },
+      "window_line": 507
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 472,
+        "name": "write_fragment",
+        "path": "benchmarks/diverted_map_error_decomposition.py"
+      },
+      "window_line": 507
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "a20caa6b0a1334b24f174f30c574426973ff3cd1",
+    "372c604914acda4cf25bfca797a1d95e6afae8ee",
+    "0c9a9db87c761096be62ff1386e70ab71a76496a",
+    "23aed662adbcaf346c538a7e023d5c0d75ae5307",
+    "064098ce3429d5e1e8deffafd736f3755b4acf22",
+    "ca50ccb8a908a7af1547191453c0bba47a4f35fe",
+    "58d05701929d7fe2d68443dd11c97b7e62797513",
+    "1aa4b84e104d3a4b393bc87cd75e9cc7587802a0",
+    "96a59e98ec7e4fd1a8d034dab0a8fc1ecb825612",
+    "4c6feb76d9fa343f806ffc079e9866be39682d9e",
+    "b7d84d916491e10ee994900bfb7520ce674ee74e",
+    "cf78659f47b11383515dc41d9ce28eea976c032a"
+  ],
+  "completed_at": "2026-10-03T12:31:07Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-03T11:14:34Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8,
+    "plan": "cut-cell-current-attribution",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 1.7989292088042832,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-terra' is projected to exhaust at 2026-10-07T00:50:09Z, which is after this node's 3600s horizon ending 2026-10-03T12:14:04.395710+00:00",
+    "horizon_ends_at": "2026-10-03T12:14:04.395710+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-03T11:14:03Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-07T00:50:09Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 554370,
+    "state": "quiet",
+    "utilisation_pct": 15.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-03T11:14:03Z",
+    "read_at": "2026-10-03T11:14:04Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 15.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T12:31:07Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T111359863261-cca-diverted-map-error-rca/manifest.md",
+  "member": "disposable-r-20261003T111359863261-cca-diverted-map-error-rca",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "cca-diverted-map-error-rca",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1326,
+          "cached_input_tokens": 918231,
+          "input_tokens": 919559,
+          "output_tokens": 2067,
+          "reasoning_output_tokens": 617,
+          "total_tokens": 921626,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: cut-cell §11. The diverted-single-null map at the analytic Solov'ev state fails the certificate bound in both clip modes, while weak-rotation-reactor-static exact passes. The last re-measure (docs/figures/plasma-cell-read-fidelity/map-fidelity/remeasure-2026-10-02.md, job 1279817) ran at fa8af260e, which includes the chord-membership merge 92613fd3d but not its revert 2992599ff, so its rows are not current. The plan session ranked this node first: whether the contour-tree region or the X-point wedge closes diverted exact decides the critical path to the cutover. Steps, all measurements, with no edit to nova/. (0) Re-measure every certificate rung of both cases in both clip modes at the dispatch base, in one H200 job, with benchmarks/plasma_cell_map_fidelity.py and explicit clip modes. Table sup_relative, rms_relative, dR and dZ against remeasure-2026-10-02. (1) At the 132-cell diverted rung, in exact and in chord, decompose the map error by cell. Attribute the sup and rms error to cell classes (the X-point cell and its neighbours, private-flux cells, boundary cut cells, interior cells), name the dominant cells by index, and draw line-contour poloidal panels of the solved map against the analytic map on shared levels, with both null sets and the wall, per the repository plotting rules. (2) Oracle substitutions, each reported as diverted exact and chord sup error and dZ at 132 and 550 cells: (a) analytic plasma-region membership in place of the production read; (b) the contour tree's plasma region from nova/equilibrium/contour_tree.py, which landed in §2; (c) the X-point wedge clip from §3, which followup f-cca-rereview-xpoint-wedge-oracle-passes-production-does-not-consume-it records as passing in the oracle but not consumed in production. Name which substitution, if any, brings diverted exact inside the certificate bound, and the mechanism by file and line. Deliverables: benchmarks/diverted_map_error_decomposition.py, and the evidence fragment with the tables and panels. Run on the H200 through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh --rungs h200 --force-submit (authorised), as one job for all of step 0. Any base tree is a git archive of the needed revision restricted to nova tests benchmarks scripts under /tmp, removed before the manifest is written. Every uv command carries --no-sync and nothing runs uv sync. Write the manifest before each long step, with empty wait fields unless a wait_probe names a job id and wait_terminal names job states; its status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Find which plasma-region or X-point substitution closes the diverted Solov'ev map error at current main",
+    "id": "cca-diverted-map-error-rca",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-03T11:14:03Z",
+      "read_at": "2026-10-03T11:14:04Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 15.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T111359863261-cca-diverted-map-error-rca/manifest.md",
+    "negative_control": "",
+    "plan": "cut-cell-current-attribution",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§11",
+    "spec_level": "open",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/diverted_map_error_decomposition.py",
+      "docs/evidence/fragments/cut-cell-current-attribution/cca-diverted-map-error-rca.html",
+      "docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.7987266345200517,
+      "derived": 0.09173155988988088,
+      "drain_hours": 168.0,
+      "effective_limit": 0.09173155988988088,
+      "elapsed_fraction": 0.08339232717261898,
+      "elapsed_hours": 14.009910964999989,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-03T11:14:09+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.85,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.15,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.06075,
+      "decided_by": "window",
+      "margin": 0.7705000000000001,
+      "name": "cca-diverted-map-error-rca",
+      "score": 0.83125,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.15
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.679474,
+        "observed_at": "2026-10-03T11:14:09+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.15,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "cca-diverted-map-error-rca",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-03T11:14:09.679474+00:00",
+    "score": 0.83125,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.38,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 351.517,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1916.698,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.7819687164699073,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.7819687164699073,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 3,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 2,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 23
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 3,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 3,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.06,
+      "claude-haiku": 0,
+      "claude-opus": 0.01,
+      "clive": 0.45,
+      "codex": 0.43,
+      "codex-astra": 0,
+      "codex-luna": 0,
+      "codex-terra": 0.02,
+      "hold": 0.03
+    },
+    "rendered_token_estimate": 1639,
+    "usage": {
+      "cost": 0.00016401,
+      "input_tokens": 3905,
+      "output_tokens": 99
+    }
+  },
+  "plan": "cut-cell-current-attribution",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "cf78659f47b11383515dc41d9ce28eea976c032a",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T111359863261-cca-diverted-map-error-rca",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§11",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a10179-3532-7332-a6e1-f6b118ca4581",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "open",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 39732736,
+    "cumulative_input_tokens": 79894686,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 103368
+  },
+  "time_budget": "60m",
+  "tool_steps": 105.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 4593,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T12:31:11Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T12:27:13Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T111359863261-cca-diverted-map-error-rca",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 653,
+    "worker_pid": 1716735
+  },
+  "worker_seconds": 4593,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

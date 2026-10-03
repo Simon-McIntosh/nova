@@ -1480,23 +1480,22 @@ def _draw_figure_two(axis: Any, row: dict[str, Any]) -> None:
     radial = np.linspace(float(np.min(limits[:, 0])), float(np.max(limits[:, 0])), 181)
     height = np.linspace(float(np.min(limits[:, 1])), float(np.max(limits[:, 1])), 181)
     radius_grid, height_grid = np.meshgrid(radial, height)
-    render = LinearNDInterpolator(centres, error, fill_value=np.nan)(
-        radius_grid, height_grid
-    )
-    if np.any(np.isfinite(render)):
-        values = np.abs(render[np.isfinite(render)])
+    if np.any(np.isfinite(error)):
+        values = np.abs(error[np.isfinite(error)])
         lower = float(np.percentile(values, 5.0)) if values.size else 1.0
         upper = float(np.max(values)) if values.size else 1.0
         lower = max(lower, 1e-300)
         if upper > lower:
             levels = np.geomspace(lower, upper, 9)
-            axis.contour(
-                radial,
-                height,
-                np.maximum(np.abs(render), lower),
-                levels=levels,
-                colors="firebrick",
-                linewidths=0.8,
+            poloidal.draw_scattered_contours(
+                axis,
+                centres[:, 0],
+                centres[:, 1],
+                np.maximum(np.abs(error), lower),
+                levels,
+                wall=wall,
+                color="firebrick",
+                linewidth=0.8,
             )
     cut_mask = plot["cut_mask"]
     polygons = [
@@ -1529,7 +1528,14 @@ def _draw_figure_two(axis: Any, row: dict[str, Any]) -> None:
     if np.any(np.isfinite(flux_raster)):
         levels = np.linspace(float(np.min(exact)), float(np.max(exact)), 12)[1:-1]
         poloidal.draw_flux_contours(
-            axis, radial, height, flux_raster, levels, style=DEFAULT_INK, color="0.6"
+            axis,
+            radial,
+            height,
+            flux_raster,
+            levels,
+            style=DEFAULT_INK,
+            color="0.6",
+            wall=wall,
         )
     poloidal.draw_wall(axis, wall[:, 0], wall[:, 1])
     poloidal.draw_nulls(

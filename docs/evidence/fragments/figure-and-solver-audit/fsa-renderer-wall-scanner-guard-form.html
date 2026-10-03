@@ -1,0 +1,104 @@
+<section id="fsa-renderer-wall-scanner-guard-form">
+<h2>The wall scanner as a per-file guard, not a defect snapshot</h2>
+
+<p>
+The scanner this node inherits (<a href="/nova/evidence/fragments/figure-and-solver-audit/fsa-renderer-wall-scanner">fsa-renderer-wall-scanner</a>)
+reported each unguarded renderer call by base name and line, pinned the rule to
+a frozen 78-site inventory, and could not see a wall handed to
+<code>draw_flux_contours</code> positionally. Those three properties made it a
+snapshot of one revision of the defect rather than a guard a repair batch can
+run on its own files. This node closes the review's five follow-ons: relative
+paths, positional-wall recognition, a documented exemption list, and the move
+of the corpus reconciliation out of the test file into a committed report
+script.
+</p>
+
+<h3>What changed</h3>
+
+<ul>
+<li><code>tests/renderer_wall_scan.py</code> — <code>UnmaskedCall.path</code>
+is now the repository-relative path, so the two
+<code>centroid-constrained-oracle-solve/repaired-remeasure{,-receipt}/measure.py</code>
+files and the several <code>render.py</code> / <code>measure.py</code> /
+<code>draw_trips.py</code> files across the trees are distinct records. The
+painter guard treats a call as wall-guarded when the wall arrives positionally
+as well as by keyword: <code>draw_flux_contours</code> declares
+<code>wall</code> as its ninth positional parameter
+(<code>nova/media/poloidal.py:147</code>, before <code>**kwargs</code>), so a
+call with nine or more positional arguments is guarded. Every entry of
+<code>NON_RENDERER_CALLS</code> is now keyed by its repository-relative path
+and carries the reason it is exempt, including the third entry
+(<code>render_mechanism_evidence.py:360</code>) the previous record omitted.</li>
+<li><code>tests/test_renderer_wall_scan.py</code> — keeps the five named
+controls against the corpus, adds a crafted positional-wall control, and
+asserts no total count of unguarded sites. A repair that fixes an inventory
+site no longer turns the file red.</li>
+<li><code>docs/figures/figure-and-solver-audit/fsa-renderer-wall-scanner-guard-form/reconcile_wall_scan_sites.py</code>
+— a committed report script that prints the scanner's current list with
+relative paths, then names the inventory sites no longer reported and the
+current sites the inventory does not carry. It always exits zero.</li>
+</ul>
+
+<h3>Rule (positional wall)</h3>
+
+<p>
+<code>nova/media/poloidal.py:138</code> declares
+<code>draw_flux_contours(axes, radius, height, flux, levels, style, color,
+linewidth, wall=None, **kwargs)</code>. <code>wall</code> is the ninth
+parameter, index 8. A call site that passes nine or more positional arguments
+hands a value for <code>wall</code> and is guarded; the scanner returns no
+record for it.
+</p>
+
+<h3>Named controls</h3>
+
+<table>
+<tr><th>Control</th><th>Expected</th><th>Observed</th></tr>
+<tr><td><code>benchmarks/plasma_cell_fixed_point_attribution.py:424</code></td><td>flagged</td><td>flagged</td></tr>
+<tr><td><code>benchmarks/sol_ledger_current_census.py:415</code></td><td>flagged</td><td>flagged</td></tr>
+<tr><td><code>docs/figures/centroid-constrained-oracle-solve/root-cause/closed-forms/render.py:52</code></td><td>not flagged (guarded route)</td><td>not flagged</td></tr>
+<tr><td><code>benchmarks/contour_tree_explanatory_figure.py:359</code></td><td>not flagged (pre-blanked raster)</td><td>not flagged</td></tr>
+<tr><td><code>benchmarks/plasma_cell_trip_panels.py:406</code></td><td>not flagged (post-filtered probe)</td><td>not flagged</td></tr>
+<tr><td>crafted call, wall passed positionally</td><td>not flagged</td><td>not flagged</td></tr>
+</table>
+
+<h3>Corpus drift is now reported, not asserted</h3>
+
+<p>
+At this base the two trees hold <strong>82</strong> unguarded sites, against the
+reviewed inventory's 78 and the 80 the prior record pinned. The report script
+prints the current list with relative paths, the <strong>4</strong> inventory
+lines no longer reported (one in <code>shafranov_combination_discriminator.py</code>
+and three in <code>shafranov_pair_receipt.py</code>, shifted by concurrent
+work) and the <strong>8</strong> current sites the inventory lacks — six of them
+those same shifted or newly-added lines and two the disclosed
+<code>repaired-remeasure</code> painters. It exits zero. The count is therefore
+a reader's observation rather than a test expectation a repair batch trips,
+which is the change the review's <em>snapshot</em> finding asked for.
+</p>
+
+<h3>Gate</h3>
+
+<p>
+<code>JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest
+-p no:cacheprovider tests/test_renderer_wall_scan.py</code> —
+<strong>11 passed in 97.21 s, EXIT=0</strong>. Baseline arm (the base revision's
+own test file) — <strong>2 failed, 9 passed in 125.77 s, EXIT=1</strong>, the two
+failures being <code>test_reproduces_every_inventory_site</code> and
+<code>test_base_count_is_inventory_plus_disclosed_drift</code>, the snapshot
+assertions this node removes; zero failures are added. Logs:
+<code>after-arm.log</code>, <code>base-arm.log</code>.
+</p>
+
+<h3>Negative control</h3>
+
+<p>
+Declared mutation: make the scanner ignore a positionally passed wall. Applied
+by deleting the <code>len(node.args) &gt; WALL_POSITION_INDEX</code> guard, the
+<code>test_treats_a_positionally_passed_wall_as_guarded</code> control fails
+(<code>1 failed, 10 passed, EXIT=1</code>); restored, the gate is green. The
+earlier form of that control crafted a call whose raster traced to no scattered
+producer, so the mutation did not redden it — corrected before this record.
+Log: <code>negative-control.log</code>.
+</p>
+</section>

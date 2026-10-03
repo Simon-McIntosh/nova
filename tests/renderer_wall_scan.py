@@ -25,6 +25,11 @@ because a regular-grid field needs no wall mask. A documented set of
 non-renderer calls (:data:`NON_RENDERER_CALLS`) is exempt: those extract
 contour polylines for measurement, reject every curve with a vertex outside the
 wall, and close the figure without drawing it.
+
+Records carry the repository-relative path so two same-named files in
+different directories stay distinct. The CLI takes any list of files or
+directories and exits nonzero when any single one holds an unguarded call, so
+a repair batch can gate its own files without scanning the whole corpus.
 """
 
 from __future__ import annotations
@@ -34,6 +39,8 @@ import ast
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 # Producers that build a field on scattered nodes and return a raster (or a
 # coordinate set) finite across the node convex hull, not the vessel.
@@ -56,29 +63,47 @@ SCATTERED_PAINTER = "draw_scattered_contours"
 TRIANGLE_CONTOURS = frozenset({"tricontour", "tricontourf"})
 GRID_CONTOURS = frozenset({"contour", "contourf"})
 
-# Calls that are not renderers of scattered data.
+# Calls that are not renderers of scattered data. Every entry is named by its
+# repository-relative path and line, with the reason it is exempt; nothing is
+# suppressed without a reason recorded here.
 #
-# ``plasma_cell_trip_panels.py:406`` triangulates the nodes only to extract
-# candidate polylines: every curve with a vertex outside ``inside_wall_units``
-# is rejected at lines 412-417, the surviving curves are measured, and the
-# temporary figure is closed at line 434 without being drawn. It is a probe,
-# not a renderer, so no field reaches a reader from it.
+# ``benchmarks/plasma_cell_trip_panels.py:406`` triangulates the nodes only to
+# extract candidate polylines: every curve with a vertex outside
+# ``inside_wall_units`` is rejected at lines 412-417, the surviving curves are
+# measured, and the temporary figure is closed at line 434 without being drawn.
+# It is a probe, not a renderer, so no field reaches a reader from it.
 #
-# ``render_mechanism_evidence.py:510`` draws ``record["analytic_grid"]``, the
-# exact analytic flux evaluated on a regular mesh; the coordinates merely share
-# the grid the solved field was interpolated onto, so the analytic panel is a
-# regular-grid draw that needs no wall mask. Its sibling at 511 draws the
-# interpolated solved field and is reported.
+# The mechanism-evidence renderer's analytic panel at 360 draws
+# ``analytic_radius``/``analytic_height``/``analytic_full``, the exact analytic
+# flux evaluated on a regular mesh; the panel needs no wall mask because the
+# field is defined by a closed form rather than interpolated. It is suppressed
+# because its value argument does not trace to a scattered producer through the
+# alias in use, and removing the entry adds a record at 360 (verified by
+# deleting it in a scratch copy: the tree reports 81 instead of 80). Its
+# sibling at 511, drawing the interpolated solved field, is reported.
 #
-# Both references are by base name and line and are fixed, because this scan
-# reports a base-pinned site count.
+# The same file's analytic draw at 510 is on the record's own coordinates; the
+# coordinates merely share the grid the solved field was interpolated onto, so
+# the analytic panel is a regular-grid draw that needs no wall mask. Its
+# sibling at 511 draws the interpolated solved field and is reported.
 NON_RENDERER_CALLS = frozenset(
     {
-        ("plasma_cell_trip_panels.py", 406),
-        ("render_mechanism_evidence.py", 360),
-        ("render_mechanism_evidence.py", 510),
+        ("benchmarks/plasma_cell_trip_panels.py", 406),
+        (
+            "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py",
+            360,
+        ),
+        (
+            "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py",
+            510,
+        ),
     }
 )
+
+# ``draw_flux_contours`` declares ``wall`` as the ninth positional parameter
+# (index 8, before ``**kwargs``), so a call with nine or more positional
+# arguments hands the wall positionally and is guarded.
+WALL_POSITION_INDEX = 8
 
 DEFAULT_ROOTS = ("benchmarks", "docs/figures")
 
@@ -88,7 +113,11 @@ _MASK_FUNCTIONS = frozenset({"inside_wall_units", "_inside_wall_units"})
 
 @dataclass(frozen=True)
 class UnmaskedCall:
-    """One unguarded scattered-field renderer call."""
+    """One unguarded scattered-field renderer call.
+
+    ``path`` is repository-relative, so two same-named files in different
+    directories are distinct records.
+    """
 
     path: str
     line: int
@@ -96,6 +125,15 @@ class UnmaskedCall:
 
     def __str__(self) -> str:
         return f"{self.path}:{self.line}: {self.kind}"
+
+
+def _relative_path(path: Path) -> str:
+    """Return ``path`` relative to the repository root, else as given."""
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return resolved.as_posix()
 
 
 def _callee_name(func: ast.expr) -> str | None:
@@ -150,6 +188,7 @@ class _Scanner:
 
     def __init__(self, path: Path) -> None:
         self.path = path
+        self.relpath = _relative_path(path)
         self.aliases: dict[str, str] = {}
         self.module = _Scope(None)
         self.scopes: dict[ast.AST, _Scope] = {}
@@ -354,7 +393,7 @@ class _Scanner:
             return None
         resolved = self._canonical(name)
 
-        if (self.path.name, node.lineno) in NON_RENDERER_CALLS:
+        if (self.relpath, node.lineno) in NON_RENDERER_CALLS:
             return None
 
         if resolved == SCATTERED_PAINTER:
@@ -363,18 +402,18 @@ class _Scanner:
         if resolved == PAINTER:
             if any(keyword.arg == "wall" for keyword in node.keywords):
                 return None
+            if len(node.args) > WALL_POSITION_INDEX:
+                return None
             if any(self._expr_flag(scope, arg, "blanked") for arg in node.args):
                 return None
             if any(self._expr_flag(scope, arg, "scattered") for arg in node.args):
-                return UnmaskedCall(self.path.name, node.lineno, resolved)
+                return UnmaskedCall(self.relpath, node.lineno, resolved)
             return None
 
         if name in TRIANGLE_CONTOURS:
-            if (self.path.name, node.lineno) in NON_RENDERER_CALLS:
-                return None
             if any(self._expr_flag(scope, arg, "blanked") for arg in node.args):
                 return None
-            return UnmaskedCall(self.path.name, node.lineno, name)
+            return UnmaskedCall(self.relpath, node.lineno, name)
 
         if name in GRID_CONTOURS:
             value = node.args[2] if len(node.args) > 2 else None
@@ -382,7 +421,7 @@ class _Scanner:
                 if self._expr_flag(scope, value, "blanked"):
                     return None
                 if self._expr_flag(scope, value, "scattered"):
-                    return UnmaskedCall(self.path.name, node.lineno, name)
+                    return UnmaskedCall(self.relpath, node.lineno, name)
             return None
 
         return None

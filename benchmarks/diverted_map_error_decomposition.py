@@ -29,7 +29,7 @@ from benchmarks.chord_booking_operation_trace import (
     analytic_condition_moments,
     production_confined_support,
 )
-from benchmarks.plasma_cell_map_fidelity import norms
+from benchmarks.plasma_cell_map_fidelity import norms, nulls
 from nova.equilibrium.forward_operator import flux_field_polynomial
 from scripts.analytic_oracle_fixtures import measure as fixture
 
@@ -170,6 +170,7 @@ def analytic_membership(requested: int, archived: dict, mode: str) -> dict:
     return {
         "sup_relative": mismatch["sup_relative"],
         "rms_relative": mismatch["rms_relative"],
+        **xpoint_offset(nulls(operator, analytic), nulls(operator, mapped)),
         "lambda": float(amplitude),
         "clip_mode": mode,
         "mechanism": (
@@ -304,8 +305,11 @@ def write_fragment(rows: list[dict], fragment: Path) -> None:
         f"<td>{row['cells']}</td>"
         f"<td>{html.escape(row['mode'])}</td>"
         f"<td>{row['contour_tree_region']['sup_relative']:.6g}</td>"
+        f"<td>{row['contour_tree_region']['dZ_m']}</td>"
         f"<td>{row['xpoint_wedge']['sup_relative']}</td>"
+        f"<td>{row['xpoint_wedge']['dZ_m']}</td>"
         f"<td>{row.get('analytic_membership', {}).get('sup_relative')}</td>"
+        f"<td>{row.get('analytic_membership', {}).get('dZ_m')}</td>"
         "</tr>"
         for row in rows
     )
@@ -327,8 +331,10 @@ def write_fragment(rows: list[dict], fragment: Path) -> None:
         "<th>class</th><th>cells</th><th>projection share</th><th>map sup relative</th>"
         f"<th>dominant indices</th></tr></thead><tbody>{class_table}</tbody></table>"
         "<h3>Oracle support substitutions</h3><table><thead><tr><th>cells</th>"
-        "<th>base mode</th><th>contour-tree region sup</th><th>X-point wedge sup</th>"
-        "<th>analytic-membership sup</th></tr></thead>"
+        "<th>base mode</th><th>contour-tree region sup</th><th>contour-tree dZ [m]</th>"
+        "<th>X-point wedge sup</th><th>X-point wedge dZ [m]</th>"
+        "<th>analytic-membership sup</th><th>analytic-membership dZ [m]</th>"
+        "</tr></thead>"
         f"<tbody>{substitution_table}</tbody></table>"
         "<figure><img src='/nova/figures/cut-cell-current-attribution/"
         "cca-diverted-map-error-rca/map-fidelity-stable/"

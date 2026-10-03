@@ -17,7 +17,6 @@ from types import SimpleNamespace
 from typing import Any
 
 import numpy as np
-from scipy.integrate import quad
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,69 +52,73 @@ def _archive_tree(revision: str, scratch: Path) -> Path:
     return destination
 
 
-def _vertical_bounds(vertices: np.ndarray, radius: float) -> tuple[float, float] | None:
-    """Return a convex cell's vertical intersection at one radius."""
-
-    scale = max(float(np.max(abs(vertices))), 1.0)
-    tolerance = 256.0 * np.finfo(np.float64).eps * scale
-    heights: list[float] = []
-    for first, second in zip(vertices, np.roll(vertices, -1, axis=0), strict=True):
-        radial_delta = second[0] - first[0]
-        if abs(radial_delta) <= tolerance:
-            if abs(radius - first[0]) <= tolerance:
-                heights.extend((float(first[1]), float(second[1])))
-            continue
-        fraction = (radius - first[0]) / radial_delta
-        if -tolerance <= fraction <= 1.0 + tolerance:
-            heights.append(float(first[1] + fraction * (second[1] - first[1])))
-    return None if len(heights) < 2 else (min(heights), max(heights))
+_TRIANGLE_RULE = np.asarray(
+    (
+        (2.0 / 3.0, 1.0 / 6.0, 1.0 / 6.0),
+        (1.0 / 6.0, 2.0 / 3.0, 1.0 / 6.0),
+        (1.0 / 6.0, 1.0 / 6.0, 2.0 / 3.0),
+    ),
+    dtype=np.float64,
+)
 
 
-def _exact_support_current(
+def _triangle_area(triangle: np.ndarray) -> float:
+    first, second, third = triangle
+    return abs(float(np.cross(second - first, third - first))) / 2.0
+
+
+def _refined_triangles(triangle: np.ndarray, refinement: int) -> np.ndarray:
+    """Uniformly split one triangle into a conforming triangular lattice."""
+
+    count = 2**refinement
+    first, second, third = triangle
+
+    def point(row: int, column: int) -> np.ndarray:
+        return first + (row * (second - first) + column * (third - first)) / count
+
+    triangles: list[np.ndarray] = []
+    for row in range(count):
+        for column in range(count - row):
+            lower = point(row, column)
+            right = point(row + 1, column)
+            upper = point(row, column + 1)
+            triangles.append(np.stack((lower, right, upper)))
+            if column < count - row - 1:
+                diagonal = point(row + 1, column + 1)
+                triangles.append(np.stack((right, diagonal, upper)))
+    return np.asarray(triangles, dtype=np.float64)
+
+
+def _triangle_reference(
     polygon: np.ndarray, density_sampler: Any, cell: int
-) -> tuple[float, float]:
-    """Adaptively integrate the state profile over one emitted support polygon."""
+) -> tuple[float, list[dict[str, float]]]:
+    """Refine a symmetric triangle rule until adjacent totals agree."""
 
-    lower = float(polygon[:, 0].min())
-    upper = float(polygon[:, 0].max())
-    if upper <= lower:
-        return 0.0, 0.0
-
-    def density(radius: float) -> float:
-        bounds = _vertical_bounds(polygon, radius)
-        if bounds is None:
-            return 0.0
-        vertical, _estimate = quad(
-            lambda height: float(
-                density_sampler(
-                    np.asarray([[radius, height]], dtype=np.float64), np.int32(cell)
-                )[0]
-            ),
-            bounds[0],
-            bounds[1],
-            epsabs=1.0e-7,
-            epsrel=RELATIVE_TOLERANCE,
-            limit=300,
+    fan = [
+        np.stack((polygon[0], polygon[index], polygon[index + 1]))
+        for index in range(1, len(polygon) - 1)
+    ]
+    ladder: list[dict[str, float]] = []
+    previous = None
+    for refinement in range(8):
+        triangles = np.concatenate(
+            [_refined_triangles(triangle, refinement) for triangle in fan]
         )
-        return vertical
-
-    breaks = [lower, upper]
-    breaks.extend(float(value) for value in polygon[:, 0] if lower < value < upper)
-    total = 0.0
-    error = 0.0
-    intervals = sorted(set(breaks))
-    for start, stop in zip(intervals, intervals[1:]):
-        value, estimate = quad(
-            density,
-            start,
-            stop,
-            epsabs=1.0e-8,
-            epsrel=RELATIVE_TOLERANCE,
-            limit=300,
+        points = np.einsum("qi,tij->tqj", _TRIANGLE_RULE, triangles).reshape(-1, 2)
+        density = np.asarray(density_sampler(points, np.int32(cell)), dtype=np.float64)
+        weighted = density.reshape(len(triangles), len(_TRIANGLE_RULE)).mean(axis=1)
+        areas = np.asarray([_triangle_area(item) for item in triangles])
+        total = float(np.sum(weighted * areas))
+        relative = (
+            None if previous is None else abs(total - previous) / max(abs(total), 1.0)
         )
-        total += value
-        error += estimate
-    return float(total), float(error)
+        ladder.append(
+            {"level": refinement, "current_a": total, "relative_change": relative}
+        )
+        if relative is not None and relative <= 1.0e-8:
+            return total, ladder
+        previous = total
+    raise RuntimeError(f"triangle reference did not converge for cell {cell}: {ladder}")
 
 
 def _install_absent_saddle_bridge(forward_operator: Any) -> None:
@@ -160,7 +163,9 @@ def _operator_clip_mode(forward_operator: Any, operator: Any, mode: str):
         forward_operator.set_support_clip_mode(previous)
 
 
-def _measure(revision: str, scratch: Path, component: str) -> dict[str, Any]:
+def _measure(
+    revision: str, scratch: Path, component: str, reference_cells: set[int] | None
+) -> dict[str, Any]:
     tree = _archive_tree(revision, scratch)
     previous = list(sys.path)
     roots = ("nova", "benchmarks", "scripts")
@@ -197,6 +202,7 @@ def _measure(revision: str, scratch: Path, component: str) -> dict[str, Any]:
             else "set_support_clip_mode"
         )
         booked = None
+        exact_cell_current = None
         if component != "reference":
             with _operator_clip_mode(forward_operator, operator, "exact") as (
                 exact_operator,
@@ -213,7 +219,7 @@ def _measure(revision: str, scratch: Path, component: str) -> dict[str, Any]:
                 context["machine"], context["exact"], context["target_current"]
             )
             try:
-                booked = census._state_census(
+                booking_census = census._state_census(
                     operator,
                     context["machine"],
                     state,
@@ -221,12 +227,17 @@ def _measure(revision: str, scratch: Path, component: str) -> dict[str, Any]:
                     context["target_current"],
                     analytic,
                     curve,
-                )["unit_amplitude_totals_a"]
+                )
+                booked = booking_census["unit_amplitude_totals_a"]
+                exact_cell_current = [
+                    float(row["exact_current_a"]) for row in booking_census["per_cell"]
+                ]
             finally:
                 if legacy_mode is not None:
                     forward_operator.set_support_clip_mode(legacy_mode)
         reference = None
         error_bound = None
+        reference_cell_rows = None
         if component != "booking":
             with _operator_clip_mode(forward_operator, operator, "exact") as (
                 exact_operator,
@@ -249,18 +260,26 @@ def _measure(revision: str, scratch: Path, component: str) -> dict[str, Any]:
                 selected = np.asarray(exact_field.active) & np.asarray(
                     exact_probe["moment_masks"].profile_participation
                 )
-                reference_values = [
-                    _exact_support_current(
-                        support_vertices[cell, : support_count[cell]],
-                        density_sampler,
-                        cell,
+                cells = (
+                    range(len(support_vertices))
+                    if reference_cells is None
+                    else sorted(reference_cells)
+                )
+                reference_cell_rows = []
+                for cell in cells:
+                    if selected[cell] and support_count[cell] >= 3:
+                        value, ladder = _triangle_reference(
+                            support_vertices[cell, : support_count[cell]],
+                            density_sampler,
+                            cell,
+                        )
+                    else:
+                        value, ladder = 0.0, []
+                    reference_cell_rows.append(
+                        {"cell": cell, "current_a": value, "refinement": ladder}
                     )
-                    if selected[cell] and support_count[cell] >= 3
-                    else (0.0, 0.0)
-                    for cell in range(len(support_vertices))
-                ]
-            reference = float(sum(value for value, _error in reference_values))
-            error_bound = float(sum(error for _value, error in reference_values))
+            reference = float(sum(row["current_a"] for row in reference_cell_rows))
+            error_bound = 0.0
         exact = None if booked is None else float(booked["exact"])
         return {
             "revision": revision,
@@ -274,8 +293,10 @@ def _measure(revision: str, scratch: Path, component: str) -> dict[str, Any]:
             "jax_backend": jax.default_backend(),
             "chord_booked_a": None if booked is None else float(booked["chord"]),
             "exact_booked_a": exact,
+            "exact_cell_current_a": exact_cell_current,
             "quadrature_reference_a": reference,
             "quadrature_error_bound_a": error_bound,
+            "quadrature_cells": reference_cell_rows,
             "exact_relative_difference": (
                 None
                 if exact is None or reference is None
@@ -298,6 +319,7 @@ def main() -> None:
     parser.add_argument(
         "--component", choices=("full", "booking", "reference"), default="full"
     )
+    parser.add_argument("--reference-cells")
     arguments = parser.parse_args()
     scratch = Path(
         tempfile.mkdtemp(prefix="outboard-census-", dir=os.environ["TMPDIR"])
@@ -316,8 +338,14 @@ def main() -> None:
             RESPONSIBLE_REVISION,
             head,
         )
+        reference_cells = (
+            None
+            if arguments.reference_cells is None
+            else {int(cell) for cell in arguments.reference_cells.split(",") if cell}
+        )
         rows = [
-            _measure(revision, scratch, arguments.component) for revision in revisions
+            _measure(revision, scratch, arguments.component, reference_cells)
+            for revision in revisions
         ]
         by_revision = {row["revision"]: row for row in rows}
         current = by_revision.get(head)

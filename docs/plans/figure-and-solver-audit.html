@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="87">
+<meta name="plan-version" content="88">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -556,6 +556,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261003T180644647707-fsa-wall-mask-shafranov" data-who="reckon-build" data-when="2026-10-03T18:15:49.764Z">
     <div class="r-comment-body"><p>routed four unguarded draw_flux_contours calls (shafranov_combination_discriminator.py:930; shafranov_pair_receipt.py:442, 459, 1073) through the wall mask by passing wall=units; the renderer wall scanner exits 0 at head and exits 1 listing exactly those four sites at base (negative control); 51 tests pass in both arms, zero added failures</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261003T181629393845-review-of-fsa-wall-mask-shafranov" data-who="reckon-build" data-when="2026-10-03T18:23:02.637Z">
+    <div class="r-comment-body"><p>reviewed run r-20261003T180644647707-fsa-wall-mask-shafranov (diff b4a5897f0..c7642107a) and stored a parsed 5-dimension record scoring goal_fidelity 19, evidence 18, scope_discipline 20, durability 11, fit 19 (total 87), verdict pass, with added_failure_count 0; one follow-on finding that the four repaired sites are pinned by no automated test</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

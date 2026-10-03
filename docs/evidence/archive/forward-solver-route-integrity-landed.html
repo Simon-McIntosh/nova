@@ -1866,6 +1866,20 @@ Receipt: <code>/nova/figures/forward-solver-route-integrity/single-site-krylov/b
     <figure><img src="/nova/figures/forward-solver-route-integrity/fsri-picard-derivative-contract-rca/derivative-estimates.png" alt="Derivative estimates of the 80-step picard route, the terminal fixed-point tangent and central differences"><figcaption>Derivative estimates from H200 job 1280500. The reverse/forward line is the derivative of the 80-step route, the second line is the explicit terminal fixed-point tangent, and the points are central differences at three steps. The review found the axis labels cropped; the repair re-renders the figure.</figcaption></figure>
   </section>
 
+  <section id="picard-implicit-derivative">
+    <h2>§1 — converged picard solves differentiate implicitly</h2>
+    <p>Run <code>r-20261002T230005440753-fsri-picard-implicit-derivative</code> (codex-terra), merged at <code>f8cd09f83</code>. Its first review failed on evidence alone, and its re-review scored 96 of 100 with no added failure. <code>fixed_point.picard</code> now carries an implicit derivative rule at its terminal state, and four checks back it.</p>
+    <ul>
+      <li>A non-converged state returns NaN tangents (<code>fixed_point.py:3026-3030</code>).</li>
+      <li>The terminal residual shadow is frozen and passed into both terminal-map differentiations.</li>
+      <li>The tangent and its transpose are solved matrix-free through <code>custom_linear_solve</code> on the terminal map, without reverse-differentiating <code>_qualified_krylov_step</code>.</li>
+      <li>Reverse mode and the JVP both return the implicit tangent.</li>
+    </ul>
+    <p>On the H200 the two conductor-current derivative tests in <code>tests/test_equilibrium_forward_solve.py</code> now pass (2 passed, 165 s). Restoring the unrolled loop reproduces the 11.31 relative error.</p>
+    <p>The root-cause witness needed explicit pinning. <code>benchmarks/picard_derivative_contract.py</code> chose its probe as the largest reverse component, which moves once the derivative changes, so it gained explicit <code>--probe</code> and <code>--steps</code> options. H200 job 1280519 ran the root-cause witness: probe 3 with steps of 293, 88 and 29 A. There, reverse, JVP and implicit all read −0.941091, where the unrolled reverse read −11.537. The central differences themselves do not converge on that probe (−0.9369, −0.9196 and −1.0133, with error growing as the step shrinks), so the primal is nonsmooth along it, and the witness cannot discriminate below its own finite-difference spread. On the smooth default probe the central differences converge to the implicit tangent at second order: 7.8e-6, 7.1e-7 and 7.8e-8. Driver SHA-256 <code>2b94cd72…</code>.</p>
+    <figure><img src="/nova/figures/forward-solver-route-integrity/fsri-picard-implicit-derivative/derivative-estimates.png" alt="Reverse, JVP, implicit and finite-difference derivative estimates after the repair"><figcaption>Derivative estimates after the repair, from the H200 receipts. Reverse, JVP and the implicit tangent coincide; central differences converge to them on the smooth witness and scatter on the nonsmooth one.</figcaption></figure>
+  </section>
+
   <section id="moment-map-derivative-boundary-flux">
     <h2>§1 — the moment-map derivative error sits in the boundary flux</h2>
     <p>Run <code>r-20261002T225511267666-fsri-moment-map-derivative-rca</code> (codex-terra), merged at <code>2bbec7a04</code>, review 91 of 100. <code>benchmarks/moment_map_derivative_contract.py</code> reproduces <code>test_the_moment_map_is_differentiable_against_finite_differences</code> on its own fixture, direction and steps, on the H200. It splits the map into stages: topology levels, axis flux, boundary flux, support weights, moments, observations and residual normalisation.</p>

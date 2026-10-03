@@ -30,7 +30,13 @@ from benchmarks.chord_booking_operation_trace import (
     production_confined_support,
 )
 from benchmarks.plasma_cell_map_fidelity import norms, nulls
-from nova.equilibrium.forward_operator import flux_field_polynomial
+from nova.equilibrium.forward_operator import (
+    _ExactClipLevel,
+    _implicit_traced_level_arc,
+    _traced_clip,
+    fit_split_spline,
+    flux_field_polynomial,
+)
 from scripts.analytic_oracle_fixtures import measure as fixture
 
 CASE = "diverted-single-null"
@@ -120,6 +126,167 @@ def class_summary(error, reference, blocks, booked, analytic, labels, rows) -> d
             "dominant_current_error_a": [row["current_error_a"] for row in ranked[:5]],
         }
     return result
+
+
+def mapped_support(
+    operator, masks, sample_psi_norm, support, target, analytic, exterior, shadow
+):
+    """Image one explicit support through the production moment and Green paths."""
+    moment_masks = operator._moment_support_masks(masks, support)
+    moments = operator.source.current_moments(
+        moment_masks,
+        operator.support_current_moments,
+        support,
+        sample_flux=sample_psi_norm,
+    )
+    coupled_moments = operator.coupling_current_moments(moments)
+    amplitude = operator.current_normalisation_amplitude(
+        target, jnp.sum(coupled_moments.cell_current)
+    )
+    plasma = np.asarray(
+        operator.current_moment_image(
+            operator.scaled_current_moments(coupled_moments, amplitude)
+        )
+    )
+    mapped = np.where(np.asarray(shadow), analytic, np.asarray(exterior) + plasma)
+    return mapped, float(amplitude)
+
+
+def contour_tree_region(requested: int, archived: dict, mode: str) -> dict:
+    """Re-book the support from an independently invoked contour-tree read."""
+    carrier, source, exact = certificate._case(CASE)
+    machine = certificate._case_machine(CASE, carrier, exact, requested)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = certificate._exact_state(CASE, exact, coordinates)
+    empty = fixture.forward_operator(source, machine)
+    physical, exterior, _cache = fixture.cached_fixture_exterior(
+        source, exact, machine, empty, analytic
+    )
+    operator = fixture.forward_operator(source, machine, exterior).with_clip_mode(mode)
+    target, _, _receipt = certificate._closed_form_current_target(
+        CASE, source, operator, physical
+    )
+    production_masks, _production_topology, _sample, _support = (
+        operator._support_partition(jnp.asarray(analytic), None)
+    )
+    masks, topology, _connected, admitted = operator._fixed_design_read(
+        jnp.asarray(analytic), None
+    )
+    assert bool(admitted), "contour-tree oracle requires an admitted axis"
+    sample_flux = operator.sample_node_flux(jnp.asarray(analytic))
+    sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+    support = operator._profile_support(
+        masks, topology, jnp.asarray(analytic), sample_psi_norm
+    )
+    mapped, amplitude = mapped_support(
+        operator,
+        masks,
+        sample_psi_norm,
+        support,
+        target,
+        analytic,
+        exterior,
+        archived["shadow"],
+    )
+    mismatch = norms(mapped - analytic, analytic)
+    membership_difference = int(
+        np.count_nonzero(
+            np.asarray(masks.profile_participation)
+            != np.asarray(production_masks.profile_participation)
+        )
+    )
+    return {
+        "sup_relative": mismatch["sup_relative"],
+        "rms_relative": mismatch["rms_relative"],
+        **xpoint_offset(nulls(operator, analytic), nulls(operator, mapped)),
+        "lambda": amplitude,
+        "membership_difference_count": membership_difference,
+        "executed": True,
+        "source": "nova/equilibrium/forward_operator.py:_fixed_design_read",
+    }
+
+
+def analytic_saddle_wedge(requested: int, archived: dict) -> dict:
+    """Rebuild exact support with the analytic saddle, not the mapped saddle."""
+    carrier, source, exact = certificate._case(CASE)
+    machine = certificate._case_machine(CASE, carrier, exact, requested)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = certificate._exact_state(CASE, exact, coordinates)
+    empty = fixture.forward_operator(source, machine)
+    physical, exterior, _cache = fixture.cached_fixture_exterior(
+        source, exact, machine, empty, analytic
+    )
+    operator = fixture.forward_operator(source, machine, exterior).with_clip_mode(
+        "exact"
+    )
+    target, _, _receipt = certificate._closed_form_current_target(
+        CASE, source, operator, physical
+    )
+    masks, topology, sample_psi_norm, _production_support = operator._support_partition(
+        jnp.asarray(analytic), None
+    )
+    shared_flux = operator.shared_node_flux(jnp.asarray(analytic))
+    inside_boundary = operator.polarity * (shared_flux - topology.boundary_flux)
+    coefficient = operator.support_flux_coefficients(masks.psi_norm, sample_psi_norm)
+    coefficient = -coefficient.at[:, 0].add(1.0)
+    coordinate = jnp.asarray(operator.grid.coordinate, dtype=masks.psi_norm.dtype)
+    surface = fit_split_spline(
+        coordinate[None, :, 0],
+        coordinate[None, :, 1],
+        masks.psi_norm[None, :],
+        masks.psi_norm[None, :] - 1.0,
+        order=6,
+        regularization=1.0e-14,
+    )
+    level = _ExactClipLevel(
+        surface,
+        coefficient,
+        operator._support_curve_centre,
+        operator._support_curve_scale,
+    )
+    mesh = operator.moment_geometry.atomic_mesh
+    vertices = jnp.asarray(mesh.node_coordinates)[jnp.asarray(mesh.cell_nodes)]
+    participation = masks.profile_participation | operator._vertex_level_participation(
+        mesh.cell_vertex_count, level(vertices)
+    )
+    analytic_apex = jnp.asarray(exact.x_point, dtype=analytic.dtype)
+    support = _traced_clip(
+        mesh.node_coordinates,
+        mesh.cell_nodes,
+        mesh.cell_vertex_count,
+        mesh.centroids,
+        mesh.support_capacity,
+        inside_boundary,
+        saddle_vertex=analytic_apex,
+        curve_evaluator=level,
+        participating_cell=participation,
+        arc_tracer=_implicit_traced_level_arc,
+    ).qualify(participation)
+    mapped, amplitude = mapped_support(
+        operator,
+        masks,
+        sample_psi_norm,
+        support,
+        target,
+        analytic,
+        exterior,
+        archived["shadow"],
+    )
+    mismatch = norms(mapped - analytic, analytic)
+    return {
+        "sup_relative": mismatch["sup_relative"],
+        "rms_relative": mismatch["rms_relative"],
+        **xpoint_offset(nulls(operator, analytic), nulls(operator, mapped)),
+        "lambda": amplitude,
+        "production_apex_rz_m": np.asarray(topology.x_point).tolist(),
+        "analytic_apex_rz_m": np.asarray(exact.x_point).tolist(),
+        "executed": True,
+        "source": "nova/equilibrium/forward_operator.py:_profile_support",
+    }
 
 
 def analytic_membership(requested: int, archived: dict, mode: str) -> dict:
@@ -230,17 +397,6 @@ def measure(input_root: Path, output: Path, fragment: Path, base_sha: str) -> di
             "dominant_cells": sorted(
                 per_cell, key=lambda item: abs(item["current_error_a"]), reverse=True
             )[:8],
-            "contour_tree_region": {
-                "sup_relative": row["mismatch"]["sup_relative"],
-                "dZ_m": xpoint_offset(row["reference_nulls"], row["mapped_nulls"])[
-                    "dZ_m"
-                ],
-                "finding": (
-                    "production-equivalent: chord support is qualified by the "
-                    "fixed-design contour-tree profile label"
-                ),
-                "source": "nova/equilibrium/forward_operator.py:_profile_support",
-            },
             "xpoint_wedge": {
                 "sup_relative": None,
                 "dZ_m": None,
@@ -251,16 +407,13 @@ def measure(input_root: Path, output: Path, fragment: Path, base_sha: str) -> di
         result["analytic_membership"] = analytic_membership(
             row["requested_cells"], archived, row["clip_mode"]
         )
+        result["contour_tree_region"] = contour_tree_region(
+            row["requested_cells"], archived, row["clip_mode"]
+        )
         if row["clip_mode"] == "exact":
-            result["xpoint_wedge"] = {
-                "sup_relative": row["mismatch"]["sup_relative"],
-                "dZ_m": result["production"]["dZ_m"],
-                "finding": (
-                    "exact support supplies topology.x_point as saddle_vertex "
-                    "to the traced clip"
-                ),
-                "source": "nova/equilibrium/forward_operator.py:_profile_support",
-            }
+            result["xpoint_wedge"] = analytic_saddle_wedge(
+                row["requested_cells"], archived
+            )
         write(output / f"{row['clip_mode']}-{row['realised_cells']}.json", result)
         results.append(result)
     report = {
@@ -271,21 +424,23 @@ def measure(input_root: Path, output: Path, fragment: Path, base_sha: str) -> di
         "rows": results,
     }
     write(output / "report.json", report)
-    write_fragment(results, fragment)
+    write_fragment(results, fragment, receipt)
     return report
 
 
-def write_fragment(rows: list[dict], fragment: Path) -> None:
+def write_fragment(rows: list[dict], fragment: Path, receipt: dict) -> None:
     map_table = "".join(
         "<tr>"
-        f"<td>{row['cells']}</td>"
-        f"<td>{html.escape(row['mode'])}</td>"
-        f"<td>{row['production']['sup_relative']:.6g}</td>"
-        f"<td>{row['production']['rms_relative']:.6g}</td>"
-        f"<td>{row['production']['dR_m']}</td>"
-        f"<td>{row['production']['dZ_m']}</td>"
+        f"<td>{html.escape(row['case'])}</td>"
+        f"<td>{row['realised_cells']}</td>"
+        f"<td>{html.escape(row['clip_mode'])}</td>"
+        f"<td>{row['mismatch']['sup_relative']:.6g}</td>"
+        f"<td>{row['mismatch']['rms_relative']:.6g}</td>"
+        f"<td>{row['support_current_centroid_offset_mm']['dR']}</td>"
+        f"<td>{row['support_current_centroid_offset_mm']['dZ']}</td>"
         "</tr>"
-        for row in rows
+        for row in receipt["rows"]
+        if row["status"] == "measured"
     )
     rows_132 = [row for row in rows if row["cells"] == 132]
     class_table = "".join(
@@ -306,8 +461,11 @@ def write_fragment(rows: list[dict], fragment: Path) -> None:
         f"<td>{html.escape(row['mode'])}</td>"
         f"<td>{row['contour_tree_region']['sup_relative']:.6g}</td>"
         f"<td>{row['contour_tree_region']['dZ_m']}</td>"
+        f"<td>{row['contour_tree_region']['membership_difference_count']}</td>"
         f"<td>{row['xpoint_wedge']['sup_relative']}</td>"
         f"<td>{row['xpoint_wedge']['dZ_m']}</td>"
+        f"<td>{row['xpoint_wedge'].get('production_apex_rz_m')}</td>"
+        f"<td>{row['xpoint_wedge'].get('analytic_apex_rz_m')}</td>"
         f"<td>{row.get('analytic_membership', {}).get('sup_relative')}</td>"
         f"<td>{row.get('analytic_membership', {}).get('dZ_m')}</td>"
         "</tr>"
@@ -323,7 +481,12 @@ def write_fragment(rows: list[dict], fragment: Path) -> None:
         "<p>No tested substitution puts diverted exact below the 1e-2 bound. "
         "Analytic membership improves chord at 550 cells below the bound but "
         "does not alter the exact saddle-vertex route.</p>"
-        "<h3>Map receipt</h3><table><thead><tr><th>cells</th><th>mode</th>"
+        "<p>The 2026-09-21 followup premise is stale: production now passes "
+        "topology.x_point as saddle_vertex in forward_operator.py:3424, from "
+        "commit d90a522fe; the analytic-apex arm below measures the remaining "
+        "difference from that mapped apex.</p>"
+        "<h3>Full H200 map receipt</h3><table><thead><tr><th>case</th>"
+        "<th>cells</th><th>mode</th>"
         "<th>sup relative</th>"
         "<th>rms relative</th><th>dR [m]</th><th>dZ [m]</th></tr></thead>"
         f"<tbody>{map_table}</tbody></table>"
@@ -332,7 +495,9 @@ def write_fragment(rows: list[dict], fragment: Path) -> None:
         f"<th>dominant indices</th></tr></thead><tbody>{class_table}</tbody></table>"
         "<h3>Oracle support substitutions</h3><table><thead><tr><th>cells</th>"
         "<th>base mode</th><th>contour-tree region sup</th><th>contour-tree dZ [m]</th>"
+        "<th>contour-tree membership differences</th>"
         "<th>X-point wedge sup</th><th>X-point wedge dZ [m]</th>"
+        "<th>production apex [m]</th><th>analytic apex [m]</th>"
         "<th>analytic-membership sup</th><th>analytic-membership dZ [m]</th>"
         "</tr></thead>"
         f"<tbody>{substitution_table}</tbody></table>"

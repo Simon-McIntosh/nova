@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -38,6 +40,16 @@ CERTIFICATE_RUNG_PATHS = (
     (340, "*production-route-cells-300.json"),
     (550, "*production-route-cells-500.json"),
     (1074, "*production-route-cells-1000.json"),
+)
+# Every contour-tree receipt field, in the order the sweep compares them.
+RECEIPT_FIELDS = (
+    "node_vertex",
+    "node_psi",
+    "node_valid",
+    "critical_type",
+    "edges",
+    "edge_valid",
+    "overflow",
 )
 
 
@@ -294,17 +306,14 @@ def measure_cpu_rungs(
                 "vertices": int(
                     np.count_nonzero(np.asarray(fixture.mesh.vertex_valid))
                 ),
-                "edges": int(
-                    np.count_nonzero(np.asarray(fixture.mesh.edge_valid))
-                ),
+                "edges": int(np.count_nonzero(np.asarray(fixture.mesh.edge_valid))),
                 "compile_seconds": cold_seconds - execute_seconds,
                 "execute_seconds": execute_seconds,
                 "overflow": bool(result.overflow),
                 "node_count": comparison["node_count"],
                 "edge_count": comparison["edge_count"],
                 "mismatches": sum(
-                    row["tree"] != row["brute_force"]
-                    for row in comparison["rows"]
+                    row["tree"] != row["brute_force"] for row in comparison["rows"]
                 ),
             }
         )
@@ -359,3 +368,145 @@ def render(fixtures: tuple[Fixture, ...], directory: Path = FIGURE_ROOT) -> list
         plt.close(figure)
         paths.append(path)
     return paths
+
+
+@dataclass(frozen=True)
+class FieldComparison:
+    """One receipt field's mismatch count across the compared fixtures."""
+
+    field: str
+    mismatches: int
+
+
+def receipt_from_tree(tree) -> dict[str, object]:
+    """Serialise every receipt field of a contour tree into plain Python."""
+
+    return {name: np.asarray(getattr(tree, name)).tolist() for name in RECEIPT_FIELDS}
+
+
+def receipt_of(fixture: Fixture) -> dict[str, object]:
+    """Build one fixture's receipt from its own carrier and field."""
+
+    tree = build_contour_tree(
+        fixture.mesh.vertex_psi,
+        fixture.mesh.vertex_valid,
+        fixture.mesh.vertex_is_wall,
+        fixture.mesh.edges,
+        fixture.mesh.edge_valid,
+        jnp.asarray(1, dtype=jnp.int32),
+    )
+    return receipt_from_tree(tree)
+
+
+def write_receipt_file(receipts: Mapping[str, object], path: Path) -> Path:
+    """Write one receipt file holding each named fixture's receipt fields."""
+
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(receipts, indent=2, sort_keys=True), encoding="utf-8")
+    return path
+
+
+def write_receipts(directory: Path, fixtures: tuple[Fixture, ...]) -> Path:
+    """Write one receipt file holding every fixture's receipt fields."""
+
+    payload = {fixture.name: receipt_of(fixture) for fixture in fixtures}
+    return write_receipt_file(payload, Path(directory) / "receipts.json")
+
+
+def compare_receipts(
+    base: Mapping[str, Mapping[str, object]],
+    head: Mapping[str, Mapping[str, object]],
+    fields: tuple[str, ...] | None = None,
+) -> list[FieldComparison]:
+    """Compare receipt fields across the two loaded receipt files.
+
+    Every receipt field is compared by default; a caller may name a narrower
+    field set, but the CLI never does, so a real mismatch cannot be turned into
+    a pass by any process-wide switch.
+
+    A fixture present in only one file, or a field missing from either, counts
+    as a mismatch for that field, so a dropped fixture is never read as equal.
+    """
+
+    compared = RECEIPT_FIELDS if fields is None else tuple(fields)
+    names = sorted(set(base) | set(head))
+    comparisons = []
+    for field in compared:
+        mismatches = 0
+        for name in names:
+            left = base.get(name, {}).get(field)
+            right = head.get(name, {}).get(field)
+            if left is None or right is None:
+                mismatches += 1
+            elif not np.array_equal(np.asarray(left), np.asarray(right)):
+                mismatches += 1
+        comparisons.append(FieldComparison(field, mismatches))
+    return comparisons
+
+
+def load_receipts(path: Path) -> dict[str, dict[str, object]]:
+    """Load one receipt file written by :func:`write_receipts`."""
+
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def run_compare(base_path: Path, head_path: Path) -> int:
+    """Print one line per field and return nonzero on any mismatch."""
+
+    comparisons = compare_receipts(load_receipts(base_path), load_receipts(head_path))
+    for comparison in comparisons:
+        print(f"{comparison.field}: {comparison.mismatches} mismatches")
+    return 1 if any(item.mismatches for item in comparisons) else 0
+
+
+def _select_fixtures(select: str) -> tuple[Fixture, ...]:
+    """Choose the fixture set a write or compare run covers."""
+
+    if select == "certificate":
+        return certificate_fixtures()
+    if select == "rungs":
+        return certificate_rung_fixtures()
+    if select == "mast":
+        return mast_fixtures()
+    if select == "all":
+        return certificate_fixtures() + certificate_rung_fixtures() + mast_fixtures()
+    raise ValueError(f"unknown fixture selection: {select}")
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Entry point for writing receipts and comparing two receipt files."""
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--write",
+        metavar="DIR",
+        help="write every selected fixture's receipt into DIR/receipts.json",
+    )
+    parser.add_argument(
+        "--compare",
+        nargs=2,
+        metavar=("BASE", "HEAD"),
+        help="compare two receipt files, one line per field, nonzero on mismatch",
+    )
+    parser.add_argument(
+        "--fixtures",
+        default="all",
+        choices=("all", "certificate", "rungs", "mast"),
+        help="fixture set a --write run covers",
+    )
+    arguments = parser.parse_args(argv)
+    if arguments.compare is not None:
+        return run_compare(Path(arguments.compare[0]), Path(arguments.compare[1]))
+    if arguments.write is not None:
+        path = write_receipts(
+            Path(arguments.write), _select_fixtures(arguments.fixtures)
+        )
+        print(path)
+        return 0
+    parser.error("one of --write or --compare is required")
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

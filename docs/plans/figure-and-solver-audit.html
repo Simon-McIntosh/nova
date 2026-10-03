@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -508,7 +508,10 @@
     <div class="r-comment-body"><p>report written to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-s19-tips-inventory.md with one row per ref and a recommendation for each of the 33 refs/s19-tips</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261003T152404719686-review-of-fsa-s19-tips-inventory" data-who="reckon-build" data-when="2026-10-03T15:47:46.373Z">
-    <div class="r-comment-body"><p>Independent review of r-20261003T144829404370-fsa-s19-tips-inventory stored at total 95/100 (goal_fidelity 20, evidence 19, scope_discipline 20, durability 17, fit 19), verdict pass, added_failure_count 0, two follow-on findings; the report&#x27;s inventory was independently reproduced across all 33 tips and every sampled claim matched.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261003T144829404370-fsa-s19-tips-inventory stored at total 95/100 (goal_fidelity 20, evidence 19, scope_discipline 20, durability 17, fit 19), verdict pass, added_failure_count 0, two follow-on findings; the report's inventory was independently reproduced across all 33 tips and every sampled claim matched.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261003T154255400457-fsa-restore-msc-figure-artifacts" data-who="reckon-build" data-when="2026-10-03T15:56:39.004Z">
+    <div class="r-comment-body"><p>Restored the six millisecond-solve figure artifacts the compile-millisecond reports reference but main lacked (compile-memory.svg from refs/s19-tips/msc-compile-host-memory; solve-profile.json, -300.json, -1000.json, -300.svg, -1000.svg from refs/s19-tips/msc-solve-profile-kernel-count), each written by git show on its tip blob with git hash-object equal to that blob (sha256 a37d5b5d/5032106e, 2e33f631/4141747c, 2543ab3c/ed24f962, ce75bfea/45ab6988, 203b2bc2/836bf645, c8fd7fe9/94a09c25); added check_report_figures.py in each directory so the report&#x27;s figure references are checked, green EXIT=0 after the restore against red EXIT=1 before (missing=1 of 1 and missing=5 of 5). Landing record: docs/evidence/fragments/figure-and-solver-audit/fsa-restore-msc-figure-artifacts.html</p></div>
 </div>
 </section>
   </main>

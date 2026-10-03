@@ -15,6 +15,7 @@ import argparse
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from functools import partial
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -32,6 +33,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from benchmarks import limited_row_shadow_census as certificate_gate
+from benchmarks import solovev_certificate as certificate
 from benchmarks import trip_quantum_width_one as trip_quantum
 from nova.equilibrium import (
     connectivity_boundary,
@@ -391,6 +393,102 @@ def _solovev_terminal_identity(output_root: Path) -> dict[str, Any]:
     }
 
 
+def _format_statistic(value: Any) -> str:
+    return "n/a" if value is None else f"{float(value):.4g}"
+
+
+def solovev_panel_title(row: dict[str, Any]) -> str:
+    """Compose a chord panel's title from the part receipt's own keys.
+
+    The panel's qualification is an axis-admission verdict, not an accuracy
+    verdict, so the title names the read status and prints the relative flux
+    error beside it. The terminal residual and converged flag complete the
+    caption a forward-solve evidence record carries.
+    """
+
+    region = row["analytic_flux_regions"]["all_carrier_cells"]
+    solver = row["solver"]
+    converged = bool(solver["converged"])
+    return (
+        f"{row['case']} · {certificate._slug(row['requested_cells'])} · "
+        f"read {row['banked_read']['read_status']} "
+        "(axis admission; not an accuracy verdict)\n"
+        f"psi relative_rms={_format_statistic(region['relative_rms'])} "
+        f"relative_sup={_format_statistic(region['relative_sup'])} · "
+        f"residual={float(solver['terminal_fixed_point_residual']):.3e} · "
+        f"converged={'yes' if converged else 'no'}"
+    )
+
+
+def _render_solovev_panels(output_root: Path) -> list[dict[str, Any]]:
+    """Regenerate the chord panels with receipt-derived titles.
+
+    Every field is read from the persisted part receipt, so no forward operator
+    is constructed and no solve is entered. Each panel is redrawn through the
+    committed painter with its title read from the same receipt, the drawn title
+    is embedded in the panel's own PNG metadata so the image and the receipt can
+    be checked against each other, and the title and refreshed digest are written
+    back into that receipt. Every chord arm is regenerated together, so the
+    directory never mixes an honest title with the bare qualification.
+    """
+
+    part_root = output_root / "solovev-certificate" / "solve-parts" / "chord"
+    parts = sorted(part_root.glob("*-production-route-cells-*.json"))
+    if not parts:
+        raise RuntimeError(f"no chord solve parts under {part_root}")
+    rows: list[dict[str, Any]] = []
+    for part in parts:
+        row = json.loads(part.read_text(encoding="utf-8"))
+        data = row["render_data"]
+        title = solovev_panel_title(row)
+        figure_path = ROOT / row["figure"]["filesystem_path"]
+        figure = certificate._plot(
+            np.asarray(data["coordinates_rz_m"], dtype=np.float64),
+            np.asarray(data["terminal_flux_wb"], dtype=np.float64),
+            np.asarray(data["analytic_flux_wb"], dtype=np.float64),
+            np.asarray(data["derivative_coordinates_rz_m"], dtype=np.float64),
+            {
+                name: np.asarray(data["error_fields"][name], dtype=np.float64)
+                for name in certificate.NORM_FIELDS
+            },
+            np.asarray(data["boundary_rz_m"], dtype=np.float64),
+            np.asarray(data["wall_units_rz_m"][0], dtype=np.float64),
+            data["terminal_topology"],
+            data["analytic_topology"],
+            figure_path,
+            title,
+        )
+        figure.savefig(figure_path, dpi=180, metadata={"Title": title})
+        plt.close(figure)
+        figure_path.with_suffix(".svg").unlink(missing_ok=True)
+        row["figure"]["panel_title"] = title
+        row["figure"]["render_source"] = "persisted_part_receipt_panel_title"
+        row["figure"]["sha256"] = hashlib.sha256(figure_path.read_bytes()).hexdigest()
+        _write_json(part, row)
+        rows.append(
+            {
+                "case": row["case"],
+                "part_filesystem_path": str(part.relative_to(ROOT)),
+                "figure_filesystem_path": str(figure_path.relative_to(ROOT)),
+                "panel_title": title,
+                "drawn_title": _panel_png_title(figure_path),
+            }
+        )
+        print("SOLOVEV_PANEL_TITLE " + json.dumps(rows[-1], sort_keys=True), flush=True)
+    print(f"SOLOVEV_PANEL_TITLES_RENDERED={len(rows)}", flush=True)
+    print("EXIT_MARKER=0", flush=True)
+    return rows
+
+
+def _panel_png_title(path: Path) -> str | None:
+    """Read the title embedded in a rendered panel's own PNG metadata."""
+
+    from PIL import Image
+
+    with Image.open(path) as image:
+        return image.text.get("Title") if image.text else None
+
+
 def _finalize_existing(output_root: Path) -> None:
     receipt_path = output_root / "parallel-components-read-receipt.json"
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
@@ -451,6 +549,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--finalize-existing", action="store_true")
+    parser.add_argument("--render-solovev-panels", action="store_true")
     parser.add_argument("--mast-paired-only", action="store_true")
     arguments = parser.parse_args()
     output_root = arguments.output_root.resolve()
@@ -459,6 +558,9 @@ def main() -> None:
 
     if arguments.finalize_existing:
         _finalize_existing(output_root)
+        return
+    if getattr(arguments, "render_solovev_panels", False):
+        _render_solovev_panels(output_root)
         return
 
     configure_dtypes()

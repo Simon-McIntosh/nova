@@ -78,9 +78,10 @@
   "derivative_support_cells": 457,
   "figure": {
     "filesystem_path": "docs/figures/playable-forward-solve/parallel-components-read/solovev-certificate/solve-panels/chord/diverted-single-null-production-route-cells-500.png",
+    "panel_title": "diverted-single-null \u00b7 cells-500 \u00b7 read qualified_axis (axis admission; not an accuracy verdict)\npsi relative_rms=4.6e-15 relative_sup=1.428e-14 \u00b7 residual=2.423e-17 \u00b7 converged=yes",
     "project_absolute_src": "/nova/figures/playable-forward-solve/parallel-components-read/solovev-certificate/solve-panels/chord/diverted-single-null-production-route-cells-500.png",
-    "render_source": "fresh_production_solve",
-    "sha256": "ab6ac9f8dd4f73f2d85a912b67586ec3d16449ff3844f1c55364c77bb3887075"
+    "render_source": "persisted_part_receipt_panel_title",
+    "sha256": "192a5405f3a29969aca603485753e1f6e2dd1b4c2bf32d9f76ba3343d31c7d11"
   },
   "fixture_exterior_cache": {
     "build_seconds": 0.0,

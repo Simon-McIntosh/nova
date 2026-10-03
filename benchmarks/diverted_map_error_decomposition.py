@@ -428,19 +428,50 @@ def measure(input_root: Path, output: Path, fragment: Path, base_sha: str) -> di
     return report
 
 
-def write_fragment(rows: list[dict], fragment: Path, receipt: dict) -> None:
-    map_table = "".join(
+def offset_mm(reference, mapped, key):
+    """Return mapped-minus-reference (R, Z) offsets in millimetres."""
+    baseline, result = reference.get(key), mapped.get(key)
+    if baseline is None or result is None:
+        return None, None
+    return (
+        1000.0 * (float(result[0]) - float(baseline[0])),
+        1000.0 * (float(result[1]) - float(baseline[1])),
+    )
+
+
+def cell(value):
+    return "n/a" if value is None else f"{value:.6g}"
+
+
+def as_mm(value):
+    return cell(None if value is None else 1000.0 * value)
+
+
+def receipt_row(row):
+    xpoint_dr, xpoint_dz = offset_mm(
+        row["reference_nulls"], row["mapped_nulls"], "x_point_rz_m"
+    )
+    axis_dr, axis_dz = offset_mm(
+        row["reference_nulls"], row["mapped_nulls"], "axis_rz_m"
+    )
+    centroid = row["support_current_centroid_offset_mm"]
+    return (
         "<tr>"
         f"<td>{html.escape(row['case'])}</td>"
         f"<td>{row['realised_cells']}</td>"
         f"<td>{html.escape(row['clip_mode'])}</td>"
         f"<td>{row['mismatch']['sup_relative']:.6g}</td>"
         f"<td>{row['mismatch']['rms_relative']:.6g}</td>"
-        f"<td>{row['support_current_centroid_offset_mm']['dR']}</td>"
-        f"<td>{row['support_current_centroid_offset_mm']['dZ']}</td>"
+        f"<td>{cell(centroid['dR'])}</td><td>{cell(centroid['dZ'])}</td>"
+        f"<td>{cell(xpoint_dr)}</td><td>{cell(xpoint_dz)}</td>"
+        f"<td>{cell(axis_dr)}</td><td>{cell(axis_dz)}</td>"
         "</tr>"
-        for row in receipt["rows"]
-        if row["status"] == "measured"
+    )
+
+
+def write_fragment(rows: list[dict], fragment: Path, receipt: dict) -> None:
+    map_table = "".join(
+        receipt_row(row) for row in receipt["rows"] if row["status"] == "measured"
     )
     rows_132 = [row for row in rows if row["cells"] == 132]
     class_table = "".join(
@@ -460,14 +491,14 @@ def write_fragment(rows: list[dict], fragment: Path, receipt: dict) -> None:
         f"<td>{row['cells']}</td>"
         f"<td>{html.escape(row['mode'])}</td>"
         f"<td>{row['contour_tree_region']['sup_relative']:.6g}</td>"
-        f"<td>{row['contour_tree_region']['dZ_m']}</td>"
+        f"<td>{as_mm(row['contour_tree_region']['dZ_m'])}</td>"
         f"<td>{row['contour_tree_region']['membership_difference_count']}</td>"
         f"<td>{row['xpoint_wedge']['sup_relative']}</td>"
-        f"<td>{row['xpoint_wedge']['dZ_m']}</td>"
+        f"<td>{as_mm(row['xpoint_wedge']['dZ_m'])}</td>"
         f"<td>{row['xpoint_wedge'].get('production_apex_rz_m')}</td>"
         f"<td>{row['xpoint_wedge'].get('analytic_apex_rz_m')}</td>"
         f"<td>{row.get('analytic_membership', {}).get('sup_relative')}</td>"
-        f"<td>{row.get('analytic_membership', {}).get('dZ_m')}</td>"
+        f"<td>{as_mm(row['analytic_membership']['dZ_m'])}</td>"
         "</tr>"
         for row in rows
     )
@@ -488,17 +519,21 @@ def write_fragment(rows: list[dict], fragment: Path, receipt: dict) -> None:
         "<h3>Full H200 map receipt</h3><table><thead><tr><th>case</th>"
         "<th>cells</th><th>mode</th>"
         "<th>sup relative</th>"
-        "<th>rms relative</th><th>dR [m]</th><th>dZ [m]</th></tr></thead>"
+        "<th>rms relative</th><th>current-centroid dR [mm]</th>"
+        "<th>current-centroid dZ [mm]</th><th>X-point dR [mm]</th>"
+        "<th>X-point dZ [mm]</th><th>axis dR [mm]</th><th>axis dZ [mm]</th>"
+        "</tr></thead>"
         f"<tbody>{map_table}</tbody></table>"
         "<h3>132-cell current-image classes</h3><table><thead><tr><th>mode</th>"
         "<th>class</th><th>cells</th><th>projection share</th><th>map sup relative</th>"
         f"<th>dominant indices</th></tr></thead><tbody>{class_table}</tbody></table>"
         "<h3>Oracle support substitutions</h3><table><thead><tr><th>cells</th>"
-        "<th>base mode</th><th>contour-tree region sup</th><th>contour-tree dZ [m]</th>"
+        "<th>base mode</th><th>contour-tree region sup</th>"
+        "<th>contour-tree dZ [mm]</th>"
         "<th>contour-tree membership differences</th>"
-        "<th>X-point wedge sup</th><th>X-point wedge dZ [m]</th>"
+        "<th>X-point wedge sup</th><th>X-point wedge dZ [mm]</th>"
         "<th>production apex [m]</th><th>analytic apex [m]</th>"
-        "<th>analytic-membership sup</th><th>analytic-membership dZ [m]</th>"
+        "<th>analytic-membership sup</th><th>analytic-membership dZ [mm]</th>"
         "</tr></thead>"
         f"<tbody>{substitution_table}</tbody></table>"
         "<figure><img src='/nova/figures/cut-cell-current-attribution/"

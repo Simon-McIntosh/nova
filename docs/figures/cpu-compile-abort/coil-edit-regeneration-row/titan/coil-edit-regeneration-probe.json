@@ -1,0 +1,41 @@
+{
+  "command": [
+    "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/benchmarks/coil_edit_latency.py",
+    "run",
+    "--output",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/coil-edit-latency.json",
+    "--figure",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/coil-edit-latency.png",
+    "--diagnostics",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/coil-edit-nonconvergence.json",
+    "--panel-data",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/panel-states.npz",
+    "--panel-figure",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png",
+    "--raster-figure",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/terminal-raster-flux.png"
+  ],
+  "pid": 1945400,
+  "exit_code": 2,
+  "wall_seconds": 948.112,
+  "interval_seconds": 1.0,
+  "max_map_count": 65530,
+  "samples_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/coil-edit-regeneration-maps.jsonl",
+  "samples_written": 946,
+  "peak_maps": 3294,
+  "peak_sample": {
+    "n": 937,
+    "t": 938.092,
+    "maps": 3294,
+    "VmPeak": 36551680,
+    "VmSize": 36507768,
+    "VmHWM": 8608740,
+    "VmRSS": 8595640
+  },
+  "last_sample": {
+    "n": 946,
+    "t": 947.11,
+    "maps": 0
+  }
+}

@@ -17,7 +17,6 @@ import numpy as np
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.forward import ForwardProfile
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import configure_dtypes
 from nova.media import poloidal
@@ -450,143 +449,143 @@ def measure(output, negative_log):
         "devices": [str(device) for device in jax.devices()],
         "jax_platform": jax.default_backend(),
         "x64": True,
-        "support_clip_mode": "exact",
+        "clip_mode": "exact",
         "requested_cells": -110,
         "cases": [],
         "negative_control": [],
     }
     output.mkdir(parents=True, exist_ok=True)
     negative_log.write_text(NEGATIVE_CONTROL + "\n")
-    previous = support_clip_mode()
-    set_support_clip_mode("exact")
-    try:
-        for case_name, expected in zip(CASES, EXPECTED_ONE_TRIP, strict=True):
-            print(f"BUILD case={case_name}", flush=True)
-            carrier_case, source_case, exact = certificate._case(case_name)
-            machine = certificate._case_machine(case_name, carrier_case, exact, -110)
-            coordinates = np.vstack(
-                (machine.node, machine.wall_node, machine.sample_coordinates)
+    for case_name, expected in zip(CASES, EXPECTED_ONE_TRIP, strict=True):
+        print(f"BUILD case={case_name}", flush=True)
+        carrier_case, source_case, exact = certificate._case(case_name)
+        machine = certificate._case_machine(case_name, carrier_case, exact, -110)
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
+        )
+        analytic = certificate._exact_state(case_name, exact, coordinates)
+        empty = oracle_fixture.forward_operator(
+            source_case, machine
+        ).with_clip_mode("exact")
+        moments, exterior, _cache = oracle_fixture.cached_fixture_exterior(
+            source_case, exact, machine, empty, analytic
+        )
+        operator = oracle_fixture.forward_operator(
+            source_case, machine, exterior
+        ).with_clip_mode("exact")
+        profile = ForwardProfile(
+            operator,
+            StencilMesh(machine.node, machine.stencil, machine.area),
+            newton_steps=recovery.NEWTON_STEPS,
+        )
+        target_current, _centroid, _current_receipt = (
+            certificate._closed_form_current_target(
+                case_name, source_case, operator, moments
             )
-            analytic = certificate._exact_state(case_name, exact, coordinates)
-            empty = oracle_fixture.forward_operator(source_case, machine)
-            moments, exterior, _cache = oracle_fixture.cached_fixture_exterior(
-                source_case, exact, machine, empty, analytic
-            )
-            operator = oracle_fixture.forward_operator(source_case, machine, exterior)
-            profile = ForwardProfile(
-                operator,
-                StencilMesh(machine.node, machine.stencil, machine.area),
-                newton_steps=recovery.NEWTON_STEPS,
-            )
-            target_current, _centroid, _current_receipt = (
-                certificate._closed_form_current_target(
-                    case_name, source_case, operator, moments
+        )
+        request = certificate._certificate_solve_request(
+            profile,
+            jnp.asarray(analytic, dtype=jnp.float64),
+            float(target_current),
+            carrier_identity=f"analytic-hex:{case_name}:-110",
+            clip_mode="exact",
+        )
+        one_request = replace(
+            request, policy=replace(request.policy, active_set_steps=1)
+        )
+        reference, census = _nulls(operator, analytic)
+        pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
+        offsets = np.asarray(operator.wall_unit_offsets)
+        row = {
+            "case": case_name,
+            "realised_cells": len(machine.node),
+            "state_values": len(analytic),
+            "characteristic_pitch_m": pitch,
+            "reference_nulls": reference,
+            "arms": [],
+            "wall_units": [
+                [int(start), int(stop), bool(closed), kind]
+                for start, stop, closed, kind in zip(
+                    offsets[:-1],
+                    offsets[1:],
+                    operator.wall_unit_closed,
+                    operator.wall_unit_kinds,
+                    strict=True,
                 )
+            ],
+            "analytic_saddle_cluster": _cluster(
+                operator, analytic, reference, census
+            ),
+            "state_file": f"{case_name}-trip-arms.npz",
+        }
+        receipt["cases"].append(row)
+        states = {}
+        for name, arm_request in (
+            ("one_trip", one_request),
+            ("default_policy", request),
+        ):
+            arm, state = _arm(
+                profile, arm_request, operator, reference, pitch, name
             )
-            request = certificate._certificate_solve_request(
-                profile,
-                jnp.asarray(analytic, dtype=jnp.float64),
-                float(target_current),
-                carrier_identity=f"analytic-hex:{case_name}:-110",
-            )
-            one_request = replace(
-                request, policy=replace(request.policy, active_set_steps=1)
-            )
-            reference, census = _nulls(operator, analytic)
-            pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
-            offsets = np.asarray(operator.wall_unit_offsets)
-            row = {
-                "case": case_name,
-                "realised_cells": len(machine.node),
-                "state_values": len(analytic),
-                "characteristic_pitch_m": pitch,
-                "reference_nulls": reference,
-                "arms": [],
-                "wall_units": [
-                    [int(start), int(stop), bool(closed), kind]
-                    for start, stop, closed, kind in zip(
-                        offsets[:-1],
-                        offsets[1:],
-                        operator.wall_unit_closed,
-                        operator.wall_unit_kinds,
-                        strict=True,
-                    )
-                ],
-                "analytic_saddle_cluster": _cluster(
-                    operator, analytic, reference, census
-                ),
-                "state_file": f"{case_name}-trip-arms.npz",
-            }
-            receipt["cases"].append(row)
-            states = {}
-            for name, arm_request in (
-                ("one_trip", one_request),
-                ("default_policy", request),
-            ):
-                arm, state = _arm(
-                    profile, arm_request, operator, reference, pitch, name
-                )
-                row["arms"].append(arm)
-                states[name] = state
-                _write_json(output / "terminal-state-trip-arms.json", receipt)
-            row["one_trip_reproduction"] = {
-                "expected_residual": expected,
-                "relative_tolerance": 0.01,
-                "matches": abs(row["arms"][0]["residual"] / expected - 1) <= 0.01,
-            }
-            default = row["arms"][1]
-            if default["converged"]:
-                require_converged(default)
-                row["disposition"] = "default_policy_converged"
-            else:
-                row["disposition"] = "default_policy_nonconverged"
-                row["solver_owner"] = "gs-absolute-accuracy-gates"
-            np.savez(
-                output / row["state_file"],
-                coordinates=coordinates,
-                wall=machine.wall_node,
-                analytic=analytic,
-                **states,
-            )
-            mutation, _ = _arm(
-                profile,
-                one_request,
-                operator,
-                reference,
-                pitch,
-                "default_policy_forced_one_trip",
-            )
-            try:
-                require_converged(mutation)
-            except ValueError as error:
-                with negative_log.open("a") as stream:
-                    stream.write(f"case={case_name} {error}\n")
-                receipt["negative_control"].append(
-                    {
-                        "case": case_name,
-                        "refused": True,
-                        "reason": str(error),
-                        "receipt": mutation,
-                    }
-                )
-            else:
-                raise AssertionError("forced-one-trip negative control did not refuse")
+            row["arms"].append(arm)
+            states[name] = state
             _write_json(output / "terminal-state-trip-arms.json", receipt)
-            assert row["one_trip_reproduction"]["matches"], (
-                "one-trip residual does not reproduce"
+        row["one_trip_reproduction"] = {
+            "expected_residual": expected,
+            "relative_tolerance": 0.01,
+            "matches": abs(row["arms"][0]["residual"] / expected - 1) <= 0.01,
+        }
+        default = row["arms"][1]
+        if default["converged"]:
+            require_converged(default)
+            row["disposition"] = "default_policy_converged"
+        else:
+            row["disposition"] = "default_policy_nonconverged"
+            row["solver_owner"] = "gs-absolute-accuracy-gates"
+        np.savez(
+            output / row["state_file"],
+            coordinates=coordinates,
+            wall=machine.wall_node,
+            analytic=analytic,
+            **states,
+        )
+        mutation, _ = _arm(
+            profile,
+            one_request,
+            operator,
+            reference,
+            pitch,
+            "default_policy_forced_one_trip",
+        )
+        try:
+            require_converged(mutation)
+        except ValueError as error:
+            with negative_log.open("a") as stream:
+                stream.write(f"case={case_name} {error}\n")
+            receipt["negative_control"].append(
+                {
+                    "case": case_name,
+                    "refused": True,
+                    "reason": str(error),
+                    "receipt": mutation,
+                }
             )
-            assert row["arms"][0]["trip_count"] == 1
-        render(receipt, output)
-        receipt["figure_src"] = (
-            "/nova/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.png"
-        )
+        else:
+            raise AssertionError("forced-one-trip negative control did not refuse")
         _write_json(output / "terminal-state-trip-arms.json", receipt)
-        print(
-            "MEASUREMENT_COMPLETE " + str(output / "terminal-state-trip-arms.json"),
-            flush=True,
+        assert row["one_trip_reproduction"]["matches"], (
+            "one-trip residual does not reproduce"
         )
-    finally:
-        set_support_clip_mode(previous)
+        assert row["arms"][0]["trip_count"] == 1
+    render(receipt, output)
+    receipt["figure_src"] = (
+        "/nova/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.png"
+    )
+    _write_json(output / "terminal-state-trip-arms.json", receipt)
+    print(
+        "MEASUREMENT_COMPLETE " + str(output / "terminal-state-trip-arms.json"),
+        flush=True,
+    )
 
 
 def build_argument_parser():

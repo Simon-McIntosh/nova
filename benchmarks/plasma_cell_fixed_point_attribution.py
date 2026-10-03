@@ -141,7 +141,6 @@ def arm(arguments):
         driver.configure_dtypes()
         assert driver.jax.config.jax_enable_x64 is True
         assert driver.jax.default_backend() == "gpu"
-        driver.set_support_clip_mode("exact")
         driver._native_nulls = driver._nulls
         driver._nulls = lambda operator, state: compatible_nulls(
             driver, operator, state
@@ -153,11 +152,15 @@ def arm(arguments):
             (machine.node, machine.wall_node, machine.sample_coordinates)
         )
         analytic = certificate._exact_state(arguments.case, exact, coordinates)
-        empty = driver.oracle_fixture.forward_operator(source, machine)
+        empty = driver.oracle_fixture.forward_operator(
+            source, machine
+        ).with_clip_mode("exact")
         moments, exterior, _ = driver.oracle_fixture.cached_fixture_exterior(
             source, exact, machine, empty, analytic
         )
-        operator = driver.oracle_fixture.forward_operator(source, machine, exterior)
+        operator = driver.oracle_fixture.forward_operator(
+            source, machine, exterior
+        ).with_clip_mode("exact")
         profile = driver.ForwardProfile(
             operator,
             driver.StencilMesh(machine.node, machine.stencil, machine.area),
@@ -171,6 +174,7 @@ def arm(arguments):
             jnp.asarray(analytic, dtype=jnp.float64),
             float(target),
             carrier_identity=f"analytic-hex:{arguments.case}:-110",
+            clip_mode="exact",
         )
         if arguments.one_trip:
             request = replace(
@@ -288,7 +292,7 @@ def measure(arguments):
     payload = {
         "revision_ladder": list(REVISIONS),
         "requested_cells": 110,
-        "support_clip_mode": "exact",
+        "clip_mode": "exact",
         "driver": str(arguments.driver),
         "driver_sha256": hashlib.sha256(arguments.driver.read_bytes()).hexdigest(),
         "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
@@ -540,7 +544,7 @@ def compare_fields(left, right, prefix=""):
     return differences
 
 
-def build_construction(driver, case_name, route):
+def build_construction(driver, case_name, route, *, clip_mode=None):
     """Build each route independently with its native seed and carrier identity."""
     certificate, np, jnp = driver.certificate, driver.np, driver.jnp
     carrier, source, exact = certificate._case(case_name)
@@ -550,10 +554,14 @@ def build_construction(driver, case_name, route):
     )
     analytic = certificate._exact_state(case_name, exact, coordinates)
     empty = driver.oracle_fixture.forward_operator(source, machine)
+    if clip_mode is not None:
+        empty = empty.with_clip_mode(clip_mode)
     moments, exterior, fixture_cache = driver.oracle_fixture.cached_fixture_exterior(
         source, exact, machine, empty, analytic
     )
     operator = driver.oracle_fixture.forward_operator(source, machine, exterior)
+    if clip_mode is not None:
+        operator = operator.with_clip_mode(clip_mode)
     profile = driver.ForwardProfile(
         operator,
         driver.StencilMesh(machine.node, machine.stencil, machine.area),
@@ -579,7 +587,7 @@ def build_construction(driver, case_name, route):
         seed_receipt = {"factory": "certificate._exact_state"}
         identity = f"analytic-hex:{case_name}:-110"
     request = certificate._certificate_solve_request(
-        profile, seed, float(target), carrier_identity=identity
+        profile, seed, float(target), carrier_identity=identity, clip_mode=clip_mode
     )
     snapshot = {
         "request": describe_value(request),
@@ -597,7 +605,7 @@ def build_construction(driver, case_name, route):
         "exterior": describe_value(exterior),
         "moments": describe_value(moments),
         "target_current": float(target),
-        "clip_mode": driver.support_clip_mode(),
+        "clip_mode": operator.clip_mode,
         "cell_polygons": describe_value(machine.cell_polygons),
         "seed_state": describe_value(seed),
         "carrier_identity": identity,
@@ -633,7 +641,6 @@ def compare_constructions(arguments):
     driver.configure_dtypes()
     assert driver.jax.config.jax_enable_x64 is True
     assert driver.jax.default_backend() == "gpu"
-    driver.set_support_clip_mode("exact")
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     assert revision.startswith("f5af729a9"), revision
     assert Path(nova.__file__).resolve().is_relative_to(Path.cwd())
@@ -666,7 +673,7 @@ def compare_constructions(arguments):
             arm_row = {"route": route, "status": "not-measured"}
             row["arms"].append(arm_row)
             try:
-                built = build_construction(driver, case_name, route)
+                built = build_construction(driver, case_name, route, clip_mode="exact")
                 constructions[route] = built
                 arm_row.update(
                     {

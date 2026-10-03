@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<title>Shared benchmark clip-mode migration</title>
+</head>
+<body>
+<main>
+<h1>Shared benchmark clip-mode migration</h1>
+<p>Ten shared benchmark helpers no longer mutate the process-global support clip
+mode. Each mode is threaded explicitly to the operator, profile or request that
+evaluates support, and a helper that another module imports gains an additive
+<code>clip_mode</code> keyword whose default <code>None</code> keeps the prior
+behaviour.</p>
+
+<h2>Former global sites</h2>
+<table>
+<thead><tr><th>Module</th><th>Mode</th><th>Explicit destination</th></tr></thead>
+<tbody>
+<tr><td><code>exact_clip_seed_amplitude</code></td><td>exact</td><td>operator and machine built with <code>.with_clip_mode(&quot;exact&quot;)</code>; certificate row request receives <code>clip_mode=&quot;exact&quot;</code></td></tr>
+<tr><td><code>exact_support_floor_attribution</code></td><td>per mode</td><td><code>evaluate(state, operator.with_clip_mode(mode))</code></td></tr>
+<tr><td><code>fixture_positional_stiffness</code></td><td>exact</td><td><code>_build_context(..., clip_mode=&quot;exact&quot;)</code></td></tr>
+<tr><td><code>oracle_start_newton_probe</code></td><td>chord and exact</td><td><code>operator.with_clip_mode(mode)</code> per arm; request receives <code>clip_mode=mode</code></td></tr>
+<tr><td><code>plasma_cell_first_step_directions</code></td><td>exact</td><td><code>build_construction(..., clip_mode=&quot;exact&quot;)</code></td></tr>
+<tr><td><code>plasma_cell_fixed_point_attribution</code></td><td>exact</td><td><code>build_construction(..., clip_mode=...)</code>; snapshot records <code>operator.clip_mode</code></td></tr>
+<tr><td><code>plasma_cell_map_fidelity</code></td><td>per mode</td><td><code>mode_operator = operator.with_clip_mode(mode)</code> threads every map, support and null read</td></tr>
+<tr><td><code>plasma_cell_terminal_state</code></td><td>exact</td><td>operators built with <code>.with_clip_mode(&quot;exact&quot;)</code>; request receives <code>clip_mode=&quot;exact&quot;</code>; receipt records <code>operator.clip_mode</code></td></tr>
+<tr><td><code>plasma_cell_trip_panels</code></td><td>chosen clip</td><td><code>build_construction(..., clip_mode=args.clip)</code></td></tr>
+<tr><td><code>unit_amplitude_current_census</code></td><td>per mode</td><td><code>operator.with_clip_mode(mode)</code> rebound in the partition and current probes</td></tr>
+</tbody>
+</table>
+
+<h2>Verification</h2>
+<p>The ten modules carry no reference to the retired global. Every module
+compiles under the shared interpreter, and every test module importing one of
+them runs at the archived base and at the migrated head in a fresh CPU pytest
+process; the run manifest records the per-module logs, the literal commands and
+the failure identifiers.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="figure-and-solver-audit">
+<title>Millisecond-solve figure artifacts restored compressed — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsa-restore-msc-figure-artifacts-compressed"
+         data-test-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T160921208577-fsa-restore-msc-figure-artifacts-compressed/logs/solve-profile-after.log"
+         data-negative-control-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T160921208577-fsa-restore-msc-figure-artifacts-compressed/logs/solve-profile-before.log">
+
+  <h2>Millisecond-solve figure artifacts restored, receipts committed compressed</h2>
+
+  <p>Two millisecond-converged-solve reports name figure artifacts that were
+  absent from <code>main</code>. <code>compile-memory/report.md</code> references
+  <code>compile-memory.svg</code>; <code>solve-profile/report.md</code> names the
+  three receipts (<code>solve-profile.json</code>, <code>-300.json</code>,
+  <code>-1000.json</code>) and two plots (<code>solve-profile-300.svg</code>,
+  <code>-1000.svg</code>). None of the six was present on the branch, so every
+  reference 404'd.</p>
+
+  <p>The three SVG plots are restored byte-for-byte from their tips with
+  <code>git show</code> and the committed blob hash equals the tip blob:</p>
+
+  <table>
+    <thead><tr><th>artifact</th><th>tip ref</th><th>committed blob</th><th>sha256 (content)</th></tr></thead>
+    <tbody>
+      <tr><td><code>compile-memory/compile-memory.svg</code></td><td>msc-compile-host-memory <code>a799465ff</code></td><td><code>a37d5b5d</code></td><td><code>5032106e…</code></td></tr>
+      <tr><td><code>solve-profile/solve-profile-300.svg</code></td><td>msc-solve-profile-kernel-count <code>7d3c7e757</code></td><td><code>203b2bc2</code></td><td><code>836bf645…</code></td></tr>
+      <tr><td><code>solve-profile/solve-profile-1000.svg</code></td><td>msc-solve-profile-kernel-count <code>7d3c7e757</code></td><td><code>c8fd7fe9</code></td><td><code>94a09c25…</code></td></tr>
+    </tbody>
+  </table>
+
+  <p>The three JSON receipts are too large for a git push (198.8, 82.8 and
+  83.0 MB raw). They are committed gzip-compressed and no raw JSON file is ever
+  staged or written into the tree. Each archive decompresses to the exact tip
+  blob, so the decompressed sha256 equals the tip blob sha256:</p>
+
+  <table>
+    <thead><tr><th>archive</th><th>tip blob</th><th>raw bytes</th><th>committed bytes</th><th>decompressed sha256</th></tr></thead>
+    <tbody>
+      <tr><td><code>solve-profile.json.gz</code></td><td><code>2e33f631</code></td><td>198,780,118</td><td>30,387,706</td><td><code>4141747c…</code></td></tr>
+      <tr><td><code>solve-profile-300.json.gz</code></td><td><code>2543ab3c</code></td><td>82,822,729</td><td>14,772,265</td><td><code>ed24f962…</code></td></tr>
+      <tr><td><code>solve-profile-1000.json.gz</code></td><td><code>ce75bfea</code></td><td>82,965,486</td><td>15,119,388</td><td><code>45ab6988…</code></td></tr>
+    </tbody>
+  </table>
+
+  <p><code>solve-profile/report.md</code> is edited only to point at the
+  compressed names — the three receipt references become <code>.json.gz</code>;
+  no other text changes (a two-line diff).</p>
+
+  <h3>Check script in each directory</h3>
+  <p>Each directory carries a committed <code>check_report_figures.py</code> that
+  reads its own <code>report.md</code>, resolves every token ending in
+  <code>.svg</code> or <code>.json.gz</code> to a file in that directory, and
+  exits nonzero if any is absent; each <code>.json.gz</code> is additionally
+  decompressed and parsed as JSON, so a corrupt archive fails there. Run before
+  the restore (artifacts absent) the logs are red — <code>MISSING 1 of 1</code>
+  (compile-memory) and <code>MISSING 5 of 5</code> (solve-profile), both
+  <code>EXIT=1</code>. Run after the restore they are green:
+  <code>RESOLVED 1 of 1</code> and <code>RESOLVED 5 of 5</code>, both
+  <code>EXIT=0</code>, with all three archives parsed as JSON.</p>
+
+  <h3>Per-file commit ceiling</h3>
+  <p>Every file in commit <code>5751c065c</code> is under the 50 MB per-file
+  limit, verified with <code>git cat-file -s</code> on the commit: the largest is
+  <code>solve-profile.json.gz</code> at 30,387,706 B (29.0 MB). No raw JSON path
+  appears in the commit tree.</p>
+
+</article>
+</main>
+</body>
+</html>

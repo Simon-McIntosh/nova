@@ -1,0 +1,45 @@
+{
+  "command": [
+    "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/benchmarks/coil_edit_latency.py",
+    "run",
+    "--output",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-latency.json",
+    "--figure",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-latency.png",
+    "--diagnostics",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-nonconvergence.json",
+    "--panel-data",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz",
+    "--panel-figure",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+    "--raster-figure",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/terminal-raster-flux.png"
+  ],
+  "pid": 4174547,
+  "exit_code": 2,
+  "wall_seconds": 736.47,
+  "interval_seconds": 1.0,
+  "max_map_count": 1048576,
+  "samples_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row/docs/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-regeneration-maps.jsonl",
+  "samples_written": 735,
+  "peak_maps": 3538,
+  "peak_sample": {
+    "n": 729,
+    "t": 729.449,
+    "maps": 3538,
+    "VmPeak": 150172736,
+    "VmSize": 150110096,
+    "VmHWM": 13468472,
+    "VmRSS": 13463872
+  },
+  "last_sample": {
+    "n": 735,
+    "t": 735.468,
+    "maps": 2759,
+    "VmPeak": 150172736,
+    "VmSize": 145539208,
+    "VmHWM": 13468472,
+    "VmRSS": 9717196
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "measurement_revision": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+  "rows": [
+    {
+      "case": "coil-edit-regeneration",
+      "compile_wall_milliseconds": 5700.257133692503,
+      "completed": true,
+      "driver": "benchmarks/coil_edit_latency.py",
+      "driver_exit_marker": 2,
+      "driver_measurement_state": "complete",
+      "driver_sha256": "6e5dfc1f4dae0ed971a3ca50620dd884145669217ac47b496e30ea765e4cbc74",
+      "driver_verdict": "FAIL",
+      "edit_count": 20,
+      "exit_code": 2,
+      "max_map_count": 65530,
+      "measurement_revision": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+      "median_warm_wall_milliseconds": 2705.8687657117844,
+      "peak_maps": 3294,
+      "probe_summary_path": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/coil-edit-regeneration-probe.json",
+      "probe_wrapper_exit": 2,
+      "program_load_maps": [
+        16789,
+        17620
+      ],
+      "row_receipt": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/coil-edit-latency.json",
+      "rung": "titan",
+      "samples_path": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/coil-edit-regeneration-maps.jsonl",
+      "scheduler": {
+        "accepted_time_limit": "00:45:00",
+        "cpus_per_task": "2",
+        "job_id": "1280646",
+        "job_name": "coil-edit-regen-row-titan",
+        "node": "98dci4-gpu-0002.iter.org",
+        "partition": "titan",
+        "reservation": null
+      },
+      "schema": "nova.coil-edit-regeneration-row",
+      "solve_wall_milliseconds": 261718.71072426438,
+      "state_path": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/panel-states.npz",
+      "state_sha256": "a4d0bcba15fbda7b0157f51dd956100f060f13920583372d792f126b00e57b58",
+      "within_one_program_load": true,
+      "within_two_program_loads": true
+    }
+  ],
+  "schema": "nova.coil-edit-regeneration-row-receipt"
+}

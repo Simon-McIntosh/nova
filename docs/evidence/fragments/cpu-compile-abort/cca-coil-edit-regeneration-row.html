@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="cpu-compile-abort">
+<title>Coil-edit regeneration row: mapping count at program load and separated solve/compile wall — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="cca-coil-edit-regeneration-row"
+         data-negative-control-log="none: the row's terminal FAIL is the driver's own latency gate, not a test file">
+
+  <h2>The coil-edit regeneration row completes inside the one-program mapping envelope and fails on latency, not on the mapping cap</h2>
+
+  <p>The regeneration driver <code>benchmarks/coil_edit_latency.py</code> ran once
+  through the mapping sampler <code>benchmarks/compile_abort_probe.py</code> in a single
+  H200 job (job <code>1280643</code>, betelgeuse, reservation <code>gpu_0003_grpA</code>,
+  one card, eight CPUs, <code>--mem=128G</code>, <code>TMPDIR=/tmp</code> in submit and
+  payload, the shared interpreter without <code>uv</code>). A titan fallback
+  (<code>1280646</code>) ran the same row while the H200 card was held. The row completed
+  all twenty edits on both rungs; the per-row receipt is
+  <code>docs/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-regeneration-row.json</code>.</p>
+
+  <p>The named mechanism <code>_certificate_rows_as_processes</code> iterates only the four
+  committed certificate rows of <code>benchmarks/solve_program_size_gate.py</code> and cannot
+  carry this regeneration driver; the deviation is recorded and the regeneration ran
+  through its own run route under the same sampler that produced the certificate rows'
+  receipts.</p>
+
+  <h3>Mapping count at the program load</h3>
+  <p>Peak sampled mapping count is <code>rows[0].peak_maps</code> = <code>3538</code> on the
+  H200 rung and <code>rows[0].peak_maps</code> = <code>3294</code> on titan, both counted at
+  1&nbsp;Hz. Both are below the second program's <code>17620</code> maps
+  (<code>rows[0].within_one_program_load</code> = <code>true</code>) and far below the host
+  kernel cap (<code>rows[0].max_map_count</code> = <code>1048576</code> H200 /
+  <code>65530</code> titan). The map-address-space limit is not approached.</p>
+
+  <h3>Solve wall separated from compile wall</h3>
+  <p><code>rows[0].solve_wall_milliseconds</code> is <code>165227.78</code>
+  (titan <code>261718.71</code>) summed over the driver's twenty <code>edits[]</code> rows;
+  <code>rows[0].compile_wall_milliseconds</code> is <code>4752.51</code>
+  (titan <code>5700.26</code>) summed over the six persistent-cache-miss edits. Compile is
+  ~2.9&nbsp;% of H200 solve wall: the row is solve-bound, not compile-bound.
+  <code>rows[0].exit_code</code> and <code>rows[0].probe_wrapper_exit</code> are both
+  <code>2</code>, the driver's latency-gate <code>FAIL</code> marker
+  (<code>rows[0].driver_verdict</code> = <code>"FAIL"</code>, median warm wall
+  <code>1869.99</code>&nbsp;ms against a 100&nbsp;ms target), not a mapping abort.</p>
+
+  <figure>
+    <img src="/nova/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-latency.png"
+         alt="Per-edit wall and solve wall across the twenty-edit coil-current sweep">
+    <figcaption>Per-edit wall from the H200 row's saved state; solve wall separated from the
+    non-solve (compile) wall. Rendered by the driver's committed painters.</figcaption>
+  </figure>
+
+</article>
+</main>
+</body>
+</html>

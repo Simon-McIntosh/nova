@@ -1,0 +1,46 @@
+{
+  "measurement_revision": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+  "rows": [
+    {
+      "case": "coil-edit-regeneration",
+      "compile_wall_milliseconds": 4752.514909952879,
+      "completed": true,
+      "driver": "benchmarks/coil_edit_latency.py",
+      "driver_exit_marker": 2,
+      "driver_measurement_state": "complete",
+      "driver_sha256": "6e5dfc1f4dae0ed971a3ca50620dd884145669217ac47b496e30ea765e4cbc74",
+      "driver_verdict": "FAIL",
+      "edit_count": 20,
+      "exit_code": 2,
+      "max_map_count": 1048576,
+      "measurement_revision": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+      "median_warm_wall_milliseconds": 1869.9936084449291,
+      "peak_maps": 3538,
+      "probe_summary_path": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-regeneration-probe.json",
+      "probe_wrapper_exit": 2,
+      "program_load_maps": [
+        16789,
+        17620
+      ],
+      "row_receipt": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-latency.json",
+      "rung": "h200",
+      "samples_path": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-regeneration-maps.jsonl",
+      "scheduler": {
+        "accepted_time_limit": "00:45:00",
+        "cpus_per_task": "8",
+        "job_id": "1280643",
+        "job_name": "coil-edit-regen-row",
+        "node": "98dci4-gpu-0003.iter.org",
+        "partition": "betelgeuse",
+        "reservation": "gpu_0003_grpA"
+      },
+      "schema": "nova.coil-edit-regeneration-row",
+      "solve_wall_milliseconds": 165227.781528607,
+      "state_path": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz",
+      "state_sha256": "18f3d936f87091c97e45eeb655984b6ccad3557075b431ebc231c7a77c0951f2",
+      "within_one_program_load": true,
+      "within_two_program_loads": true
+    }
+  ],
+  "schema": "nova.coil-edit-regeneration-row-receipt"
+}

@@ -927,7 +927,7 @@ def _render_state_panel(
     topology = _state_topology(profile.operator, state)
     levels = state_contour_levels(field, topology)
     figure, axis = plt.subplots(figsize=(4.8, 4.2), constrained_layout=True)
-    poloidal.draw_flux_contours(axis, radial, height, field, levels)
+    poloidal.draw_flux_contours(axis, radial, height, field, levels, wall=units)
     poloidal.draw_wall(axis, units=units)
     if topology.get("read_status") == "qualified":
         poloidal.draw_nulls(

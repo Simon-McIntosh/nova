@@ -440,7 +440,7 @@ def _render(
     )
     figure, axis = plt.subplots(figsize=(4.8, 4.2), constrained_layout=True)
     contours = poloidal.draw_flux_contours(
-        axis, radial, height, reference_field, levels, color="#3366cc"
+        axis, radial, height, reference_field, levels, color="#3366cc", wall=units
     )
     drawn = [
         (
@@ -457,7 +457,7 @@ def _render(
     if terminal is not None:
         _, _, terminal_field = _raster(profile, terminal, units)
         poloidal.draw_flux_contours(
-            axis, radial, height, terminal_field, levels, color="#cc7722"
+            axis, radial, height, terminal_field, levels, color="#cc7722", wall=units
         )
         drawn.append(
             (
@@ -1070,7 +1070,9 @@ def _render_projection(
     )
     for state, color, marker in drawn:
         radial, height, field = _raster(profile, state, units)
-        poloidal.draw_flux_contours(axes[2], radial, height, field, levels, color=color)
+        poloidal.draw_flux_contours(
+            axes[2], radial, height, field, levels, color=color, wall=units
+        )
     poloidal.draw_wall(axes[2], units=units)
     for state, color, marker in drawn:
         topology = _topology(profile.operator, state)

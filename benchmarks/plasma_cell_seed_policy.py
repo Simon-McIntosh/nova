@@ -487,7 +487,7 @@ def render(receipt, output):
             axis = axes[row_index, column]
             radial, height, raster = certificate._raster_field(coordinates, state, wall)
             contour = poloidal.draw_flux_contours(
-                axis, radial, height, raster, levels, color="#444444"
+                axis, radial, height, raster, levels, color="#444444", wall=units
             )
             segments = sum(len(part) > 1 for group in contour.allsegs for part in group)
             assert segments > 0, "contour positive control is empty"

@@ -734,7 +734,7 @@ def render(payload, output):
                     data["coordinates"], data[field], data["wall"]
                 )
                 contours = poloidal.draw_flux_contours(
-                    axis, radial, vertical, raster, levels, color=color
+                    axis, radial, vertical, raster, levels, color=color, wall=units
                 )
                 count = sum(
                     len(part) > 1 for group in contours.allsegs for part in group

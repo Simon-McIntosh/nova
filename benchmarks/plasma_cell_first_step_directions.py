@@ -190,6 +190,7 @@ def render(driver, built, states, residual, output):
     assert reference["axis_rz_m"] is not None
     assert reference["x_point_rz_m"] is not None
     wall = built["machine"].wall_node
+    units = wall_units(driver, built["operator"], wall)
     panels = []
     for name, state in states.items():
         nulls, _ = driver._nulls(built["operator"], state)
@@ -201,13 +202,13 @@ def render(driver, built, states, residual, output):
                 built["coordinates"], flux, wall
             )
             contours = driver.poloidal.draw_flux_contours(
-                ax, r, z, field, levels, color=color
+                ax, r, z, field, levels, wall=units, color=color
             )
             counts.append(
                 sum(len(segment) > 1 for group in contours.allsegs for segment in group)
             )
         assert counts[-1] > 0
-        driver.poloidal.draw_wall(ax, units=wall_units(driver, built["operator"], wall))
+        driver.poloidal.draw_wall(ax, units=units)
         for found, color, size in ((reference, "#3366cc", 10), (nulls, "#d52d28", 5)):
             others = np.asarray(found["qualified_saddles_rz_m"]).reshape(-1, 2)
             admitted = found["x_point_rz_m"]

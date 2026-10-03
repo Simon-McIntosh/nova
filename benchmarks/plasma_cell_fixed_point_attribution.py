@@ -422,7 +422,7 @@ def render(payload, output, driver_path):
                     data["coordinates"], data[field], data["wall"]
                 )
                 contours = driver.poloidal.draw_flux_contours(
-                    axis, radial, height, raster, levels, color=color
+                    axis, radial, height, raster, levels, color=color, wall=units
                 )
                 count = sum(
                     len(part) > 1 for group in contours.allsegs for part in group
@@ -817,7 +817,7 @@ def render_constructions(driver, payload, output):
                         data["coordinates"], data[name], data["wall"]
                     )
                     contours = driver.poloidal.draw_flux_contours(
-                        axis, radial, height, raster, levels, color=color
+                        axis, radial, height, raster, levels, color=color, wall=units
                     )
                     count = sum(
                         len(part) > 1 for group in contours.allsegs for part in group

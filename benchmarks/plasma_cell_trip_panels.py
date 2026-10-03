@@ -515,7 +515,7 @@ def render_panel(driver, built, row, trip, state, output):
                 built["coordinates"], values, wall
             )
             contour = driver.poloidal.draw_flux_contours(
-                ax, r, z, field, levels, color=color
+                ax, r, z, field, levels, color=color, wall=units
             )
             counts.append(
                 sum(len(part) > 1 for group in contour.allsegs for part in group)

@@ -8,7 +8,6 @@ import json
 import numpy as np
 
 from nova.equilibrium import ExplicitSolveSeed, ForwardSolveRequest
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.jax.config import configure_dtypes
 from nova.transport.coupled_window import (
     TransportSweepReceipt,
@@ -42,19 +41,14 @@ def _coupled_input(clip_mode: str | None = None):
 
 
 def test_coupled_receipt_records_each_requests_own_clip_mode():
-    """The transport receipt records the request's mode, not the process global."""
+    """The transport receipt records the mode on each embedded request."""
 
-    previous_mode = support_clip_mode()
-    set_support_clip_mode("exact")
-    try:
-        recorded = [
-            ForwardTransport()
-            .solve(_coupled_input(clip_mode=clip_mode))
-            .equilibrium_resolved_defaults.clip_mode
-            for clip_mode in ("chord", "exact")
-        ]
-    finally:
-        set_support_clip_mode(previous_mode)
+    recorded = [
+        ForwardTransport()
+        .solve(_coupled_input(clip_mode=clip_mode))
+        .equilibrium_resolved_defaults.clip_mode
+        for clip_mode in ("chord", "exact")
+    ]
 
     assert recorded == ["chord", "exact"]
 

@@ -36,14 +36,6 @@ SupportClipMode = Literal["chord", "exact", "chord_cells"]
 JsonScalar = str | int | float | bool | None
 
 
-def _process_support_clip_mode() -> SupportClipMode:
-    """Return the process-wide support clip mode a request inherits by omission."""
-
-    from nova.equilibrium.forward_operator import support_clip_mode
-
-    return support_clip_mode()
-
-
 def _evaluate_sampled_flux_function(
     coordinate,
     values,
@@ -483,11 +475,9 @@ class ForwardSolveRequest:
     constraints.  Existing ``constraint_pins`` remain post-solve validation
     claims, so the two meanings cannot be conflated.
 
-    ``clip_mode`` is a request field, not the process global.  An omitted mode
-    follows the process mode (``forward_operator.support_clip_mode()``) at the
-    moment the request is built, so the request, its resolved defaults and its
-    receipt always hold a concrete mode; an explicit mode always wins.  The
-    process global is the transition bridge until every caller passes a mode.
+    ``clip_mode`` is request-owned state.  An omitted mode resolves to the
+    production ``"chord"`` default, while an explicit mode is carried through
+    the request, its resolved defaults, and its receipt.
     """
 
     carrier_identity: str
@@ -502,7 +492,7 @@ class ForwardSolveRequest:
     prescribed_current: object | None = None
     enforce: tuple[str, ...] = ()
     compilation_cache_hit: bool = False
-    clip_mode: SupportClipMode = field(default_factory=_process_support_clip_mode)
+    clip_mode: SupportClipMode = "chord"
 
     def __post_init__(self) -> None:
         """Require a self-consistent, statically shaped request."""
@@ -529,14 +519,13 @@ class ForwardSolveRequest:
     ) -> ForwardSolveRequest:
         """Build a request from the version-keyed declaration plus deviations.
 
-        An omitted ``clip_mode`` follows the process mode at build time; an
+        An omitted ``clip_mode`` uses the production ``"chord"`` default; an
         explicit mode passes through unchanged.
         """
 
         policy = declared_forward_solve_policy(nova_version)
         if policy_overrides:
             policy = replace(policy, **dict(policy_overrides))
-        inputs.setdefault("clip_mode", _process_support_clip_mode())
         return cls(
             carrier_identity=carrier_identity,
             source_profile=source_profile,
@@ -564,16 +553,16 @@ class ResolvedForwardSolveDefaults:
         *,
         nova_version: str = NOVA_VERSION,
         compilation_cache_directory: str | None = None,
-        clip_mode: SupportClipMode | None = None,
+        clip_mode: SupportClipMode = "chord",
     ) -> ResolvedForwardSolveDefaults:
         """Compare one resolved policy with its version's declared defaults.
 
-        An omitted ``clip_mode`` follows the process mode at build time, so a
-        receipt always records a concrete mode rather than ``None``.
+        An omitted ``clip_mode`` uses the production ``"chord"`` default, so a
+        receipt always records a concrete mode.
         """
 
-        if clip_mode is None:
-            clip_mode = _process_support_clip_mode()
+        if clip_mode not in {"chord", "exact", "chord_cells"}:
+            raise ValueError(f"unknown support clip mode {clip_mode!r}")
         default = declared_forward_solve_policy(nova_version)
         default_values = default.to_dict()
         actual_values = policy.to_dict()

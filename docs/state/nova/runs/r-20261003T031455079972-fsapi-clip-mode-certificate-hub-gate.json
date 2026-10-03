@@ -1,0 +1,359 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "c090222b2fe41addc3f0da24bc451460f592e55e",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 1610844,
+      "input_tokens_cumulative": 1610844,
+      "output_tokens": 8459,
+      "output_tokens_cumulative": 8459,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 28,
+    "files": 1,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "0a2106004a21347461e78631b61d1219569c0d55",
+    "ef9174d1ef65f503caae6315c16fae62dc9deecb"
+  ],
+  "completed_at": "2026-10-03T05:17:19.308Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-03T03:15:20Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.985,
+    "plan": "forward-solve-api",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-03T04:14:56.744440+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-03T03:14:56Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 21,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 5,
+    "headroom": 11,
+    "mean_context": 133333,
+    "observed_at": "2026-10-03T03:14:35Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T05:17:19.308Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T031455079972-fsapi-clip-mode-certificate-hub-gate/manifest.md",
+  "member": "disposable-r-20261003T031455079972-fsapi-clip-mode-certificate-hub-gate",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsapi-clip-mode-certificate-hub-gate",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1444,
+          "cached_input_tokens": 610293,
+          "input_tokens": 611739,
+          "output_tokens": 1271,
+          "reasoning_output_tokens": 29,
+          "total_tokens": 613010,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: the certificate-hub migration (run r-20261002T225104739997, commit 2e0061a7c) threads explicit clip modes through benchmarks/solovev_certificate.py and scripts/analytic_oracle_fixtures/measure.py in place of the process global. Its own base could not build a certificate row, because of the live-read fallback defect, now repaired at 8130fed42. This node's base, c090222b2, merges the hub onto main a28856c81. Measure on the H200 through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh --rungs h200 --force-submit (authorised), one job running every arm sequentially. (1) Chord identity: the diverted-jump-bearing smallest-rung certificate row is built at main a28856c81 with the default mode, and at this node's head with an explicit chord mode. Every numeric array in the two receipts is bit-identical, by SHA-256 of each array's bytes, and both receipts and their hashes are kept in the run directory. (2) Exact reaches the operator: the same row at this node's head with an explicit exact mode prints the solving operator's _active_support_clip_mode as exact, its receipt records exact, and its receipt differs from the chord one. (3) The same three arms for one limited certificate case at its smallest rung. Build the main tree with git archive of a28856c81 restricted to nova tests benchmarks scripts, extracted under /tmp and removed before the manifest is written. Record each arm's terminal residual and converged flag in the evidence fragment. No source change. Every uv command carries --no-sync and nothing runs uv sync. Write the manifest before the long step, with empty wait fields unless a wait_probe names a job id and wait_terminal names a state the probe prints; its status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Show that the certificate hub keeps chord rows bit-identical and carries exact to the solving operator",
+    "id": "fsapi-clip-mode-certificate-hub-gate",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-03T03:14:56Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 21,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 5,
+      "headroom": 11,
+      "mean_context": 133333,
+      "observed_at": "2026-10-03T03:14:35Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T031455079972-fsapi-clip-mode-certificate-hub-gate/manifest.md",
+    "negative_control": "",
+    "plan": "forward-solve-api",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-certificate-hub-gate.html",
+      "docs/figures/forward-solve-api/fsapi-clip-mode-certificate-hub-gate"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsapi-clip-mode-certificate-hub-gate",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-03T03:14:59.784618+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.383,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solve-api",
+  "plan_impl_at_dispatch": 0.985,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "ef9174d1ef65f503caae6315c16fae62dc9deecb",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "c090222b2fe41addc3f0da24bc451460f592e55e",
+    "reviewed_head_sha": "ef9174d1ef65f503caae6315c16fae62dc9deecb",
+    "scores": {
+      "durability": 16,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 90
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "run_id": "r-20261003T031455079972-fsapi-clip-mode-certificate-hub-gate",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "c6a23437-cd21-4c62-a623-c3ed24824967",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 16127768,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 151.068,
+    "generated_tokens": 93531,
+    "generation_seconds": 122.203,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 56.0,
+    "machine_seconds": 28.865,
+    "peak_input_tokens": 128867,
+    "tokens_per_second": 765.37,
+    "wall_tokens_per_second": 619.13
+  },
+  "time_budget": "60m",
+  "tool_steps": 75.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 7319,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T05:17:23Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-03T05:14:43Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T031455079972-fsapi-clip-mode-certificate-hub-gate",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 14476,
+    "worker_pid": 1527267
+  },
+  "worker_seconds": 7266,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

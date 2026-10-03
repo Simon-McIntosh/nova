@@ -518,6 +518,68 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "200bdeeb5022348711b8327c077a512a34e64549",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 2086925,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261003T124214230863-cco-first-moment-consumer-test-delta",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "dirty",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [
+            " M docs/figures/constraint-augmented-newton-krylov/compensator-bound/receipt.json"
+          ],
+          "head": "200bdeeb5022348711b8327c077a512a34e64549",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-consumer-test-delta",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-03T13:42:35.402Z",
+            "session_id": "3cc47db9-389e-4d99-8edf-76ad9502396f",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-consumer-test-delta"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:807874cb13c0bd4cd39631e2f6749b660d80b631e7d9993f105070c5c4aef251",
+          "status_entries": [
+            {
+              "code": " M",
+              "path": "docs/figures/constraint-augmented-newton-krylov/compensator-bound/receipt.json"
+            }
+          ],
+          "withheld": "this worktree is the working directory of recoverable session 3cc47db9-389e-4d99-8edf-76ad9502396f"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-03T13:42:35.402Z",
+      "session_id": "3cc47db9-389e-4d99-8edf-76ad9502396f",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-consumer-test-delta"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 3cc47db9-389e-4d99-8edf-76ad9502396f"
+  },
   "resume_waiver": {
     "reason": "superseded: the seven failures it measured were repaired by cco-first-moment-test-stubs (merged f04690e62, 15 passed); its remaining arm, tests/test_reduced_newton_constraints.py, aborts natively in the JAX compilation cache on both base and head, so resuming would re-measure a pre-existing abort",
     "session_id": "3cc47db9-389e-4d99-8edf-76ad9502396f",

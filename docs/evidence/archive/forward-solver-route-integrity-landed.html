@@ -1953,6 +1953,23 @@ Receipt: <code>/nova/figures/forward-solver-route-integrity/single-site-krylov/b
     <p>Report: <code>docs/figures/forward-solver-route-integrity/fsri-ladder-census-counts-every-entry/report.md</code>.</p>
   </section>
 
+  <section id="moment-map-contract-after-first-moments">
+    <h2>§1 — the moment-map derivative contract holds after the first-moment centroid hand-off</h2>
+    <p>Run <code>r-20261003T124306427341-fsri-moment-map-contract-after-first-moments</code> (local lane), merged at <code>9654c1380</code>. Review: 88, pass with follow-ons. S22's merge <code>45f5ee8ef</code> changed <code>current_moment_observation</code> to hand over within-cell first moments, and S22's consumer inventory named <code>current_moment_map</code> (<code>forward.py:1285</code>) as a reader. So the contract was re-run at <code>200bdeeb5</code>, which contains that merge: H200 lane job 1280616, with no source or test change.</p>
+    <table>
+      <thead><tr><th>stage</th><th>at 3825858f2 (S22, before the hand-off)</th><th>at 200bdeeb5 (after)</th></tr></thead>
+      <tbody>
+        <tr><td>smooth control</td><td>9.9e-11</td><td>9.91e-11</td></tr>
+        <tr><td>axis flux</td><td>8.3e-10</td><td>8.28e-10</td></tr>
+        <tr><td>held-point boundary flux</td><td>5.4e-12</td><td>1.40e-13</td></tr>
+        <tr><td>support partition and clip weights</td><td>9.2e-5</td><td>9.21e-5, shrinking with the step</td></tr>
+      </tbody>
+    </table>
+    <p>Reverse mode matches forward mode to better than 1.1e-14, and <code>test_the_moment_map_is_differentiable_against_finite_differences</code> passes.</p>
+    <p><strong>Qualification.</strong> The lane printed <code>PINNED_REVISION_MISMATCH</code> (the pin was compiled for <code>eb565ed4c</code>), and its GPU-utilisation samples read 0 at 10, 30 and 60 s. The programs probably compiled on the host, and device use is unconfirmed. The relative errors are the contract and are unaffected; the wall times are not an H200 timing. The lane's cache guard, which should have flagged this, never loads; that is carried by f-fsri-lane-cache-guard-loads.</p>
+    <p><strong>Review follow-ons.</strong> The gate ran through an uncommitted scratch driver that hardcodes the worktree path, and no committed test asserts the staged errors. The finite-difference test guards the contract end to end, but not each stage.</p>
+  </section>
+
 </main>
 </body>
 </html>

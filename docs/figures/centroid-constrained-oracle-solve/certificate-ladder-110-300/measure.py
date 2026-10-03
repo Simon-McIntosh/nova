@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import json
 import os
 from pathlib import Path
 from time import perf_counter
+from unittest.mock import patch
 
 import jax
+import jax.numpy as jnp
 from jax._src import compiler
 import numpy as np
 
@@ -24,6 +27,20 @@ CASES = (
     "strong-rotation-compact-static",
 )
 CELLS = (110, 300)
+
+
+def _require_support_mode(requested: str, actual: str, stage: str) -> None:
+    if actual != requested:
+        raise RuntimeError(
+            f"{stage} support mode {actual!r} differs from {requested!r}"
+        )
+
+
+def _require_distinct_states(exact_digest: str | None, control_digest: str) -> None:
+    if exact_digest is not None and exact_digest == control_digest:
+        raise RuntimeError(
+            "exact row and whole-cell control share a terminal state digest"
+        )
 
 
 def _span(context: dict, result: dict) -> dict:
@@ -62,7 +79,54 @@ def _whole_cell_context(exact: dict) -> dict:
     return context
 
 
-def _measure(context: dict, support: str, initial_level: float, output: Path) -> dict:
+def _measure(
+    context: dict,
+    support: str,
+    initial_level: float,
+    exact_tolerance: np.ndarray,
+    exact_state_digest: str | None,
+    output: Path,
+) -> dict:
+    requested_mode = "exact" if support == "exact" else "chord"
+    _require_support_mode(
+        requested_mode, context["profile"].operator.clip_mode, "input operator"
+    )
+    request_factory = fixture.certificate._certificate_solve_request
+    pair_factory = fixture._certificate_pairs
+    solve = context["profile"].solve
+    request_modes: list[str] = []
+    realised_modes: list[str] = []
+
+    def explicit_request(*args, **kwargs):
+        supplied_mode = kwargs.pop("clip_mode", None)
+        if supplied_mode not in (None, requested_mode):
+            raise RuntimeError("conflicting typed request support mode")
+        request = request_factory(*args, **kwargs, clip_mode=requested_mode)
+        _require_support_mode(requested_mode, request.clip_mode, "typed request")
+        request_modes.append(request.clip_mode)
+        return request
+
+    def shared_row_tolerance(*args, **kwargs):
+        pairs = pair_factory(*args, **kwargs)
+        centroid = replace(
+            pairs[0],
+            binding=replace(pairs[0].binding, tolerance=jnp.asarray(exact_tolerance)),
+        )
+        return (centroid, *pairs[1:])
+
+    def checked_solve(request):
+        _require_support_mode(requested_mode, request.clip_mode, "typed solve request")
+        receipt = solve(request)
+        realised_mode = (
+            context["profile"]
+            ._with_source(request.source_profile, clip_mode=request.clip_mode)
+            .operator.clip_mode
+        )
+        _require_support_mode(requested_mode, receipt.clip_mode, "solve receipt")
+        _require_support_mode(requested_mode, realised_mode, "realised operator")
+        realised_modes.append(realised_mode)
+        return receipt
+
     compilation = {"seconds": 0.0, "calls": 0}
     original = compiler.compile_or_get_cached
 
@@ -76,15 +140,25 @@ def _measure(context: dict, support: str, initial_level: float, output: Path) ->
 
     compiler.compile_or_get_cached = timed_compile
     try:
-        result, state = fixture._solve(
-            context,
-            context["seed"],
-            constrained=True,
-            field_scale_t=fixture.DEFAULT_FIELD_BOUND_T,
-            initial_level_wb=initial_level,
-        )
+        with (
+            patch.object(
+                fixture.certificate, "_certificate_solve_request", explicit_request
+            ),
+            patch.object(fixture, "_certificate_pairs", shared_row_tolerance),
+            patch.object(context["profile"], "solve", checked_solve),
+        ):
+            result, state = fixture._solve(
+                context,
+                context["seed"],
+                constrained=True,
+                field_scale_t=fixture.DEFAULT_FIELD_BOUND_T,
+                initial_level_wb=initial_level,
+            )
     finally:
         compiler.compile_or_get_cached = original
+    if request_modes != [requested_mode] or realised_modes != [requested_mode]:
+        raise RuntimeError("typed request and realised support mode were not observed")
+    _require_distinct_states(exact_state_digest, result["state_sha256_binary64"])
 
     pair = fixture._certificate_pairs(
         context, level=True, field_scale_t=fixture.DEFAULT_FIELD_BOUND_T
@@ -101,13 +175,12 @@ def _measure(context: dict, support: str, initial_level: float, output: Path) ->
         "requested_cells": context["requested_cells"],
         "realised_cells": len(context["machine"].node),
         "support": support,
-        "clip_mode": context["profile"].operator.clip_mode,
+        "clip_mode": realised_modes[0],
+        "requested_clip_mode": request_modes[0],
         "exact_exterior_retained": True,
         "production_seed_sha256_binary64": fixture._digest(context["seed"]),
         "characteristic_pitch_m": pitch,
-        "row_tolerance_pitches": (
-            np.asarray(pair.binding.tolerance, dtype=np.float64) / pitch
-        ).tolist(),
+        "row_tolerance_pitches": (exact_tolerance / pitch).tolist(),
         "analytic_row_observation_m": np.asarray(
             pair.binding.payload, dtype=np.float64
         ).tolist(),
@@ -139,6 +212,10 @@ def _measure(context: dict, support: str, initial_level: float, output: Path) ->
         "qualified": result["qualified"],
         "row_qualified": result["row_qualified"],
         "converged": result["newton_history"]["converged"],
+        "accepted_newton_promotions": result["newton_history"][
+            "accepted_newton_promotions"
+        ],
+        "newton_termination_reason": result["newton_history"]["termination_reason"],
         "solve": result,
         "terminal_state_path": str(state_path),
     }
@@ -192,8 +269,19 @@ def main() -> None:
                 f"ROW_BEGIN {key} setup_seconds={perf_counter() - started:.3f}",
                 flush=True,
             )
-            _measure(
-                exact, "exact", level["initial_level_wb"], output / f"{key}-exact.json"
+            exact_tolerance = np.asarray(
+                fixture._certificate_pairs(
+                    exact, level=True, field_scale_t=fixture.DEFAULT_FIELD_BOUND_T
+                )[0].binding.tolerance,
+                dtype=np.float64,
+            )
+            exact_receipt = _measure(
+                exact,
+                "exact",
+                level["initial_level_wb"],
+                exact_tolerance,
+                None,
+                output / f"{key}-exact.json",
             )
             whole = _whole_cell_context(exact)
             assert whole["profile"].operator.clip_mode == "chord"
@@ -203,6 +291,8 @@ def main() -> None:
                 whole,
                 "whole-cell",
                 level["initial_level_wb"],
+                exact_tolerance,
+                exact_receipt["solve"]["state_sha256_binary64"],
                 output / f"{key}-whole-cell.json",
             )
     print("MEASUREMENT_COMPLETE", flush=True)

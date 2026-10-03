@@ -4,7 +4,7 @@ set -uo pipefail
 script_dir=$(dirname "$(readlink -f "$0")")
 tree=$(git -C "$script_dir" rev-parse --show-toplevel)
 revision=$(git -C "$tree" rev-parse HEAD)
-run_dir=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T141823788120-cco-certificate-ladder-110-300
+run_dir=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T165801907034-cco-certificate-ladder-110-300-clip-explicit
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cuda,cpu
 export PYTHONPATH="$tree"

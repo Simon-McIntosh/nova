@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="forward-solver-route-integrity">
+<title>Moment-map derivative contract after the first-moment hand-off</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsri-moment-map-contract-after-first-moments"
+         data-test-log="/home/ITER/mcintos/.cache/nova-moment-map-after-first-moments/contract.log"
+         data-negative-control-log="none: a re-measurement of an existing contract at a new head; the S22 reading at 3825858f2, one commit before the first-moment hand-off, is the paired baseline, and the benchmark carries its own smooth-control stage">
+  <h2>The moment-map derivative contract holds over the first-moment hand-off</h2>
+  <p>The contract was last measured at <code>3825858f2</code> (S22), one commit
+  before the first-moment centroid hand-off in
+  <code>nova/equilibrium/forward.py</code> shipped at
+  <code>45f5ee8ef</code>. Re-measured here at the dispatch base
+  <code>200bdeeb5</code>, which contains <code>45f5ee8ef</code>, every stage
+  reproduces its prior reading to the quoted precision and the derivative
+  contract test passes. One H200 lane job (job <code>1280616</code>, betelgeuse)
+  runs <code>benchmarks/moment_map_derivative_contract.py</code> and
+  <code>tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences</code>;
+  it reports <strong>2 passed in 159.95s</strong> with <code>EXIT_STATUS=0</code>.</p>
+
+  <p>Relative error of the forward JVP against central differences, per stage,
+  at the three registered steps. The S22 column is the reading recorded at
+  <code>3825858f2</code>; a dash means the earlier record did not quote that
+  stage. The scalar no-selection control is measured at the single
+  <code>1e-5</code> step.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>stage</th>
+        <th>S22 at 3825858f2</th>
+        <th>head 1e-3</th>
+        <th>head 3e-5</th>
+        <th>head 1e-5</th>
+        <th>reverse vs forward</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>smooth no-selection control</td><td>9.9e-11</td><td>—</td><td>—</td><td>9.91e-11</td><td>0.0</td></tr>
+      <tr><td>topology flux levels</td><td>—</td><td>3.97e-3</td><td>9.90e-5</td><td>3.28e-5</td><td>1.11e-15</td></tr>
+      <tr><td>axis flux</td><td>8.3e-10</td><td>8.12e-6</td><td>7.29e-9</td><td>8.28e-10</td><td>1.05e-15</td></tr>
+      <tr><td>held-point boundary flux</td><td>5.4e-12</td><td>1.93e-13</td><td>1.40e-13</td><td>1.40e-13</td><td>0.0</td></tr>
+      <tr><td>support partition and clip weights</td><td>9.2e-5</td><td>1.13e-2</td><td>2.78e-4</td><td>9.21e-5</td><td>1.40e-14</td></tr>
+      <tr><td>cell current moments</td><td>—</td><td>4.07e-3</td><td>1.03e-4</td><td>3.40e-5</td><td>1.01e-14</td></tr>
+      <tr><td>cell integral measure</td><td>—</td><td>4.07e-3</td><td>3.19e-4</td><td>3.40e-5</td><td>1.01e-14</td></tr>
+      <tr><td>normalised moment observations</td><td>—</td><td>8.39e-3</td><td>2.11e-4</td><td>7.00e-5</td><td>1.08e-14</td></tr>
+      <tr><td>target residual normalisation</td><td>—</td><td>1.16e-2</td><td>3.07e-4</td><td>1.02e-4</td><td>9.44e-15</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Reading.</strong> Three of the four stages the S22 record quoted
+  reproduce exactly at their quoted precision: smooth control
+  <code>9.91e-11</code> beside <code>9.9e-11</code>, axis flux
+  <code>8.28e-10</code> beside <code>8.3e-10</code>, and support partition and
+  clip weights <code>9.21e-5</code> beside <code>9.2e-5</code>. The held-point
+  boundary flux tightens from <code>5.4e-12</code> to <code>1.40e-13</code>, the
+  same sub-picometre order. Every stage's error shrinks monotonically as the
+  step shrinks over <code>3e-5</code> and <code>1e-5</code>, and reverse mode
+  and the forward JVP agree to better than <code>1.1e-14</code> everywhere but
+  the near-exact boundary stage, so no stage separates the two automatic
+  differentiation arms. The first-moment centroid hand-off in
+  <code>forward.py</code> leaves the derivative contract unchanged.</p>
+
+  <p>Module under test as imported:
+  <code>nova/equilibrium/forward.py</code> at
+  <code>200bdeeb5022348711b8327c077a512a34e64549</code>, resolved from the
+  measurement worktree root. Receipt:
+  <code>/home/ITER/mcintos/.cache/nova-moment-map-after-first-moments/moment-map-derivative.json</code>.
+  Log: <code>/home/ITER/mcintos/.cache/nova-moment-map-after-first-moments/contract.log</code>
+  (<code>EXIT_STATUS=0</code>, H200 job <code>1280616</code>). This node changes
+  no source or test file; it re-measures the contract only.</p>
+</article>
+</main>
+</body>
+</html>

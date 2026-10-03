@@ -1,11 +1,13 @@
-"""The limited-cell chord panels title their axis-admission read honestly.
+"""The chord panels title their axis-admission read honestly.
 
 Each panel's qualification is an axis-admission verdict, not an accuracy
 verdict, so its title must name the read status and print the relative flux
 error beside it, together with the terminal residual and converged flag. The
-three tests read only the part receipt the panel was drawn from, so a title
-recorded there and a title a reader derives from the same receipt keys must
-agree, and the receipt must describe the panel actually on disk.
+tests read only the part receipt the panel was drawn from, so a title recorded
+there and a title a reader derives from the same receipt keys must agree, the
+text drawn on the panel's own image must equal the recorded title, and the
+receipt must describe the panel actually on disk. Every chord arm is checked,
+so the directory cannot mix an honest title with the bare qualification.
 """
 
 from __future__ import annotations
@@ -14,6 +16,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from PIL import Image
 import pytest
 
 from benchmarks.parallel_components_read import solovev_panel_title
@@ -25,16 +28,23 @@ PART_ROOT = (
     / "docs/figures/playable-forward-solve/parallel-components-read"
     / "solovev-certificate/solve-parts/chord"
 )
-CASES = (
-    "weak-rotation-reactor-static",
-    "moderate-rotation-conventional-static",
-    "strong-rotation-compact-static",
-)
+CASE_CELLS = {
+    "diverted-single-null": 500,
+    "weak-rotation-reactor-static": 1000,
+    "moderate-rotation-conventional-static": 1000,
+    "strong-rotation-compact-static": 1000,
+}
+CASES = tuple(CASE_CELLS)
 
 
 def _read_row(case: str) -> dict:
-    part = PART_ROOT / f"{case}-production-route-cells-1000.json"
+    part = PART_ROOT / f"{case}-production-route-cells-{CASE_CELLS[case]}.json"
     return json.loads(part.read_text(encoding="utf-8"))
+
+
+def _drawn_title(path: Path) -> str | None:
+    with Image.open(path) as image:
+        return image.text.get("Title") if image.text else None
 
 
 @pytest.mark.parametrize("case", CASES)
@@ -79,3 +89,15 @@ def test_panel_receipt_describes_the_drawn_panel(case: str) -> None:
     assert panel.is_file()
     digest = hashlib.sha256(panel.read_bytes()).hexdigest()
     assert digest == row["figure"]["sha256"]
+
+
+@pytest.mark.parametrize("case", CASES)
+def test_drawn_title_matches_the_receipt_title(case: str) -> None:
+    row = _read_row(case)
+    panel = ROOT / row["figure"]["filesystem_path"]
+    drawn = _drawn_title(panel)
+    assert drawn is not None, (
+        "the panel carries no embedded title, so its drawn text cannot be "
+        "checked against the receipt"
+    )
+    assert drawn == row["figure"]["panel_title"]

@@ -51,7 +51,6 @@ from nova.equilibrium.flux_surface_connectivity import (
     label_saddle_aware_hex_connected_components,
     private_flux_mask,
 )
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.jax.config import configure_dtypes
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
@@ -184,14 +183,19 @@ def _rebuild(
     case_name: str = CASE_NAME,
     *,
     whole_cell_control: bool = False,
+    clip_mode: str | None = None,
 ):
-    carrier_case, source_case, exact = certificate._case(case_name)
-    machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
+    carrier_case, source_case, exact = certificate._case(case_name, clip_mode=clip_mode)
+    machine = certificate._case_machine(
+        case_name, carrier_case, exact, requested_cells, clip_mode=clip_mode
+    )
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     analytic = certificate._exact_state(case_name, exact, coordinates)
     empty = certificate.oracle_fixture.forward_operator(source_case, machine)
+    if clip_mode is not None:
+        empty = empty.with_clip_mode(clip_mode)
     fixture = (
         _whole_cell_fixture_exterior
         if whole_cell_control
@@ -203,6 +207,8 @@ def _rebuild(
     operator = certificate.oracle_fixture.forward_operator(
         source_case, machine, exterior
     )
+    if clip_mode is not None:
+        operator = operator.with_clip_mode(clip_mode)
     return machine, operator, coordinates, np.asarray(analytic), exterior_cache
 
 
@@ -308,7 +314,6 @@ def _solve_gate(output_root: Path, *, regenerate_rows: bool = False) -> dict[str
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("the solve gate requires binary64")
-    original_mode = support_clip_mode()
     original_figure_root = certificate.FIGURE_ROOT
     original_part_root = certificate.PART_ROOT
     rows: list[dict[str, Any]] = []
@@ -320,7 +325,6 @@ def _solve_gate(output_root: Path, *, regenerate_rows: bool = False) -> dict[str
     receipt_path = output_root / "solve-receipt.json"
     try:
         for mode, case_name, requested_cells in solve_plan:
-            set_support_clip_mode(mode)
             certificate.FIGURE_ROOT = output_root / "solve-panels" / mode
             certificate.PART_ROOT = output_root / "solve-parts" / mode
             if regenerate_rows:
@@ -329,11 +333,12 @@ def _solve_gate(output_root: Path, *, regenerate_rows: bool = False) -> dict[str
                 )
             whole_cell_control = case_name == certificate.DIVERTED_CASE_NAME
             with _certificate_fixture(whole_cell_control):
-                row = certificate._measure(case_name, requested_cells)
+                row = certificate._measure(case_name, requested_cells, clip_mode=mode)
             _machine, operator, _coordinates, _analytic, _cache = _rebuild(
                 requested_cells,
                 case_name,
                 whole_cell_control=whole_cell_control,
+                clip_mode=mode,
             )
             rows.append(_row_summary(mode, row, operator))
             _write_json(
@@ -346,7 +351,6 @@ def _solve_gate(output_root: Path, *, regenerate_rows: bool = False) -> dict[str
                 },
             )
     finally:
-        set_support_clip_mode(original_mode)
         certificate.FIGURE_ROOT = original_figure_root
         certificate.PART_ROOT = original_part_root
     limited = [row for row in rows if row["case"] in LIMITED_CASES]
@@ -778,59 +782,54 @@ def _run(output_root: Path) -> dict[str, Any]:
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("the limited-row shadow census requires binary64")
-    original_mode = support_clip_mode()
     rows = []
     render_rows = []
-    try:
-        set_support_clip_mode("chord")
-        for requested_cells in REQUESTED_CELLS:
-            machine, operator, coordinates, analytic, exterior_cache = _rebuild(
-                requested_cells
-            )
-            part = json.loads(_part_path(requested_cells).read_text(encoding="utf-8"))
-            terminal = np.asarray(part["render_data"]["terminal_flux_wb"])
-            persisted_coordinates = np.asarray(part["render_data"]["coordinates_rz_m"])
-            np.testing.assert_array_equal(coordinates, persisted_coordinates)
-            terminal_census = _state_census(operator, machine, terminal)
-            analytic_census = _state_census(operator, machine, analytic)
-            row = {
+    for requested_cells in REQUESTED_CELLS:
+        machine, operator, coordinates, analytic, exterior_cache = _rebuild(
+            requested_cells, clip_mode="chord"
+        )
+        part = json.loads(_part_path(requested_cells).read_text(encoding="utf-8"))
+        terminal = np.asarray(part["render_data"]["terminal_flux_wb"])
+        persisted_coordinates = np.asarray(part["render_data"]["coordinates_rz_m"])
+        np.testing.assert_array_equal(coordinates, persisted_coordinates)
+        terminal_census = _state_census(operator, machine, terminal)
+        analytic_census = _state_census(operator, machine, analytic)
+        row = {
+            "requested_cells": requested_cells,
+            "realised_cells": len(machine.node),
+            "source_part": str(_part_path(requested_cells).relative_to(ROOT)),
+            "exterior_cache": exterior_cache,
+            "terminal": terminal_census,
+            "analytic": analytic_census,
+        }
+        rows.append(row)
+        _write_json(
+            output_root / "parts" / f"weak-cells-{abs(requested_cells)}.json",
+            row,
+        )
+        carrier_case, _source_case, exact = certificate._case(CASE_NAME)
+        render_rows.append(
+            {
                 "requested_cells": requested_cells,
-                "realised_cells": len(machine.node),
-                "source_part": str(_part_path(requested_cells).relative_to(ROOT)),
-                "exterior_cache": exterior_cache,
-                "terminal": terminal_census,
-                "analytic": analytic_census,
+                "coordinates": coordinates,
+                "wall": np.asarray(machine.wall_node),
+                "boundary": certificate._boundary(CASE_NAME, exact),
+                "terminal": terminal,
+                "analytic": analytic,
+                "terminal_census": terminal_census,
+                "analytic_census": analytic_census,
             }
-            rows.append(row)
-            _write_json(
-                output_root / "parts" / f"weak-cells-{abs(requested_cells)}.json",
-                row,
-            )
-            carrier_case, _source_case, exact = certificate._case(CASE_NAME)
-            render_rows.append(
-                {
-                    "requested_cells": requested_cells,
-                    "coordinates": coordinates,
-                    "wall": np.asarray(machine.wall_node),
-                    "boundary": certificate._boundary(CASE_NAME, exact),
-                    "terminal": terminal,
-                    "analytic": analytic,
-                    "terminal_census": terminal_census,
-                    "analytic_census": analytic_census,
-                }
-            )
-            _write_json(
-                output_root / "receipt.json",
-                {
-                    "schema": "nova.limited-row-shadow-census",
-                    "source_revision": _source_revision(),
-                    "completed": False,
-                    "rows": rows,
-                },
-            )
-        figure = _render(output_root, render_rows)
-    finally:
-        set_support_clip_mode(original_mode)
+        )
+        _write_json(
+            output_root / "receipt.json",
+            {
+                "schema": "nova.limited-row-shadow-census",
+                "source_revision": _source_revision(),
+                "completed": False,
+                "rows": rows,
+            },
+        )
+    figure = _render(output_root, render_rows)
     receipt = {
         "schema": "nova.limited-row-shadow-census",
         "source_revision": _source_revision(),

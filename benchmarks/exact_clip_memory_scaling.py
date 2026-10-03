@@ -25,7 +25,6 @@ import numpy as np
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import forward_operator
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.jax.config import configure_dtypes
 
 
@@ -117,6 +116,7 @@ def _compile_memory_only(
     requested_cells: int,
     *,
     arm: str,
+    clip_mode: str | None = None,
 ) -> dict[str, Any]:
     """Compile one solve and read memory without serializing multi-GiB HLO.
 
@@ -128,7 +128,7 @@ def _compile_memory_only(
     """
     started = perf_counter()
     profile, seed, request, dimensions = certificate._certificate_compile_problem(
-        case_name, requested_cells
+        case_name, requested_cells, clip_mode=clip_mode
     )
     mapped = profile.flux_map(
         request.current,
@@ -197,58 +197,55 @@ def measure(
     landed.
     """
     configure_dtypes()
-    original_mode = support_clip_mode()
     rows: list[dict[str, Any]] = []
     source_revision = certificate._source_revision()
     lane = certificate._lane()
     if part_root is None:
         part_root = output.parent / f"{output.stem}-parts"
-    try:
-        set_support_clip_mode("exact")
-        for requested in requested_cells:
-            if capture_hlo:
-                row = certificate._compile_solve_memory(
-                    "weak-rotation-reactor-static",
-                    -abs(requested),
-                    arm=f"exact-{abs(requested)}",
-                    compiler_artifact_root=compiler_root,
-                )
-            else:
-                row = _compile_memory_only(
-                    "weak-rotation-reactor-static",
-                    -abs(requested),
-                    arm=f"exact-{abs(requested)}",
-                )
-            row["pairwise_predicate_candidates"] = _pairwise_predicates(row)
-            _atomic_json(
-                part_root / f"requested-{abs(requested)}.json",
-                {
-                    "schema": SCHEMA,
-                    "source_revision": source_revision,
-                    "lane": lane,
-                    "row": row,
-                },
+    for requested in requested_cells:
+        if capture_hlo:
+            row = certificate._compile_solve_memory(
+                "weak-rotation-reactor-static",
+                -abs(requested),
+                arm=f"exact-{abs(requested)}",
+                compiler_artifact_root=compiler_root,
+                clip_mode="exact",
             )
-            rows.append(row)
-            receipt = {
+        else:
+            row = _compile_memory_only(
+                "weak-rotation-reactor-static",
+                -abs(requested),
+                arm=f"exact-{abs(requested)}",
+                clip_mode="exact",
+            )
+        row["pairwise_predicate_candidates"] = _pairwise_predicates(row)
+        _atomic_json(
+            part_root / f"requested-{abs(requested)}.json",
+            {
                 "schema": SCHEMA,
                 "source_revision": source_revision,
                 "lane": lane,
-                "rows": rows,
-                "scaling": _scaling(rows),
-                "completed": len(rows) == len(requested_cells),
-            }
-            _atomic_json(output, receipt)
-            temporary_gib = row["memory_analysis"]["temp_size_in_bytes"] / 2**30
-            print(
-                "EXACT_CLIP_MEMORY_RUNG "
-                f"requested={abs(requested)} realised={row['realised_cells']} "
-                f"temporary_gib={temporary_gib:.6f} "
-                f"pairwise_predicates={len(row['pairwise_predicate_candidates'])}",
-                flush=True,
-            )
-    finally:
-        set_support_clip_mode(original_mode)
+                "row": row,
+            },
+        )
+        rows.append(row)
+        receipt = {
+            "schema": SCHEMA,
+            "source_revision": source_revision,
+            "lane": lane,
+            "rows": rows,
+            "scaling": _scaling(rows),
+            "completed": len(rows) == len(requested_cells),
+        }
+        _atomic_json(output, receipt)
+        temporary_gib = row["memory_analysis"]["temp_size_in_bytes"] / 2**30
+        print(
+            "EXACT_CLIP_MEMORY_RUNG "
+            f"requested={abs(requested)} realised={row['realised_cells']} "
+            f"temporary_gib={temporary_gib:.6f} "
+            f"pairwise_predicates={len(row['pairwise_predicate_candidates'])}",
+            flush=True,
+        )
     return json.loads(output.read_text(encoding="utf-8"))
 
 
@@ -272,17 +269,16 @@ def solve_and_measure(
     figure_root = figure_root.resolve()
     part_root = part_root.resolve()
     device = jax.devices()[0]
-    original_mode = support_clip_mode()
     original_figure_root = certificate.FIGURE_ROOT
     original_part_root = certificate.PART_ROOT
     certificate.FIGURE_ROOT = figure_root
     certificate.PART_ROOT = part_root
     requested_cells = -abs(requested_cells)
     try:
-        set_support_clip_mode("exact")
         certificate._measure(
             "weak-rotation-reactor-static",
             requested_cells,
+            clip_mode="exact",
         )
         row_path = certificate._part_path(
             "weak-rotation-reactor-static", requested_cells
@@ -295,7 +291,6 @@ def solve_and_measure(
     finally:
         certificate.FIGURE_ROOT = original_figure_root
         certificate.PART_ROOT = original_part_root
-        set_support_clip_mode(original_mode)
 
     statistics = {
         str(name): int(value) if isinstance(value, int | float) else str(value)
@@ -564,419 +559,402 @@ def measure_jvp_accuracy(
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("exact-clip JVP validation requires binary64")
-    original_mode = support_clip_mode()
     rows: list[dict[str, Any]] = []
-    try:
-        set_support_clip_mode("exact")
-        for requested in requested_cells:
-            state_path = state_paths[requested]
-            state = jnp.asarray(_terminal_state(state_path), dtype=jnp.float64)
-            profile, _seed, request, dimensions = (
-                certificate._certificate_compile_problem(
-                    "weak-rotation-reactor-static", -requested
+    for requested in requested_cells:
+        state_path = state_paths[requested]
+        state = jnp.asarray(_terminal_state(state_path), dtype=jnp.float64)
+        profile, _seed, request, dimensions = certificate._certificate_compile_problem(
+            "weak-rotation-reactor-static", -requested, clip_mode="exact"
+        )
+        if state.shape != (dimensions["solve_state_size"],):
+            raise RuntimeError(
+                f"terminal state size {state.size} does not match "
+                f"compiled size {dimensions['solve_state_size']}"
+            )
+        mapped, branch = _fixed_clip_map(profile, request, state)
+        _masks, topology, _sample_psi_norm, support = (
+            profile.operator._support_partition(state)
+        )
+        (
+            polished_root_primal,
+            polished_level_residual,
+            polished_cell_count,
+        ) = _fixed_polished_root_primal(profile, topology, support)
+        branch_levels = _clip_branch_levels(profile, topology)
+        base_levels = jax.block_until_ready(branch_levels(state))
+        base_sign = base_levels > 0.0
+        branch |= {
+            "packing_level_count": int(base_levels.size),
+            "packing_exact_zero_count": int(jnp.sum(base_levels == 0.0)),
+            "packing_minimum_absolute_level": float(jnp.min(jnp.abs(base_levels))),
+            "polished_cell_count": polished_cell_count,
+        }
+        compiled_map = jax.jit(mapped)
+        compiled_polished_root_primal = jax.jit(polished_root_primal)
+        compiled_polished_level_residual = jax.jit(polished_level_residual)
+        mapped_state, tangent_action = jax.linearize(compiled_map, state)
+        residual = mapped_state - state
+
+        def linear_action(vector):
+            return vector - tangent_action(vector)
+
+        newton_direction, gmres_info = jax.scipy.sparse.linalg.gmres(
+            linear_action,
+            residual,
+            tol=1.0e-12,
+            maxiter=request.policy.gmres_iterations,
+            restart=request.policy.gmres_iterations,
+            solve_method="batched",
+        )
+        newton_direction = _normalise_direction(jax.block_until_ready(newton_direction))
+        generator = np.random.default_rng(20260915 + requested)
+        directions = [("newton", newton_direction)]
+        for index in range(3):
+            directions.append(
+                (
+                    f"random-{index + 1}",
+                    _normalise_direction(
+                        jnp.asarray(generator.standard_normal(state.shape))
+                    ),
                 )
             )
-            if state.shape != (dimensions["solve_state_size"],):
-                raise RuntimeError(
-                    f"terminal state size {state.size} does not match "
-                    f"compiled size {dimensions['solve_state_size']}"
-                )
-            mapped, branch = _fixed_clip_map(profile, request, state)
-            _masks, topology, _sample_psi_norm, support = (
-                profile.operator._support_partition(state)
-            )
-            (
-                polished_root_primal,
-                polished_level_residual,
-                polished_cell_count,
-            ) = _fixed_polished_root_primal(profile, topology, support)
-            branch_levels = _clip_branch_levels(profile, topology)
-            base_levels = jax.block_until_ready(branch_levels(state))
-            base_sign = base_levels > 0.0
-            branch |= {
-                "packing_level_count": int(base_levels.size),
-                "packing_exact_zero_count": int(jnp.sum(base_levels == 0.0)),
-                "packing_minimum_absolute_level": float(jnp.min(jnp.abs(base_levels))),
-                "polished_cell_count": polished_cell_count,
-            }
-            compiled_map = jax.jit(mapped)
-            compiled_polished_root_primal = jax.jit(polished_root_primal)
-            compiled_polished_level_residual = jax.jit(polished_level_residual)
-            mapped_state, tangent_action = jax.linearize(compiled_map, state)
-            residual = mapped_state - state
 
-            def linear_action(vector):
-                return vector - tangent_action(vector)
-
-            newton_direction, gmres_info = jax.scipy.sparse.linalg.gmres(
-                linear_action,
-                residual,
-                tol=1.0e-12,
-                maxiter=request.policy.gmres_iterations,
-                restart=request.policy.gmres_iterations,
-                solve_method="batched",
+        state_scale = float(jnp.maximum(jnp.max(jnp.abs(state)), 1.0))
+        difference_step = float(np.sqrt(np.finfo(np.float64).eps) * state_scale)
+        comparisons = []
+        for name, direction in directions:
+            _primal, map_tangent = jax.jvp(
+                compiled_map,
+                (state,),
+                (direction,),
             )
-            newton_direction = _normalise_direction(
-                jax.block_until_ready(newton_direction)
+            _polished, polished_tangent = jax.jvp(
+                compiled_polished_root_primal,
+                (state,),
+                (direction,),
             )
-            generator = np.random.default_rng(20260915 + requested)
-            directions = [("newton", newton_direction)]
-            for index in range(3):
-                directions.append(
+            _level_primal, level_tangent = jax.jvp(
+                branch_levels,
+                (state,),
+                (direction,),
+            )
+            upper = compiled_map(state + difference_step * direction)
+            lower = compiled_map(state - difference_step * direction)
+            map_central = (upper - lower) / (2.0 * difference_step)
+            polished_upper = compiled_polished_root_primal(
+                state + difference_step * direction
+            )
+            polished_lower = compiled_polished_root_primal(
+                state - difference_step * direction
+            )
+            polished_central = (polished_upper - polished_lower) / (
+                2.0 * difference_step
+            )
+            upper_levels = branch_levels(state + difference_step * direction)
+            lower_levels = branch_levels(state - difference_step * direction)
+            level_central = (upper_levels - lower_levels) / (2.0 * difference_step)
+            map_tangent, map_central, polished_tangent, polished_central = (
+                jax.block_until_ready(
                     (
-                        f"random-{index + 1}",
-                        _normalise_direction(
-                            jnp.asarray(generator.standard_normal(state.shape))
-                        ),
+                        map_tangent,
+                        map_central,
+                        polished_tangent,
+                        polished_central,
                     )
                 )
-
-            state_scale = float(jnp.maximum(jnp.max(jnp.abs(state)), 1.0))
-            difference_step = float(np.sqrt(np.finfo(np.float64).eps) * state_scale)
-            comparisons = []
-            for name, direction in directions:
-                _primal, map_tangent = jax.jvp(
-                    compiled_map,
-                    (state,),
-                    (direction,),
+            )
+            level_tangent, level_central = jax.block_until_ready(
+                (level_tangent, level_central)
+            )
+            polished_error = polished_tangent - polished_central
+            polished_tangent_norm = float(jnp.linalg.norm(polished_tangent))
+            polished_central_norm = float(jnp.linalg.norm(polished_central))
+            polished_error_norm = float(jnp.linalg.norm(polished_error))
+            polished_scale = max(
+                polished_tangent_norm,
+                polished_central_norm,
+                np.finfo(np.float64).tiny,
+            )
+            polished_step_probes = []
+            implicit_relation_probes = []
+            for multiplier in (
+                0.5,
+                1.0,
+                2.0,
+                4.0,
+                8.0,
+                16.0,
+                32.0,
+                64.0,
+                128.0,
+                256.0,
+                512.0,
+                1024.0,
+                2048.0,
+                4096.0,
+                8192.0,
+            ):
+                probe_step = difference_step * multiplier
+                root_upper = compiled_polished_root_primal(
+                    state + probe_step * direction
                 )
-                _polished, polished_tangent = jax.jvp(
-                    compiled_polished_root_primal,
-                    (state,),
-                    (direction,),
+                root_lower = compiled_polished_root_primal(
+                    state - probe_step * direction
                 )
-                _level_primal, level_tangent = jax.jvp(
-                    branch_levels,
-                    (state,),
-                    (direction,),
+                root_central = jax.block_until_ready(
+                    (root_upper - root_lower) / (2.0 * probe_step)
                 )
-                upper = compiled_map(state + difference_step * direction)
-                lower = compiled_map(state - difference_step * direction)
-                map_central = (upper - lower) / (2.0 * difference_step)
-                polished_upper = compiled_polished_root_primal(
-                    state + difference_step * direction
-                )
-                polished_lower = compiled_polished_root_primal(
-                    state - difference_step * direction
-                )
-                polished_central = (polished_upper - polished_lower) / (
-                    2.0 * difference_step
-                )
-                upper_levels = branch_levels(state + difference_step * direction)
-                lower_levels = branch_levels(state - difference_step * direction)
-                level_central = (upper_levels - lower_levels) / (2.0 * difference_step)
-                map_tangent, map_central, polished_tangent, polished_central = (
-                    jax.block_until_ready(
-                        (
-                            map_tangent,
-                            map_central,
-                            polished_tangent,
-                            polished_central,
-                        )
-                    )
-                )
-                level_tangent, level_central = jax.block_until_ready(
-                    (level_tangent, level_central)
-                )
-                polished_error = polished_tangent - polished_central
-                polished_tangent_norm = float(jnp.linalg.norm(polished_tangent))
-                polished_central_norm = float(jnp.linalg.norm(polished_central))
-                polished_error_norm = float(jnp.linalg.norm(polished_error))
-                polished_scale = max(
-                    polished_tangent_norm,
-                    polished_central_norm,
-                    np.finfo(np.float64).tiny,
-                )
-                polished_step_probes = []
-                implicit_relation_probes = []
-                for multiplier in (
-                    0.5,
-                    1.0,
-                    2.0,
-                    4.0,
-                    8.0,
-                    16.0,
-                    32.0,
-                    64.0,
-                    128.0,
-                    256.0,
-                    512.0,
-                    1024.0,
-                    2048.0,
-                    4096.0,
-                    8192.0,
-                ):
-                    probe_step = difference_step * multiplier
-                    root_upper = compiled_polished_root_primal(
-                        state + probe_step * direction
-                    )
-                    root_lower = compiled_polished_root_primal(
-                        state - probe_step * direction
-                    )
-                    root_central = jax.block_until_ready(
-                        (root_upper - root_lower) / (2.0 * probe_step)
-                    )
-                    root_error = float(jnp.linalg.norm(polished_tangent - root_central))
-                    root_central_norm = float(jnp.linalg.norm(root_central))
-                    polished_step_probes.append(
-                        {
-                            "multiplier": multiplier,
-                            "step": probe_step,
-                            "relative_error": root_error
-                            / max(
-                                polished_tangent_norm,
-                                root_central_norm,
-                                np.finfo(np.float64).tiny,
-                            ),
-                        }
-                    )
-                    corrected_upper = compiled_polished_level_residual(
-                        state + probe_step * direction,
-                        _polished + probe_step * polished_tangent,
-                    )
-                    corrected_lower = compiled_polished_level_residual(
-                        state - probe_step * direction,
-                        _polished - probe_step * polished_tangent,
-                    )
-                    corrected_upper_two = compiled_polished_level_residual(
-                        state + 2.0 * probe_step * direction,
-                        _polished + 2.0 * probe_step * polished_tangent,
-                    )
-                    corrected_lower_two = compiled_polished_level_residual(
-                        state - 2.0 * probe_step * direction,
-                        _polished - 2.0 * probe_step * polished_tangent,
-                    )
-                    partial_upper = compiled_polished_level_residual(
-                        state + probe_step * direction,
-                        _polished,
-                    )
-                    partial_lower = compiled_polished_level_residual(
-                        state - probe_step * direction,
-                        _polished,
-                    )
-                    partial_upper_two = compiled_polished_level_residual(
-                        state + 2.0 * probe_step * direction,
-                        _polished,
-                    )
-                    partial_lower_two = compiled_polished_level_residual(
-                        state - 2.0 * probe_step * direction,
-                        _polished,
-                    )
-                    root_upper = compiled_polished_level_residual(
-                        state,
-                        _polished + probe_step * polished_tangent,
-                    )
-                    root_lower = compiled_polished_level_residual(
-                        state,
-                        _polished - probe_step * polished_tangent,
-                    )
-                    root_upper_two = compiled_polished_level_residual(
-                        state,
-                        _polished + 2.0 * probe_step * polished_tangent,
-                    )
-                    root_lower_two = compiled_polished_level_residual(
-                        state,
-                        _polished - 2.0 * probe_step * polished_tangent,
-                    )
-                    corrected_derivative, partial_derivative, root_derivative = (
-                        jax.block_until_ready(
-                            (
-                                (
-                                    -corrected_upper_two
-                                    + 8.0 * corrected_upper
-                                    - 8.0 * corrected_lower
-                                    + corrected_lower_two
-                                )
-                                / (12.0 * probe_step),
-                                (
-                                    -partial_upper_two
-                                    + 8.0 * partial_upper
-                                    - 8.0 * partial_lower
-                                    + partial_lower_two
-                                )
-                                / (12.0 * probe_step),
-                                (
-                                    -root_upper_two
-                                    + 8.0 * root_upper
-                                    - 8.0 * root_lower
-                                    + root_lower_two
-                                )
-                                / (12.0 * probe_step),
-                            )
-                        )
-                    )
-                    corrected_norm = float(jnp.linalg.norm(corrected_derivative))
-                    partial_norm = float(jnp.linalg.norm(partial_derivative))
-                    root_norm = float(jnp.linalg.norm(root_derivative))
-                    relation_upper_levels = jax.block_until_ready(
-                        branch_levels(state + 2.0 * probe_step * direction)
-                    )
-                    relation_lower_levels = jax.block_until_ready(
-                        branch_levels(state - 2.0 * probe_step * direction)
-                    )
-                    implicit_relation_probes.append(
-                        {
-                            "multiplier": multiplier,
-                            "step": probe_step,
-                            "finite_difference_stencil": "five-point central",
-                            "corrected_derivative_l2": corrected_norm,
-                            "partial_derivative_l2": partial_norm,
-                            "root_derivative_l2": root_norm,
-                            "relative_error": corrected_norm
-                            / max(
-                                partial_norm,
-                                root_norm,
-                                np.finfo(np.float64).tiny,
-                            ),
-                            "upper_sign_changes": int(
-                                jnp.sum((relation_upper_levels > 0.0) != base_sign)
-                            ),
-                            "lower_sign_changes": int(
-                                jnp.sum((relation_lower_levels > 0.0) != base_sign)
-                            ),
-                        }
-                    )
-                selected_root_probe = min(
-                    polished_step_probes,
-                    key=lambda probe: probe["relative_error"],
-                )
-                stable_relation_probes = [
-                    probe
-                    for probe in implicit_relation_probes
-                    if probe["upper_sign_changes"] == 0
-                    and probe["lower_sign_changes"] == 0
-                ]
-                if not stable_relation_probes:
-                    raise RuntimeError("no finite-difference probe retained its branch")
-                selected_relation_probe = min(
-                    stable_relation_probes,
-                    key=lambda probe: probe["relative_error"],
-                )
-                map_error_norm = float(jnp.linalg.norm(map_tangent - map_central))
-                map_tangent_norm = float(jnp.linalg.norm(map_tangent))
-                map_central_norm = float(jnp.linalg.norm(map_central))
-                level_error_norm = float(jnp.linalg.norm(level_tangent - level_central))
-                level_tangent_norm = float(jnp.linalg.norm(level_tangent))
-                level_central_norm = float(jnp.linalg.norm(level_central))
-                step_probes = []
-                for multiplier in (0.25, 1.0, 4.0, 16.0, 64.0, 256.0):
-                    probe_step = difference_step * multiplier
-                    probe_upper = compiled_map(state + probe_step * direction)
-                    probe_lower = compiled_map(state - probe_step * direction)
-                    probe_central = (probe_upper - probe_lower) / (2.0 * probe_step)
-                    upper_levels = branch_levels(state + probe_step * direction)
-                    lower_levels = branch_levels(state - probe_step * direction)
-                    probe_central, upper_levels, lower_levels = jax.block_until_ready(
-                        (probe_central, upper_levels, lower_levels)
-                    )
-                    probe_error = float(jnp.linalg.norm(map_tangent - probe_central))
-                    probe_norm = float(jnp.linalg.norm(probe_central))
-                    step_probes.append(
-                        {
-                            "multiplier": multiplier,
-                            "step": probe_step,
-                            "relative_error": probe_error
-                            / max(
-                                map_tangent_norm,
-                                probe_norm,
-                                np.finfo(np.float64).tiny,
-                            ),
-                            "upper_sign_changes": int(
-                                jnp.sum((upper_levels > 0.0) != base_sign)
-                            ),
-                            "lower_sign_changes": int(
-                                jnp.sum((lower_levels > 0.0) != base_sign)
-                            ),
-                            "opposed_probe_signs": int(
-                                jnp.sum((upper_levels > 0.0) != (lower_levels > 0.0))
-                            ),
-                        }
-                    )
-                comparisons.append(
+                root_error = float(jnp.linalg.norm(polished_tangent - root_central))
+                root_central_norm = float(jnp.linalg.norm(root_central))
+                polished_step_probes.append(
                     {
-                        "direction": name,
-                        "finite_difference_rule": (
-                            "sqrt(binary64 epsilon) times terminal infinity scale "
-                            "for a max-unit direction"
-                        ),
-                        "finite_difference_step": difference_step,
-                        "polished_root_tangent_l2": polished_tangent_norm,
-                        "polished_root_central_difference_l2": polished_central_norm,
-                        "polished_root_error_l2": polished_error_norm,
-                        "base_step_relative_error": polished_error_norm
-                        / polished_scale,
-                        "root_replay_relative_error": selected_root_probe[
-                            "relative_error"
-                        ],
-                        "relative_error": selected_relation_probe["relative_error"],
-                        "selected_finite_difference_step": selected_relation_probe[
-                            "step"
-                        ],
-                        "polished_root_error_linf": float(
-                            jnp.max(jnp.abs(polished_error))
-                        ),
-                        "production_map_relative_error": map_error_norm
+                        "multiplier": multiplier,
+                        "step": probe_step,
+                        "relative_error": root_error
                         / max(
-                            map_tangent_norm,
-                            map_central_norm,
+                            polished_tangent_norm,
+                            root_central_norm,
                             np.finfo(np.float64).tiny,
                         ),
-                        "packing_level_jvp_relative_error": level_error_norm
-                        / max(
-                            level_tangent_norm,
-                            level_central_norm,
-                            np.finfo(np.float64).tiny,
-                        ),
-                        "polished_root_step_probes": polished_step_probes,
-                        "implicit_relation_step_probes": implicit_relation_probes,
-                        "step_probes": step_probes,
                     }
                 )
-            row = {
-                "requested_cells": requested,
-                "realised_cells": dimensions["realised_cells"],
-                "terminal_state": str(state_path),
-                "terminal_state_size": int(state.size),
-                "fixed_point_residual_l2": float(jnp.linalg.norm(residual)),
-                "gmres_info": int(gmres_info),
-                "branch": branch,
-                "relative_error_bound": JVP_RELATIVE_ERROR_BOUND,
-                "directions": comparisons,
-                "passed": all(
-                    item["relative_error"] <= JVP_RELATIVE_ERROR_BOUND
-                    for item in comparisons
-                ),
-            }
-            _atomic_json(
-                part_root / f"requested-{requested}.json",
-                {
-                    "schema": "nova.exact-clip-jvp-accuracy",
-                    "source_revision": certificate._source_revision(),
-                    "lane": certificate._lane(),
-                    "row": row,
-                },
+                corrected_upper = compiled_polished_level_residual(
+                    state + probe_step * direction,
+                    _polished + probe_step * polished_tangent,
+                )
+                corrected_lower = compiled_polished_level_residual(
+                    state - probe_step * direction,
+                    _polished - probe_step * polished_tangent,
+                )
+                corrected_upper_two = compiled_polished_level_residual(
+                    state + 2.0 * probe_step * direction,
+                    _polished + 2.0 * probe_step * polished_tangent,
+                )
+                corrected_lower_two = compiled_polished_level_residual(
+                    state - 2.0 * probe_step * direction,
+                    _polished - 2.0 * probe_step * polished_tangent,
+                )
+                partial_upper = compiled_polished_level_residual(
+                    state + probe_step * direction,
+                    _polished,
+                )
+                partial_lower = compiled_polished_level_residual(
+                    state - probe_step * direction,
+                    _polished,
+                )
+                partial_upper_two = compiled_polished_level_residual(
+                    state + 2.0 * probe_step * direction,
+                    _polished,
+                )
+                partial_lower_two = compiled_polished_level_residual(
+                    state - 2.0 * probe_step * direction,
+                    _polished,
+                )
+                root_upper = compiled_polished_level_residual(
+                    state,
+                    _polished + probe_step * polished_tangent,
+                )
+                root_lower = compiled_polished_level_residual(
+                    state,
+                    _polished - probe_step * polished_tangent,
+                )
+                root_upper_two = compiled_polished_level_residual(
+                    state,
+                    _polished + 2.0 * probe_step * polished_tangent,
+                )
+                root_lower_two = compiled_polished_level_residual(
+                    state,
+                    _polished - 2.0 * probe_step * polished_tangent,
+                )
+                corrected_derivative, partial_derivative, root_derivative = (
+                    jax.block_until_ready(
+                        (
+                            (
+                                -corrected_upper_two
+                                + 8.0 * corrected_upper
+                                - 8.0 * corrected_lower
+                                + corrected_lower_two
+                            )
+                            / (12.0 * probe_step),
+                            (
+                                -partial_upper_two
+                                + 8.0 * partial_upper
+                                - 8.0 * partial_lower
+                                + partial_lower_two
+                            )
+                            / (12.0 * probe_step),
+                            (
+                                -root_upper_two
+                                + 8.0 * root_upper
+                                - 8.0 * root_lower
+                                + root_lower_two
+                            )
+                            / (12.0 * probe_step),
+                        )
+                    )
+                )
+                corrected_norm = float(jnp.linalg.norm(corrected_derivative))
+                partial_norm = float(jnp.linalg.norm(partial_derivative))
+                root_norm = float(jnp.linalg.norm(root_derivative))
+                relation_upper_levels = jax.block_until_ready(
+                    branch_levels(state + 2.0 * probe_step * direction)
+                )
+                relation_lower_levels = jax.block_until_ready(
+                    branch_levels(state - 2.0 * probe_step * direction)
+                )
+                implicit_relation_probes.append(
+                    {
+                        "multiplier": multiplier,
+                        "step": probe_step,
+                        "finite_difference_stencil": "five-point central",
+                        "corrected_derivative_l2": corrected_norm,
+                        "partial_derivative_l2": partial_norm,
+                        "root_derivative_l2": root_norm,
+                        "relative_error": corrected_norm
+                        / max(
+                            partial_norm,
+                            root_norm,
+                            np.finfo(np.float64).tiny,
+                        ),
+                        "upper_sign_changes": int(
+                            jnp.sum((relation_upper_levels > 0.0) != base_sign)
+                        ),
+                        "lower_sign_changes": int(
+                            jnp.sum((relation_lower_levels > 0.0) != base_sign)
+                        ),
+                    }
+                )
+            selected_root_probe = min(
+                polished_step_probes,
+                key=lambda probe: probe["relative_error"],
             )
-            rows.append(row)
-            receipt = {
+            stable_relation_probes = [
+                probe
+                for probe in implicit_relation_probes
+                if probe["upper_sign_changes"] == 0 and probe["lower_sign_changes"] == 0
+            ]
+            if not stable_relation_probes:
+                raise RuntimeError("no finite-difference probe retained its branch")
+            selected_relation_probe = min(
+                stable_relation_probes,
+                key=lambda probe: probe["relative_error"],
+            )
+            map_error_norm = float(jnp.linalg.norm(map_tangent - map_central))
+            map_tangent_norm = float(jnp.linalg.norm(map_tangent))
+            map_central_norm = float(jnp.linalg.norm(map_central))
+            level_error_norm = float(jnp.linalg.norm(level_tangent - level_central))
+            level_tangent_norm = float(jnp.linalg.norm(level_tangent))
+            level_central_norm = float(jnp.linalg.norm(level_central))
+            step_probes = []
+            for multiplier in (0.25, 1.0, 4.0, 16.0, 64.0, 256.0):
+                probe_step = difference_step * multiplier
+                probe_upper = compiled_map(state + probe_step * direction)
+                probe_lower = compiled_map(state - probe_step * direction)
+                probe_central = (probe_upper - probe_lower) / (2.0 * probe_step)
+                upper_levels = branch_levels(state + probe_step * direction)
+                lower_levels = branch_levels(state - probe_step * direction)
+                probe_central, upper_levels, lower_levels = jax.block_until_ready(
+                    (probe_central, upper_levels, lower_levels)
+                )
+                probe_error = float(jnp.linalg.norm(map_tangent - probe_central))
+                probe_norm = float(jnp.linalg.norm(probe_central))
+                step_probes.append(
+                    {
+                        "multiplier": multiplier,
+                        "step": probe_step,
+                        "relative_error": probe_error
+                        / max(
+                            map_tangent_norm,
+                            probe_norm,
+                            np.finfo(np.float64).tiny,
+                        ),
+                        "upper_sign_changes": int(
+                            jnp.sum((upper_levels > 0.0) != base_sign)
+                        ),
+                        "lower_sign_changes": int(
+                            jnp.sum((lower_levels > 0.0) != base_sign)
+                        ),
+                        "opposed_probe_signs": int(
+                            jnp.sum((upper_levels > 0.0) != (lower_levels > 0.0))
+                        ),
+                    }
+                )
+            comparisons.append(
+                {
+                    "direction": name,
+                    "finite_difference_rule": (
+                        "sqrt(binary64 epsilon) times terminal infinity scale "
+                        "for a max-unit direction"
+                    ),
+                    "finite_difference_step": difference_step,
+                    "polished_root_tangent_l2": polished_tangent_norm,
+                    "polished_root_central_difference_l2": polished_central_norm,
+                    "polished_root_error_l2": polished_error_norm,
+                    "base_step_relative_error": polished_error_norm / polished_scale,
+                    "root_replay_relative_error": selected_root_probe["relative_error"],
+                    "relative_error": selected_relation_probe["relative_error"],
+                    "selected_finite_difference_step": selected_relation_probe["step"],
+                    "polished_root_error_linf": float(jnp.max(jnp.abs(polished_error))),
+                    "production_map_relative_error": map_error_norm
+                    / max(
+                        map_tangent_norm,
+                        map_central_norm,
+                        np.finfo(np.float64).tiny,
+                    ),
+                    "packing_level_jvp_relative_error": level_error_norm
+                    / max(
+                        level_tangent_norm,
+                        level_central_norm,
+                        np.finfo(np.float64).tiny,
+                    ),
+                    "polished_root_step_probes": polished_step_probes,
+                    "implicit_relation_step_probes": implicit_relation_probes,
+                    "step_probes": step_probes,
+                }
+            )
+        row = {
+            "requested_cells": requested,
+            "realised_cells": dimensions["realised_cells"],
+            "terminal_state": str(state_path),
+            "terminal_state_size": int(state.size),
+            "fixed_point_residual_l2": float(jnp.linalg.norm(residual)),
+            "gmres_info": int(gmres_info),
+            "branch": branch,
+            "relative_error_bound": JVP_RELATIVE_ERROR_BOUND,
+            "directions": comparisons,
+            "passed": all(
+                item["relative_error"] <= JVP_RELATIVE_ERROR_BOUND
+                for item in comparisons
+            ),
+        }
+        _atomic_json(
+            part_root / f"requested-{requested}.json",
+            {
                 "schema": "nova.exact-clip-jvp-accuracy",
                 "source_revision": certificate._source_revision(),
                 "lane": certificate._lane(),
-                "rows": rows,
-                "completed": len(rows) == 2,
-                "passed": len(rows) == 2 and all(item["passed"] for item in rows),
-            }
-            _atomic_json(output, receipt)
-            print(
-                "EXACT_CLIP_JVP "
-                f"requested={requested} "
-                + " ".join(
-                    f"{item['direction']}={item['relative_error']:.3e}"
-                    for item in comparisons
-                ),
-                flush=True,
-            )
-    finally:
-        set_support_clip_mode(original_mode)
+                "row": row,
+            },
+        )
+        rows.append(row)
+        receipt = {
+            "schema": "nova.exact-clip-jvp-accuracy",
+            "source_revision": certificate._source_revision(),
+            "lane": certificate._lane(),
+            "rows": rows,
+            "completed": len(rows) == 2,
+            "passed": len(rows) == 2 and all(item["passed"] for item in rows),
+        }
+        _atomic_json(output, receipt)
+        print(
+            "EXACT_CLIP_JVP "
+            f"requested={requested} "
+            + " ".join(
+                f"{item['direction']}={item['relative_error']:.3e}"
+                for item in comparisons
+            ),
+            flush=True,
+        )
     if not receipt["passed"]:
         raise RuntimeError("exact-clip JVP central-difference gate failed")
     return receipt

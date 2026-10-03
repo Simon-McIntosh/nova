@@ -26,7 +26,6 @@ import sys
 from time import time
 
 import benchmarks.solovev_certificate as certificate
-from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.equilibrium.reduced_newton import set_step_relaxation
 
 
@@ -124,14 +123,13 @@ def measure_one(label: str, clip_mode: str, relaxation: float) -> dict[str, obje
     figure_root.mkdir(parents=True, exist_ok=True)
     certificate.PART_ROOT = part_root
     certificate.FIGURE_ROOT = figure_root
-    set_support_clip_mode(clip_mode)
     set_step_relaxation(relaxation)
     print(
         f"DISCRIMINATOR_ARM_BEGIN arm={label} clip_mode={clip_mode} "
         f"relaxation={relaxation}",
         flush=True,
     )
-    certificate._measure(CASE_NAME, REQUESTED_CELLS)
+    certificate._measure(CASE_NAME, REQUESTED_CELLS, clip_mode=clip_mode)
     summary = _read_terminal_row(label)
     summary["completed_at_unix_seconds"] = time()
     summary["exit_status"] = 0

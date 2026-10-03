@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<title>Leaf benchmark clip-mode migration</title>
+</head>
+<body>
+<main>
+<h1>Leaf benchmark clip-mode migration</h1>
+<p>Twelve leaf benchmark drivers no longer set the process-global support clip
+mode. Each mode the file chose is now threaded explicitly to the operator,
+profile or solve request that evaluates support, and to the <code>clip_mode</code>
+keyword of every certificate or fixture helper it calls. No helper signature
+became mandatory: the migrated helpers keep an additive
+<code>clip_mode: str | None = None</code> keyword whose default <code>None</code>
+preserves the prior behaviour.</p>
+
+<h2>Former global sites</h2>
+<table>
+<thead><tr><th>Module</th><th>Mode</th><th>Explicit destination</th></tr></thead>
+<tbody>
+<tr><td><code>centroid_constrained_fixture_receipt</code></td><td>exact</td><td><code>_context(..., clip_mode=)</code> threads to <code>certificate._case</code>, <code>_case_machine</code> and both operators; <code>_row</code> and every row call pass <code>clip_mode=&quot;exact&quot;</code>; receipts record <code>operator.clip_mode</code></td></tr>
+<tr><td><code>centroid_field_response_probe</code></td><td>exact</td><td><code>stiffness._build_context(CASE_NAME, REQUESTED_CELLS, clip_mode=&quot;exact&quot;)</code>; receipt records <code>operator.clip_mode</code></td></tr>
+<tr><td><code>chord_booking_operation_trace</code></td><td>chord</td><td><code>fixture.forward_operator(...).with_clip_mode(&quot;chord&quot;)</code></td></tr>
+<tr><td><code>coupling_moment_order_evaluation</code></td><td>exact</td><td><code>operator = oracle_fixture.forward_operator(...).with_clip_mode(&quot;exact&quot;)</code></td></tr>
+<tr><td><code>empty_exact_polygon_probe</code></td><td>exact</td><td><code>operator = operator.with_clip_mode(&quot;exact&quot;)</code></td></tr>
+<tr><td><code>exact_clip_low_state_discriminator</code></td><td>exact</td><td><code>_build_context(..., clip_mode=)</code> threads to <code>_case</code>, <code>_case_machine</code> and both operators</td></tr>
+<tr><td><code>exact_clip_memory_scaling</code></td><td>exact</td><td>every compile and solve helper takes <code>clip_mode</code> and passes <code>clip_mode=&quot;exact&quot;</code> to <code>_certificate_compile_problem</code></td></tr>
+<tr><td><code>exact_clip_warm_cost</code></td><td>exact</td><td><code>_certificate_problem(cells, *, clip_mode=)</code> passes it to <code>_certificate_compile_problem</code></td></tr>
+<tr><td><code>exact_cut_cell_moment_stages</code></td><td>exact</td><td><code>operator = fixture.forward_operator(...).with_clip_mode(&quot;exact&quot;)</code></td></tr>
+<tr><td><code>exact_placement_discriminator</code></td><td>per arm</td><td><code>certificate._measure(CASE_NAME, REQUESTED_CELLS, clip_mode=clip_mode)</code></td></tr>
+<tr><td><code>limited_row_shadow_census</code></td><td>chord and exact</td><td><code>_rebuild</code>, <code>_solve_gate</code> and <code>_run</code> thread <code>clip_mode</code> to <code>_case</code>, <code>_case_machine</code> and the operators</td></tr>
+<tr><td><code>limiter_read_resolution_audit</code></td><td>chord and exact</td><td>each <code>oracle_fixture.forward_operator(...)</code> is rebound with <code>.with_clip_mode(...)</code></td></tr>
+</tbody>
+</table>
+
+<h2>Verification</h2>
+<p>Eleven of the twelve modules carry no reference to the retired global; the
+one residual grep hit is a test-module path literal in the
+<code>limited_row_shadow_census</code> CPU-delta roster, not a symbol reference.
+Every module compiles and imports under the shared interpreter. No test module
+imports any of the twelve, so the importer set is empty; the clip-mode contract
+tests that would catch a bad migration run in a fresh CPU pytest process at the
+archived base and at the migrated head and are identical by test id. The run
+manifest records the literal commands, the per-module logs and the failure
+identifiers.</p>
+</main>
+</body>
+</html>

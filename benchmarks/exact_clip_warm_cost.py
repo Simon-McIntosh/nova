@@ -40,7 +40,6 @@ import numpy as np
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import clip_quadrature
 from nova.equilibrium import forward_operator
-from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes, configure_persistent_compilation_cache
 
@@ -327,9 +326,13 @@ def _solve_program(profile: Any, request: Any) -> Callable[[jax.Array], Any]:
     return solve_program
 
 
-def _certificate_problem(cells: int) -> tuple[Any, np.ndarray, Any, dict[str, Any]]:
+def _certificate_problem(
+    cells: int, *, clip_mode: str | None = None
+) -> tuple[Any, np.ndarray, Any, dict[str, Any]]:
     """Build one certificate row across the quadrature-node ownership move."""
-    return certificate._certificate_compile_problem(CASE, -abs(cells))
+    return certificate._certificate_compile_problem(
+        CASE, -abs(cells), clip_mode=clip_mode
+    )
 
 
 def _compile_and_time(
@@ -427,8 +430,7 @@ def _production_worker(
         raise RuntimeError("the exact-clip cost requires binary64")
     source = _require_promoted_source()
     cache = configure_persistent_compilation_cache(cache_root)
-    set_support_clip_mode("exact")
-    profile, seed, request, dimensions = _certificate_problem(cells)
+    profile, seed, request, dimensions = _certificate_problem(cells, clip_mode="exact")
     seed_array = jnp.asarray(seed, dtype=jnp.float64)
     compiled, solve_timing, result = _compile_and_time(
         _solve_program(profile, request), seed_array
@@ -577,10 +579,11 @@ def _former_compact_integrator():
 def _moment_worker(cells: int, production_part: Path, output: Path) -> dict[str, Any]:
     configure_dtypes()
     source = _require_promoted_source()
-    set_support_clip_mode("exact")
     production = json.loads(production_part.read_text(encoding="utf-8"))
     terminal = jnp.asarray(production["terminal"]["state"], dtype=jnp.float64)
-    profile, _seed, _request, dimensions = _certificate_problem(cells)
+    profile, _seed, _request, dimensions = _certificate_problem(
+        cells, clip_mode="exact"
+    )
     partition = jax.block_until_ready(
         profile.operator._support_partition(terminal, int(TopologyClass.LIMITED))
     )

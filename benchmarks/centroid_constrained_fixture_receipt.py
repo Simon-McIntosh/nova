@@ -30,7 +30,6 @@ from nova.equilibrium.constraint import (
     ConstraintPair,
     assemble_augmented_system,
 )
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.solve_request import default_forward_compilation_cache_root
 from nova.equilibrium.stencil_mesh import StencilMesh
@@ -183,20 +182,28 @@ def _translated_state(context: dict[str, Any]) -> np.ndarray:
     )
 
 
-def _context(case_name: str, requested_cells: int) -> dict[str, Any]:
-    carrier_case, source_case, exact = certificate._case(case_name)
-    machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
+def _context(
+    case_name: str, requested_cells: int, *, clip_mode: str | None = None
+) -> dict[str, Any]:
+    carrier_case, source_case, exact = certificate._case(case_name, clip_mode=clip_mode)
+    machine = certificate._case_machine(
+        case_name, carrier_case, exact, requested_cells, clip_mode=clip_mode
+    )
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     analytic = certificate._exact_state(case_name, exact, coordinates)
     empty = oracle_fixture.forward_operator(source_case, machine)
+    if clip_mode is not None:
+        empty = empty.with_clip_mode(clip_mode)
     exact_moments, baseline, cache = oracle_fixture.cached_fixture_exterior(
         source_case, exact, machine, empty, analytic
     )
     operator = oracle_fixture.forward_operator(
         source_case, machine, baseline, compensation=True
     )
+    if clip_mode is not None:
+        operator = operator.with_clip_mode(clip_mode)
     profile = ForwardProfile(
         operator,
         StencilMesh(machine.node, machine.stencil, machine.area),
@@ -637,46 +644,41 @@ def compile_probe_arm(output_root: Path, arm: str) -> dict[str, Any]:
         default_forward_compilation_cache_root()
     )
     lane = _lane("cpu")
-    previous_mode = support_clip_mode()
-    set_support_clip_mode("exact")
     started = perf_counter()
-    try:
-        context = _context("weak-rotation-reactor-static", -110)
-        constructed = perf_counter()
-        program, arguments = _compile_probe_program(
-            context, constrained=arm == "constrained"
-        )
-        lower_started = perf_counter()
-        lowered = program.lower(*arguments)
-        lower_seconds = perf_counter() - lower_started
-        stablehlo = lowered.as_text(dialect="stablehlo")
-        stablehlo_path = output_root / f"compile-{arm}.stablehlo"
-        stablehlo_path.parent.mkdir(parents=True, exist_ok=True)
-        stablehlo_path.write_text(stablehlo, encoding="utf-8")
-        partial = {
-            "schema": "nova.centroid-constraint-compile-probe",
-            "arm": arm,
-            "source_revision": _revision(),
-            "lane": lane,
-            "cache_directory": str(cache.directory),
-            "construction_seconds": constructed - started,
-            "lower_seconds": lower_seconds,
-            "stablehlo_instruction_count": _stablehlo_instruction_count(stablehlo),
-            "stablehlo_sha256": hashlib.sha256(stablehlo.encode()).hexdigest(),
-            "stablehlo_path": str(stablehlo_path),
-            "completed": False,
-        }
-        state_path = output_root / f"compile-{arm}.json"
-        _write_json(state_path, partial)
-        compile_started = perf_counter()
-        lowered.compile()
-        partial["backend_compile_seconds"] = perf_counter() - compile_started
-        partial["total_seconds"] = perf_counter() - started
-        partial["completed"] = True
-        _write_json(state_path, partial)
-        return partial
-    finally:
-        set_support_clip_mode(previous_mode)
+    context = _context("weak-rotation-reactor-static", -110, clip_mode="exact")
+    constructed = perf_counter()
+    program, arguments = _compile_probe_program(
+        context, constrained=arm == "constrained"
+    )
+    lower_started = perf_counter()
+    lowered = program.lower(*arguments)
+    lower_seconds = perf_counter() - lower_started
+    stablehlo = lowered.as_text(dialect="stablehlo")
+    stablehlo_path = output_root / f"compile-{arm}.stablehlo"
+    stablehlo_path.parent.mkdir(parents=True, exist_ok=True)
+    stablehlo_path.write_text(stablehlo, encoding="utf-8")
+    partial = {
+        "schema": "nova.centroid-constraint-compile-probe",
+        "arm": arm,
+        "source_revision": _revision(),
+        "lane": lane,
+        "cache_directory": str(cache.directory),
+        "construction_seconds": constructed - started,
+        "lower_seconds": lower_seconds,
+        "stablehlo_instruction_count": _stablehlo_instruction_count(stablehlo),
+        "stablehlo_sha256": hashlib.sha256(stablehlo.encode()).hexdigest(),
+        "stablehlo_path": str(stablehlo_path),
+        "completed": False,
+    }
+    state_path = output_root / f"compile-{arm}.json"
+    _write_json(state_path, partial)
+    compile_started = perf_counter()
+    lowered.compile()
+    partial["backend_compile_seconds"] = perf_counter() - compile_started
+    partial["total_seconds"] = perf_counter() - started
+    partial["completed"] = True
+    _write_json(state_path, partial)
+    return partial
 
 
 def _callback_counts(text: str) -> dict[str, int]:
@@ -718,125 +720,118 @@ def reader_facts(output_root: Path) -> dict[str, Any]:
     configure_dtypes()
     configure_persistent_compilation_cache(default_forward_compilation_cache_root())
     lane = _lane("h200")
-    previous_mode = support_clip_mode()
-    set_support_clip_mode("exact")
-    try:
-        context = _context("weak-rotation-reactor-static", -110)
-        profile = context["profile"]
-        pairs = _certificate_pairs(context, level=True)
-        centroid_pair, level_pair = pairs
-        binding = level_pair.binding
-        flux = jnp.asarray(context["seed"], dtype=jnp.float64)
+    context = _context("weak-rotation-reactor-static", -110, clip_mode="exact")
+    profile = context["profile"]
+    pairs = _certificate_pairs(context, level=True)
+    centroid_pair, level_pair = pairs
+    binding = level_pair.binding
+    flux = jnp.asarray(context["seed"], dtype=jnp.float64)
 
-        def read(flux_state, pair):
-            ctx = ConstraintContext(
-                flux=flux_state,
-                requested_class=None,
-                target_current=jnp.asarray(context["target_current"]),
-                shadow=None,
-            )
-            return pair.functional.residual(
-                profile,
-                ctx,
-                jnp.zeros(1, dtype=jnp.float64),
-                binding.payload,
-                binding.target,
-                binding.scale,
-            )
-
-        row_jaxpr = jax.make_jaxpr(lambda state: read(state, level_pair))(flux)
-        centroid_jaxpr = jax.make_jaxpr(lambda state: read(state, centroid_pair))(flux)
-        row_text = str(row_jaxpr)
-        centroid_text = str(centroid_jaxpr)
-        row_callbacks = _callback_counts(row_text)
-
-        row_observed = jax.jit(lambda state: read(state, level_pair))
-        observed_wall = _wall_per_evaluation(row_observed, flux)
-
-        request = _certificate_request(context)
-        systems = {
-            level: _augmented_system(
-                context, request, _certificate_pairs(context, level=level)
-            )
-            for level in (True, False)
-        }
-        steps = {level: jax.jit(system.map_fn) for level, system in systems.items()}
-        # each map is evaluated at its own initial state: the two systems carry
-        # one unknown per row, so the level row's system holds one more
-        newton_step_wall = _wall_per_evaluation(
-            steps[True], jnp.asarray(systems[True].initial, dtype=jnp.float64)
+    def read(flux_state, pair):
+        ctx = ConstraintContext(
+            flux=flux_state,
+            requested_class=None,
+            target_current=jnp.asarray(context["target_current"]),
+            shadow=None,
         )
-        newton_step_wall_without = _wall_per_evaluation(
-            steps[False], jnp.asarray(systems[False].initial, dtype=jnp.float64)
+        return pair.functional.residual(
+            profile,
+            ctx,
+            jnp.zeros(1, dtype=jnp.float64),
+            binding.payload,
+            binding.target,
+            binding.scale,
         )
 
-        builds = {}
-        for level in (True, False):
-            program, arguments = _compile_probe_program(
-                context, constrained=True, level=level
-            )
-            lowered = program.lower(*arguments)
-            text = lowered.as_text(dialect="stablehlo")
-            started = perf_counter()
-            lowered.compile()
-            builds["with_level_row" if level else "without_level_row"] = {
-                "compile_seconds": perf_counter() - started,
-                "stablehlo_instruction_count": _stablehlo_instruction_count(text),
-                "stablehlo_callback_counts": _callback_counts(text),
-                "stablehlo_sha256": hashlib.sha256(text.encode()).hexdigest(),
-            }
+    row_jaxpr = jax.make_jaxpr(lambda state: read(state, level_pair))(flux)
+    centroid_jaxpr = jax.make_jaxpr(lambda state: read(state, centroid_pair))(flux)
+    row_text = str(row_jaxpr)
+    centroid_text = str(centroid_jaxpr)
+    row_callbacks = _callback_counts(row_text)
 
-        observed_seconds = observed_wall["seconds_per_evaluation"]
-        step_seconds = newton_step_wall["seconds_per_evaluation"]
-        level_cost = {
-            "unknowns_with_level_row": int(systems[True].initial.shape[0]),
-            "unknowns_without_level_row": int(systems[False].initial.shape[0]),
-            "observed_seconds_per_evaluation": observed_seconds,
-            "observed_repeats": observed_wall["repeats"],
-            "one_newton_step_seconds": step_seconds,
-            "one_newton_step_repeats": newton_step_wall["repeats"],
-            "observed_to_step_ratio": observed_seconds / step_seconds,
-            "one_newton_step_seconds_without_level_row": newton_step_wall_without[
-                "seconds_per_evaluation"
-            ],
-            "one_newton_step_repeats_without_level_row": newton_step_wall_without[
-                "repeats"
-            ],
-            "compile_seconds_with_level_row": builds["with_level_row"][
-                "compile_seconds"
-            ],
-            "compile_seconds_without_level_row": builds["without_level_row"][
-                "compile_seconds"
-            ],
-            "compile_seconds_delta": builds["with_level_row"]["compile_seconds"]
-            - builds["without_level_row"]["compile_seconds"],
-            "stablehlo_instruction_delta": builds["with_level_row"][
-                "stablehlo_instruction_count"
-            ]
-            - builds["without_level_row"]["stablehlo_instruction_count"],
+    row_observed = jax.jit(lambda state: read(state, level_pair))
+    observed_wall = _wall_per_evaluation(row_observed, flux)
+
+    request = _certificate_request(context)
+    systems = {
+        level: _augmented_system(
+            context, request, _certificate_pairs(context, level=level)
+        )
+        for level in (True, False)
+    }
+    steps = {level: jax.jit(system.map_fn) for level, system in systems.items()}
+    # each map is evaluated at its own initial state: the two systems carry
+    # one unknown per row, so the level row's system holds one more
+    newton_step_wall = _wall_per_evaluation(
+        steps[True], jnp.asarray(systems[True].initial, dtype=jnp.float64)
+    )
+    newton_step_wall_without = _wall_per_evaluation(
+        steps[False], jnp.asarray(systems[False].initial, dtype=jnp.float64)
+    )
+
+    builds = {}
+    for level in (True, False):
+        program, arguments = _compile_probe_program(
+            context, constrained=True, level=level
+        )
+        lowered = program.lower(*arguments)
+        text = lowered.as_text(dialect="stablehlo")
+        started = perf_counter()
+        lowered.compile()
+        builds["with_level_row" if level else "without_level_row"] = {
+            "compile_seconds": perf_counter() - started,
+            "stablehlo_instruction_count": _stablehlo_instruction_count(text),
+            "stablehlo_callback_counts": _callback_counts(text),
+            "stablehlo_sha256": hashlib.sha256(text.encode()).hexdigest(),
         }
-        receipt = {
-            "schema": "nova.centroid-flux-level-reader-facts",
-            "source_revision": _revision(),
-            "lane": lane,
-            "support_clip_mode": "exact",
-            "case": "weak-rotation-reactor-static",
-            "requested_cells": -110,
-            "carrier": type(profile.lattice).__name__,
-            "reader_identity": reader_identity(),
-            "row_jaxpr_callback_counts": row_callbacks,
-            "row_jaxpr_has_host_callback": bool(
-                row_callbacks["pure_callback"] or row_callbacks["callback"]
-            ),
-            "centroid_row_jaxpr_callback_counts": _callback_counts(centroid_text),
-            "compiled_program": builds,
-            "level_cost": level_cost,
-            "level_amplitude_slot_wb": float(DEFAULT_LEVEL_SCALE_WB),
-        }
-        _write_json(output_root / "reader-facts.json", receipt)
-        return receipt
-    finally:
-        set_support_clip_mode(previous_mode)
+
+    observed_seconds = observed_wall["seconds_per_evaluation"]
+    step_seconds = newton_step_wall["seconds_per_evaluation"]
+    level_cost = {
+        "unknowns_with_level_row": int(systems[True].initial.shape[0]),
+        "unknowns_without_level_row": int(systems[False].initial.shape[0]),
+        "observed_seconds_per_evaluation": observed_seconds,
+        "observed_repeats": observed_wall["repeats"],
+        "one_newton_step_seconds": step_seconds,
+        "one_newton_step_repeats": newton_step_wall["repeats"],
+        "observed_to_step_ratio": observed_seconds / step_seconds,
+        "one_newton_step_seconds_without_level_row": newton_step_wall_without[
+            "seconds_per_evaluation"
+        ],
+        "one_newton_step_repeats_without_level_row": newton_step_wall_without[
+            "repeats"
+        ],
+        "compile_seconds_with_level_row": builds["with_level_row"]["compile_seconds"],
+        "compile_seconds_without_level_row": builds["without_level_row"][
+            "compile_seconds"
+        ],
+        "compile_seconds_delta": builds["with_level_row"]["compile_seconds"]
+        - builds["without_level_row"]["compile_seconds"],
+        "stablehlo_instruction_delta": builds["with_level_row"][
+            "stablehlo_instruction_count"
+        ]
+        - builds["without_level_row"]["stablehlo_instruction_count"],
+    }
+    receipt = {
+        "schema": "nova.centroid-flux-level-reader-facts",
+        "source_revision": _revision(),
+        "lane": lane,
+        "clip_mode": profile.operator.clip_mode,
+        "case": "weak-rotation-reactor-static",
+        "requested_cells": -110,
+        "carrier": type(profile.lattice).__name__,
+        "reader_identity": reader_identity(),
+        "row_jaxpr_callback_counts": row_callbacks,
+        "row_jaxpr_has_host_callback": bool(
+            row_callbacks["pure_callback"] or row_callbacks["callback"]
+        ),
+        "centroid_row_jaxpr_callback_counts": _callback_counts(centroid_text),
+        "compiled_program": builds,
+        "level_cost": level_cost,
+        "level_amplitude_slot_wb": float(DEFAULT_LEVEL_SCALE_WB),
+    }
+    _write_json(output_root / "reader-facts.json", receipt)
+    return receipt
 
 
 def measure_first_step(output_root: Path) -> dict[str, Any]:
@@ -851,66 +846,63 @@ def measure_first_step(output_root: Path) -> dict[str, Any]:
     configure_dtypes()
     configure_persistent_compilation_cache(default_forward_compilation_cache_root())
     lane = _lane("h200")
-    previous_mode = support_clip_mode()
-    set_support_clip_mode("exact")
-    try:
-        context = _context("weak-rotation-reactor-static", -110)
-        observation = context["profile"].current_moment_observation(
-            jnp.asarray(context["seed"]),
-            support=MomentIntegralSupport.ALL_DOMAIN,
-            target_current=context["target_current"],
-        )
-        observed = np.asarray(
-            (observation.centroid_r, observation.centroid_z), dtype=np.float64
-        )
-        target = context["centroid"]
-        pitch = context["pitch"]
-        row_scaled_residual = (observed - target) / pitch
-        normalised_step = -row_scaled_residual
-        field_step = DEFAULT_FIELD_SCALE_T * normalised_step
-        probe_field = -row_scaled_residual[0] * pitch / PROBE_RADIAL_M_PER_T
-        receipt = {
-            "schema": "nova.centroid-first-newton-step",
-            "source_revision": _revision(),
-            "support_clip_mode": "exact",
-            "lane": lane,
-            "case": "weak-rotation-reactor-static",
-            "requested_cells": -110,
-            "realised_cells": len(context["machine"].node),
-            "characteristic_pitch_m": pitch,
-            "analytic_centroid_m": target,
-            "seed_centroid_observed_m": observed,
-            "seed_centroid_offset_m": observed - target,
-            "row_scaled_residual": row_scaled_residual,
-            "first_step_normalized": normalised_step,
-            "first_step_field_t": field_step,
-            "first_step_pitches": normalised_step,
-            "probe_radial_response_m_per_t": PROBE_RADIAL_M_PER_T,
-            "probe_field_for_seed_offset_t": np.asarray(
-                (probe_field, np.nan), dtype=np.float64
-            ),
-            "probe_field_for_seed_offset_pitches": np.asarray(
-                (probe_field * PROBE_RADIAL_M_PER_T / pitch, np.nan),
-                dtype=np.float64,
-            ),
-            "first_step_to_probe_ratio": float(field_step[0] / probe_field),
-            "field_bound_t": DEFAULT_FIELD_BOUND_T,
-            "step_limit": DEFAULT_STEP_LIMIT,
-            "first_step_exceeds_declared_bound": bool(
-                np.any(np.abs(field_step) > DEFAULT_FIELD_BOUND_T)
-            ),
-            "first_step_cap_binds": bool(
-                np.any(np.abs(normalised_step) > DEFAULT_STEP_LIMIT)
-            ),
-        }
-        _write_json(output_root / "weak-first-step.json", receipt)
-        return receipt
-    finally:
-        set_support_clip_mode(previous_mode)
+    context = _context("weak-rotation-reactor-static", -110, clip_mode="exact")
+    observation = context["profile"].current_moment_observation(
+        jnp.asarray(context["seed"]),
+        support=MomentIntegralSupport.ALL_DOMAIN,
+        target_current=context["target_current"],
+    )
+    observed = np.asarray(
+        (observation.centroid_r, observation.centroid_z), dtype=np.float64
+    )
+    target = context["centroid"]
+    pitch = context["pitch"]
+    row_scaled_residual = (observed - target) / pitch
+    normalised_step = -row_scaled_residual
+    field_step = DEFAULT_FIELD_SCALE_T * normalised_step
+    probe_field = -row_scaled_residual[0] * pitch / PROBE_RADIAL_M_PER_T
+    receipt = {
+        "schema": "nova.centroid-first-newton-step",
+        "source_revision": _revision(),
+        "clip_mode": context["profile"].operator.clip_mode,
+        "lane": lane,
+        "case": "weak-rotation-reactor-static",
+        "requested_cells": -110,
+        "realised_cells": len(context["machine"].node),
+        "characteristic_pitch_m": pitch,
+        "analytic_centroid_m": target,
+        "seed_centroid_observed_m": observed,
+        "seed_centroid_offset_m": observed - target,
+        "row_scaled_residual": row_scaled_residual,
+        "first_step_normalized": normalised_step,
+        "first_step_field_t": field_step,
+        "first_step_pitches": normalised_step,
+        "probe_radial_response_m_per_t": PROBE_RADIAL_M_PER_T,
+        "probe_field_for_seed_offset_t": np.asarray(
+            (probe_field, np.nan), dtype=np.float64
+        ),
+        "probe_field_for_seed_offset_pitches": np.asarray(
+            (probe_field * PROBE_RADIAL_M_PER_T / pitch, np.nan),
+            dtype=np.float64,
+        ),
+        "first_step_to_probe_ratio": float(field_step[0] / probe_field),
+        "field_bound_t": DEFAULT_FIELD_BOUND_T,
+        "step_limit": DEFAULT_STEP_LIMIT,
+        "first_step_exceeds_declared_bound": bool(
+            np.any(np.abs(field_step) > DEFAULT_FIELD_BOUND_T)
+        ),
+        "first_step_cap_binds": bool(
+            np.any(np.abs(normalised_step) > DEFAULT_STEP_LIMIT)
+        ),
+    }
+    _write_json(output_root / "weak-first-step.json", receipt)
+    return receipt
 
 
-def _row(case_name: str, requested_cells: int) -> tuple[dict[str, Any], dict[str, Any]]:
-    context = _context(case_name, requested_cells)
+def _row(
+    case_name: str, requested_cells: int, *, clip_mode: str | None = None
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    context = _context(case_name, requested_cells, clip_mode=clip_mode)
     result, state = _solve(context, context["seed"], constrained=True)
     row = {
         "case": case_name,
@@ -1236,30 +1228,25 @@ def control_arm(
     configure_persistent_compilation_cache(default_forward_compilation_cache_root())
     lane = _lane(lane_requirement)
     constrained = arm == "positive"
-    previous_mode = support_clip_mode()
-    set_support_clip_mode("exact")
-    try:
-        context = _context("weak-rotation-reactor-static", -110)
-        displaced = _translated_state(context)
-        result, state = _solve(context, displaced, constrained=constrained)
-        topology = result["topology"]
-        figure = _draw_state(
-            context,
-            state,
-            figure_path,
-            title=(
-                "bounded centroid row on a displaced seed"
-                if constrained
-                else "same displaced seed, no row"
-            ),
-            project_src=(
-                f"/nova/figures/centroid-constrained-oracle-solve/control-{arm}.png"
-            ),
-            topology=topology,
-            contact_rz_m=topology.get("wall_contact_rz_m"),
-        )
-    finally:
-        set_support_clip_mode(previous_mode)
+    context = _context("weak-rotation-reactor-static", -110, clip_mode="exact")
+    displaced = _translated_state(context)
+    result, state = _solve(context, displaced, constrained=constrained)
+    topology = result["topology"]
+    figure = _draw_state(
+        context,
+        state,
+        figure_path,
+        title=(
+            "bounded centroid row on a displaced seed"
+            if constrained
+            else "same displaced seed, no row"
+        ),
+        project_src=(
+            f"/nova/figures/centroid-constrained-oracle-solve/control-{arm}.png"
+        ),
+        topology=topology,
+        contact_rz_m=topology.get("wall_contact_rz_m"),
+    )
     state_path = output_root / f"control-{arm}-state.npy"
     np.save(state_path, np.asarray(state, dtype=np.float64))
     control = control_receipt(
@@ -1295,7 +1282,7 @@ def control_receipt(
         "arm": arm,
         "constrained": constrained,
         "source_revision": _revision(),
-        "support_clip_mode": "exact",
+        "clip_mode": context["operator"].clip_mode,
         "lane": lane,
         "field_identity": exterior_field_identity(),
         "case": "weak-rotation-reactor-static",
@@ -1327,91 +1314,86 @@ def unit_leverage_arm(
     configure_dtypes()
     configure_persistent_compilation_cache(default_forward_compilation_cache_root())
     lane = _lane(lane_requirement)
-    previous_mode = support_clip_mode()
-    set_support_clip_mode("exact")
-    try:
-        context = _context("weak-rotation-reactor-static", -110)
-        displaced = _translated_state(context)
-        seed_digest = _digest(displaced)
-        if not seed_digest.startswith(UNIT_LEVERAGE_SEED_DIGEST):
-            raise RuntimeError(
-                f"the displaced seed hashes to {seed_digest}, not the banked "
-                f"{UNIT_LEVERAGE_SEED_DIGEST}"
-            )
-        level = _seed_level_offset_wb(context, displaced)
-        print(f"CENTROID_UNIT_LEVERAGE_START {level}", flush=True)
-        arguments = {
-            "constrained": True,
-            "field_scale_t": DEFAULT_FIELD_BOUND_T,
-            "initial_level_wb": level["initial_level_wb"],
-        }
-        result, state = _solve(context, displaced, **arguments)
-        state_path = output_root / "control-positive-state.npy"
-        output_root.mkdir(parents=True, exist_ok=True)
-        np.save(state_path, np.asarray(state, dtype=np.float64))
-        control = control_receipt(
-            context,
-            arm="positive",
-            constrained=True,
-            lane=lane,
-            displaced=displaced,
-            result=result,
-            state=state,
-            figure=None,
+    context = _context("weak-rotation-reactor-static", -110, clip_mode="exact")
+    displaced = _translated_state(context)
+    seed_digest = _digest(displaced)
+    if not seed_digest.startswith(UNIT_LEVERAGE_SEED_DIGEST):
+        raise RuntimeError(
+            f"the displaced seed hashes to {seed_digest}, not the banked "
+            f"{UNIT_LEVERAGE_SEED_DIGEST}"
         )
-        control["terminal_state_path"] = str(state_path)
-        control["unit_leverage"] = {
-            **level,
-            "field_scale_t": DEFAULT_FIELD_BOUND_T,
-            "newton_steps": certificate.recovery.NEWTON_STEPS,
-            "gmres_iterations": certificate.recovery.KRYLOV_ITERATIONS,
-            "solve_wall_seconds_first_call": result["wall_seconds"],
-        }
-        _write_json(output_root / "control-positive.json", control)
-        print(
-            "CENTROID_UNIT_LEVERAGE "
-            f"lane={lane['partition']} "
-            f"centroid_error_pitches={result['centroid_error_pitches']:+.9e} "
-            f"row_scaled_residual_sup={result['row_scaled_residual_sup']:+.9e} "
-            f"level_row_scaled_residual={result['level_row_scaled_residual']:+.9e} "
-            f"terminal_residual={result['terminal_residual']:+.9e} "
-            f"field_t={result['compensating_field_t']} "
-            f"bound_refusal={result['bound_refusal']} "
-            f"qualified={result['qualified']} "
-            f"wall_seconds={result['wall_seconds']:.3f}",
-            flush=True,
-        )
-        topology = result["topology"]
-        control["figure"] = _draw_state(
-            context,
-            state,
-            figure_path,
-            title="three unit-leverage columns on a displaced seed",
-            project_src=(
-                "/nova/figures/centroid-constrained-oracle-solve/unit-leverage/"
-                f"{figure_path.name}"
-            ),
-            topology=topology,
-            contact_rz_m=topology.get("wall_contact_rz_m"),
-        )
-        _write_json(output_root / "control-positive.json", control)
-        warm, _ = _solve(context, displaced, **arguments)
-        control["unit_leverage"]["solve_wall_seconds_warm_call"] = warm["wall_seconds"]
-        control["unit_leverage"]["warm_terminal_residual"] = warm["terminal_residual"]
-        control["unit_leverage"]["compile_and_trace_seconds"] = (
-            result["wall_seconds"] - warm["wall_seconds"]
-        )
-        _write_json(output_root / "control-positive.json", control)
-        print(
-            "CENTROID_UNIT_LEVERAGE_WARM "
-            f"warm_wall_seconds={warm['wall_seconds']:.3f} "
-            f"compile_and_trace_seconds="
-            f"{control['unit_leverage']['compile_and_trace_seconds']:.3f} "
-            f"warm_terminal_residual={warm['terminal_residual']:+.9e}",
-            flush=True,
-        )
-    finally:
-        set_support_clip_mode(previous_mode)
+    level = _seed_level_offset_wb(context, displaced)
+    print(f"CENTROID_UNIT_LEVERAGE_START {level}", flush=True)
+    arguments = {
+        "constrained": True,
+        "field_scale_t": DEFAULT_FIELD_BOUND_T,
+        "initial_level_wb": level["initial_level_wb"],
+    }
+    result, state = _solve(context, displaced, **arguments)
+    state_path = output_root / "control-positive-state.npy"
+    output_root.mkdir(parents=True, exist_ok=True)
+    np.save(state_path, np.asarray(state, dtype=np.float64))
+    control = control_receipt(
+        context,
+        arm="positive",
+        constrained=True,
+        lane=lane,
+        displaced=displaced,
+        result=result,
+        state=state,
+        figure=None,
+    )
+    control["terminal_state_path"] = str(state_path)
+    control["unit_leverage"] = {
+        **level,
+        "field_scale_t": DEFAULT_FIELD_BOUND_T,
+        "newton_steps": certificate.recovery.NEWTON_STEPS,
+        "gmres_iterations": certificate.recovery.KRYLOV_ITERATIONS,
+        "solve_wall_seconds_first_call": result["wall_seconds"],
+    }
+    _write_json(output_root / "control-positive.json", control)
+    print(
+        "CENTROID_UNIT_LEVERAGE "
+        f"lane={lane['partition']} "
+        f"centroid_error_pitches={result['centroid_error_pitches']:+.9e} "
+        f"row_scaled_residual_sup={result['row_scaled_residual_sup']:+.9e} "
+        f"level_row_scaled_residual={result['level_row_scaled_residual']:+.9e} "
+        f"terminal_residual={result['terminal_residual']:+.9e} "
+        f"field_t={result['compensating_field_t']} "
+        f"bound_refusal={result['bound_refusal']} "
+        f"qualified={result['qualified']} "
+        f"wall_seconds={result['wall_seconds']:.3f}",
+        flush=True,
+    )
+    topology = result["topology"]
+    control["figure"] = _draw_state(
+        context,
+        state,
+        figure_path,
+        title="three unit-leverage columns on a displaced seed",
+        project_src=(
+            "/nova/figures/centroid-constrained-oracle-solve/unit-leverage/"
+            f"{figure_path.name}"
+        ),
+        topology=topology,
+        contact_rz_m=topology.get("wall_contact_rz_m"),
+    )
+    _write_json(output_root / "control-positive.json", control)
+    warm, _ = _solve(context, displaced, **arguments)
+    control["unit_leverage"]["solve_wall_seconds_warm_call"] = warm["wall_seconds"]
+    control["unit_leverage"]["warm_terminal_residual"] = warm["terminal_residual"]
+    control["unit_leverage"]["compile_and_trace_seconds"] = (
+        result["wall_seconds"] - warm["wall_seconds"]
+    )
+    _write_json(output_root / "control-positive.json", control)
+    print(
+        "CENTROID_UNIT_LEVERAGE_WARM "
+        f"warm_wall_seconds={warm['wall_seconds']:.3f} "
+        f"compile_and_trace_seconds="
+        f"{control['unit_leverage']['compile_and_trace_seconds']:.3f} "
+        f"warm_terminal_residual={warm['terminal_residual']:+.9e}",
+        flush=True,
+    )
     return control
 
 
@@ -1458,68 +1440,63 @@ def control_arm_chunked(
         field_t = None
         level_wb = None
     started = perf_counter()
-    previous_mode = support_clip_mode()
-    set_support_clip_mode("exact")
-    try:
-        context = _context("weak-rotation-reactor-static", -110)
-        displaced = (
-            np.asarray(state, dtype=np.float64)
-            if state is not None
-            else _translated_state(context)
+    context = _context("weak-rotation-reactor-static", -110, clip_mode="exact")
+    displaced = (
+        np.asarray(state, dtype=np.float64)
+        if state is not None
+        else _translated_state(context)
+    )
+    state = displaced
+    converged = False
+    result: dict[str, Any] = {}
+    while True:
+        result, state = _solve(
+            context,
+            state,
+            constrained=arm == "positive",
+            trips=trips,
+            initial_field_t=field_t,
+            initial_level_wb=level_wb,
         )
-        state = displaced
-        converged = False
-        result: dict[str, Any] = {}
-        while True:
-            result, state = _solve(
-                context,
-                state,
-                constrained=arm == "positive",
-                trips=trips,
-                initial_field_t=field_t,
-                initial_level_wb=level_wb,
-            )
-            trips_done += trips
-            chunks_done += 1
-            amplitudes = np.asarray(result["compensating_amplitudes"], dtype=np.float64)
-            field_t = [float(value) for value in amplitudes[:2]]
-            level_wb = float(amplitudes[2])
-            residual = float(result["terminal_residual"])
-            converged = residual <= certificate.TERMINAL_RESIDUAL_BOUND
-            np.save(checkpoint_state, np.asarray(state, dtype=np.float64))
-            _write_json(
-                checkpoint_path,
-                {
-                    "schema": "nova.centroid-control-continuation",
-                    "arm": arm,
-                    "resumed_from": None if resumed is None else resumed.get("arm"),
-                    "chunks_completed": chunks_done,
-                    "trips_completed": trips_done,
-                    "trips_per_chunk": trips,
-                    "terminal_residual": residual,
-                    "converged": converged,
-                    "last_field_t": field_t,
-                    "last_level_wb": level_wb,
-                    "wall_seconds": perf_counter() - started,
-                    "source_revision": _revision(),
-                    "lane": lane,
-                },
-            )
-            print(
-                "CENTROID_CONTROL_CHUNK "
-                f"arm={arm} chunks={chunks_done} trips={trips_done} "
-                f"terminal_residual={residual:+.6e} converged={converged} "
-                f"wall_seconds={perf_counter() - started:.3f}",
-                flush=True,
-            )
-            if converged:
-                break
-            if perf_counter() - started >= wall_fence_seconds:
-                break
-            if trips_done >= CHUNK_TRIP_CEILING:
-                break
-    finally:
-        set_support_clip_mode(previous_mode)
+        trips_done += trips
+        chunks_done += 1
+        amplitudes = np.asarray(result["compensating_amplitudes"], dtype=np.float64)
+        field_t = [float(value) for value in amplitudes[:2]]
+        level_wb = float(amplitudes[2])
+        residual = float(result["terminal_residual"])
+        converged = residual <= certificate.TERMINAL_RESIDUAL_BOUND
+        np.save(checkpoint_state, np.asarray(state, dtype=np.float64))
+        _write_json(
+            checkpoint_path,
+            {
+                "schema": "nova.centroid-control-continuation",
+                "arm": arm,
+                "resumed_from": None if resumed is None else resumed.get("arm"),
+                "chunks_completed": chunks_done,
+                "trips_completed": trips_done,
+                "trips_per_chunk": trips,
+                "terminal_residual": residual,
+                "converged": converged,
+                "last_field_t": field_t,
+                "last_level_wb": level_wb,
+                "wall_seconds": perf_counter() - started,
+                "source_revision": _revision(),
+                "lane": lane,
+            },
+        )
+        print(
+            "CENTROID_CONTROL_CHUNK "
+            f"arm={arm} chunks={chunks_done} trips={trips_done} "
+            f"terminal_residual={residual:+.6e} converged={converged} "
+            f"wall_seconds={perf_counter() - started:.3f}",
+            flush=True,
+        )
+        if converged:
+            break
+        if perf_counter() - started >= wall_fence_seconds:
+            break
+        if trips_done >= CHUNK_TRIP_CEILING:
+            break
     if not converged:
         return {
             "arm": arm,
@@ -1582,27 +1559,22 @@ def render_control_state(
             )
     topology = control["solve"]["topology"]
     configure_dtypes()
-    previous_mode = support_clip_mode()
-    set_support_clip_mode("exact")
-    try:
-        context = _context("weak-rotation-reactor-static", -110)
-        figure = _draw_state(
-            context,
-            state,
-            figure_path,
-            title=(
-                "bounded centroid row on a displaced seed"
-                if arm == "positive"
-                else "same displaced seed, no row"
-            ),
-            project_src=(
-                f"/nova/figures/centroid-constrained-oracle-solve/control-{arm}.png"
-            ),
-            topology=topology,
-            contact_rz_m=topology.get("wall_contact_rz_m"),
-        )
-    finally:
-        set_support_clip_mode(previous_mode)
+    context = _context("weak-rotation-reactor-static", -110, clip_mode="exact")
+    figure = _draw_state(
+        context,
+        state,
+        figure_path,
+        title=(
+            "bounded centroid row on a displaced seed"
+            if arm == "positive"
+            else "same displaced seed, no row"
+        ),
+        project_src=(
+            f"/nova/figures/centroid-constrained-oracle-solve/control-{arm}.png"
+        ),
+        topology=topology,
+        contact_rz_m=topology.get("wall_contact_rz_m"),
+    )
     control["figure"] = figure
     control["panel_source"] = (
         "persisted terminal state" if state is not None else "committed receipt"
@@ -1646,7 +1618,7 @@ def merge_controls(output_root: Path) -> dict[str, Any]:
     report = {
         "schema": "nova.centroid-constrained-analytic-fixture",
         "source_revision": _revision(),
-        "support_clip_mode": "exact",
+        "clip_mode": positive_receipt["clip_mode"],
         "split_jobs": {
             "row": row_path.name,
             "positive": positive_path.name,
@@ -1677,40 +1649,33 @@ def measure(output_root: Path, figure_path: Path) -> dict[str, Any]:
     configure_dtypes()
     configure_persistent_compilation_cache(default_forward_compilation_cache_root())
     lane = _lane("h200")
-    previous_mode = support_clip_mode()
-    set_support_clip_mode("exact")
     rows = []
     weak_artifacts = None
-    try:
-        for case_name, requested_cells in ROWS:
-            row, artifacts = _row(case_name, requested_cells)
-            rows.append(row)
-            _write_json(
-                output_root / f"{case_name}-cells-{abs(requested_cells)}.json", row
-            )
-            if case_name == "weak-rotation-reactor-static":
-                weak_artifacts = artifacts
-        if weak_artifacts is None:
-            raise RuntimeError("the weak positive control was not measured")
-        context = weak_artifacts["context"]
-        displaced = _translated_state(context)
-        positive, positive_state = _solve(context, displaced, constrained=True)
-        negative, negative_state = _solve(context, displaced, constrained=False)
-        controls = {
-            "displacement_m": DISPLACEMENT_M,
-            "displaced_seed_sha256_binary64": _digest(displaced),
-            "positive": positive,
-            "negative": negative,
-        }
-        _write_json(output_root / "weak-displaced-controls.json", controls)
-        figure = _draw_control(context, positive_state, negative_state, figure_path)
-    finally:
-        set_support_clip_mode(previous_mode)
+    for case_name, requested_cells in ROWS:
+        row, artifacts = _row(case_name, requested_cells, clip_mode="exact")
+        rows.append(row)
+        _write_json(output_root / f"{case_name}-cells-{abs(requested_cells)}.json", row)
+        if case_name == "weak-rotation-reactor-static":
+            weak_artifacts = artifacts
+    if weak_artifacts is None:
+        raise RuntimeError("the weak positive control was not measured")
+    context = weak_artifacts["context"]
+    displaced = _translated_state(context)
+    positive, positive_state = _solve(context, displaced, constrained=True)
+    negative, negative_state = _solve(context, displaced, constrained=False)
+    controls = {
+        "displacement_m": DISPLACEMENT_M,
+        "displaced_seed_sha256_binary64": _digest(displaced),
+        "positive": positive,
+        "negative": negative,
+    }
+    _write_json(output_root / "weak-displaced-controls.json", controls)
+    figure = _draw_control(context, positive_state, negative_state, figure_path)
     verdict = _control_verdict(rows, controls["positive"], controls["negative"])
     report = {
         "schema": "nova.centroid-constrained-analytic-fixture",
         "source_revision": _revision(),
-        "support_clip_mode": "exact",
+        "clip_mode": context["operator"].clip_mode,
         "lane": lane,
         "field_identity": exterior_field_identity(),
         "bound_refusal": _bound_refusal(),
@@ -1928,31 +1893,26 @@ def span_offset_receipt(
     if _digest(state) != control["terminal_state_sha256_binary64"]:
         raise ValueError("the banked state does not hash to its receipt digest")
     configure_dtypes()
-    previous_mode = support_clip_mode()
-    try:
-        set_support_clip_mode("exact")
-        context = _context(case_name, requested_cells)
-        profile = context["profile"]
-        target_current = context["target_current"]
+    context = _context(case_name, requested_cells, clip_mode="exact")
+    profile = context["profile"]
+    target_current = context["target_current"]
 
-        def observe(flux: np.ndarray) -> np.ndarray:
-            observation = profile.current_moment_observation(
-                jnp.asarray(flux),
-                support=MomentIntegralSupport.ALL_DOMAIN,
-                target_current=target_current,
-            )
-            return np.asarray(
-                (observation.centroid_r, observation.centroid_z), dtype=np.float64
-            )
+    def observe(flux: np.ndarray) -> np.ndarray:
+        observation = profile.current_moment_observation(
+            jnp.asarray(flux),
+            support=MomentIntegralSupport.ALL_DOMAIN,
+            target_current=target_current,
+        )
+        return np.asarray(
+            (observation.centroid_r, observation.centroid_z), dtype=np.float64
+        )
 
-        observed = observe(state)
-        perturbed = observe(np.nextafter(state, np.inf))
-        single = state.copy()
-        index = int(np.argmax(np.abs(state)))
-        single[index] = np.nextafter(single[index], np.inf)
-        single_perturbed = observe(single)
-    finally:
-        set_support_clip_mode(previous_mode)
+    observed = observe(state)
+    perturbed = observe(np.nextafter(state, np.inf))
+    single = state.copy()
+    index = int(np.argmax(np.abs(state)))
+    single[index] = np.nextafter(single[index], np.inf)
+    single_perturbed = observe(single)
     pitch = float(control["characteristic_pitch_m"])
     target = np.asarray(solve["centroid_target_m"], dtype=np.float64)
     error = observed - target

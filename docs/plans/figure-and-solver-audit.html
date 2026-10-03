@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="47">
+<meta name="plan-version" content="48">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -245,10 +245,11 @@
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit</pre>
     <p class="r-fu-outcome">Nova's record half landed at merge 93d6d9540 (commits ac83a864b, 9d1586498; reviews pass 89/100 and 93/100). Row r-20260918T201949355073-nia-limited-boundary-touches-wall-2 reads gate failed with exit_status 1. Its executable srun command is stored as a string, and its three failing ids are in suite_delta.after_suite.failure_ids. Both corrected rows round-trip through reckon's ledger normalisers unchanged. The write-path guard, refusing a passed verdict beside a nonzero asserted exit and a non-argv command, is reckon's: crew-runtime-positive-controls followup f-crpc-a-passed-verdict-agrees-with-its-exit-status. Eight further rows of the same class are section 5.</p>
     </article>
-<article class="r-fu" data-id="f-fsa-gate-b-cell-count-sign" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-gate-b-cell-count-sign" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-03T14:47:51+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Print the gate-b figures&#x27; cell count as a magnitude, as the moment-order titles now do</h4>
     <div class="r-fu-body">The fsa-repair-the-cell-count-sign follow-on: the two gate-b figures print the same leading minus on the cell count and need the same title repair in their own driver.</div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit</pre>
+    <p class="r-fu-outcome">Not repairable at HEAD. Node fsa-gate-b-cell-count-magnitude reproduced the leading minus on both committed gate-b panels, then found that their driver, benchmarks/frozen_current_flux_image_gate.py, is absent from main. It exists only on the unmerged ref refs/s19-tips/cca-gate-b-frozen-current-flux-image (e7e6cb392), beside unmerged forward_operator.py and observation.py changes. A cosmetic title repair does not justify landing that tip, so the decision moves to f-fsa-s19-tips-inventory, which covers all 33 unmerged S19 tips.</p>
     </article>
 <article class="r-fu" data-id="f-fsa-production-route-receipt-revision" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-02T17:40:22+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Stamp every production-route receipt with the source revision it was solved at</h4>
@@ -270,6 +271,11 @@
     <h4 class="r-fu-title">Make the production-solver receipt writer emit source_revision itself</h4>
     <div class="r-fu-body">docs/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json carries a source_revision field that was added by hand, with a value matching the receipt's own revision key, while its writer docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py does not emit the key. The test pinning source_revision now asserts it on that committed receipt, so regenerating the receipt would drop the field and turn the test red. Route measure.py's payload through the same stamp the benchmark writers use, so the field is written where the receipt is written, and regenerate nothing until a measurement needs it.</div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: make docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py stamp source_revision on its receipt payload.</pre>
+    </article>
+<article class="r-fu" data-id="f-fsa-s19-tips-inventory" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Inventory the 33 unmerged refs/s19-tips and decide which land and which retire</h4>
+    <div class="r-fu-body"><p>The repository carries 33 refs under refs/s19-tips that are not ancestors of main. At least one holds the only copy of a driver whose figures are banked on main: refs/s19-tips/cca-gate-b-frozen-current-flux-image (e7e6cb392) has benchmarks/frozen_current_flux_image_gate.py, which drew docs/figures/cut-cell-current-attribution/gate-b, beside unmerged changes to nova/equilibrium/forward_operator.py and observation.py. So committed figures on main cannot be regenerated, and a fix to them cannot land. For each tip, record its head, whether it is patch-equivalent to work already on main (git cherry), the files it changes beyond main, whether main carries figures or receipts it produced, and whether a later commit superseded it. Recommend land, extract only the driver, or retire. Done when every tip has a row and a recommendation, and the tips that strand banked figures are named.</p></div>
+    <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: inventory refs/s19-tips against main and recommend land, extract or retire for each</pre>
     </article>
 </section>
 
@@ -449,7 +455,7 @@
     <div class="r-comment-body"><p>Corrected two historical promotion rows: both commands and after-suite observations round-trip unchanged, with the failed row retaining exit 1 and all 3 failure ids and the passing row retaining its verified after-suite digest.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261003T142809497200-fsa-gate-b-cell-count-magnitude" data-who="reckon-build" data-when="2026-10-03T14:46:01.698Z">
-    <div class="r-comment-body"><p>blocked — the driver that drew the gate-b panels is benchmarks/frozen_current_flux_image_gate.py, outside this node&#x27;s gate-b write scope and not present in HEAD; no in-scope re-render is possible, so the two committed panels still print &quot;-110&quot;/&quot;-300&quot; (7 signed titles) and no corrected artifact was produced</p></div>
+    <div class="r-comment-body"><p>blocked — the driver that drew the gate-b panels is benchmarks/frozen_current_flux_image_gate.py, outside this node's gate-b write scope and not present in HEAD; no in-scope re-render is possible, so the two committed panels still print "-110"/"-300" (7 signed titles) and no corrected artifact was produced</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

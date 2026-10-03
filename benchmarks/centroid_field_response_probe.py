@@ -257,10 +257,10 @@ def _draw_panel(
     levels = poloidal.contour_levels(analytic_field, count=12)
     figure, axis = plt.subplots(1, 1, figsize=(5.4, 4.8), constrained_layout=True)
     poloidal.draw_flux_contours(
-        axis, radial, height, analytic_field, levels, color="#3366cc"
+        axis, radial, height, analytic_field, levels, color="#3366cc", wall=(wall,)
     )
     poloidal.draw_flux_contours(
-        axis, radial, height, response_field, levels, color="#cc7722"
+        axis, radial, height, response_field, levels, color="#cc7722", wall=(wall,)
     )
     poloidal.draw_wall(axis, units=(wall,))
     poloidal.draw_nulls(

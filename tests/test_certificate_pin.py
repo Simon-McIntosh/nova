@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -23,6 +24,39 @@ def _unqualified_rows(receipt: dict[str, object]) -> list[str]:
             if row["solver"]["qualification"] != "qualified":
                 rows.append(f"{case_name}:{row['requested_cells']}")
     return rows
+
+
+def test_pinned_certificate_retains_its_census_and_render_integrity() -> None:
+    """Keep the published receipt internally consistent while it remains data."""
+
+    receipt = _receipt()
+    expected_convergence = {
+        "diverted-single-null": [True, True, True, False],
+        "moderate-rotation-conventional-static": [False, False, False, False],
+        "strong-rotation-compact-static": [False, False, False, False],
+        "weak-rotation-reactor-static": [False, False, False, False],
+    }
+    cases = receipt["cases"]
+    assert set(cases) == set(expected_convergence)
+    for case_name, expected_flags in expected_convergence.items():
+        rows = cases[case_name]["rows"]
+        assert [row["solver"]["converged"] for row in rows] == expected_flags
+        for row in rows:
+            render_data = row["render_data"]
+            assert render_data["schema"] == "nova.solovev-certificate-render-data"
+            assert render_data["version"] == 1
+            coordinate_count = len(render_data["coordinates_rz_m"])
+            assert coordinate_count == len(render_data["terminal_flux_wb"])
+            assert coordinate_count == len(render_data["analytic_flux_wb"])
+            figure = row["figure"]
+            assert figure["project_absolute_src"].startswith(
+                "/nova/figures/gs-absolute-accuracy/solovev/"
+            )
+            figure_path = ROOT / figure["filesystem_path"]
+            assert (
+                hashlib.sha256(figure_path.read_bytes()).hexdigest()
+                == figure["sha256"]
+            )
 
 
 def test_pinned_certificate_refuses_unqualified_production_rows() -> None:

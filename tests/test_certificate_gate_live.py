@@ -63,7 +63,9 @@ def _live_route() -> dict[str, object]:
 
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
-    assert jax.default_backend() == "gpu"
+    if jax.default_backend() != "gpu":
+        pytest.skip("live certificate route requires an accelerator backend")
+    print(f"LIVE_CERTIFICATE_MODULE={certificate.__file__}")
 
     carrier_case, source_case, exact = certificate._case(CASE, clip_mode="exact")
     machine = certificate._case_machine(
@@ -169,14 +171,24 @@ def _render_terminal_state(
     certificate.plt.close(figure)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "weak exact 300-cell residual 0.037411957639809125; "
-        "forward-solver-route-integrity §1 Newton-Krylov termination defect"
-    ),
+@pytest.mark.parametrize(
+    "terminal_bound",
+    [
+        pytest.param(
+            certificate.TERMINAL_RESIDUAL_BOUND,
+            marks=pytest.mark.xfail(
+                strict=True,
+                reason=(
+                    "weak exact 300-cell residual 0.03741195763896904; "
+                    "forward-solver-route-integrity §1 Newton-Krylov termination defect"
+                ),
+            ),
+        )
+    ],
 )
-def test_live_certificate_route_requires_map_convergence_and_position() -> None:
+def test_live_certificate_route_requires_map_convergence_and_position(
+    terminal_bound: float,
+) -> None:
     """The live production route must pass every certificate predicate."""
 
     route = _live_route()
@@ -217,7 +229,7 @@ def test_live_certificate_route_requires_map_convergence_and_position() -> None:
         f"converged={solve_receipt.equilibrium.fixed_point.converged}"
     )
     _render_terminal_state(route, terminal, topology)
-    assert residual <= certificate.TERMINAL_RESIDUAL_BOUND
+    assert residual <= terminal_bound
     assert solve_receipt.equilibrium.fixed_point.converged
 
     axis = np.asarray(topology["axis_rz_m"], dtype=np.float64)

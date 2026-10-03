@@ -183,10 +183,12 @@ def analytic_membership(requested: int, archived: dict) -> dict:
     }
 
 
-def measure(input_root: Path, output: Path, fragment: Path) -> dict:
+def measure(input_root: Path, output: Path, fragment: Path, base_sha: str) -> dict:
     receipt = json.loads((input_root / "map-fidelity.json").read_text())
     assert receipt["completed"], "fresh map-fidelity receipt is incomplete"
-    assert receipt["source_revision"] == certificate._source_revision()
+    assert receipt["source_revision"] == base_sha, (
+        f"receipt revision {receipt['source_revision']} is not dispatch base {base_sha}"
+    )
     selected = [
         row
         for row in receipt["rows"]
@@ -263,7 +265,8 @@ def measure(input_root: Path, output: Path, fragment: Path) -> dict:
         write(output / f"{row['mode']}-{row['realised_cells']}.json", result)
         results.append(result)
     report = {
-        "revision": receipt["source_revision"],
+        "measurement_revision": receipt["source_revision"],
+        "analysis_revision": certificate._source_revision(),
         "input_receipt": str(input_root / "map-fidelity.json"),
         "completed": True,
         "rows": results,
@@ -311,9 +314,13 @@ def main() -> None:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--fragment", type=Path, required=True)
+    parser.add_argument("--base-sha", required=True)
     args = parser.parse_args()
     report = measure(
-        args.input.resolve(), args.output.resolve(), args.fragment.resolve()
+        args.input.resolve(),
+        args.output.resolve(),
+        args.fragment.resolve(),
+        args.base_sha,
     )
     print("DIVERTED_MAP_ERROR_COMPLETE " + json.dumps({"rows": len(report["rows"])}))
 

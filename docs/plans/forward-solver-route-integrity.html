@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="101">
+<meta name="plan-version" content="102">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.66">
 </head>
@@ -650,6 +650,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261003T030030870350-review-2-of-fsri-live-read-fallback-acceptance" data-who="reckon-build" data-when="2026-10-03T03:10:22Z">
     <div class="r-comment-body"><p>Stored parsed PASS review at reviewed head 821707843cb999bde0954e1f74a876721b1d3c0c; five dimensions score 20/20, total 100/100, with zero derived added failures.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261003T124306427341-fsri-moment-map-contract-after-first-moments" data-who="reckon-build" data-when="2026-10-03T12:57:11.149Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/forward-solver-route-integrity/fsri-moment-map-contract-after-first-moments.html re-measures the moment-map derivative contract at 200bdeeb5 (contains the first-moment hand-off 45f5ee8ef): smooth control 9.91e-11, axis flux 8.28e-10, held-point boundary flux 1.40e-13 and support partition and clip weights 9.21e-5 at the 1e-5 step, every stage shrinking with the step and reverse matching forward to better than 1.1e-14; test_the_moment_map_is_differentiable_against_finite_differences passes in one H200 lane job 1280616 (2 passed in 159.95s, EXIT_STATUS=0); no source or test file changes.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-fsri-compile-blocks-a-cpu-control" data-who="coordinator" data-when="2026-09-19T16:55:00Z">
     <div class="r-comment-body"><p>The program size this section owns now blocks another plan's evidence, measured 2026-09-19 on the centroid-constrained positive control. Two all_debug jobs aborted inside LLVM compiling <code>jit_scan</code>, the first at 64G and the second at 180G, both with <code>allocateMappedMemory failed</code> and a core dump at exit 134, the second after a slow-compile alarm and 38 minutes. Tripling the allocation changed nothing, so the constraint is the compiled module rather than the job's memory request. Two things follow for this section. The gate for section 2 should include a CPU arm, since an executable that cannot be compiled on a 180G node is a failure a device-only budget would not catch. And the scheduler signal is not trustworthy here: <code>sacct</code> reported <code>COMPLETED 0:0</code> for both jobs and for every sub-step while the payload aborted, so the payload log is the only evidence of what happened. The centroid plan's positive control waits on this section rather than on its own node.</p></div>

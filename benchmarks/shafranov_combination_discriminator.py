@@ -50,6 +50,7 @@ import json
 import platform
 from pathlib import Path
 import subprocess
+import textwrap
 from typing import Any
 
 import jax
@@ -151,6 +152,11 @@ NULL_GLYPH_STYLE = DEFAULT_INK.variant(
 #: Contour count the state panels are drawn on, one line of which is the
 #: boundary flux of the drawn state so the separatrix is always visible.
 STATE_CONTOUR_COUNT = 12
+#: Character budget per strip-title line.  The strip title names the two
+#: magnetics readings and the equality between them, and passed unwrapped it
+#: runs off the 7.2 in canvas; wrapping it keeps every line inside the canvas,
+#: which the recorded measured extent confirms.
+STRIP_TITLE_WRAP_CHARACTERS = 118
 #: The freed-scale arm the projected-fit title leads with: the row's
 #: shape-versus-scale finding turns on whether freeing one component's scale
 #: reaches the source curve, and the pressure-gradient arm is the one whose
@@ -1033,18 +1039,26 @@ def _draw_panel(receipt: dict[str, Any], path: Path, *, source: str) -> dict[str
     axes[0].legend(fontsize=6, ncol=4, loc="lower center", frameon=False)
     axes[-1].set_xlabel(r"$\beta_p + l_i/2$", fontsize=8)
     axes[-1].set_xlim(low - pad, high + pad)
-    figure.suptitle(
+    suptitle_lines = textwrap.wrap(
         "beta_p + l_i/2 on the MAST bank rows: EFIT's own value, the extracted "
         "profiles, and the magnetics read two ways (the row kernel equals the "
         f"circular reading, residual {residual:.1f})",
-        fontsize=8,
+        width=STRIP_TITLE_WRAP_CHARACTERS,
     )
+    figure.suptitle("\n".join(suptitle_lines), fontsize=8)
     path.parent.mkdir(parents=True, exist_ok=True)
+    figure.canvas.draw()
+    suptitle_extent = figure._suptitle.get_window_extent(figure.canvas.get_renderer())
+    suptitle_widest_inches = suptitle_extent.width / figure.dpi
+    canvas_width_inches = figure.get_figwidth()
     figure.savefig(path, dpi=180)
     with plt.rc_context({"svg.fonttype": "none"}):
         figure.savefig(path.with_suffix(".svg"))
     plt.close(figure)
     return {
+        "suptitle_lines": suptitle_lines,
+        "suptitle_widest_inches": round(suptitle_widest_inches, 4),
+        "canvas_width_inches": round(canvas_width_inches, 4),
         "png": {
             "filesystem_path": str(path),
             "project_absolute_src": (

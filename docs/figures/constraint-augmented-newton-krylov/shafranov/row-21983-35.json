@@ -20,7 +20,7 @@
   "figure": {
     "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21983-35.png",
     "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21983-35.png",
-    "sha256": "b0c9b849f5188f8024c99cf02f874a1f6d3317cb31059446933f9391f3a780cd",
+    "sha256": "b47a87f1184156c650d632ee26612c6a4fa714381a2a52f9ccdfeae75877e476",
     "caption_lines": [
       "MAST 21983/35: beta_p + l_i/2 row",
       "reference state alone: the row is refused on",
@@ -28,6 +28,42 @@
       "shared levels"
     ],
     "caption_widest_inches": 2.5,
-    "canvas_width_inches": 4.8
+    "canvas_width_inches": 4.8,
+    "reference_topology": {
+      "read_status": "qualified",
+      "class": "1",
+      "boundary_rz_m": [
+        0.54609502386733,
+        -1.2299497761535776
+      ],
+      "axis_rz_m": [
+        0.9043885191307982,
+        0.0048077630296991586
+      ],
+      "x_point_rz_m": [
+        [
+          0.54609502386733,
+          -1.2299497761535776
+        ]
+      ],
+      "axis_flux_wb": 0.30517641903015225,
+      "boundary_flux_wb": -0.10345884149130553
+    },
+    "levels_wb": [
+      -0.10345884149130553,
+      -0.06631018144390027,
+      -0.029161521396495027,
+      0.007987138650910233,
+      0.04513579869831548,
+      0.08228445874572073,
+      0.119433118793126,
+      0.15658177884053126,
+      0.1937304388879365,
+      0.23087909893534175,
+      0.268027758982747,
+      0.30517641903015225
+    ],
+    "saddle_flux_gap_wb": 0.0,
+    "saddle_contour_distance_px": 0.242
   }
 }

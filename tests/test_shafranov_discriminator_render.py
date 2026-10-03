@@ -140,6 +140,33 @@ def test_shafranov_row_panel_subtitle_fits_the_canvas(receipt_path: Path) -> Non
     assert figure["caption_widest_inches"] < figure["canvas_width_inches"]
 
 
+@pytest.mark.parametrize("receipt_path", SHAFRANOV_ROWS, ids=lambda path: path.name)
+def test_shafranov_row_panel_separatrix_reaches_the_marked_saddle(
+    receipt_path: Path,
+) -> None:
+    """The drawn contours put a separatrix through the marked admitted saddle.
+
+    The reference boundary flux is the admitted saddle's own flux, so naming it
+    to the level builder makes one of the drawn lines the separatrix through
+    that saddle. The panel records the gap in rendered pixels between the marked
+    saddle and that contour, and it must sit within one pixel, because a level
+    set measured at a null's own value can still sit far from the null where the
+    map's gradient vanishes; a saddle no contour reaches reads as a marked
+    X-point with no separatrix.
+    """
+    figure = json.loads(receipt_path.read_text(encoding="utf-8"))["figure"]
+    topology = figure["reference_topology"]
+    assert topology["read_status"] == "qualified"
+    boundary = topology["boundary_flux_wb"]
+    assert boundary is not None and np.isfinite(boundary)
+    levels = figure["levels_wb"]
+    nearest = min(abs(level - boundary) for level in levels)
+    assert nearest < 1.0e-9
+    distance = figure["saddle_contour_distance_px"]
+    assert distance is not None
+    assert distance < 1.0
+
+
 def test_combination_strip_does_not_advertise_the_covered_series() -> None:
     """The strip draws the identical magnetics pair once and names the equality.
 
@@ -167,6 +194,24 @@ def test_combination_strip_receipt_records_the_merged_series() -> None:
             row["readings"]["magnetics_circular"]["combination"]
             == row["readings"]["magnetics_discrete"]["combination"]
         )
+
+
+def test_combination_strip_suptitle_fits_the_canvas() -> None:
+    """Every line of the strip's title lies inside the canvas.
+
+    The title names both magnetics readings and the equality between them, and
+    passed unwrapped its last words run off the right edge of the canvas. The
+    strip records the wrapped lines and the measured extent of the widest, and
+    that measurement must sit inside the canvas the strip is drawn on.
+    """
+    figure = json.loads(STRIP_RECEIPT.read_text(encoding="utf-8"))["figure"]
+    lines = figure["suptitle_lines"]
+    assert len(lines) >= 2
+    joined = " ".join(lines)
+    assert "read two ways" in joined
+    assert "residual 0.0" in joined
+    # The widest wrapped line is measured, not guessed: it must fit the canvas.
+    assert figure["suptitle_widest_inches"] < figure["canvas_width_inches"]
 
 
 def test_flux_function_fit_draws_the_reference_contours() -> None:

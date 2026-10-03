@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="73">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -286,6 +286,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261003T141337624101-cco-receipt-row-history" data-who="reckon-build" data-when="2026-10-03T15:05:26Z">
     <div class="r-comment-body"><p>Two H200 attempts reproduced a +3.019853745269e-5 (+3.642879817979%) first-promotion global mismatch; failed receipt and 215754-byte terminal panel committed, row monotonicity undetermined.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261003T142002106912-cco-certificate-ladder-500-1000-probe" data-who="reckon-build" data-when="2026-10-03T16:28:11Z">
+    <div class="r-comment-body"><p>All four exact-clip rows compiled and returned a solve state on H200; weak and moderate accepted zero Newton promotions, strong reached global 1.60e-15 and row 2.07e-16 yet missed map and boundary clauses, and single-null failed its fixed-point clauses. Four receipts and four contour panels are published; the coordinator accepted the bounded two-job readout recovery; the 500-cell readout came from a bounded repair job, bringing actual GPU use to 45m30s of the authorized 60m. [Measured record](/nova/evidence/fragments/centroid-constrained-oracle-solve/cco-certificate-ladder-500-1000-probe#large-mesh-probe).</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260919T065922634567-review-of-cco-flux-level-compensating-term-2" data-who="reckon-ship" data-when="2026-09-19T07:12:54.415Z">
     <div class="r-comment-body"><p>Review stored: 79/100, four findings</p></div>

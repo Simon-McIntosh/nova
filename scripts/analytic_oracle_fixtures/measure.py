@@ -35,8 +35,6 @@ from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.forward_operator import (
     ForwardFluxOperator,
     PrescribedCurrentField,
-    set_support_clip_mode,
-    support_clip_mode,
 )
 from nova.equilibrium.rotation import IsothermalRotation, RotatingDomainProfile
 from nova.equilibrium.source import ForwardSource
@@ -1033,14 +1031,11 @@ def _analytic_profile_support(
     )
     masks = DomainMasks(label=labels, psi_norm=psi_norm)
     topology = _analytic_topology(analytic, axis_flux, boundary_flux, flux_span)
-    previous = support_clip_mode()
-    set_support_clip_mode("exact")
-    try:
-        return operator._profile_support(
-            masks, topology, physical, sample_psi_norm
-        ).qualify(jnp.asarray(participation))
-    finally:
-        set_support_clip_mode(previous)
+    return (
+        operator.with_clip_mode("exact")
+        ._profile_support(masks, topology, physical, sample_psi_norm)
+        .qualify(jnp.asarray(participation))
+    )
 
 
 def exact_current_moments(
@@ -1075,14 +1070,9 @@ def whole_cell_current_moments(
     case: RotatingEquilibrium, operator: ForwardFluxOperator, state: np.ndarray
 ) -> CellCurrentMoments:
     """Retain the former whole-cell fixture integration as a comparison arm."""
-    previous = support_clip_mode()
-    set_support_clip_mode("chord")
-    try:
-        masks, _topology, _sample, support = operator._support_partition(
-            jnp.asarray(state)
-        )
-    finally:
-        set_support_clip_mode(previous)
+    masks, _topology, _sample, support = operator.with_clip_mode(
+        "chord"
+    )._support_partition(jnp.asarray(state))
     counts = np.asarray(support.vertex_count)
     vertices = np.asarray(support.support_vertices)
     centres = np.asarray(operator.moment_geometry.atomic_mesh.centroids)

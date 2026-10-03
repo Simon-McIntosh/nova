@@ -538,7 +538,16 @@ def main() -> None:
             if arguments.reference_cells is None
             else {int(cell) for cell in arguments.reference_cells.split(",") if cell}
         )
-        reference_revisions = set(arguments.reference_revision or revisions)
+        reference_revisions = (
+            {
+                subprocess.check_output(
+                    ["git", "-C", str(ROOT), "rev-parse", revision], text=True
+                ).strip()
+                for revision in arguments.reference_revision
+            }
+            if arguments.reference_revision
+            else set(revisions)
+        )
         rows = []
         for revision in revisions:
             component = arguments.component

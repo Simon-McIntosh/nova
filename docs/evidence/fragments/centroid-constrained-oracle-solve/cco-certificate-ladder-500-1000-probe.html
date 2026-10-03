@@ -12,6 +12,7 @@
 <article class="landing" data-node="cco-certificate-ladder-500-1000-probe" id="admission">
   <h2>The larger certificate rows remain unmeasured</h2>
   <p>The bounded exact-clip driver was committed at <code>93d138b48</code>. H200 job <code>1280638</code> requested one card, 8 CPUs and 192 GB for one hour, and was still pending on <code>Resources</code> after the required minute. All eight H200 cards were allocated. The job was cancelled by its own id before fallback. Titan job <code>1280639</code> requested the same CPU, memory and time shape with one card. It was also pending on <code>Resources</code>: titan had 74 GB and 6 CPUs free, below the request. Its scheduler start projection was 16:29 UTC, after this worker's 15:20 UTC deadline, so it too was cancelled by its own id. Neither job entered an allocation; GPU use was zero card-hours against the authorized one-hour job.</p>
+  <p>At the coordinator's direction, the exact H200 shape was submitted again as job <code>1280644</code> on <code>betelgeuse</code> under reservation <code>gpu_0003_grpA</code>. It requests one card, 8 CPUs, 192 GB and one hour. Its first <code>sacct</code> state is <code>PENDING</code>; the job remains queued until a card frees, and no row result is claimed before its terminal receipt. The earlier cancellations remain part of the admission history.</p>
   <table>
     <thead><tr><th>Case</th><th>Requested cells</th><th>Measured state</th></tr></thead>
     <tbody>
@@ -21,7 +22,7 @@
       <tr><td>diverted-single-null</td><td>-500</td><td>unmeasured</td></tr>
     </tbody>
   </table>
-  <p>No compile, solve, or certificate clause is inferred from scheduler refusal. The next action is to dispatch the committed driver at its exact resource request after capacity opens, then write the row receipts and required poloidal panels. A smaller titan memory request would make a memory failure ambiguous as a program-size result.</p>
+  <p>No compile, solve, or certificate clause is inferred from scheduler state. The terminal read of job <code>1280644</code> will determine when to write the row receipts, report table and required poloidal panels. A smaller titan memory request would make a memory failure ambiguous as a program-size result.</p>
 </article>
 </main>
 </body>

@@ -111,7 +111,14 @@ def panel(context: dict, state: np.ndarray, result: dict, stem: str) -> str:
         (solved, fixture.TERMINAL_INK),
     ):
         poloidal.draw_flux_contours(
-            axes[0], radial, height, field, levels, color=color, linewidth=2.6
+            axes[0],
+            radial,
+            height,
+            field,
+            levels,
+            color=color,
+            linewidth=2.6,
+            wall=wall,
         )
     for nulls, color in (
         (analytic_nulls, fixture.ANALYTIC_INK),
@@ -138,6 +145,7 @@ def panel(context: dict, state: np.ndarray, result: dict, stem: str) -> str:
             difference_levels,
             color=fixture.TERMINAL_INK,
             linewidth=2.6,
+            wall=wall,
         )
     axes[0].text(0.03, 0.95, "solved / analytic", transform=axes[0].transAxes, va="top")
     axes[1].text(

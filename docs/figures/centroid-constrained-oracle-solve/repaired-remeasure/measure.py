@@ -75,6 +75,7 @@ def draw_panels(context: dict, state: np.ndarray, result: dict) -> dict:
             levels,
             color=fixture.ANALYTIC_INK if label == "analytic" else fixture.TERMINAL_INK,
             linewidth=2.6,
+            wall=wall,
         )
         poloidal.draw_wall(axis, units=(wall,))
         for nulls, color in (

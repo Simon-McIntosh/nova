@@ -1,0 +1,23 @@
+<section id="fsa-wall-mask-centroid-drivers">
+<h2>Wall mask on the three centroid-constrained drivers</h2>
+
+<p>
+Three scattered-field drivers drew an interpolated raster through
+<code>draw_flux_contours</code> without the wall they already held, so a contour
+could cross the vessel where the convex hull of the sample nodes extends past
+it. Each call now passes <code>wall=wall</code>, the wall the driver loads from
+its machine description, so the painter blanks every grid point outside the
+wall units before contouring. No filled contour is introduced: every call was
+already an unfilled line-contour draw on a stated level array.
+</p>
+
+<p>
+Gate: <code>tests/renderer_wall_scan.py</code> over the three drivers exits 0
+at the repaired head and exits 1 listing exactly the four sites at base
+(<code>logs/head_scan.log</code>, <code>logs/base_scan.log</code>).
+<code>tests/test_renderer_wall_scan.py</code> passes 11 tests in both arms, zero
+added failures. No committed figure was re-rendered; a later regeneration wave
+must rerun the solves behind the six committed PNG paths listed in
+<code>reports/nova/s22/fsa-wall-mask-centroid-drivers.md</code>.
+</p>
+</section>

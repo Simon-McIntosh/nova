@@ -122,7 +122,7 @@ def class_summary(error, reference, blocks, booked, analytic, labels, rows) -> d
     return result
 
 
-def analytic_membership(requested: int, archived: dict) -> dict:
+def analytic_membership(requested: int, archived: dict, mode: str) -> dict:
     """Condition the production quadrature by the analytic core region."""
     carrier, source, exact = certificate._case(CASE)
     machine = certificate._case_machine(CASE, carrier, exact, requested)
@@ -135,9 +135,7 @@ def analytic_membership(requested: int, archived: dict) -> dict:
     physical, exterior, _cache = fixture.cached_fixture_exterior(
         source, exact, machine, empty, analytic
     )
-    operator = fixture.forward_operator(source, machine, exterior).with_clip_mode(
-        "chord"
-    )
+    operator = fixture.forward_operator(source, machine, exterior).with_clip_mode(mode)
     target, _, _receipt = certificate._closed_form_current_target(
         CASE, source, operator, physical
     )
@@ -173,6 +171,7 @@ def analytic_membership(requested: int, archived: dict) -> dict:
         "sup_relative": mismatch["sup_relative"],
         "rms_relative": mismatch["rms_relative"],
         "lambda": float(amplitude),
+        "clip_mode": mode,
         "mechanism": (
             "analytic membership replaces the local quadratic point condition "
             "after the production chord carrier has been selected"
@@ -248,11 +247,10 @@ def measure(input_root: Path, output: Path, fragment: Path, base_sha: str) -> di
                 "source": "nova/equilibrium/forward_operator.py:_profile_support",
             },
         }
-        if row["clip_mode"] == "chord":
-            result["analytic_membership"] = analytic_membership(
-                row["requested_cells"], archived
-            )
-        else:
+        result["analytic_membership"] = analytic_membership(
+            row["requested_cells"], archived, row["clip_mode"]
+        )
+        if row["clip_mode"] == "exact":
             result["xpoint_wedge"] = {
                 "sup_relative": row["mismatch"]["sup_relative"],
                 "dZ_m": result["production"]["dZ_m"],

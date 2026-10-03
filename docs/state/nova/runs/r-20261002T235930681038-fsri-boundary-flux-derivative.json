@@ -1,0 +1,538 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-terra",
+  "base_sha": "d4b108a760f8eef4a0cfcb603fcc5ffa582b7d7b",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 20681472,
+      "cached_input_tokens_cumulative": 20681472,
+      "input_tokens": 20969694,
+      "input_tokens_cumulative": 20969694,
+      "output_tokens": 45712,
+      "output_tokens_cumulative": 45712,
+      "reasoning_output_tokens": 14683,
+      "reasoning_output_tokens_cumulative": 14683
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 196,
+    "files": 5,
+    "removed": 13
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 352,
+        "name": "_traversed_read",
+        "path": "tests/test_jax_topology.py"
+      },
+      "run_function": {
+        "line": 1125,
+        "name": "read_qualification",
+        "path": "nova/equilibrium/topology.py"
+      },
+      "window_line": 1193
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_forward_terminal_boundary_flux_matches_held_point_difference",
+        "path": "tests/test_boundary_flux_derivative.py"
+      },
+      "run_function": {
+        "line": 41,
+        "name": "test_boundary_flux_jvp_holds_the_admitted_point_fixed",
+        "path": "tests/test_boundary_flux_derivative.py"
+      },
+      "window_line": 70
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "fixed_point_value",
+        "path": "tests/test_boundary_flux_derivative.py"
+      },
+      "run_function": {
+        "line": 55,
+        "name": "fixed_point_value",
+        "path": "tests/test_boundary_flux_derivative.py"
+      },
+      "window_line": 55
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_boundary_flux_jvp_holds_the_admitted_point_fixed",
+        "path": "tests/test_boundary_flux_derivative.py"
+      },
+      "run_function": {
+        "line": 90,
+        "name": "test_forward_terminal_boundary_flux_matches_held_point_difference",
+        "path": "tests/test_boundary_flux_derivative.py"
+      },
+      "window_line": 118
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "fixed_point_value",
+        "path": "tests/test_boundary_flux_derivative.py"
+      },
+      "run_function": {
+        "line": 106,
+        "name": "fixed_point_value",
+        "path": "tests/test_boundary_flux_derivative.py"
+      },
+      "window_line": 106
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "ca097b15ce5c14607c9a97243f9b82f6d4eb3719",
+    "eea822be8f3121f4427469f9c50288091cb2335d"
+  ],
+  "completed_at": "2026-10-03T00:33:24Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-03T00:00:03Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 4.250175685172172,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-03T00:59:35.041730+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T23:59:34Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 594839,
+    "state": "quiet",
+    "utilisation_pct": 7.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T23:59:34Z",
+    "read_at": "2026-10-02T23:59:35Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 7.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T00:33:24Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T235930681038-fsri-boundary-flux-derivative/manifest.md",
+  "member": "disposable-r-20261002T235930681038-fsri-boundary-flux-derivative",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/test_boundary_flux_derivative.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsri-boundary-flux-derivative",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2426,
+          "cached_input_tokens": 388508,
+          "input_tokens": 390936,
+          "output_tokens": 1871,
+          "reasoning_output_tokens": 59,
+          "total_tokens": 392807,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Root cause (run r-20261002T225511267666, merged 2bbec7a04, benchmarks/moment_map_derivative_contract.py): on the fixture of test_the_moment_map_is_differentiable_against_finite_differences, TopologyState.boundary_flux (nova/equilibrium/topology.py:1355, data_b = where(boundary_is_xpoint, data_x, data_w) after :1314, with data_x from polish_receipt['selected_value']) is the first stage whose central difference disagrees, at 0.394 for a 1e-5 step. Reverse mode and the JVP agree on it to 2.1e-14, and axis_flux agrees to 8.3e-10. Contract, from the locked decision separatrix-spline-extraction polish-termination (reverse mode from implicit differentiation at grad psi(x*) = 0, never through the polish loop): with the topology class and the selected boundary point held at the terminal state, d(boundary_flux) equals the flux perturbation evaluated at the admitted boundary point. At an X-point the position term vanishes because grad psi = 0 there. At a limiter contact the position moves along the wall, and the tangential term vanishes at the constrained extremum. First find which part of the current path breaks this, by file and line: polish value, interpolation stencil, wall-point selection, or a stop_gradient. Then repair it. Gate: (a) a new tests/test_boundary_flux_derivative.py, on one diverted and one limited fixture, over a batch of at least eight seeded directions, asserts that the boundary-flux JVP matches a central difference within a bound stated with its step, and that a no-selection control agrees to 1e-10; it fails at the dispatch base. (b) benchmarks/moment_map_derivative_contract.py, re-run at the committed revision with a SHA-256 of the driver source in the receipt, shows boundary_flux agreeing at the axis-flux level and names the next disagreeing stage, if any. A separate clip-quadrature custom_jvp defect is being repaired by session S22 in nova/equilibrium/clip_quadrature.py; do not edit that file, and expect the downstream support stages to stay off until both land. (c) test_the_moment_map_is_differentiable_against_finite_differences is reported with its value; do not widen any tolerance. (d) tests/test_equilibrium_forward_solve.py and every tests/test_*topology*.py file add no failure against the dispatch base, compared by test id. (e) Re-render stage-derivatives.png into this node's figures directory at the repository's data-ink sizes: 22 pt axis labels, 20 pt ticks and direct labels, and direct labels on the boundary-flux and axis-flux curves. Run long or GPU steps through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh --rungs h200 --force-submit; the coordinator authorises this launch path, and the general fence does not forbid it. For a base tree, use git archive of the base revision restricted to nova tests benchmarks scripts, extracted under /tmp with PYTHONPATH pointing there, and remove it before writing the manifest, because .git/worktrees is read-only in this fence and /tmp on this node filled earlier tonight. Every uv command carries --no-sync and nothing runs uv sync. Write the manifest before any long step; its status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Make the derivative of TopologyState.boundary_flux equal the derivative of the flux at the admitted boundary point",
+    "id": "fsri-boundary-flux-derivative",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T23:59:34Z",
+      "read_at": "2026-10-02T23:59:35Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 7.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T235930681038-fsri-boundary-flux-derivative/manifest.md",
+    "negative_control": "restore the dispatch-base boundary-flux derivative path; the new boundary-flux derivative test must fail with the 0.39 relative error",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§1",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/topology.py",
+      "tests/test_boundary_flux_derivative.py",
+      "benchmarks/moment_map_derivative_contract.py",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-boundary-flux-derivative.html",
+      "docs/figures/forward-solver-route-integrity/fsri-boundary-flux-derivative"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 4.247916358721943,
+      "derived": 0.01812653392807545,
+      "drain_hours": 168.0,
+      "effective_limit": 0.01812653392807545,
+      "elapsed_fraction": 0.016478667207341317,
+      "elapsed_hours": 2.768416090833341,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-02T23:59:40+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.9299999999999999,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.07,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.014014000000000002,
+      "decided_by": "window",
+      "margin": 0.648486,
+      "name": "fsri-boundary-flux-derivative",
+      "score": 0.6625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.07
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.297927,
+        "observed_at": "2026-10-02T23:59:40+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.07,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "fsri-boundary-flux-derivative",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-02T23:59:40.297927+00:00",
+    "score": 0.6625,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.334,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "eea822be8f3121f4427469f9c50288091cb2335d",
+  "resume_waiver": null,
+  "review": {
+    "absent": [
+      "The reviewed manifest leaves baseline_suite null even though boundary-flux-test.log is a completed dispatch-base arm. The review derives the delta directly from that durable log and the completed final head log.",
+      "The reviewer's direct replay could not provide an independent completed arm: the first read-only-tree attempt stopped at numba cache discovery, and the retry with NUMBA_CACHE_DIR reached its first test but ended without a pytest summary. The reviewed H200 gate remains the completed functional receipt."
+    ],
+    "reviewed_base_sha": "d4b108a760f8eef4a0cfcb603fcc5ffa582b7d7b",
+    "reviewed_head_sha": "eea822be8f3121f4427469f9c50288091cb2335d",
+    "scores": {
+      "durability": 18,
+      "evidence": 18,
+      "fit": 12,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 87
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261002T235930681038-fsri-boundary-flux-derivative",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0ff0f-a802-7e30-92c3-84a994ea8952",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 20681472,
+    "cumulative_input_tokens": 41651166,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 60395
+  },
+  "time_budget": "60m",
+  "tool_steps": 134.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 3544,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 137,
+          "exited_at": "2026-10-02T23:39:43Z",
+          "last_record_type": "item.started",
+          "launched_at": "2026-10-02T23:00:45Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261002T230005440753-fsri-picard-implicit-derivative",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 623,
+          "worker_pid": 1977362
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1207,
+        "log_fresh": false,
+        "manifest_commits": [
+          "1b3b277a9",
+          "4badca0e6",
+          "d97e67092",
+          "95c465731",
+          "c35a30c21",
+          "c75057d59",
+          "db2812cdc"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "f96be95734950853ad9c5423074a70e09ce7a7bb3d54a29c8bc13ce9953bcb4f",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T230005440753-fsri-picard-implicit-derivative/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --plan forward-solver-route-integrity --section '§1' --role review --spec-level exact --node review-of-fsri-picard-implicit-derivative --goal 'attach an independent review to run r-20261002T230005440753-fsri-picard-implicit-derivative' --done-when 'the review for r-20261002T230005440753-fsri-picard-implicit-derivative stores a parsed record scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T230005440753-fsri-picard-implicit-derivative.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261002T230005440753-fsri-picard-implicit-derivative.at-f3a1f8e302b00ff0650aae021a1a236165242522.json --time-budget 60m --session s21-nova --allow-unreconciled-runs --backend codex-terra",
+        "node": "fsri-picard-implicit-derivative",
+        "phase": "complete",
+        "plan": "forward-solver-route-integrity",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261002T230005440753-fsri-picard-implicit-derivative",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1498,
+        "terminal_at": "2026-10-02T23:34:38Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-picard-implicit-derivative"
+      }
+    ]
+  },
+  "wall_seconds": 2001,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T00:33:27Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T00:00:08Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T235930681038-fsri-boundary-flux-derivative",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 401,
+    "worker_pid": 2760113
+  },
+  "worker_seconds": 2001,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="53">
 </head>
 <body>
   <main class="plan-doc">
@@ -486,7 +486,10 @@
     <div class="r-comment-body"><p>Added a --compare BASE HEAD mode to benchmarks/contour_tree_brute_force.py that loads two receipt files and reports a mismatch count for each of the seven receipt fields (node vertices, node values, node masks, critical types, compact edges, edge masks, overflow), exiting nonzero on any mismatch; the comparison field set is an explicit argument defaulting to every field with no environment switch, the new tests/test_contour_tree_receipt_comparator.py passes 17/17, and under the declared negative control (default field set skips the edge-mask field) it fails on receipts differing only there.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20261002T233222856971-ctta-scatter-segmented-max-equivalence" data-who="reckon-build" data-when="2026-10-03T01:53:56.538Z">
-    <div class="r-comment-body"><p>Replaced the test file, which exercised a private re-implemented scatter and never the product, with product-level tests of the sweep&#x27;s duplicate-root combine (nova/equilibrium/contour_tree.py:326). Two invariance tests permute the carrier edge storage order over the twelve certificate rungs and one MAST carrier under seeds 0,1,2: one asserts every receipt node field is bit-identical, one sweeps the join and split trees and asserts both arc sets and node sets are invariant. A third hand-builds a triangle whose last visited vertex has two active neighbours sharing one root and asserts a single arc with no spurious saddle. Product file untouched (peer node ctta-carrier-adjacency-index-dtype owns it).</p></div>
+    <div class="r-comment-body"><p>Replaced the test file, which exercised a private re-implemented scatter and never the product, with product-level tests of the sweep's duplicate-root combine (nova/equilibrium/contour_tree.py:326). Two invariance tests permute the carrier edge storage order over the twelve certificate rungs and one MAST carrier under seeds 0,1,2: one asserts every receipt node field is bit-identical, one sweeps the join and split trees and asserts both arc sets and node sets are invariant. A third hand-builds a triangle whose last visited vertex has two active neighbours sharing one root and asserts a single arc with no spurious saddle. Product file untouched (peer node ctta-carrier-adjacency-index-dtype owns it).</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20261003T015520623481-review-of-ctta-scatter-segmented-max-equivalence" data-who="reckon-build" data-when="2026-10-03T02:17:28.919Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261002T233222856971-ctta-scatter-segmented-max-equivalence at head 93da36c7be39e44bf84376696a48130684c8f77d (base f7f823c667f9b65740a04d5de40d991e60a2cd4e, three commits, tests/test_contour_tree_scatter_equivalence.py + docs/evidence/fragments/contour-tree-topology-authority/ctta-scatter-segmented-max-equivalence.html, +250/-0). The prior review&#x27;s central finding is repaired: the test now imports and drives the product sweep (_sweep_tree, build_contour_tree, _carrier_adjacency) instead of a test-local scatter. Stored a parsed record scoring all five dimensions: pass-with-follow-ons, 92/100; added_failure_count 0 (both armed suite arms 8 passed EXIT=0); two follow-ons, no blocking finding.</p></div>
 </div>
 </section>
 </main>

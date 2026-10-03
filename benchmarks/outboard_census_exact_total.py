@@ -72,7 +72,7 @@ def _vertical_bounds(vertices: np.ndarray, radius: float) -> tuple[float, float]
 
 
 def _exact_support_current(
-    polygon: np.ndarray, field: Any, profile: Any, cell: int
+    polygon: np.ndarray, density_sampler: Any, cell: int
 ) -> tuple[float, float]:
     """Adaptively integrate the state profile over one emitted support polygon."""
 
@@ -87,13 +87,9 @@ def _exact_support_current(
             return 0.0
         vertical, _estimate = quad(
             lambda height: float(
-                profile.current_density(
-                    radius,
-                    field.sample(
-                        np.asarray([[[radius, height]]]),
-                        np.asarray([cell], dtype=np.int32),
-                    )[0][0, 0],
-                )
+                density_sampler(
+                    np.asarray([[radius, height]], dtype=np.float64), np.int32(cell)
+                )[0]
             ),
             bounds[0],
             bounds[1],
@@ -135,6 +131,17 @@ def _install_absent_saddle_bridge(forward_operator: Any) -> None:
         return target(self, masks, topology, physical, sample_psi_norm, **kwargs)
 
     forward_operator.ForwardFluxOperator._profile_support = bridged
+
+
+def _profile_density_sampler(jax: Any, field: Any, profile: Any):
+    """Compile terminal-profile samples once for the adaptive reference."""
+
+    @jax.jit
+    def sample(points, cell):
+        psi_norm, _radial, _vertical = field.sample(points[None, ...], cell[None])
+        return profile.current_density(points[:, 0], psi_norm[0])
+
+    return sample
 
 
 @contextmanager
@@ -223,6 +230,7 @@ def _measure(revision: str, scratch: Path) -> dict[str, Any]:
             profile = _FluxSelectedProfile(
                 exact_operator.source.core, exact_operator.source.common_sol
             )
+            density_sampler = _profile_density_sampler(jax, exact_field, profile)
             support_vertices = np.asarray(
                 exact_probe["profile_support"].support_vertices
             )
@@ -233,8 +241,7 @@ def _measure(revision: str, scratch: Path) -> dict[str, Any]:
             reference_values = [
                 _exact_support_current(
                     support_vertices[cell, : support_count[cell]],
-                    exact_field,
-                    profile,
+                    density_sampler,
                     cell,
                 )
                 if selected[cell] and support_count[cell] >= 3

@@ -107,6 +107,29 @@ WALL_POSITION_INDEX = 8
 
 DEFAULT_ROOTS = ("benchmarks", "docs/figures")
 
+
+def _is_none_literal(expr: ast.expr) -> bool:
+    return isinstance(expr, ast.Constant) and expr.value is None
+
+
+def _passes_wall(call: ast.Call) -> bool:
+    """True when a call hands ``draw_flux_contours`` a non-null wall mask.
+
+    An explicit ``wall=None`` does not guard: the painter then blanks nothing
+    and the scattered field contours across the node hull, so the call is
+    reported exactly as if the argument were absent. The same holds for a
+    ``None`` handed at the wall's positional index.
+    """
+    for keyword in call.keywords:
+        if keyword.arg == "wall" and not _is_none_literal(keyword.value):
+            return True
+    if len(call.args) > WALL_POSITION_INDEX and not _is_none_literal(
+        call.args[WALL_POSITION_INDEX]
+    ):
+        return True
+    return False
+
+
 # Mask helpers whose call inside an expression proves the raster was blanked.
 _MASK_FUNCTIONS = frozenset({"inside_wall_units", "_inside_wall_units"})
 
@@ -361,7 +384,9 @@ class _Scanner:
             if isinstance(node, ast.Subscript):
                 if self.key_flags.get(self._subscript_key(node)) == kind:
                     return True
-                if kind == "scattered" and self._expr_flag(scope, node.value, "scattered"):
+                if kind == "scattered" and self._expr_flag(
+                    scope, node.value, "scattered"
+                ):
                     return True
             if kind == "blanked" and isinstance(node, ast.Call):
                 if _callee_name(node.func) == "where":
@@ -400,9 +425,7 @@ class _Scanner:
             return None  # draw_scattered_contours requires a wall
 
         if resolved == PAINTER:
-            if any(keyword.arg == "wall" for keyword in node.keywords):
-                return None
-            if len(node.args) > WALL_POSITION_INDEX:
+            if _passes_wall(node):
                 return None
             if any(self._expr_flag(scope, arg, "blanked") for arg in node.args):
                 return None

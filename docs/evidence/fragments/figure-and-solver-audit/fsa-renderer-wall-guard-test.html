@@ -1,0 +1,43 @@
+<section id="fsa-renderer-wall-guard-test">
+<h2>A tree-wide guard for the clean renderer wall scan</h2>
+
+<p>
+The wall-mask cleanup landed the repairs; this node pins the invariant they
+establish. The scanner
+(<a href="/nova/evidence/fragments/figure-and-solver-audit/fsa-renderer-wall-scanner-guard-form">fsa-renderer-wall-scanner-guard-form</a>)
+was a per-file entry with no corpus-wide tenant, and two of its positive
+controls still pinned sites that the cleanup had repaired, so the unit file was
+red on the clean tree.
+</p>
+
+<h3>What changed</h3>
+<ul>
+<li><code>tests/test_renderer_contours_inside_wall.py</code> — new. Runs
+<code>renderer_wall_scan.scan_paths</code> over <code>benchmarks/</code> and
+<code>docs/figures/</code> and asserts the result is empty, naming every
+offending file and line in the failure message. The roots come from
+<code>NOVA_RENDERER_SCAN_ROOTS</code> when set, so the same entry scans a
+scratch tree for the negative control.</li>
+<li><code>tests/renderer_wall_scan.py</code> — an explicit
+<code>wall=None</code> on <code>draw_flux_contours</code> no longer counts as
+guarded: the painter then blanks nothing, so the call is reported exactly as if
+the argument were absent. A <code>None</code> handed at the wall's ninth
+positional is treated the same.</li>
+<li><code>tests/test_renderer_wall_scan.py</code> — the two positive controls
+that pinned now-repaired corpus sites are recast as crafted sources, so the
+file is green on the clean tree and still reddens if the painter or tricontour
+rule is removed; a <code>wall=None</code> control pair is added.</li>
+</ul>
+
+<h3>Measure</h3>
+<p>
+Gate <code>JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider
+tests/test_renderer_contours_inside_wall.py tests/test_renderer_wall_scan.py</code>:
+<strong>14 passed</strong>, exit 0, against a baseline arm of
+<strong>2 failed, 9 passed</strong> (the two stale controls) — zero added
+failures, two removed. Negative control: a scratch copy of
+<code>benchmarks/plasma_cell_fixed_point_attribution.py</code> with
+<code>wall=units</code> removed at source line 425 makes the guard fail,
+naming <code>...:424: draw_flux_contours</code>, exit 1.
+</p>
+</section>

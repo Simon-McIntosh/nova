@@ -1,0 +1,24 @@
+<!-- fragment: fsri-boundary-flux-derivative -->
+<section id="fsri-boundary-flux-derivative">
+<h3>Boundary flux differentiates at the admitted point</h3>
+
+<p>The structured topology read now evaluates its published boundary value on
+the shared tensor spline at a stopped-gradient admitted point. This preserves
+the primal value while excluding the finite polish position tangent. The
+restored prior path fails the terminal fixture at a relative error of
+<code>0.39382554237027145</code> for a <code>1e-5</code> central difference.</p>
+
+<figure>
+<img src="/nova/figures/forward-solver-route-integrity/fsri-boundary-flux-derivative/stage-derivatives.png" alt="Central-difference derivative errors for the moment-map stages">
+<figcaption>At the held terminal boundary point, boundary-flux JVP error is
+<code>2.9681535007597404e-12</code> at a <code>1e-5</code> step, compared with
+<code>7.839446314328313e-10</code> for axis flux. The next disagreement is the
+support partition and clip weights.</figcaption>
+</figure>
+
+<p>Commit <code>ca097b15ce5c14607c9a97243f9b82f6d4eb3719</code> carries the
+implementation and initial regression coverage. The committed benchmark driver
+SHA-256 is <code>cb7ef979b0ab0b9227fb7a591c52b3fb44237d4e90886f1ad7a508b751970298</code>.
+The H200 test gate passes three checks: eight seeded directions for each
+diverted and limited fixture, plus the terminal moment-map fixture.</p>
+</section>

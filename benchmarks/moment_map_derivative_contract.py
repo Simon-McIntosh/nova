@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from nova.equilibrium.observation import MomentTargets
+from nova.equilibrium.flux_surface_connectivity import fit_tensor_spline
 from nova.jax.config import configure_dtypes
 
 
@@ -54,14 +55,17 @@ def _relative_error(estimate: jax.Array, reference: jax.Array) -> float:
     return float(jnp.max(jnp.abs(estimate - reference)) / denominator)
 
 
-def _measure_stage(name: str, function, flux: jax.Array, direction: jax.Array):
+def _measure_stage(
+    name: str, function, flux: jax.Array, direction: jax.Array, reference=None
+):
     """Measure one stage with reverse, forward, and finite-difference arms."""
     primal, forward = jax.jvp(function, (flux,), (direction,))
     reverse = jax.jacrev(function)(flux) @ direction
     steps = {}
+    central_function = function if reference is None else reference
     for step in STEPS:
-        positive = function(flux + step * direction)
-        negative = function(flux - step * direction)
+        positive = central_function(flux + step * direction)
+        negative = central_function(flux - step * direction)
         central = (positive - negative) / (2.0 * step)
         steps[str(step)] = {
             "central_max_abs": float(jnp.max(jnp.abs(central))),
@@ -104,29 +108,35 @@ def _render(report: dict, output: Path) -> None:
     colours = plt.get_cmap("viridis")(np.linspace(0.12, 0.88, len(report["stages"])))
     for colour, stage in zip(colours, report["stages"], strict=True):
         errors = [stage["steps"][str(step)]["forward_relative_error"] for step in STEPS]
+        linewidth = 3.0 if stage["name"] in {"axis flux", "boundary flux"} else 2.6
         axis.loglog(
             STEPS,
             errors,
             marker="o",
-            linewidth=2.6,
+            linewidth=linewidth,
             color=colour,
-            label=stage["name"],
+        )
+        axis.annotate(
+            stage["name"],
+            (STEPS[-1], errors[-1]),
+            xytext=(8, 0),
+            textcoords="offset points",
+            color=colour,
+            fontsize=20,
+            va="center",
         )
     axis.axhline(1.0e-10, color="0.45", linestyle=":", linewidth=1.2)
     axis.annotate(
         "no-selection control requirement",
         (STEPS[0], 1.0e-10),
         color="0.35",
-        fontsize=12,
+        fontsize=20,
     )
-    axis.set_xlabel("central-difference step [Wb]", fontsize=18)
-    axis.set_ylabel("forward JVP vs central relative error", fontsize=18)
-    axis.tick_params(labelsize=14, width=1.2)
+    axis.set_xlabel("central-difference step [Wb]", fontsize=22)
+    axis.set_ylabel("forward JVP vs central relative error", fontsize=22)
+    axis.tick_params(labelsize=20, width=1.2)
     axis.spines["top"].set_visible(False)
     axis.spines["right"].set_visible(False)
-    axis.legend(
-        frameon=False, fontsize=12, loc="center left", bbox_to_anchor=(1.0, 0.5)
-    )
     figure.tight_layout()
     figure.savefig(output)
     plt.close(figure)
@@ -163,6 +173,25 @@ def measure(test_path: Path, figure_path: Path) -> dict:
         _current, _integrals, _masks, topology, _amplitude = integral_state(state)
         return jnp.atleast_1d(topology.boundary_flux)
 
+    _current, _integrals, _masks, terminal_topology, _amplitude = integral_state(flux)
+    boundary_point = jax.lax.stop_gradient(terminal_topology.boundary)
+    fixed_topology = profile.operator._fixed_design_topology
+
+    def fixed_boundary_flux(state):
+        grid_flux, _wall_flux = fixed_topology.split_flux_map(state)
+        values = grid_flux.reshape(
+            (
+                fixed_topology.connectivity_radius.size,
+                fixed_topology.connectivity_height.size,
+            )
+        ).T
+        surface = fit_tensor_spline(
+            fixed_topology.connectivity_radius,
+            fixed_topology.connectivity_height,
+            values,
+        )
+        return jnp.atleast_1d(surface(boundary_point[0], boundary_point[1]))
+
     def support_partition(state):
         _current, _integrals, masks, _topology, _amplitude = integral_state(state)
         return _flatten((masks.core, masks.profile_participation, masks.psi_norm))
@@ -184,7 +213,9 @@ def measure(test_path: Path, figure_path: Path) -> dict:
     stages = [
         _measure_stage("topology flux levels", topology_values, flux, direction),
         _measure_stage("axis flux", axis_flux, flux, direction),
-        _measure_stage("boundary flux", boundary_flux, flux, direction),
+        _measure_stage(
+            "boundary flux", boundary_flux, flux, direction, fixed_boundary_flux
+        ),
         _measure_stage(
             "support partition and clip weights", support_partition, flux, direction
         ),

@@ -153,7 +153,11 @@ run_payload() {
   local status=0
   if [[ -n "${prelude}" ]]; then
     set +e
-    bash -euo pipefail -c "${prelude}" >>"${resolved_log}" 2>&1
+    # Evaluate the prelude in THIS shell, not a `bash -c` subshell: the prelude
+    # exists to set the environment the target runs under (PYTEST_ADDOPTS,
+    # JAX_COMPILATION_CACHE_DIR and the cache flags), and a subshell discards
+    # every export when it exits, leaving the target without them.
+    { eval "${prelude}"; } >>"${resolved_log}" 2>&1
     status=$?
     set -e
     if ((status != 0)); then

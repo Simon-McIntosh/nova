@@ -169,6 +169,37 @@ def test_h200_payload_keeps_sampler_and_pin_diagnostic(tmp_path: Path) -> None:
     assert "PINNED_REVISION" in result.stdout
 
 
+def test_payload_prelude_exports_reach_the_target(tmp_path: Path) -> None:
+    """The payload prelude sets the environment the target runs under.
+
+    The H200 lane hands the cache guard to pytest through the prelude's
+    exports (PYTEST_ADDOPTS, JAX_COMPILATION_CACHE_DIR and the cache flags).
+    A prelude evaluated in a `bash -c` subshell discards every export when the
+    subshell exits, so the target runs without them and the guard never loads.
+    Here the target records the value it was given.
+    """
+    probe_text = tmp_path / "probe.txt"
+    probe = (
+        "import os, sys; "
+        "open(sys.argv[1], 'w').write("
+        "os.environ.get('NOVA_LANE_PRELUDE_PROBE', 'MISSING'))"
+    )
+    result = _launch(
+        "--in-place",
+        "--mode",
+        "python-c",
+        "--log",
+        str(tmp_path / "lane.log"),
+        "--prelude",
+        "export NOVA_LANE_PRELUDE_PROBE=delivered",
+        "--",
+        probe,
+        str(probe_text),
+    )
+    assert result.returncode == 0, result.stderr
+    assert probe_text.read_text() == "delivered"
+
+
 def _write_executable(path: Path, body: str) -> None:
     path.write_text(body)
     path.chmod(0o755)

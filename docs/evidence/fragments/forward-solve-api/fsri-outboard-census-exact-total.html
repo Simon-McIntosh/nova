@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<title>Outboard exact booking census</title>
+</head>
+<body>
+<main>
+<h1>Outboard exact booking census</h1>
+<p>The persisted weak-rotation terminal state was evaluated from isolated Git
+archives on the CPU backend. Each arm records its archive path, imported
+<code>forward_operator</code> path and selected clip-mode interface. The
+archive directories were removed after their receipts were written.</p>
+
+<h2>Booked totals</h2>
+<table>
+<thead><tr><th>Revision</th><th>Clip selection</th><th>Chord [A]</th><th>Exact [A]</th></tr></thead>
+<tbody>
+<tr><td><code>247e5aa4a</code></td><td><code>set_support_clip_mode</code></td><td>15,875,439.764504</td><td>14,013,835.437176</td></tr>
+<tr><td><code>a28a3e880</code></td><td><code>set_support_clip_mode</code></td><td>15,875,439.764504</td><td>14,013,835.437176</td></tr>
+<tr><td><code>38b441dad</code></td><td><code>set_support_clip_mode</code></td><td>15,875,439.764504</td><td>15,491,539.124775</td></tr>
+<tr><td><code>main</code></td><td><code>with_clip_mode</code></td><td>15,875,439.764504</td><td>15,491,539.124775</td></tr>
+</tbody>
+</table>
+<p>The chord total is invariant. The exact total increases by 1,477,703.687599 A
+at <code>38b441dad</code> and remains at that value on <code>main</code>.</p>
+
+<h2>Independent exact-support reference</h2>
+<p>Only the ten cells whose exact bookings differ across the bracket were
+integrated: 5, 7, 30, 65, 74, 78, 87, 110, 119 and 124. Each emitted clipped
+polygon was triangulated, evaluated by the symmetric three-point triangle rule,
+and uniformly subdivided until two levels agreed within 1e-8 relative. Every
+cell converged at level 1 or 2.</p>
+<table>
+<thead><tr><th>Cell</th><th>Before booking [A]</th><th>After booking [A]</th><th>Triangle reference [A]</th><th>Final level</th></tr></thead>
+<tbody>
+<tr><td>5</td><td>0.000000</td><td>155,777.459349</td><td>155,777.459395</td><td>1</td></tr>
+<tr><td>7</td><td>0.000000</td><td>151,338.595253</td><td>151,338.595315</td><td>2</td></tr>
+<tr><td>30</td><td>0.000000</td><td>130,914.909258</td><td>130,914.908685</td><td>2</td></tr>
+<tr><td>65</td><td>0.000000</td><td>130,914.909256</td><td>130,914.908539</td><td>1</td></tr>
+<tr><td>74</td><td>0.000000</td><td>151,338.595249</td><td>151,338.595217</td><td>1</td></tr>
+<tr><td>78</td><td>0.000000</td><td>124,146.374711</td><td>124,146.374722</td><td>1</td></tr>
+<tr><td>87</td><td>0.000000</td><td>176,674.505242</td><td>176,674.505227</td><td>1</td></tr>
+<tr><td>110</td><td>0.000000</td><td>176,674.505237</td><td>176,674.505234</td><td>2</td></tr>
+<tr><td>119</td><td>0.000000</td><td>124,146.374704</td><td>124,146.374721</td><td>2</td></tr>
+<tr><td>124</td><td>0.000000</td><td>155,777.459340</td><td>155,777.459311</td><td>2</td></tr>
+</tbody>
+</table>
+<p>The after-booked sum is 1,477,703.687599 A; the independent sum is
+1,477,703.686366 A, a 0.001232 A difference (8.34e-10 relative). The prior
+sum is 6.15e-10 A. The current exact booking therefore agrees with the
+independent reference for every changed support, while the pinned booking
+omits them.</p>
+
+<h2>Cause and recommendation</h2>
+<p><code>38b441dad</code> changes the primal routing in
+<code>nova/equilibrium/clip_quadrature.py</code> at lines 516–521 and 731–736:
+supports with more than the whole-cell vertex capacity are classified as
+boundaries and sent through compact cut-cell integration instead of the
+whole-cell route. This is not the <code>custom_jvp</code> beginning later in the
+file. Re-pin the exact booking to 15,491,539.124775 A; do not repair the
+primal routing or widen the gate tolerance.</p>
+
+<h2>Receipts</h2>
+<ul>
+<li><code>bookings-isolated.log</code> and <code>bookings-isolated.json</code></li>
+<li><code>census-candidate-cells.log</code> and <code>census-candidate-cells.json</code></li>
+<li><code>triangle-reference.log</code> and <code>triangle-reference.json</code></li>
+</ul>
+</main>
+</body>
+</html>

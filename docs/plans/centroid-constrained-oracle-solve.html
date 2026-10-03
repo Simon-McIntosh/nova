@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="78">
+<meta name="plan-version" content="79">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -304,6 +304,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261003T180046389519-cco-certificate-ladder-110-300-h200-preflight" data-who="reckon-build" data-when="2026-10-03T20:08:17Z">
     <div class="r-comment-body"><p>GPU one-trip support preflight passed with realised exact and chord modes; H200 job 1280657 timed out after 7/12 row receipts, with 0 accepted promotions in all seven landed rows and no full certificate verdict.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s22-ladder-110-300-20261003" data-who="" data-when="">
+    <div class="r-comment-body"><p>The 110 and 300 cell rungs do not qualify on today's solver. From the production seed, no landed row accepts a Newton promotion. The first run (r-20261003T141823788120) was void because exact rows equalled their whole-cell controls to the digit: the driver never passed the clip mode. The third run (r-20261003T180046389519, H200 job 1280657) passed an in-job preflight showing the realised exact and chord support modes differ, then persisted 7 of 12 rows before its 2 h limit. Every landed row accepted 0 promotions, so each terminal state is the seed itself and exact and control share a state digest. Their residuals differ by support mode. Weak-110 reads 0.017621 exact and 0.017641 whole-cell; weak-300 reads 0.017098 and 0.017099; moderate-110 reads 0.409349 and 0.409515; moderate-300 exact reads 0.410489. Strong at 110 and 300, and the moderate-300 control, were not reached. With the large-mesh probe, the plan now has zero promotions from the production seed at every measured size. The weak-110 receipt from a 20 mm displaced seed reaches 2.7e-14. That contrast is handed to the solve rework (S21) as the behaviour its analysis must explain, and section 3 waits on the rework, not on another run of this solver. The driver at 831f498b8, unlanded, is the base for re-running the certificate under the new solve.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260919T065922634567-review-of-cco-flux-level-compensating-term-2" data-who="reckon-ship" data-when="2026-09-19T07:12:54.415Z">
     <div class="r-comment-body"><p>Review stored: 79/100, four findings</p></div>

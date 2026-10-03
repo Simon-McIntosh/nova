@@ -2883,15 +2883,18 @@ def picard(
     map_arguments: tuple[Any, ...] = (),
     callback_arguments: tuple[Any, ...] = (),
     precision: Precision | str = Precision.AUTOMATIC,
+    implicit_tolerance: float = 1.0e-6,
 ) -> FixedPointResult:
-    """Relaxed Picard iteration with per-evaluation residual accounting."""
-    map_fn = _bind_traced_map_arguments(map_fn, map_arguments)
-    shadowed_map_fn = _bind_traced_map_arguments(shadowed_map_fn, map_arguments)
-    shadow_mask_fn = _bind_callback_arguments(shadow_mask_fn, callback_arguments)
-    promoted_shadow_mask_fn = _bind_callback_arguments(
-        promoted_shadow_mask_fn, callback_arguments
-    )
-    initial = _solver_state(initial, precision)
+    """Relaxed Picard iteration with an implicit terminal-state derivative.
+
+    The primal is the bounded iteration used for convergence diagnostics.  Its
+    tangent is instead the fixed-point response of the terminal map, with the
+    terminal topology shadow held constant.  This intentionally makes an
+    unconverged bounded iterate non-differentiable rather than treating it as
+    a fixed point it has not reached.
+    """
+    if implicit_tolerance <= 0.0 or not math.isfinite(implicit_tolerance):
+        raise ValueError("implicit_tolerance must be positive and finite")
 
     observe_shadows = shadow_mask_fn is not None
     carry_shadows = promoted_shadow_mask_fn is not None
@@ -2900,47 +2903,148 @@ def picard(
     if carry_shadows and not observe_shadows:
         raise ValueError("promoted shadow masks require an initial shadow mask")
 
-    def shadow_mask(state):
-        if observe_shadows:
-            return jnp.ravel(jnp.asarray(shadow_mask_fn(state), dtype=bool))
-        return jnp.zeros(1, dtype=bool)
+    map_argument_count = len(map_arguments)
 
-    def mapped_with_shadow(state, shadow):
-        if carry_shadows:
-            return shadowed_map_fn(state, shadow)
-        return map_fn(state)
-
-    def promoted_shadow(state, previous):
-        if carry_shadows:
-            return jnp.ravel(promoted_shadow_mask_fn(state, previous))
-        return shadow_mask(state)
-
-    def body(index, carry):
-        state, trace, previous_shadow, shadow_changes = carry
-        mapped = mapped_with_shadow(state, previous_shadow)
-        trace = trace.at[index].set(_relative_residual(mapped, state))
-        candidate = state + relaxation * (mapped - state)
-        current_shadow = promoted_shadow(candidate, previous_shadow)
-        changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
-        shadow_changes = shadow_changes.at[index].set(
-            jnp.where(observe_shadows, changed, -1)
+    def iterate(state, dynamic_arguments):
+        arguments = dynamic_arguments[:map_argument_count]
+        callback_values = dynamic_arguments[map_argument_count:]
+        bound_map = _bind_traced_map_arguments(map_fn, arguments)
+        bound_shadowed_map = _bind_traced_map_arguments(shadowed_map_fn, arguments)
+        bound_shadow_mask = _bind_callback_arguments(shadow_mask_fn, callback_values)
+        bound_promoted_shadow = _bind_callback_arguments(
+            promoted_shadow_mask_fn, callback_values
         )
-        return candidate, trace, current_shadow, shadow_changes
 
-    state, trace, _shadow, shadow_changes = jax.lax.fori_loop(
-        0,
-        evaluations,
-        body,
-        (
-            initial,
-            jnp.full(evaluations, jnp.nan, dtype=initial.dtype),
-            shadow_mask(initial),
-            jnp.full(evaluations, -1, dtype=jnp.int32),
-        ),
-    )
-    return FixedPointResult(
-        state, trace[evaluations - 1], trace, shadow_mask_changes=shadow_changes
-    )
+        def shadow_mask(value):
+            if observe_shadows:
+                return jnp.ravel(jnp.asarray(bound_shadow_mask(value), dtype=bool))
+            return jnp.zeros(1, dtype=bool)
+
+        def mapped_with_shadow(value, shadow):
+            if carry_shadows:
+                return bound_shadowed_map(value, shadow)
+            return bound_map(value)
+
+        def promoted_shadow(value, previous):
+            if carry_shadows:
+                return jnp.ravel(bound_promoted_shadow(value, previous))
+            return shadow_mask(value)
+
+        def body(index, carry):
+            value, trace, previous_shadow, shadow_changes = carry
+            mapped = mapped_with_shadow(value, previous_shadow)
+            trace = trace.at[index].set(_relative_residual(mapped, value))
+            candidate = value + relaxation * (mapped - value)
+            current_shadow = promoted_shadow(candidate, previous_shadow)
+            changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
+            shadow_changes = shadow_changes.at[index].set(
+                jnp.where(observe_shadows, changed, -1)
+            )
+            return candidate, trace, current_shadow, shadow_changes
+
+        state, trace, terminal_shadow, shadow_changes = jax.lax.fori_loop(
+            0,
+            evaluations,
+            body,
+            (
+                state,
+                jnp.full(evaluations, jnp.nan, dtype=state.dtype),
+                shadow_mask(state),
+                jnp.full(evaluations, -1, dtype=jnp.int32),
+            ),
+        )
+        residual = trace[evaluations - 1]
+        return (
+            FixedPointResult(
+                state,
+                residual,
+                trace,
+                converged=jnp.isfinite(residual) & (residual <= implicit_tolerance),
+                shadow_mask_changes=shadow_changes,
+            ),
+            terminal_shadow,
+        )
+
+    @jax.custom_jvp
+    def solve(state, *arguments):
+        return iterate(state, arguments)[0]
+
+    @solve.defjvp
+    def solve_jvp(primals, tangents):
+        state, *dynamic_arguments = primals
+        _state_tangent, *dynamic_tangents = tangents
+        arguments = tuple(dynamic_arguments[:map_argument_count])
+        argument_tangents = tuple(dynamic_tangents[:map_argument_count])
+        result, terminal_shadow = iterate(state, tuple(dynamic_arguments))
+
+        def terminal_map(value, shadow, *dynamic_arguments):
+            if carry_shadows:
+                return shadowed_map_fn(value, shadow, *dynamic_arguments)
+            return map_fn(value, *dynamic_arguments)
+
+        shadow_tangent = jnp.zeros_like(terminal_shadow, dtype=jax.dtypes.float0)
+        _, parameter_tangent = jax.jvp(
+            lambda values: terminal_map(result.state, values[0], *values[1]),
+            ((terminal_shadow, tuple(arguments)),),
+            ((shadow_tangent, tuple(argument_tangents)),),
+        )
+        _, terminal_linear = jax.linearize(
+            lambda values: terminal_map(values[0], values[1], *arguments),
+            (result.state, terminal_shadow),
+        )
+
+        def state_linear(value):
+            return terminal_linear((value, shadow_tangent))
+
+        def implicit_tangent(_):
+            def linear_map(value):
+                return value - state_linear(value)
+
+            _, transpose = jax.vjp(linear_map, jnp.zeros_like(result.state))
+
+            def solve_linear(matvec, rhs):
+                return jax.scipy.sparse.linalg.gmres(
+                    matvec,
+                    rhs,
+                    tol=1.0e-10,
+                    atol=1.0e-12,
+                    restart=min(80, result.state.size),
+                    maxiter=20,
+                )[0]
+
+            def solve_transpose(_, rhs):
+                return solve_linear(lambda value: transpose(value)[0], rhs)
+
+            return jax.lax.custom_linear_solve(
+                linear_map,
+                parameter_tangent,
+                solve=solve_linear,
+                transpose_solve=solve_transpose,
+                symmetric=False,
+            )
+
+        state_tangent = jax.lax.cond(
+            result.converged,
+            implicit_tangent,
+            lambda _: jnp.full_like(result.state, jnp.nan),
+            operand=None,
+        )
+
+        def zero_tangent(value):
+            if not hasattr(value, "dtype"):
+                if isinstance(value, int | bool):
+                    return jnp.zeros_like(value, dtype=jax.dtypes.float0)
+                return jnp.zeros_like(value)
+            if not jnp.issubdtype(value.dtype, jnp.inexact):
+                return jnp.zeros_like(value, dtype=jax.dtypes.float0)
+            return jnp.zeros_like(value)
+
+        tangent_result = jax.tree.map(zero_tangent, result)._replace(
+            state=state_tangent
+        )
+        return result, tangent_result
+
+    return solve(_solver_state(initial, precision), *map_arguments, *callback_arguments)
 
 
 def anderson(

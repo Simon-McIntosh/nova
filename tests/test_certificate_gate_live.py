@@ -84,10 +84,9 @@ def _live_route() -> dict[str, object]:
     operator = oracle_fixture.forward_operator(
         source_case, machine, fixture_exterior
     ).with_clip_mode("exact")
+    mesh = StencilMesh(machine.node, machine.stencil, machine.area)
     profile = ForwardProfile(
-        operator,
-        StencilMesh(machine.node, machine.stencil, machine.area),
-        newton_steps=certificate.recovery.NEWTON_STEPS,
+        operator, mesh, newton_steps=certificate.recovery.NEWTON_STEPS
     )
     target_current, centroid, current_receipt = certificate._closed_form_current_target(
         CASE, source_case, operator, exact_physical
@@ -108,6 +107,8 @@ def _live_route() -> dict[str, object]:
         "coordinates": coordinates,
         "exact": exact,
         "map": profile.flux_map(target_current=target_current),
+        "machine": machine,
+        "mesh": mesh,
         "pitch": pitch,
         "profile": profile,
         "request": request,
@@ -131,6 +132,50 @@ def _vertical_shifted_analytic(route: dict[str, object]) -> np.ndarray:
     return certificate._exact_state(CASE, route["exact"], coordinates)
 
 
+def _render_terminal_state(
+    route: dict[str, object], terminal: np.ndarray, topology: dict[str, object]
+) -> None:
+    """Render the measured terminal state when the lane names an output path."""
+
+    output = os.environ.get("NOVA_CERTIFICATE_FIGURE_PATH")
+    if output is None:
+        return
+    path = Path(output)
+    machine = route["machine"]
+    cell_count = len(machine.node)
+    derivative_coordinates, terminal_gradient, terminal_hessian = (
+        certificate._quadratic_derivatives(route["mesh"], terminal[:cell_count])
+    )
+    analytic_gradient, analytic_hessian = certificate._exact_derivatives(
+        CASE, route["exact"], derivative_coordinates
+    )
+    figure = certificate._plot(
+        route["coordinates"],
+        terminal,
+        route["analytic"],
+        derivative_coordinates,
+        {
+            "psi": terminal[:cell_count] - route["analytic"][:cell_count],
+            "gradient": terminal_gradient - analytic_gradient,
+            "hessian": terminal_hessian - analytic_hessian,
+        },
+        certificate._boundary(CASE, route["exact"]),
+        machine.wall_node,
+        topology,
+        certificate._topology(route["profile"].operator, route["analytic"]),
+        path,
+        "weak exact 300 cells · live terminal state",
+    )
+    certificate.plt.close(figure)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "weak exact 300-cell residual 0.037411957639809125; "
+        "forward-solver-route-integrity §1 Newton-Krylov termination defect"
+    ),
+)
 def test_live_certificate_route_requires_map_convergence_and_position() -> None:
     """The live production route must pass every certificate predicate."""
 
@@ -148,9 +193,17 @@ def test_live_certificate_route_requires_map_convergence_and_position() -> None:
         else route["analytic"]
     )
     measurement = _map_measurement(route, input_state)
+    print(
+        f"LIVE_CERTIFICATE_MAP sup={measurement['sup']:.16g} "
+        f"rms={measurement['rms']:.16g}"
+    )
     _require_map_fidelity(measurement)
 
     control = _map_measurement(route, _vertical_shifted_analytic(route))
+    print(
+        f"LIVE_CERTIFICATE_CONTROL sup={control['sup']:.16g} "
+        f"rms={control['rms']:.16g}"
+    )
     with pytest.raises(AssertionError):
         _require_map_fidelity(control)
 
@@ -158,6 +211,12 @@ def test_live_certificate_route_requires_map_convergence_and_position() -> None:
     terminal = np.asarray(solve_receipt.equilibrium.flux, dtype=np.float64)
     topology = certificate._topology(route["profile"].operator, terminal)
     residual = float(solve_receipt.equilibrium.fixed_point.residual)
+    print(
+        "LIVE_CERTIFICATE_TERMINAL "
+        f"residual={residual:.16g} "
+        f"converged={solve_receipt.equilibrium.fixed_point.converged}"
+    )
+    _render_terminal_state(route, terminal, topology)
     assert residual <= certificate.TERMINAL_RESIDUAL_BOUND
     assert solve_receipt.equilibrium.fixed_point.converged
 

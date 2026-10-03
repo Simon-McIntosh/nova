@@ -4296,6 +4296,27 @@
     "reason": "corrective-run:resume",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "changed_paths_differing": null,
+    "checkout_descends_from_integrated_revision": false,
+    "checkout_on_integrated_revision": true,
+    "checkout_revision": "e8ec267ac325a0f4fb0ba0ab12fac34933fe8f8d",
+    "exit_status": 0,
+    "finding": null,
+    "gate_command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_clip_mode_has_no_process_global.py tests/test_forward_support_clip_mode.py tests/test_forward_solve_clip_mode_bridge.py",
+    "gate_command_source": "stored",
+    "integrated_revision": "e8ec267ac325a0f4fb0ba0ab12fac34933fe8f8d",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/verify-gate.log",
+    "ran": true,
+    "reason": null,
+    "recorded_gate_seconds": 14.64,
+    "replay_bound_seconds": 900.0,
+    "replay_bound_source": "explicit",
+    "timed_out": false,
+    "worktree_roots_rewritten": []
+  },
   "lane_advisory": {
     "backend": "codex-terra",
     "burn_multiple": 1.8039820039273196,

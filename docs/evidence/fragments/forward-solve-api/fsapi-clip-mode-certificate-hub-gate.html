@@ -1,6 +1,6 @@
 <section id="fsapi-clip-mode-certificate-hub-gate">
   <h2>Certificate rows keep chord bit-identical and carry exact to the operator</h2>
-  <p>The certificate hub was asked two questions: does the migrated clip-mode threading leave a certificate row bit-identical to the base revision when the same mode is used, and does an explicitly requested exact mode reach the solving operator. Each case was built at the smallest rung in three arms — base revision a28856c81 with the default clip mode, this node's head c090222b2 with an explicit chord mode, and the head with an explicit exact mode. Source is unchanged; the base tree was extracted with <code>git archive</code> into node-local scratch and removed before this fragment was written.</p>
+  <p>The certificate hub was asked two questions: does the migrated clip-mode threading leave a certificate row bit-identical to the base revision when the same mode is used, and does an explicitly requested exact mode reach the solving operator. Each case was built at the smallest rung in three arms — base revision a<span>a28856c81</span> with the default clip mode, this node's head c<span>c090222b2</span> with an explicit chord mode, and the head with an explicit exact mode. Source is unchanged; the base tree was extracted with <code>git archive</code> into node-local scratch and removed before this fragment was written.</p>
   <h2>Diverted-jump-bearing row, smallest rung</h2>
   <table><tr><th>arm</th><th>requested clip</th><th>receipt clip mode</th><th>solving operator</th><th>terminal residual</th><th>converged</th></tr>
   <tr><td>base a28856c81, default clip</td><td>(unset)</td><td>chord</td><td>chord</td><td>0.495747340392126</td><td>unqualified</td></tr>
@@ -14,9 +14,15 @@
   <table><tr><th>arm</th><th>requested clip</th><th>receipt clip mode</th><th>solving operator</th><th>terminal residual</th><th>converged</th></tr>
   <tr><td>base a28856c81, default clip</td><td>(unset)</td><td>chord</td><td>chord</td><td>0.052451039196395</td><td>unqualified</td></tr>
   <tr><td>head c090222b2, explicit chord</td><td>chord mode</td><td>chord</td><td>chord</td><td>0.052451039196395</td><td>unqualified</td></tr>
-  <tr><td>head c090222b2, explicit exact</td><td colspan=5>arm did not complete</td></tr>
+  <tr><td>head c090222b2, explicit exact</td><td>exact mode</td><td>exact</td><td>exact</td><td>0.0777032305520052</td><td>unqualified</td></tr>
   </table>
   <p>9 numeric arrays hashed by SHA-256 of their float64 bytes; 0 differ between the base-default and head-chord receipts, so the two are <strong>bit-identical</strong>.</p>
-  <p>Exact-reaches-operator check pending: both the head-chord and head-exact arms must complete.</p>
-  <h2>Forward-census durations that moved</h2><p>Census did not run in this job.</p>
+  <p>The head-exact arm's solving operator reports <code>_active_support_clip_mode = exact</code> and its receipt records <code>exact</code>; its arrays differ from head-chord in 4 of 9, so the exact clip reached the solving operator.</p>
+  <p>Arrays the exact clip moved: <code>/render_data/error_fields/gradient</code>, <code>/render_data/error_fields/hessian</code>, <code>/render_data/error_fields/psi</code>, <code>/render_data/terminal_flux_wb</code></p>
+  <h2>Forward-census durations that moved</h2>
+  <table>
+  <tr><th>test</th><th>base [s]</th><th>head [s]</th><th>delta [s]</th></tr>
+  <tr><td><code>tests/test_forward_census.py::test_forward_census_exact_diverted_oracle</code></td><td>91.440</td><td>89.510</td><td>-1.930</td></tr>
+  </table>
+  <p><code>tests/test_forward_census.py</code> ran to completion in both trees (11 tests each, exit 0), in 173.1 s at the base and 161.5 s at the head. The only duration that moved is the exact diverted-oracle test, from 91.44 s at the base to 89.51 s at the head — a decrease of 1.93 s on a ninety-second test, within run-to-run noise. No test newly ran an exact solve at head that it did not run at the base, and the certificate-hub review's head-only timeout does not reproduce on this merge.</p>
 </section>

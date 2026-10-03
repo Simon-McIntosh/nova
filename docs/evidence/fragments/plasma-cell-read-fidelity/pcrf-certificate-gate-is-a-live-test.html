@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="plasma-cell-read-fidelity">
+<meta name="plan-evidence-for" content="plasma-cell-read-fidelity">
+<title>Live weak exact certificate gate</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Live weak exact certificate gate</h1></header>
+<section id="landing">
+<p>H200 job <code>1280625</code>, revision <code>5346e9258fef241528a37a5cbe9a579cd90136b4</code>, ran the weak-rotation-reactor-static exact production route at requested 300 cells. The analytic-state map passed: relative sup <code>0.001432192972150018</code>, relative RMS <code>0.001143298756480554</code>, both below <code>1e-2</code>. The declared one-pitch vertical-input control fired: relative sup <code>0.2486673925768625</code> and RMS <code>0.3096551033409771</code>, so the first map assertion rejects it.</p>
+<p>The live production solve terminated with residual <code>0.03741195763932729</code> and <code>converged=False</code>, above the certificate bound <code>1e-12</code>. The guard stays strict under an expected-failure marker: a converged production route becomes an XPASS and fails the lane. The earlier weak exact 110-cell live row also failed convergence, at residual <code>0.0777032330759655</code>.</p>
+<figure><img src="/nova/figures/plasma-cell-read-fidelity/pcrf-certificate-gate-is-a-live-test/weak-exact-300-terminal.png" alt="Analytic and live weak exact terminal flux contours on shared levels, with stationary markers and wall"><figcaption>Fresh 300-cell terminal state from H200 job 1280625: reference blue and solved ochre line contours share physical Wb levels; both stationary-point vocabularies and the wall are drawn. Terminal residual 0.03741195763932729; converged=False. <a href="/nova/figures/plasma-cell-read-fidelity/pcrf-certificate-gate-is-a-live-test/weak-exact-300-terminal.svg">SVG companion</a>.</figcaption></figure>
+<p>The map-shift red arm ran with <code>--runxfail</code> so it remained a real failing test: job <code>1280614</code> exited 1 at the first map assertion with shifted relative sup <code>0.2486673925768625</code> and RMS <code>0.3096551033409771</code>. The old static receipt pin independently fails on its fifteen unqualified rows.</p>
+</section>
+</main></body>
+</html>

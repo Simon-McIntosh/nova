@@ -514,6 +514,33 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "e9849ca8cd34653de8aa37a80da38218c2f37671",
+  "release": {
+    "process_signalled": true,
+    "process_stopped_pid": 3818814,
+    "scratch_bytes": 5038,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261003T155653746986-review-of-fsa-restore-msc-figure-artifacts",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/review-of-fsa-restore-msc-figure-artifacts",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "full",

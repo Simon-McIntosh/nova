@@ -674,26 +674,30 @@ def _draw_figure(
         difference = data["difference"]
         levels = _figure_levels([difference])
         # The per-cell difference is piecewise constant: exterior and interior
-        # cells sit at zero or at a single value, so contouring the complete
-        # field against sign-selected levels draws the boundary of the
-        # differing region (masked points would break the Delaunay
-        # triangulation).
-        ax.tricontour(
+        # cells sit at zero or at a single value, so contouring the field
+        # against sign-selected levels draws the boundary of the differing
+        # region. The nodes are triangulated and every triangle that leaves the
+        # wall units is masked, so no contour is drawn in the gap the convex
+        # hull would otherwise bridge.
+        poloidal.draw_scattered_contours(
+            ax,
             node[:, 0],
             node[:, 1],
             difference,
-            levels=levels[levels >= 0.0],
-            colors="firebrick",
-            linewidths=0.8,
+            levels[levels >= 0.0],
+            wall=wall,
+            color="firebrick",
+            linewidth=0.8,
         )
-        ax.tricontour(
+        poloidal.draw_scattered_contours(
+            ax,
             node[:, 0],
             node[:, 1],
             difference,
-            levels=-levels[levels > 0.0][::-1],
-            colors="navy",
-            linestyles="dashed",
-            linewidths=0.8,
+            -levels[levels > 0.0][::-1],
+            wall=wall,
+            color="navy",
+            linewidth=0.8,
         )
         for cell in np.flatnonzero(data["cut"]):
             polygon = np.asarray(machine.cell_polygons[cell], dtype=np.float64)

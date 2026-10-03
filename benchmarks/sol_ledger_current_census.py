@@ -412,13 +412,15 @@ def _draw_panel(render, output):
     nulls = render.get("nulls", {})
     figure, axes = plt.subplots(1, 1, figsize=(9.6, 7.6), dpi=180)
     plot_axes = poloidal_axes(axes)
-    plot_axes.tricontour(
+    poloidal.draw_scattered_contours(
+        plot_axes,
         node[:, 0],
         node[:, 1],
         grid_flux,
-        levels=levels,
-        colors="#999999",
-        linewidths=0.35,
+        levels,
+        wall=wall,
+        color="#999999",
+        linewidth=0.35,
     )
     if not DROP_WALL:
         poloidal.draw_wall(plot_axes, units=(wall,))

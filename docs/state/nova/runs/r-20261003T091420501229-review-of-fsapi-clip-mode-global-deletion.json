@@ -1,0 +1,360 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-terra",
+  "base_sha": "126b18f4dda5ec8b7e68b479e4a5f11ff6eee707",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 3488000,
+      "cached_input_tokens_cumulative": 3488000,
+      "input_tokens": 3669950,
+      "input_tokens_cumulative": 3669950,
+      "output_tokens": 23488,
+      "output_tokens_cumulative": 23488,
+      "reasoning_output_tokens": 5762,
+      "reasoning_output_tokens_cumulative": 5762
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-03T09:24:59Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-03T09:14:47Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "nova/equilibrium/forward_operator.py:2354;"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.985,
+    "plan": "forward-solve-api",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 1.81793798700548,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-terra' is projected to exhaust at 2026-10-06T23:02:36Z, which is after this node's 2700s horizon ending 2026-10-03T09:59:23.102037+00:00",
+    "horizon_ends_at": "2026-10-03T09:59:23.102037+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": "2026-10-03T09:14:22Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-06T23:02:36Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 561551,
+    "state": "quiet",
+    "utilisation_pct": 13.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-03T09:14:22Z",
+    "read_at": "2026-10-03T09:14:23Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 13.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T09:24:59Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T091420501229-review-of-fsapi-clip-mode-global-deletion/manifest.md",
+  "member": "disposable-r-20261003T091420501229-review-of-fsapi-clip-mode-global-deletion",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-fsapi-clip-mode-global-deletion",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1529,
+          "cached_input_tokens": 791951,
+          "input_tokens": 793482,
+          "output_tokens": 830,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 794312,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "The review for r-20261003T082403871267-fsapi-clip-mode-global-deletion stores a parsed record scoring all 5 dimensions in the range 0..20, recording reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the run's baseline_suite and after_suite gate logs. It verifies by file and line that _SUPPORT_CLIP_MODE, set_support_clip_mode, support_clip_mode and the request bridge are gone, that ForwardFluxOperator.clip_mode and every request construction route default to chord with no fallback, and that an explicit mode still reaches the operator. It checks that tests/test_clip_mode_has_no_process_global.py would catch a reintroduced reference through an import alias or attribute access as well as a module-level definition, and that no production default changed. The record is stored once and the manifest reads complete.",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261003T082403871267-fsapi-clip-mode-global-deletion",
+    "id": "review-of-fsapi-clip-mode-global-deletion",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-03T09:14:22Z",
+      "read_at": "2026-10-03T09:14:23Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 13.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T091420501229-review-of-fsapi-clip-mode-global-deletion/manifest.md",
+    "negative_control": "",
+    "plan": "forward-solve-api",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T082403871267-fsapi-clip-mode-global-deletion.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T082403871267-fsapi-clip-mode-global-deletion.at-f80a679b91abfc32670cfeb8dbff1d6fb91e5718.json"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.8177629433984341,
+      "derived": 0.07866812365128953,
+      "drain_hours": 168.0,
+      "effective_limit": 0.07866812365128953,
+      "elapsed_fraction": 0.07151647604662684,
+      "elapsed_hours": 12.014767975833308,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-03T09:14:27+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.87,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.13,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.04630600000000001,
+      "decided_by": "window",
+      "margin": 0.578694,
+      "name": "review-of-fsapi-clip-mode-global-deletion",
+      "score": 0.625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.13
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.164713,
+        "observed_at": "2026-10-03T09:14:27+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.13,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "review-of-fsapi-clip-mode-global-deletion",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-03T09:14:27.164713+00:00",
+    "score": 0.625,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5013.156,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solve-api",
+  "plan_impl_at_dispatch": 0.985,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "126b18f4dda5ec8b7e68b479e4a5f11ff6eee707",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "none",
+  "role": "review",
+  "run_id": "r-20261003T091420501229-review-of-fsapi-clip-mode-global-deletion",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a1010b-8588-7f91-b536-1cd2519a2a28",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 3488000,
+    "cumulative_input_tokens": 7157950,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 29250
+  },
+  "time_budget": "45m",
+  "tool_steps": 31.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 612,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T09:25:02Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T09:14:52Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T091420501229-review-of-fsapi-clip-mode-global-deletion",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 103,
+    "worker_pid": 3931942
+  },
+  "worker_seconds": 612,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

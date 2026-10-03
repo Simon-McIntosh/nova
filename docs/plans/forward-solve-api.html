@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="143">
+<meta name="plan-version" content="144">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -553,6 +553,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20261003T063401667067-fsapi-outboard-census-exact-total" data-who="reckon-build" data-when="2026-10-03T10:15:17Z">
     <div class="r-comment-body"><p>Re-review 66 repaired: final-head paired receipts derive re-pin from current and pinned comparisons, record the 0.006251 A measured refinement bound, and reconcile every published number.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20261003T101621271048-review-of-fsapi-outboard-census-exact-total" data-who="reckon-build" data-when="2026-10-03T10:25:03.028Z">
+    <div class="r-comment-body"><p>Independent review of the five commits gained since prior reviewed head a57f6c203 (60baa8ee7..314e8aaaa): prior findings on the preset recommendation and the literal-zero bound are closed and verified against the regenerated paired receipt; total 82 (goal_fidelity 18, evidence 17, scope_discipline 20, durability 9, fit 18); no code commits authored.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260915T082752949902-fsa-transport-shim-delta-gate" data-who="fsa-transport-shim-delta-gate" data-when="2026-09-15T11:35:00+02:00">
     <div class="r-comment-body"><p>Transport test delta gate did not complete in its single exact scheduler allocation. Job <code>1271211</code> on <code>all_debug</code> ran the base archive <code>0f872fd6</code> through seven modules: 35 passed, 0 failed and 1 xfailed; it reached <code>tests/test_transport_geometry_reference.py</code> at the 59-minute wall and exited <code>143</code> before a terminal receipt. The shim-removal revision <code>fb402f8f</code> was not run, so the added-failure set is <strong>NOT MEASURABLE</strong>, not assumed empty. Full per-module logs and JUnit receipts are under <code>~/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/</code>; the next action is a fresh allocation with sufficient time or an exact plan-approved test selection.</p></div>

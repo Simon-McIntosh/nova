@@ -1978,6 +1978,26 @@ Receipt: <code>/nova/figures/forward-solver-route-integrity/single-site-krylov/b
     <p>A <code>@pytest.mark.timeout(660)</code> mark was measured and then withdrawn: pytest-timeout's marker overrides the command line, so it would have lowered that test's lane bound from 3600 s to 660 s. The confirm job 1280612 ran under that mark. The negative-control jobs were cancelled once the premise fell, so no red arm exists, and none is needed for a node that lands no check. Per-test table: <code>docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-tests-fit-their-bound.html</code>.</p>
   </section>
 
+  <section id="lane-cache-guard-loads">
+    <h2>§4 — the H200 lane's prelude reaches pytest, so the cache guard loads</h2>
+    <p>Run <code>r-20261003T130331364525-fsri-lane-cache-guard-loads</code> (local lane), merged at <code>32e8838a2</code>. Review: 91, pass with follow-ons.</p>
+    <p><strong>The defect.</strong> <code>scripts/nova_lane/run.sh</code> ran the payload prelude as <code>bash -euo pipefail -c "${prelude}"</code>. The exports the H200 test lane sets there all died with that subshell: <code>PYTEST_ADDOPTS</code> with <code>-p cache_guard</code>, <code>JAX_COMPILATION_CACHE_DIR</code> and the cache flags. As a result, from the launcher's introduction until this merge, no lane run:</p>
+    <ul>
+      <li>printed per-program hit or miss rows or the guard's marker;</li>
+      <li>enforced <code>NOVA_CACHE_MISS_BUDGET</code>;</li>
+      <li>reached WALL-CLOCK-UNRELIABLE, even on a mismatched pin.</li>
+    </ul>
+    <p>The diagnosis that opened this followup cited pytest's <code>plugins:</code> line. That line lists entry-point plugins only, so it was not evidence; the missing marker and rows were.</p>
+    <p><strong>Repair.</strong> The prelude runs with <code>eval</code> in the payload shell. <code>tests/test_nova_lane_launcher.py</code> gains a case that fails at the base (1 failed, 8 passed) and passes after (9 passed). On the H200, job 1280627 loads the guard and prints its rows and <code>CACHE_GUARD_MARKER=wall-clock-reliable misses=13</code> at a permissive budget. The negative control, job 1280632, runs at budget 0 against a directory without the programs and ends <code>WALL-CLOCK-UNRELIABLE misses=13</code> with exit 1.</p>
+    <p><strong>Consequences.</strong></p>
+    <ul>
+      <li>Every H200 lane timing recorded before <code>32e8838a2</code> carries no cache receipt. Read those walls as possibly compile-inclusive.</li>
+      <li>Now that the cache directory reaches the tests, lane runs write their compiled programs into the shared pre-warm pin directory. A negative control pointed at that pin read zero misses because of this.</li>
+      <li>The prelude now runs without errexit, so an early failing prelude command no longer aborts the lane.</li>
+    </ul>
+    <p>The last two are carried by f-fsri-lane-prelude-errexit-and-pin-writes.</p>
+  </section>
+
 </main>
 </body>
 </html>

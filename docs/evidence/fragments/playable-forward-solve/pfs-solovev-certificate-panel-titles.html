@@ -14,9 +14,10 @@ while the receipt's own <code>analytic_flux_regions.all_carrier_cells</code> giv
 flux error near 0.12. The panels were re-rendered from their persisted part receipts through the
 committed <code>benchmarks.solovev_certificate._plot</code> painter — no forward operator is built
 and no solve is entered — with a two-line title that names the read status, prints the relative
-flux error, and carries the terminal residual and converged flag, every number read from
-<code>solve-parts/chord/&lt;case&gt;-production-route-cells-1000.json</code>. The title is recorded
-back into that receipt as <code>figure.panel_title</code>.</p>
+flux error, and carries the terminal residual and converged flag, every number read from that arm's
+own <code>solve-parts/chord/&lt;case&gt;-production-route-cells-&lt;cells&gt;.json</code> receipt. The
+title is recorded back into that receipt as <code>figure.panel_title</code>, and the four-arm set is
+re-rendered together — including the diverted control — so the directory carries one title form.</p>
 
 <h3>Panels</h3>
 
@@ -52,14 +53,30 @@ The relative RMS on these three arms is <code>0.1176</code>, <code>0.1155</code>
 <code>0.1178</code>, roughly two orders of magnitude above the accuracy of the diverted control
 row in the same directory (<code>diverted-single-null-production-route-cells-500</code>,
 <code>relative_rms=4.60015e-15</code>), which is why the title now states both facts side by side.
-The diverted row was not re-rendered: its title was never a false accuracy claim.</p>
+The diverted row was never a false accuracy claim, but it is re-rendered alongside the other
+three so the chord directory carries one title form: its title states
+<code>relative_rms=4.6e-15</code>, <code>relative_sup=1.428e-14</code> and
+<code>residual=2.423e-17</code>, all read from
+<code>diverted-single-null-production-route-cells-500.json</code>.</p>
 
 <h3>Check and negative control</h3>
 <p><code>tests/test_solovev_certificate_panel_titles.py</code> re-derives each title from the part
 receipt keys and asserts the receipt's recorded title matches, that the title is not the bare
-qualification, that it names the read status and the relative error, and that the receipt digest
-matches the panel on disk. Against the committed pre-repair panels the same test fails on the bare
-<code>qualified</code> title (9 failed, exit 1).</p>
+qualification, that it names the read status and the relative error, that the receipt digest
+matches the panel on disk, and that the title embedded in the panel's own image equals the
+recorded one, for every chord arm including the diverted control.
+
+<p>The negative control runs the test against the committed pre-repair artifacts, and its two
+revisions are named separately because one tree cannot carry both. The <em>test</em> revision is
+<em>4d3363b58</em>, the head of this node's work and the revision in which
+<code>tests/test_solovev_certificate_panel_titles.py</code> exists. The <em>artifact</em> revision
+under test is <em>0dfce2a0d</em>, the pre-repair tree the pre-repair receipts and panels come
+from. Restoring those pre-repair receipts and panels and running the head test against them fails
+on the bare <code>qualified</code> title (9 failed, exit 1). The artifact revision
+<em>0dfce2a0d</em> claims only that the artifacts the arm consumes come from that tree, never that
+the test could run there: it could not, because the file did not exist until <em>4720f395b</em>,
+and <code>git cat-file -e
+0dfce2a0d:tests/test_solovev_certificate_panel_titles.py</code> fails.</p>
 
 <h3>Out of scope</h3>
 <ul>

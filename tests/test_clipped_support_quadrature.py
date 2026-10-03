@@ -8,11 +8,14 @@ import pytest
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.clip_quadrature import (
+    _QuadratureSupport,
+    _flux_selected_current_moments,
     clipped_support_current_moments,
     clipped_support_field_integrals,
     clipped_support_quadrature,
     cut_cell_bank_capacity,
 )
+from nova.equilibrium.source import _FluxSelectedProfile
 from nova.equilibrium.stencil_mesh import (
     FluxFieldPolynomial,
     flux_field_polynomial,
@@ -285,6 +288,37 @@ def _large_field(field: FluxFieldPolynomial, cell_count: int) -> FluxFieldPolyno
 
 def _shape_bytes(shape, dtype) -> int:
     return int(np.prod(shape, dtype=np.int64)) * np.dtype(dtype).itemsize
+
+
+def test_moving_outer_polygon_contributes_to_clipped_current_tangent():
+    class ConstantCurrent:
+        def current_density(self, radius, psi_norm):
+            return jnp.ones_like(radius)
+
+    polygon = jnp.asarray([[[0.8, -0.2], [1.2, -0.2], [1.2, 0.2], [0.8, 0.2]]])
+    field = FluxFieldPolynomial(
+        coefficient=jnp.asarray([[1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]),
+        centre=jnp.asarray([[1.0, 0.0]]),
+        scale=jnp.ones((1, 2)),
+        active=jnp.asarray([True]),
+    )
+    profile = _FluxSelectedProfile(ConstantCurrent(), None)
+
+    def current(displacement):
+        moving = polygon + jnp.asarray([displacement, 0.0])
+        support = _QuadratureSupport(
+            moving, jnp.asarray([4]), jnp.asarray([[1.0, 0.0]])
+        )
+        return _flux_selected_current_moments(
+            support, jnp.asarray([True]), field, profile, cut_cell_capacity=1
+        ).cell_current[0]
+
+    displacement = jnp.asarray(0.0)
+    _, tangent = jax.jvp(current, (displacement,), (jnp.asarray(1.0),))
+    step = 1.0e-5
+    central = (current(step) - current(-step)) / (2.0 * step)
+    assert abs(float(central)) > 0.1
+    np.testing.assert_allclose(tangent, central, rtol=1.0e-5, atol=1.0e-7)
 
 
 def test_compact_reduction_work_arrays_stay_below_one_gibibyte():

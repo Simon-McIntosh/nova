@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 
 import jax
@@ -12,7 +13,6 @@ import jax.numpy as jnp
 import numpy as np
 
 from benchmarks import centroid_constrained_fixture_receipt as fixture
-from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.equilibrium.observation import MomentIntegralSupport
 from nova.jax.config import configure_dtypes
 
@@ -35,11 +35,14 @@ def _metrics(values):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("mode", choices=("sweep", "factor", "control"))
-    mode = parser.parse_args().mode
+    parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
+    args = parser.parse_args()
+    mode = args.mode
+    output_dir = args.output_dir.resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
     configure_dtypes()
     assert jax.config.jax_enable_x64
-    set_support_clip_mode("exact")
-    context = fixture._context("weak-rotation-reactor-static", -110)
+    context = fixture._context("weak-rotation-reactor-static", -110, clip_mode="exact")
     operator = context["profile"].operator
     profile = context["profile"]
     target = context["target_current"]
@@ -96,7 +99,11 @@ def main():
         if not np.allclose(base["centroid"], control, rtol=0, atol=2e-12):
             raise RuntimeError("factor reconstruction misses the production centroid")
     result = {
-        "revision": "b4103b477e2807790996fbc9b7edeb07778cd433",
+        "revision": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parents[5],
+            text=True,
+        ).strip(),
         "analytic_state_digest": digest,
         "clip_mode": "exact",
         "requested_class": 0,
@@ -122,7 +129,7 @@ def main():
                     "central_m_per_t": ((plus - minus) / (2 * step)).tolist(),
                 }
             )
-            (OUTPUT_DIR / "step-sweep.json").write_text(
+            (output_dir / "step-sweep.json").write_text(
                 json.dumps(result, indent=2, allow_nan=False) + "\n"
             )
             print(f"step {step}: {result['sweep'][-1]}", flush=True)
@@ -133,7 +140,7 @@ def main():
         if mode == "factor"
         else ("level_wb", columns[:, 2], [1e-4])
     )
-    output = OUTPUT_DIR / (
+    output = output_dir / (
         "derivative-factors.json" if mode == "factor" else "control.json"
     )
     for name, column, steps in ((name, column, steps),):

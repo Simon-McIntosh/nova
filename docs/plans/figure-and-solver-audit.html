@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="58">
+<meta name="plan-version" content="59">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -514,7 +514,10 @@
     <div class="r-comment-body"><p>Restored the six millisecond-solve figure artifacts the compile-millisecond reports reference but main lacked (compile-memory.svg from refs/s19-tips/msc-compile-host-memory; solve-profile.json, -300.json, -1000.json, -300.svg, -1000.svg from refs/s19-tips/msc-solve-profile-kernel-count), each written by git show on its tip blob with git hash-object equal to that blob (sha256 a37d5b5d/5032106e, 2e33f631/4141747c, 2543ab3c/ed24f962, ce75bfea/45ab6988, 203b2bc2/836bf645, c8fd7fe9/94a09c25); added check_report_figures.py in each directory so the report's figure references are checked, green EXIT=0 after the restore against red EXIT=1 before (missing=1 of 1 and missing=5 of 5). Landing record: docs/evidence/fragments/figure-and-solver-audit/fsa-restore-msc-figure-artifacts.html</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261003T155653746986-review-of-fsa-restore-msc-figure-artifacts" data-who="reckon-build" data-when="2026-10-03T16:08:51.943Z">
-    <div class="r-comment-body"><p>Independent review of r-20261003T154255400457-fsa-restore-msc-figure-artifacts (f2ea3fc15..1c469999f): pass, total 92 (goal_fidelity 20, evidence 19, scope_discipline 20, durability 17, fit 16). All six restored artifacts are byte-identical to their s19 tip blobs (git rev-parse commit-blob == tip-blob and on-disk sha256 matches the manifest&#x27;s declared value for each), both check_report_figures.py scripts reproduce EXIT=0 (1 and 5 references present) and the solve-profile check independently reddens (missing=4 of 5, EXIT=1) on the base report in a scratch dir; the single commit adds nine files, all inside the declared write paths. Three follow-ons, none holding the node: the two check scripts are duplicated verbatim and are not wired into any pytest lane (existence-only guard), and ~365 MB of JSON receipts enter git. added_failure_count is null (unmeasured) and added_failure_ids [] because the reviewed docs node ran no pytest suite, so its manifest names no baseline_suite/after_suite gate logs.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261003T154255400457-fsa-restore-msc-figure-artifacts (f2ea3fc15..1c469999f): pass, total 92 (goal_fidelity 20, evidence 19, scope_discipline 20, durability 17, fit 16). All six restored artifacts are byte-identical to their s19 tip blobs (git rev-parse commit-blob == tip-blob and on-disk sha256 matches the manifest's declared value for each), both check_report_figures.py scripts reproduce EXIT=0 (1 and 5 references present) and the solve-profile check independently reddens (missing=4 of 5, EXIT=1) on the base report in a scratch dir; the single commit adds nine files, all inside the declared write paths. Three follow-ons, none holding the node: the two check scripts are duplicated verbatim and are not wired into any pytest lane (existence-only guard), and ~365 MB of JSON receipts enter git. added_failure_count is null (unmeasured) and added_failure_ids [] because the reviewed docs node ran no pytest suite, so its manifest names no baseline_suite/after_suite gate logs.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261003T154320591361-fsa-extract-frozen-current-gate-driver" data-who="reckon-build" data-when="2026-10-03T16:00:06Z">
+    <div class="r-comment-body"><p>Recovered the receipt-cited frozen-current driver at 0f8f89c9ca3835816233cf3416c8778d7a744a70 with render-only validation; 3/3 committed-head CPU tests pass, 0 added failures, and the missing-row mutation fails the reproduction test (1 failed, 2 passed); both SVGs reproduce all contour/wall paths, labels, null positions and levels, differing only in metadata/generated ids and current null glyph shapes.</p></div>
 </div>
 </section>
   </main>

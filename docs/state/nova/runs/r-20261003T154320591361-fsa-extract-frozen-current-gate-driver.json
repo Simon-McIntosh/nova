@@ -1,0 +1,1015 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-astra",
+  "base_sha": "f2ea3fc1511f3deddce9328f7dff4f72771c7af5",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 3039872,
+      "cached_input_tokens_cumulative": 3039872,
+      "input_tokens": 3177756,
+      "input_tokens_cumulative": 3177756,
+      "output_tokens": 19595,
+      "output_tokens_cumulative": 19595,
+      "reasoning_output_tokens": 4171,
+      "reasoning_output_tokens_cumulative": 4171
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 6681,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "measure_rung",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 1009
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "_fixture_summary",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "measure_rung",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 1018
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "measure_rung",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 1008
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "measure_rung",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 1041
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "measure_production_receipt",
+        "path": "tests/test_conditioning_shrinkage.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "measure_rung",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 1019
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "measure_rung",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 964
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "measure_rung",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 965
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "measure_rung",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 965
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 785,
+        "name": "measure_rung",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 965
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1277,
+        "name": "aggregate",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 1362
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "_fixture_summary",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1277,
+        "name": "aggregate",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 1364
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1277,
+        "name": "aggregate",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 1359
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "measure_production_receipt",
+        "path": "tests/test_conditioning_shrinkage.py"
+      },
+      "run_function": {
+        "line": 1277,
+        "name": "aggregate",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 1360
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_per_row_report",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 1454
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 1391,
+        "name": "_per_row_report",
+        "path": "benchmarks/frozen_current_flux_image_gate.py"
+      },
+      "window_line": 1452
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "0f8f89c9ca3835816233cf3416c8778d7a744a70"
+  ],
+  "completed_at": "2026-10-03T16:00:06Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-03T15:43:47Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_frozen_current_flux_image_gate.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T154320591361-fsa-extract-frozen-current-gate-driver/committed-head.log"
+  },
+  "impl_move": {
+    "at_complete": 1.0,
+    "at_dispatch": 1.0,
+    "plan": "figure-and-solver-audit",
+    "reason": "driver recovery; the plan implementation fraction is already 1",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex-astra",
+    "burn_multiple": 2.4522232734153264,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-astra' is projected to exhaust at 2026-10-06T04:41:21Z, which is after this node's 3600s horizon ending 2026-10-03T16:43:25.708496+00:00",
+    "horizon_ends_at": "2026-10-03T16:43:25.708496+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-03T15:43:24Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-06T04:41:21Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 538209,
+    "state": "quiet",
+    "utilisation_pct": 27.0
+  },
+  "lane_declaration": {
+    "backend": "codex-astra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-03T15:43:24Z",
+    "read_at": "2026-10-03T15:43:25Z",
+    "resolved_backend": "codex-astra",
+    "utilisation_pct": 27.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T16:00:06Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T154320591361-fsa-extract-frozen-current-gate-driver/manifest.md",
+  "member": "disposable-r-20261003T154320591361-fsa-extract-frozen-current-gate-driver",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_frozen_current_flux_image_gate.py::test_render_only_reproduces_receipted_panel_set"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_frozen_current_flux_image_gate.py::test_driver_imports_from_this_checkout",
+      "tests/test_frozen_current_flux_image_gate.py::test_render_only_reproduces_receipted_panel_set",
+      "tests/test_frozen_current_flux_image_gate.py::test_render_refuses_a_missing_receipt_row_before_drawing"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_frozen_current_flux_image_gate.py::test_render_only_reproduces_receipted_panel_set"
+    ],
+    "declaration": "feed the render a copy of the gate-b receipt with one row removed; the reproduction test must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T154320591361-fsa-extract-frozen-current-gate-driver/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T154320591361-fsa-extract-frozen-current-gate-driver/negative-control.log",
+    "test_paths": [
+      "tests/test_frozen_current_flux_image_gate.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fsa-extract-frozen-current-gate-driver",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 428,
+          "cached_input_tokens": 520910,
+          "input_tokens": 521340,
+          "output_tokens": 1766,
+          "reasoning_output_tokens": 73,
+          "total_tokens": 523106,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "benchmarks/frozen_current_flux_image_gate.py exists on main, taken from refs/s19-tips/cca-gate-b-finish-and-attribute (48a5764b5, the revision the gate-b receipt cites as measurement_driver_revision) with git show, together with any benchmark modules it imports that are also absent from main (the inventory names FCFIG, PSAG and rung_a_cert style helpers on sibling tips; confirm each by import, not by name), adapted only as far as today API requires and with no change under nova/. It imports at HEAD with JAX_PLATFORMS=cpu. A render-only invocation reading the committed docs/figures/cut-cell-current-attribution/gate-b/receipt.json and parts, with no solve, reproduces absolute-flux-error.svg and weak-110-frozen-prediction-analytic-terminal.svg; the manifest records whether each reproduction is byte-identical or, if not, which drawn elements differ. tests/test_frozen_current_flux_image_gate.py asserts the import and the render-only reproduction of the panel set from the receipt, and its negative control (the render fed a receipt with one row removed) fails. Report: /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-extract-frozen-current-gate-driver.md, listing every file brought over, its source tip and blob, and any adaptation with its reason. Gate: JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_frozen_current_flux_image_gate.py passes with zero added failures against the base.",
+    "estimated_hours": null,
+    "goal": "bring benchmarks/frozen_current_flux_image_gate.py onto main so the gate-b, cut-cell-coupling and first-order-coupling figures it drew can be regenerated",
+    "id": "fsa-extract-frozen-current-gate-driver",
+    "lane_declaration": {
+      "backend": "codex-astra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-03T15:43:24Z",
+      "read_at": "2026-10-03T15:43:25Z",
+      "resolved_backend": "codex-astra",
+      "utilisation_pct": 27.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T154320591361-fsa-extract-frozen-current-gate-driver/manifest.md",
+    "negative_control": "feed the render a copy of the gate-b receipt with one row removed; the reproduction test must fail",
+    "plan": "figure-and-solver-audit",
+    "requested_backend": "codex-astra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/frozen_current_flux_image_gate.py",
+      "tests/test_frozen_current_flux_image_gate.py",
+      "docs/figures/cut-cell-current-attribution/gate-b",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-extract-frozen-current-gate-driver.md",
+      "docs/evidence/fragments/figure-and-solver-audit/fsa-extract-frozen-current-gate-driver.html",
+      "docs/figures/figure-and-solver-audit/fsa-extract-frozen-current-gate-driver"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.452008407171085,
+      "derived": 0.1211251964436178,
+      "drain_hours": 168.0,
+      "effective_limit": 0.1211251964436178,
+      "elapsed_fraction": 0.11011381494874345,
+      "elapsed_hours": 18.4991209113889,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-03T15:43:30+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.73,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.27,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.17933400000000002,
+      "decided_by": "window",
+      "margin": 0.46441600000000005,
+      "name": "fsa-extract-frozen-current-gate-driver",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.27
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.835281,
+        "observed_at": "2026-10-03T15:43:30+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.27,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-astra",
+    "member": "codex",
+    "node": "fsa-extract-frozen-current-gate-driver",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-03T15:43:30.835281+00:00",
+    "score": 0.64375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.68,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 346.197,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 963.167,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.5949129253819445,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.5949129253819445,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 9,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 3,
+          "not-run": 17,
+          "passed": 91,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 2
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.04,
+      "claude-haiku": 0,
+      "claude-opus": 0,
+      "clive": 0.72,
+      "codex": 0.05,
+      "codex-astra": 0.02,
+      "codex-luna": 0.01,
+      "codex-terra": 0.04,
+      "hold": 0.12
+    },
+    "rendered_token_estimate": 1376,
+    "usage": {
+      "cost": 0.00015267,
+      "input_tokens": 3635,
+      "output_tokens": 99
+    }
+  },
+  "plan": "figure-and-solver-audit",
+  "plan_impl_at_dispatch": 1.0,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "0f8f89c9ca3835816233cf3416c8778d7a744a70",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "f2ea3fc1511f3deddce9328f7dff4f72771c7af5",
+    "reviewed_head_sha": "0f8f89c9ca3835816233cf3416c8778d7a744a70",
+    "scores": {
+      "durability": 17,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 92
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T154320591361-fsa-extract-frozen-current-gate-driver",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a1026f-ae7f-7a21-aee0-953cee673dd1",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 3039872,
+    "cumulative_input_tokens": 6217628,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 23766
+  },
+  "time_budget": "60m",
+  "tool_steps": 84.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 845,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but the attached review is parsed; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 4445,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-03T15:24:17Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-03T14:29:29Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261003T142906581394-cca-coil-edit-regeneration-row",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 11931,
+          "worker_pid": 3049236
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-03T15:24:17Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1152,
+        "log_fresh": false,
+        "manifest_commits": [
+          "5da98592b"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "747c20474a5f565640b79918cc587a8a481babe76abccaf893f6eb57391c6cb3",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T142906581394-cca-coil-edit-regeneration-row/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --plan cpu-compile-abort --section '§2' --role review --spec-level exact --node review-of-cca-coil-edit-regeneration-row --goal 'attach an independent review to run r-20261003T142906581394-cca-coil-edit-regeneration-row' --done-when 'the review for r-20261003T142906581394-cca-coil-edit-regeneration-row stores a parsed record scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T142906581394-cca-coil-edit-regeneration-row.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T142906581394-cca-coil-edit-regeneration-row.at-5da98592b3365f836b00f948c29be8b7f0983d9b.json --time-budget 60m --session s22-nova --allow-unreconciled-runs --local",
+        "node": "cca-coil-edit-regeneration-row",
+        "phase": "complete",
+        "plan": "cpu-compile-abort",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_status": "parsed",
+        "run_id": "r-20261003T142906581394-cca-coil-edit-regeneration-row",
+        "session": "s22-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1207,
+        "terminal_at": "2026-10-03T15:23:20Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 278,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 3878,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-03T15:20:13Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-03T14:39:01Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261003T143831229519-cank-shafranov-figure-remainder",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 9587,
+          "worker_pid": 3125627
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-03T15:20:13Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1396,
+        "log_fresh": false,
+        "manifest_commits": [
+          "12a894f23"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "3d33ec89ee9e0f15c306b2960b999766063c99009c3beeb57d462cf8e592cdbc",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143831229519-cank-shafranov-figure-remainder/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "needs_help_complete": null,
+        "next_action": "reckon crew complete --run r-20261003T143831229519-cank-shafranov-figure-remainder --gate <verdict> --commit 12a894f23214f20db840ace6e8ab272d9f2a6eb4",
+        "node": "cank-shafranov-figure-remainder",
+        "phase": "complete",
+        "plan": "constraint-augmented-newton-krylov",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_status": "parsed",
+        "run_id": "r-20261003T143831229519-cank-shafranov-figure-remainder",
+        "session": "s22-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1447,
+        "terminal_at": "2026-10-03T15:19:21Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cank-shafranov-figure-remainder"
+      }
+    ]
+  },
+  "wall_seconds": 979,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T16:00:10Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T15:43:54Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T154320591361-fsa-extract-frozen-current-gate-driver",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 204,
+    "worker_pid": 3698089
+  },
+  "worker_seconds": 979,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

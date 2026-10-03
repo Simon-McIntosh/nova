@@ -1,0 +1,41 @@
+<section id="fsa-wall-mask-shafranov">
+<h2>Wall mask on the two Shafranov receipt drivers</h2>
+
+<p>
+Four scattered-field renderer calls in this batch drew an interpolated raster
+through <code>draw_flux_contours</code> while passing no <code>wall</code>, so a
+contour could cross the vessel where the convex hull of the sample nodes extends
+past it. Each call now passes <code>wall=units</code>, the wall the driver
+already holds (<code>_wall_units(profile.operator)</code> in the pair receipt,
+the operator's typed units in the discriminator). Every site was already an
+unfilled line-contour draw on a stated level array, so no filled contour is
+introduced.
+</p>
+
+<p>
+Changed sites: <code>benchmarks/shafranov_combination_discriminator.py</code>
+<code>_render_state_panel</code> (was line 930);
+<code>benchmarks/shafranov_pair_receipt.py</code> <code>_render</code> (was
+lines 442, 459) and <code>_render_projection</code> (was line 1073). No
+<code>nova/</code> source is edited.
+</p>
+
+<p>
+Measure: <code>tests/renderer_wall_scan.py</code> over the two files exits 0 at
+the repaired head, and exits 1 listing exactly those four sites at base (the
+negative control, <code>base-arm.log</code>). Every existing test file that
+imports a changed module passes in both arms — 51 passed at head and 51 at base,
+zero added failures:
+<code>test_shafranov_combination_discriminator.py</code>,
+<code>test_shafranov_pair_receipt.py</code>,
+<code>test_shafranov_discriminator_render.py</code>.
+</p>
+
+<p>
+No committed figure was re-rendered in this node. For a later regeneration wave,
+<code>reports/nova/s22/fsa-wall-mask-shafranov.md</code> lists per changed
+driver the committed figure paths it writes and states that regeneration needs
+no new solve (both drivers draw from banked states and the persisted response
+cache).
+</p>
+</section>

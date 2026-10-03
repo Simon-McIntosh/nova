@@ -1,0 +1,36 @@
+{
+  "arm": "positive",
+  "case": "weak-rotation-reactor-static",
+  "clip_mode_requested": "exact",
+  "displacement_m": [
+    0.02,
+    0.0
+  ],
+  "expected_realised_cells": 135,
+  "field_bound_t": 0.25,
+  "field_scale_t": 0.25,
+  "gmres_iterations": 30,
+  "lane": {
+    "cpus": 8,
+    "gpus": 1,
+    "memory_gb": 128,
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA"
+  },
+  "newton_steps": 10,
+  "prior_field_t": [
+    -0.021255810528996315,
+    -7.579039140032072e-12
+  ],
+  "prior_global_residual": 8.49138557668533e-13,
+  "prior_job": 1280380,
+  "prior_row_scaled_residual": 8.423207074027404e-12,
+  "prior_span_offset_of_solved_span": 0.08296782922901276,
+  "prior_span_offset_wb": 4.517667659749549,
+  "prior_state_sha256_binary64": "41b9e055fbdcd4b7940e1d799a3f796eeb5116865257e7993c721bf0824cb50e",
+  "prior_wall_flux_wb": -4.50167829148427,
+  "requested_cells": -110,
+  "schema": "nova.centroid-constrained-measurement-request",
+  "source_revision": "fda483e45007aa20084300afae13837d14efed88",
+  "status": "inputs-verified; h200-run-pending"
+}

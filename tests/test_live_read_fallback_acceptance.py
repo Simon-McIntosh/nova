@@ -19,13 +19,34 @@ with skip_import("jax"):
 def test_live_read_recovery_keeps_own_mask_acceptance_callbacks(monkeypatch):
     calls = []
 
+    def shadowed_map():
+        def mapped(state, _shadow, *_arguments):
+            return state + 1.0
+
+        mapped._read_frozen_partition = lambda *_arguments: None
+        mapped._map_frozen_partition = lambda state, _partition, *_arguments: (
+            state + 2.0
+        )
+        mapped._frozen_partition_shadow = lambda partition: partition
+        return mapped
+
     def controlled_newton(map_fn, initial, **options):
         if options["own_mask_acceptance"] and (
             options.get("promoted_shadow_mask_fn") is None
             or options.get("shadowed_map_fn") is None
         ):
             raise ValueError("own-mask acceptance requires promoted shadow masks")
-        calls.append(options)
+        fallback_image = None
+        if calls:
+            shadowed = options["shadowed_map_fn"]
+            arguments = options["map_arguments"]
+            if hasattr(shadowed, "_map_frozen_partition"):
+                fallback_image = shadowed._map_frozen_partition(
+                    initial, None, *arguments
+                )
+            else:
+                fallback_image = shadowed(initial, jnp.zeros_like(initial), *arguments)
+        calls.append((options, fallback_image))
         return fixed_point.FixedPointResult(
             state=map_fn(initial, *options["map_arguments"]),
             residual=jnp.asarray(0.0),
@@ -38,9 +59,7 @@ def test_live_read_recovery_keeps_own_mask_acceptance_callbacks(monkeypatch):
         clip_mode=None,
         external=lambda *_arguments: jnp.zeros(1),
         traced_flux_map=lambda *_arguments: lambda state, *_call_arguments: state,
-        traced_flux_map_with_shadow=lambda *_arguments: (
-            lambda state, _shadow, *_call_arguments: state
-        ),
+        traced_flux_map_with_shadow=lambda *_arguments: shadowed_map(),
     )
     profile = SimpleNamespace(
         newton_steps=1,
@@ -68,7 +87,8 @@ def test_live_read_recovery_keeps_own_mask_acceptance_callbacks(monkeypatch):
     assert receipt is not None
     assert bool(np.asarray(receipt.fixed_point.converged))
     assert int(np.asarray(receipt.fixed_point.live_partition_reads)) == 1
-    fallback = calls[-1]
+    fallback, fallback_image = calls[-1]
     assert fallback["shadow_mask_fn"] is not None
     assert fallback["promoted_shadow_mask_fn"] is not None
     assert fallback["shadowed_map_fn"] is not None
+    np.testing.assert_array_equal(fallback_image, [1.0])

@@ -1077,6 +1077,492 @@ def _run(output: Path, report: Path) -> dict[str, Any]:
     return receipt
 
 
+# ---------------------------------------------------------------------------
+# Completion-receipt figures.
+#
+# The three figures drawn here re-derive every number from the committed
+# completion receipt: they share one header stating the corpus, each count
+# annotation names the receipt path it reads, every fraction drawn lies in
+# [0, 1], and any fraction over a subset of the corpus carries its numerator
+# and denominator paths so the population it is over is explicit.
+# ---------------------------------------------------------------------------
+
+DEFAULT_FIGURE_DIR = ROOT / "docs/figures/playable-forward-solve/labeller-receipt"
+DEFAULT_COMPLETION_RECEIPT = DEFAULT_FIGURE_DIR / "receipt.json"
+
+#: Displacement classes ordered from the far-negative open end to the far
+#: positive one.
+_PIN_CLASSES = (
+    ("below_-50_mm", "< -50 mm"),
+    ("-50_to_0_mm", "-50 to 0 mm"),
+    ("0_to_+50_mm", "0 to +50 mm"),
+    ("above_+50_mm", "> +50 mm"),
+)
+_PIN_COLORS = ("#4c72b0", "#55a868", "#c44e52", "#8172b2")
+_ACCENT = "#4c72b0"
+_NEUTRAL = "#6b6b6b"
+_MUTED = "#9a9a9a"
+
+
+def _at(receipt: dict[str, Any], path: str) -> Any:
+    """Return the value at a dotted receipt path, indexing lists by integer."""
+    value: Any = receipt
+    for key in path.split("."):
+        value = value[int(key)] if isinstance(value, list) else value[key]
+    return value
+
+
+def _decl(
+    label: str,
+    kind: str,
+    value: float,
+    *,
+    json_path: str | None = None,
+    numerator: str | None = None,
+    denominator: str | None = None,
+    denominator_paths: tuple[str, ...] | None = None,
+    sum_paths: tuple[str, ...] | None = None,
+) -> dict[str, Any]:
+    """Record one printed number together with where the receipt carries it.
+
+    A count read directly carries ``json_path``; a count that is the sum of
+    several paths carries ``sum_json_paths``; a fraction over a subset carries
+    ``numerator_json_path`` and either one denominator path or the several
+    count paths that sum to its denominator.
+    """
+    item: dict[str, Any] = {"label": label, "kind": kind, "value": float(value)}
+    if json_path is not None:
+        item["json_path"] = json_path
+    if numerator is not None:
+        item["numerator_json_path"] = numerator
+    if denominator is not None:
+        item["denominator_json_path"] = denominator
+    if denominator_paths is not None:
+        item["denominator_json_paths"] = list(denominator_paths)
+    if sum_paths is not None:
+        item["sum_json_paths"] = list(sum_paths)
+    return item
+
+
+def _decile_paths(decile: str) -> tuple[str, ...]:
+    """Return the four class-slice paths whose sum is a decile's written slices."""
+    return tuple(
+        f"pin_displacement_crosstab.by_decile.{decile}.{key}.slices"
+        for key, _ in _PIN_CLASSES
+    )
+
+
+def _decile_total(receipt: dict[str, Any], decile: str) -> int:
+    """Sum a decile's class slices to its written-slices total."""
+    return int(sum(_at(receipt, path) for path in _decile_paths(decile)))
+
+
+def _count_decl(receipt: dict[str, Any], label: str, json_path: str) -> dict[str, Any]:
+    """Record a printed count read directly from one receipt path."""
+    return _decl(label, "count", _at(receipt, json_path), json_path=json_path)
+
+
+def _corpus(receipt: dict[str, Any]) -> dict[str, Any]:
+    """Return the one corpus every figure header states."""
+    return {
+        "completed_shots": int(_at(receipt, "completed_shots")),
+        "slices": int(_at(receipt, "slices")),
+        "shots_json_path": "completed_shots",
+        "slices_json_path": "slices",
+    }
+
+
+def _corpus_title(corpus: dict[str, Any]) -> str:
+    """Compose the shared one-corpus header."""
+    return (
+        f"Forward labeller receipt: {corpus['completed_shots']} completed shots, "
+        f"{corpus['slices']} written slices"
+    )
+
+
+def _despine(axis) -> None:
+    """Draw a panel with no gridlines and no top or right spine."""
+    axis.grid(False)
+    axis.spines["top"].set_visible(False)
+    axis.spines["right"].set_visible(False)
+
+
+def _annotate_bars(axis, bars, values, *, fmt: str = "{:d}", dy: float = 3.0) -> None:
+    """Write each bar's value above the bar centre."""
+    for bar, value in zip(bars, values):
+        axis.annotate(
+            fmt.format(value),
+            (bar.get_x() + bar.get_width() / 2, bar.get_height() + dy),
+            ha="center",
+            va="bottom",
+            fontsize=12,
+        )
+
+
+def _draw_adjudication(
+    receipt: dict[str, Any], path: Path, title: str
+) -> dict[str, Any]:
+    """Slice census, guard agreement, displacement classes and decile trend."""
+    import matplotlib.pyplot as plt
+
+    declarations: list[dict[str, Any]] = []
+    figure, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+    census = (
+        ("admitted", "admitted_slices"),
+        ("converged", "converged_slices"),
+        ("qualified", "qualified_slices"),
+        ("unconverged", "unconverged_slices"),
+    )
+    labels = [item[0] for item in census]
+    values = [_at(receipt, json_path) for _, json_path in census]
+    for label, json_path in census:
+        declarations.append(_count_decl(receipt, label, json_path))
+    axis = axes[0][0]
+    _annotate_bars(axis, axis.bar(labels, values, color=_ACCENT), values)
+    axis.set_ylabel("slices")
+    axis.set_title("Slice census", fontsize=13)
+    _despine(axis)
+
+    axis = axes[0][1]
+    guard = (
+        (
+            "branch",
+            "branch_guard_agreement_slices",
+            "branch_guard_evaluated_slices",
+            "branch_guard_agreement_fraction",
+        ),
+        (
+            "conditioned",
+            "conditioned_guard_agreement_slices",
+            "conditioned_guard_evaluated_slices",
+            "conditioned_guard_agreement_fraction",
+        ),
+    )
+    positions = np.arange(len(guard))
+    width = 0.36
+    for position, (name, agree, evaluated, fraction) in enumerate(guard):
+        evaluated_value = _at(receipt, evaluated)
+        agreement_value = _at(receipt, agree)
+        fraction_value = _at(receipt, fraction)
+        declarations.append(_count_decl(receipt, f"{name} evaluated", evaluated))
+        declarations.append(_count_decl(receipt, f"{name} agreement", agree))
+        declarations.append(
+            _decl(
+                f"{name} agreement fraction",
+                "fraction",
+                fraction_value,
+                json_path=fraction,
+            )
+        )
+        axis.bar(position - width / 2, evaluated_value, width, color=_MUTED)
+        axis.bar(position + width / 2, agreement_value, width, color=_ACCENT)
+        axis.annotate(
+            f"{fraction_value:.4f}",
+            (position + width / 2, agreement_value),
+            ha="center",
+            va="bottom",
+            fontsize=12,
+        )
+    axis.set_xticks(positions)
+    axis.set_xticklabels([item[0] for item in guard])
+    axis.set_ylabel("slices")
+    axis.set_title("Guard agreement (fraction over evaluated slices)", fontsize=13)
+    _despine(axis)
+
+    axis = axes[1][0]
+    class_slices = []
+    class_labels = []
+    for key, label in _PIN_CLASSES:
+        json_path = f"pin_displacement_crosstab.overall.{key}.slices"
+        class_slices.append(_at(receipt, json_path))
+        class_labels.append(label)
+        declarations.append(_count_decl(receipt, f"displacement {label}", json_path))
+    _annotate_bars(
+        axis,
+        axis.bar(class_labels, class_slices, color=_PIN_COLORS),
+        class_slices,
+    )
+    axis.set_ylabel("slices")
+    axis.set_xlabel("each open-ended end bin drawn as its own bar")
+    axis.set_title("Centroid pin displacement by class", fontsize=13)
+    _despine(axis)
+
+    axis = axes[1][1]
+    deciles = _at(receipt, "conditioned_by_time_in_shot.deciles.bins")
+    xs = []
+    fractions = []
+    counts = []
+    for index in range(len(deciles)):
+        prefix = f"conditioned_by_time_in_shot.deciles.bins.{index}"
+        xs.append(int(_at(receipt, f"{prefix}.decile")))
+        fractions.append(_at(receipt, f"{prefix}.fraction"))
+        counts.append(_at(receipt, f"{prefix}.slices"))
+        declarations.append(
+            _decl(
+                f"conditioned fraction decile {index}",
+                "fraction",
+                _at(receipt, f"{prefix}.fraction"),
+                json_path=f"{prefix}.fraction",
+            )
+        )
+    axis.step(xs, fractions, where="mid", color=_ACCENT, linewidth=2.6)
+    for x, fraction, count in zip(xs, fractions, counts):
+        axis.annotate(
+            f"n={count}",
+            (x, fraction),
+            ha="center",
+            va="bottom",
+            fontsize=9,
+            color=_NEUTRAL,
+        )
+    axis.set_ylim(0.0, 1.0)
+    axis.set_xlabel("time-in-shot decile")
+    axis.set_ylabel("conditioned fraction")
+    axis.set_title("Conditioned fraction by time-in-shot decile", fontsize=13)
+    _despine(axis)
+
+    figure.suptitle(title, y=0.985, fontsize=15)
+    figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.96))
+    figure.savefig(path, dpi=100, metadata={"Title": title})
+    plt.close(figure)
+    return {"png": str(path), "title": title, "declarations": declarations}
+
+
+def _draw_pin_tail(receipt: dict[str, Any], path: Path, title: str) -> dict[str, Any]:
+    """Pin displacement cross-tabulation over time-in-shot deciles."""
+    import matplotlib.pyplot as plt
+
+    declarations: list[dict[str, Any]] = []
+    figure, axes = plt.subplots(1, 3, figsize=(14, 5.4))
+
+    axis = axes[0]
+    totals = []
+    labels = []
+    for key, label in _PIN_CLASSES:
+        json_path = f"pin_displacement_crosstab.overall.{key}.slices"
+        totals.append(_at(receipt, json_path))
+        labels.append(label)
+        declarations.append(_count_decl(receipt, f"class total {label}", json_path))
+    _annotate_bars(axis, axis.bar(labels, totals, color=_PIN_COLORS), totals)
+    axis.set_ylabel("slices")
+    axis.set_title("Pin displacement class totals", fontsize=13)
+    _despine(axis)
+
+    axis = axes[1]
+    by_decile = _at(receipt, "pin_displacement_crosstab.by_decile")
+    decile_keys = list(by_decile)
+    xs = np.arange(len(decile_keys))
+    bottoms = np.zeros(len(decile_keys))
+    for key, color in zip([item[0] for item in _PIN_CLASSES], _PIN_COLORS):
+        shares = []
+        for decile in decile_keys:
+            numerator = f"pin_displacement_crosstab.by_decile.{decile}.{key}.slices"
+            share = _at(receipt, numerator) / _decile_total(receipt, decile)
+            shares.append(share)
+            declarations.append(
+                _decl(
+                    f"decile {decile} {key} share",
+                    "fraction",
+                    share,
+                    numerator=numerator,
+                    denominator_paths=_decile_paths(decile),
+                )
+            )
+        shares_array = np.asarray(shares)
+        axis.bar(xs, shares_array, bottom=bottoms, color=color, width=0.72)
+        bottoms += shares_array
+    for position, decile in enumerate(decile_keys):
+        total = _decile_total(receipt, decile)
+        declarations.append(
+            _decl(
+                f"decile {decile} written slices",
+                "count",
+                total,
+                sum_paths=_decile_paths(decile),
+            )
+        )
+        axis.annotate(
+            f"n={total}",
+            (xs[position], 1.0),
+            ha="center",
+            va="bottom",
+            fontsize=9,
+            color=_NEUTRAL,
+        )
+    axis.set_ylim(0.0, 1.12)
+    axis.set_xticks(xs)
+    axis.set_xticklabels(decile_keys)
+    axis.set_xlabel("time-in-shot decile")
+    axis.set_ylabel("class fraction within decile")
+    axis.set_title("Class composition within each decile", fontsize=13)
+    _despine(axis)
+
+    axis = axes[2]
+    series_key, series_label = _PIN_CLASSES[2]
+    shares = []
+    counts = []
+    for decile in decile_keys:
+        numerator = f"pin_displacement_crosstab.by_decile.{decile}.{series_key}.slices"
+        share = _at(receipt, numerator) / _decile_total(receipt, decile)
+        shares.append(share)
+        counts.append(_at(receipt, numerator))
+        declarations.append(
+            _decl(
+                f"{series_label} share decile {decile}",
+                "fraction",
+                share,
+                numerator=numerator,
+                denominator_paths=_decile_paths(decile),
+            )
+        )
+    axis.plot(xs, shares, marker="o", color=_PIN_COLORS[2], linewidth=2.6)
+    for index, (x, share, count) in enumerate(zip(xs, shares, counts)):
+        axis.annotate(
+            f"n={count}",
+            (x, share),
+            ha="center",
+            va="bottom" if index % 2 else "top",
+            fontsize=9,
+            color=_NEUTRAL,
+        )
+    axis.set_ylim(0.0, 1.0)
+    axis.set_xticks(xs)
+    axis.set_title(f"{series_label} share by decile", fontsize=13)
+    _despine(axis)
+
+    figure.suptitle(title, y=0.99, fontsize=15)
+    figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.93))
+    figure.savefig(path, dpi=100, metadata={"Title": title})
+    plt.close(figure)
+    return {"png": str(path), "title": title, "declarations": declarations}
+
+
+def _draw_signed_error(
+    receipt: dict[str, Any], path: Path, title: str
+) -> dict[str, Any]:
+    """Signed error summaries with one wrapped title and no covering legend."""
+    import matplotlib.pyplot as plt
+
+    declarations: list[dict[str, Any]] = []
+    figure, axes = plt.subplots(1, 2, figsize=(14, 5.6))
+
+    distributions = (
+        ("free_error", "free_error_mm.distribution"),
+        ("conditioned_error", "conditioned_error_mm.distribution"),
+        ("absolute_reduction", "absolute_error_reduction_mm.distribution"),
+        ("pin_correction", "pin_correction_mm.overall"),
+    )
+    axis = axes[0]
+    rows = []
+    for name, root in distributions:
+        median = _at(receipt, f"{root}.median")
+        p90 = _at(receipt, f"{root}.p90")
+        maximum = _at(receipt, f"{root}.maximum")
+        count = _at(receipt, f"{root}.count")
+        for stat, value in (
+            ("median", median),
+            ("p90", p90),
+            ("maximum", maximum),
+        ):
+            declarations.append(
+                _decl(f"{name} {stat}", "value", value, json_path=f"{root}.{stat}")
+            )
+        declarations.append(_count_decl(receipt, f"{name} count", f"{root}.count"))
+        rows.append((name, median, p90, maximum, count))
+    for row_index, (name, median, p90, maximum, count) in enumerate(rows):
+        axis.barh(
+            row_index,
+            max(p90, 0.0),
+            left=min(0.0, median),
+            color=_PIN_COLORS[row_index % len(_PIN_COLORS)],
+        )
+        axis.plot(
+            [median, median],
+            [row_index - 0.32, row_index + 0.32],
+            color="black",
+            linewidth=2.0,
+        )
+    axis.set_yticks(range(len(rows)))
+    axis.set_yticklabels(
+        [
+            f"{name}\nmedian {median:.3g}, p90 {p90:.3g}, max {maximum:.3g}, n={count}"
+            for name, median, p90, maximum, count in rows
+        ],
+        fontsize=11,
+    )
+    axis.set_xlabel("mm (bar spans 0 to p90, black tick at median)")
+    axis.set_title("Signed error summaries", fontsize=13)
+    _despine(axis)
+
+    axis = axes[1]
+    root = "absolute_error_reduction_mm.distribution"
+    median = _at(receipt, f"{root}.median")
+    p90 = _at(receipt, f"{root}.p90")
+    maximum = _at(receipt, f"{root}.maximum")
+    count = _at(receipt, f"{root}.count")
+    bars = axis.bar(
+        ("median", "p90", "maximum"),
+        (median, p90, maximum),
+        color=_ACCENT,
+    )
+    _annotate_bars(axis, bars, (median, p90, maximum), fmt="{:.3g}")
+    axis.set_xlabel("mm")
+    axis.set_title(
+        "Absolute error reduction |free| - |conditioned|\n"
+        "positive means conditioning\nreduced the centroid error",
+        fontsize=13,
+    )
+    axis.annotate(
+        f"n={count}",
+        (0.5, 0.92),
+        xycoords="axes fraction",
+        ha="center",
+        fontsize=11,
+        color=_NEUTRAL,
+    )
+    _despine(axis)
+
+    figure.suptitle(title, y=0.985, fontsize=15)
+    figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.94))
+    figure.savefig(path, dpi=100, metadata={"Title": title})
+    plt.close(figure)
+    return {"png": str(path), "title": title, "declarations": declarations}
+
+
+def _figure_paths(figure_dir: Path) -> dict[str, Path]:
+    """Return the three served figure paths beside the receipt."""
+    return {
+        "labeller-receipt-adjudication": figure_dir
+        / "labeller-receipt-adjudication.png",
+        "pin-tail-crosstab": figure_dir / "pin-tail-crosstab.png",
+        "signed-error-summaries": figure_dir / "signed-error-summaries.png",
+    }
+
+
+def render_figures(figure_dir: Path) -> dict[str, Any]:
+    """Regenerate the three completion-receipt figures from their receipt."""
+    receipt = json.loads((figure_dir / "receipt.json").read_text(encoding="utf-8"))
+    corpus = _corpus(receipt)
+    title = _corpus_title(corpus)
+    paths = _figure_paths(figure_dir)
+    figures = [
+        _draw_adjudication(receipt, paths["labeller-receipt-adjudication"], title),
+        _draw_pin_tail(receipt, paths["pin-tail-crosstab"], title),
+        _draw_signed_error(receipt, paths["signed-error-summaries"], title),
+    ]
+    payload = {
+        "schema": "nova-labeller-receipt-figures",
+        "source_receipt": "receipt.json",
+        "corpus": corpus,
+        "figures": [{"name": name, **figure} for name, figure in zip(paths, figures)],
+    }
+    (figure_dir / "render-receipt.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return payload
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -1092,6 +1578,8 @@ def _parser() -> argparse.ArgumentParser:
     acceptance.add_argument("--slice-count", type=int, default=CORPUS_SHOT_COUNT)
     acceptance.add_argument("--output", type=Path, default=DEFAULT_ACCEPTANCE_OUTPUT)
     subparsers.add_parser("reference")
+    render = subparsers.add_parser("render")
+    render.add_argument("--figure-dir", type=Path, default=DEFAULT_FIGURE_DIR)
     return parser
 
 
@@ -1143,6 +1631,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 allow_nan=False,
             )
         )
+        return 0
+    if arguments.command == "render":
+        payload = render_figures(arguments.figure_dir)
+        print(json.dumps(_strict(payload), sort_keys=True, allow_nan=False))
         return 0
     receipt = _run(arguments.output, arguments.report)
     return 0 if receipt["status"] == "complete" else 1

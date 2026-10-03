@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="100">
+<meta name="plan-version" content="101">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.66">
 </head>
@@ -538,6 +538,11 @@
     <h4 class="r-fu-title">Make the ladder census&#x27;s runtime execution counts register the ladder calls the solver makes</h4>
     <div class="r-fu-body"><p>From the merge of the recovery-ladder census (1ab7d00fd, review 93). On the diverted-single-null 300-cell row, all five per-solve execution counts read zero while the solver telemetry for the same solve records one promotion attempt. <code>instrumented()</code> patches module globals, and the ladder calls made inside the active-set route do not reach the patched names, although the trip entry does. That is an inert instrument.</p><p>Repair, all three in this node:</p><ol><li>Find how the active-set route reaches the ladder entries (a captured reference, a dispatch table, or a closure), and count at a point every call passes through.</li><li>Prove it with a row whose telemetry records a promotion: its census count must be nonzero and agree with the telemetry.</li><li>Fix the two review follow-ons. <code>test_module_under_test_is_the_imported_copy</code> asserts only that <code>fixed_point.__file__</code> is truthy, which no regression can fail. The committed report.json names census_commit 5721de656 while the raw run log names 419152362, so the report cannot be tied to the run that produced it.</li></ol><p>Benchmarks and tests only.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §2</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-lane-cache-guard-loads" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build forward-solver-route-integrity §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the H200 lane&#x27;s payload prelude reach pytest so the cache guard loads</h4>
+    <div class="r-fu-body"><p>Found by the forward-solve per-test bound node and confirmed in two lane logs from 2026-10-03: <code>~/.cache/nova-forward-solve-timeouts/measure.log</code> (job 1280609) and <code>~/.cache/nova-moment-map-after-first-moments/contract.log</code> (job 1280616).</p><p><strong>The defect.</strong> <code>scripts/nova_lane/run.sh</code> runs the payload prelude as <code>bash -euo pipefail -c "${prelude}"</code> (line 156). The prelude that <code>scripts/h200_test_lane/run.sh</code> passes exports <code>PYTEST_ADDOPTS="... -p cache_guard"</code>, <code>JAX_COMPILATION_CACHE_DIR</code> and the cache flags, and all of those die with the subshell. In both logs, pytest's <code>plugins:</code> line lists no cache_guard, so:</p><ul><li>no per-program hit or miss rows are printed;</li><li><code>NOVA_CACHE_MISS_BUDGET</code> is never enforced;</li><li>WALL-CLOCK-UNRELIABLE never fires, even when the header prints PINNED_REVISION_MISMATCH, as both of these runs did;</li><li>the GPU-utilisation samples read 0 at 10, 30 and 60 s.</li></ul><p>The lane behaviour AGENTS.md describes has therefore not been happening.</p><p><strong>Repair.</strong> Make the prelude's exports reach the pytest process: source it in the payload shell, or write its environment to a file the payload sources. Then show:</p><ul><li>a lane log whose <code>plugins:</code> line lists cache_guard, with the hit and miss rows and the marker printed;</li><li>a deliberately mismatched pin under budget 0 that ends with WALL-CLOCK-UNRELIABLE and a nonzero exit (the negative control).</li></ul><p>Whether <code>JAX_COMPILATION_CACHE_DIR</code> was ever served to the lane's tests is part of the report. Scripts and their tests only.</p></div>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §4</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

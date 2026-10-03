@@ -1,8 +1,8 @@
 """The support clip mode defaults to the committed chord clip.
 
 The chord clip is the committed production behaviour of the forward
-operator; exact participation and the chord-cells hybrid are opt-in
-through ``set_support_clip_mode``.  These tests pin the import default,
+operator; exact participation and the chord-cells hybrid are opt-in on the
+operator.  These tests pin the operator default,
 prove it reproduces the main checkout's forward operator bit-for-bit on
 the weak-rotation-reactor-static certificate state, and prove the exact
 opt-in path changes cell currents.
@@ -78,9 +78,7 @@ def main() -> int:
     args = parser.parse_args()
     operator, state = build()
     if args.mode is not None:
-        from nova.equilibrium.forward_operator import set_support_clip_mode
-
-        set_support_clip_mode(args.mode)
+        operator = operator.with_clip_mode(args.mode)
     raw, unit = zeroth_moments(operator, state)
     np.savez(args.output, raw=raw, unit=unit)
     return 0
@@ -124,28 +122,6 @@ def _load_arrays(path: Path) -> tuple[np.ndarray, np.ndarray]:
         return np.asarray(receipt["raw"]), np.asarray(receipt["unit"])
 
 
-def test_support_clip_mode_defaults_to_chord_on_import():
-    """A fresh interpreter reports the committed chord default."""
-    environment = dict(os.environ)
-    environment["PYTHONPATH"] = str(WORKTREE)
-    probe = subprocess.run(
-        [
-            sys.executable,
-            "-c",
-            (
-                "from nova.equilibrium.forward_operator import support_clip_mode;"
-                "assert support_clip_mode() == 'chord'"
-            ),
-        ],
-        cwd=str(WORKTREE),
-        env=environment,
-        capture_output=True,
-        text=True,
-        timeout=300,
-    )
-    assert probe.returncode == 0, probe.stderr
-
-
 def test_default_chord_moments_match_main_checkout_bit_for_bit(tmp_path):
     """The default mode reproduces the main checkout's moments to the bit.
 
@@ -172,28 +148,20 @@ def test_default_chord_moments_match_main_checkout_bit_for_bit(tmp_path):
     assert np.sum(worktree_raw) == np.sum(main_raw)
 
 
-def test_exact_mode_changes_cell_currents(tmp_path):
-    """The exact opt-in path is live: it moves at least one cell's current."""
-    from nova.equilibrium.forward_operator import (
-        set_support_clip_mode,
-        support_clip_mode,
-    )
-
+def test_operator_clip_modes_apply_through_with_clip_mode(tmp_path):
+    """Exact and chord-cells are explicit operator modes, not process state."""
     configure_dtypes()
-    previous = support_clip_mode()
-    try:
-        assert set_support_clip_mode("exact") == "exact"
-        assert support_clip_mode() == "exact"
+    driver = _write_driver(tmp_path)
+    chord_out = tmp_path / "chord.npz"
+    exact_out = tmp_path / "exact.npz"
+    chord_cells_out = tmp_path / "chord-cells.npz"
+    _run_driver(WORKTREE, driver, chord_out, mode="chord")
+    _run_driver(WORKTREE, driver, exact_out, mode="exact")
+    _run_driver(WORKTREE, driver, chord_cells_out, mode="chord_cells")
+    chord_raw, _chord_unit = _load_arrays(chord_out)
+    exact_raw, _exact_unit = _load_arrays(exact_out)
+    chord_cells_raw, _chord_cells_unit = _load_arrays(chord_cells_out)
 
-        driver = _write_driver(tmp_path)
-        chord_out = tmp_path / "chord.npz"
-        exact_out = tmp_path / "exact.npz"
-        _run_driver(WORKTREE, driver, chord_out, mode="chord")
-        _run_driver(WORKTREE, driver, exact_out, mode="exact")
-        chord_raw, _chord_unit = _load_arrays(chord_out)
-        exact_raw, _exact_unit = _load_arrays(exact_out)
-
-        assert not np.array_equal(chord_raw, exact_raw)
-        assert np.any(chord_raw != exact_raw)
-    finally:
-        set_support_clip_mode(previous)
+    assert not np.array_equal(chord_raw, exact_raw)
+    assert np.any(chord_raw != exact_raw)
+    assert not np.array_equal(exact_raw, chord_cells_raw)

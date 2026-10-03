@@ -104,34 +104,6 @@ __all__ = [
 _PRODUCTION_STATIONARY_POINT_CAPACITY = 30
 """Candidate slots retained by the topology reader used by forward solves."""
 
-_SUPPORT_CLIP_MODE = "chord"
-"""Plasma-support clip mode for solver construction.
-
-``chord`` (the committed production default) reproduces the prior
-committed chord clip, full cells selected by the profile partition label
-only, so production results are unchanged; ``exact`` traces the curved
-boundary support with every cut cell participating; ``chord_cells`` keeps
-the exact support everywhere except a named pair of cells whose entries
-revert to their chord-moment values.  ``exact`` and ``chord_cells`` are
-opt-in through :func:`set_support_clip_mode`; production never changes
-the mode.
-"""
-
-
-def set_support_clip_mode(mode: str) -> str:
-    """Select the plasma-support clip mode for subsequent solves."""
-    global _SUPPORT_CLIP_MODE
-    if mode not in ("exact", "chord", "chord_cells"):
-        raise ValueError(f"unknown support clip mode {mode!r}")
-    _SUPPORT_CLIP_MODE = mode
-    return _SUPPORT_CLIP_MODE
-
-
-def support_clip_mode() -> str:
-    """Return the active plasma-support clip mode."""
-    return _SUPPORT_CLIP_MODE
-
-
 #: The two boundary cells whose contaminated moments the discriminator
 #: reverts to their chord values to test the two-cell-destabilisation arm.
 _CHORD_REVERTED_CELLS = (101, 102)
@@ -2366,7 +2338,7 @@ class ForwardFluxOperator:
     wall_unit_offsets: object = field(repr=False, default=None)
     wall_unit_closed: object = field(repr=False, default=None)
     wall_unit_kinds: tuple[str, ...] | None = field(repr=False, default=None)
-    clip_mode: str | None = field(repr=False, default=None)
+    clip_mode: str = field(repr=False, default="chord")
     prescribed_current_field: InitVar[PrescribedCurrentField | None] = None
     prescribed_field: PrescribedCurrentField | None = field(
         init=False, repr=False, default=None
@@ -2740,8 +2712,8 @@ class ForwardFluxOperator:
 
     @property
     def _active_support_clip_mode(self) -> str:
-        """Resolve legacy global selection only for callers without a request."""
-        return self.clip_mode if self.clip_mode is not None else support_clip_mode()
+        """Return the support mode selected for this operator."""
+        return self.clip_mode
 
     def tree_flatten(self):
         """Separate traced arithmetic arrays from immutable host metadata."""

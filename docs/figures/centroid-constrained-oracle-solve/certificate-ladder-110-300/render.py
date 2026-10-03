@@ -128,7 +128,19 @@ def main() -> None:
     configure_dtypes()
     for case in CASES:
         for cells in CELLS:
-            context = fixture._context(case, -cells, clip_mode="exact")
+            carrier, _, exact = certificate._case(case, clip_mode="exact")
+            machine = certificate._case_machine(
+                case, carrier, exact, -cells, clip_mode="exact"
+            )
+            coordinates = np.vstack(
+                (machine.node, machine.wall_node, machine.sample_coordinates)
+            )
+            context = {
+                "machine": machine,
+                "coordinates": coordinates,
+                "analytic": certificate._exact_state(case, exact, coordinates),
+                "exact": exact,
+            }
             for support in SUPPORTS:
                 stem = f"{case}-{cells}-{support}"
                 receipt = json.loads((args.receipts / f"{stem}.json").read_text())

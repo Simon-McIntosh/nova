@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="145">
+<meta name="plan-version" content="146">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -559,6 +559,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20261003T095314766715-fsapi-sol-ledger-receipt-regeneration" data-who="reckon-build" data-when="2026-10-03T10:24:58.162Z">
     <div class="r-comment-body"><p>Regenerated docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json at head a6fe0d05b (job 1280596): it now carries clip_mode=chord and no support_clip_mode; tests/test_sol_ledger_render.py 4 passed; net_current_scaling_census._read_sol_ledger reads it without raising; every changed float is numerical drift with the bound stated by population (headline aggregates max 2.3e-13, per-cell fields max 1.6e-10 relative), verdict, cell counts and all categorical fields identical; panel and render receipt redrawn. Evidence: docs/evidence/fragments/forward-solve-api/fsapi-sol-ledger-receipt-regeneration.html (drift bound restated per finding f7633b5ac36 in 0b205655d).</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20261003T102819374453-review-2-of-fsapi-sol-ledger-receipt-regeneration" data-who="reckon-build" data-when="2026-10-03T10:35:31.523Z">
+    <div class="r-comment-body"><p>Reviewed r-20261003T095314766715-fsapi-sol-ledger-receipt-regeneration at head 0b205655d (base a6fe0d05b): verdict pass, total 86/100 (goal_fidelity 19, evidence 17, fit 18, durability 13, scope_discipline 19). Independently reproduced both drift bounds (headline 2.260e-13 at ledger.common_sol; per-cell 1.619e-10 at per_cell[111].current_a from 1.7545606765386679 -&gt; 1.7545606762546715) and confirmed the regenerated receipt is unchanged from c65d98322 (0 render diffs, no key-set change); the repair commit 0b205655d restates both bounds in the fragment, manifest and commit body as required by f7633b5ac36. Four follow-on record-accuracy findings (326 not 328 changed floats; &#x27;lone 0.50&#x27; also fixed_point_residual; headline population excludes common_sol_split totals; the _read_sol_ledger guard and the repair&#x27;s check script are uncommitted).</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260915T082752949902-fsa-transport-shim-delta-gate" data-who="fsa-transport-shim-delta-gate" data-when="2026-09-15T11:35:00+02:00">
     <div class="r-comment-body"><p>Transport test delta gate did not complete in its single exact scheduler allocation. Job <code>1271211</code> on <code>all_debug</code> ran the base archive <code>0f872fd6</code> through seven modules: 35 passed, 0 failed and 1 xfailed; it reached <code>tests/test_transport_geometry_reference.py</code> at the 59-minute wall and exited <code>143</code> before a terminal receipt. The shim-removal revision <code>fb402f8f</code> was not run, so the added-failure set is <strong>NOT MEASURABLE</strong>, not assumed empty. Full per-module logs and JUnit receipts are under <code>~/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/</code>; the next action is a fresh allocation with sufficient time or an exact plan-approved test selection.</p></div>

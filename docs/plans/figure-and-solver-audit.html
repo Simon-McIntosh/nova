@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="73">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -511,6 +511,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261003T171027671435-fsa-wall-mask-efit-parity" data-who="reckon-build" data-when="2026-10-03T17:31:05.019Z">
     <div class="r-comment-body"><p>Routed the three scattered-field renderers in benchmarks/efit_forward_parity_slice.py (lines 3338, 3437, 3684) through nova.media.poloidal.draw_scattered_contours with the wall the driver holds, replacing filled tricontourf with unfilled level lines; the wall scanner gate now exits 0 against a base that exits 1 listing exactly those three sites, and 115 of 122 fast importing tests pass with zero added failures against the base.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261003T170717970343-fsa-wall-mask-solovev-and-sol" data-who="reckon-build" data-when="2026-10-03T17:29:42.303Z">
+    <div class="r-comment-body"><p>routed all 12 unguarded scattered-field contour calls in the batch through the wall mask — benchmarks/solovev_certificate.py (draw_flux_contours now passed wall=), solovev_solver_discriminator.py / solovev_off_axis_census.py / solovev_cut_cell_moments.py / sol_current_demonstration.py (direct tricontour moved to draw_scattered_contours with the wall); the renderer wall scanner reports 0 sites in the batch where the base reported 12 (EXIT 1 -&gt; 0).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

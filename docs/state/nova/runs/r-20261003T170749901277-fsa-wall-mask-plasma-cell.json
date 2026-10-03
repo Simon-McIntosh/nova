@@ -1,0 +1,1206 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 10270221,
+      "input_tokens_cumulative": 10270221,
+      "output_tokens": 45883,
+      "output_tokens_cumulative": 45883,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 10,
+    "files": 7,
+    "removed": 9
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "measure",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 578
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 254,
+        "name": "measure",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 576
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 331,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 337
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "1cdad46bb8a18d34bfc092c1b1ae0219514871be"
+  ],
+  "completed_at": "2026-10-03T17:33:49.521Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-03T17:08:08Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python tests/renderer_wall_scan.py benchmarks/plasma_cell_first_step_directions.py benchmarks/plasma_cell_fixed_point_attribution.py benchmarks/plasma_cell_map_fidelity.py benchmarks/plasma_cell_production_ladder.py benchmarks/plasma_cell_seed_policy.py benchmarks/plasma_cell_terminal_state.py benchmarks/plasma_cell_trip_panels.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T170749901277-fsa-wall-mask-plasma-cell/gate.log"
+  },
+  "impl_move": {
+    "at_complete": 1.0,
+    "at_dispatch": 1.0,
+    "plan": "figure-and-solver-audit",
+    "reason": "renderer hygiene; the plan implementation fraction is already 1",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-03T18:07:51.779983+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-03T17:07:51Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 5,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 15,
+    "mean_context": 150000,
+    "observed_at": "2026-10-03T17:07:46Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T17:33:49.521Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T170749901277-fsa-wall-mask-plasma-cell/manifest.md",
+  "member": "disposable-r-20261003T170749901277-fsa-wall-mask-plasma-cell",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsa-wall-mask-plasma-cell",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 5880,
+          "cached_input_tokens": 667040,
+          "input_tokens": 672922,
+          "output_tokens": 284,
+          "reasoning_output_tokens": 46,
+          "total_tokens": 673206,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "The renderer wall scanner (tests/renderer_wall_scan.py, on main since 8a83014b2) lists 8 unguarded calls in this batch at main: benchmarks/plasma_cell_first_step_directions.py lines 203 (draw_flux_contours); benchmarks/plasma_cell_fixed_point_attribution.py lines 424 (draw_flux_contours), 819 (draw_flux_contours); benchmarks/plasma_cell_map_fidelity.py lines 526 (draw_flux_contours); benchmarks/plasma_cell_production_ladder.py lines 736 (draw_flux_contours); benchmarks/plasma_cell_seed_policy.py lines 489 (draw_flux_contours); benchmarks/plasma_cell_terminal_state.py lines 357 (draw_flux_contours); benchmarks/plasma_cell_trip_panels.py lines 517 (draw_flux_contours). Each goes through the wall mask: a direct tricontour, tricontourf, contour or contourf on scattered data moves to nova.media.poloidal.draw_scattered_contours with the wall, and a draw_flux_contours call fed by an interpolated scattered field passes the wall the driver already holds, or loads it from the fixture or machine description the driver already uses. Filled contours of a scalar map become unfilled line contours on stated levels. Gate: `JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python tests/renderer_wall_scan.py benchmarks/plasma_cell_first_step_directions.py benchmarks/plasma_cell_fixed_point_attribution.py benchmarks/plasma_cell_map_fidelity.py benchmarks/plasma_cell_production_ladder.py benchmarks/plasma_cell_seed_policy.py benchmarks/plasma_cell_terminal_state.py benchmarks/plasma_cell_trip_panels.py` exits 0 (log ends EXIT=0), and the same command at the base exits 1 listing exactly these sites, logged as the negative control. Every existing test file that imports a changed module passes with zero added failures against the base (name them and log both arms). Do not re-render committed figures in this node: the report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-wall-mask-plasma-cell.md lists, per changed driver, the committed figure paths it writes and whether regenerating them needs a solve, for a later regeneration wave. No source under nova/ is edited. Keep scratch under the run directory.",
+    "estimated_hours": null,
+    "goal": "route every unguarded scattered-field renderer call in this batch through the wall mask so no figure draws field outside the vessel",
+    "id": "fsa-wall-mask-plasma-cell",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-03T17:07:51Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 5,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 15,
+      "mean_context": 150000,
+      "observed_at": "2026-10-03T17:07:46Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T170749901277-fsa-wall-mask-plasma-cell/manifest.md",
+    "negative_control": "",
+    "plan": "figure-and-solver-audit",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/plasma_cell_first_step_directions.py",
+      "benchmarks/plasma_cell_fixed_point_attribution.py",
+      "benchmarks/plasma_cell_map_fidelity.py",
+      "benchmarks/plasma_cell_production_ladder.py",
+      "benchmarks/plasma_cell_seed_policy.py",
+      "benchmarks/plasma_cell_terminal_state.py",
+      "benchmarks/plasma_cell_trip_panels.py",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-wall-mask-plasma-cell.md",
+      "docs/evidence/fragments/figure-and-solver-audit/fsa-wall-mask-plasma-cell.html",
+      "docs/figures/figure-and-solver-audit/fsa-wall-mask-plasma-cell"
+    ]
+  },
+  "orientation_input_tokens": 1775915.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsa-wall-mask-plasma-cell",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-03T17:07:54.450119+00:00",
+    "score": 0.71875,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.68,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 340.28,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 912.314,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.5362588800231481,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.5362588800231481,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 1,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 19,
+          "passed": 96,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 33
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 1,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.07,
+      "claude-haiku": 0,
+      "claude-opus": 0.01,
+      "clive": 0.72,
+      "codex": 0.04,
+      "codex-astra": 0.05,
+      "codex-luna": 0.01,
+      "codex-terra": 0.02,
+      "hold": 0.08
+    },
+    "rendered_token_estimate": 1537,
+    "usage": {
+      "cost": 0.000158802,
+      "input_tokens": 3781,
+      "output_tokens": 99
+    }
+  },
+  "plan": "figure-and-solver-audit",
+  "plan_impl_at_dispatch": 1.0,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "1cdad46bb8a18d34bfc092c1b1ae0219514871be",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+    "reviewed_head_sha": "1cdad46bb8a18d34bfc092c1b1ae0219514871be",
+    "scores": {
+      "durability": 15,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 90
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T170749901277-fsa-wall-mask-plasma-cell",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "1463b6f3-0427-4884-8b5f-50ed6b4b662f",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 10270221,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1531.515,
+    "generated_tokens": 45883,
+    "generation_seconds": 883.47,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 78.2,
+    "machine_seconds": 648.045,
+    "peak_input_tokens": 179969,
+    "tokens_per_second": 51.93,
+    "wall_tokens_per_second": 29.96
+  },
+  "time_budget": "60m",
+  "tool_steps": 86.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1541,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T17:33:54Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-03T17:08:14Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T170749901277-fsa-wall-mask-plasma-cell",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 7523,
+    "worker_pid": 604970
+  },
+  "worker_seconds": 1503,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

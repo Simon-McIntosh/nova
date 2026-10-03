@@ -40,7 +40,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from nova.equilibrium import ForwardProfile
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import (
     configure_dtypes,
@@ -53,6 +52,9 @@ from scripts.oracle_rebaseline import measure as recovery
 from benchmarks import solovev_certificate as solovev
 
 CASE_NAME_DEFAULT = "weak-rotation-reactor-static"
+
+#: Support clip mode the compiled-kernel census measures under.
+CLIP_MODE = "chord"
 
 _OP_LINE = re.compile(r"^\s+%[A-Za-z0-9_.-]+\s*=", re.M)
 _OP_INDENT = re.compile(r"^(?P<indent>\s+)%(?P<name>[A-Za-z0-9_.-]+)\s*=", re.M)
@@ -420,13 +422,17 @@ def measure_case(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     oracle_state = solovev._exact_state(case_name, exact, coordinates)
-    empty_operator = oracle_fixture.forward_operator(source_case, machine)
+    empty_operator = oracle_fixture.forward_operator(
+        source_case, machine
+    ).with_clip_mode(CLIP_MODE)
     exact_physical, fixture_exterior, fixture_cache = (
         oracle_fixture.cached_fixture_exterior(
             source_case, exact, machine, empty_operator, oracle_state
         )
     )
-    operator = oracle_fixture.forward_operator(source_case, machine, fixture_exterior)
+    operator = oracle_fixture.forward_operator(
+        source_case, machine, fixture_exterior
+    ).with_clip_mode(CLIP_MODE)
     mesh = StencilMesh(machine.node, machine.stencil, machine.area)
     profile = ForwardProfile(operator, mesh, newton_steps=recovery.NEWTON_STEPS)
     target_current, current_centroid, current_receipt = (
@@ -442,6 +448,7 @@ def measure_case(
         seed,
         target_current,
         carrier_identity=f"solovev:{case_name}:{requested_cells}",
+        clip_mode=CLIP_MODE,
     )
 
     warm_started = perf_counter()
@@ -453,7 +460,7 @@ def measure_case(
         "case": case_name,
         "requested_cells": cells,
         "mesh_nodes": len(machine.node),
-        "whole_cell_clip_mode": support_clip_mode(),
+        "whole_cell_clip_mode": CLIP_MODE,
         "warm_solve_seconds": warm_seconds,
         "machine_cache": machine.cache,
         "fixture_exterior_cache": fixture_cache,
@@ -482,7 +489,6 @@ def main() -> None:
     parser.add_argument("--smoke", action="store_true")
     arguments = parser.parse_args()
 
-    set_support_clip_mode("chord")
     run_dir = arguments.run_dir
     run_dir.mkdir(parents=True, exist_ok=True)
     output_dir = arguments.output_dir

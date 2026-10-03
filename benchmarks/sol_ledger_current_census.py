@@ -225,28 +225,13 @@ def _measure():
     fraction = float(ledger.common_sol) / plasma_current
 
     operator = profile.operator
-    clip_mode_available = bool(
-        hasattr(operator, "set_support_clip_mode")
-        or hasattr(operator, "support_clip_mode")
-    )
     return {
         "ledger": totals,
         "plasma_current_a": plasma_current,
         "common_sol_over_plasma_current": fraction,
         "per_cell": rows,
         "common_sol_split": sol_split,
-        "support_clip_mode": {
-            "available": clip_mode_available,
-            "reason": (
-                "the mapped-case machine exposes no set_support_clip_mode or "
-                "support_clip_mode symbol on this revision (package-wide grep "
-                "returns none), so the committed chord clip cannot be compared "
-                "against an exact-support clip here; that switch is the "
-                "in-flight uniform-clip work"
-            )
-            if not clip_mode_available
-            else "selectable",
-        },
+        "clip_mode": operator.clip_mode or "chord",
         "fixed_point_residual": float(equilibrium.fixed_point.residual),
         "converged_boolean": bool(float(equilibrium.fixed_point.residual) < 1.0e-6),
         "topology_branch": {

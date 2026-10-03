@@ -44,7 +44,6 @@ import jax.numpy as jnp
 import numpy as np
 
 from benchmarks import solovev_certificate as certificate
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.jax.config import configure_dtypes
 from nova.media import ink
 from nova.media import poloidal
@@ -153,6 +152,8 @@ def _load_part(case_name: str) -> dict[str, Any]:
 def _rebuild_operator(
     case_name: str,
     part: dict[str, Any],
+    *,
+    clip_mode: str,
 ) -> tuple[Any, Any, np.ndarray, dict[str, Any]]:
     """Rebuild the production operator at the persisted terminal geometry.
 
@@ -175,7 +176,7 @@ def _rebuild_operator(
     )
     operator = certificate.oracle_fixture.forward_operator(
         source_case, machine, fixture_exterior
-    )
+    ).with_clip_mode(clip_mode)
     cache_record = {
         "machine": machine.cache,
         "fixture_exterior": exterior_cache,
@@ -297,6 +298,8 @@ def _topology_record(operator: Any, terminal: np.ndarray) -> dict[str, Any]:
 def _measure_row(
     case_name: str,
     part: dict[str, Any],
+    *,
+    clip_mode: str,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Load, rebuild, apply once, and fold the residual evidence for one row.
 
@@ -307,7 +310,7 @@ def _measure_row(
     live_peak: list[int] = [0]
     with _monitor_live_peak() as peak:
         machine, operator, coordinates, cache_record = _rebuild_operator(
-            case_name, part
+            case_name, part, clip_mode=clip_mode
         )
         terminal = np.asarray(part["render_data"]["terminal_flux_wb"], dtype=np.float64)
         if len(terminal) != len(coordinates):
@@ -369,7 +372,7 @@ def _measure_row(
         "requested_cells": -2500,
         "source_part_relative": str(_row_part_path(case_name).relative_to(ROOT)),
         "source_revision": _source_revision(),
-        "clip_mode": support_clip_mode(),
+        "clip_mode": operator.clip_mode,
         "state_length": len(terminal),
         "grid_node_number": int(len(machine.node)),
         "wall_node_number": int(len(machine.wall_node)),
@@ -722,9 +725,7 @@ def _render_panels(
     return {
         "figure": figure_record,
         "panels": panels,
-        "render_receipt": str(
-            (output_root / "render-receipt.json").relative_to(ROOT)
-        ),
+        "render_receipt": str((output_root / "render-receipt.json").relative_to(ROOT)),
     }
 
 
@@ -801,10 +802,6 @@ def _run(output_root: Path, rows: list[tuple[str, int]]) -> dict[str, Any]:
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("the zero-residual check requires binary64")
-    if support_clip_mode() != CLIP_MODE:
-        set_support_clip_mode(CLIP_MODE)
-    if support_clip_mode() != CLIP_MODE:
-        raise RuntimeError(f"zero-residual clip mode {CLIP_MODE!r} is not active")
 
     certificate.DIAGNOSTIC_ROOT = output_root / "diagnostics"
     certificate.FIGURE_ROOT = output_root / "panels"
@@ -817,7 +814,7 @@ def _run(output_root: Path, rows: list[tuple[str, int]]) -> dict[str, Any]:
         try:
             part = _load_part(case_name)
             measured[case_name], figure_payloads[case_name] = _measure_row(
-                case_name, part
+                case_name, part, clip_mode=CLIP_MODE
             )
         except Exception:
             _write_json(
@@ -826,7 +823,7 @@ def _run(output_root: Path, rows: list[tuple[str, int]]) -> dict[str, Any]:
                     "schema": "nova.zero-residual-check-acceptance",
                     "source_revision": _source_revision(),
                     "driver_sha256": _driver_sha256(),
-                    "clip_mode": support_clip_mode(),
+                    "clip_mode": CLIP_MODE,
                     "completed": False,
                     "rows": measured,
                 },
@@ -849,7 +846,7 @@ def _run(output_root: Path, rows: list[tuple[str, int]]) -> dict[str, Any]:
             "schema": "nova.zero-residual-check-acceptance",
             "source_revision": _source_revision(),
             "driver_sha256": _driver_sha256(),
-            "clip_mode": support_clip_mode(),
+            "clip_mode": CLIP_MODE,
             "device": _device_record(),
             "figure": render_result["figure"],
             "panels": render_result["panels"],
@@ -872,9 +869,7 @@ def _run(output_root: Path, rows: list[tuple[str, int]]) -> dict[str, Any]:
     return json.loads(receipt_path.read_text(encoding="utf-8"))
 
 
-def _run_render_only(
-    output_root: Path, rows: list[tuple[str, int]]
-) -> dict[str, Any]:
+def _run_render_only(output_root: Path, rows: list[tuple[str, int]]) -> dict[str, Any]:
     """Rebuild the panels from the persisted bundles, applying no map.
 
     This is the render path: it reads the arrays the measurement pass wrote
@@ -950,7 +945,7 @@ def main() -> None:
         print("ZERO_RESIDUAL_DRY_RUN rows=%d" % len(rows))
         for case_name, _requested_cells in rows:
             print(f"ZERO_RESIDUAL_DRY_RUN_ROW case={case_name} cells=2500")
-        clip = f"{support_clip_mode()} default->{CLIP_MODE}"
+        clip = f"{CLIP_MODE}"
         print(f"ZERO_RESIDUAL_DRY_RUN clip_mode={clip}")
         return
     _run(arguments.output_root, rows)

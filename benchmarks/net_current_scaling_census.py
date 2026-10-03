@@ -42,7 +42,6 @@ import numpy as np
 
 from benchmarks import solovev_certificate as certificate
 from benchmarks.exact_clip_seed_amplitude import _problem
-from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
 from nova.equilibrium.source import SCALAR_CURRENT_AMPLITUDE_BAND
 from nova.jax.config import configure_dtypes
@@ -196,7 +195,6 @@ def _solve_row(
     """Build one certificate row, run one route, and census its lambda."""
 
     started = perf_counter()
-    set_support_clip_mode(clip_mode)
     (
         machine,
         _exact,
@@ -206,7 +204,7 @@ def _solve_row(
         target_current,
         centroid,
         current_receipt,
-    ) = _problem(case_name, requested_cells)
+    ) = _problem(case_name, requested_cells, clip_mode=clip_mode)
     seed, requested_class, seed_receipt = certificate._production_seed(
         profile, case_name, target_current, centroid, current_receipt
     )
@@ -230,6 +228,7 @@ def _solve_row(
             "qualification_tolerance": certificate.TERMINAL_RESIDUAL_BOUND,
         },
         target_current=target_current,
+        clip_mode=clip_mode,
     )
     solve_receipt = profile.solve(request)
     equilibrium = solve_receipt.equilibrium
@@ -269,11 +268,17 @@ def _read_sol_ledger() -> dict[str, Any]:
             "reason": f"receipt absent at {SOL_LEDGER_RECEIPT.relative_to(ROOT)}",
         }
     receipt = json.loads(SOL_LEDGER_RECEIPT.read_text(encoding="utf-8"))
+    if "clip_mode" not in receipt:
+        raise ValueError(
+            f"{SOL_LEDGER_RECEIPT} predates the 'clip_mode' receipt key and "
+            "carries the retired clip-mode key instead; it must be regenerated "
+            "by benchmarks/sol_ledger_current_census.py before this census reads it"
+        )
     return {
         "route": "sol-ledger-census",
         "status": "read-from-committed-receipt",
         "receipt": str(SOL_LEDGER_RECEIPT.relative_to(ROOT)),
-        "support_clip_mode": receipt.get("support_clip_mode"),
+        "clip_mode": receipt["clip_mode"],
         "plasma_current_a": receipt.get("plasma_current_a"),
         "common_sol_over_plasma_current": receipt.get("common_sol_over_plasma_current"),
         "fixed_point_residual": receipt.get("fixed_point_residual"),

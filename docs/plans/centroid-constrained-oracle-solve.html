@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -214,6 +214,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T231145475955-cco-root-cause-centroid-tangent-localisation" data-who="reckon-build" data-when="2026-10-02T23:56:47Z">
     <div class="r-comment-body"><p>At the 135-cell analytic state under exact clipping, the radial centroid JVP is +0.8368701055 m/T versus a six-step central-difference plateau of +1.629224 to +1.629226 m/T; the moving outer polygon contributes 3.024582e6 A/T L2 to raw-current finite difference but only 0.001288 A/T to JVP because nova/equilibrium/clip_quadrature.py:883 contracts only the coefficient tangent; the uniform-level control is zero to roundoff; [receipts](/nova/evidence/fragments/centroid-constrained-oracle-solve/cco-root-cause-centroid-tangent-localisation#centroid-tangent-localisation) and [root-cause report](/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-centroid-tangent-localisation.md).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T235737052938-review-of-cco-root-cause-centroid-tangent-localisation" data-who="reckon-build" data-when="2026-10-03T00:08:33Z">
+    <div class="r-comment-body"><p>Independent review of b4103b477e2807790996fbc9b7edeb07778cd433..8c42a3d526aea6401caa97c63180d5c78cbb4247 is parsed at both granted review paths, verdict pass-with-follow-ons, scores 19/18/20/15/18 = 90/100; source confirms _quadratic_support_vertices custom JVP omits vertex tangent, and six-step central slope 1.629224..1.629226 m/T exceeds JVP 0.836870 m/T by 0.792355 m/T; added suite failures are unmeasured because both suite arms are absent, with report status and provenance clarity as follow-ons.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T053656352101-review-of-cco-bounded-row-step-control" data-who="s19c-review-cco-c" data-when="2026-09-17T06:45:40.145Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T205409901465-cco-bounded-row-step-control stored at the fence path, total 84, findings recorded on the reviewed run's completion</p></div>

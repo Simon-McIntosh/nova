@@ -141,8 +141,11 @@
   },
   "analytic_membership": {
     "sup_relative": 0.007046062864358472,
-    "rms_relative": 0.00816959290392864,
+    "rms_relative": 0.008169592903927547,
+    "dR_m": 0.0012303712830854519,
+    "dZ_m": 0.010302500797367609,
     "lambda": 1.0012957886080531,
+    "clip_mode": "chord",
     "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
     "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
   }

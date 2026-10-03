@@ -138,5 +138,15 @@
     "dZ_m": 0.06695029174161415,
     "finding": "exact support supplies topology.x_point as saddle_vertex to the traced clip",
     "source": "nova/equilibrium/forward_operator.py:_profile_support"
+  },
+  "analytic_membership": {
+    "sup_relative": 0.015252286478982533,
+    "rms_relative": 0.014151849550109938,
+    "dR_m": 0.0005043264415340865,
+    "dZ_m": 0.016946423206423367,
+    "lambda": 1.0018370593174946,
+    "clip_mode": "exact",
+    "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
+    "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
   }
 }

@@ -140,9 +140,12 @@
     "source": "nova/equilibrium/forward_operator.py:_profile_support"
   },
   "analytic_membership": {
-    "sup_relative": 0.06119079826580496,
-    "rms_relative": 0.05662118146554103,
+    "sup_relative": 0.06119079826580562,
+    "rms_relative": 0.056621181465541084,
+    "dR_m": 0.020574483830374746,
+    "dZ_m": 0.002564931460649511,
     "lambda": 1.0034867755362062,
+    "clip_mode": "chord",
     "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
     "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
   }

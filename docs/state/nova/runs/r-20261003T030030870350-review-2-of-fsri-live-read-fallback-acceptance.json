@@ -1,0 +1,358 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-terra",
+  "base_sha": "4609ceca2f782308f0f1d60139fcc0ce39f211b6",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 2549760,
+      "cached_input_tokens_cumulative": 2549760,
+      "input_tokens": 2684675,
+      "input_tokens_cumulative": 2684675,
+      "output_tokens": 21599,
+      "output_tokens_cumulative": 21599,
+      "reasoning_output_tokens": 6429,
+      "reasoning_output_tokens_cumulative": 6429
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-03T03:10:22Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-03T03:01:13Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 2.9046201133416583,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex-terra'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-03T03:45:36.643856+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": "2026-10-03T03:00:35Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 583978,
+    "state": "quiet",
+    "utilisation_pct": 10.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-03T03:00:35Z",
+    "read_at": "2026-10-03T03:00:36Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 10.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T03:10:22Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T030030870350-review-2-of-fsri-live-read-fallback-acceptance/manifest.md",
+  "member": "disposable-r-20261003T030030870350-review-2-of-fsri-live-read-fallback-acceptance",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-2-of-fsri-live-read-fallback-acceptance",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 3581,
+          "cached_input_tokens": 588603,
+          "input_tokens": 592186,
+          "output_tokens": 1479,
+          "reasoning_output_tokens": 166,
+          "total_tokens": 593665,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "The review for r-20261003T012143009100-fsri-live-read-fallback-acceptance at head 821707843cb999bde0954e1f74a876721b1d3c0c stores a parsed record scoring all 5 dimensions in the range 0..20, recording reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the run's baseline_suite and after_suite gate logs. It verifies by file and line that the two findings of the prior review are closed. First, tests/test_live_read_fallback_acceptance.py fails when the fallback receives the frozen newton_shadowed_map instead of the live map (the run reports frozen [2.0] against live [1.0]). Second, the full after arm (tests/test_frozen_route_settlement.py, tests/test_one_read_per_trip.py and tests/test_equilibrium_forward_solve.py) ran at the final head on the H200 with 33 passed, in h200/final-after-suite.log. The turn ends once the record is stored and the manifest reads complete.",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261003T012143009100-fsri-live-read-fallback-acceptance",
+    "id": "review-2-of-fsri-live-read-fallback-acceptance",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-03T03:00:35Z",
+      "read_at": "2026-10-03T03:00:36Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 10.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T030030870350-review-2-of-fsri-live-read-fallback-acceptance/manifest.md",
+    "negative_control": "",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§1",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T012143009100-fsri-live-read-fallback-acceptance.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T012143009100-fsri-live-read-fallback-acceptance.at-821707843cb999bde0954e1f74a876721b1d3c0c.json"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.9034722120348815,
+      "derived": 0.0378856734168319,
+      "drain_hours": 168.0,
+      "effective_limit": 0.0378856734168319,
+      "elapsed_fraction": 0.03444152128802899,
+      "elapsed_hours": 5.786175576388871,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-03T03:00:44+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.9,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.1,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.028000000000000004,
+      "decided_by": "window",
+      "margin": 0.597,
+      "name": "review-2-of-fsri-live-read-fallback-acceptance",
+      "score": 0.625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.1
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.232075,
+        "observed_at": "2026-10-03T03:00:44+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.1,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "review-2-of-fsri-live-read-fallback-acceptance",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-03T03:00:44.232075+00:00",
+    "score": 0.625,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5026.538,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "4609ceca2f782308f0f1d60139fcc0ce39f211b6",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "role": "review",
+  "run_id": "r-20261003T030030870350-review-2-of-fsri-live-read-fallback-acceptance",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a0ffb5-93a6-7003-b579-df50c9290d5c",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 2549760,
+    "cumulative_input_tokens": 5234435,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 28028
+  },
+  "time_budget": "45m",
+  "tool_steps": 26.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 549,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T03:10:25Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T03:01:22Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T030030870350-review-2-of-fsri-live-read-fallback-acceptance",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 91,
+    "worker_pid": 291942
+  },
+  "worker_seconds": 549,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

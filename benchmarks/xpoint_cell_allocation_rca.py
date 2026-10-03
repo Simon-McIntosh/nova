@@ -1,7 +1,8 @@
 """Root-cause production chord-clip current allocation in multi-crossing cells.
 
-The production support partition in chord mode (``set_support_clip_mode`` on
-:mod:`nova.equilibrium.forward_operator`) hands every profile-participating
+The production support partition in chord mode
+(:meth:`nova.equilibrium.forward_operator.ForwardFluxOperator.with_clip_mode`)
+hands every profile-participating
 cell its FULL atomic hexagon, never clipping against the separatrix at all: a
 cell whose analytic separatrix crosses its boundary more than twice is either
 fully attributed or not attributed, with no partial region.  In an X-point
@@ -60,7 +61,6 @@ from shapely.ops import unary_union
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.analytic_single_null import CerfonFreidbergSingleNull
-from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.jax.config import configure_dtypes
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
@@ -709,14 +709,14 @@ def _mode_production_integrals(
     flux is evaluated at the fixed Duffy nodes over each cell's support polygon
     and the source density integrated there.
     """
-    set_support_clip_mode(mode)
-    masks, _topology, sample_flux, support = operator._support_partition(
+    mode_operator = operator.with_clip_mode(mode)
+    masks, _topology, sample_flux, support = mode_operator._support_partition(
         jnp.asarray(state)
     )
     centroid_flux = np.asarray(masks.psi_norm, dtype=np.float64)
     sample_flux_array = np.asarray(sample_flux, dtype=np.float64)
     coefficient, sampling_centre, coordinate_scale = _production_flux_coefficients(
-        operator, centroid_flux, sample_flux_array
+        mode_operator, centroid_flux, sample_flux_array
     )
     counts = np.asarray(support.vertex_count, dtype=np.intp)
     support_vertices = np.asarray(support.support_vertices, dtype=np.float64)

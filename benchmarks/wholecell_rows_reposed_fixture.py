@@ -30,7 +30,6 @@ import jax
 import numpy as np
 
 from benchmarks import solovev_certificate as certificate
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.jax.config import configure_dtypes
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -137,7 +136,7 @@ def _acceptance_part(
     telemetry = solver["production_telemetry"]
     topology = row["geometry"]["root_topology"]
     acceptance["solver"] = {
-        "clip_mode": support_clip_mode(),
+        "clip_mode": CLIP_MODE,
         "qualification": solver["qualification"],
         "trip_count": telemetry["trip_count"],
         "converged": telemetry["converged"],
@@ -174,7 +173,7 @@ def _solve_row(
     row_started = perf_counter()
     live_peak: list[int] = [0]
     with _monitor_live_peak() as peak:
-        row = certificate._measure(case_name, requested_cells)
+        row = certificate._measure(case_name, requested_cells, clip_mode=CLIP_MODE)
         live_peak[:] = peak
     running_peak = _peak_bytes()
     wall_seconds = perf_counter() - row_started
@@ -227,10 +226,6 @@ def _run(output_root: Path, rows: list[tuple[str, int]]) -> dict[str, Any]:
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("the whole-cell control rows require binary64")
-    if support_clip_mode() != CLIP_MODE:
-        set_support_clip_mode(CLIP_MODE)
-    if support_clip_mode() != CLIP_MODE:
-        raise RuntimeError(f"whole-cell clip mode {CLIP_MODE!r} is not active")
 
     certificate.DIAGNOSTIC_ROOT = output_root / "diagnostics"
     certificate.FIGURE_ROOT = output_root / "panels"
@@ -250,7 +245,7 @@ def _run(output_root: Path, rows: list[tuple[str, int]]) -> dict[str, Any]:
                     "schema": "nova.wholecell-reposed-rows-acceptance",
                     "source_revision": _source_revision(),
                     "driver_sha256": _driver_sha256(),
-                    "clip_mode": support_clip_mode(),
+                    "clip_mode": CLIP_MODE,
                     "lanes": "single H200 job",
                     "rows": solved,
                     "rung_ratios": certificate._certificate_rung_ratios(solved),
@@ -264,7 +259,7 @@ def _run(output_root: Path, rows: list[tuple[str, int]]) -> dict[str, Any]:
                 "schema": "nova.wholecell-reposed-rows-acceptance",
                 "source_revision": _source_revision(),
                 "driver_sha256": _driver_sha256(),
-                "clip_mode": support_clip_mode(),
+                "clip_mode": CLIP_MODE,
                 "device": _device_record(),
                 "rows": solved,
                 "rung_ratios": certificate._certificate_rung_ratios(solved),
@@ -315,7 +310,7 @@ def main() -> None:
         print("WHOLECELL_DRY_RUN rows=%d" % len(rows))
         for case_name, requested_cells in rows:
             print(f"WHOLECELL_DRY_RUN_ROW case={case_name} cells={requested_cells}")
-        print(f"WHOLECELL_DRY_RUN clip_mode={support_clip_mode()} default->{CLIP_MODE}")
+        print(f"WHOLECELL_DRY_RUN clip_mode={CLIP_MODE}")
         return
     _run(arguments.output_root, rows)
 

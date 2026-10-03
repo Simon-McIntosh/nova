@@ -58,7 +58,6 @@ from nova.equilibrium.fixed_point import (
     _smooth_relative_sup_merit,
     _solver_state,
 )
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.jax.config import (
     Precision,
     configure_dtypes,
@@ -73,6 +72,7 @@ except Exception:  # pragma: no cover - rendering fallback only
 
 CASE = "weak-rotation-reactor-static"
 REQUESTED_CELLS = -300
+CLIP_MODE = "chord"
 
 ROOT = Path(__file__).resolve().parents[1]
 FIGURE_ROOT = ROOT / "docs/figures/millisecond-converged-solve/scan-prototype"
@@ -99,7 +99,7 @@ def _lane() -> dict[str, Any]:
         "hostname": socket.gethostname(),
         "jax_platforms": os.environ.get("JAX_PLATFORMS"),
         "jax_default_backend": jax.default_backend(),
-        "clip_mode": support_clip_mode(),
+        "clip_mode": CLIP_MODE,
         "requested_cells": abs(REQUESTED_CELLS),
     }
 
@@ -837,7 +837,7 @@ def measurement_set() -> tuple[Any, np.ndarray, Any, Any, dict[str, Any]]:
     """Build the shared problem once and return every operand the arms need."""
 
     profile, seed, request, dimensions = _certificate_compile_problem(
-        CASE, REQUESTED_CELLS
+        CASE, REQUESTED_CELLS, clip_mode=CLIP_MODE
     )
     _carrier, _source, exact = _case(CASE)
     return profile, seed, request, exact, dimensions
@@ -1040,8 +1040,6 @@ def main() -> None:
     configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root() / "scan-prototype"
     )
-    if support_clip_mode() != "chord":
-        set_support_clip_mode("chord")
     PARTS_ROOT.mkdir(parents=True, exist_ok=True)
 
     platform = arguments.platform or _platform()

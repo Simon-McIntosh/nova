@@ -39,8 +39,6 @@ from nova.equilibrium.forward_operator import (
     PrescribedCurrentField,
     _CallableLayout,
     _SourceLayout,
-    set_support_clip_mode,
-    support_clip_mode,
 )
 from nova.equilibrium.rotation import RotatingDomainProfile
 from nova.equilibrium.source import (
@@ -68,6 +66,7 @@ OUTPUT = Path(
 RUN_DIRECTORY = Path(os.environ.get("HLO_RUN_DIRECTORY", OUTPUT.parent))
 RUN_LABEL = os.environ.get("SLURM_JOB_ID", "local")
 CASE = CASES[0]
+CLIP_MODE = "chord"
 PRESSURE_SCALE = 0.9
 DIAMAGNETIC_SCALE = 1.1
 
@@ -672,9 +671,6 @@ def main() -> int:
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root(), minimum_compile_seconds=0.0
     )
-    set_support_clip_mode("chord")
-    assert support_clip_mode() == "chord"
-
     print("STAGE load weak cached 300-cell certificate row", flush=True)
     closure_row = _certificate_row(CASE)
     fixture_source = _scaled_source(closure_row[0].source, 1.0, 1.0)
@@ -739,7 +735,7 @@ def main() -> int:
 
     receipt = {
         "case": CASE,
-        "clip_mode": support_clip_mode(),
+        "clip_mode": fixture_profile.operator.clip_mode or CLIP_MODE,
         "requested_cells": REQUESTED_CELLS,
         "persistent_compilation_cache": str(cache.directory),
         "pressure_scale": PRESSURE_SCALE,

@@ -252,7 +252,6 @@ def measure_arm(args):
         import numpy as np
         from benchmarks import solovev_certificate as certificate
         from nova.equilibrium.forward import ForwardProfile
-        from nova.equilibrium.forward_operator import set_support_clip_mode
         from nova.equilibrium.stencil_mesh import StencilMesh
         from scripts.analytic_oracle_fixtures import measure as fixture
         from scripts.oracle_rebaseline import measure as recovery
@@ -268,18 +267,19 @@ def measure_arm(args):
         print(f"NOVA_FILE {row['nova_file']}", flush=True)
         row["devices"] = [str(device) for device in jax.devices()]
         row["device_kinds"] = [device.device_kind for device in jax.devices()]
-        set_support_clip_mode(args.mode)
         carrier, source, exact = certificate._case(args.case)
         machine = certificate._case_machine(args.case, carrier, exact, -110)
         coordinates = np.vstack(
             (machine.node, machine.wall_node, machine.sample_coordinates)
         )
         analytic = certificate._exact_state(args.case, exact, coordinates)
-        empty = fixture.forward_operator(source, machine)
+        empty = fixture.forward_operator(source, machine).with_clip_mode(args.mode)
         moments, exterior, fixture_cache = fixture.cached_fixture_exterior(
             source, exact, machine, empty, analytic
         )
-        operator = fixture.forward_operator(source, machine, exterior)
+        operator = fixture.forward_operator(source, machine, exterior).with_clip_mode(
+            args.mode
+        )
         profile = ForwardProfile(
             operator,
             StencilMesh(machine.node, machine.stencil, machine.area),
@@ -299,7 +299,11 @@ def measure_arm(args):
         )
         identity = f"solovev:{args.case}:-110"
         request = certificate._certificate_solve_request(
-            profile, seed, float(target), carrier_identity=identity
+            profile,
+            seed,
+            float(target),
+            carrier_identity=identity,
+            clip_mode=args.mode,
         )
         row["seed_policy"] = seed_policy_receipt(request, seed_receipt)
         write_json(args.output, row)

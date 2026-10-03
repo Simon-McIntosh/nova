@@ -50,10 +50,6 @@ from nova.equilibrium.forward import (
     ForwardProfile,
 )
 from nova.equilibrium.stencil_mesh import StencilMesh
-from nova.equilibrium.forward_operator import (
-    set_support_clip_mode,
-    support_clip_mode,
-)
 from nova.jax.config import configure_dtypes
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
@@ -63,6 +59,8 @@ from scripts.oracle_rebaseline import measure as recovery
 
 CASES = ("diverted-single-null", "weak-rotation-reactor-static")
 REQUESTED_CELLS = -110
+#: Support clip mode the exact-support seed-policy arms are measured under.
+CLIP_MODE = "exact"
 SEED_POLICIES = ("analytic", "current_centroid_disc")
 # The route's own seed is not one of the two policies under comparison; it
 # is measured in the forced one-trip control and labelled so every arm row
@@ -543,7 +541,7 @@ def render(receipt, output):
     plt.close(figure)
 
 
-def _construction(case_name):
+def _construction(case_name, *, clip_mode):
     """Build the certificate route for one case at the reduced rung."""
     carrier_case, source_case, exact = certificate._case(case_name)
     machine = certificate._case_machine(case_name, carrier_case, exact, REQUESTED_CELLS)
@@ -551,11 +549,15 @@ def _construction(case_name):
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     analytic = certificate._exact_state(case_name, exact, coordinates)
-    empty = oracle_fixture.forward_operator(source_case, machine)
+    empty = oracle_fixture.forward_operator(source_case, machine).with_clip_mode(
+        clip_mode
+    )
     exact_physical, exterior, _cache = oracle_fixture.cached_fixture_exterior(
         source_case, exact, machine, empty, analytic
     )
-    operator = oracle_fixture.forward_operator(source_case, machine, exterior)
+    operator = oracle_fixture.forward_operator(
+        source_case, machine, exterior
+    ).with_clip_mode(clip_mode)
     profile = ForwardProfile(
         operator,
         StencilMesh(machine.node, machine.stencil, machine.area),
@@ -772,42 +774,37 @@ def complete_receipt(output, negative_log):
         record for record in receipt["negative_control"] if record["case"] != CASES[0]
     ]
     negative_log.write_text(NEGATIVE_CONTROL + "\n")
-    previous = support_clip_mode()
-    set_support_clip_mode("exact")
-    try:
-        for case_name in CASES:
-            print("BUILD case=" + case_name, flush=True)
-            built = _construction(case_name)
-            carrier = f"solovev:{case_name}:{REQUESTED_CELLS}"
-            existing = next(
-                (row for row in receipt["cases"] if row["case"] == case_name), None
-            )
-            if existing is None:
-                _run_case(built, receipt, output, negative_log)
-                continue
-            seeds = _policy_seeds(built, built["profile"])
-            existing["seed_rebuilds"] = _seed_rebuild_records(existing, seeds)
-            production = _record_seed_flux_ranges(existing, built, seeds)
-            if case_name == CASES[0]:
-                receipt["negative_control"].extend(
-                    _run_control(
-                        built["profile"],
-                        built,
-                        existing,
-                        existing["reference_nulls"],
-                        float(existing["characteristic_pitch_m"]),
-                        carrier,
-                        seeds,
-                        negative_log,
-                        production,
-                    )
+    for case_name in CASES:
+        print("BUILD case=" + case_name, flush=True)
+        built = _construction(case_name, clip_mode=CLIP_MODE)
+        carrier = f"solovev:{case_name}:{REQUESTED_CELLS}"
+        existing = next(
+            (row for row in receipt["cases"] if row["case"] == case_name), None
+        )
+        if existing is None:
+            _run_case(built, receipt, output, negative_log)
+            continue
+        seeds = _policy_seeds(built, built["profile"])
+        existing["seed_rebuilds"] = _seed_rebuild_records(existing, seeds)
+        production = _record_seed_flux_ranges(existing, built, seeds)
+        if case_name == CASES[0]:
+            receipt["negative_control"].extend(
+                _run_control(
+                    built["profile"],
+                    built,
+                    existing,
+                    existing["reference_nulls"],
+                    float(existing["characteristic_pitch_m"]),
+                    carrier,
+                    seeds,
+                    negative_log,
+                    production,
                 )
-            _write_receipt(output, receipt)
-        render(receipt, output)
-        receipt["figure_src"] = FIGURE_URL + "/" + FIGURE_STEM + ".png"
+            )
         _write_receipt(output, receipt)
-    finally:
-        set_support_clip_mode(previous)
+    render(receipt, output)
+    receipt["figure_src"] = FIGURE_URL + "/" + FIGURE_STEM + ".png"
+    _write_receipt(output, receipt)
     print("MEASUREMENT_COMPLETE", flush=True)
 
 
@@ -872,25 +869,20 @@ def measure(output, negative_log):
         "devices": [str(device) for device in jax.devices()],
         "jax_platform": jax.default_backend(),
         "x64": True,
-        "support_clip_mode": "exact",
+        "clip_mode": CLIP_MODE,
         "requested_cells": REQUESTED_CELLS,
         "cases": [],
         "negative_control": [],
     }
     output.mkdir(parents=True, exist_ok=True)
     negative_log.write_text(NEGATIVE_CONTROL + "\n")
-    previous = support_clip_mode()
-    set_support_clip_mode("exact")
-    try:
-        for case_name in CASES:
-            print("BUILD case=" + case_name, flush=True)
-            built = _construction(case_name)
-            _run_case(built, receipt, output, negative_log)
-        render(receipt, output)
-        receipt["figure_src"] = FIGURE_URL + "/" + FIGURE_STEM + ".png"
-        _write_receipt(output, receipt)
-    finally:
-        set_support_clip_mode(previous)
+    for case_name in CASES:
+        print("BUILD case=" + case_name, flush=True)
+        built = _construction(case_name, clip_mode=CLIP_MODE)
+        _run_case(built, receipt, output, negative_log)
+    render(receipt, output)
+    receipt["figure_src"] = FIGURE_URL + "/" + FIGURE_STEM + ".png"
+    _write_receipt(output, receipt)
     print("MEASUREMENT_COMPLETE", flush=True)
 
 

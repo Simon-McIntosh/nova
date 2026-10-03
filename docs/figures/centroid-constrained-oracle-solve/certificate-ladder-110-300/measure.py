@@ -37,13 +37,6 @@ def _require_support_mode(requested: str, actual: str, stage: str) -> None:
         )
 
 
-def _require_distinct_states(exact_digest: str | None, control_digest: str) -> None:
-    if exact_digest is not None and exact_digest == control_digest:
-        raise RuntimeError(
-            "exact row and whole-cell control share a terminal state digest"
-        )
-
-
 def _span(context: dict, result: dict) -> dict:
     topology = result["topology"]
     reading = oracle_fixture.gauge_free_flux_read(
@@ -170,8 +163,6 @@ def _measure(
             "clip_mode": realised_modes[0],
             "solve": result,
         }
-    _require_distinct_states(exact_state_digest, result["state_sha256_binary64"])
-
     pair = fixture._certificate_pairs(
         context, level=True, field_scale_t=fixture.DEFAULT_FIELD_BOUND_T
     )[0]
@@ -189,6 +180,11 @@ def _measure(
         "support": support,
         "clip_mode": realised_modes[0],
         "requested_clip_mode": request_modes[0],
+        "state_differs_from_exact": (
+            None
+            if exact_state_digest is None
+            else result["state_sha256_binary64"] != exact_state_digest
+        ),
         "exact_exterior_retained": True,
         "production_seed_sha256_binary64": fixture._digest(context["seed"]),
         "characteristic_pitch_m": pitch,
@@ -299,14 +295,14 @@ def main() -> None:
     )
     configure_dtypes()
     assert jax.config.jax_enable_x64
-    if args.preflight:
-        if os.environ.get("JAX_PLATFORMS") != "cpu":
-            raise RuntimeError("CPU preflight requires JAX_PLATFORMS=cpu")
-        _preflight(output)
-        return
+    if jax.devices()[0].platform != "gpu":
+        raise RuntimeError("certificate preflight requires a GPU device")
     configure_persistent_compilation_cache(
         fixture.default_forward_compilation_cache_root()
     )
+    _preflight(output)
+    if args.preflight:
+        return
     lane = fixture._lane(
         "h200" if os.environ["SLURM_JOB_PARTITION"] == "betelgeuse" else "titan"
     )

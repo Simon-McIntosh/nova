@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>pfs-solovev-certificate-panel-titles — landing record</title>
+</head>
+<body>
+<section id="pfs-solovev-certificate-panel-titles">
+<h2>Three Solovev certificate chord panels title their axis-admission read, not an accuracy claim</h2>
+<p>Repairs <code>f-fsaudit-repair-solovev-certificate-qualified-title</code>. Each of the three
+1000-cell chord panels was titled bare <code>{case} · cells-1000 · qualified</code>: the word was
+the axis-admission verdict (<code>banked_read.read_status</code> = <code>qualified_axis</code>),
+while the receipt's own <code>analytic_flux_regions.all_carrier_cells</code> gives a relative RMS
+flux error near 0.12. The panels were re-rendered from their persisted part receipts through the
+committed <code>benchmarks.solovev_certificate._plot</code> painter — no forward operator is built
+and no solve is entered — with a two-line title that names the read status, prints the relative
+flux error, and carries the terminal residual and converged flag, every number read from
+<code>solve-parts/chord/&lt;case&gt;-production-route-cells-1000.json</code>. The title is recorded
+back into that receipt as <code>figure.panel_title</code>.</p>
+
+<h3>Panels</h3>
+
+<figure>
+<img src="/nova/figures/playable-forward-solve/parallel-components-read/solovev-certificate/solve-panels/chord/weak-rotation-reactor-static-production-route-cells-1000.png" alt="weak-rotation-reactor-static certificate panel">
+<figcaption><code>weak-rotation-reactor-static</code>: read <code>qualified_axis</code> (axis
+admission; not an accuracy verdict) · psi <code>relative_rms=0.1178</code>,
+<code>relative_sup=0.2098</code> (<code>analytic_flux_regions.all_carrier_cells.relative_rms</code>
+/ <code>.relative_sup</code>) · <code>residual=1.388e-15</code>
+(<code>solver.terminal_fixed_point_residual</code>) · <code>converged=yes</code>
+(<code>solver.converged</code>). The flux map draws the analytic and solved sets as unfilled line
+contours on shared Wb levels, both null sets through <code>draw_nulls</code> (solid triangle axis,
+filled cross admitted saddle, hollow other nulls) and the first wall over the unit collection.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/playable-forward-solve/parallel-components-read/solovev-certificate/solve-panels/chord/moderate-rotation-conventional-static-production-route-cells-1000.png" alt="moderate-rotation-conventional-static certificate panel">
+<figcaption><code>moderate-rotation-conventional-static</code>: read <code>qualified_axis</code> ·
+psi <code>relative_rms=0.1176</code>, <code>relative_sup=0.2093</code> ·
+<code>residual=5.875e-16</code> · <code>converged=yes</code>. Same keys and painter as above.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/playable-forward-solve/parallel-components-read/solovev-certificate/solve-panels/chord/strong-rotation-compact-static-production-route-cells-1000.png" alt="strong-rotation-compact-static certificate panel">
+<figcaption><code>strong-rotation-compact-static</code>: read <code>qualified_axis</code> ·
+psi <code>relative_rms=0.1155</code>, <code>relative_sup=0.2038</code> ·
+<code>residual=2.913e-16</code> · <code>converged=yes</code>. Same keys and painter as above.</figcaption>
+</figure>
+
+<h3>Accuracy, not admission</h3>
+<p>The <code>qualified_axis</code> verdict admits the axis; it says nothing about flux accuracy.
+The relative RMS on these three arms is <code>0.1176</code>, <code>0.1155</code> and
+<code>0.1178</code>, roughly two orders of magnitude above the accuracy of the diverted control
+row in the same directory (<code>diverted-single-null-production-route-cells-500</code>,
+<code>relative_rms=4.60015e-15</code>), which is why the title now states both facts side by side.
+The diverted row was not re-rendered: its title was never a false accuracy claim.</p>
+
+<h3>Check and negative control</h3>
+<p><code>tests/test_solovev_certificate_panel_titles.py</code> re-derives each title from the part
+receipt keys and asserts the receipt's recorded title matches, that the title is not the bare
+qualification, that it names the read status and the relative error, and that the receipt digest
+matches the panel on disk. Against the committed pre-repair panels the same test fails on the bare
+<code>qualified</code> title (9 failed, exit 1).</p>
+
+<h3>Out of scope</h3>
+<ul>
+<li>The followup's items (2) and (3) — the error panels draw only absolute levels, so the four
+panels cannot be compared as drawn, and the level strings sit over the wall polyline — are a
+re-render of the error fields, not a caption defect, and are outside this node's write scope.
+Recorded under follow_ons.</li>
+</ul>
+</section>
+</body>
+</html>

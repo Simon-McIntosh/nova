@@ -70,9 +70,10 @@
   "derivative_support_cells": 930,
   "figure": {
     "filesystem_path": "docs/figures/playable-forward-solve/parallel-components-read/solovev-certificate/solve-panels/chord/strong-rotation-compact-static-production-route-cells-1000.png",
+    "panel_title": "strong-rotation-compact-static \u00b7 cells-1000 \u00b7 read qualified_axis (axis admission; not an accuracy verdict)\npsi relative_rms=0.1155 relative_sup=0.2038 \u00b7 residual=2.913e-16 \u00b7 converged=yes",
     "project_absolute_src": "/nova/figures/playable-forward-solve/parallel-components-read/solovev-certificate/solve-panels/chord/strong-rotation-compact-static-production-route-cells-1000.png",
-    "render_source": "fresh_production_solve",
-    "sha256": "7624e4cdfef1b9ce5d8eb24dc79a226f5b0fea5eb27449e71e1454bb7ef89adb"
+    "render_source": "persisted_part_receipt_panel_title",
+    "sha256": "9b560bc2ac9a97f937670ffb419beaf86e3cddf31a340128aadca65fddec021f"
   },
   "fixture_exterior_cache": {
     "build_seconds": 0.0,

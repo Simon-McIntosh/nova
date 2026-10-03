@@ -1,6 +1,6 @@
 {
   "measurement_revision": "372c604914acda4cf25bfca797a1d95e6afae8ee",
-  "analysis_revision": "58d05701929d7fe2d68443dd11c97b7e62797513",
+  "analysis_revision": "96a59e98ec7e4fd1a8d034dab0a8fc1ecb825612",
   "input_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-diverted-map-error-rca/docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/map-fidelity-stable/map-fidelity.json",
   "completed": true,
   "rows": [
@@ -133,27 +133,42 @@
           "current_error_a": -6.615829192944943
         }
       ],
-      "contour_tree_region": {
-        "sup_relative": 0.18056762361844786,
-        "dZ_m": 0.11507597111551116,
-        "finding": "production-equivalent: chord support is qualified by the fixed-design contour-tree profile label",
-        "source": "nova/equilibrium/forward_operator.py:_profile_support"
-      },
       "xpoint_wedge": {
-        "sup_relative": 0.18056762361844786,
-        "dZ_m": 0.11507597111551116,
-        "finding": "exact support supplies topology.x_point as saddle_vertex to the traced clip",
+        "sup_relative": 0.1799812358443686,
+        "rms_relative": 0.16175841812891456,
+        "dR_m": 0.012206525212579367,
+        "dZ_m": 0.11469001810249324,
+        "lambda": 0.990871869433073,
+        "production_apex_rz_m": [
+          1.5107863810710611,
+          -1.0275005315610446
+        ],
+        "analytic_apex_rz_m": [
+          1.5025279999999999,
+          -1.01728
+        ],
+        "executed": true,
         "source": "nova/equilibrium/forward_operator.py:_profile_support"
       },
       "analytic_membership": {
-        "sup_relative": 0.07123681863304854,
-        "rms_relative": 0.06619153388387905,
-        "dR_m": 0.024250017948708624,
-        "dZ_m": 0.005943350175695361,
-        "lambda": 1.0042364954949123,
+        "sup_relative": 0.071236818634126,
+        "rms_relative": 0.06619153388513321,
+        "dR_m": 0.024250017948920677,
+        "dZ_m": 0.005943350176422335,
+        "lambda": 1.0042364954949987,
         "clip_mode": "exact",
         "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
         "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
+      },
+      "contour_tree_region": {
+        "sup_relative": 0.18056762361783077,
+        "rms_relative": 0.16320251494111235,
+        "dR_m": 0.011885135014019,
+        "dZ_m": 0.11507597111495838,
+        "lambda": 0.9907796670532908,
+        "membership_difference_count": 1,
+        "executed": true,
+        "source": "nova/equilibrium/forward_operator.py:_fixed_design_read"
       }
     },
     {
@@ -285,12 +300,6 @@
           "current_error_a": -2.617685654640127
         }
       ],
-      "contour_tree_region": {
-        "sup_relative": 0.0950848225228153,
-        "dZ_m": 0.06202268271350475,
-        "finding": "production-equivalent: chord support is qualified by the fixed-design contour-tree profile label",
-        "source": "nova/equilibrium/forward_operator.py:_profile_support"
-      },
       "xpoint_wedge": {
         "sup_relative": null,
         "dZ_m": null,
@@ -299,13 +308,23 @@
       },
       "analytic_membership": {
         "sup_relative": 0.06119079826580562,
-        "rms_relative": 0.056621181465541084,
-        "dR_m": 0.020574483830374746,
-        "dZ_m": 0.002564931460649511,
-        "lambda": 1.0034867755362062,
+        "rms_relative": 0.05662118146553904,
+        "dR_m": 0.02057448383037408,
+        "dZ_m": 0.0025649314606468465,
+        "lambda": 1.003486775536206,
         "clip_mode": "chord",
         "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
         "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
+      },
+      "contour_tree_region": {
+        "sup_relative": 0.09508482252281729,
+        "rms_relative": 0.06196529984359127,
+        "dR_m": 0.011647610680066256,
+        "dZ_m": 0.06202268271350886,
+        "lambda": 0.9964822024242458,
+        "membership_difference_count": 0,
+        "executed": true,
+        "source": "nova/equilibrium/forward_operator.py:_fixed_design_read"
       }
     },
     {
@@ -437,27 +456,42 @@
           "current_error_a": -2.342494703120437
         }
       ],
-      "contour_tree_region": {
-        "sup_relative": 0.1384568621521094,
-        "dZ_m": 0.06695029174161415,
-        "finding": "production-equivalent: chord support is qualified by the fixed-design contour-tree profile label",
-        "source": "nova/equilibrium/forward_operator.py:_profile_support"
-      },
       "xpoint_wedge": {
-        "sup_relative": 0.1384568621521094,
-        "dZ_m": 0.06695029174161415,
-        "finding": "exact support supplies topology.x_point as saddle_vertex to the traced clip",
+        "sup_relative": 0.13845686214883815,
+        "rms_relative": 0.11095610571905488,
+        "dR_m": 0.00807825252998673,
+        "dZ_m": 0.06695029173949563,
+        "lambda": 0.9949982883504518,
+        "production_apex_rz_m": [
+          1.5011136054305771,
+          -1.02364125030317
+        ],
+        "analytic_apex_rz_m": [
+          1.5025279999999999,
+          -1.01728
+        ],
+        "executed": true,
         "source": "nova/equilibrium/forward_operator.py:_profile_support"
       },
       "analytic_membership": {
-        "sup_relative": 0.015252286478982533,
-        "rms_relative": 0.014151849550109938,
-        "dR_m": 0.0005043264415340865,
-        "dZ_m": 0.016946423206423367,
-        "lambda": 1.0018370593174946,
+        "sup_relative": 0.015252286478994938,
+        "rms_relative": 0.014151849550114783,
+        "dR_m": 0.0005043264415320881,
+        "dZ_m": 0.016946423206432915,
+        "lambda": 1.0018370593174948,
         "clip_mode": "exact",
         "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
         "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
+      },
+      "contour_tree_region": {
+        "sup_relative": 0.13845686214883815,
+        "rms_relative": 0.11095610571905488,
+        "dR_m": 0.00807825252998673,
+        "dZ_m": 0.06695029173949563,
+        "lambda": 0.9949982883504518,
+        "membership_difference_count": 3,
+        "executed": true,
+        "source": "nova/equilibrium/forward_operator.py:_fixed_design_read"
       }
     },
     {
@@ -589,12 +623,6 @@
           "current_error_a": -1.1442816455264762
         }
       ],
-      "contour_tree_region": {
-        "sup_relative": 0.033867325392280156,
-        "dZ_m": 0.026992139537305282,
-        "finding": "production-equivalent: chord support is qualified by the fixed-design contour-tree profile label",
-        "source": "nova/equilibrium/forward_operator.py:_profile_support"
-      },
       "xpoint_wedge": {
         "sup_relative": null,
         "dZ_m": null,
@@ -603,13 +631,23 @@
       },
       "analytic_membership": {
         "sup_relative": 0.007046062864358472,
-        "rms_relative": 0.008169592903927547,
-        "dR_m": 0.0012303712830854519,
-        "dZ_m": 0.010302500797367609,
+        "rms_relative": 0.008169592903928647,
+        "dR_m": 0.0012303712830870062,
+        "dZ_m": 0.01030250079736672,
         "lambda": 1.0012957886080531,
         "clip_mode": "chord",
         "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
         "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
+      },
+      "contour_tree_region": {
+        "sup_relative": 0.033867325392281704,
+        "rms_relative": 0.01788047689363212,
+        "dR_m": 0.0058972736538529524,
+        "dZ_m": 0.02699213953730717,
+        "lambda": 0.9999716422248102,
+        "membership_difference_count": 0,
+        "executed": true,
+        "source": "nova/equilibrium/forward_operator.py:_fixed_design_read"
       }
     }
   ]

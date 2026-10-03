@@ -127,26 +127,41 @@
       "current_error_a": -2.342494703120437
     }
   ],
-  "contour_tree_region": {
-    "sup_relative": 0.1384568621521094,
-    "dZ_m": 0.06695029174161415,
-    "finding": "production-equivalent: chord support is qualified by the fixed-design contour-tree profile label",
-    "source": "nova/equilibrium/forward_operator.py:_profile_support"
-  },
   "xpoint_wedge": {
-    "sup_relative": 0.1384568621521094,
-    "dZ_m": 0.06695029174161415,
-    "finding": "exact support supplies topology.x_point as saddle_vertex to the traced clip",
+    "sup_relative": 0.13845686214883815,
+    "rms_relative": 0.11095610571905488,
+    "dR_m": 0.00807825252998673,
+    "dZ_m": 0.06695029173949563,
+    "lambda": 0.9949982883504518,
+    "production_apex_rz_m": [
+      1.5011136054305771,
+      -1.02364125030317
+    ],
+    "analytic_apex_rz_m": [
+      1.5025279999999999,
+      -1.01728
+    ],
+    "executed": true,
     "source": "nova/equilibrium/forward_operator.py:_profile_support"
   },
   "analytic_membership": {
-    "sup_relative": 0.015252286478982533,
-    "rms_relative": 0.014151849550109938,
-    "dR_m": 0.0005043264415340865,
-    "dZ_m": 0.016946423206423367,
-    "lambda": 1.0018370593174946,
+    "sup_relative": 0.015252286478994938,
+    "rms_relative": 0.014151849550114783,
+    "dR_m": 0.0005043264415320881,
+    "dZ_m": 0.016946423206432915,
+    "lambda": 1.0018370593174948,
     "clip_mode": "exact",
     "mechanism": "analytic membership replaces the local quadratic point condition after the production chord carrier has been selected",
     "source": "benchmarks/chord_booking_operation_trace.py:analytic_condition_moments"
+  },
+  "contour_tree_region": {
+    "sup_relative": 0.13845686214883815,
+    "rms_relative": 0.11095610571905488,
+    "dR_m": 0.00807825252998673,
+    "dZ_m": 0.06695029173949563,
+    "lambda": 0.9949982883504518,
+    "membership_difference_count": 3,
+    "executed": true,
+    "source": "nova/equilibrium/forward_operator.py:_fixed_design_read"
   }
 }

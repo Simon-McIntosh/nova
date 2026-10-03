@@ -1080,17 +1080,24 @@ def _mode_measure_decomposed(
         and mode == "exact"
         and amplitude is not None
     ):
-        per_cell_attribution = _per_cell_moment_attribution(
-            operator,
-            state,
-            requested_class,
-            booked_moments,
-            exact_coefficients,
-            amplitude,
-            residual_shadow,
-            span,
-            grid_count,
-        )
+        try:
+            per_cell_attribution = _per_cell_moment_attribution(
+                operator,
+                state,
+                requested_class,
+                booked_moments,
+                exact_coefficients,
+                amplitude,
+                residual_shadow,
+                span,
+                grid_count,
+            )
+        except NoQualifiedAxisError as error:
+            per_cell_attribution = {
+                "outcome": "no_qualified_axis",
+                "exception_class": type(error).__name__,
+                "exception_message": str(error),
+            }
 
     part = _part_path(output, case_name, requested_cells, mode)
     measured = {

@@ -37,6 +37,7 @@ from benchmarks.solovev_certificate import (
 from benchmarks.stagnation_mechanism_probe import _prepare_reference
 from nova.equilibrium import ForwardProfile
 from nova.equilibrium.rotation import IsothermalRotation
+from nova.equilibrium.topology import NoQualifiedAxisError
 from nova.equilibrium.stencil_mesh import (
     StencilMesh,
     _DENSITY_UNIT_NODE,
@@ -689,7 +690,20 @@ def main() -> None:
     validate_parser.add_argument("--input", type=Path, default=DEFAULT_OUTPUT)
     arguments = parser.parse_args()
     if arguments.command == "measure":
-        measure(arguments.output)
+        try:
+            measure(arguments.output)
+        except NoQualifiedAxisError as error:
+            print(
+                json.dumps(
+                    {
+                        "outcome": "no_qualified_axis",
+                        "exception_class": type(error).__name__,
+                        "exception_message": str(error),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
     else:
         validate(arguments.input)
 

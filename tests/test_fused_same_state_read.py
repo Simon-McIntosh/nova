@@ -118,7 +118,10 @@ def _first_unqualified_map_state(sampled, sampled_seed):
             return jnp.asarray(state)
         image = np.asarray(mapped(jnp.asarray(state)))
         state = state + sampled.relaxation * (image - state)
-    raise AssertionError("the relaxed map never left the qualified region")
+    raise RuntimeError(
+        "relaxed-map fixture never left the qualified region "
+        f"within {HOST_EVALUATIONS} host evaluations"
+    )
 
 
 def test_the_point_arm_serves_both_requests_from_one_read(machine):

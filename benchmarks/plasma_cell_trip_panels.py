@@ -12,6 +12,8 @@ import subprocess
 import sys
 import traceback
 
+from nova.equilibrium.topology import NoQualifiedAxisError
+
 
 NEGATIVE_CONTROL = (
     "the reading-rule function is fed a synthetic arm pair with non-finite moments "
@@ -745,6 +747,18 @@ def main():
     elif args.mode == "arm":
         try:
             measure_arm(args)
+        except NoQualifiedAxisError as error:
+            print(
+                json.dumps(
+                    {
+                        "outcome": "no_qualified_axis",
+                        "exception_class": type(error).__name__,
+                        "exception_message": str(error),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
         except Exception:
             traceback.print_exc()
             return 1

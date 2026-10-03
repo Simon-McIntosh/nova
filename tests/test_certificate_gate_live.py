@@ -25,7 +25,7 @@ from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 
 
 CASE = "weak-rotation-reactor-static"
-REQUESTED_CELLS = -110
+REQUESTED_CELLS = -300
 MAP_FIDELITY_BOUND = 1.0e-2
 
 

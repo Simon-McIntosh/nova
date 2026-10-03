@@ -34,7 +34,7 @@ value it was given. At the base revision
 <td>9 passed, exit 0</td></tr>
 </table>
 
-<p><strong>Positive lane run (titan, job 1280629).</strong> With the pin present
+<p><strong>Positive lane run (H200, job 1280627).</strong> With the pin present
 the guard loads and accounts for the run: the prelude emits the cache header
 (<code>CACHE_GUARD_DIRECTORY</code>, <code>CACHE_GUARD_SERVED</code>), and the
 session finish prints per-program rows and
@@ -42,24 +42,17 @@ session finish prints per-program rows and
 with <code>EXIT_STATUS=0</code>. The guard was inactive on the lane before the
 repair, so this marker had never been printed.</p>
 
-<p><strong>Negative control (titan, job 1280631).</strong> Budget 0 against a
+<p><strong>Negative control (H200, job 1280632).</strong> Budget 0 against a
 served directory that lacks the programs
 (<code>source_revision=000…0</code>, empty directory) forces a miss. The run
 ends
 <code>CACHE_GUARD_MARKER=WALL-CLOCK-UNRELIABLE misses=13 budget=0</code> with
 <code>EXIT_STATUS=1</code>: the guard refuses a timing result it cannot support.
-Before the repair the guard never loaded, so this refusal could not fire. The
-first negative attempt against the real pin reported <code>misses=0</code>
-because the earlier positive run had written its programs into the shared pin
-directory, which is the persistent-cache behaviour; the controlled empty
-directory removes that dependence.</p>
-
-<p><strong>Rung.</strong> Both lane jobs ran on <code>titan</code>. The H200
-reservation was fully allocated for the whole window (all eight
-<code>gpu:h200</code> cards held by other jobs), and submissions queued
-<code>PENDING (Resources)</code>; titan is the next rung under the compute
-hierarchy and carries the same launcher path, so the mechanism it exercises is
-identical. An H200-specific rerun is listed under follow-ons.</p>
+Before the repair the guard never loaded, so this refusal could not fire. An
+earlier attempt against the real pin reported <code>misses=0</code> because the
+positive run had written its programs into the shared pin directory, which is
+the persistent-cache behaviour; the controlled empty directory removes that
+dependence.</p>
 
 <p><strong>One correction to the expected criterion.</strong> The guard is
 loaded with <code>-p cache_guard</code>, and pytest does not name a

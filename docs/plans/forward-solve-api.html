@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="138">
+<meta name="plan-version" content="139">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -538,6 +538,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20261003T095229804071-fsapi-route-request-fixture-null" data-who="reckon-build" data-when="2026-10-03T10:08:22.519Z">
     <div class="r-comment-body"><p>Repaired the route-request fixture: a locally registered pytree target now carries the null locator and the operator the host geometry members the identity reads (configure_dtypes first); tests/test_route_solve_requests.py runs 8 passed against a base of 1 failed/7 passed, fixing the AttributeError bit-identity failure and adding none.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20261003T100912791327-review-of-fsapi-route-request-fixture-null" data-who="reckon-build" data-when="2026-10-03T10:16:36.192Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261003T095229804071-fsapi-route-request-fixture-null at head 4cd4b0ace (base a6fe0d05): pass, 92/100. Verified by file and line that tests/test_route_solve_requests.py:198 still asserts bit identity on real arrays (probe: receipt.equilibrium.flux == keyword.flux == [12.625, -11.625, -20.375, 9.625], float64, 4/4 nonzero, max abs diff 0.0); confirmed the added null locator (None) and neutral operator geometry are consistent with the linear target the fixture models; judged the tests.test_prescribed_current_solve import coupling a minor design wart, recorded as a follow_on. added_failure_count 0.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260915T082752949902-fsa-transport-shim-delta-gate" data-who="fsa-transport-shim-delta-gate" data-when="2026-09-15T11:35:00+02:00">
     <div class="r-comment-body"><p>Transport test delta gate did not complete in its single exact scheduler allocation. Job <code>1271211</code> on <code>all_debug</code> ran the base archive <code>0f872fd6</code> through seven modules: 35 passed, 0 failed and 1 xfailed; it reached <code>tests/test_transport_geometry_reference.py</code> at the 59-minute wall and exited <code>143</code> before a terminal receipt. The shim-removal revision <code>fb402f8f</code> was not run, so the added-failure set is <strong>NOT MEASURABLE</strong>, not assumed empty. Full per-module logs and JUnit receipts are under <code>~/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/</code>; the next action is a fresh allocation with sufficient time or an exact plan-approved test selection.</p></div>

@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import io
 import json
-import math
 import os
 from pathlib import Path
 import shutil
@@ -71,36 +70,40 @@ def _vertical_bounds(vertices: np.ndarray, radius: float) -> tuple[float, float]
     return None if len(heights) < 2 else (min(heights), max(heights))
 
 
-def _exact_support_current(case: Any, polygon: np.ndarray) -> tuple[float, float]:
-    """Integrate one analytic cell support without production clip moments."""
+def _exact_support_current(
+    polygon: np.ndarray, field: Any, profile: Any, cell: int
+) -> tuple[float, float]:
+    """Adaptively integrate the state profile over one emitted support polygon."""
 
-    plasma_lower, plasma_upper = case.boundary_midplane_radii()
-    lower = max(float(polygon[:, 0].min()), float(plasma_lower))
-    upper = min(float(polygon[:, 0].max()), float(plasma_upper))
+    lower = float(polygon[:, 0].min())
+    upper = float(polygon[:, 0].max())
     if upper <= lower:
         return 0.0, 0.0
 
     def density(radius: float) -> float:
-        remaining = float(case.axis_flux - case._flux_offset(case._flux_label(radius)))
-        if remaining <= 0.0:
-            return 0.0
-        half_height = math.sqrt(remaining / float(case.field_coefficient))
         bounds = _vertical_bounds(polygon, radius)
         if bounds is None:
             return 0.0
-        lower_height = max(bounds[0], -half_height)
-        upper_height = min(bounds[1], half_height)
-        if upper_height <= lower_height:
-            return 0.0
-        return float(case.toroidal_current_density(radius, 0.0)) * (
-            upper_height - lower_height
+        vertical, _estimate = quad(
+            lambda height: float(
+                profile.current_density(
+                    radius,
+                    field.sample(
+                        np.asarray([[[radius, height]]]),
+                        np.asarray([cell], dtype=np.int32),
+                    )[0][0, 0],
+                )
+            ),
+            bounds[0],
+            bounds[1],
+            epsabs=1.0e-7,
+            epsrel=RELATIVE_TOLERANCE,
+            limit=300,
         )
+        return vertical
 
     breaks = [lower, upper]
     breaks.extend(float(value) for value in polygon[:, 0] if lower < value < upper)
-    axis = float(case.major_radius)
-    if lower < axis < upper:
-        breaks.append(axis)
     total = 0.0
     error = 0.0
     intervals = sorted(set(breaks))
@@ -150,6 +153,7 @@ def _measure(revision: str, scratch: Path) -> dict[str, Any]:
         import nova.equilibrium.forward_operator as forward_operator
         from benchmarks import unit_amplitude_current_census as census
         from nova.jax.config import configure_dtypes
+        from nova.equilibrium.source import _FluxSelectedProfile
 
         configure_dtypes()
         _install_absent_saddle_bridge(forward_operator)
@@ -176,11 +180,31 @@ def _measure(revision: str, scratch: Path) -> dict[str, Any]:
             analytic,
             curve,
         )["unit_amplitude_totals_a"]
+        exact_operator = operator.with_clip_mode("exact")
+        exact_probe = census._partition_probe(exact_operator, state, "exact")
+        exact_field = forward_operator.flux_field_polynomial(
+            exact_operator._support_moment_stencils,
+            exact_probe["moment_masks"].psi_norm,
+            exact_probe["sample_psi_norm"],
+        )
+        profile = _FluxSelectedProfile(
+            exact_operator.source.core, exact_operator.source.common_sol
+        )
+        support_vertices = np.asarray(exact_probe["profile_support"].support_vertices)
+        support_count = np.asarray(exact_probe["profile_support"].vertex_count)
+        selected = np.asarray(exact_field.active) & np.asarray(
+            exact_probe["moment_masks"].profile_participation
+        )
         reference_values = [
             _exact_support_current(
-                context["exact"], np.asarray(polygon, dtype=np.float64)
+                support_vertices[cell, : support_count[cell]],
+                exact_field,
+                profile,
+                cell,
             )
-            for polygon in context["machine"].cell_polygons
+            if selected[cell] and support_count[cell] >= 3
+            else (0.0, 0.0)
+            for cell in range(len(support_vertices))
         ]
         reference = float(sum(value for value, _error in reference_values))
         error_bound = float(sum(error for _value, error in reference_values))

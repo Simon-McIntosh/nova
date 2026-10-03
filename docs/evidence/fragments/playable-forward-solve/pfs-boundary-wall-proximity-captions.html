@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>pfs-boundary-wall-proximity-captions — landing record</title>
+</head>
+<body>
+<section id="pfs-boundary-wall-proximity-captions">
+<h2>Separate the two boundary-wall-proximity panels and bind every caption number to its receipt</h2>
+<p>The two boundary-wall-proximity panels under
+<code>docs/figures/playable-forward-solve/boundary-routing/</code> were served in
+<code>docs/evidence/archive/playable-forward-solve-landed.html</code> under one identical caption —
+“boundary-wall-proximity. Recovered from worktree pfs-boundary-routing at 6ab5ae30” — while the two
+images state opposite results, so a reader could not tell which sentence belonged to which panel
+nor which census is current. This record gives each panel its own caption naming the gate that
+produced it, and every number in each caption is written as a named JSON path resolved in the
+<code>boundary-wall-proximity.json</code> beside that panel.</p>
+<p>The driver that draws these two scatter panels is
+<code>imas_ambix.worldmodel.boundary_wall_proximity.write_figure</code> in the imas-ambix repository,
+outside this node's write scope; the panels are not poloidal flux maps, and the panels' own data are
+correct (each panel's numbers re-derive from its receipt). The repairs the driving followup names are
+caption-level — separate the shared caption, date the two censuses, and state that the diverted group
+is empty — so no panel is re-rendered here. The two panels are drawn from the same
+<code>pfs-boundary-routing</code> session and the same source revision, once without and once behind an
+explicit branch guard, and the gate that differs is named in each title below.</p>
+
+<h3>Which census is current</h3>
+<p>The explicit-branch-gate census is the current one and the non-gated census is superseded. The
+gate census was generated later (17:49:16Z against 17:11:13Z) and its boundary-to-limiter distances
+are non-degenerate, while the non-gated census reports every one of its eleven distances as data
+value <code>.aggregate.all.boundary_to_limiter_distance_mm.maximum = 0.0</code> mm. A census that
+reads a uniform zero column cannot distinguish measured tangency from a measurement that collapsed,
+so it is dated and withdrawn rather than carried as the current result.</p>
+
+<h3>Panel: area-evidence — census without the explicit branch gate (superseded)</h3>
+<figure data-panel="area-evidence" data-gate="without-explicit-branch-gate">
+  <h3>Wall proximity by recorded topology — census without the explicit branch gate (superseded)</h3>
+  <img src="/nova/figures/playable-forward-solve/boundary-routing/area-evidence/boundary-wall-proximity.png" alt="Boundary-to-limiter distance by topology and distance versus enclosed boundary area, for the census without the explicit branch gate.">
+  <figcaption>
+  Superseded census, run without the explicit branch gate (<code>.generated_at = "2026-09-07T17:11:13.387258+00:00"</code>,
+  source revision <code>.source_revision = "0c5bdf6092109a1cb1e71227af17aa1dbae8f9a1"</code>). Of
+  <code>.aggregate.all.admitted_slice_count = 11</code> admitted trainable slices,
+  <code>.aggregate.all.floating_boundary_count = 0</code> carry a measured floating boundary beyond the
+  <code>.floating_boundary_threshold_mm = 50.0</code> mm threshold, a fraction of
+  <code>.aggregate.all.floating_boundary_fraction = 0.0</code>. Every one of the eleven
+  boundary-to-limiter distances is identically zero, so the maximum is
+  <code>.aggregate.all.boundary_to_limiter_distance_mm.maximum = 0.0</code> mm — a uniform column in
+  which measured tangency and a collapsed read are indistinguishable — and
+  <code>.aggregate.all.boundary_not_fully_inside_count = 11</code> of 11 boundaries are not fully
+  inside the limiter. The diverted group is empty: <code>.aggregate.diverted_true.admitted_slice_count = 0</code>,
+  so the receipt's own <code>.floating_confined_to_non_diverted = false</code> is vacuous and no
+  confinement claim is tested here. Retained only as the superseded arm.
+  </figcaption>
+</figure>
+
+<h3>Panel: area-evidence-explicit-gate — census behind the explicit branch gate (current)</h3>
+<figure data-panel="area-evidence-explicit-gate" data-gate="explicit-branch-gate">
+  <h3>Wall proximity by recorded topology — census behind the explicit branch gate (current)</h3>
+  <img src="/nova/figures/playable-forward-solve/boundary-routing/area-evidence-explicit-gate/boundary-wall-proximity.png" alt="Boundary-to-limiter distance by topology and distance versus enclosed boundary area, for the census behind the explicit branch gate.">
+  <figcaption>
+  Current census, run behind the explicit branch gate
+  (<code>.generated_at = "2026-09-07T17:49:16.505377+00:00"</code>, source revision
+  <code>.source_revision = "0c5bdf6092109a1cb1e71227af17aa1dbae8f9a1"</code>). Of
+  <code>.aggregate.all.admitted_slice_count = 12</code> admitted trainable slices,
+  <code>.aggregate.all.floating_boundary_count = 10</code> carry a measured floating boundary beyond
+  the <code>.floating_boundary_threshold_mm = 50.0</code> mm threshold, a fraction of
+  <code>.aggregate.all.floating_boundary_fraction = 0.8333333333333334</code>. The
+  boundary-to-limiter distances span <code>.aggregate.all.boundary_to_limiter_distance_mm.minimum = 28.392342475174388</code> mm
+  to <code>.aggregate.all.boundary_to_limiter_distance_mm.maximum = 391.64711927670294</code> mm, with
+  median <code>.aggregate.all.boundary_to_limiter_distance_mm.median = 90.29077866256266</code> mm and
+  90th percentile <code>.aggregate.all.boundary_to_limiter_distance_mm.p90 = 265.79239792058627</code> mm.
+  <code>.aggregate.all.boundary_not_fully_inside_count = 0</code> of 12 boundaries lie outside the
+  limiter. The census admits no diverted slice, so its
+  <code>.floating_confined_to_non_diverted = true</code> is untested: with
+  <code>.aggregate.diverted_true.admitted_slice_count = 0</code> the diverted group is empty and the
+  confinement claim cannot fail. Both panels carry a diverted legend entry and x tick with zero data
+  for the same reason, and the empty group is stated here rather than left for the reader to infer.
+  </figcaption>
+</figure>
+
+<h3>Check script</h3>
+<p><code>docs/figures/playable-forward-solve/boundary-routing/check_boundary_wall_proximity_captions.py</code>
+parses both receipts and both corrected captions above and exits nonzero if any caption number
+disagrees with its own receipt, if a caption carries no binding, or if a title does not name its gate.
+Run green it ends <code>EXIT=0</code>; run against the shared pre-repair caption it ends
+<code>EXIT=1</code>.</p>
+</section>
+</body>
+</html>

@@ -1,13 +1,26 @@
-"""The carrier neighbour combine is a duplicate-index maximum scatter.
+"""Product-level tests for the sweep's duplicate-root combine.
 
-The carrier sweep folds one contribution per edge endpoint into a per-vertex
-carrier key, and a vertex named by several edges supplies that key more than
-once.  A last-write-wins combine would make the reduction depend on the order
-the carrier happens to store its edges, so that a receipt could change without
-the graph changing.  These tests pin the duplicate-index maximum scatter the
-sweep relies on against ``jax.ops.segment_max`` and a NumPy reference, bit for
-bit, on carrier graphs that carry a saturated vertex, an isolated vertex and
-repeated identical edges.
+The sweep folds one contribution per carrier neighbour slot into the visited
+vertex's parent array. A vertex reached through several edges supplies its root
+to that array more than once, so the combine is a scatter with duplicate indices
+and resolves last-write-wins. It is deterministic only because every duplicate
+slot writes the same value: an active slot writes the visited vertex, and an
+inactive slot writes its own root's unchanged parent. The receipt is therefore
+determined by the carrier graph, not by the order the carrier stores its edges.
+
+The tests exercise the product sweep, not a re-implemented scatter. Permuting
+the carrier edge storage order permutes each vertex's neighbour slots without
+changing any vertex's neighbour set, so neither the swept tree nor the receipt's
+node fields may move. A mutation that makes the inactive slot write a value
+other than the root's parent breaks the invariance, and is the declared negative
+control.
+
+The join and split arc sets are compared as sets: the sweep emits arcs in
+neighbour-slot order, so a slot permutation permutes the arc rows while leaving
+the arc set unchanged. The merged receipt's arc set is deliberately not asserted
+here; on the MAST carrier the arc set is not invariant to edge order, and that
+dependence is introduced after the sweep, by the split-node subdivision, not by
+the duplicate-root combine these tests pin.
 """
 
 from __future__ import annotations
@@ -17,134 +30,178 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from nova.equilibrium.contour_tree import _carrier_adjacency
+from benchmarks.contour_tree_brute_force import (
+    certificate_rung_fixtures,
+    mast_fixtures,
+)
+from nova.equilibrium.contour_tree import (
+    _carrier_adjacency,
+    _sweep_tree,
+    build_contour_tree,
+)
 from nova.jax.config import configure_dtypes
 
 
 configure_dtypes()
 assert jax.config.jax_enable_x64 is True
 
-_INT32_MIN = int(np.iinfo(np.int32).min)
-
-# The neighbour width the carrier adjacency reserves once a mesh edge count
-# exceeds twice its vertex count: a denser carrier has bounded vertex degree.
-_SATURATED_DEGREE = 16
-
-
-def _endpoint_keys(edges) -> np.ndarray:
-    """Every edge endpoint in carrier storage order, one key per occurrence."""
-
-    edges = np.asarray(edges, dtype=np.int32).reshape(-1, 2)
-    return np.concatenate((edges[:, 0], edges[:, 1])).astype(np.int32)
+#: Receipt fields that must be bit-identical under an edge-order permutation.
+#: ``edges`` is excluded: it is compared as a set where asserted at all.
+_NODE_FIELDS = (
+    "node_vertex",
+    "node_psi",
+    "node_valid",
+    "critical_type",
+    "overflow",
+)
 
 
-def _max_scatter(keys, values, num_segments):
-    """Fold values into per-key maxima with a duplicate-index scatter."""
+def _receipt(mesh, edges=None, edge_valid=None):
+    """Build one receipt, optionally from a permuted copy of the carrier edges."""
 
-    identity = jnp.full((num_segments,), _INT32_MIN, dtype=jnp.int32)
-    return identity.at[keys].max(values)
-
-
-def _numpy_reference(keys, values, num_segments) -> np.ndarray:
-    """A NumPy reduction of the same keys and values."""
-
-    reference = np.full((num_segments,), _INT32_MIN, dtype=np.int32)
-    np.maximum.at(reference, np.asarray(keys), np.asarray(values))
-    return reference
-
-
-def _assert_agrees(keys, values, num_segments) -> np.ndarray:
-    """The scatter equals segment_max and the NumPy reference, bit for bit."""
-
-    keys = jnp.asarray(keys, dtype=jnp.int32)
-    values = jnp.asarray(values, dtype=jnp.int32)
-    scatter = _max_scatter(keys, values, num_segments)
-    segmented = jax.ops.segment_max(values, keys, num_segments=num_segments)
-    reference = _numpy_reference(keys, values, num_segments)
-
-    assert scatter.dtype == jnp.int32
-    assert segmented.dtype == jnp.int32
-    assert np.array_equal(np.asarray(scatter), np.asarray(segmented))
-    assert np.asarray(scatter).tobytes() == np.asarray(segmented).tobytes()
-    assert np.array_equal(np.asarray(segmented), reference)
-    return np.asarray(scatter)
+    edges = mesh.edges if edges is None else edges
+    edge_valid = mesh.edge_valid if edge_valid is None else edge_valid
+    return build_contour_tree(
+        mesh.vertex_psi,
+        mesh.vertex_valid,
+        mesh.vertex_is_wall,
+        jnp.asarray(edges, dtype=jnp.int32),
+        jnp.asarray(edge_valid, dtype=bool),
+        jnp.asarray(1, dtype=jnp.int32),
+    )
 
 
-def test_saturated_vertex_combine_matches_segment_max():
-    """A vertex at the carrier's full neighbour width reduces as a maximum.
+def _sweep(mesh, edges=None, edge_valid=None, descending=True):
+    """Sweep one merge tree from the carrier adjacency, as the product does."""
 
-    The hub is named by sixteen edges, so the carrier adjacency fills its whole
-    neighbour row and the scatter sees the same key sixteen times.  The values
-    fall along the storage order, so the reduction keeps the first occurrence's
-    large value rather than the last occurrence's small one.
+    edges = mesh.edges if edges is None else edges
+    edge_valid = mesh.edge_valid if edge_valid is None else edge_valid
+    vertex_count = int(mesh.vertex_psi.size)
+    edge_capacity = int(edges.shape[0])
+    neighbours, neighbour_valid, _ = _carrier_adjacency(
+        jnp.asarray(edges, dtype=jnp.int32),
+        jnp.asarray(edge_valid, dtype=bool),
+        vertex_count,
+    )
+    nodes, node_type, out_edges, out_valid, overflow, _ = _sweep_tree(
+        jnp.asarray(mesh.vertex_psi, dtype=jnp.float64),
+        jnp.asarray(mesh.vertex_valid, dtype=bool),
+        jnp.asarray(mesh.vertex_is_wall, dtype=bool),
+        neighbours,
+        neighbour_valid,
+        descending,
+        vertex_count,
+        edge_capacity,
+    )
+    return nodes, node_type, out_edges, out_valid, overflow
+
+
+def _canonical_arcs(edges, edge_valid) -> np.ndarray:
+    """The live arcs as a sorted set, independent of append order."""
+
+    rows = np.asarray(edges)[np.asarray(edge_valid)]
+    if rows.size == 0:
+        return rows.reshape(0, 2)
+    return rows[np.lexsort((rows[:, 1], rows[:, 0]))]
+
+
+@pytest.fixture(scope="module")
+def carrier_meshes():
+    """The certificate rungs and one MAST carrier the brute-force tests build."""
+
+    meshes = [fixture.mesh for fixture in certificate_rung_fixtures()]
+    meshes.append(mast_fixtures()[0].mesh)
+    return meshes
+
+
+def _permuted(mesh, seed):
+    """A carrier edge order drawn from a fixed seed, with its validity row."""
+
+    order = np.random.default_rng(seed).permutation(int(mesh.edges.shape[0]))
+    return mesh.edges[order], mesh.edge_valid[order]
+
+
+@pytest.mark.parametrize("seed", [0, 1, 2])
+def test_receipt_nodes_are_invariant_to_carrier_edge_order(carrier_meshes, seed):
+    """Reordering the carrier edges leaves every receipt node field unchanged.
+
+    The edge order fed to the carrier adjacency fixes the column order of each
+    vertex's neighbour slots, not the neighbour set. Reordering the edges
+    reorders those slots, so a receipt assembled from the swept deduplicated
+    roots must carry the same nodes: the same vertex identities, the same
+    critical classifications, and the same adjacency overflow flag, bit for bit.
     """
 
-    leaves = _SATURATED_DEGREE
-    hub = np.zeros(leaves, dtype=np.int32)
-    spokes = np.arange(1, leaves + 1, dtype=np.int32)
-    edges = np.stack((hub, spokes), axis=1)
+    for mesh in carrier_meshes:
+        reference = _receipt(mesh)
+        edges, edge_valid = _permuted(mesh, seed)
+        candidate = _receipt(mesh, edges, edge_valid)
+        label = f"seed {seed}, {int(mesh.vertex_psi.size)} vertices"
+        for name in _NODE_FIELDS:
+            left = np.asarray(getattr(reference, name))
+            right = np.asarray(getattr(candidate, name))
+            assert left.shape == right.shape, f"{label}: {name} shape moved"
+            assert left.tobytes() == right.tobytes(), f"{label}: {name} moved"
 
-    neighbours, neighbour_valid, overflow = _carrier_adjacency(
-        jnp.asarray(edges), jnp.ones(leaves, dtype=bool), leaves + 1
+
+@pytest.mark.parametrize("seed", [0, 1, 2])
+def test_swept_arc_sets_are_invariant_to_carrier_edge_order(carrier_meshes, seed):
+    """Reordering the carrier edges leaves both swept trees' arcs unchanged.
+
+    Each sweep emits an arc per distinct ``(component birth, visited vertex)``
+    pair, drawn from the roots the duplicate-index scatter resolves. Column order
+    permutes the rows those arcs land in but not the pairs themselves, so the
+    join and split arc sets are invariant and the arc count is unchanged. This is
+    the observable form of the combine's determinism: without it, a tree would
+    depend on carrier storage order rather than on the graph.
+    """
+
+    for mesh in carrier_meshes:
+        edges, edge_valid = _permuted(mesh, seed)
+        label = f"seed {seed}, {int(mesh.vertex_psi.size)} vertices"
+        for descending, arm in ((True, "join"), (False, "split")):
+            reference = _sweep(mesh, descending=descending)
+            candidate = _sweep(mesh, edges, edge_valid, descending=descending)
+            reference_arcs = _canonical_arcs(reference[2], reference[3])
+            candidate_arcs = _canonical_arcs(candidate[2], candidate[3])
+            assert reference[0].tobytes() == candidate[0].tobytes(), (
+                f"{label}: {arm} node set moved"
+            )
+            assert reference_arcs.shape == candidate_arcs.shape, (
+                f"{label}: {arm} arc count moved"
+            )
+            assert reference_arcs.tobytes() == candidate_arcs.tobytes(), (
+                f"{label}: {arm} arc set moved"
+            )
+
+
+def test_active_neighbours_sharing_one_root_sweep_to_one_arc():
+    """Two active neighbours with one root combine without a spurious saddle.
+
+    A triangle whose values fall with the vertex index is visited 0, 1, 2. When
+    vertex 2 is visited last, its two neighbours 0 and 1 are already active and
+    share the single root 1, so the duplicate-index scatter writes that root
+    twice with the same value and the component count stays one. The receipt's
+    node types and arc endpoints are the swept births and parents made
+    observable: the maximum sits at vertex 0, the minimum at vertex 2, and a
+    single arc joins them, with no saddle at the shared-root vertex.
+    """
+
+    values = jnp.asarray([2.0, 1.0, 0.0], dtype=jnp.float64)
+    edges = jnp.asarray([[0, 1], [0, 2], [1, 2]], dtype=jnp.int32)
+    result = build_contour_tree(
+        values,
+        jnp.ones(3, dtype=bool),
+        jnp.zeros(3, dtype=bool),
+        edges,
+        jnp.ones(3, dtype=bool),
+        jnp.asarray(1, dtype=jnp.int32),
     )
-    assert not bool(overflow)
-    assert int(np.sum(np.asarray(neighbour_valid)[0])) == _SATURATED_DEGREE
-    assert np.asarray(neighbours)[0].tolist() == spokes.tolist()
 
-    keys = _endpoint_keys(edges)
-    values = np.arange(2 * leaves, 0, -1, dtype=np.int32)
+    vertex = np.asarray(result.node_vertex)[np.asarray(result.node_valid)]
+    kind = np.asarray(result.critical_type)[np.asarray(result.node_valid)]
+    arcs = np.asarray(result.edges)[np.asarray(result.edge_valid)]
 
-    result = _assert_agrees(keys, values, leaves + 1)
-
-    assert result[0] == 2 * leaves
-
-
-def test_isolated_vertex_segment_keeps_the_identity():
-    """A vertex no edge names reduces to the identity in every reduction."""
-
-    edges = np.asarray([[0, 1], [1, 2]], dtype=np.int32)
-
-    _, neighbour_valid, _ = _carrier_adjacency(
-        jnp.asarray(edges), jnp.ones(2, dtype=bool), 4
-    )
-    assert int(np.sum(np.asarray(neighbour_valid)[3])) == 0
-
-    keys = _endpoint_keys(edges)
-    values = np.asarray([3, -7, 5, 11], dtype=np.int32)
-
-    result = _assert_agrees(keys, values, 4)
-
-    assert 3 not in keys.tolist()
-    assert result[3] == _INT32_MIN
-
-
-def test_repeated_identical_edges_keep_one_maximum_per_vertex():
-    """An edge stored three times still yields one maximum per endpoint."""
-
-    edges = np.asarray([[0, 1], [0, 1], [0, 1], [1, 2]], dtype=np.int32)
-    keys = _endpoint_keys(edges)
-    values = np.asarray([5, 4, 9, 2, 3, 1, 7, 6], dtype=np.int32)
-
-    result = _assert_agrees(keys, values, 3)
-
-    assert keys.tolist() == [0, 0, 0, 1, 1, 1, 1, 2]
-    assert result[0] == 9
-    assert result[1] == 7
-    assert result[2] == 6
-
-
-@pytest.mark.parametrize("seed", [0, 1, 2, 3, 4])
-def test_random_carrier_endpoint_scatter_matches_segment_max(seed):
-    """Small random carriers with repeated endpoints reduce as a maximum."""
-
-    rng = np.random.default_rng(seed)
-    vertex_count = int(rng.integers(3, 7))
-    edge_count = int(rng.integers(4, 13))
-    edges = rng.integers(0, vertex_count, size=(edge_count, 2), dtype=np.int32)
-
-    keys = _endpoint_keys(edges)
-    values = rng.integers(-500, 500, size=keys.size, dtype=np.int32)
-
-    result = _assert_agrees(keys, values, vertex_count)
-
-    assert result.shape == (vertex_count,)
+    assert vertex.tolist() == [0, 2]
+    assert kind.tolist() == [2, 0]
+    assert arcs.tolist() == [[0, 1]]

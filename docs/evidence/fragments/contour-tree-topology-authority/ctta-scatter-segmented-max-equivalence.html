@@ -1,29 +1,43 @@
 <section id="scatter-segmented-max-equivalence">
-  <h3>Carrier neighbour combine: a duplicate-index scatter equals a segmented maximum</h3>
-  <p>The carrier sweep folds one contribution per edge endpoint into a per-vertex
-  key. A vertex named by several edges supplies that key more than once, so the
-  combine sees duplicate indices. A last-write-wins combine would make the
-  reduction depend on the order the carrier happens to store its edges, and a
-  receipt could change without the graph changing. Combining duplicates with a
-  maximum removes that dependence. This node names the equivalence the sweep
-  relies on, which the near-linear sweep's review argued but no test pinned.</p>
-  <p><code>tests/test_contour_tree_scatter_equivalence.py</code> builds carrier
-  graphs whose edge endpoints repeat and asserts the scatter's result equals
-  <code>jax.ops.segment_max</code> and a NumPy <code>np.maximum.at</code>
-  reference, bit for bit, at fixed seeds. The named cases are a vertex at the
-  carrier's full neighbour width (sixteen edges on one vertex, its neighbour row
-  full), a vertex no edge names (an empty segment that must keep the reduction's
-  identity), and an edge stored three times.</p>
+  <h3>Carrier sweep: the duplicate-root combine is order-independent</h3>
+  <p>The indexed sweep folds one contribution per carrier neighbour slot into the
+  visited vertex's parent array. A vertex reached through several edges supplies a
+  root to that array more than once, so the combine is a scatter over duplicate
+  indices and resolves last-write-wins. It is deterministic only because every
+  duplicate slot writes the same thing: an active slot writes the visited vertex,
+  and an inactive slot writes its own root's unchanged parent. Because the
+  writers of one root are all vertices of the same component, any surviving write
+  resolves to that component's root, so the swept tree depends on the graph and
+  not on the order the carrier stores its edges.</p>
+  <p><code>tests/test_contour_tree_scatter_equivalence.py</code> exercises the
+  product sweep, not a re-implemented scatter. It permutes the carrier's edge
+  storage order, which permutes each vertex's neighbour slots without changing
+  any neighbour set, and asserts the built tree does not move. Two invariance
+  tests run over all twelve certificate rungs and one MAST carrier under three
+  fixed seeds: one asserts every receipt node field (<code>node_vertex</code>,
+  <code>node_psi</code>, <code>node_valid</code>, <code>critical_type</code>,
+  <code>overflow</code>) is bit-identical; the other sweeps the join and split
+  trees directly and asserts both arc sets and node sets are identical. A third
+  test hand-builds the case the combine is about: a triangle in which the last
+  visited vertex has two active neighbours sharing one root, which must sweep to a
+  single arc with no spurious saddle.</p>
   <table>
     <thead><tr><th>arm</th><th>command</th><th>result</th></tr></thead>
     <tbody>
-      <tr><td>gate</td><td><code>JAX_PLATFORMS=cpu ... pytest tests/test_contour_tree_scatter_equivalence.py</code></td><td>8 passed, EXIT=0</td></tr>
-      <tr><td>negative control</td><td>scatter combine <code>.max</code> replaced by last-write-wins <code>.set</code>, scratch copy</td><td>6 failed, EXIT=1</td></tr>
+      <tr><td>gate</td><td><code>JAX_PLATFORMS=cpu ... pytest tests/test_contour_tree_scatter_equivalence.py</code></td><td>7 passed, EXIT=0</td></tr>
+      <tr><td>negative control</td><td>representative selection (<code>first_root</code>) pinned to slot 0, scratch copy</td><td>3 failed, 4 passed, EXIT=1</td></tr>
     </tbody>
   </table>
-  <p>The negative control replaces the scatter's maximum combine with
-  last-write-wins; the saturated-vertex case and all five random-carrier seeds
-  then disagree with <code>segment_max</code>, while the empty-segment and
-  single-endpoint cases are unchanged. The hazard is therefore measured, not
-  restated: the equivalence holds because the combine is a maximum.</p>
+  <p>The negative control removes the one position-dependent read in the combine.
+  With the representative no longer chosen by slot position, the join arc set of
+  the MAST carrier moves with the edge order and all three order-invariance
+  seeds fail, so the equivalence the tests pin is measured, not restated.</p>
+  <p><strong>Measured limitation, recorded rather than asserted.</strong> The
+  <em>merged</em> receipt's arc set is not invariant to carrier edge order on the
+  MAST carrier: the join and split arc sets are each invariant, and every receipt
+  node field is bit-identical, but the merged arc set moves. That dependence is
+  introduced after the sweep, by the split-node subdivision choosing an arc by
+  table position, not by the duplicate-root combine these tests cover. The order
+  test therefore asserts the swept trees' arc sets and the receipt's node fields,
+  and the merged-arc dependence is left as a follow-on for the subdivision step.</p>
 </section>

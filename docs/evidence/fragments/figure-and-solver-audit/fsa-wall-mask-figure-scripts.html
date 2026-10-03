@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="figure-and-solver-audit">
+<title>Every unguarded scattered-field renderer call in this batch now passes the wall — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsa-wall-mask-figure-scripts"
+         data-test-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T171057428711-fsa-wall-mask-figure-scripts/logs/scan-head.log"
+         data-negative-control-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T171057428711-fsa-wall-mask-figure-scripts/logs/scan-base.log">
+
+  <h2>Every unguarded scattered-field renderer call in this batch now passes the wall</h2>
+
+  <p>The renderer wall scanner (<code>tests/renderer_wall_scan.py</code>, on main since
+  <code>8a83014b2</code>) reported <strong>10</strong> unguarded <code>draw_flux_contours</code>
+  calls over rasters interpolated from scattered nodes across five figure drivers, all reached
+  with no <code>wall</code> and therefore finite over the whole convex hull of the nodes rather
+  than the vessel. Each now passes the wall the driver already holds, so
+  <code>draw_flux_contours</code> blanks every grid point outside the wall units before
+  contouring. No level array, null, caption or <code>nova/</code> source changed.</p>
+
+  <ul>
+    <li><code>continuous-support/draw_trips.py:72</code> — <code>wall=wall</code> (from
+      <code>payload["wall_r_m"/"wall_z_m"]</code>).</li>
+    <li><code>direction-generators/measure.py:599</code> — <code>wall=wall</code> (from
+      <code>receipt["wall_r_m"/"wall_z_m"]</code>).</li>
+    <li><code>merit-model/measure.py:215</code> — <code>wall=wall</code> (from
+      <code>receipt["wall_r_m"/"wall_z_m"]</code>).</li>
+    <li><code>outboard-hole/measure.py:299,308</code> — <code>wall=wall_units</code> (the
+      unit-faithful collection, not the concatenated raster-limits polyline).</li>
+    <li><code>mechanism-evidence/render_mechanism_evidence.py:363,366,511,516,868</code> —
+      <code>wall=wall</code> / <code>wall=record["wall"]</code>, the record's own wall.</li>
+  </ul>
+
+  <p>The measure is the scanner's own exit status on the five named files. At the base revision
+  it printed exactly these 10 sites and exited <strong>1</strong> (negative control, logged at
+  <code>scan-base.log</code>); with the fixes it prints nothing and exits <strong>0</strong>
+  (<code>scan-head.log</code>, <code>EXIT=0</code>). The scanner silently skips files that fail
+  to parse, so all five drivers were independently compiled with
+  <code>python -m py_compile</code> (<code>PY_COMPILE_OK</code>). The scanner's own test file
+  passes <strong>11/11</strong> at the head arm; no existing test file imports a changed driver,
+  so the "zero added failures against the base" arm is vacuous.</p>
+
+  <p>The two exempt analytic draws in
+  <code>render_mechanism_evidence.py</code> (regular-grid draws, scanner lines 360 and 510) are
+  untouched; the edit above them is line-count-neutral so their exemption still resolves.
+  Regeneration map per changed driver — committed figure paths and whether regeneration needs a
+  solve — is in the node report
+  (<code>fsa-wall-mask-figure-scripts.md</code>); no figure was re-rendered in this node.</p>
+
+</article>
+</main>
+</body>
+</html>

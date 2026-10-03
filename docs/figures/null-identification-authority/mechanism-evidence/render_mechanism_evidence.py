@@ -360,7 +360,7 @@ def _draw_certificate(record: dict[str, Any]) -> dict[str, Any]:
     draw_flux_contours(
         axes, analytic_radius, analytic_height, analytic_full, levels, color="#3366cc"
     )
-    draw_flux_contours(axes, radius, height, solved, levels, color="#cc7722")
+    draw_flux_contours(axes, radius, height, solved, levels, color="#cc7722", wall=wall)
     root_boundary = topology.get("boundary_flux_wb")
     if root_boundary is not None and np.isfinite(root_boundary):
         draw_flux_contours(
@@ -370,7 +370,7 @@ def _draw_certificate(record: dict[str, Any]) -> dict[str, Any]:
             solved,
             [float(root_boundary)],
             color="#cc7722",
-            linewidth=1.4,
+            linewidth=1.4, wall=wall,
         )
     draw_boundary(axes, boundary[:, 0], boundary[:, 1], color="#cc0000")
     draw_wall(axes, wall[:, 0], wall[:, 1])
@@ -508,7 +508,9 @@ def _draw_error_locality(record: dict[str, Any], locality: dict[str, Any]) -> st
     view = poloidal_view(_extent(wall, boundary), height=5.8)
     axes = view.poloidal
     draw_flux_contours(axes, radius, height, analytic, levels, color="#3366cc")
-    draw_flux_contours(axes, radius, height, solved, levels, color="#cc7722")
+    draw_flux_contours(
+        axes, radius, height, solved, levels, color="#cc7722", wall=wall
+    )
     draw_boundary(axes, boundary[:, 0], boundary[:, 1])
     draw_wall(axes, wall[:, 0], wall[:, 1])
     absolute_error = np.abs(solved - analytic)
@@ -521,6 +523,7 @@ def _draw_error_locality(record: dict[str, Any], locality: dict[str, Any]) -> st
         error_levels,
         color="#7a3e00",
         linewidth=0.9,
+        wall=wall,
     )
     axes.plot([], [], color="#3366cc", lw=0.7, label="analytic flux")
     axes.plot([], [], color="#cc7722", lw=0.7, label="terminal flux")
@@ -865,7 +868,14 @@ def _draw_cold_start() -> dict[str, Any]:
     view = poloidal_view(_extent(record["wall"]), height=5.8)
     axes = view.poloidal
     levels = contour_levels(record["flux"], count=15)
-    draw_flux_contours(axes, record["radius"], record["height"], record["flux"], levels)
+    draw_flux_contours(
+        axes,
+        record["radius"],
+        record["height"],
+        record["flux"],
+        levels,
+        wall=record["wall"],
+    )
     draw_wall(axes, record["wall"][:, 0], record["wall"][:, 1])
     draw_nulls(
         axes,

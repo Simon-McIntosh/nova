@@ -596,7 +596,9 @@ def draw(data, receipt, output):
         (field, previous.certificate.ANALYTIC_INK_COLOR),
         (trial, previous.certificate.SOLVED_INK_COLOR),
     ):
-        poloidal.draw_flux_contours(ax, radial, height, scalar, levels, color=color)
+        poloidal.draw_flux_contours(
+            ax, radial, height, scalar, levels, color=color, wall=wall
+        )
     poloidal.draw_wall(ax, units=(wall,))
     for axis, saddles, color, size in (
         (

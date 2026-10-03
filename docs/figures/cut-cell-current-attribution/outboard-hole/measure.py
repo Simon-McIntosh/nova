@@ -304,9 +304,17 @@ def render():
             levels,
             color=certificate.ANALYTIC_INK_COLOR,
             linewidth=0.65,
+            wall=wall_units,
         )
         poloidal.draw_flux_contours(
-            ax, r, z, solved, levels, color=certificate.SOLVED_INK_COLOR, linewidth=0.65
+            ax,
+            r,
+            z,
+            solved,
+            levels,
+            color=certificate.SOLVED_INK_COLOR,
+            linewidth=0.65,
+            wall=wall_units,
         )
         poloidal.draw_wall(ax, units=wall_units)
         for name, color in (

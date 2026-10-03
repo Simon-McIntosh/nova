@@ -195,7 +195,7 @@
         "svg": {
           "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21978-35-state.svg",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21978-35-state.svg",
-          "sha256": "5bbcd9f4d7453ddf70e0f483618006575aeaa9c2c78dd90696ae4371efb4c7e3"
+          "sha256": "303a5a7e42ca248e983069e87b53f6cd0551755e4c5df21acc3b0caec992c6ce"
         },
         "levels_wb": [
           -0.06831344688047811,
@@ -335,7 +335,7 @@
         "svg": {
           "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21983-35-state.svg",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21983-35-state.svg",
-          "sha256": "92aa2ccd3336537e949d28c76f5bc451111674acd651334bd246c07c3bf29d55"
+          "sha256": "c5174f861bf290c6a3d72e9a41291f266d6653c4f886778ddd8e6b1b5c485943"
         },
         "levels_wb": [
           -0.10345884149130553,
@@ -475,7 +475,7 @@
         "svg": {
           "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
-          "sha256": "07819499d9402fb65313e215327e0aa64b21abdc0271a864a61fe0b2a7668cb7"
+          "sha256": "337ec1156bb8e6383e3a98285d3ed72d649b2c8a4c1b3fefa5e7dfb589371ee1"
         },
         "levels_wb": [
           -0.21935554785766842,
@@ -615,7 +615,7 @@
         "svg": {
           "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.svg",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.svg",
-          "sha256": "41e72dee269faad37a0516d24c8e0bccc9a18c05b26705c2691d66e8b98f94ed"
+          "sha256": "aa0a087940909ff077f11a71a44ec39122825a9af46297996f60c903af12e43f"
         },
         "levels_wb": [
           -0.17700265611346355,
@@ -755,7 +755,7 @@
         "svg": {
           "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21989-55-state.svg",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21989-55-state.svg",
-          "sha256": "d987ca5b39761c8216327cca0723ddcf332abc01c8773bb0fe7624bc4144b09c"
+          "sha256": "d1d79312606667f9b0f3c6e16e852c1bcd20bbfdf7da80fded8647b9f2025a74"
         },
         "levels_wb": [
           -0.21315064928426178,
@@ -895,7 +895,7 @@
         "svg": {
           "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-22086-43-state.svg",
           "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-22086-43-state.svg",
-          "sha256": "d71ee77f7292e3e3311dd62522eea443a94d47323d9d57c91e5c20b2ddb3cdce"
+          "sha256": "fb810bde7f16ec6327f637cad52ff91388886550c9bba7df4d12b44235c846a4"
         },
         "levels_wb": [
           -0.12933198764991055,
@@ -979,14 +979,28 @@
     "png": {
       "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.png",
       "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.png",
-      "sha256": "4af6761c35fcf04631fd9634f8cfef5be42822704a53756eb877b2e2df363278"
+      "sha256": "859acae44fa16b5c066b8c7ac86f86930c3d21ddec7f55763057de450c000cee"
     },
     "svg": {
       "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.svg",
       "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.svg",
-      "sha256": "76b7247baacb84f235b25a839aa9b588850128ec8fe6587af33caa0ba200a65a"
+      "sha256": "b1f8816defc020892ca39a3c733bdcc4337d22e2137354b89f732f5080389153"
     },
-    "source_revision": "c3f82561e4582b8b37023337e336237c1b912ff2"
+    "source_revision": "c3f82561e4582b8b37023337e336237c1b912ff2",
+    "series_policy": {
+      "drawn_series": [
+        "efit_own",
+        "profiles",
+        "magnetics_circular",
+        "magnetics_elongated"
+      ],
+      "merged_series": [
+        "magnetics_circular",
+        "magnetics_discrete"
+      ],
+      "merge_reason": "the row-kernel reading equals the circular reading on every row, so the two are one value drawn once and named as equal",
+      "row_kernel_versus_circular_residual_max": 0.0
+    }
   },
   "render": {
     "cache_version": "runtime-ea5c55820be3d80549fe",

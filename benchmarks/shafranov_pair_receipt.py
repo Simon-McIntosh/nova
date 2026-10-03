@@ -29,6 +29,7 @@ import json
 import platform
 from pathlib import Path
 import subprocess
+import textwrap
 from typing import Any
 from dataclasses import replace
 
@@ -67,6 +68,26 @@ DEFAULT_DIRECTORY = ROOT / "docs/figures/constraint-augmented-newton-krylov/shaf
 ROW_TOLERANCE = 1.0e-6
 #: Display raster resolution for the per-row panels.
 RASTER_SAMPLES = 181
+#: Character budget per subtitle line.  The subtitle carries the sentence that
+#: keeps a refused row honest, and an unbroken line of it runs off both edges of
+#: the panel canvas and is unreadable at either end, so it is wrapped to a width
+#: the measured text extent confirms fits the canvas.
+CAPTION_WRAP_CHARACTERS = 46
+
+
+def _caption_lines(title: str, note: str) -> list[str]:
+    """Wrap the panel's title and subtitle to lines that fit the canvas."""
+    lines = [title]
+    for paragraph in f"{note}, shared levels".split("\n"):
+        lines.extend(
+            textwrap.wrap(
+                paragraph, width=CAPTION_WRAP_CHARACTERS, break_long_words=True
+            )
+            or [""]
+        )
+    return lines
+
+
 #: Fields of one row receipt, in the order the document is written.  A receipt
 #: replayed from a banked emission is assembled through this order, so a replay
 #: and a fresh measurement agree on the document shape as well as the values.
@@ -332,8 +353,13 @@ def _render(
             contain=units,
         )
     poloidal_axes(axis)
-    axis.set_title(f"{title}\n{note}, shared levels", fontsize=8)
+    lines = _caption_lines(title, note)
+    axis.set_title("\n".join(lines), fontsize=8)
     path.parent.mkdir(parents=True, exist_ok=True)
+    figure.canvas.draw()
+    extent = axis.title.get_window_extent(figure.canvas.get_renderer())
+    caption_widest_inches = extent.width / figure.dpi
+    canvas_width_inches = figure.get_figwidth()
     figure.savefig(path, dpi=180)
     plt.close(figure)
     return {
@@ -342,7 +368,20 @@ def _render(
             f"/nova/figures/constraint-augmented-newton-krylov/shafranov/{path.name}"
         ),
         "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "caption_lines": lines,
+        "caption_widest_inches": round(caption_widest_inches, 4),
+        "canvas_width_inches": round(canvas_width_inches, 4),
     }
+
+
+def _row_note(refusal: str | None) -> str:
+    """Return the panel subtitle for a row's outcome, refused or imposed."""
+    return (
+        "reference state alone: the row is refused on this profile, so no "
+        "terminal state exists"
+        if refusal is not None
+        else "reference blue / terminal orange"
+    )
 
 
 def _row_receipt(
@@ -439,12 +478,7 @@ def _row_receipt(
         )
     units = _wall_units(profile.operator)
     slug = identity.replace("/", "-")
-    note = (
-        "reference state alone: the row is refused on this profile, so no "
-        "terminal state exists"
-        if refusal is not None
-        else "reference blue / terminal orange"
-    )
+    note = _row_note(refusal)
     entry["figure"] = _render(
         profile,
         reference=np.asarray(reference_state),
@@ -798,17 +832,18 @@ def _draw_component_panels(
         extracted = getattr(core, _component_field(component))
         axis.plot(
             coordinate,
-            _component_curve(extracted, coordinate, 1.0),
-            color="#888888",
-            linewidth=1.0,
-            label="extracted",
-        )
-        axis.plot(
-            coordinate,
             _component_curve(fit.function, coordinate, 1.0),
             color="#3366cc",
             linewidth=1.6,
             label="projected",
+        )
+        axis.plot(
+            coordinate,
+            _component_curve(extracted, coordinate, 1.0),
+            color="#888888",
+            linewidth=1.8,
+            linestyle="--",
+            label="extracted",
         )
         scale = scales.get(component)
         if scale is not None:
@@ -817,7 +852,7 @@ def _draw_component_panels(
                 _component_curve(fit.function, coordinate, scale),
                 color="#cc7722",
                 linewidth=1.6,
-                linestyle="--",
+                linestyle=":",
                 label=f"freed scale {(scale - 1.0) * 100:+.2f} %",
             )
         axis.set_xlabel(r"$\psi_N$")
@@ -893,18 +928,19 @@ def _render_projection(
             contain=units,
         )
     poloidal_axes(axes[2])
-    axes[2].set_title(
-        (
-            "terminal flux, line contours on shared levels\n"
-            "reference blue (^ axis, P x-point) / terminal orange (^ axis, X x-point)"
-            if terminal is not None
-            else "reference flux, line contours on its own levels\n"
-            "the row receipt persists no terminal field, so the constrained "
-            "solve's terminal state cannot be redrawn here"
-        ),
-        fontsize=8,
+    third_title = (
+        "terminal flux, line contours on shared levels | reference blue "
+        "(^ axis, P x-point) / terminal orange (^ axis, X x-point)"
+        if terminal is not None
+        else "reference flux, line contours on its own levels; the row receipt "
+        "persists no terminal field, so the constrained solve's terminal state "
+        "cannot be redrawn here"
     )
-    figure.suptitle(f"MAST {identity}: {caption}", fontsize=9)
+    axes[2].set_title("\n".join(textwrap.wrap(third_title, width=54)), fontsize=8)
+    figure.suptitle(
+        "\n".join(textwrap.wrap(f"MAST {identity}: {caption}", width=118)),
+        fontsize=9,
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     block: dict[str, Any] = {}
     if write_raster:
@@ -923,7 +959,8 @@ def _render_projection(
     # can inspect, so a lane that cannot open the raster still reads the labels,
     # the fitted orders and the curves the record cites.
     svg_path = path.with_suffix(".svg")
-    figure.savefig(svg_path)
+    with plt.rc_context({"svg.fonttype": "none"}):
+        figure.savefig(svg_path)
     plt.close(figure)
     block.update(
         {
@@ -1360,11 +1397,73 @@ def render_vector_companion(
     return {"rows": drawn, "receipt": str(receipt_path)}
 
 
+def render_row_panels(*, directory: Path = DEFAULT_DIRECTORY, cache_root=None) -> dict:
+    """Redraw every committed row panel from the banked reference states.
+
+    Each panel is a function of the banked reference state and the row's
+    recorded outcome, so a re-render changes the drawing and nothing else; no
+    equilibrium is solved.  A row that terminated carries a terminal state the
+    banked reference does not hold, so it is refused here rather than drawn as
+    the reference alone.
+    """
+    configure_dtypes()
+    configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+        if cache_root is None
+        else cache_root
+    )
+    response_cache, _evidence = settled._persisted_response_cache(
+        settled.response_carrier.DEFAULT_CARRIER,
+        settled.response_carrier.DEFAULT_RECEIPT,
+    )
+    selected = _selection()
+    receipt_path = directory / "receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    committed = {entry["identity"]: entry for entry in receipt["rows_receipt"]}
+    redrawn: list[str] = []
+    for shot, row_index in sorted(selected):
+        identity = f"{shot}/{row_index}"
+        entry = committed[identity]
+        if entry["status"] != "refused":
+            raise ValueError(
+                f"row {identity} terminated; its terminal state is not banked, "
+                "so its panel cannot be redrawn without a solve"
+            )
+        selected_row, qualification = selected[(shot, row_index)]
+        case, context = settled._mast_case_from_selection(
+            settled.SHOT_STORE, selected_row, qualification
+        )
+        passive_case, profile, _policy = settled._passive_inclusive_case(
+            case, context, response_cache
+        )
+        entry["figure"] = _render(
+            profile,
+            reference=jnp.asarray(passive_case["state"]),
+            terminal=None,
+            units=_wall_units(profile.operator),
+            path=directory / f"row-{shot}-{row_index}.png",
+            title=f"MAST {identity}: beta_p + l_i/2 row",
+            note=_row_note(entry["refusal_reason"]),
+        )
+        write_entry(directory, entry)
+        redrawn.append(identity)
+        print(f"SHAFRANOV-ROW-PANEL {identity}", flush=True)
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    return {"rows": redrawn, "receipt": str(receipt_path)}
+
+
 def main(argv=None):
     """Run the Shafranov-row receipt from the command line."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--directory", type=Path, default=DEFAULT_DIRECTORY)
     parser.add_argument("--cache-root", type=Path, default=None)
+    parser.add_argument(
+        "--render-rows-directory",
+        type=Path,
+        default=None,
+        help="redraw every committed row panel from the banked reference "
+        "states without solving",
+    )
     parser.add_argument(
         "--emissions",
         type=Path,
@@ -1392,7 +1491,12 @@ def main(argv=None):
         "without solving, so a published raster gains its vector companion",
     )
     arguments = parser.parse_args(argv)
-    if arguments.vector_directory is not None:
+    if arguments.render_rows_directory is not None:
+        render_row_panels(
+            directory=arguments.render_rows_directory,
+            cache_root=arguments.cache_root,
+        )
+    elif arguments.vector_directory is not None:
         render_vector_companion(
             directory=arguments.vector_directory,
             cache_root=arguments.cache_root,

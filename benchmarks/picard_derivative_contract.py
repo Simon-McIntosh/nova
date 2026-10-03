@@ -103,7 +103,15 @@ def _fixed_point_tangent(mapping, terminal_flux, conductor, direction):
     return solution, int(np.asarray(information)), float(jnp.max(jnp.abs(residual)))
 
 
-def _scalar_methods(profile, seed, conductor, *, live_selection: bool):
+def _scalar_methods(
+    profile,
+    seed,
+    conductor,
+    *,
+    live_selection: bool,
+    probe: int | None = None,
+    steps: tuple[float, ...] | None = None,
+):
     """Compare reverse, forward, fixed-point and finite-difference responses."""
     with live_null_coordinates(live_selection):
 
@@ -121,7 +129,12 @@ def _scalar_methods(profile, seed, conductor, *, live_selection: bool):
             ).moments.plasma_current
 
         reverse = jax.grad(flux_function)(conductor)
-        probe = int(np.argmax(np.abs(np.asarray(reverse))))
+        if probe is None:
+            probe = int(np.argmax(np.abs(np.asarray(reverse))))
+        if not 0 <= probe < conductor.size:
+            raise ValueError(
+                f"probe {probe} is outside conductor width {conductor.size}"
+            )
         direction = jnp.zeros_like(conductor).at[probe].set(1.0)
         _, forward = jax.jvp(flux_function, (conductor,), (direction,))
         _, current_forward = jax.jvp(current_function, (conductor,), (direction,))
@@ -139,8 +152,12 @@ def _scalar_methods(profile, seed, conductor, *, live_selection: bool):
             (fixed_tangent,),
         )[1]
         rows = []
-        for fraction in STEPS:
-            delta = fraction * float(jnp.abs(conductor[probe]))
+        deltas = (
+            tuple(fraction * float(jnp.abs(conductor[probe])) for fraction in STEPS)
+            if steps is None
+            else steps
+        )
+        for delta in deltas:
             flux_fd = (
                 flux_function(conductor + delta * direction)
                 - flux_function(conductor - delta * direction)
@@ -151,7 +168,7 @@ def _scalar_methods(profile, seed, conductor, *, live_selection: bool):
             ) / (2.0 * delta)
             rows.append(
                 {
-                    "step_fraction": fraction,
+                    "step_fraction": delta / float(jnp.abs(conductor[probe])),
                     "step": delta,
                     "flux_fd": float(flux_fd),
                     "current_fd": float(current_fd),
@@ -323,16 +340,46 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--json", type=Path, required=True)
     parser.add_argument("--figure", type=Path, required=True)
+    parser.add_argument(
+        "--probe",
+        type=int,
+        help=(
+            "conductor component for central differences "
+            "(default: largest reverse tangent)"
+        ),
+    )
+    parser.add_argument(
+        "--steps",
+        type=float,
+        nargs=3,
+        metavar="A",
+        help=(
+            "three absolute central-difference steps in A (default: existing fractions)"
+        ),
+    )
     arguments = parser.parse_args()
     configure_dtypes()
     profile, seed, _vacuum = _fixture()
     conductor = profile.operator.external_current
-    held = _scalar_methods(profile, seed, conductor, live_selection=False)
+    default = _scalar_methods(profile, seed, conductor, live_selection=False)
+    held = (
+        default
+        if arguments.probe is None and arguments.steps is None
+        else _scalar_methods(
+            profile,
+            seed,
+            conductor,
+            live_selection=False,
+            probe=arguments.probe,
+            steps=None if arguments.steps is None else tuple(arguments.steps),
+        )
+    )
     terminal = profile.solve(
         seed, route="picard", current=conductor, evaluations=80, relaxation=0.7
     )
     report = {
         "driver_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "default_selection": default,
         "held": held,
         "map_tangent": _map_tangent_contract(profile, terminal.flux, conductor),
         "moment": _moment_contract(profile, terminal.flux),

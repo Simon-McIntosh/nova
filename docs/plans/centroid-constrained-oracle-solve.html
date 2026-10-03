@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="55">
+<meta name="plan-version" content="56">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -211,6 +211,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261002T225930630440-review-of-cco-root-cause-coupled-centroid-response" data-who="reckon-build" data-when="2026-10-02T23:10:53Z">
     <div class="r-comment-body"><p>Independent review of d0e8f17e44aa6eb6f05cc94141ed513e1fa18d04..25671c28680ce7c66e0a1ea16cff99bf3d781b1e is parsed, pass-with-follow-ons, 87/100; 121-cell support is stable, but radial JVP 0.836870105 m/T differs from central 1.629225248 m/T, and the formal +4.624 mT field prediction opposes the banked -21.256 mT.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261002T231145475955-cco-root-cause-centroid-tangent-localisation" data-who="reckon-build" data-when="2026-10-02T23:56:47Z">
+    <div class="r-comment-body"><p>At the 135-cell analytic state under exact clipping, the radial centroid JVP is +0.8368701055 m/T versus a six-step central-difference plateau of +1.629224 to +1.629226 m/T; the moving outer polygon contributes 3.024582e6 A/T L2 to raw-current finite difference but only 0.001288 A/T to JVP because nova/equilibrium/clip_quadrature.py:883 contracts only the coefficient tangent; the uniform-level control is zero to roundoff; [receipts](/nova/evidence/fragments/centroid-constrained-oracle-solve/cco-root-cause-centroid-tangent-localisation#centroid-tangent-localisation) and [root-cause report](/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-centroid-tangent-localisation.md).</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T053656352101-review-of-cco-bounded-row-step-control" data-who="s19c-review-cco-c" data-when="2026-09-17T06:45:40.145Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T205409901465-cco-bounded-row-step-control stored at the fence path, total 84, findings recorded on the reviewed run's completion</p></div>

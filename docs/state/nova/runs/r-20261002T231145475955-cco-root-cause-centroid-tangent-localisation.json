@@ -1,0 +1,362 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "b4103b477e2807790996fbc9b7edeb07778cd433",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 31023360,
+      "cached_input_tokens_cumulative": 31023360,
+      "input_tokens": 31238435,
+      "input_tokens_cumulative": 31238435,
+      "output_tokens": 54364,
+      "output_tokens_cumulative": 54364,
+      "reasoning_output_tokens": 20381,
+      "reasoning_output_tokens_cumulative": 20381
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 581,
+    "files": 5,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "1b13bfc0570d6d6eab21c75b1c6e636482514843",
+    "c2324542f67ea3cdf301c7525dfe8b1d1c1dd33b",
+    "f634c313468519872a219d0eaa6e5b90526277b9",
+    "0de8a519cd1a8fd6eca21b55050709b6a04cd888",
+    "9a49893a21777228fff0de42722865a904ec05c2",
+    "8c42a3d526aea6401caa97c63180d5c78cbb4247"
+  ],
+  "completed_at": "2026-10-02T23:56:47Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-02T23:12:08Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "nova/equilibrium/clip_quadrature.py",
+    "area/first-moment"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-centroid-tangent-localisation /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-centroid-tangent-localisation/docs/figures/centroid-constrained-oracle-solve/root-cause/centroid-tangent/measure.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T231145475955-cco-root-cause-centroid-tangent-localisation/factor.log"
+  },
+  "impl_move": {
+    "at_complete": 0.8,
+    "at_dispatch": 0.8,
+    "plan": "centroid-constrained-oracle-solve",
+    "reason": "a root-cause localisation; the repair is a separate node",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 5.115308711587256,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-03T00:11:48.513650+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T23:11:47Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 597706,
+    "state": "quiet",
+    "utilisation_pct": 6.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-02T23:11:47Z",
+    "read_at": "2026-10-02T23:11:48Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 6.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-02T23:56:47Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T231145475955-cco-root-cause-centroid-tangent-localisation/manifest.md",
+  "member": "disposable-r-20261002T231145475955-cco-root-cause-centroid-tangent-localisation",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "cco-root-cause-centroid-tangent-localisation",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1648,
+          "cached_input_tokens": 761825,
+          "input_tokens": 763475,
+          "output_tokens": 1413,
+          "reasoning_output_tokens": 27,
+          "total_tokens": 764888,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Lead ruling 2026-10-02: root-cause before any fix; this node measures and fixes nothing. Input: /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-coupled-centroid-response.md (on main at 96d8d4c46): at the analytic state of the weak-rotation-reactor-static -110 row at 135 cells, exact clip, jax.jvp of the centroid with respect to a uniform vertical field gives +0.836870105 m/T while a +/-1 uT central difference gives +1.629225248 m/T, with the same 121 active cells in every probe; both bypass requests, so the clip-mode regression is not involved. CPU in place with JAX_PLATFORMS=cpu, the global clip mode set to exact and any request built with clip_mode='exact' explicitly, persisting every result under docs/figures/centroid-constrained-oracle-solve/root-cause/centroid-tangent/: (1) sweep the central-difference step over at least five decades (1e-9 to 1e-4 T) and report whether the difference has a plateau, to separate finite-step nonlinearity from a tangent defect; (2) decompose the centroid tangent into its factors, the cell-current tangent, the cell-geometry tangent (exact cut-cell area, centre and moment motion as the boundary flux changes), and the normalisation tangent, comparing each factor's JVP with its own central difference, and name the first factor whose JVP disagrees; (3) if a factor's JVP is zero or truncated where its difference is not, find the code that stops its gradient (stop_gradient, a non-differentiable select, a host round trip or a custom_jvp) and give its file and line. The report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-centroid-tangent-localisation.md states which factor carries the shortfall and the code that causes it.",
+    "estimated_hours": null,
+    "goal": "localise why the centroid row's automatic tangent is 48.6 percent short of its finite difference at the analytic fixture state",
+    "id": "cco-root-cause-centroid-tangent-localisation",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-02T23:11:47Z",
+      "read_at": "2026-10-02T23:11:48Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 6.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T231145475955-cco-root-cause-centroid-tangent-localisation/manifest.md",
+    "negative_control": "the same factor decomposition applied to a field direction whose effect on the boundary is zero must show JVP and difference agreeing, so the decomposition can show agreement where no geometry moves",
+    "plan": "centroid-constrained-oracle-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "open",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/centroid-constrained-oracle-solve/root-cause/centroid-tangent",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-centroid-tangent-localisation.md",
+      "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-root-cause-centroid-tangent-localisation.html",
+      "docs/figures/centroid-constrained-oracle-solve/cco-root-cause-centroid-tangent-localisation"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "codex",
+    "member": null,
+    "node": "cco-root-cause-centroid-tangent-localisation",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-02T23:11:53.012732+00:00",
+    "score": 0.83125,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.08,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "centroid-constrained-oracle-solve",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "8c42a3d526aea6401caa97c63180d5c78cbb4247",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "b4103b477e2807790996fbc9b7edeb07778cd433",
+    "reviewed_head_sha": "8c42a3d526aea6401caa97c63180d5c78cbb4247",
+    "scores": {
+      "durability": 15,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 90
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "run_id": "r-20261002T231145475955-cco-root-cause-centroid-tangent-localisation",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a0fee3-c620-7b72-8bde-5f3ca1983702",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "open",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 31023360,
+    "cumulative_input_tokens": 62261795,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 74745
+  },
+  "time_budget": "60m",
+  "tool_steps": 243.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 2679,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-02T23:56:53Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-02T23:12:13Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261002T231145475955-cco-root-cause-centroid-tangent-localisation",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 680,
+    "worker_pid": 2043315
+  },
+  "worker_seconds": 2679,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

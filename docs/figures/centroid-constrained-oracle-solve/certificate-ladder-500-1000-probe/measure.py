@@ -66,21 +66,29 @@ def compile_meter() -> dict:
 
 def span(context: dict, result: dict) -> dict:
     topology = result["topology"]
-    reading = oracle_fixture.gauge_free_flux_read(
-        context["exact"],
-        np.asarray(topology["axis_rz_m"], dtype=np.float64),
-        np.asarray(topology["boundary_rz_m"], dtype=np.float64),
-        float(topology["axis_flux_wb"]),
-        float(topology["boundary_flux_wb"]),
-        np.asarray(result["compensating_field_t"], dtype=np.float64),
+    points = np.vstack(
+        (
+            np.asarray(topology["axis_rz_m"], dtype=np.float64),
+            np.asarray(topology["boundary_rz_m"], dtype=np.float64),
+        )
     )
-    net = float(reading["gauge_free_flux_offset_wb"]) - float(
-        reading["compensator_span_contribution_wb"]
+    analytic = certificate._exact_state(context["case_name"], context["exact"], points)
+    field = np.asarray(result["compensating_field_t"], dtype=np.float64)
+    compensator = oracle_fixture.uniform_exterior_field_flux(
+        context["exact"], points, field
     )
+    solved_span = float(topology["axis_flux_wb"]) - float(topology["boundary_flux_wb"])
+    analytic_span = float(analytic[0] - analytic[1])
+    compensator_span = float(compensator[0] - compensator[1])
+    offset = solved_span - analytic_span
+    net = offset - compensator_span
     return {
-        **reading,
+        "solved_span_wb": solved_span,
+        "analytic_span_wb": analytic_span,
+        "compensator_span_contribution_wb": compensator_span,
+        "gauge_free_flux_offset_wb": offset,
         "net_offset_wb": net,
-        "net_offset_of_span": net / abs(float(reading["analytic_span_wb"])),
+        "net_offset_of_span": net / abs(analytic_span),
     }
 
 
@@ -188,6 +196,24 @@ def measure(case: str, requested_cells: int) -> None:
             field_scale_t=fixture.DEFAULT_FIELD_BOUND_T,
         )
         solve_wall = time.perf_counter() - solve_started
+        partial.update(
+            status="solved",
+            solve=result,
+            compiled_program_size_bytes=(
+                max(meter["program_sizes_bytes"])
+                if meter["program_sizes_bytes"]
+                else None
+            ),
+            compile_calls=meter["calls"],
+            compile_seconds=meter["seconds"],
+            solve_seconds=max(0.0, solve_wall - meter["seconds"]),
+            total_seconds=time.perf_counter() - started,
+        )
+        write(receipt_path, partial)
+        state_path = OUTPUT / f"{stem}-state.npy"
+        np.save(state_path, np.asarray(state, dtype=np.float64))
+        partial["terminal_state_path"] = str(state_path)
+        write(receipt_path, partial)
         phase = "readout"
         reading = span(context, result)
         analytic_span = abs(float(reading["analytic_span_wb"]))
@@ -221,19 +247,7 @@ def measure(case: str, requested_cells: int) -> None:
             "bound_refusal": result["bound_refusal"],
         }
         partial.update(
-            status="solved",
-            solve=result,
-            span=reading,
-            clauses=clauses,
-            compiled_program_size_bytes=(
-                max(meter["program_sizes_bytes"])
-                if meter["program_sizes_bytes"]
-                else None
-            ),
-            compile_calls=meter["calls"],
-            compile_seconds=meter["seconds"],
-            solve_seconds=max(0.0, solve_wall - meter["seconds"]),
-            total_seconds=time.perf_counter() - started,
+            span=reading, clauses=clauses, total_seconds=time.perf_counter() - started
         )
         write(receipt_path, partial)
         phase = "panel"

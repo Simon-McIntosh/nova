@@ -5,6 +5,7 @@ from __future__ import annotations
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
 
 from nova.equilibrium.contour_tree import (
     CRITICAL_TYPE_OUTSIDE,
@@ -179,6 +180,7 @@ def test_large_carrier_with_few_critical_points_stays_qualified():
     assert int(np.sum(result.edge_valid)) == 1
 
 
+@pytest.mark.filterwarnings("error::FutureWarning")
 def test_critical_node_capacity_overflow_is_jittable_and_visible():
     """Too many events refuse the receipt without raising or losing the flag."""
 
@@ -201,12 +203,17 @@ def test_critical_node_capacity_overflow_is_jittable_and_visible():
     assert int(np.sum(result.edge_valid)) == 255
 
 
+@pytest.mark.filterwarnings("error::FutureWarning")
 def test_carrier_neighbour_capacity_overflow_is_visible():
     """A carrier vertex beyond the fixed neighbour width refuses the receipt."""
 
     leaves = 17
     branches = jnp.stack(
-        (jnp.zeros(leaves, dtype=jnp.int32), jnp.arange(1, leaves + 1)), axis=1
+        (
+            jnp.zeros(leaves, dtype=jnp.int32),
+            jnp.arange(1, leaves + 1, dtype=jnp.int32),
+        ),
+        axis=1,
     )
     edges = jnp.zeros((3 * leaves, 2), dtype=jnp.int32).at[:leaves].set(branches)
     result = build_contour_tree(

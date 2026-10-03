@@ -1538,16 +1538,28 @@ def _certificate_flux_panel(
         np.concatenate((solved.ravel(), analytic.ravel())), count=12
     )
     figure, axis = plt.subplots(figsize=(6.4, 6.0), constrained_layout=True)
+    wall_units = (wall,)
     poloidal.draw_flux_contours(
-        axis, radial, height, analytic, levels, color=certificate.ANALYTIC_INK_COLOR
+        axis,
+        radial,
+        height,
+        analytic,
+        levels,
+        color=certificate.ANALYTIC_INK_COLOR,
+        wall=wall_units,
     )
     poloidal.draw_flux_contours(
-        axis, radial, height, solved, levels, color=certificate.SOLVED_INK_COLOR
+        axis,
+        radial,
+        height,
+        solved,
+        levels,
+        color=certificate.SOLVED_INK_COLOR,
+        wall=wall_units,
     )
     poloidal.draw_boundary(
         axis, boundary[:, 0], boundary[:, 1], color=certificate.ANALYTIC_INK_COLOR
     )
-    wall_units = (wall,)
     poloidal.draw_wall(axis, units=wall_units)
     for topology, color in (
         (analytic_topology, certificate.ANALYTIC_INK_COLOR),

@@ -1141,13 +1141,15 @@ def _draw_error_figure(rows: list[dict[str, Any]], output: Path) -> dict[str, An
         oracle = np.asarray(plot["oracle_flux_wb"], dtype=np.float64)
         image = np.asarray(plot["full_moment_image_wb"], dtype=np.float64)
         absolute = np.abs(image - oracle)
-        panel.tricontour(
+        poloidal.draw_scattered_contours(
+            panel,
             node[:, 0],
             node[:, 1],
             np.maximum(absolute, error_levels[0]),
-            levels=error_levels,
-            colors="firebrick",
-            linewidths=0.8,
+            error_levels,
+            wall,
+            color="firebrick",
+            linewidth=0.8,
         )
         poloidal.draw_wall(panel, wall[:, 0], wall[:, 1], style=DEFAULT_INK)
         carrier, _source, exact = certificate._case(row["case"])
@@ -1205,13 +1207,15 @@ def _draw_comparison_panel(row: dict[str, Any], output: Path) -> dict[str, Any]:
         )
     ):
         panel = poloidal_axes(axes[column])
-        panel.tricontour(
+        poloidal.draw_scattered_contours(
+            panel,
             node[:, 0],
             node[:, 1],
             field,
-            levels=levels,
-            colors="royalblue",
-            linewidths=0.6,
+            levels,
+            wall,
+            color="royalblue",
+            linewidth=0.6,
         )
         poloidal.draw_wall(panel, wall[:, 0], wall[:, 1], style=DEFAULT_INK)
         poloidal.draw_nulls(panel, magnetic_axis=axis_rz, x_points=x_points)

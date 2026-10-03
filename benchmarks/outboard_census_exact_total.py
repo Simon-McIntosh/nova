@@ -163,11 +163,12 @@ def _operator_clip_mode(forward_operator: Any, operator: Any, mode: str):
 def _measure(revision: str, scratch: Path, component: str) -> dict[str, Any]:
     tree = _archive_tree(revision, scratch)
     previous = list(sys.path)
-    prefixes = ("nova.", "benchmarks.", "scripts.")
+    roots = ("nova", "benchmarks", "scripts")
+    prefixes = tuple(f"{root}." for root in roots)
     modules = {
         name: module
         for name, module in sys.modules.items()
-        if name == "nova" or name.startswith(prefixes)
+        if name in roots or name.startswith(prefixes)
     }
     try:
         for name in list(modules):
@@ -284,7 +285,7 @@ def _measure(revision: str, scratch: Path, component: str) -> dict[str, Any]:
     finally:
         sys.path[:] = previous
         for name in list(sys.modules):
-            if name == "nova" or name.startswith(("nova.", "benchmarks.", "scripts.")):
+            if name in roots or name.startswith(prefixes):
                 sys.modules.pop(name, None)
         sys.modules.update(modules)
 

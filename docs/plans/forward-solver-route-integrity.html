@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="104">
+<meta name="plan-version" content="105">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.66">
 </head>
@@ -678,6 +678,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261003T115901403358-review-of-fsri-ladder-census-counts-every-entry" data-who="reckon-build" data-when="2026-10-03T12:09:16.942Z">
     <div class="r-comment-body"><p>Independent review of r-20261003T111711852375-fsri-ladder-census-counts-every-entry stored at both granted paths; the read path returns status=parsed with all five dimensions scored (goal_fidelity 19, evidence 17, scope_discipline 20, durability 18, fit 19; total 93), reviewed_base_sha 8f475ae23620206e833b7f92347dccf64a7e46d3 and reviewed_head_sha a90d04c14b54a55eabce135cfbbcc3cb87a13a5c; verdict pass-with-follow-ons, three follow-on findings.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261003T120048839648-fsri-forward-solve-tests-fit-their-bound" data-who="reckon-build" data-when="2026-10-03T13:08:50.172Z">
+    <div class="r-comment-body"><p>measured tests/test_equilibrium_forward_solve.py on the H200 lane (job 1280609: 29 passed in 665.51 s, slowest item test_the_accelerator_routes_agree_on_the_fixed_point at 312.57 s) and found the lane bound is the launcher-injected 3600 s, so no per-test timeout mark is needed; the test file is byte-identical to base 8b149152a and the evidence fragment is committed at 3ec60184d</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-fsri-section-2-goes-first-and-never-loops" data-who="lead" data-when="2026-09-20T19:55:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-09-20, reordering this plan. Section 2 goes first, ahead of the Newton-Krylov repair and the pre-warm pin, and on the strongest lane. The reason is measured on the compile-abort plan: one compiled solve costs about seventeen thousand memory mappings to load because it is 400 to 900 MB of executable, a process is capped at 65,530, and the certificate needs four loads, so every heavy CPU measurement in the sprint now aborts in compilation. The pre-warm pin is moot until this section shrinks the programs; pre-warming 450 MB programs is what fills a 7.6 GB cache.</p><p>The ruling is also a design constraint, stronger than the section's wording of scanning the trips: <strong>these processes never loop; they are designed as efficient maps.</strong> Newton steps, trips, the per-trip read and the polygon fan over cells are expressed as vectorised maps and scans with fixed telemetry slots, never as Python loops that inline a copy of the body per iteration. A converged forward solve compiles to megabytes.</p></div>

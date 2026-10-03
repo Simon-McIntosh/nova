@@ -101,19 +101,19 @@ def _draw(context: dict, receipt: dict, state: np.ndarray, path: Path) -> None:
         )
         poloidal_axes(axis)
     axes[0].text(
-        0.03,
-        0.95,
+        0.01,
+        1.02,
         "analytic blue · solved orange",
         transform=axes[0].transAxes,
-        va="top",
+        va="bottom",
         fontsize=20,
     )
     axes[1].text(
-        0.03,
-        0.95,
+        0.01,
+        1.02,
         "solved − analytic [Wb]",
         transform=axes[1].transAxes,
-        va="top",
+        va="bottom",
         fontsize=20,
     )
     path.parent.mkdir(parents=True, exist_ok=True)

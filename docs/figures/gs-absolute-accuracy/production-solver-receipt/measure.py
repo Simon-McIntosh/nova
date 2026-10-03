@@ -3,7 +3,6 @@
 import json
 import os
 from pathlib import Path
-import subprocess
 import sys
 from time import perf_counter
 
@@ -12,7 +11,6 @@ import numpy as np
 
 from benchmarks import solovev_certificate as certificate
 from benchmarks.exact_clip_seed_amplitude import _problem
-from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
 from nova.jax.config import configure_dtypes
 
@@ -20,8 +18,49 @@ from nova.jax.config import configure_dtypes
 ROOT = Path(__file__).resolve().parent
 
 
+def build_payload(
+    *,
+    revision,
+    case,
+    requested_cells,
+    realised_cells,
+    clip_mode,
+    job_id,
+    platform,
+    x64,
+    history_shapes,
+    residual,
+    converged,
+    production_solver,
+    elapsed_seconds,
+):
+    """Assemble the certificate receipt and stamp it with its source revision.
+
+    The stamp is the same one every benchmark receipt writer applies, so the
+    payload this writer persists names the tree it was measured at without a
+    hand edit.
+    """
+    payload = {
+        "revision": revision,
+        "route": "reduced_newton",
+        "case": case,
+        "requested_cells": requested_cells,
+        "realised_cells": realised_cells,
+        "clip_mode": clip_mode,
+        "job_id": job_id,
+        "platform": platform,
+        "x64": x64,
+        "history_shapes": history_shapes,
+        "residual": residual,
+        "converged": converged,
+        "production_solver": production_solver,
+        "elapsed_seconds": elapsed_seconds,
+    }
+    return certificate.stamp_source_revision(payload)
+
+
 def main():
-    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    revision = certificate._source_revision()
     print(
         f"revision={revision} tree={Path.cwd()} command={' '.join(sys.argv)}",
         flush=True,
@@ -29,7 +68,6 @@ def main():
     configure_dtypes()
     assert jax.config.jax_enable_x64
     assert jax.default_backend() == "cpu"
-    set_support_clip_mode("chord")
     case = "weak-rotation-reactor-static"
     started = perf_counter()
     machine, exact, analytic, operator, profile, target, centroid, current = _problem(
@@ -40,6 +78,7 @@ def main():
         carrier_identity="receipt:weak-rotation-reactor-static:300:chord",
         source_profile=profile.source,
         seed_policy=ExplicitSolveSeed(seed),
+        clip_mode="chord",
         policy_overrides={
             "route": "reduced_newton",
             "newton_steps": certificate.recovery.NEWTON_STEPS,
@@ -61,22 +100,21 @@ def main():
     shapes = {name: np.shape(getattr(history, name)) for name in history._fields}
     print(f"HISTORY_SHAPES {json.dumps(shapes, sort_keys=True)}", flush=True)
     production = certificate._production_solver_receipt(equilibrium)
-    payload = {
-        "revision": revision,
-        "route": "reduced_newton",
-        "case": case,
-        "requested_cells": 300,
-        "realised_cells": len(machine.node),
-        "clip_mode": "chord",
-        "job_id": os.environ.get("SLURM_JOB_ID"),
-        "platform": jax.default_backend(),
-        "x64": jax.config.jax_enable_x64,
-        "history_shapes": shapes,
-        "residual": float(history.residual),
-        "converged": bool(history.converged),
-        "production_solver": production,
-        "elapsed_seconds": perf_counter() - started,
-    }
+    payload = build_payload(
+        revision=revision,
+        case=case,
+        requested_cells=300,
+        realised_cells=len(machine.node),
+        clip_mode="chord",
+        job_id=os.environ.get("SLURM_JOB_ID"),
+        platform=jax.default_backend(),
+        x64=jax.config.jax_enable_x64,
+        history_shapes=shapes,
+        residual=float(history.residual),
+        converged=bool(history.converged),
+        production_solver=production,
+        elapsed_seconds=perf_counter() - started,
+    )
     certificate._write_json(ROOT / "receipt.json", payload)
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)

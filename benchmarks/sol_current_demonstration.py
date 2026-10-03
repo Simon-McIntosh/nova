@@ -25,7 +25,6 @@ import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 from matplotlib.path import Path as PlotPath
-import matplotlib.tri as mtri
 import numpy as np
 
 from nova.equilibrium import fixed_point
@@ -38,6 +37,7 @@ from nova.equilibrium.sol_closure import (
 )
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.jax.config import configure_dtypes
+from nova.media import poloidal
 from tests import test_equilibrium_forward_reference as reference
 
 
@@ -480,7 +480,6 @@ def _contour_figure(
     sol_strike: np.ndarray,
 ) -> None:
     """Plot matched discrete normalised-flux levels on the shared carrier."""
-    triangulation = mtri.Triangulation(machine.node[:, 0], machine.node[:, 1])
     levels = np.linspace(0.1, 1.1, 11)
     colours = plt.cm.viridis(np.linspace(0.08, 0.92, len(levels)))
     figure, axes = plt.subplots(
@@ -491,12 +490,15 @@ def _contour_figure(
         ("SOL-carrying solution", sol_masks, sol_topology, sol_strike),
     )
     for axis, (title, masks, topology, strikes) in zip(axes[:2], states, strict=True):
-        axis.tricontour(
-            triangulation,
+        poloidal.draw_scattered_contours(
+            axis,
+            machine.node[:, 0],
+            machine.node[:, 1],
             np.asarray(masks.psi_norm),
-            levels=levels,
-            colors=colours,
-            linewidths=1.0,
+            levels,
+            machine.wall_node,
+            color=list(colours),
+            linewidth=1.0,
         )
         axis.plot(
             machine.wall_node[:, 0],
@@ -524,20 +526,25 @@ def _contour_figure(
         axis.set_aspect("equal")
         axis.set_xlabel("R [m]")
     overlay = axes[2]
-    overlay.tricontour(
-        triangulation,
+    poloidal.draw_scattered_contours(
+        overlay,
+        machine.node[:, 0],
+        machine.node[:, 1],
         np.asarray(control_masks.psi_norm),
-        levels=levels,
-        colors=colours,
-        linewidths=0.9,
-        linestyles="--",
+        levels,
+        machine.wall_node,
+        color=list(colours),
+        linewidth=0.9,
     )
-    overlay.tricontour(
-        triangulation,
+    poloidal.draw_scattered_contours(
+        overlay,
+        machine.node[:, 0],
+        machine.node[:, 1],
         np.asarray(sol_masks.psi_norm),
-        levels=levels,
-        colors=colours,
-        linewidths=1.25,
+        levels,
+        machine.wall_node,
+        color=list(colours),
+        linewidth=1.25,
     )
     overlay.plot(
         machine.wall_node[:, 0], machine.wall_node[:, 1], color="#222", linewidth=0.8

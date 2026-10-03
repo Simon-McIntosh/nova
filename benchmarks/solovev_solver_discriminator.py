@@ -43,6 +43,7 @@ from nova.jax.config import (
     configure_persistent_compilation_cache,
     default_persistent_compilation_cache_root,
 )
+from nova.media import poloidal
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 
 
@@ -482,6 +483,7 @@ def measure_rung(tiling: str, requested_cells: int) -> dict[str, Any]:
         },
         "plot_data": {
             "node_rz_m": node,
+            "wall_rz_m": machine.wall_node,
             "analytic_flux_wb": exact_grid,
             "production_error_wb": baseline_grid - exact_grid,
             "exact_axis_control_error_wb": control_grid - exact_grid,
@@ -533,27 +535,32 @@ def _plot(rows: list[dict[str, Any]], key: str, output: Path, title: str) -> Non
     )
     for axis, row in zip(axes.ravel(), ordered, strict=True):
         node = np.asarray(row["plot_data"]["node_rz_m"], dtype=np.float64)
+        wall = np.asarray(row["plot_data"]["wall_rz_m"], dtype=np.float64)
         analytic = np.asarray(row["plot_data"]["analytic_flux_wb"], dtype=np.float64)
         error = np.abs(np.asarray(row["plot_data"][key], dtype=np.float64))
         analytic_axis = float(
             row["exact_axis_flux_renormalisation"]["exact_axis_flux_wb"]
         )
         analytic_norm = (analytic - analytic_axis) / -analytic_axis
-        axis.tricontour(
+        poloidal.draw_scattered_contours(
+            axis,
             node[:, 0],
             node[:, 1],
             analytic_norm,
-            levels=np.linspace(0.1, 0.9, 9),
-            colors="0.65",
-            linewidths=0.55,
+            np.linspace(0.1, 0.9, 9),
+            wall,
+            color="0.65",
+            linewidth=0.55,
         )
-        axis.tricontour(
+        poloidal.draw_scattered_contours(
+            axis,
             node[:, 0],
             node[:, 1],
             np.maximum(error, levels[0]),
-            levels=levels,
-            colors="C3",
-            linewidths=0.9,
+            levels,
+            wall,
+            color="C3",
+            linewidth=0.9,
         )
         exact_axis = np.asarray(
             row["exact_axis_iteration_control"]["exact_axis_rz_m"], dtype=np.float64

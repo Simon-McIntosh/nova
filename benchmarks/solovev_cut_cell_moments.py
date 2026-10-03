@@ -801,30 +801,35 @@ def _draw_figure(rows: list[dict[str, Any]], output: Path) -> dict[str, Any]:
             axes_cell = poloidal_axes(axes[row_index, column])
             image = np.asarray(plot["variant_state_wb"][name], dtype=np.float64)
             error = np.abs(image - exact)
-            axes_cell.tricontour(
+            poloidal.draw_scattered_contours(
+                axes_cell,
                 node[:, 0],
                 node[:, 1],
                 np.maximum(error, error_levels[0]),
-                levels=error_levels,
-                colors="firebrick",
-                linewidths=0.8,
+                error_levels,
+                wall,
+                color="firebrick",
+                linewidth=0.8,
             )
-            axes_cell.tricontour(
+            poloidal.draw_scattered_contours(
+                axes_cell,
                 node[:, 0],
                 node[:, 1],
                 exact,
-                levels=flux_levels,
-                colors="dimgray",
-                linewidths=0.42,
+                flux_levels,
+                wall,
+                color="dimgray",
+                linewidth=0.42,
             )
-            axes_cell.tricontour(
+            poloidal.draw_scattered_contours(
+                axes_cell,
                 node[:, 0],
                 node[:, 1],
                 image,
-                levels=flux_levels,
-                colors="royalblue",
-                linewidths=0.42,
-                linestyles="dashed",
+                flux_levels,
+                wall,
+                color="royalblue",
+                linewidth=0.42,
             )
             poloidal.draw_wall(axes_cell, wall[:, 0], wall[:, 1])
             image_axis = row["images"][name]["axis"]["read"]["axis_rz_m"]

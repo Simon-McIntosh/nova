@@ -1972,6 +1972,7 @@ def _draw_error_contours(
         levels,
         color="#7a3e9d",
         linewidth=0.65,
+        wall=wall,
     )
     poloidal.draw_boundary(axis, boundary[:, 0], boundary[:, 1], color="#35b9c8")
     poloidal.draw_wall(axis, units=(wall,))
@@ -2043,10 +2044,10 @@ def _plot(
         np.concatenate((solved.ravel(), analytic.ravel())), count=12
     )
     poloidal.draw_flux_contours(
-        flux_axis, radial, height, analytic, levels, color=ANALYTIC_INK_COLOR
+        flux_axis, radial, height, analytic, levels, color=ANALYTIC_INK_COLOR, wall=wall
     )
     poloidal.draw_flux_contours(
-        flux_axis, radial, height, solved, levels, color=SOLVED_INK_COLOR
+        flux_axis, radial, height, solved, levels, color=SOLVED_INK_COLOR, wall=wall
     )
     poloidal.draw_boundary(
         flux_axis, boundary[:, 0], boundary[:, 1], color=ANALYTIC_INK_COLOR

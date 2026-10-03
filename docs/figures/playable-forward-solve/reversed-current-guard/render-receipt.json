@@ -1,0 +1,36 @@
+{
+  "source_receipt": "diagnosis.json",
+  "revision": "9c4a2257aba7787c7734b12c00a0f2de547ba651",
+  "figures": [
+    {
+      "figure": "diagnosis-row30.png",
+      "row": 30,
+      "identity": "22475/30",
+      "title": "O-point census on the converged (terminal residual 0) \u2014 class DIVERTED refused (NoQualifiedAxisError)",
+      "converged": true,
+      "terminal_residual": 0.0,
+      "termination": "CONVERGED",
+      "verdict": "class DIVERTED refused (NoQualifiedAxisError)"
+    },
+    {
+      "figure": "diagnosis.png",
+      "row": 50,
+      "identity": "22475/50",
+      "title": "O-point census on the unconverged (terminal residual unreported, ACTIVE_SET_SETTLED, 11 trips) \u2014 class DIVERTED refused (NoQualifiedAxisError)",
+      "converged": false,
+      "terminal_residual": null,
+      "termination": "ACTIVE_SET_SETTLED",
+      "verdict": "class DIVERTED refused (NoQualifiedAxisError)"
+    },
+    {
+      "figure": "diagnosis-row55.png",
+      "row": 55,
+      "identity": "22475/55",
+      "title": "O-point census on the unconverged (terminal residual 1.380e-01, ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED, 16 trips) \u2014 class DIVERTED refused (NoQualifiedAxisError)",
+      "converged": false,
+      "terminal_residual": 0.13798999335500364,
+      "termination": "ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED",
+      "verdict": "class DIVERTED refused (NoQualifiedAxisError)"
+    }
+  ]
+}

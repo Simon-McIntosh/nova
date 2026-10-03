@@ -72,10 +72,10 @@
   ],
   "gate": "passed",
   "gate_check": {
-    "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T121544352422-cco-first-moment-centroid-consumers/measure_shift.py",
+    "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-centroid-consumers /home/ITER/mcintos/Code/nova/.venv/bin/python - [inline displaced exact-clip centroid measurement]",
     "exit_status": 0,
     "log_digest": null,
-    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T121544352422-cco-first-moment-centroid-consumers/caller-audit.log"
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T121544352422-cco-first-moment-centroid-consumers/displaced-centroid-shift-verified.log"
   },
   "impl_move": {
     "at_complete": null,

@@ -1,0 +1,1007 @@
+{
+  "corpus": {
+    "completed_shots": 358,
+    "shots_json_path": "completed_shots",
+    "slices": 29875,
+    "slices_json_path": "slices"
+  },
+  "figures": [
+    {
+      "declarations": [
+        {
+          "json_path": "admitted_slices",
+          "kind": "count",
+          "label": "admitted",
+          "value": 29875.0
+        },
+        {
+          "json_path": "converged_slices",
+          "kind": "count",
+          "label": "converged",
+          "value": 19649.0
+        },
+        {
+          "json_path": "qualified_slices",
+          "kind": "count",
+          "label": "qualified",
+          "value": 3395.0
+        },
+        {
+          "json_path": "unconverged_slices",
+          "kind": "count",
+          "label": "unconverged",
+          "value": 10226.0
+        },
+        {
+          "json_path": "branch_guard_evaluated_slices",
+          "kind": "count",
+          "label": "branch evaluated",
+          "value": 25711.0
+        },
+        {
+          "json_path": "branch_guard_agreement_slices",
+          "kind": "count",
+          "label": "branch agreement",
+          "value": 20451.0
+        },
+        {
+          "json_path": "branch_guard_agreement_fraction",
+          "kind": "fraction",
+          "label": "branch agreement fraction",
+          "value": 0.7954183034498853
+        },
+        {
+          "json_path": "conditioned_guard_evaluated_slices",
+          "kind": "count",
+          "label": "conditioned evaluated",
+          "value": 8482.0
+        },
+        {
+          "json_path": "conditioned_guard_agreement_slices",
+          "kind": "count",
+          "label": "conditioned agreement",
+          "value": 8334.0
+        },
+        {
+          "json_path": "conditioned_guard_agreement_fraction",
+          "kind": "fraction",
+          "label": "conditioned agreement fraction",
+          "value": 0.9825512850742749
+        },
+        {
+          "json_path": "pin_displacement_crosstab.overall.below_-50_mm.slices",
+          "kind": "count",
+          "label": "displacement < -50 mm",
+          "value": 2827.0
+        },
+        {
+          "json_path": "pin_displacement_crosstab.overall.-50_to_0_mm.slices",
+          "kind": "count",
+          "label": "displacement -50 to 0 mm",
+          "value": 1811.0
+        },
+        {
+          "json_path": "pin_displacement_crosstab.overall.0_to_+50_mm.slices",
+          "kind": "count",
+          "label": "displacement 0 to +50 mm",
+          "value": 1594.0
+        },
+        {
+          "json_path": "pin_displacement_crosstab.overall.above_+50_mm.slices",
+          "kind": "count",
+          "label": "displacement > +50 mm",
+          "value": 2093.0
+        },
+        {
+          "json_path": "conditioned_by_time_in_shot.deciles.bins.0.fraction",
+          "kind": "fraction",
+          "label": "conditioned fraction decile 0",
+          "value": 0.36392606755895474
+        },
+        {
+          "json_path": "conditioned_by_time_in_shot.deciles.bins.1.fraction",
+          "kind": "fraction",
+          "label": "conditioned fraction decile 1",
+          "value": 0.25785953177257526
+        },
+        {
+          "json_path": "conditioned_by_time_in_shot.deciles.bins.2.fraction",
+          "kind": "fraction",
+          "label": "conditioned fraction decile 2",
+          "value": 0.25309261116683385
+        },
+        {
+          "json_path": "conditioned_by_time_in_shot.deciles.bins.3.fraction",
+          "kind": "fraction",
+          "label": "conditioned fraction decile 3",
+          "value": 0.2615859938208033
+        },
+        {
+          "json_path": "conditioned_by_time_in_shot.deciles.bins.4.fraction",
+          "kind": "fraction",
+          "label": "conditioned fraction decile 4",
+          "value": 0.4628016085790885
+        },
+        {
+          "json_path": "conditioned_by_time_in_shot.deciles.bins.5.fraction",
+          "kind": "fraction",
+          "label": "conditioned fraction decile 5",
+          "value": 0.46790250600755234
+        },
+        {
+          "json_path": "conditioned_by_time_in_shot.deciles.bins.6.fraction",
+          "kind": "fraction",
+          "label": "conditioned fraction decile 6",
+          "value": 0.5146258503401361
+        },
+        {
+          "json_path": "conditioned_by_time_in_shot.deciles.bins.7.fraction",
+          "kind": "fraction",
+          "label": "conditioned fraction decile 7",
+          "value": 0.5551794177386594
+        },
+        {
+          "json_path": "conditioned_by_time_in_shot.deciles.bins.8.fraction",
+          "kind": "fraction",
+          "label": "conditioned fraction decile 8",
+          "value": 0.5516655336505778
+        },
+        {
+          "json_path": "conditioned_by_time_in_shot.deciles.bins.9.fraction",
+          "kind": "fraction",
+          "label": "conditioned fraction decile 9",
+          "value": 0.6231511254019293
+        }
+      ],
+      "name": "labeller-receipt-adjudication",
+      "png": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-labeller-receipt-corpus-headers/docs/figures/playable-forward-solve/labeller-receipt/labeller-receipt-adjudication.png",
+      "title": "Forward labeller receipt: 358 completed shots, 29875 written slices"
+    },
+    {
+      "declarations": [
+        {
+          "json_path": "pin_displacement_crosstab.overall.below_-50_mm.slices",
+          "kind": "count",
+          "label": "class total < -50 mm",
+          "value": 2827.0
+        },
+        {
+          "json_path": "pin_displacement_crosstab.overall.-50_to_0_mm.slices",
+          "kind": "count",
+          "label": "class total -50 to 0 mm",
+          "value": 1811.0
+        },
+        {
+          "json_path": "pin_displacement_crosstab.overall.0_to_+50_mm.slices",
+          "kind": "count",
+          "label": "class total 0 to +50 mm",
+          "value": 1594.0
+        },
+        {
+          "json_path": "pin_displacement_crosstab.overall.above_+50_mm.slices",
+          "kind": "count",
+          "label": "class total > +50 mm",
+          "value": 2093.0
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.0.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 0 below_-50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.0.below_-50_mm.slices",
+          "value": 0.09547738693467336
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.1.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 1 below_-50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.1.below_-50_mm.slices",
+          "value": 0.9022988505747126
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.2.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 2 below_-50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.2.below_-50_mm.slices",
+          "value": 0.7962085308056872
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.3.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 3 below_-50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.3.below_-50_mm.slices",
+          "value": 0.4083969465648855
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.4.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 4 below_-50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.4.below_-50_mm.slices",
+          "value": 0.33083411433926896
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.5.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 5 below_-50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.5.below_-50_mm.slices",
+          "value": 0.35209825997952915
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.6.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 6 below_-50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.6.below_-50_mm.slices",
+          "value": 0.27511737089201876
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.7.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 7 below_-50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.7.below_-50_mm.slices",
+          "value": 0.24934612031386225
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.8.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 8 below_-50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.8.below_-50_mm.slices",
+          "value": 0.26272727272727275
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.9.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 9 below_-50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.9.below_-50_mm.slices",
+          "value": 0.28191072826938135
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.0.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 0 -50_to_0_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.0.-50_to_0_mm.slices",
+          "value": 0.3316582914572864
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.1.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 1 -50_to_0_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.1.-50_to_0_mm.slices",
+          "value": 0.040229885057471264
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.2.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 2 -50_to_0_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.2.-50_to_0_mm.slices",
+          "value": 0.04028436018957346
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.3.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 3 -50_to_0_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.3.-50_to_0_mm.slices",
+          "value": 0.0916030534351145
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.4.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 4 -50_to_0_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.4.-50_to_0_mm.slices",
+          "value": 0.13776944704779756
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.5.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 5 -50_to_0_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.5.-50_to_0_mm.slices",
+          "value": 0.20573183213920163
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.6.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 6 -50_to_0_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.6.-50_to_0_mm.slices",
+          "value": 0.2591549295774648
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.7.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 7 -50_to_0_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.7.-50_to_0_mm.slices",
+          "value": 0.28596338273757627
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.8.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 8 -50_to_0_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.8.-50_to_0_mm.slices",
+          "value": 0.2809090909090909
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.9.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 9 -50_to_0_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.9.-50_to_0_mm.slices",
+          "value": 0.2654659357870008
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.0.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 0 0_to_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.0.0_to_+50_mm.slices",
+          "value": 0.5276381909547738
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.1.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 1 0_to_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.1.0_to_+50_mm.slices",
+          "value": 0.034482758620689655
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.2.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 2 0_to_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.2.0_to_+50_mm.slices",
+          "value": 0.023696682464454975
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.3.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 3 0_to_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.3.0_to_+50_mm.slices",
+          "value": 0.07061068702290077
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.4.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 4 0_to_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.4.0_to_+50_mm.slices",
+          "value": 0.10590440487347703
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.5.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 5 0_to_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.5.0_to_+50_mm.slices",
+          "value": 0.1299897645854657
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.6.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 6 0_to_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.6.0_to_+50_mm.slices",
+          "value": 0.16901408450704225
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.7.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 7 0_to_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.7.0_to_+50_mm.slices",
+          "value": 0.21970357454228423
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.8.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 8 0_to_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.8.0_to_+50_mm.slices",
+          "value": 0.2772727272727273
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.9.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 9 0_to_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.9.0_to_+50_mm.slices",
+          "value": 0.2725137039937353
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.0.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 0 above_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.0.above_+50_mm.slices",
+          "value": 0.04522613065326633
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.1.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 1 above_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.1.above_+50_mm.slices",
+          "value": 0.022988505747126436
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.2.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 2 above_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.2.above_+50_mm.slices",
+          "value": 0.13981042654028436
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.3.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 3 above_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.3.above_+50_mm.slices",
+          "value": 0.42938931297709926
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.4.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 4 above_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.4.above_+50_mm.slices",
+          "value": 0.42549203373945643
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.5.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 5 above_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.5.above_+50_mm.slices",
+          "value": 0.31218014329580346
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.6.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 6 above_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.6.above_+50_mm.slices",
+          "value": 0.29671361502347415
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.7.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 7 above_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.7.above_+50_mm.slices",
+          "value": 0.24498692240627726
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.8.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 8 above_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.8.above_+50_mm.slices",
+          "value": 0.17909090909090908
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.9.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "decile 9 above_+50_mm share",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.9.above_+50_mm.slices",
+          "value": 0.18010963194988253
+        },
+        {
+          "kind": "count",
+          "label": "decile 0 written slices",
+          "sum_json_paths": [
+            "pin_displacement_crosstab.by_decile.0.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.above_+50_mm.slices"
+          ],
+          "value": 398.0
+        },
+        {
+          "kind": "count",
+          "label": "decile 1 written slices",
+          "sum_json_paths": [
+            "pin_displacement_crosstab.by_decile.1.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.above_+50_mm.slices"
+          ],
+          "value": 348.0
+        },
+        {
+          "kind": "count",
+          "label": "decile 2 written slices",
+          "sum_json_paths": [
+            "pin_displacement_crosstab.by_decile.2.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.above_+50_mm.slices"
+          ],
+          "value": 422.0
+        },
+        {
+          "kind": "count",
+          "label": "decile 3 written slices",
+          "sum_json_paths": [
+            "pin_displacement_crosstab.by_decile.3.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.above_+50_mm.slices"
+          ],
+          "value": 524.0
+        },
+        {
+          "kind": "count",
+          "label": "decile 4 written slices",
+          "sum_json_paths": [
+            "pin_displacement_crosstab.by_decile.4.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.above_+50_mm.slices"
+          ],
+          "value": 1067.0
+        },
+        {
+          "kind": "count",
+          "label": "decile 5 written slices",
+          "sum_json_paths": [
+            "pin_displacement_crosstab.by_decile.5.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.above_+50_mm.slices"
+          ],
+          "value": 977.0
+        },
+        {
+          "kind": "count",
+          "label": "decile 6 written slices",
+          "sum_json_paths": [
+            "pin_displacement_crosstab.by_decile.6.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.above_+50_mm.slices"
+          ],
+          "value": 1065.0
+        },
+        {
+          "kind": "count",
+          "label": "decile 7 written slices",
+          "sum_json_paths": [
+            "pin_displacement_crosstab.by_decile.7.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.above_+50_mm.slices"
+          ],
+          "value": 1147.0
+        },
+        {
+          "kind": "count",
+          "label": "decile 8 written slices",
+          "sum_json_paths": [
+            "pin_displacement_crosstab.by_decile.8.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.above_+50_mm.slices"
+          ],
+          "value": 1100.0
+        },
+        {
+          "kind": "count",
+          "label": "decile 9 written slices",
+          "sum_json_paths": [
+            "pin_displacement_crosstab.by_decile.9.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.above_+50_mm.slices"
+          ],
+          "value": 1277.0
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.0.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.0.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "0 to +50 mm share decile 0",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.0.0_to_+50_mm.slices",
+          "value": 0.5276381909547738
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.1.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.1.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "0 to +50 mm share decile 1",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.1.0_to_+50_mm.slices",
+          "value": 0.034482758620689655
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.2.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.2.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "0 to +50 mm share decile 2",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.2.0_to_+50_mm.slices",
+          "value": 0.023696682464454975
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.3.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.3.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "0 to +50 mm share decile 3",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.3.0_to_+50_mm.slices",
+          "value": 0.07061068702290077
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.4.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.4.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "0 to +50 mm share decile 4",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.4.0_to_+50_mm.slices",
+          "value": 0.10590440487347703
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.5.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.5.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "0 to +50 mm share decile 5",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.5.0_to_+50_mm.slices",
+          "value": 0.1299897645854657
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.6.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.6.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "0 to +50 mm share decile 6",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.6.0_to_+50_mm.slices",
+          "value": 0.16901408450704225
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.7.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.7.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "0 to +50 mm share decile 7",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.7.0_to_+50_mm.slices",
+          "value": 0.21970357454228423
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.8.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.8.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "0 to +50 mm share decile 8",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.8.0_to_+50_mm.slices",
+          "value": 0.2772727272727273
+        },
+        {
+          "denominator_json_paths": [
+            "pin_displacement_crosstab.by_decile.9.below_-50_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.-50_to_0_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.0_to_+50_mm.slices",
+            "pin_displacement_crosstab.by_decile.9.above_+50_mm.slices"
+          ],
+          "kind": "fraction",
+          "label": "0 to +50 mm share decile 9",
+          "numerator_json_path": "pin_displacement_crosstab.by_decile.9.0_to_+50_mm.slices",
+          "value": 0.2725137039937353
+        }
+      ],
+      "name": "pin-tail-crosstab",
+      "png": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-labeller-receipt-corpus-headers/docs/figures/playable-forward-solve/labeller-receipt/pin-tail-crosstab.png",
+      "title": "Forward labeller receipt: 358 completed shots, 29875 written slices"
+    },
+    {
+      "declarations": [
+        {
+          "json_path": "free_error_mm.distribution.median",
+          "kind": "value",
+          "label": "free_error median",
+          "value": 1.9311714140877487
+        },
+        {
+          "json_path": "free_error_mm.distribution.p90",
+          "kind": "value",
+          "label": "free_error p90",
+          "value": 59.70645234663424
+        },
+        {
+          "json_path": "free_error_mm.distribution.maximum",
+          "kind": "value",
+          "label": "free_error maximum",
+          "value": 856.9510158500299
+        },
+        {
+          "json_path": "free_error_mm.distribution.count",
+          "kind": "count",
+          "label": "free_error count",
+          "value": 25711.0
+        },
+        {
+          "json_path": "conditioned_error_mm.distribution.median",
+          "kind": "value",
+          "label": "conditioned_error median",
+          "value": 5.6066262743570405e-12
+        },
+        {
+          "json_path": "conditioned_error_mm.distribution.p90",
+          "kind": "value",
+          "label": "conditioned_error p90",
+          "value": 1.7335353545353034e-05
+        },
+        {
+          "json_path": "conditioned_error_mm.distribution.maximum",
+          "kind": "value",
+          "label": "conditioned_error maximum",
+          "value": 655.2894860506058
+        },
+        {
+          "json_path": "conditioned_error_mm.distribution.count",
+          "kind": "count",
+          "label": "conditioned_error count",
+          "value": 8482.0
+        },
+        {
+          "json_path": "absolute_error_reduction_mm.distribution.median",
+          "kind": "value",
+          "label": "absolute_reduction median",
+          "value": 57.40167884042664
+        },
+        {
+          "json_path": "absolute_error_reduction_mm.distribution.p90",
+          "kind": "value",
+          "label": "absolute_reduction p90",
+          "value": 171.8964492027968
+        },
+        {
+          "json_path": "absolute_error_reduction_mm.distribution.maximum",
+          "kind": "value",
+          "label": "absolute_reduction maximum",
+          "value": 613.700120126912
+        },
+        {
+          "json_path": "absolute_error_reduction_mm.distribution.count",
+          "kind": "count",
+          "label": "absolute_reduction count",
+          "value": 8325.0
+        },
+        {
+          "json_path": "pin_correction_mm.overall.median",
+          "kind": "value",
+          "label": "pin_correction median",
+          "value": -8.081344517266485
+        },
+        {
+          "json_path": "pin_correction_mm.overall.p90",
+          "kind": "value",
+          "label": "pin_correction p90",
+          "value": 99.0383422012718
+        },
+        {
+          "json_path": "pin_correction_mm.overall.maximum",
+          "kind": "value",
+          "label": "pin_correction maximum",
+          "value": 615.2804456915928
+        },
+        {
+          "json_path": "pin_correction_mm.overall.count",
+          "kind": "count",
+          "label": "pin_correction count",
+          "value": 8325.0
+        }
+      ],
+      "name": "signed-error-summaries",
+      "png": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-labeller-receipt-corpus-headers/docs/figures/playable-forward-solve/labeller-receipt/signed-error-summaries.png",
+      "title": "Forward labeller receipt: 358 completed shots, 29875 written slices"
+    }
+  ],
+  "schema": "nova-labeller-receipt-figures",
+  "source_receipt": "receipt.json"
+}

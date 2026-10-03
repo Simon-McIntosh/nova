@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>pfs-labeller-receipt-corpus-headers — landing record</title>
+</head>
+<body>
+<section id="pfs-labeller-receipt-corpus-headers">
+<h2>Labeller-receipt figures report one corpus and no fraction above one</h2>
+<p>The three figures under <code>docs/figures/playable-forward-solve/labeller-receipt</code>
+are regenerated from their committed <code>receipt.json</code> by
+<code>benchmarks/batched_labeller_receipt.py render</code>, which writes
+<code>render-receipt.json</code> beside them. Every figure header now states the
+same corpus, read by name from the receipt: <strong>358 completed shots,
+29875 written slices</strong> (<code>completed_shots</code>, <code>slices</code>).
+Each caption number names the receipt path it is read from; every fraction drawn
+lies in [0, 1].</p>
+
+<figure>
+<img src="/nova/figures/playable-forward-solve/labeller-receipt/labeller-receipt-adjudication.png"
+     alt="labeller-receipt-adjudication">
+<figcaption>Adjudication of the written-slice census. Header: 358 completed
+shots, 29875 written slices. Slice census reads <code>admitted_slices</code> 29875,
+<code>converged_slices</code> 19649, <code>qualified_slices</code> 3395,
+<code>unconverged_slices</code> 10226. Guard agreement prints the branch fraction
+<code>branch_guard_agreement_fraction</code> 0.7954 and the conditioned fraction
+<code>conditioned_guard_agreement_fraction</code> 0.9826. The bottom-left panel
+draws the four <code>pin_displacement_crosstab.overall.*.slices</code> classes,
+the two open-ended end bins as their own annotated bars, so no clipped edge
+spike reads as a mode. The bottom-right panel steps the conditioned fraction by
+decile with its sample count <code>conditioned_by_time_in_shot.deciles.bins[i].slices</code>
+annotated, replacing the unbinned scatter.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/playable-forward-solve/labeller-receipt/pin-tail-crosstab.png"
+     alt="pin-tail-crosstab">
+<figcaption>Pin displacement cross-tabulation. Header: 358 completed shots, 29875
+written slices. Left: class totals from
+<code>pin_displacement_crosstab.overall.*.slices</code> (2827 / 1811 / 1594 / 2093).
+Middle: each decile's class composition as a stacked fraction that sums to 1 by
+construction, from <code>pin_displacement_crosstab.by_decile[i].*.slices</code> over
+their sum, with the decile's written-slice total annotated. Right: the
+0 to +50&nbsp;mm share by decile with its sample count annotated, so the near-zero
+value at decile&nbsp;1 reads as a twelve-slice bin rather than a collapse. No
+fraction exceeds 1.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/playable-forward-solve/labeller-receipt/signed-error-summaries.png"
+     alt="signed-error-summaries">
+<figcaption>Signed error summaries. Header: 358 completed shots, 29875 written
+slices. Left: one bar per distribution spanning 0 to its
+<code>.distribution.p90</code> with a black tick at its
+<code>.distribution.median</code>; the row label carries
+<code>median</code>, <code>p90</code>, <code>maximum</code> and <code>count</code>
+(free_error_mm n=25711, conditioned_error_mm n=8482,
+absolute_error_reduction_mm n=8325, pin_correction_mm n=8325), so no row is
+covered by a legend box. Right: <code>absolute_error_reduction_mm.distribution</code>
+median 57.4, p90 172, maximum 614 over n=8325, with the whole sentence carried in
+one wrapped title.</figcaption>
+</figure>
+
+<h3>Measure</h3>
+<p>Gate: <code>JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider
+tests/test_labeller_receipt_figures.py</code> — 5 passed, exit 0. The test reads
+<code>render-receipt.json</code> and <code>receipt.json</code> only and asserts the
+one-corpus header, every printed number against its named receipt path, every
+fraction in [0, 1], and that each PNG on disk embeds its regenerated title.
+Negative control: running the same test against the committed pre-repair figures
+(the PNGs from this checkout's history) fails on the three corpus sizes, exit 1:
+<code>test_every_figure_header_states_the_same_one_corpus</code> and
+<code>test_the_figure_on_disk_carries_the_regenerated_title</code>.</p>
+</section>
+</body>
+</html>

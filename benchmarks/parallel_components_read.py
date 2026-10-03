@@ -421,18 +421,21 @@ def solovev_panel_title(row: dict[str, Any]) -> str:
 
 
 def _render_solovev_panels(output_root: Path) -> list[dict[str, Any]]:
-    """Regenerate the limited-cell chord panels with receipt-derived titles.
+    """Regenerate the chord panels with receipt-derived titles.
 
     Every field is read from the persisted part receipt, so no forward operator
     is constructed and no solve is entered. Each panel is redrawn through the
-    committed painter with its title read from the same receipt, and the title
-    and refreshed digest are written back into that receipt.
+    committed painter with its title read from the same receipt, the drawn title
+    is embedded in the panel's own PNG metadata so the image and the receipt can
+    be checked against each other, and the title and refreshed digest are written
+    back into that receipt. Every chord arm is regenerated together, so the
+    directory never mixes an honest title with the bare qualification.
     """
 
     part_root = output_root / "solovev-certificate" / "solve-parts" / "chord"
-    parts = sorted(part_root.glob("*-production-route-cells-1000.json"))
+    parts = sorted(part_root.glob("*-production-route-cells-*.json"))
     if not parts:
-        raise RuntimeError(f"no 1000-cell solve parts under {part_root}")
+        raise RuntimeError(f"no chord solve parts under {part_root}")
     rows: list[dict[str, Any]] = []
     for part in parts:
         row = json.loads(part.read_text(encoding="utf-8"))
@@ -455,6 +458,7 @@ def _render_solovev_panels(output_root: Path) -> list[dict[str, Any]]:
             figure_path,
             title,
         )
+        figure.savefig(figure_path, dpi=180, metadata={"Title": title})
         plt.close(figure)
         figure_path.with_suffix(".svg").unlink(missing_ok=True)
         row["figure"]["panel_title"] = title
@@ -467,12 +471,22 @@ def _render_solovev_panels(output_root: Path) -> list[dict[str, Any]]:
                 "part_filesystem_path": str(part.relative_to(ROOT)),
                 "figure_filesystem_path": str(figure_path.relative_to(ROOT)),
                 "panel_title": title,
+                "drawn_title": _panel_png_title(figure_path),
             }
         )
         print("SOLOVEV_PANEL_TITLE " + json.dumps(rows[-1], sort_keys=True), flush=True)
     print(f"SOLOVEV_PANEL_TITLES_RENDERED={len(rows)}", flush=True)
     print("EXIT_MARKER=0", flush=True)
     return rows
+
+
+def _panel_png_title(path: Path) -> str | None:
+    """Read the title embedded in a rendered panel's own PNG metadata."""
+
+    from PIL import Image
+
+    with Image.open(path) as image:
+        return image.text.get("Title") if image.text else None
 
 
 def _finalize_existing(output_root: Path) -> None:

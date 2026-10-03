@@ -1,0 +1,4859 @@
+{
+  "agent": {
+    "alias": "terra5.6",
+    "backend": "codex-terra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-5.6-terra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex-terra",
+  "base_sha": "2acc1ff9151326b7ab2891948e2b46b34fe377dc",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 29052672,
+      "cached_input_tokens_cumulative": 29052672,
+      "input_tokens": 29370254,
+      "input_tokens_cumulative": 29370254,
+      "output_tokens": 57745,
+      "output_tokens_cumulative": 57745,
+      "reasoning_output_tokens": 13231,
+      "reasoning_output_tokens_cumulative": 13231
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 240,
+    "files": 8,
+    "removed": 287
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 134
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 131,
+        "name": "_unflatten_atomic_mesh",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 170,
+        "name": "_unflatten_interior_moment_stencil",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "_unflatten_moment_geometry",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 43,
+        "name": "_all_origin_census",
+        "path": "tests/test_census_polish_compaction.py"
+      },
+      "run_function": {
+        "line": 1284,
+        "name": "census_lane",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1473
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "retain",
+        "path": "tests/test_census_polish_compaction.py"
+      },
+      "run_function": {
+        "line": 1380,
+        "name": "retain",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1380
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1667
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1667
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1667
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1667
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1667
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 1655,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1658
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_seeding_leaves_the_physical_configuration_identical",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2631
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 2592,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2620
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 2718,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2731
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "_sampled_flux_with_edges",
+        "path": "tests/test_sampled_flux_batching.py"
+      },
+      "run_function": {
+        "line": 39,
+        "name": "_evaluate_sampled_flux_function",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 62
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_structured_read_consumes_retained_rows_without_repolishing",
+        "path": "tests/test_structured_read_census_rows.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 276
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 255,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 259
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 597
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_seeding_leaves_the_physical_configuration_identical",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_request_clip_mode_builds_each_operator_and_records_each_receipt",
+        "path": "tests/test_forward_solve_clip_mode_request.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_omitted_request_clip_mode_uses_chord_and_explicit_mode_wins",
+        "path": "tests/test_forward_solve_clip_mode_bridge.py"
+      },
+      "window_line": 38
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_omitted_request_clip_mode_uses_chord_and_explicit_mode_wins",
+        "path": "tests/test_forward_solve_clip_mode_bridge.py"
+      },
+      "run_function": {
+        "line": 20,
+        "name": "test_request_clip_mode_builds_each_operator_and_records_each_receipt",
+        "path": "tests/test_forward_solve_clip_mode_request.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "_run_driver",
+        "path": "tests/test_equilibrium_forward_operator.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "_run_driver",
+        "path": "tests/test_forward_support_clip_mode.py"
+      },
+      "window_line": 107
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_run_terminal_driver",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "_run_driver",
+        "path": "tests/test_forward_support_clip_mode.py"
+      },
+      "window_line": 107
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "f80a679b91abfc32670cfeb8dbff1d6fb91e5718",
+    "8072b50563b3ade024e1f39a8f8f39c00f05f87d"
+  ],
+  "completed_at": "2026-10-03T09:35:14Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-03T08:24:30Z",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest process",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture",
+    "tests/test_forward_receipt_raster.py::test_reduced_hex_request_receipt_records_absent_raster_flux"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_clip_mode_has_no_process_global.py tests/test_forward_support_clip_mode.py tests/test_forward_solve_clip_mode_bridge.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/none-validation-tests.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.985,
+    "plan": "forward-solve-api",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-terra",
+    "burn_multiple": 1.8039820039273196,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-terra' is projected to exhaust at 2026-10-06T23:20:01Z, which is after this node's 3600s horizon ending 2026-10-03T09:24:06.247486+00:00",
+    "horizon_ends_at": "2026-10-03T09:24:06.247486+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-03T08:24:04Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-06T23:20:01Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 564569,
+    "state": "quiet",
+    "utilisation_pct": 12.0
+  },
+  "lane_declaration": {
+    "backend": "codex-terra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-03T08:24:04Z",
+    "read_at": "2026-10-03T08:24:06Z",
+    "resolved_backend": "codex-terra",
+    "utilisation_pct": 12.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T09:35:14Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/manifest.md",
+  "member": "disposable-r-20261003T082403871267-fsapi-clip-mode-global-deletion",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_clip_mode_has_no_process_global.py::test_no_python_source_references_the_retired_process_global"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_forward_receipt_raster.py::test_reduced_hex_request_receipt_records_absent_raster_flux",
+      "tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_clip_mode_has_no_process_global.py::test_no_python_source_references_the_retired_process_global"
+    ],
+    "declaration": "in a scratch full-tree copy run with --import-mode=importlib, add a module-level _SUPPORT_CLIP_MODE back to forward_operator.py; the no-global test must fail naming that file, with the imported __file__ printed",
+    "head_failure_ids": [
+      "tests/test_forward_receipt_raster.py::test_reduced_hex_request_receipt_records_absent_raster_flux",
+      "tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/negative-control.log",
+    "test_paths": [
+      "tests/test_clip_mode_has_no_process_global.py",
+      "tests/test_forward_solve_clip_mode_bridge.py",
+      "tests/test_forward_solve_clip_mode_request.py",
+      "tests/test_forward_support_clip_mode.py",
+      "tests/test_transport_forward_seam.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fsapi-clip-mode-global-deletion",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1505,
+          "cached_input_tokens": 764584,
+          "input_tokens": 766091,
+          "output_tokens": 2964,
+          "reasoning_output_tokens": 924,
+          "total_tokens": 769055,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: every benchmark, script and test that set the process-global support clip mode now passes an explicit mode (merged through 74d4cd1f3). The global survives only in its own home and in four tests. This node deletes it. (1) nova/equilibrium/forward_operator.py: remove _SUPPORT_CLIP_MODE, set_support_clip_mode and support_clip_mode. ForwardFluxOperator.clip_mode defaults to \"chord\", not None, and _active_support_clip_mode returns self.clip_mode with no fallback. Update every docstring that mentions the global to describe the request and operator mode. (2) nova/equilibrium/solve_request.py: remove _process_support_clip_mode, the bridge that let an omitted mode follow the global. ForwardSolveRequest.clip_mode, from_defaults and ResolvedForwardSolveDefaults.from_policy default to \"chord\", so an omitted mode is the production default and an explicit mode still wins. (3) Tests: tests/test_forward_support_clip_mode.py becomes tests of operator-level modes: chord is the default, and exact and chord_cells apply through with_clip_mode; drop anything that only exercised the setter. tests/test_forward_solve_clip_mode_bridge.py asserts that an omitted request mode is chord on every construction route and that an explicit mode wins, with no global. tests/test_forward_solve_clip_mode_request.py and tests/test_transport_forward_seam.py use explicit modes in place of any global set. (4) A new tests/test_clip_mode_has_no_process_global.py scans nova/, benchmarks/, scripts/ and tests/ with ast or tokenize and fails naming any file that references set_support_clip_mode, support_clip_mode or _SUPPORT_CLIP_MODE, excluding its own source. Gate, logged under the run directory: the four test files above, the new file, tests/test_equilibrium_forward_operator.py, tests/test_forward_moment_class.py, tests/test_route_solve_requests.py and tests/test_forward_receipt_raster.py, run with JAX_PLATFORMS=cpu in one fresh pytest process per file in place on this fleet allocation, add no failure by test id against the dispatch base, recorded as baseline_suite and after_suite JSON objects with literal commands. Chord is the production default before and after, so chord results must be unchanged. Every uv command carries --no-sync and nothing runs uv sync. The manifest's status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Delete the process-global support clip mode, its setter, its getter and the request bridge",
+    "id": "fsapi-clip-mode-global-deletion",
+    "lane_declaration": {
+      "backend": "codex-terra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-03T08:24:04Z",
+      "read_at": "2026-10-03T08:24:06Z",
+      "resolved_backend": "codex-terra",
+      "utilisation_pct": 12.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/manifest.md",
+    "negative_control": "in a scratch full-tree copy run with --import-mode=importlib, add a module-level _SUPPORT_CLIP_MODE back to forward_operator.py; the no-global test must fail naming that file, with the imported __file__ printed",
+    "plan": "forward-solve-api",
+    "requested_backend": "codex-terra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/forward_operator.py",
+      "nova/equilibrium/solve_request.py",
+      "tests/test_forward_support_clip_mode.py",
+      "tests/test_forward_solve_clip_mode_bridge.py",
+      "tests/test_forward_solve_clip_mode_request.py",
+      "tests/test_transport_forward_seam.py",
+      "tests/test_clip_mode_has_no_process_global.py",
+      "docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-global-deletion.html",
+      "docs/figures/forward-solve-api/fsapi-clip-mode-global-deletion"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.8037452408774182,
+      "derived": 0.07318106626620376,
+      "drain_hours": 168.0,
+      "effective_limit": 0.07318106626620376,
+      "elapsed_fraction": 0.06652824206018523,
+      "elapsed_hours": 11.17674466611112,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-03T08:24:10+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.88,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.12,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.039743999999999995,
+      "decided_by": "window",
+      "margin": 0.604006,
+      "name": "fsapi-clip-mode-global-deletion",
+      "score": 0.64375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.12
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.280798,
+        "observed_at": "2026-10-03T08:24:10+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.12,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-terra",
+    "member": "codex",
+    "node": "fsapi-clip-mode-global-deletion",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-03T08:24:10.280798+00:00",
+    "score": 0.64375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.59,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 499.067,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2056.499,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.8999802799421296,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.8999802799421296,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 1,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 14,
+          "passed": 102,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 29
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.09,
+      "claude-haiku": 0,
+      "claude-opus": 0.01,
+      "clive": 0.63,
+      "codex": 0.04,
+      "codex-astra": 0.01,
+      "codex-luna": 0.01,
+      "codex-terra": 0.05,
+      "hold": 0.16
+    },
+    "rendered_token_estimate": 1575,
+    "usage": {
+      "cost": 0.000157962,
+      "input_tokens": 3761,
+      "output_tokens": 99
+    }
+  },
+  "plan": "forward-solve-api",
+  "plan_impl_at_dispatch": 0.985,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "8072b50563b3ade024e1f39a8f8f39c00f05f87d",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "2acc1ff9151326b7ab2891948e2b46b34fe377dc",
+    "reviewed_head_sha": "8072b50563b3ade024e1f39a8f8f39c00f05f87d",
+    "scores": {
+      "durability": 19,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 94
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T082403871267-fsapi-clip-mode-global-deletion",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a100dd-7bf1-7691-9997-fdfa1db9772a",
+  "session_model": "gpt-5.6-terra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 29052672,
+    "cumulative_input_tokens": 58422926,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 70976
+  },
+  "time_budget": "60m",
+  "tool_steps": 151.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 4244,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T09:35:18Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T09:22:32Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T082403871267-fsapi-clip-mode-global-deletion",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 518,
+    "worker_pid": 3965883
+  },
+  "worker_seconds": 4244,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

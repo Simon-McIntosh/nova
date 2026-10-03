@@ -59,31 +59,41 @@ def draw_panel(context: dict, state: np.ndarray, topology: dict) -> dict:
             linewidth=2.6,
         )
         poloidal.draw_wall(axis, units=(wall,))
-        for nulls, style in (
-            (
-                analytic_nulls,
-                DEFAULT_INK.variant(
-                    axis_marker="o",
-                    axis_markersize=12,
-                    axis_color=fixture.ANALYTIC_INK,
-                ),
+        poloidal.draw_nulls(
+            axis,
+            magnetic_axis=analytic_nulls["axis_rz_m"],
+            x_points=analytic_nulls["x_point_rz_m"],
+            style=DEFAULT_INK.variant(
+                axis_marker="o",
+                axis_markersize=12,
+                axis_color=fixture.ANALYTIC_INK,
             ),
-            (
-                topology,
-                DEFAULT_INK.variant(
-                    axis_marker="^",
-                    axis_markersize=6.5,
-                    axis_color=fixture.TERMINAL_INK,
-                ),
+            contain=(wall,),
+        )
+        analytic_axis = analytic_nulls["axis_rz_m"]
+        axis.plot(
+            analytic_axis[0],
+            analytic_axis[1],
+            marker="o",
+            markersize=12,
+            markerfacecolor="white",
+            markeredgecolor=fixture.ANALYTIC_INK,
+            markeredgewidth=2,
+            linestyle="none",
+            zorder=DEFAULT_INK.zorder_markers + 1,
+        )
+        poloidal.draw_nulls(
+            axis,
+            magnetic_axis=topology["axis_rz_m"],
+            x_points=topology["x_point_rz_m"],
+            style=DEFAULT_INK.variant(
+                axis_marker="^",
+                axis_markersize=8.5,
+                axis_color=fixture.TERMINAL_INK,
+                zorder_markers=DEFAULT_INK.zorder_markers + 2,
             ),
-        ):
-            poloidal.draw_nulls(
-                axis,
-                magnetic_axis=nulls["axis_rz_m"],
-                x_points=nulls["x_point_rz_m"],
-                style=style,
-                contain=(wall,),
-            )
+            contain=(wall,),
+        )
         poloidal_axes(axis)
         axis.text(0.03, 0.95, label, transform=axis.transAxes, va="top")
     path = OUT / "flux-panels.png"
@@ -97,8 +107,8 @@ def draw_panel(context: dict, state: np.ndarray, topology: dict) -> dict:
         "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         "bytes": path.stat().st_size,
         "shared_levels_wb": levels.tolist(),
-        "analytic_axis_marker": "large circle",
-        "solved_axis_marker": "small filled triangle",
+        "analytic_axis_marker": "large hollow circle",
+        "solved_axis_marker": "filled triangle",
     }
 
 
@@ -162,14 +172,15 @@ def main() -> None:
             carrier_identity=f"centroid-row-history-{promotions}",
             clip_mode="exact",
         )
+        stopping_tolerance = (
+            float(history["relative_residual_after"][promotions - 1]) * 2.0
+            if promotions < count
+            else request.policy.kernel_tolerance
+        )
         request = replace(
             request,
             constraint_pairs=pairs,
-            policy=replace(
-                request.policy,
-                newton_steps=promotions,
-                active_set_steps=1,
-            ),
+            policy=replace(request.policy, kernel_tolerance=stopping_tolerance),
         )
         receipt = context["profile"].solve(request)
         equilibrium = receipt.equilibrium
@@ -193,6 +204,7 @@ def main() -> None:
         )
         row = {
             "promotion": promotions,
+            "stopping_tolerance": stopping_tolerance,
             "accepted_newton_promotions": current["accepted_newton_promotions"],
             "global_residual": current["terminal_relative_residual"],
             "promotion_global_residual": promotion_global,

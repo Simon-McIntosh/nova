@@ -105,7 +105,7 @@
       "figure": {
         "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21978-35.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21978-35.png",
-        "sha256": "dacd8f7e6618d6ff08036ee4a9157faba756bb15b95a29156d4c3478250e6b33",
+        "sha256": "19b49f9c1d1fa0d3fd6ead71c0c13ab00e99e89cec37f3f6e5e0cf5ffe64d8b2",
         "caption_lines": [
           "MAST 21978/35: beta_p + l_i/2 row",
           "reference state alone: the row is refused on",
@@ -149,7 +149,7 @@
           0.3139540771556307
         ],
         "saddle_flux_gap_wb": 0.0,
-        "saddle_contour_distance_px": 0.2138
+        "saddle_contour_distance_px": 0.0847
       }
     },
     {
@@ -174,7 +174,7 @@
       "figure": {
         "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21983-35.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21983-35.png",
-        "sha256": "6217e53219909c090c67acb1c2707d00b631fd6493d83b759aac91f73313eb07",
+        "sha256": "b47a87f1184156c650d632ee26612c6a4fa714381a2a52f9ccdfeae75877e476",
         "caption_lines": [
           "MAST 21983/35: beta_p + l_i/2 row",
           "reference state alone: the row is refused on",
@@ -218,7 +218,7 @@
           0.30517641903015225
         ],
         "saddle_flux_gap_wb": 0.0,
-        "saddle_contour_distance_px": 0.8272
+        "saddle_contour_distance_px": 0.242
       }
     },
     {
@@ -243,7 +243,7 @@
       "figure": {
         "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21985-51.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21985-51.png",
-        "sha256": "699ea2b4488898a0788eeab6c7ebc76a7afddbbcfa0c796e5f4a0f06c21baf4f",
+        "sha256": "89f791e8e81ed9f10c0dcf4485103c2625d454e72d1b64d7e9c6f6da2e8ef3ef",
         "caption_lines": [
           "MAST 21985/51: beta_p + l_i/2 row",
           "reference state alone: the row is refused on",
@@ -287,7 +287,7 @@
           0.3390813512143219
         ],
         "saddle_flux_gap_wb": 0.0,
-        "saddle_contour_distance_px": 1.393
+        "saddle_contour_distance_px": 0.1233
       }
     },
     {
@@ -312,7 +312,7 @@
       "figure": {
         "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21986-46.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21986-46.png",
-        "sha256": "4967d24b6057c97b9a513597747380ee44a32ae46c7c32c99d93129a433ef84c",
+        "sha256": "7a417882ff5d314aa5214b7cc9b89bc7d4a9723dc59bb75295fb99e74d69590c",
         "caption_lines": [
           "MAST 21986/46: beta_p + l_i/2 row",
           "reference state alone: the row is refused on",
@@ -356,7 +356,7 @@
           0.34640670241759725
         ],
         "saddle_flux_gap_wb": 0.0,
-        "saddle_contour_distance_px": 1.0698
+        "saddle_contour_distance_px": 0.0605
       }
     },
     {
@@ -381,7 +381,7 @@
       "figure": {
         "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21989-55.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21989-55.png",
-        "sha256": "22562023d9df5f4910ad1fba76bd1e50496f25ae4166c92a2e8c298141359173",
+        "sha256": "8f62ed31a2716ea20f75686cf4d5fb2fd44bc97fb12208a0bdc06e7e9983a6cf",
         "caption_lines": [
           "MAST 21989/55: beta_p + l_i/2 row",
           "reference state alone: the row is refused on",
@@ -425,7 +425,7 @@
           0.3320755684244527
         ],
         "saddle_flux_gap_wb": 0.0,
-        "saddle_contour_distance_px": 0.0506
+        "saddle_contour_distance_px": 0.0445
       }
     },
     {
@@ -450,7 +450,7 @@
       "figure": {
         "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-22086-43.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-22086-43.png",
-        "sha256": "d33edb90d9108ee0131416f9b9b599c1678c9e7617fac3b8cd4b1eb3954a72ab",
+        "sha256": "3fc529aa61c059b513757639bc18ae122768f07920bbf726a2806ff7eaaa4edc",
         "caption_lines": [
           "MAST 22086/43: beta_p + l_i/2 row",
           "reference state alone: the row is refused on",
@@ -494,7 +494,7 @@
           0.34231158419959146
         ],
         "saddle_flux_gap_wb": 0.0,
-        "saddle_contour_distance_px": 0.3332
+        "saddle_contour_distance_px": 0.2626
       }
     }
   ]

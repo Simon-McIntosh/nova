@@ -20,7 +20,7 @@
   "figure": {
     "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-22086-43.png",
     "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-22086-43.png",
-    "sha256": "d33edb90d9108ee0131416f9b9b599c1678c9e7617fac3b8cd4b1eb3954a72ab",
+    "sha256": "3fc529aa61c059b513757639bc18ae122768f07920bbf726a2806ff7eaaa4edc",
     "caption_lines": [
       "MAST 22086/43: beta_p + l_i/2 row",
       "reference state alone: the row is refused on",
@@ -64,6 +64,6 @@
       0.34231158419959146
     ],
     "saddle_flux_gap_wb": 0.0,
-    "saddle_contour_distance_px": 0.3332
+    "saddle_contour_distance_px": 0.2626
   }
 }

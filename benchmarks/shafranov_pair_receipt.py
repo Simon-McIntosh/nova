@@ -67,8 +67,14 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DIRECTORY = ROOT / "docs/figures/constraint-augmented-newton-krylov/shafranov"
 #: Row tolerance on the combination, stated in the row's own physical scale.
 ROW_TOLERANCE = 1.0e-6
-#: Display raster resolution for the per-row panels.
-RASTER_SAMPLES = 181
+#: Display raster resolution for the per-row panels.  The separatrix level
+#: reaches the marked saddle only as finely as the raster the contours are
+#: traced on, and the gap is quantized by the grid spacing rather than falling
+#: smoothly, so the resolution is set from the measured saddle-to-contour
+#: distance: at 181 samples two rows stood more than a pixel from their
+#: separatrix, and 601 samples -- where the grid step is below one canvas
+#: pixel -- brings every row inside one pixel.
+RASTER_SAMPLES = 601
 #: Contour levels drawn on a row panel's reference map.  The reference boundary
 #: flux, which is the admitted saddle's own flux, is named to the level builder
 #: so one of these lines is the separatrix and a contour reaches the marked
@@ -339,7 +345,6 @@ def _kept_x_points(topology: dict[str, Any], units) -> np.ndarray:
     if points.shape[0] == 0:
         return points
     return points[np.asarray(inside_wall_units(points, units), dtype=bool)]
-
 
 
 def _reference_contour_levels(field, topology: dict[str, Any], boundary) -> np.ndarray:

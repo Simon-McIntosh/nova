@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="137">
+<meta name="plan-version" content="138">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -535,6 +535,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20261003T093559978170-review-2-of-fsapi-clip-mode-global-deletion" data-who="reckon-build" data-when="2026-10-03T09:42:44.425Z">
     <div class="r-comment-body"><p>Attached an independent parsed review of run r-20261003T082403871267-fsapi-clip-mode-global-deletion at reviewed head 8072b50563b3ade024e1f39a8f8f39c00f05f87d (base 2acc1ff9): verdict pass 94/100. Verified by file and line that clip_mode=None is rejected at ForwardFluxOperator.__post_init__ (forward_operator.py:2354), ForwardFluxOperator.with_clip_mode (forward_operator.py:2706), ForwardSolveRequest.__post_init__ (solve_request.py:506) and ResolvedForwardSolveDefaults.from_policy (solve_request.py:564), each asserted by a committed test; added_failure_count 0 from the run's readable baseline/after gate logs; f80a679b's deletion otherwise unchanged. The record is stored once at each granted path; the reviews directory is not a git repo, so there is no commit for this node's data deliverable.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20261003T095229804071-fsapi-route-request-fixture-null" data-who="reckon-build" data-when="2026-10-03T10:08:22.519Z">
+    <div class="r-comment-body"><p>Repaired the route-request fixture: a locally registered pytree target now carries the null locator and the operator the host geometry members the identity reads (configure_dtypes first); tests/test_route_solve_requests.py runs 8 passed against a base of 1 failed/7 passed, fixing the AttributeError bit-identity failure and adding none.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260915T082752949902-fsa-transport-shim-delta-gate" data-who="fsa-transport-shim-delta-gate" data-when="2026-09-15T11:35:00+02:00">
     <div class="r-comment-body"><p>Transport test delta gate did not complete in its single exact scheduler allocation. Job <code>1271211</code> on <code>all_debug</code> ran the base archive <code>0f872fd6</code> through seven modules: 35 passed, 0 failed and 1 xfailed; it reached <code>tests/test_transport_geometry_reference.py</code> at the 59-minute wall and exited <code>143</code> before a terminal receipt. The shim-removal revision <code>fb402f8f</code> was not run, so the added-failure set is <strong>NOT MEASURABLE</strong>, not assumed empty. Full per-module logs and JUnit receipts are under <code>~/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/</code>; the next action is a fresh allocation with sufficient time or an exact plan-approved test selection.</p></div>

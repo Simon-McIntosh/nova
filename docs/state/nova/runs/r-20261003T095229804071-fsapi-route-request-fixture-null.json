@@ -1,0 +1,664 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "a6fe0d05bc5a301db46825e1d2a8c86a5f1b9e47",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 8590823,
+      "input_tokens_cumulative": 8590823,
+      "output_tokens": 42458,
+      "output_tokens_cumulative": 42458,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 82,
+    "files": 2,
+    "removed": 2
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_bank_replay_receipts",
+        "path": "tests/test_default_wiring.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "test_exact_bank_replay_request_names_every_policy_deviation",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "window_line": 88
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "_diiid_match_receipts",
+        "path": "tests/test_default_wiring.py"
+      },
+      "run_function": {
+        "line": 122,
+        "name": "test_diiid_match_request_names_every_registered_budget_deviation",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "window_line": 124
+    },
+    {
+      "existing_function": {
+        "line": 82,
+        "name": "test_request_path_is_bit_identical_and_defaults_round_trip_through_json",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 178,
+        "name": "test_request_execution_is_bit_identical_to_the_keyword_fixture",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_cold_portfolio_seed_policy_solves_and_records_its_selected_branch",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 178,
+        "name": "test_request_execution_is_bit_identical_to_the_keyword_fixture",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "window_line": 187
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_compilation_cache_receipt_observes_reuse_not_the_request_field",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 178,
+        "name": "test_request_execution_is_bit_identical_to_the_keyword_fixture",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "window_line": 187
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "4cd4b0acedf7f0f70c656399841824b29eb6a0ae"
+  ],
+  "completed_at": "2026-10-03T10:08:22.519Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-03T09:52:51Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests/test_prescribed_current_solve.py::test_solve_none_reproduces_the_stored_vector_bit_identically",
+    "failed/5",
+    "logs/siblings_base.log);",
+    "tests/test_prescribed_current_solve.py."
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.985,
+    "plan": "forward-solve-api",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-03T10:22:31.731997+00:00",
+    "horizon_seconds": 1800,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-03T09:52:31Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 11,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 14,
+    "mean_context": 120000,
+    "observed_at": "2026-10-03T09:52:20Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T10:08:22.519Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T095229804071-fsapi-route-request-fixture-null/manifest.md",
+  "member": "disposable-r-20261003T095229804071-fsapi-route-request-fixture-null",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/test_route_solve_requests.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsapi-route-request-fixture-null",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2125,
+          "cached_input_tokens": 827089,
+          "input_tokens": 829216,
+          "output_tokens": 989,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 830205,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture fails at main with AttributeError: '_LinearTarget' object has no attribute 'null'. ForwardFluxOperator._compute_geometry_identity (nova/equilibrium/forward_operator.py, near the program identity code) reads self.grid.null and self.wall.null, and the test's fixture builds a _LinearTarget without .null. tests/test_forward_solve_clip_mode_request.py avoids the same read by monkeypatching program_identity. Repair the fixture, not the product: give the test's _LinearTarget the attributes the identity read needs, with values consistent with the target it models, or patch program identity as the sibling test does. Choose whichever keeps the test asserting bit identity between request execution and the keyword fixture on real arrays, and say which in the manifest. Gate, logged under the run directory: the test passes with JAX_PLATFORMS=cpu in a fresh process in place on this fleet allocation; the rest of tests/test_route_solve_requests.py adds no failure against the dispatch base. Every uv command carries --no-sync and nothing runs uv sync. The manifest's status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Repair the route-request test fixture so its target carries the attributes the geometry identity reads",
+    "id": "fsapi-route-request-fixture-null",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-03T09:52:31Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 11,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 14,
+      "mean_context": 120000,
+      "observed_at": "2026-10-03T09:52:20Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T095229804071-fsapi-route-request-fixture-null/manifest.md",
+    "negative_control": "remove the added fixture attributes; the bit-identity test must fail again with the AttributeError",
+    "plan": "forward-solve-api",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "exact",
+    "time_budget": "30m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/test_route_solve_requests.py",
+      "docs/evidence/fragments/forward-solve-api/fsapi-route-request-fixture-null.html",
+      "docs/figures/forward-solve-api/fsapi-route-request-fixture-null"
+    ]
+  },
+  "orientation_input_tokens": 1532262.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsapi-route-request-fixture-null",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-03T09:52:35.547887+00:00",
+    "score": 0.56875,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.72,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 315.733,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1771.442,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.8385648063425926,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.8385648063425926,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 2,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 14,
+          "passed": 100,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 29
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.04,
+      "claude-haiku": 0.01,
+      "claude-opus": 0,
+      "clive": 0.76,
+      "codex": 0.01,
+      "codex-astra": 0.04,
+      "codex-luna": 0,
+      "codex-terra": 0.02,
+      "hold": 0.12
+    },
+    "rendered_token_estimate": 1301,
+    "usage": {
+      "cost": 0.000145362,
+      "input_tokens": 3461,
+      "output_tokens": 99
+    }
+  },
+  "plan": "forward-solve-api",
+  "plan_impl_at_dispatch": 0.985,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "4cd4b0acedf7f0f70c656399841824b29eb6a0ae",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a6fe0d05bc5a301db46825e1d2a8c86a5f1b9e47",
+    "reviewed_head_sha": "4cd4b0acedf7f0f70c656399841824b29eb6a0ae",
+    "scores": {
+      "durability": 19,
+      "evidence": 18,
+      "fit": 17,
+      "goal_fidelity": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 92
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "run_id": "r-20261003T095229804071-fsapi-route-request-fixture-null",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "651e433d-3a07-4b3e-ab66-613455656c22",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 8590823,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 922.028,
+    "generated_tokens": 42458,
+    "generation_seconds": 568.182,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 70.5,
+    "machine_seconds": 353.846,
+    "peak_input_tokens": 162220,
+    "tokens_per_second": 74.73,
+    "wall_tokens_per_second": 46.05
+  },
+  "time_budget": "30m",
+  "tool_steps": 70.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 931,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T10:08:27Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-03T09:52:56Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T095229804071-fsapi-route-request-fixture-null",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 8710,
+    "worker_pid": 4191253
+  },
+  "worker_seconds": 896,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

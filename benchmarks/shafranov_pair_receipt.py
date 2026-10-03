@@ -60,6 +60,7 @@ from nova.jax.config import (
 )
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
+from nova.media.sources.frame import inside_wall_units
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -68,6 +69,11 @@ DEFAULT_DIRECTORY = ROOT / "docs/figures/constraint-augmented-newton-krylov/shaf
 ROW_TOLERANCE = 1.0e-6
 #: Display raster resolution for the per-row panels.
 RASTER_SAMPLES = 181
+#: Contour levels drawn on a row panel's reference map.  The reference boundary
+#: flux, which is the admitted saddle's own flux, is named to the level builder
+#: so one of these lines is the separatrix and a contour reaches the marked
+#: saddle rather than stopping short of it.
+REFERENCE_CONTOUR_COUNT = 12
 #: Character budget per subtitle line.  The subtitle carries the sentence that
 #: keeps a refused row honest, and an unbroken line of it runs off both edges of
 #: the panel canvas and is unreadable at either end, so it is wrapped to a width
@@ -245,6 +251,8 @@ def _topology(operator, state) -> dict[str, Any]:
         "x_point_rz_m": np.asarray(topology.x_point, dtype=float)
         .reshape(-1, 2)
         .tolist(),
+        "axis_flux_wb": _strict_float(np.asarray(topology.axis_flux)),
+        "boundary_flux_wb": _strict_float(np.asarray(topology.boundary_flux)),
     }
 
 
@@ -272,7 +280,7 @@ def _wall_units(operator) -> tuple[Any, ...]:
     )
 
 
-def _raster(profile, state, units, *, samples: int = RASTER_SAMPLES):
+def _raster(profile, state, units, *, samples: int = RASTER_SAMPLES, anchors=None):
     """Interpolate one state onto a display raster for line contours.
 
     The state vector is a stitched target: the plasma grid block first, then
@@ -280,11 +288,24 @@ def _raster(profile, state, units, *, samples: int = RASTER_SAMPLES):
     the grid block alone, so the grid prefix is the block to contour.  The
     raster is framed on the grid nodes and the wall together, so the vessel
     is not clipped out of its own panel.
+
+    ``anchors`` carries optional ``(points, values)`` that pin the interpolant
+    at named locations the lattice nodes do not span.  The admitted saddle is
+    the case this exists for: it can lie in the divertor region outside the
+    plasma node hull, where a plain interpolation is undefined and no contour
+    can be drawn, so naming its own flux there lets the separatrix level reach
+    the marker the panel draws.
     """
     points = np.asarray(profile.lattice.coordinate, dtype=float)
     field = np.asarray(state, dtype=float).reshape(-1)[: points.shape[0]]
     finite = np.all(np.isfinite(points), axis=1) & np.isfinite(field)
     points, field = points[finite], field[finite]
+    if anchors is not None:
+        anchor_points, anchor_values = anchors
+        anchor_points = np.asarray(anchor_points, dtype=float).reshape(-1, 2)
+        anchor_values = np.asarray(anchor_values, dtype=float).reshape(-1)
+        points = np.vstack((points, anchor_points))
+        field = np.concatenate((field, anchor_values))
     if points.shape[0] < 3:
         raise ValueError("the state carries too few finite samples to contour")
     limits = np.vstack(
@@ -303,15 +324,117 @@ def _raster(profile, state, units, *, samples: int = RASTER_SAMPLES):
     return radial, height, np.asarray(raster, dtype=float)
 
 
+def _kept_x_points(topology: dict[str, Any], units) -> np.ndarray:
+    """Return the admitted saddle(s) the null marker will actually draw.
+
+    ``draw_nulls`` drops an x-point that falls outside the wall, so a point
+    beyond the vessel is finite and would otherwise be measured against as
+    though it were marked.  The same containment filter is applied here so the
+    saddle-contour distance is taken against a drawn marker.
+    """
+    if topology.get("read_status") != "qualified":
+        return np.empty((0, 2))
+    points = np.asarray(topology.get("x_point_rz_m", []), dtype=float).reshape(-1, 2)
+    points = points[np.all(np.isfinite(points), axis=1)]
+    if points.shape[0] == 0:
+        return points
+    return points[np.asarray(inside_wall_units(points, units), dtype=bool)]
+
+
+
+def _reference_contour_levels(field, topology: dict[str, Any], boundary) -> np.ndarray:
+    """Return the reference map's levels with the admitted saddle flux named.
+
+    The reference boundary flux is the admitted saddle's own flux, so naming it
+    to :func:`poloidal.contour_levels` makes the separatrix one of the drawn
+    lines: the level nearest it is replaced by it and a contour passes through
+    the saddle the panel marks.  An unqualified topology carries no boundary
+    flux and the levels fall back to the map's own finite range.
+    """
+    return poloidal.contour_levels(
+        field,
+        count=REFERENCE_CONTOUR_COUNT,
+        boundary=boundary,
+        axis=topology.get("axis_flux_wb"),
+    )
+
+
+def _saddle_contour_distance_px(
+    axis, contours, saddles: np.ndarray, boundary: float | None
+) -> float | None:
+    """Return the rendered gap between the admitted saddle and its contour.
+
+    The distance is measured in display pixels from each drawn saddle to the
+    contour drawn at the boundary flux, not assumed: the level set of a map at
+    a null's own value can sit far from the null where the map's gradient
+    vanishes, so the guarantee is checked rather than stated.  ``None`` when
+    there is no drawn contour at that level to measure against.
+    """
+    if saddles.shape[0] == 0 or boundary is None or not np.isfinite(boundary):
+        return None
+    levels = np.asarray(contours.levels, dtype=float)
+    index = int(np.argmin(np.abs(levels - boundary)))
+    segments = contours.allsegs[index]
+    best = np.inf
+    for segment in segments:
+        vertices = np.asarray(segment, dtype=float)[:, :2]
+        if vertices.shape[0] == 0:
+            continue
+        display = axis.transData.transform(vertices)
+        for saddle in saddles:
+            saddle_display = axis.transData.transform(saddle)
+            if display.shape[0] == 1:
+                gaps = np.hypot(
+                    display[0, 0] - saddle_display[0],
+                    display[0, 1] - saddle_display[1],
+                )
+                best = min(best, float(gaps))
+                continue
+            start = display[:-1]
+            step = display[1:] - start
+            to_point = saddle_display[None, :] - start
+            length_sq = np.sum(step * step, axis=1)
+            fraction = np.where(
+                length_sq > 0,
+                np.clip(np.sum(to_point * step, axis=1) / length_sq, 0.0, 1.0),
+                0.0,
+            )
+            projection = start + fraction[:, None] * step
+            gaps = np.hypot(
+                projection[:, 0] - saddle_display[0],
+                projection[:, 1] - saddle_display[1],
+            )
+            best = min(best, float(np.min(gaps)))
+    return None if not np.isfinite(best) else best
+
+
 def _render(
     profile, *, reference, terminal, units, path: Path, title: str, note: str
 ) -> dict:
     """Draw the reference and terminal states as shared-level line contours."""
-    radial, height, reference_field = _raster(profile, reference, units)
-    levels = poloidal.contour_levels(reference_field, count=12)
     reference_topology = _topology(profile.operator, reference)
+    saddles = _kept_x_points(reference_topology, units)
+    boundary = reference_topology.get("boundary_flux_wb")
+    saddle_flux_available = (
+        reference_topology.get("read_status") == "qualified"
+        and boundary is not None
+        and bool(np.isfinite(boundary))
+        and saddles.shape[0] > 0
+    )
+    anchors = (
+        (saddles, np.full(saddles.shape[0], float(boundary)))
+        if saddle_flux_available
+        else None
+    )
+    radial, height, reference_field = _raster(
+        profile, reference, units, anchors=anchors
+    )
+    drawn_boundary = float(boundary) if saddle_flux_available else None
+    levels = _reference_contour_levels(
+        reference_field, reference_topology, drawn_boundary
+    )
     figure, axis = plt.subplots(figsize=(4.8, 4.2), constrained_layout=True)
-    poloidal.draw_flux_contours(
+    contours = poloidal.draw_flux_contours(
         axis, radial, height, reference_field, levels, color="#3366cc"
     )
     drawn = [
@@ -323,6 +446,7 @@ def _render(
                 axis_marker="^",
                 xpoint_marker="P",
             ),
+            not saddle_flux_available,
         )
     ]
     if terminal is not None:
@@ -339,27 +463,49 @@ def _render(
                     axis_marker="^",
                     xpoint_marker="X",
                 ),
+                False,
             )
         )
     poloidal.draw_wall(axis, units=units)
-    for topology, style in drawn:
+    for topology, style, hollow in drawn:
         if topology.get("read_status") != "qualified":
             continue
-        poloidal.draw_nulls(
-            axis,
-            magnetic_axis=topology["axis_rz_m"],
-            x_points=np.asarray(topology["x_point_rz_m"], dtype=float),
-            style=style,
-            contain=units,
-        )
+        x_points = np.asarray(topology["x_point_rz_m"], dtype=float)
+        if hollow:
+            poloidal.draw_nulls(
+                axis,
+                magnetic_axis=topology["axis_rz_m"],
+                other_x_points=x_points,
+                style=style,
+                contain=units,
+            )
+        else:
+            poloidal.draw_nulls(
+                axis,
+                magnetic_axis=topology["axis_rz_m"],
+                x_points=x_points,
+                style=style,
+                contain=units,
+            )
     poloidal_axes(axis)
-    lines = _caption_lines(title, note)
+    caption_note = note
+    if reference_topology.get("read_status") == "qualified" and not (
+        saddle_flux_available
+    ):
+        caption_note = (
+            f"{note}; the reference saddle flux is not recorded, so the marked "
+            "saddle is drawn hollow"
+        )
+    lines = _caption_lines(title, caption_note)
     axis.set_title("\n".join(lines), fontsize=8)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.canvas.draw()
     extent = axis.title.get_window_extent(figure.canvas.get_renderer())
     caption_widest_inches = extent.width / figure.dpi
     canvas_width_inches = figure.get_figwidth()
+    saddle_distance_px = _saddle_contour_distance_px(
+        axis, contours, saddles, drawn_boundary
+    )
     figure.savefig(path, dpi=180)
     plt.close(figure)
     return {
@@ -371,6 +517,16 @@ def _render(
         "caption_lines": lines,
         "caption_widest_inches": round(caption_widest_inches, 4),
         "canvas_width_inches": round(canvas_width_inches, 4),
+        "reference_topology": reference_topology,
+        "levels_wb": [float(level) for level in levels],
+        "saddle_flux_gap_wb": (
+            None
+            if drawn_boundary is None or boundary is None
+            else round(abs(float(drawn_boundary) - float(boundary)), 12)
+        ),
+        "saddle_contour_distance_px": (
+            None if saddle_distance_px is None else round(saddle_distance_px, 4)
+        ),
     }
 
 

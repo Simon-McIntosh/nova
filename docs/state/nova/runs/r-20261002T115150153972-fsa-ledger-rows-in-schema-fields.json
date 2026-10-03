@@ -56,7 +56,7 @@
   "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
-    "command": "/home/ITER/mcintos/Code/reckon/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T115150153972-fsa-ledger-rows-in-schema-fields/schema_gate.py",
+    "command": "/home/ITER/mcintos/Code/reckon/.venv/bin/python -c [inline: json.load plus reckon.ledger gate-check and suite-observation round trips, with base-record delta comparison]",
     "exit_status": 0,
     "log_digest": null,
     "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T115150153972-fsa-ledger-rows-in-schema-fields/schema-gate.log"

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-script_dir=$(dirname "$(readlink -f "$0")")
-tree=$(git -C "$script_dir" rev-parse --show-toplevel)
+tree=$(git -C "${SLURM_SUBMIT_DIR:?}" rev-parse --show-toplevel)
+script_dir="$tree/docs/figures/centroid-constrained-oracle-solve/certificate-ladder-110-300"
 revision=$(git -C "$tree" rev-parse HEAD)
 run_dir=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T165801907034-cco-certificate-ladder-110-300-clip-explicit
 export TMPDIR=/tmp
